@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: easydynamics
+Version: 0.0.0
+Summary: A QENS python package built on the EasyScience framework.
+Author-email: Henrik Jacobsen <henrik.jacobsen@ess.eu>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: scipy
+
+# EasyQENSLib
+QENS data analysis library
