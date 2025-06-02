@@ -108,6 +108,29 @@ class DHOComponent(ModelComponent):
             (x**2 - self.center**2) ** 2 + (self.gamma * x) ** 2
         )
 
+class PolynomialComponent(ModelComponent):
+    """
+    Polynomial function component.
+
+    Args:
+        coefficients (list or tuple): Coefficients c0, c1, ..., cN
+        representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
+    """
+
+    def __init__(self, coefficients):
+        if not coefficients:
+            raise ValueError("At least one coefficient must be provided.")
+        self.coefficients = list(coefficients)
+
+    def evaluate(self, x: np.ndarray) -> np.ndarray:
+        result = np.zeros_like(x, dtype=float)
+        for i, coef in enumerate(self.coefficients):
+            result += coef * np.power(x, i)
+        return result
+
+    def degree(self):
+        return len(self.coefficients) - 1
+
 
 class UserDefinedComponent(ModelComponent):
     """
