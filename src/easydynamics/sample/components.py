@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import Callable, Dict
 
+from scipy.special import voigt_profile
+
 from easyscience.Objects.variable import Parameter 
 
 #TODO: Allow specification of units for parameters in components
@@ -97,6 +99,27 @@ class LorentzianComponent(ModelComponent):
     def area(self, value):
         #TODO: Handle units properly
         self.amplitude.value = value / (np.pi * self.width.value)
+
+class VoigtComponent(ModelComponent):
+    """
+    Voigt profile, a convolution of Gaussian and Lorentzian.
+
+    Args:
+        center (float): Center of the Voigt profile.
+        width (float): Standard deviation of the Gaussian part.
+        gamma (float): HWHM of the Lorentzian part.
+        area (float): Total area under the curve.
+    """
+
+    def __init__(self, center=0.0, Gwidth=1.0, Lwidth=1.0, area=1.0, unit='meV'):
+        self.center = Parameter(name='center', value=center, unit=unit)
+        self.Gwidth = Parameter(name='Gwidth', value=Gwidth, unit=unit)
+        self.Lwidth = Parameter(name='LWidth', value=Lwidth, unit=unit)
+        self.area = Parameter(name='area', value=area)
+
+    def evaluate(self, x):
+        return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)    
+
 
 
 class DHOComponent(ModelComponent):
