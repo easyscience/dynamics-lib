@@ -55,7 +55,7 @@ class ResolutionHandler:
                      (isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, GaussianComponent)):
                     G = s_comp if isinstance(s_comp, GaussianComponent) else r_comp
                     L = r_comp if isinstance(r_comp, LorentzianComponent) else s_comp
-                    center = G.center.value  
+                    center = G.center.value #TODO: Handle case where centers are different 
                     area = G.area * L.area
                     voigt = VoigtComponent(center=center, Gwidth=G.width.value, Lwidth=L.width.value, area=area).evaluate(x)
                     total += voigt
