@@ -13,6 +13,7 @@ class ResolutionHandler:
     - Fallback: Numerical FFT-based convolution
     """
 
+# TODO: add support for convolution with components instead of only SampleModels
     def convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel) -> np.ndarray:
         """
         Convolve a sample model with a resolution model.
