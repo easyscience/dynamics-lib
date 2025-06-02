@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import Callable, Dict
 
+from easyscience.Objects.variable import Parameter 
+
+#TODO: Allow specification of units for parameters in components
 
 class ModelComponent(ABC):
     """
@@ -33,26 +36,30 @@ class GaussianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None):
-        self.center = center
-        self.width = width
+    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None,unit='meV'):
+        self.center = Parameter(name='center', value=center, unit=unit)
+        self.width = Parameter(name='width', value=width, unit=unit)
+            
         if amplitude is not None:
-            self.amplitude = amplitude
+            self.amplitude = Parameter(name='amplitude', value=amplitude)
         elif area is not None:
-            self.amplitude = area / (width * np.sqrt(2 * np.pi))
+            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
         else:
             raise ValueError("Must provide either amplitude or area")
 
     def evaluate(self, x):
-        return self.amplitude * np.exp(-0.5 * ((x - self.center) / self.width) ** 2)
+        #TODO: Handle units properly
+        return self.amplitude.value * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
 
     @property
     def area(self):
-        return self.amplitude * self.width * np.sqrt(2 * np.pi)
+        #TODO: Handle units properly
+        return self.amplitude.value * self.width.value * np.sqrt(2 * np.pi)
 
     @area.setter
     def area(self, value):
-        self.amplitude = value / (self.width * np.sqrt(2 * np.pi))
+        #TODO: Handle units properly
+        self.amplitude.value = value / (self.width.value * np.sqrt(2 * np.pi))
 
 
 class LorentzianComponent(ModelComponent):
@@ -66,26 +73,30 @@ class LorentzianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None):
-        self.center = center
-        self.width = width
+    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None,unit='meV'):
+        self.center = Parameter(name='center', value=center, unit=unit)
+        self.width = Parameter(name='width', value=width, unit=unit)
+            
         if amplitude is not None:
-            self.amplitude = amplitude
+            self.amplitude = Parameter(name='amplitude', value=amplitude)
         elif area is not None:
-            self.amplitude = area / (np.pi * width)
+            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
         else:
             raise ValueError("Must provide either amplitude or area")
 
     def evaluate(self, x):
-        return self.amplitude * (self.width**2 / ((x - self.center)**2 + self.width**2))
+            #TODO: Handle units properly
+        return self.amplitude.value * (self.width.value**2 / ((x - self.center.value)**2 + self.width.value**2))
 
     @property
     def area(self):
-        return self.amplitude * np.pi * self.width
+        #TODO: Handle units properly
+        return self.amplitude.value * np.pi * self.width.value
 
     @area.setter
     def area(self, value):
-        self.amplitude = value / (np.pi * self.width)
+        #TODO: Handle units properly
+        self.amplitude.value = value / (np.pi * self.width.value)
 
 
 class DHOComponent(ModelComponent):
@@ -94,19 +105,20 @@ class DHOComponent(ModelComponent):
 
     Args:
         center (float): Resonance frequency.
-        gamma (float): Damping constant.
-        amplitude (float): Scaling factor.
+        width (float): Damping constant, approximately the HWHM of the peaks.
+        area (float): Area of DHO.
     """
 
-    def __init__(self, center=1.0, gamma=1.0, amplitude=1.0):
-        self.center = center
-        self.gamma = gamma
-        self.amplitude = amplitude
+    def __init__(self, center=1.0, width=1.0, area=1.0,unit='meV'):
+        self.center = Parameter(name='center', value=center, unit=unit)
+        self.width = Parameter(name='width', value=width, unit=unit)
+        self.area = Parameter(name='area', value=area)
 
     def evaluate(self, x):
-        return self.amplitude * (self.gamma * x) / (
-            (x**2 - self.center**2) ** 2 + (self.gamma * x) ** 2
+        return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
+            (x**2 - self.center.value**2) ** 2 + (2*self.width.value * x) ** 2
         )
+
 
 class PolynomialComponent(ModelComponent):
     """
