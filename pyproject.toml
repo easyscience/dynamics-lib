@@ -16,7 +16,8 @@ dependencies = [
 "scipy",
 "easyscience",
 "scipp",
-"plopp"]
+"plopp",
+"ipympl"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
