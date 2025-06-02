@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.special import voigt_profile
-from easydynamics.sample import GaussianComponent, LorentzianComponent
+from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtComponent
 from easydynamics.sample import SampleModel
 
 
@@ -26,36 +25,38 @@ class ResolutionHandler:
         Returns:
             np.ndarray: Convolved model evaluated on x.
         """
+
+        #TODO: Handle units properly
+        #TODO: Allow resolution model that has multiple components that are not all centered
+        #TODO: Implement numerical convolution for cases not handled analytically
         total = np.zeros_like(x)
 
         for s_comp in sample_model.components:
             matched = False
             for r_comp in resolution_model.components:
                 if isinstance(s_comp, GaussianComponent) and isinstance(r_comp, GaussianComponent):
-                    width = np.sqrt(s_comp.width**2 + r_comp.width**2)
+                    width = np.sqrt(s_comp.width.value**2 + r_comp.width.value**2)
                     area = s_comp.area * r_comp.area
-                    conv = GaussianComponent(center=s_comp.center, width=width, area=area).evaluate(x)
+                    conv = GaussianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
                     total += conv
                     matched = True
                     break
 
                 elif isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, LorentzianComponent):
-                    width = s_comp.width + r_comp.width
+                    width = s_comp.width.value + r_comp.width.value
                     area = s_comp.area * r_comp.area
-                    conv = LorentzianComponent(center=s_comp.center, width=width, area=area).evaluate(x)
+                    conv = LorentzianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
                     total += conv
                     matched = True
                     break
 
                 elif (isinstance(s_comp, GaussianComponent) and isinstance(r_comp, LorentzianComponent)) or \
                      (isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, GaussianComponent)):
-                    g = s_comp if isinstance(s_comp, GaussianComponent) else r_comp
-                    l = r_comp if isinstance(r_comp, LorentzianComponent) else s_comp
-                    sigma = g.width
-                    gamma = l.width
-                    center = g.center  # assume aligned
-                    area = g.area * l.area
-                    voigt = area * voigt_profile(x - center, sigma, gamma)
+                    G = s_comp if isinstance(s_comp, GaussianComponent) else r_comp
+                    L = r_comp if isinstance(r_comp, LorentzianComponent) else s_comp
+                    center = G.center.value  
+                    area = G.area * L.area
+                    voigt = VoigtComponent(center=center, Gwidth=G.width.value, Lwidth=L.width.value, area=area).evaluate(x)
                     total += voigt
                     matched = True
                     break

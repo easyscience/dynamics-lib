@@ -7,6 +7,7 @@ from scipy.special import voigt_profile
 from easyscience.Objects.variable import Parameter 
 
 #TODO: Allow specification of units for parameters in components
+#TODO: Handle area and amplitude if user specifies area
 
 class ModelComponent(ABC):
     """
@@ -38,7 +39,7 @@ class GaussianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None,unit='meV'):
+    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
         self.center = Parameter(name='center', value=center, unit=unit)
         self.width = Parameter(name='width', value=width, unit=unit)
             
@@ -75,14 +76,14 @@ class LorentzianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None,unit='meV'):
+    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
         self.center = Parameter(name='center', value=center, unit=unit)
         self.width = Parameter(name='width', value=width, unit=unit)
             
         if amplitude is not None:
             self.amplitude = Parameter(name='amplitude', value=amplitude)
         elif area is not None:
-            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
+            self.amplitude = Parameter(name='amplitude', value=area / (np.pi * self.width.value))
         else:
             raise ValueError("Must provide either amplitude or area")
 
