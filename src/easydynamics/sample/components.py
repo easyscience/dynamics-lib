@@ -33,7 +33,7 @@ class GaussianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center, width, amplitude=None, area=None):
+    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None):
         self.center = center
         self.width = width
         if amplitude is not None:
@@ -66,7 +66,7 @@ class LorentzianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center, width, amplitude=None, area=None):
+    def __init__(self, center=0.0, width=1.0, amplitude=1.0, area=None):
         self.center = center
         self.width = width
         if amplitude is not None:
@@ -98,7 +98,7 @@ class DHOComponent(ModelComponent):
         amplitude (float): Scaling factor.
     """
 
-    def __init__(self, center, gamma, amplitude=1.0):
+    def __init__(self, center=1.0, gamma=1.0, amplitude=1.0):
         self.center = center
         self.gamma = gamma
         self.amplitude = amplitude
@@ -117,7 +117,7 @@ class PolynomialComponent(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    def __init__(self, coefficients):
+    def __init__(self, coefficients=0.0):
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
         self.coefficients = list(coefficients)
