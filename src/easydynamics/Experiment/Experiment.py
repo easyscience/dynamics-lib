@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-class data:
+class Experiment:
 
     def load_example_vanadium_data():
         """
