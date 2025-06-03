@@ -27,6 +27,8 @@ class Analysis(AnalysisBase):
         """
         MyResolutionHandler=ResolutionHandler()
         y=MyResolutionHandler.convolve(x, self._SampleModel, self._ResolutionModel)+ self._BackgroundModel.evaluate(x)
+        
+
         return y
     
     def fit(self):

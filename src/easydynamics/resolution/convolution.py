@@ -39,10 +39,7 @@ class ResolutionHandler:
                     width = np.sqrt(s_comp.width.value**2 + r_comp.width.value**2)
                     area = s_comp.area * r_comp.area
                     # conv = GaussianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x) # I am not allowed to make new components, since it makes new Parameters
-                    print(x)
-                    print(s_comp.center.value)
-                    print(width)
-                    print(area)
+
                     conv = self.gaussian_eval(x, s_comp.center.value, width, area)
                     total += conv
                     matched = True
