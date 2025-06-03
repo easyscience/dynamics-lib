@@ -153,19 +153,24 @@ class PolynomialComponent(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    def __init__(self, coefficients=0.0):
+    def __init__(self, coefficients=(0.0,)):
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
-        self.coefficients = list(coefficients)
+
+        self.coefficients = [
+            Parameter(name=f"c{i}", value=coef)
+            for i, coef in enumerate(coefficients)
+        ]
 
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         result = np.zeros_like(x, dtype=float)
-        for i, coef in enumerate(self.coefficients):
-            result += coef * np.power(x, i)
+        for i, param in enumerate(self.coefficients):
+            result += param.value * np.power(x, i)
         return result
 
     def degree(self):
         return len(self.coefficients) - 1
+
 
 
 class UserDefinedComponent(ModelComponent):

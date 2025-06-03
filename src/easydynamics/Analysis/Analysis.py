@@ -1,5 +1,9 @@
 from easyscience.Objects.job.analysis import AnalysisBase
+from easyscience.fitting import AvailableMinimizers
+from easyscience.fitting import FitResults
+from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
 
+from easyscience.Objects.variable import Parameter
 
 from easydynamics.resolution import ResolutionHandler
 
@@ -25,8 +29,36 @@ class Analysis(AnalysisBase):
         y=MyResolutionHandler.convolve(x, self._SampleModel, self._ResolutionModel)+ self._BackgroundModel.evaluate(x)
         return y
     
-    def fit():
-        raise NotImplementedError("fit not implemented")
+    def fit(self):
+
+        x, y, e = self._data
+
+        # Define the function to be minimized
+        def fit_func(x_vals):
+            return self.calculate_theory(x_vals)
+
+        # Wrap into EasyScience MultiFitter
+        multi_fitter = EasyScienceMultiFitter(
+            fit_objects=[self],
+            fit_functions=[fit_func],
+        )
+
+        # Perform the fit
+        fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
+
+        # Store result
+        self.fit_result = fit_result
+
+        return fit_result
+
+    def switch_minimizer(self, minimizer: AvailableMinimizers) -> None:
+        """
+        Switch the minimizer for the fitting.
+
+        :param minimizer: Minimizer to be switched to
+        """
+        self.easy_science_multi_fitter.switch_minimizer(minimizer)
+
         
     def set_sample_model(self, sample_model):
         """
@@ -80,6 +112,30 @@ class Analysis(AnalysisBase):
             data (scipp DataArray or np.ndarray): The data used in the analysis.
         """
         return self._data
+
+    @property
+    def parameters(self):
+        def collect_parameters(obj):
+            found = []
+            if isinstance(obj, Parameter):
+                found.append(obj)
+            elif isinstance(obj, dict):
+                for v in obj.values():
+                    found.extend(collect_parameters(v))
+            elif isinstance(obj, (list, tuple, set)):
+                for item in obj:
+                    found.extend(collect_parameters(item))
+            elif hasattr(obj, '__dict__'):
+                for v in vars(obj).values():
+                    found.extend(collect_parameters(v))
+            return found
+
+        params = []
+        for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
+            if model is not None:
+                for comp in model.components:
+                    params.extend(collect_parameters(comp))
+        return params
 
 
             
