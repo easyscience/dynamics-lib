@@ -38,7 +38,12 @@ class ResolutionHandler:
                 if isinstance(s_comp, GaussianComponent) and isinstance(r_comp, GaussianComponent):
                     width = np.sqrt(s_comp.width.value**2 + r_comp.width.value**2)
                     area = s_comp.area * r_comp.area
-                    conv = GaussianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
+                    # conv = GaussianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x) # I am not allowed to make new components, since it makes new Parameters
+                    print(x)
+                    print(s_comp.center.value)
+                    print(width)
+                    print(area)
+                    conv = self.gaussian_eval(x, s_comp.center.value, width, area)
                     total += conv
                     matched = True
                     break
@@ -46,7 +51,8 @@ class ResolutionHandler:
                 elif isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, LorentzianComponent):
                     width = s_comp.width.value + r_comp.width.value
                     area = s_comp.area * r_comp.area
-                    conv = LorentzianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
+                    # conv = LorentzianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
+                    conv = self.lorentzian_eval(x, s_comp.center.value, width, area)
                     total += conv
                     matched = True
                     break
@@ -66,3 +72,13 @@ class ResolutionHandler:
                 raise NotImplementedError("Not yet implemented for this combination of components.")
 
         return total
+    
+    @staticmethod
+    def gaussian_eval(x, center, width, area):
+        norm = area / (width * np.sqrt(2 * np.pi))
+        return norm * np.exp(-0.5 * ((x - center) / width) ** 2)
+
+    @staticmethod
+    def lorentzian_eval(x, center, width, area):
+        norm = area / (np.pi * width)
+        return norm / (1 + ((x - center) / width) ** 2)
