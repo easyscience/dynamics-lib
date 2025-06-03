@@ -6,10 +6,13 @@ from scipy.special import voigt_profile
 
 from easyscience.Objects.variable import Parameter 
 
+from easyscience.Objects.ObjectClasses import BaseObj
+
+
 #TODO: Allow specification of units for parameters in components
 #TODO: Handle area and amplitude if user specifies area
 
-class ModelComponent(ABC):
+class ModelComponent(BaseObj):
     """
     Abstract base class for all model components.
     """

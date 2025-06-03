@@ -43,6 +43,9 @@ class Analysis(AnalysisBase):
             fit_functions=[fit_func],
         )
 
+# quad = BaseObj(name='quad', a=a, b=b, c=c)
+# f = Fitter(quad, math_model)
+
         # Perform the fit
         fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
 
@@ -113,8 +116,8 @@ class Analysis(AnalysisBase):
         """
         return self._data
 
-    @property
-    def parameters(self):
+ 
+    def get_fit_parameters(self):
         def collect_parameters(obj):
             found = []
             if isinstance(obj, Parameter):
@@ -136,45 +139,6 @@ class Analysis(AnalysisBase):
                 for comp in model.components:
                     params.extend(collect_parameters(comp))
         return params
-
-
             
 
 
-
-    # @abstractmethod
-    # def calculate_theory(self,
-    #                      x: Union[xr.DataArray, np.ndarray],
-    #                      **kwargs) -> np.ndarray:
-    #     raise NotImplementedError("calculate_theory not implemented")
-
-    # @abstractmethod
-    # def fit(self,
-    #         x: Union[xr.DataArray, np.ndarray],
-    #         y: Union[xr.DataArray, np.ndarray],
-    #         e: Union[xr.DataArray, np.ndarray],
-    #         **kwargs) -> None:
-    #     raise NotImplementedError("fit not implemented")
-
-    # @property
-    # def calculator(self) -> str:
-    #     if self._calculator is None:
-    #         self._calculator = self.interface.current_interface_name
-    #     return self._calculator
-
-    # @calculator.setter
-    # def calculator(self, value) -> None:
-    #     # TODO: check if the calculator is available for the given JobType
-    #     self.interface.switch(value, fitter=self._fitter)
-
-    # @property
-    # def minimizer(self) -> MinimizerBase:
-    #     return self._minimizer
-
-    # @minimizer.setter
-    # def minimizer(self, minimizer: MinimizerBase) -> None:
-    #     self._minimizer = minimizer
-
-    # # required dunder methods
-    # def __str__(self):
-    #     return f"Analysis: {self.name}"
