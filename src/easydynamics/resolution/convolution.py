@@ -13,6 +13,31 @@ class ResolutionHandler:
     - Fallback: Numerical FFT-based convolution
     """
 
+
+    def numerical_convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel) -> np.ndarray:
+        """
+        Perform numerical convolution using FFT.
+
+        Args:
+            x (np.ndarray): Evaluation points.
+            sample_model (SampleModel): Signal model.
+            resolution_model (SampleModel): Resolution model.
+
+        Returns:
+            np.ndarray: Convolved model evaluated on x.
+        """
+        from scipy.signal import fftconvolve
+
+        # Evaluate both models at the same points
+        sample_values = sample_model.evaluate(x)
+        resolution_values = resolution_model.evaluate(x)
+
+        # Perform convolution
+        convolved = fftconvolve(sample_values, resolution_values, mode='same')
+
+        return convolved
+
+
 # TODO: add support for convolution with components instead of only SampleModels
     def convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel) -> np.ndarray:
         """

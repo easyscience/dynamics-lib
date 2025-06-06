@@ -19,15 +19,54 @@ class Analysis(AnalysisBase):
         self._ResolutionModel = None
         self._BackgroundModel = None
 
+
+    def plot_data_and_fit(self,plot_individual_components=False):
+        """
+        Plot the data and the fit result.
+        """
+
+
+
+
+        # Plotting using matplotlib
+        import matplotlib.pyplot as plt
+
+        fig= plt.figure(figsize=(10, 6))
+        x, y, e = self._data
+        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None',markerfacecolor='none')
+        fit_y = self.calculate_theory(x)
+        plt.plot(x, fit_y, label='Fit', color='red')
+
+        if plot_individual_components:
+            # Plot individual components of the sample model. Need to handle resolution
+            for comp in self._SampleModel.components:
+                comp_y = comp.evaluate(x)
+                plt.plot(x, comp_y, label=f'Component: {comp.__class__.__name__}', linestyle='--')
+
+
+        plt.xlabel('Energy (meV)') #TODO: Handle units properly
+        plt.ylabel('Intensity')
+        plt.legend()
+        plt.show()
+        return fig
+        
+
+
     def calculate_theory(self,
                         x: np.ndarray) -> np.ndarray:
         """
         Calculate the theoretical model by convolving the sample model with the resolution model
         and adding the background model.
         """
-        MyResolutionHandler=ResolutionHandler()
-        y=MyResolutionHandler.convolve(x, self._SampleModel, self._ResolutionModel)+ self._BackgroundModel.evaluate(x)
         
+        if self._ResolutionModel is None:
+            y= self._SampleModel.evaluate(x)
+        else:
+            MyResolutionHandler=ResolutionHandler()
+            y= MyResolutionHandler.numerical_convolve(x, self._SampleModel, self._ResolutionModel)
+
+        if self._BackgroundModel is not None:
+            y += self._BackgroundModel.evaluate(x)
 
         return y
     
@@ -45,8 +84,6 @@ class Analysis(AnalysisBase):
             fit_functions=[fit_func],
         )
 
-# quad = BaseObj(name='quad', a=a, b=b, c=c)
-# f = Fitter(quad, math_model)
 
         # Perform the fit
         fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
