@@ -247,7 +247,8 @@ class DeltaFunctionComponent(ModelComponent):
 
     def evaluate(self, x):
         #TODO: Handle units properly
-        return self.area.value if x==0 else 0
+        return 0*x
+    
     
     def get_parameters(self):
         """

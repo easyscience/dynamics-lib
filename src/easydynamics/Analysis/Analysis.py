@@ -1,7 +1,7 @@
 from easyscience.Objects.job.analysis import AnalysisBase
 from easyscience.fitting import AvailableMinimizers
 from easyscience.fitting import FitResults
-from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
+from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 
 from easyscience.Objects.variable import Parameter
 
@@ -79,14 +79,24 @@ class Analysis(AnalysisBase):
         def fit_func(x_vals):
             return self.calculate_theory(x_vals)
 
-        multi_fitter = EasyScienceMultiFitter(
-            fit_objects=[self],
-            fit_functions=[fit_func],
+        # multi_fitter = EasyScienceMultiFitter(
+        #     fit_objects=[self],
+        #     fit_functions=[fit_func],
+        # )
+
+
+        # # Perform the fit
+        # fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
+
+
+        fitter = EasyScienceFitter(
+        fit_object=self,
+        fit_function=fit_func,
         )
 
 
         # Perform the fit
-        fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
+        fit_result = fitter.fit(x=x, y=y, weights=1.0 / e)
 
         # Store result
         self.fit_result = fit_result

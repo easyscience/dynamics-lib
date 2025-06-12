@@ -1,5 +1,5 @@
 import numpy as np
-from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtComponent
+from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtComponent, DeltaFunctionComponent
 from easydynamics.sample import SampleModel
 
 from scipy.signal import fftconvolve
@@ -39,10 +39,17 @@ class ResolutionHandler:
         # Normalize the result to maintain the area under the curve
         convolved*= (x[1] - x[0])  # Assuming uniform spacing in x
 
+
+        # Handle delta functions in the sample model
+        for comp in sample_model.components:
+            if isinstance(comp,DeltaFunctionComponent):                
+                convolved=convolved+ resolution_model.evaluate(x)
+
         return convolved
 
 
 # TODO: add support for convolution with components instead of only SampleModels
+# TODO: add support for delta function
     def convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel) -> np.ndarray:
         """
         Convolve a sample model with a resolution model.
