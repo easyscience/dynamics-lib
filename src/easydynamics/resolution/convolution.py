@@ -31,7 +31,7 @@ class ResolutionHandler:
         'TODO: implement upsampling and interpolation to avoid issues with sparse data and non-uniform spacing'
 
         # Evaluate both models at the same points
-        sample_values = sample_model.evaluate(x)
+        sample_values = sample_model.evaluate(x) # TODO: do not evaluate the delta function here. For now, the delta function evaluates to 0 everywhere.
         resolution_values = resolution_model.evaluate(x)
 
         # Perform convolution
