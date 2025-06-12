@@ -57,3 +57,16 @@ class SampleModel:
             np.ndarray: Evaluated model at input x.
         """
         return sum(comp.evaluate(x-self.offset.value) for comp in self.components)
+    
+    def get_parameters(self):
+        """
+        Get all parameters from the model components.
+
+        Returns:
+            List[Parameter]: List of parameters from all components.
+        """
+        params = []
+        for comp in self.components:
+            params.extend(comp.get_parameters())
+        params.append(self.offset)
+        return params

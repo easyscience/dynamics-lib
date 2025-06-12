@@ -28,20 +28,21 @@ class Analysis(AnalysisBase):
 
 
 
-
         # Plotting using matplotlib
 
 
         fig= plt.figure(figsize=(10, 6))
         x, y, e = self._data
         plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None',markerfacecolor='none')
+
+
         fit_y = self.calculate_theory(x)
         plt.plot(x, fit_y, label='Fit', color='red')
 
         if plot_individual_components:
             # Plot individual components of the sample model. Need to handle resolution
             for comp in self._SampleModel.components:
-                comp_y = comp.evaluate(x)
+                comp_y = comp.evaluate(x-self._SampleModel.offset.value)
                 plt.plot(x, comp_y, label=f'Component: {comp.__class__.__name__}', linestyle='--')
 
 
@@ -111,6 +112,8 @@ class Analysis(AnalysisBase):
             sample_model (SampleModel): The sample model to be used in the analysis.
         """
         self._SampleModel = sample_model
+        self._SampleModel.offset.value = 0.0  # Ensure sample model has an offset of 0
+        self._SampleModel.fix_offset(True)  # Fix the offset to avoid fitting it
 
     def set_resolution_model(self, resolution_model):
         """
@@ -119,7 +122,9 @@ class Analysis(AnalysisBase):
         Args:
             resolution_model (SampleModel): The resolution model to be used in the analysis.
         """
-        self._ResolutionModel = resolution_model 
+        self._ResolutionModel = resolution_model
+        self._ResolutionModel.offset.value= 0.0  # Ensure resolution model has an offset of 0
+        self._ResolutionModel.fix_offset(True)  # Fix the offset to avoid fitting it
 
     def set_background_model(self, background_model):   
         """
@@ -158,27 +163,36 @@ class Analysis(AnalysisBase):
 
  
     def get_fit_parameters(self):
-        def collect_parameters(obj):
-            found = []
-            if isinstance(obj, Parameter):
-                found.append(obj)
-            elif isinstance(obj, dict):
-                for v in obj.values():
-                    found.extend(collect_parameters(v))
-            elif isinstance(obj, (list, tuple, set)):
-                for item in obj:
-                    found.extend(collect_parameters(item))
-            elif hasattr(obj, '__dict__'):
-                for v in vars(obj).values():
-                    found.extend(collect_parameters(v))
-            return found
-
-        params = []
+        params= []
         for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
             if model is not None:
-                for comp in model.components:
-                    params.extend(collect_parameters(comp))
-        return params
+                params.extend(model.get_parameters())
+        return params   
+
+
+
+
+        # def collect_parameters(obj):
+        #     found = []
+        #     if isinstance(obj, Parameter):
+        #         found.append(obj)
+        #     elif isinstance(obj, dict):
+        #         for v in obj.values():
+        #             found.extend(collect_parameters(v))
+        #     elif isinstance(obj, (list, tuple, set)):
+        #         for item in obj:
+        #             found.extend(collect_parameters(item))
+        #     elif hasattr(obj, '__dict__'):
+        #         for v in vars(obj).values():
+        #             found.extend(collect_parameters(v))
+        #     return found
+
+        # params = []
+        # for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
+        #     if model is not None:
+        #         for comp in model.components:
+        #             params.extend(collect_parameters(comp))
+        # return params
             
 
 

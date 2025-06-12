@@ -44,16 +44,16 @@ class GaussianComponent(ModelComponent):
 
     def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
         if center is None:
-            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name='Gcenter', value=0.0, unit=unit,fixed=True)
         else:
-            self.center = Parameter(name='center', value=center, unit=unit)
+            self.center = Parameter(name='Gcenter', value=center, unit=unit)
 
-        self.width = Parameter(name='width', value=width, unit=unit)
+        self.width = Parameter(name='Gwidth', value=width, unit=unit)
             
         if amplitude is not None:
-            self.amplitude = Parameter(name='amplitude', value=amplitude)
+            self.amplitude = Parameter(name='Gamplitude', value=amplitude)
         elif area is not None:
-            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
+            self.amplitude = Parameter(name='Gamplitude', value=area / (width * np.sqrt(2 * np.pi)))
         else:
             raise ValueError("Must provide either amplitude or area")
 
@@ -71,6 +71,14 @@ class GaussianComponent(ModelComponent):
         #TODO: Handle units properly
         self.amplitude.value = value / (self.width.value * np.sqrt(2 * np.pi))
 
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.center, self.width, self.amplitude]
+
 
 class LorentzianComponent(ModelComponent):
     """
@@ -85,15 +93,15 @@ class LorentzianComponent(ModelComponent):
 
     def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
         if center is None:
-            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name='Lcenter', value=0.0, unit=unit,fixed=True)
         else:
-            self.center = Parameter(name='center', value=center, unit=unit)
-        self.width = Parameter(name='width', value=width, unit=unit)
+            self.center = Parameter(name='Lcenter', value=center, unit=unit)
+        self.width = Parameter(name='Lwidth', value=width, unit=unit)
             
         if amplitude is not None:
-            self.amplitude = Parameter(name='amplitude', value=amplitude)
+            self.amplitude = Parameter(name='Lamplitude', value=amplitude)
         elif area is not None:
-            self.amplitude = Parameter(name='amplitude', value=area / (np.pi * self.width.value))
+            self.amplitude = Parameter(name='Lamplitude', value=area / (np.pi * self.width.value))
         else:
             raise ValueError("Must provide either amplitude or area")
 
@@ -111,6 +119,15 @@ class LorentzianComponent(ModelComponent):
         #TODO: Handle units properly
         self.amplitude.value = value / (np.pi * self.width.value)
 
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.center, self.width, self.amplitude]
+
+
 class VoigtComponent(ModelComponent):
     """
     Voigt profile, a convolution of Gaussian and Lorentzian.
@@ -124,16 +141,23 @@ class VoigtComponent(ModelComponent):
 
     def __init__(self, center=None, Gwidth=1.0, Lwidth=1.0, area=1.0, unit='meV'):
         if center is None:
-            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name='Vcenter', value=0.0, unit=unit,fixed=True)
         else:
-            self.center = Parameter(name='center', value=center, unit=unit)
-        self.Gwidth = Parameter(name='Gwidth', value=Gwidth, unit=unit)
-        self.Lwidth = Parameter(name='LWidth', value=Lwidth, unit=unit)
-        self.area = Parameter(name='area', value=area)
+            self.center = Parameter(name='Vcenter', value=center, unit=unit)
+        self.Gwidth = Parameter(name='VGwidth', value=Gwidth, unit=unit)
+        self.Lwidth = Parameter(name='VWidth', value=Lwidth, unit=unit)
+        self.area = Parameter(name='Varea', value=area)
 
     def evaluate(self, x):
         return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)    
 
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.center, self.Gwidth, self.Lwidth, self.area]
 
 
 class DHOComponent(ModelComponent):
@@ -155,6 +179,14 @@ class DHOComponent(ModelComponent):
         return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
             (x**2 - self.center.value**2) ** 2 + (2*self.width.value * x) ** 2
         )
+    
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.center, self.width, self.area]
 
 
 class PolynomialComponent(ModelComponent):
@@ -183,6 +215,14 @@ class PolynomialComponent(ModelComponent):
 
     def degree(self):
         return len(self.coefficients) - 1
+    
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return self.coefficients
 
 
 
@@ -197,30 +237,26 @@ class DeltaFunctionComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
-        self.center = Parameter(name='center', value=center, unit=unit)
-        self.width = Parameter(name='width', value=width, unit=unit)
-            
-        if amplitude is not None:
-            self.amplitude = Parameter(name='amplitude', value=amplitude)
-        elif area is not None:
-            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
+    def __init__(self, center=None, area=1.0,unit='meV'):
+        if center is None:
+            self.center = Parameter(name='Dcenter', value=0.0, unit=unit,fixed=True)
         else:
-            raise ValueError("Must provide either amplitude or area")
+            self.center = Parameter(name='Dcenter', value=center, unit=unit)
+            self.area = Parameter(name='Darea', value=area, unit=unit)
+
 
     def evaluate(self, x):
         #TODO: Handle units properly
-        return self.amplitude.value * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
+        return self.area.value if x==0 else 0
+    
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.center, self.area]
 
-    @property
-    def area(self):
-        #TODO: Handle units properly
-        return self.amplitude.value * self.width.value * np.sqrt(2 * np.pi)
-
-    @area.setter
-    def area(self, value):
-        #TODO: Handle units properly
-        self.amplitude.value = value / (self.width.value * np.sqrt(2 * np.pi))
 
 
 
