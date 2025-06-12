@@ -76,11 +76,9 @@ class Analysis(AnalysisBase):
 
         x, y, e = self._data
 
-        # Define the function to be minimized
         def fit_func(x_vals):
             return self.calculate_theory(x_vals)
 
-        # Wrap into EasyScience MultiFitter
         multi_fitter = EasyScienceMultiFitter(
             fit_objects=[self],
             fit_functions=[fit_func],
@@ -111,9 +109,8 @@ class Analysis(AnalysisBase):
         Args:
             sample_model (SampleModel): The sample model to be used in the analysis.
         """
+        #TODO: handle offset more elegantly
         self._SampleModel = sample_model
-        self._SampleModel.offset.value = 0.0  # Ensure sample model has an offset of 0
-        self._SampleModel.fix_offset(True)  # Fix the offset to avoid fitting it
 
     def set_resolution_model(self, resolution_model):
         """
@@ -122,6 +119,7 @@ class Analysis(AnalysisBase):
         Args:
             resolution_model (SampleModel): The resolution model to be used in the analysis.
         """
+        #TODO: handle offset more elegantly
         self._ResolutionModel = resolution_model
         self._ResolutionModel.offset.value= 0.0  # Ensure resolution model has an offset of 0
         self._ResolutionModel.fix_offset(True)  # Fix the offset to avoid fitting it
@@ -134,6 +132,9 @@ class Analysis(AnalysisBase):
             background_model (SampleModel): The background model to be used in the analysis.
         """
         self._BackgroundModel = background_model
+        self._BackgroundModel.offset.value = 0.0  # Ensure sample model has an offset of 0
+        self._BackgroundModel.fix_offset(True)  # Fix the offset to avoid fitting it
+
 
     def set_data(self,data):
         """
