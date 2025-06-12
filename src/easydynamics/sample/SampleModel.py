@@ -22,6 +22,17 @@ class SampleModel:
         """
         self.components.append(component)
 
+    def temperature(self, temperature: float):
+        """
+        Set the temperature for all components in the model.
+
+        Args:
+            temperature (float): Temperature value to set.
+        """
+        for comp in self.components:
+            if hasattr(comp, 'temperature'):
+                comp.temperature = temperature
+
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
         Evaluate the full model by summing all components.
