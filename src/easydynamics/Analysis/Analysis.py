@@ -11,6 +11,7 @@ import numpy as np
 
 import scipp as sc
 
+import matplotlib.pyplot as plt
 
 class Analysis(AnalysisBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -29,7 +30,7 @@ class Analysis(AnalysisBase):
 
 
         # Plotting using matplotlib
-        import matplotlib.pyplot as plt
+
 
         fig= plt.figure(figsize=(10, 6))
         x, y, e = self._data

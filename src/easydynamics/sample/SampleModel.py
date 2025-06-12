@@ -2,6 +2,9 @@ from typing import List
 import numpy as np
 from .components import ModelComponent
 
+from easyscience.Objects.variable import Parameter
+
+
 class SampleModel:
     """
     Represents a combined model composed of multiple model components.
@@ -12,6 +15,7 @@ class SampleModel:
     """
     def __init__(self):
         self.components: List[ModelComponent] = []
+        self.offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def add_component(self, component: ModelComponent):
         """
@@ -33,6 +37,15 @@ class SampleModel:
             if hasattr(comp, 'temperature'):
                 comp.temperature = temperature
 
+    def set_offset(self, offset: float):
+        # TODO: handle units properly
+        
+        self.offset.value= offset
+
+    def fix_offset(self, fix: bool = True):
+    
+        self.offset.fixed = fix
+
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
         Evaluate the full model by summing all components.
@@ -43,4 +56,4 @@ class SampleModel:
         Returns:
             np.ndarray: Evaluated model at input x.
         """
-        return sum(comp.evaluate(x) for comp in self.components)
+        return sum(comp.evaluate(x-self.offset.value) for comp in self.components)

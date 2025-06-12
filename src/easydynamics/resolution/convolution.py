@@ -2,6 +2,7 @@ import numpy as np
 from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtComponent
 from easydynamics.sample import SampleModel
 
+from scipy.signal import fftconvolve
 
 class ResolutionHandler:
     """
@@ -26,7 +27,8 @@ class ResolutionHandler:
         Returns:
             np.ndarray: Convolved model evaluated on x.
         """
-        from scipy.signal import fftconvolve
+
+        'TODO: implement upsampling and interpolation to avoid issues with sparse data and non-uniform spacing'
 
         # Evaluate both models at the same points
         sample_values = sample_model.evaluate(x)
@@ -34,6 +36,8 @@ class ResolutionHandler:
 
         # Perform convolution
         convolved = fftconvolve(sample_values, resolution_values, mode='same')
+        # Normalize the result to maintain the area under the curve
+        convolved*= (x[1] - x[0])  # Assuming uniform spacing in x
 
         return convolved
 

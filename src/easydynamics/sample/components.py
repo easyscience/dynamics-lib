@@ -42,8 +42,12 @@ class GaussianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
-        self.center = Parameter(name='center', value=center, unit=unit)
+    def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
+        if center is None:
+            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+        else:
+            self.center = Parameter(name='center', value=center, unit=unit)
+
         self.width = Parameter(name='width', value=width, unit=unit)
             
         if amplitude is not None:
@@ -79,8 +83,11 @@ class LorentzianComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
-        self.center = Parameter(name='center', value=center, unit=unit)
+    def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
+        if center is None:
+            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+        else:
+            self.center = Parameter(name='center', value=center, unit=unit)
         self.width = Parameter(name='width', value=width, unit=unit)
             
         if amplitude is not None:
@@ -115,8 +122,11 @@ class VoigtComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=0.0, Gwidth=1.0, Lwidth=1.0, area=1.0, unit='meV'):
-        self.center = Parameter(name='center', value=center, unit=unit)
+    def __init__(self, center=None, Gwidth=1.0, Lwidth=1.0, area=1.0, unit='meV'):
+        if center is None:
+            self.center = Parameter(name='center', value=0.0, unit=unit,fixed=True)
+        else:
+            self.center = Parameter(name='center', value=center, unit=unit)
         self.Gwidth = Parameter(name='Gwidth', value=Gwidth, unit=unit)
         self.Lwidth = Parameter(name='LWidth', value=Lwidth, unit=unit)
         self.area = Parameter(name='area', value=area)
@@ -173,6 +183,44 @@ class PolynomialComponent(ModelComponent):
 
     def degree(self):
         return len(self.coefficients) - 1
+
+
+
+class DeltaFunctionComponent(ModelComponent):
+    """
+    Delta function.
+
+    Args:
+        center (float): Mean of the Gaussian.
+        width (float): Standard deviation.
+        amplitude (float): Peak height or
+        area (float): Total area under the curve.
+    """
+
+    def __init__(self, center=0.0, width=1.0, amplitude=None, area=None,unit='meV'):
+        self.center = Parameter(name='center', value=center, unit=unit)
+        self.width = Parameter(name='width', value=width, unit=unit)
+            
+        if amplitude is not None:
+            self.amplitude = Parameter(name='amplitude', value=amplitude)
+        elif area is not None:
+            self.amplitude = Parameter(name='amplitude', value=area / (width * np.sqrt(2 * np.pi)))
+        else:
+            raise ValueError("Must provide either amplitude or area")
+
+    def evaluate(self, x):
+        #TODO: Handle units properly
+        return self.amplitude.value * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
+
+    @property
+    def area(self):
+        #TODO: Handle units properly
+        return self.amplitude.value * self.width.value * np.sqrt(2 * np.pi)
+
+    @area.setter
+    def area(self, value):
+        #TODO: Handle units properly
+        self.amplitude.value = value / (self.width.value * np.sqrt(2 * np.pi))
 
 
 
