@@ -2,10 +2,11 @@ from typing import List
 import numpy as np
 from .components import ModelComponent
 
+
 from easyscience.Objects.variable import Parameter
+from easyscience.Objects.ObjectClasses import BaseObj
 
-
-class SampleModel:
+class SampleModel(BaseObj):
     """
     Represents a combined model composed of multiple model components.
 
@@ -16,6 +17,7 @@ class SampleModel:
     def __init__(self):
         self.components: List[ModelComponent] = []
         self.offset=Parameter(name='offset', value=0.0, unit='meV')
+        # self.unique_name = name
 
     def add_component(self, component: ModelComponent):
         """
