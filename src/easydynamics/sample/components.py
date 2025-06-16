@@ -36,40 +36,24 @@ class GaussianComponent(ModelComponent):
     Gaussian function.
 
     Args:
-        center (float): Mean of the Gaussian.
+        area (float): area of the Gaussian.
+        center (float): Center of the Gaussian. If None, defaults to 0 and is fixed
         width (float): Standard deviation.
-        amplitude (float): Peak height or
-        area (float): Total area under the curve.
     """
 
-    def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
+    def __init__(self, area=1.0, center=None, width=1.0, unit='meV'):
         if center is None:
             self.center = Parameter(name='Gcenter', value=0.0, unit=unit,fixed=True)
         else:
             self.center = Parameter(name='Gcenter', value=center, unit=unit)
 
-        self.width = Parameter(name='Gwidth', value=width, unit=unit)
+        self.width = Parameter(name='Gwidth', value=width, unit=unit,min=0.0)
             
-        if amplitude is not None:
-            self.amplitude = Parameter(name='Gamplitude', value=amplitude)
-        elif area is not None:
-            self.amplitude = Parameter(name='Gamplitude', value=area / (width * np.sqrt(2 * np.pi)))
-        else:
-            raise ValueError("Must provide either amplitude or area")
+        self.area = Parameter(name='Garea', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
         #TODO: Handle units properly
-        return self.amplitude.value * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
-
-    @property
-    def area(self):
-        #TODO: Handle units properly
-        return self.amplitude.value * self.width.value * np.sqrt(2 * np.pi)
-
-    @area.setter
-    def area(self, value):
-        #TODO: Handle units properly
-        self.amplitude.value = value / (self.width.value * np.sqrt(2 * np.pi))
+        return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
 
     def get_parameters(self):
         """
@@ -77,7 +61,7 @@ class GaussianComponent(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """ 
-        return [self.center, self.width, self.amplitude]
+        return [self.area, self.center, self.width]
 
 
 class LorentzianComponent(ModelComponent):
@@ -85,39 +69,24 @@ class LorentzianComponent(ModelComponent):
     Lorentzian function.
 
     Args:
+        area (float): Area of the Lorentzian.
         center (float): Peak center.
         width (float): HWHM (Half Width at Half Maximum).
-        amplitude (float): Peak height or
-        area (float): Total area under the curve.
     """
 
-    def __init__(self, center=None, width=1.0, amplitude=None, area=None,unit='meV'):
+    def __init__(self, area=1.0, center=None, width=1.0, unit='meV'):
         if center is None:
             self.center = Parameter(name='Lcenter', value=0.0, unit=unit,fixed=True)
         else:
             self.center = Parameter(name='Lcenter', value=center, unit=unit)
         self.width = Parameter(name='Lwidth', value=width, unit=unit)
-            
-        if amplitude is not None:
-            self.amplitude = Parameter(name='Lamplitude', value=amplitude)
-        elif area is not None:
-            self.amplitude = Parameter(name='Lamplitude', value=area / (np.pi * self.width.value))
-        else:
-            raise ValueError("Must provide either amplitude or area")
+
+        self.area = Parameter(name='Larea', value=area, unit=unit)
 
     def evaluate(self, x):
             #TODO: Handle units properly
-        return self.amplitude.value * (self.width.value**2 / ((x - self.center.value)**2 + self.width.value**2))
+        return self.area.value * (self.width.value/np.pi / ((x - self.center.value)**2 + self.width.value**2))
 
-    @property
-    def area(self):
-        #TODO: Handle units properly
-        return self.amplitude.value * np.pi * self.width.value
-
-    @area.setter
-    def area(self, value):
-        #TODO: Handle units properly
-        self.amplitude.value = value / (np.pi * self.width.value)
 
     def get_parameters(self):
         """
@@ -125,7 +94,7 @@ class LorentzianComponent(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """ 
-        return [self.center, self.width, self.amplitude]
+        return [self.area, self.center, self.width]
 
 
 class VoigtComponent(ModelComponent):
@@ -139,11 +108,12 @@ class VoigtComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=None, Gwidth=1.0, Lwidth=1.0, area=1.0, unit='meV'):
+    def __init__(self, area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
         if center is None:
-            self.center = Parameter(name='Vcenter', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name='Vcenter', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name='Vcenter', value=center, unit=unit)
+
         self.Gwidth = Parameter(name='VGwidth', value=Gwidth, unit=unit)
         self.Lwidth = Parameter(name='VWidth', value=Lwidth, unit=unit)
         self.area = Parameter(name='Varea', value=area)
@@ -157,7 +127,7 @@ class VoigtComponent(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """ 
-        return [self.center, self.Gwidth, self.Lwidth, self.area]
+        return [self.area, self.center, self.Gwidth, self.Lwidth]
 
 
 class DHOComponent(ModelComponent):
@@ -186,7 +156,7 @@ class DHOComponent(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """ 
-        return [self.center, self.width, self.area]
+        return [self.area, self.center, self.width]
 
 
 class PolynomialComponent(ModelComponent):
@@ -246,7 +216,7 @@ class DeltaFunctionComponent(ModelComponent):
 
 
     def evaluate(self, x):
-        #TODO: Handle units properly
+        #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
         return 0*x
     
     
@@ -256,7 +226,7 @@ class DeltaFunctionComponent(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """ 
-        return [self.center, self.area]
+        return [self.area, self.center]
 
 
 

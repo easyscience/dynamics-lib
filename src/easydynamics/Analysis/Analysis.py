@@ -173,12 +173,27 @@ class Analysis(AnalysisBase):
         return self._data
 
  
-    def get_fit_parameters(self):
+    def get_parameters(self):
+        """
+        Get all parameters from the sample, resolution, and background models.
+        Returns:
+            List[Parameter]: A list of all parameters from the models.
+        """ 
         params= []
         for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
             if model is not None:
                 params.extend(model.get_parameters())
         return params   
+    
+    def get_fit_parameters(self):
+        """
+        Get all fit parameters from the sample, resolution, and background models that are not fixed.
+        Returns:
+            List[Parameter]: A list of all fit parameters from the models that are not fixed.
+        """
+        params= self.get_parameters()
+        return [param for param in params if not getattr(param, 'fixed', False)]
+
 
 
 
