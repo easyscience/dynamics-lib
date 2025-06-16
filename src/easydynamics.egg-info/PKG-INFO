@@ -7,6 +7,10 @@ Requires-Python: >=3.10
 Description-Content-Type: text/markdown
 Requires-Dist: numpy
 Requires-Dist: scipy
+Requires-Dist: easyscience@ git+https://github.com/easyscience/corelib.git@develop
+Requires-Dist: scipp
+Requires-Dist: plopp
+Requires-Dist: ipympl
 
 # EasyQENSLib
 QENS data analysis library

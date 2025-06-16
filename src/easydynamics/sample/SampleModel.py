@@ -3,10 +3,10 @@ import numpy as np
 from .components import ModelComponent
 
 
-from easyscience.Objects.variable import Parameter
-from easyscience.Objects.ObjectClasses import BaseObj
+from easyscience.variable import Parameter
+from easyscience.base_classes import ObjBase
 
-class SampleModel(BaseObj):
+class SampleModel(ObjBase):
     """
     Represents a combined model composed of multiple model components.
 

@@ -5,5 +5,12 @@ src/easydynamics.egg-info/SOURCES.txt
 src/easydynamics.egg-info/dependency_links.txt
 src/easydynamics.egg-info/requires.txt
 src/easydynamics.egg-info/top_level.txt
+src/easydynamics/Analysis/Analysis.py
+src/easydynamics/Analysis/__init__.py
+src/easydynamics/Experiment/Experiment.py
+src/easydynamics/Experiment/__init__.py
+src/easydynamics/resolution/__init__.py
+src/easydynamics/resolution/convolution.py
+src/easydynamics/sample/SampleModel.py
 src/easydynamics/sample/__init__.py
 src/easydynamics/sample/components.py

@@ -4,15 +4,15 @@ from typing import Callable, Dict
 
 from scipy.special import voigt_profile
 
-from easyscience.Objects.variable import Parameter 
+from easyscience.variable import Parameter 
 
-from easyscience.Objects.ObjectClasses import BaseObj
+from easyscience.base_classes import ObjBase
 
 
 #TODO: Allow specification of units for parameters in components
 #TODO: Handle area and amplitude if user specifies area
 
-class ModelComponent(BaseObj):
+class ModelComponent(ObjBase):
     """
     Abstract base class for all model components.
     """

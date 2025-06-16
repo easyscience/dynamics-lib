@@ -1,9 +1,9 @@
-from easyscience.Objects.job.analysis import AnalysisBase
+from easyscience.job.analysis import AnalysisBase
 from easyscience.fitting import AvailableMinimizers
 from easyscience.fitting import FitResults
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 
-from easyscience.Objects.variable import Parameter
+from easyscience.variable import Parameter
 
 from easydynamics.resolution import ResolutionHandler
 

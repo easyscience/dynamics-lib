@@ -1,2 +1,6 @@
 numpy
 scipy
+easyscience@ git+https://github.com/easyscience/corelib.git@develop
+scipp
+plopp
+ipympl
