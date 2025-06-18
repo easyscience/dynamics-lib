@@ -6,6 +6,10 @@ from .components import ModelComponent
 from easyscience.variable import Parameter
 from easyscience.base_classes import ObjBase
 
+
+from easyscience import global_object
+
+
 class SampleModel(ObjBase):
     """
     Represents a combined model composed of multiple model components.
@@ -14,10 +18,13 @@ class SampleModel(ObjBase):
         add_component(component): Add a new model component.
         evaluate(x): Sum and evaluate all components at given x.
     """
-    def __init__(self):
+    def __init__(self,name):
         self.components: List[ModelComponent] = []
         self.offset=Parameter(name='offset', value=0.0, unit='meV')
-        # self.unique_name = name
+        self.unique_name = name
+
+        self._global_object = global_object
+
 
     def add_component(self, component: ModelComponent):
         """
