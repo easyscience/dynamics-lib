@@ -71,6 +71,8 @@ class ResolutionHandler:
         for s_comp in sample_model.components:
             matched = False
             for r_comp in resolution_model.components:
+                print(s_comp)
+                print(r_comp)
                 if isinstance(s_comp, GaussianComponent) and isinstance(r_comp, GaussianComponent):
                     width = np.sqrt(s_comp.width.value**2 + r_comp.width.value**2)
                     area = s_comp.area * r_comp.area

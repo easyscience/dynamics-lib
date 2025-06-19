@@ -17,6 +17,9 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
+    def __init__(self, name='ModelComponent'):
+        super().__init__(name=name)
+
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
@@ -30,6 +33,9 @@ class ModelComponent(ObjBase):
         """
         pass
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name={self.name})"
+
 
 class GaussianComponent(ModelComponent):
     """
@@ -41,15 +47,17 @@ class GaussianComponent(ModelComponent):
         width (float): Standard deviation.
     """
 
-    def __init__(self, area=1.0, center=None, width=1.0, unit='meV'):
-        if center is None:
-            self.center = Parameter(name='Gcenter', value=0.0, unit=unit,fixed=True)
-        else:
-            self.center = Parameter(name='Gcenter', value=center, unit=unit)
+    def __init__(self, name='Gaussian', area=1.0, center=None, width=1.0, unit='meV'):
+        super().__init__(name=name)
 
-        self.width = Parameter(name='Gwidth', value=width, unit=unit,min=0.0)
-            
-        self.area = Parameter(name='Garea', value=area, unit=unit,min=0.0)
+        if center is None:
+            self.center = Parameter(name= name+ 'center', value=0.0, unit=unit,fixed=True)
+        else:
+            self.center = Parameter(name=name+ 'center', value=center, unit=unit)
+
+        self.width = Parameter(name=name+ 'width', value=width, unit=unit,min=0.0)
+
+        self.area = Parameter(name=name+ 'area', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
         #TODO: Handle units properly
@@ -63,6 +71,9 @@ class GaussianComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.width]
 
+    def __repr__(self):
+        return f"GaussianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+
 
 class LorentzianComponent(ModelComponent):
     """
@@ -74,14 +85,16 @@ class LorentzianComponent(ModelComponent):
         width (float): HWHM (Half Width at Half Maximum).
     """
 
-    def __init__(self, area=1.0, center=None, width=1.0, unit='meV'):
-        if center is None:
-            self.center = Parameter(name='Lcenter', value=0.0, unit=unit,fixed=True)
-        else:
-            self.center = Parameter(name='Lcenter', value=center, unit=unit)
-        self.width = Parameter(name='Lwidth', value=width, unit=unit)
+    def __init__(self, name='Lorentzian', area=1.0, center=None, width=1.0, unit='meV'):
+        super().__init__(name=name)
 
-        self.area = Parameter(name='Larea', value=area, unit=unit)
+        if center is None:
+            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
+        else:
+            self.center = Parameter(name=name + 'center', value=center, unit=unit)
+        self.width = Parameter(name=name + 'width', value=width, unit=unit)
+
+        self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
     def evaluate(self, x):
             #TODO: Handle units properly
@@ -96,6 +109,9 @@ class LorentzianComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.width]
 
+    def __repr__(self):
+        return f"LorentzianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+
 
 class VoigtComponent(ModelComponent):
     """
@@ -108,15 +124,16 @@ class VoigtComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
+    def __init__(self, name='Voigt', area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
+        super().__init__(name=name)
         if center is None:
-            self.center = Parameter(name='Vcenter', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
-            self.center = Parameter(name='Vcenter', value=center, unit=unit)
+            self.center = Parameter(name=name + 'center', value=center, unit=unit)
 
-        self.Gwidth = Parameter(name='VGwidth', value=Gwidth, unit=unit)
-        self.Lwidth = Parameter(name='VWidth', value=Lwidth, unit=unit)
-        self.area = Parameter(name='Varea', value=area)
+        self.Gwidth = Parameter(name=name + 'Gwidth', value=Gwidth, unit=unit)
+        self.Lwidth = Parameter(name=name + 'Lwidth', value=Lwidth, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
     def evaluate(self, x):
         return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)    
@@ -129,6 +146,9 @@ class VoigtComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.Gwidth, self.Lwidth]
 
+    def __repr__(self):
+        return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
+
 
 class DHOComponent(ModelComponent):
     """
@@ -140,10 +160,11 @@ class DHOComponent(ModelComponent):
         area (float): Area of DHO.
     """
 
-    def __init__(self, center=1.0, width=1.0, area=1.0,unit='meV'):
-        self.center = Parameter(name='center', value=center, unit=unit)
-        self.width = Parameter(name='width', value=width, unit=unit)
-        self.area = Parameter(name='area', value=area)
+    def __init__(self, name='DHO', center=1.0, width=1.0, area=1.0,unit='meV'):
+        super().__init__(name=name)
+        self.center = Parameter(name=name + 'center', value=center, unit=unit)
+        self.width = Parameter(name=name + 'width', value=width, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
     def evaluate(self, x):
         return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
@@ -159,6 +180,9 @@ class DHOComponent(ModelComponent):
         return [self.area, self.center, self.width]
 
 
+    def __repr__(self):
+        return f"DHOComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+
 class PolynomialComponent(ModelComponent):
     """
     Polynomial function component.
@@ -168,12 +192,13 @@ class PolynomialComponent(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    def __init__(self, coefficients=(0.0,)):
+    def __init__(self, name='Polynomial', coefficients=(0.0,)):
+        super().__init__(name=name)
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
 
         self.coefficients = [
-            Parameter(name=f"c{i}", value=coef)
+            Parameter(name=f"{name}_c{i}", value=coef, unit='meV')
             for i, coef in enumerate(coefficients)
         ]
 
@@ -194,6 +219,10 @@ class PolynomialComponent(ModelComponent):
         """ 
         return self.coefficients
 
+    def __repr__(self):
+        coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
+        return f"PolynomialComponent(name={self.name}, coefficients=[{coeffs_str}])"
+
 
 
 class DeltaFunctionComponent(ModelComponent):
@@ -207,12 +236,12 @@ class DeltaFunctionComponent(ModelComponent):
         area (float): Total area under the curve.
     """
 
-    def __init__(self, center=None, area=1.0,unit='meV'):
+    def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
         if center is None:
-            self.center = Parameter(name='Dcenter', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
-            self.center = Parameter(name='Dcenter', value=center, unit=unit)
-            self.area = Parameter(name='Darea', value=area, unit=unit)
+            self.center = Parameter(name=name + 'center', value=center, unit=unit)
+            self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
 
     def evaluate(self, x):
@@ -228,7 +257,8 @@ class DeltaFunctionComponent(ModelComponent):
         """ 
         return [self.area, self.center]
 
-
+    def __repr__(self):
+        return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
 
 
 class UserDefinedComponent(ModelComponent):
