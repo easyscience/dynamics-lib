@@ -123,28 +123,10 @@ class Analysis(AnalysisBase):
         self._SampleModel = sample_model
 
     def set_resolution_model(self, resolution_model):
-        """
-        Set the resolution model for the analysis.
-
-        Args:
-            resolution_model (SampleModel): The resolution model to be used in the analysis.
-        """
-        #TODO: handle offset more elegantly
-        self._ResolutionModel = resolution_model
-        self._ResolutionModel.offset.value= 0.0  # Ensure resolution model has an offset of 0
-        self._ResolutionModel.fix_offset(True)  # Fix the offset to avoid fitting it
+        raise NotImplementedError ("Resolution model setting is not implemented yet.")
 
     def set_background_model(self, background_model):   
-        """
-        Set the background model for the analysis.
-
-        Args:
-            background_model (SampleModel): The background model to be used in the analysis.
-        """
-        self._BackgroundModel = background_model
-        self._BackgroundModel.offset.value = 0.0  # Ensure sample model has an offset of 0
-        self._BackgroundModel.fix_offset(True)  # Fix the offset to avoid fitting it
-
+        raise NotImplementedError ("Background model setting is not implemented yet.")
 
     def set_data(self,data):
         """
