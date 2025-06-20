@@ -1,9 +1,9 @@
 import scipp as sc
 import numpy as np
 
+from easyscience.job.experiment import ExperimentBase
 
-
-class Experiment:
+class Experiment(ExperimentBase):
 
     def load_example_vanadium_data():
         """
