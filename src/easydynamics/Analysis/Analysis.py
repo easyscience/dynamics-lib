@@ -21,7 +21,7 @@ class Analysis(AnalysisBase):
         self._BackgroundModel = None
 
 
-    def plot_data_and_fit(self,plot_individual_components=False):
+    def plot_data_and_model(self,plot_individual_components=False):
         """
         Plot the data and the fit result.
         """
