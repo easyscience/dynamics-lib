@@ -237,11 +237,12 @@ class DeltaFunctionComponent(ModelComponent):
     """
 
     def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
+        super().__init__(name=name)
         if center is None:
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name=name + 'center', value=center, unit=unit)
-            self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
 
     def evaluate(self, x):
@@ -270,7 +271,8 @@ class UserDefinedComponent(ModelComponent):
         params (dict): Parameters passed to the function.
     """
 
-    def __init__(self, func: Callable[[np.ndarray, Dict], np.ndarray], params: Dict):
+    def __init__(self, name, func: Callable[[np.ndarray, Dict], np.ndarray], params: Dict):
+        super().__init__(name=name)
         self.func = func
         self.params = params
 

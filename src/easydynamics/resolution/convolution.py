@@ -3,6 +3,7 @@ from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtCom
 from easydynamics.sample import SampleModel
 
 from scipy.signal import fftconvolve
+from scipy.special import voigt_profile
 
 class ResolutionHandler:
     """
@@ -41,7 +42,7 @@ class ResolutionHandler:
 
 
         # Handle delta functions in the sample model
-        for comp in sample_model.components:
+        for name, comp in sample_model.components.items():
             if isinstance(comp,DeltaFunctionComponent):                
                 convolved=convolved+ resolution_model.evaluate(x)
 
@@ -62,51 +63,51 @@ class ResolutionHandler:
         Returns:
             np.ndarray: Convolved model evaluated on x.
         """
+        total = np.zeros_like(x, dtype=float)
 
-        #TODO: Handle units properly
-        #TODO: Allow resolution model that has multiple components that are not all centered
-        #TODO: Implement numerical convolution for cases not handled analytically
-        total = np.zeros_like(x)
-
-        for s_comp in sample_model.components:
+        for s_name, s_comp in sample_model.components.items():
             matched = False
-            for r_comp in resolution_model.components:
-                print(s_comp)
-                print(r_comp)
+            for r_name, r_comp in resolution_model.components.items():
+
+                # === Gaussian + Gaussian → Gaussian ===
                 if isinstance(s_comp, GaussianComponent) and isinstance(r_comp, GaussianComponent):
                     width = np.sqrt(s_comp.width.value**2 + r_comp.width.value**2)
-                    area = s_comp.area * r_comp.area
-                    # conv = GaussianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x) # I am not allowed to make new components, since it makes new Parameters
-
-                    conv = self.gaussian_eval(x, s_comp.center.value, width, area)
-                    total += conv
+                    area = s_comp.area.value * r_comp.area.value
+                    center = s_comp.center.value + r_comp.center.value 
+                    total += self.gaussian_eval(x, center, width, area)
                     matched = True
                     break
 
+                # === Lorentzian + Lorentzian → Lorentzian ===
                 elif isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, LorentzianComponent):
                     width = s_comp.width.value + r_comp.width.value
-                    area = s_comp.area * r_comp.area
-                    # conv = LorentzianComponent(center=s_comp.center.value, width=width, area=area).evaluate(x)
-                    conv = self.lorentzian_eval(x, s_comp.center.value, width, area)
-                    total += conv
+                    area = s_comp.area.value * r_comp.area.value
+                    center = s_comp.center.value + r_comp.center.value  
+                    total += self.lorentzian_eval(x, center, width, area)
                     matched = True
                     break
 
-                elif (isinstance(s_comp, GaussianComponent) and isinstance(r_comp, LorentzianComponent)) or \
-                     (isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, GaussianComponent)):
+                # === Gaussian + Lorentzian → Voigt ===
+                elif (
+                    isinstance(s_comp, GaussianComponent) and isinstance(r_comp, LorentzianComponent)
+                ) or (
+                    isinstance(s_comp, LorentzianComponent) and isinstance(r_comp, GaussianComponent)
+                ):
                     G = s_comp if isinstance(s_comp, GaussianComponent) else r_comp
                     L = r_comp if isinstance(r_comp, LorentzianComponent) else s_comp
-                    center = G.center.value #TODO: Handle case where centers are different 
+                    center = G.center.value + L.center.value 
                     area = G.area.value * L.area.value
-                    voigt = VoigtComponent(center=center, Gwidth=G.width.value, Lwidth=L.width.value, area=area).evaluate(x)
-                    total += voigt
+                    total += self.voigt_eval(x, center, G.width.value, L.width.value, area)
                     matched = True
                     break
 
             if not matched:
-                raise NotImplementedError("Not yet implemented for this combination of components.")
+                raise NotImplementedError(
+                    f"Convolution not implemented for: {type(s_comp).__name__} + {type(r_comp).__name__}"
+                )
 
         return total
+
     
     @staticmethod
     def gaussian_eval(x, center, width, area):
@@ -117,3 +118,7 @@ class ResolutionHandler:
     def lorentzian_eval(x, center, width, area):
         norm = area / (np.pi * width)
         return norm / (1 + ((x - center) / width) ** 2)
+
+    @staticmethod
+    def voigt_eval(x, center, g_width, l_width, area):
+        return area * voigt_profile(x - center, g_width, l_width)
