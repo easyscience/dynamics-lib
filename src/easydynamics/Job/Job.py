@@ -25,6 +25,18 @@ class Job(JobBase):
         if self._analysis is None:
             raise RuntimeError("Analysis is not set in Job.")
         return self._analysis.fit(self._experiment,self._theory)    
+    
+    def analysis(self):
+        return self._analysis
+    
+    def calculate_theory(self, x):
+
+        return self._analysis.calculate_theory(x,_experiment=self._experiment, theory=self._theory)
+    
+    def experiment(self):
+        return self._experiment
+    
+    def theoretical_model(self):
+        return self._theory
 
 
-    # 'analysis', 'calculate_theory', 'experiment', 'fit', 'theoretical_model'
