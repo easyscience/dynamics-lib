@@ -84,7 +84,8 @@ class SampleModel(ObjBase):
         result = np.zeros_like(x, dtype=float)
 
         for component in self.components.values():
-            result += component.evaluate( x - self.offset.value)
+            # result += component.evaluate( x - self.offset.value)
+            result += component.evaluate( x)
 
         return result
 
@@ -107,7 +108,8 @@ class SampleModel(ObjBase):
             raise KeyError(f"No component named '{name}' exists.")
         
         component = self.components[name]
-        return component.evaluate(x - self.offset.value)
+        # return component.evaluate(x - self.offset.value)
+        return component.evaluate(x)
 
     
     def get_parameters(self):
@@ -120,7 +122,6 @@ class SampleModel(ObjBase):
         params = []
         for comp in self.components.values():
             params.extend(comp.get_parameters())
-        params.append(self.offset)
         return params
     
     def name(self):

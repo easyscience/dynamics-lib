@@ -19,13 +19,17 @@ class Job(JobBase):
 
     def set_analysis(self, analysis):
         self._analysis = analysis
-    
+        if self._experiment is not None:
+            self._analysis.set_experiment(self._experiment)
+        if self._theory is not None:
+            self._analysis.set_theory(self._theory)
 
     def fit(self):
         if self._analysis is None:
             raise RuntimeError("Analysis is not set in Job.")
-        return self._analysis.fit(self._experiment,self._theory)    
+        return self._analysis.fit()    
     
+    @property
     def analysis(self):
         return self._analysis
     

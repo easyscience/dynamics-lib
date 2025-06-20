@@ -9,9 +9,9 @@ class Data(ExperimentBase):
         data : The experimental data.
     """
     
-    def __init__(self, data=None):
-        super().__init__()
-        self.data = data
+    def __init__(self, name):
+        super().__init__(name)
+        self.data = None
 
 
     def append(self, new_data):
@@ -56,14 +56,14 @@ class Data(ExperimentBase):
         Returns:
             str: Representation of the Data object.
         """
-        return f"Data(data={self.data})"
+        return f"Data(data={self.name})"
     
     def plot(self):
         raise NotImplementedError("Plotting is not implemented yet. Use a plotting library to visualize the data.")
     
 
     
-
+    @staticmethod
     def load_example_vanadium_data():
         """
         Load example vanadium data from files.
@@ -101,6 +101,7 @@ class Data(ExperimentBase):
 
         return vanadium_data
     
+    @staticmethod
     def load_example_vanadium_data_1d():
             """
             Load example vanadium data from files.
