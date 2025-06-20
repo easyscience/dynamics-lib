@@ -19,7 +19,6 @@ class SampleModel(ObjBase):
     """
     def __init__(self,name):
         self.components: Dict[str, ModelComponent] = {}
-        self.offset=Parameter(name='offset', value=0.0, unit='meV')
         super().__init__(name=name)
 
 
@@ -70,14 +69,7 @@ class SampleModel(ObjBase):
             if hasattr(comp, 'temperature'):
                 comp.temperature = temperature
 
-    def set_offset(self, offset: float):
-        # TODO: handle units properly
-        
-        self.offset.value= offset
 
-    def fix_offset(self, fix: bool = True):
-    
-        self.offset.fixed = fix
 
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
@@ -92,7 +84,8 @@ class SampleModel(ObjBase):
         result = np.zeros_like(x, dtype=float)
 
         for component in self.components.values():
-            result += component.evaluate( x - self.offset.value)
+            # result += component.evaluate( x - self.offset.value)
+            result += component.evaluate( x)
 
         return result
 
@@ -115,7 +108,8 @@ class SampleModel(ObjBase):
             raise KeyError(f"No component named '{name}' exists.")
         
         component = self.components[name]
-        return component.evaluate(x - self.offset.value)
+        # return component.evaluate(x - self.offset.value)
+        return component.evaluate(x)
 
     
     def get_parameters(self):
@@ -128,7 +122,6 @@ class SampleModel(ObjBase):
         params = []
         for comp in self.components.values():
             params.extend(comp.get_parameters())
-        params.append(self.offset)
         return params
     
     def name(self):

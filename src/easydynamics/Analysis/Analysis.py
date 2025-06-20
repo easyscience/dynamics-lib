@@ -16,65 +16,113 @@ import matplotlib.pyplot as plt
 class Analysis(AnalysisBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
-        self._SampleModel= None
-        self._ResolutionModel = None
-        self._BackgroundModel = None
+        self._theory= None
+        self._experiment= None
 
 
-    def plot_data_and_fit(self,plot_individual_components=False):
+    # def plot_data_and_model(self,plot_individual_components=False):
+    #     """
+    #     Plot the data and the fit result.
+    #     """
+    #     # Plotting using matplotlib
+
+
+    #     fig= plt.figure(figsize=(10, 6))
+    #     x, y, e = self._experiment.extract_xye_data(self._experiment._data)
+    #     plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None',markerfacecolor='none')
+
+
+    #     fit_y = self.calculate_theory(x)
+    #     plt.plot(x, fit_y, label='Fit', color='red')
+
+    #     if plot_individual_components:
+    #         # Plot individual components of the sample model. Need to handle resolution
+    #         for comp in self._theory.components.values():
+    #             comp_y = comp.evaluate(x-self._theory.offset.value)
+    #             plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
+
+
+    #     plt.xlabel('Energy (meV)') #TODO: Handle units properly
+    #     plt.ylabel('Intensity')
+    #     plt.legend()
+    #     plt.show()
+    #     return fig
+
+
+    def plot_data_and_model(self, plot_individual_components: bool = False):
         """
-        Plot the data and the fit result.
+        Plot the experimental data and the theoretical fit.
+
+        Args:
+            plot_individual_components (bool): If True, plots individual components of the theory model.
         """
+        if self._experiment is None or self._theory is None:
+            raise RuntimeError("Experiment and theory must be set before plotting.")
 
+        if self._experiment._data is None:
+            raise RuntimeError("No data has been set in the experiment.")
 
+        # Extract data
+        x, y, e = self._experiment.extract_xye_data(self._experiment._data)
 
-        # Plotting using matplotlib
+        # Start plot
+        fig = plt.figure(figsize=(10, 6))
+        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None', markerfacecolor='none')
 
-
-        fig= plt.figure(figsize=(10, 6))
-        x, y, e = self._data
-        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None',markerfacecolor='none')
-
-
+        # Compute and plot fit
         fit_y = self.calculate_theory(x)
         plt.plot(x, fit_y, label='Fit', color='red')
 
+        # Plot individual components, shifted by offset
         if plot_individual_components:
-            # Plot individual components of the sample model. Need to handle resolution
-            for comp in self._SampleModel.components.values():
-                comp_y = comp.evaluate(x-self._SampleModel.offset.value)
+            offset = getattr(self._experiment, "offset", None)
+            shift = offset.value if offset else 0.0
+            for comp in self._theory.components.values():
+                comp_y = comp.evaluate(x - shift)
                 plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
 
-
-        plt.xlabel('Energy (meV)') #TODO: Handle units properly
+        # Labels and legend
+        plt.xlabel('Energy (meV)')  # TODO: Handle units programmatically
         plt.ylabel('Intensity')
         plt.legend()
+        plt.tight_layout()
         plt.show()
+
         return fig
-        
 
 
-    def calculate_theory(self,
-                        x: np.ndarray) -> np.ndarray:
+
+    def set_theory(self, theory):
+        self._theory = theory
+
+    def set_experiment(self, experiment):
+        self._experiment = experiment   
+
+
+    def calculate_theory(self, x) -> np.ndarray:
         """
         Calculate the theoretical model by convolving the sample model with the resolution model
         and adding the background model.
         """
-        
-        if self._ResolutionModel is None:
-            y= self._SampleModel.evaluate(x)
-        else:
-            MyResolutionHandler=ResolutionHandler()
-            y= MyResolutionHandler.numerical_convolve(x, self._SampleModel, self._ResolutionModel)
 
-        if self._BackgroundModel is not None:
-            y += self._BackgroundModel.evaluate(x)
+        if self._experiment is not None:
+            x=x- self._experiment.offset.value
+
+        if self._experiment._resolution_model is None:
+            y = self._theory.evaluate(x)
+        else:
+            resolution_handler = ResolutionHandler()
+            y = resolution_handler.numerical_convolve(x, self._theory, self._experiment._resolution_model)
+
+        if self._experiment._background_model is not None:
+            y += self._experiment._background_model.evaluate(x)
 
         return y
-    
+
+
     def fit(self):
 
-        x, y, e = self._data
+        x, y, e = self._experiment.extract_xye_data(self._experiment._data)
 
         def fit_func(x_vals):
             return self.calculate_theory(x_vals)
@@ -111,114 +159,35 @@ class Analysis(AnalysisBase):
         """
         self.easy_science_multi_fitter.switch_minimizer(minimizer)
 
-        
-    def set_sample_model(self, sample_model):
-        """
-        Set the sample model for the analysis.
-
-        Args:
-            sample_model (SampleModel): The sample model to be used in the analysis.
-        """
-        #TODO: handle offset more elegantly
-        self._SampleModel = sample_model
-
-    def set_resolution_model(self, resolution_model):
-        """
-        Set the resolution model for the analysis.
-
-        Args:
-            resolution_model (SampleModel): The resolution model to be used in the analysis.
-        """
-        #TODO: handle offset more elegantly
-        self._ResolutionModel = resolution_model
-        self._ResolutionModel.offset.value= 0.0  # Ensure resolution model has an offset of 0
-        self._ResolutionModel.fix_offset(True)  # Fix the offset to avoid fitting it
-
-    def set_background_model(self, background_model):   
-        """
-        Set the background model for the analysis.
-
-        Args:
-            background_model (SampleModel): The background model to be used in the analysis.
-        """
-        self._BackgroundModel = background_model
-        self._BackgroundModel.offset.value = 0.0  # Ensure sample model has an offset of 0
-        self._BackgroundModel.fix_offset(True)  # Fix the offset to avoid fitting it
-
-
-    def set_data(self,data):
-        """
-        Set the data for the analysis.
-
-        Args:
-            data (scipp DataArray or np.ndarray): The data to be used in the analysis.
-        """
-        #TODO: handle data properly
-        if isinstance(data, sc.DataArray):
-            x= data.coords['energy'].values
-            y = data.values
-            e= np.sqrt(data.variances) 
-
-            data=[x, y, e]
-            
-        self._data = data
-
-    def get_data(self):
-        """
-        Get the data used in the analysis.
-
-        Returns:
-            data (scipp DataArray or np.ndarray): The data used in the analysis.
-        """
-        return self._data
-
  
     def get_parameters(self):
         """
-        Get all parameters from the sample, resolution, and background models.
+        Get all parameters from the theory, resolution, background models, and experiment offset.
+        
         Returns:
-            List[Parameter]: A list of all parameters from the models.
-        """ 
-        params= []
-        for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
-            if model is not None:
-                params.extend(model.get_parameters())
-        return params   
-    
+            List[Parameter]: A list of all parameters.
+        """
+        params = []
+
+        if self._theory is not None:
+            params.extend(self._theory.get_parameters())
+
+        if self._experiment is not None:
+            if self._experiment._resolution_model is not None:
+                params.extend(self._experiment._resolution_model.get_parameters())
+            if self._experiment._background_model is not None:
+                params.extend(self._experiment._background_model.get_parameters())
+            if hasattr(self._experiment, "offset"):
+                params.append(self._experiment.offset)
+
+        return params
+
     def get_fit_parameters(self):
         """
-        Get all fit parameters from the sample, resolution, and background models that are not fixed.
+        Get all fit parameters from the theory, resolution, background models, and experiment offset,
+        filtering out fixed parameters.
+
         Returns:
-            List[Parameter]: A list of all fit parameters from the models that are not fixed.
+            List[Parameter]: A list of unfixed fit parameters.
         """
-        params= self.get_parameters()
-        return [param for param in params if not getattr(param, 'fixed', False)]
-
-
-
-
-
-        # def collect_parameters(obj):
-        #     found = []
-        #     if isinstance(obj, Parameter):
-        #         found.append(obj)
-        #     elif isinstance(obj, dict):
-        #         for v in obj.values():
-        #             found.extend(collect_parameters(v))
-        #     elif isinstance(obj, (list, tuple, set)):
-        #         for item in obj:
-        #             found.extend(collect_parameters(item))
-        #     elif hasattr(obj, '__dict__'):
-        #         for v in vars(obj).values():
-        #             found.extend(collect_parameters(v))
-        #     return found
-
-        # params = []
-        # for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
-        #     if model is not None:
-        #         for comp in model.components:
-        #             params.extend(collect_parameters(comp))
-        # return params
-            
-
-
+        return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]

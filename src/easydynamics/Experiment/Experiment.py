@@ -1,77 +1,75 @@
-import scipp as sc
+
+from easyscience.job.experiment import ExperimentBase
+
+from easyscience.variable import Parameter
+
+from easydynamics.Experiment.Data import Data
+from easydynamics.sample import SampleModel
+
 import numpy as np
+import scipp as sc
 
+class Experiment(ExperimentBase):
 
-
-class Experiment:
-
-    def load_example_vanadium_data():
+    def __init__ (self,name):
         """
-        Load example vanadium data from files.
+        Initialize the Experiment class.
+        """
+        super().__init__(name)
+        self._data = None
+        self._resolution_model = None
+        self._background_model = None
+        self.offset=Parameter(name='offset', value=0.0, unit='meV')
+
+    def set_background_model(self, background:SampleModel):
+        """ Set the background model for the experiment.
+        Args:
+            background (SampleModel): The background model to be used in the experiment.
+        """
+        if not isinstance(background, SampleModel):
+            raise TypeError("Background model must be an instance of SampleModel.")
+        self._background_model = background
+
+    def set_resolution_model(self, resolution:SampleModel):
+        """        Set the resolution model for the experiment.
+        Args:
+            resolution (SampleModel): The resolution model to be used in the experiment.
+        """
+        # TODO: allow resolution to be DataArray or SampleModel
+
+        if resolution is not None and not isinstance(resolution, SampleModel):
+            raise TypeError("Resolution model must be an instance of SampleModel.")
+        self._resolution_model = resolution
+
+    def set_data(self, data: Data):
+        if not isinstance(data, Data):
+            raise TypeError("Data must be an instance of Data.")
+        self._data = data
+
+    def extract_xye_data(self, data):
+        """
+        Extract x, y, and e data from the experiment.
         
         Returns:
-            sc.DataArray: DataArray containing the vanadium data with energy and Q as coordinates.
+            tuple: A tuple containing x, y, and e data.
         """
-        NUMBER_OF_Q_POINTS=16
-        NUMBER_OF_E_POINTS=1024
-        # TODO Add the correct Q values
-        # [  0.5708,    0.7002,    0.8262 ,   0.9485 ,   1.0664  ,  1.1793   , 1.2868 ,   1.3883 ,   1.4833 ,   1.5716  ,  1.6525  ,  1.7258  ,  1.7910 ,   1.8480  ,  1.8965 ,   1.9361],unit='1/angstrom'
+
+        if isinstance(data, Data):
+            data = data.get_data()
+
+        if isinstance(data, sc.DataArray):
+            x = data.coords['energy'].values
+            y = data.values
+            e = np.sqrt(data.variances)
+
+        return x, y, e
 
 
-
-        intensity_values=np.zeros((NUMBER_OF_Q_POINTS,NUMBER_OF_E_POINTS))
-        error_values=np.zeros((NUMBER_OF_Q_POINTS,NUMBER_OF_E_POINTS))
-
-        # Load data into a matrix
-        for Q in range(NUMBER_OF_Q_POINTS):
-            filename = '../examples/QENS_example/IN16b_GGG_data/vanadium_Q' +str(Q+1) +'.dat'
-
-            data_array = np.loadtxt(filename)
-            energy_values=data_array[:, 0] #should be the same for all Q
-            # EnergyValues[Q,:]=data_array[:, 0]
-            intensity_values[Q,:]=data_array[:,1]
-            error_values[Q,:]=data_array[:,2]
-
-        # Define energy, q and intensity as scipp variables with units, and make a DataArray
-        Q=sc.array(dims=['Q'],values=range(NUMBER_OF_Q_POINTS))
-        energy=sc.array(dims=['energy'],values=energy_values/1000,unit='meV')
-        intensity=sc.array(dims=['Q','energy'],values=intensity_values,variances=error_values*error_values) #The variance is the square of the uncertainty!
-
-        vanadium_data = sc.DataArray(data=intensity, coords={'Q':Q,'energy': energy})
+    def set_offset(self, offset: float):
+        # TODO: handle units properly
         
+        self.offset.value= offset
 
-        return vanadium_data
+    def fix_offset(self, fix: bool = True):
     
-    def load_example_vanadium_data_1d():
-            """
-            Load example vanadium data from files.
-            
-            Returns:
-                sc.DataArray: DataArray containing the vanadium data with energy and Q as coordinates.
-            """
-            NUMBER_OF_Q_POINTS=16
-            # TODO Add the correct Q values
-            # [  0.5708,    0.7002,    0.8262 ,   0.9485 ,   1.0664  ,  1.1793   , 1.2868 ,   1.3883 ,   1.4833 ,   1.5716  ,  1.6525  ,  1.7258  ,  1.7910 ,   1.8480  ,  1.8965 ,   1.9361],unit='1/angstrom'
-
-
-
-            # Load data into a matrix
-            for Q in [5]:
-                filename = '../examples/QENS_example/IN16b_GGG_data/vanadium_Q' +str(Q+1) +'.dat'
-
-                data_array = np.loadtxt(filename)
-                energy_values=data_array[:, 0] #should be the same for all Q
-                # EnergyValues[Q,:]=data_array[:, 0]
-                intensity_values=data_array[:,1]
-                error_values=data_array[:,2]
-
-            # Define energy, q and intensity as scipp variables with units, and make a DataArray
-            Q=sc.array(dims=['Q'],values=range(NUMBER_OF_Q_POINTS))
-            energy=sc.array(dims=['energy'],values=energy_values/1000,unit='meV')
-            intensity=sc.array(dims=['energy'],values=intensity_values,variances=error_values*error_values) #The variance is the square of the uncertainty!
-
-            vanadium_data = sc.DataArray(data=intensity, coords={'energy': energy})
-            
-
-            return vanadium_data    
-    
+        self.offset.fixed = fix
