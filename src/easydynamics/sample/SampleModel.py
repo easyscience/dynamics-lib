@@ -19,7 +19,6 @@ class SampleModel(ObjBase):
     """
     def __init__(self,name):
         self.components: Dict[str, ModelComponent] = {}
-        self.offset=Parameter(name='offset', value=0.0, unit='meV')
         super().__init__(name=name)
 
 
@@ -70,14 +69,7 @@ class SampleModel(ObjBase):
             if hasattr(comp, 'temperature'):
                 comp.temperature = temperature
 
-    def set_offset(self, offset: float):
-        # TODO: handle units properly
-        
-        self.offset.value= offset
 
-    def fix_offset(self, fix: bool = True):
-    
-        self.offset.fixed = fix
 
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """

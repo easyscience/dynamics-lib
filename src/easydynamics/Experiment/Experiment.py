@@ -1,6 +1,8 @@
 
 from easyscience.job.experiment import ExperimentBase
 
+from easyscience.variable import Parameter
+
 from easydynamics.Experiment import Data
 from easydynamics.sample import SampleModel
 
@@ -17,6 +19,7 @@ class Experiment(ExperimentBase):
         self._data = Data()
         self._resolution_model = None
         self._background_model = None
+        self.offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def set_background_model(self, background:SampleModel):
         """ Set the background model for the experiment.
@@ -62,3 +65,13 @@ class Experiment(ExperimentBase):
             e = np.sqrt(data.variances)
 
         return x, y, e
+
+
+    def set_offset(self, offset: float):
+        # TODO: handle units properly
+        
+        self.offset.value= offset
+
+    def fix_offset(self, fix: bool = True):
+    
+        self.offset.fixed = fix
