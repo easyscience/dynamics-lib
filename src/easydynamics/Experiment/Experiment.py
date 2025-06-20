@@ -13,8 +13,8 @@ class Experiment(ExperimentBase):
         """
         super().__init__()
         self.data = Data()
-        self.ResolutionModel = None
-        self.BackgroundModel = None
+        self._resolution_model = None
+        self._background_model = None
 
     def set_background_model(self, background:SampleModel):
         """ Set the background model for the experiment.
@@ -24,9 +24,9 @@ class Experiment(ExperimentBase):
         # TODO: handle offset more elegantly
         if not isinstance(background, SampleModel):
             raise TypeError("Background model must be an instance of SampleModel.")
-        self.BackgroundModel = background
-        self.BackgroundModel.offset.value = 0.0  # Ensure sample model has an offset of 0
-        self.BackgroundModel.fix_offset(True)  # Fix the offset to avoid fitting it
+        self._background_model = background
+        self._background_model.offset.value = 0.0  # Ensure sample model has an offset of 0
+        self._background_model.fix_offset(True)  # Fix the offset to avoid fitting it
 
     def set_resolution_model(self, resolution:SampleModel):
         """        Set the resolution model for the experiment.
@@ -38,8 +38,8 @@ class Experiment(ExperimentBase):
 
         if not isinstance(resolution, SampleModel):
             raise TypeError("Resolution model must be an instance of SampleModel.")
-        self.ResolutionModel = resolution
-        self.ResolutionModel.offset.value = 0.0  # Ensure resolution model has an offset of 0
-        self.ResolutionModel.fix_offset(True)  # Fix the offset to avoid fitting it
+        self._resolution_model = resolution
+        self._resolution_model.offset.value = 0.0  # Ensure resolution model has an offset of 0
+        self._resolution_model.fix_offset(True)  # Fix the offset to avoid fitting it
 
     

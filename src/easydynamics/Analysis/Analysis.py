@@ -54,14 +54,32 @@ class Analysis(AnalysisBase):
         
 
 
-    def calculate_theory(self,
-                        x: np.ndarray) -> np.ndarray:
+    # def calculate_theory(self,
+    #                     x: np.ndarray) -> np.ndarray:
+    #     """
+    #     Calculate the theoretical model by convolving the sample model with the resolution model
+    #     and adding the background model.
+    #     """
+        
+    #     if self._ResolutionModel is None:
+    #         y= self._SampleModel.evaluate(x)
+    #     else:
+    #         MyResolutionHandler=ResolutionHandler()
+    #         y= MyResolutionHandler.numerical_convolve(x, self._SampleModel, self._ResolutionModel)
+
+    #     if self._BackgroundModel is not None:
+    #         y += self._BackgroundModel.evaluate(x)
+
+    #     return y
+
+    def calculate_theory(self, Experiment, Theory
+                        ) -> np.ndarray:
         """
         Calculate the theoretical model by convolving the sample model with the resolution model
         and adding the background model.
         """
         
-        if self._ResolutionModel is None:
+        if Experiment.ResolutionModel is None:
             y= self._SampleModel.evaluate(x)
         else:
             MyResolutionHandler=ResolutionHandler()
@@ -71,10 +89,11 @@ class Analysis(AnalysisBase):
             y += self._BackgroundModel.evaluate(x)
 
         return y
-    
-    def fit(self):
 
-        x, y, e = self._data
+
+    def fit(self,Experiment,Theory):
+
+        x, y, e = Experiment._data
 
         def fit_func(x_vals):
             return self.calculate_theory(x_vals)
@@ -175,32 +194,5 @@ class Analysis(AnalysisBase):
         """
         params= self.get_parameters()
         return [param for param in params if not getattr(param, 'fixed', False)]
-
-
-
-
-
-        # def collect_parameters(obj):
-        #     found = []
-        #     if isinstance(obj, Parameter):
-        #         found.append(obj)
-        #     elif isinstance(obj, dict):
-        #         for v in obj.values():
-        #             found.extend(collect_parameters(v))
-        #     elif isinstance(obj, (list, tuple, set)):
-        #         for item in obj:
-        #             found.extend(collect_parameters(item))
-        #     elif hasattr(obj, '__dict__'):
-        #         for v in vars(obj).values():
-        #             found.extend(collect_parameters(v))
-        #     return found
-
-        # params = []
-        # for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
-        #     if model is not None:
-        #         for comp in model.components:
-        #             params.extend(collect_parameters(comp))
-        # return params
-            
 
 
