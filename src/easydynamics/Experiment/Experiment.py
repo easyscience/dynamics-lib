@@ -12,7 +12,7 @@ class Experiment(ExperimentBase):
         Initialize the Experiment class.
         """
         super().__init__()
-        self.data = Data()
+        self._data = Data()
         self._resolution_model = None
         self._background_model = None
 
@@ -42,4 +42,5 @@ class Experiment(ExperimentBase):
         self._resolution_model.offset.value = 0.0  # Ensure resolution model has an offset of 0
         self._resolution_model.fix_offset(True)  # Fix the offset to avoid fitting it
 
-    
+    def set_data(self, data: Data):
+        self._data = data
