@@ -26,4 +26,5 @@ class Job(JobBase):
             raise RuntimeError("Analysis is not set in Job.")
         return self._analysis.fit(self._experiment,self._theory)    
 
+
     # 'analysis', 'calculate_theory', 'experiment', 'fit', 'theoretical_model'

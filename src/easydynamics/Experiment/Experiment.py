@@ -4,6 +4,8 @@ from easyscience.job.experiment import ExperimentBase
 from easydynamics.Experiment import Data
 from easydynamics.sample import SampleModel
 
+import numpy as np
+import scipp as sc
 
 class Experiment(ExperimentBase):
 
@@ -43,4 +45,20 @@ class Experiment(ExperimentBase):
         self._resolution_model.fix_offset(True)  # Fix the offset to avoid fitting it
 
     def set_data(self, data: Data):
+        if not isinstance(data, Data):
+            raise TypeError("Data must be an instance of Data.")
         self._data = data
+
+    def extract_xye_data(self, data):
+        """
+        Extract x, y, and e data from the experiment.
+        
+        Returns:
+            tuple: A tuple containing x, y, and e data.
+        """
+        if isinstance(data, sc.DataArray):
+            x = data.coords['energy'].values
+            y = data.values
+            e = np.sqrt(data.variances)
+
+        return x, y, e

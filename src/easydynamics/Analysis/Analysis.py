@@ -16,18 +16,14 @@ import matplotlib.pyplot as plt
 class Analysis(AnalysisBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
-        self._SampleModel= None
-        self._ResolutionModel = None
-        self._BackgroundModel = None
+        self._theory= None
+        self._experiment= None
 
 
     def plot_data_and_model(self,plot_individual_components=False):
         """
         Plot the data and the fit result.
         """
-
-
-
         # Plotting using matplotlib
 
 
@@ -41,8 +37,8 @@ class Analysis(AnalysisBase):
 
         if plot_individual_components:
             # Plot individual components of the sample model. Need to handle resolution
-            for comp in self._SampleModel.components.values():
-                comp_y = comp.evaluate(x-self._SampleModel.offset.value)
+            for comp in self._theory.components.values():
+                comp_y = comp.evaluate(x-self._theory.offset.value)
                 plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
 
 
@@ -61,42 +57,41 @@ class Analysis(AnalysisBase):
     #     and adding the background model.
     #     """
         
-    #     if self._ResolutionModel is None:
-    #         y= self._SampleModel.evaluate(x)
+    #     if self._resolution_model is None:
+    #         y= self._theory.evaluate(x)
     #     else:
-    #         MyResolutionHandler=ResolutionHandler()
-    #         y= MyResolutionHandler.numerical_convolve(x, self._SampleModel, self._ResolutionModel)
+    #         resolution_handler=ResolutionHandler()
+    #         y= resolution_handler.numerical_convolve(x, self._theory, self._resolution_model)
 
-    #     if self._BackgroundModel is not None:
-    #         y += self._BackgroundModel.evaluate(x)
+    #     if self._background_model is not None:
+    #         y += self._background_model.evaluate(x)
 
     #     return y
 
-    def calculate_theory(self, Experiment, Theory
-                        ) -> np.ndarray:
+    def calculate_theory(self, x, experiment, theory) -> np.ndarray:
         """
         Calculate the theoretical model by convolving the sample model with the resolution model
         and adding the background model.
         """
         
-        if Experiment.ResolutionModel is None:
-            y= self._SampleModel.evaluate(x)
+        if experiment._resolution_model is None:
+            y = self.theory.evaluate(x)
         else:
-            MyResolutionHandler=ResolutionHandler()
-            y= MyResolutionHandler.numerical_convolve(x, self._SampleModel, self._ResolutionModel)
+            resolution_handler = ResolutionHandler()
+            y = resolution_handler.numerical_convolve(x, theory, experiment._resolution_model)
 
-        if self._BackgroundModel is not None:
-            y += self._BackgroundModel.evaluate(x)
+        if experiment._background_model is not None:
+            y += experiment._background_model.evaluate(x)
 
         return y
 
 
-    def fit(self,Experiment,Theory):
+    def fit(self, experiment, theory):
 
-        x, y, e = Experiment._data
+        x, y, e = experiment.extract_xye_data(experiment._data)
 
         def fit_func(x_vals):
-            return self.calculate_theory(x_vals)
+            return self.calculate_theory(x_vals, experiment, theory)
 
         # multi_fitter = EasyScienceMultiFitter(
         #     fit_objects=[self],
@@ -130,49 +125,6 @@ class Analysis(AnalysisBase):
         """
         self.easy_science_multi_fitter.switch_minimizer(minimizer)
 
-        
-    def set_sample_model(self, sample_model):
-        """
-        Set the sample model for the analysis.
-
-        Args:
-            sample_model (SampleModel): The sample model to be used in the analysis.
-        """
-        #TODO: handle offset more elegantly
-        self._SampleModel = sample_model
-
-    def set_resolution_model(self, resolution_model):
-        raise NotImplementedError ("Resolution model setting is not implemented yet.")
-
-    def set_background_model(self, background_model):   
-        raise NotImplementedError ("Background model setting is not implemented yet.")
-
-    def set_data(self,data):
-        """
-        Set the data for the analysis.
-
-        Args:
-            data (scipp DataArray or np.ndarray): The data to be used in the analysis.
-        """
-        #TODO: handle data properly
-        if isinstance(data, sc.DataArray):
-            x= data.coords['energy'].values
-            y = data.values
-            e= np.sqrt(data.variances) 
-
-            data=[x, y, e]
-            
-        self._data = data
-
-    def get_data(self):
-        """
-        Get the data used in the analysis.
-
-        Returns:
-            data (scipp DataArray or np.ndarray): The data used in the analysis.
-        """
-        return self._data
-
  
     def get_parameters(self):
         """
@@ -181,7 +133,7 @@ class Analysis(AnalysisBase):
             List[Parameter]: A list of all parameters from the models.
         """ 
         params= []
-        for model in [self._SampleModel, self._ResolutionModel, self._BackgroundModel]:
+        for model in [self._theory, self._resolution_model, self._background_model]:
             if model is not None:
                 params.extend(model.get_parameters())
         return params   
