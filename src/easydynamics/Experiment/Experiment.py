@@ -3,7 +3,21 @@ import numpy as np
 
 from easyscience.job.experiment import ExperimentBase
 
+
+
+
 class Experiment(ExperimentBase):
+
+    def __init__ (self):
+        """
+        Initialize the Experiment class.
+        """
+        super().__init__()
+        self.data = None
+        self.resolution = None
+        self.background = None
+
+
 
     def load_example_vanadium_data():
         """
@@ -74,4 +88,4 @@ class Experiment(ExperimentBase):
             
 
             return vanadium_data    
-    
+
