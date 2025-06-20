@@ -126,7 +126,7 @@ class SampleModel(ObjBase):
             List[Parameter]: List of parameters from all components.
         """
         params = []
-        for comp in self.components:
+        for comp in self.components.values():
             params.extend(comp.get_parameters())
         params.append(self.offset)
         return params

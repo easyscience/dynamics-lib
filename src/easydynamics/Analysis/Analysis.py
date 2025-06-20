@@ -41,9 +41,9 @@ class Analysis(AnalysisBase):
 
         if plot_individual_components:
             # Plot individual components of the sample model. Need to handle resolution
-            for comp in self._SampleModel.components:
+            for comp in self._SampleModel.components.values():
                 comp_y = comp.evaluate(x-self._SampleModel.offset.value)
-                plt.plot(x, comp_y, label=f'Component: {comp.__class__.__name__}', linestyle='--')
+                plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
 
 
         plt.xlabel('Energy (meV)') #TODO: Handle units properly
