@@ -106,14 +106,14 @@ class Analysis(AnalysisBase):
         and adding the background model.
         """
 
-        if self._experiment is not None:
-            x=x- self._experiment.offset.value
+        # if self._experiment is not None:
+            # x=x- self._experiment.offset.value #TODO: offset is not handled properly here! Both resolution and sample are being shifted this way, which is both incorrect and creates shifts when delta functions are used
 
         if self._experiment._resolution_model is None:
-            y = self._theory.evaluate(x)
+            y = self._theory.evaluate(x- self._experiment.offset.value)
         else:
             resolution_handler = ResolutionHandler()
-            y = resolution_handler.numerical_convolve(x, self._theory, self._experiment._resolution_model)
+            y = resolution_handler.numerical_convolve(x, self._theory, self._experiment._resolution_model, self._experiment.offset)
 
         if self._experiment._background_model is not None:
             y += self._experiment._background_model.evaluate(x)

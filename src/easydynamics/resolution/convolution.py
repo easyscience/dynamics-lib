@@ -5,6 +5,7 @@ from easydynamics.sample import SampleModel
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
+from easyscience.variable import Parameter
 class ResolutionHandler:
     """
     Convolution handler that uses analytical expressions where possible:
@@ -16,7 +17,7 @@ class ResolutionHandler:
     """
 
 
-    def numerical_convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel) -> np.ndarray:
+    def numerical_convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel,offset:Parameter) -> np.ndarray:
         """
         Perform numerical convolution using FFT.
 
@@ -32,7 +33,7 @@ class ResolutionHandler:
         'TODO: implement upsampling and interpolation to avoid issues with sparse data and non-uniform spacing'
 
         # Evaluate both models at the same points
-        sample_values = sample_model.evaluate(x) # TODO: do not evaluate the delta function here. For now, the delta function evaluates to 0 everywhere.
+        sample_values = sample_model.evaluate(x-offset.value) # TODO: do not evaluate the delta function here. For now, the delta function evaluates to 0 everywhere.
         resolution_values = resolution_model.evaluate(x)
 
         # Perform convolution
@@ -44,7 +45,7 @@ class ResolutionHandler:
         # Handle delta functions in the sample model
         for name, comp in sample_model.components.items():
             if isinstance(comp,DeltaFunctionComponent):                
-                convolved=convolved+ comp.area.value*resolution_model.evaluate(x) #TODO: Normalize the resolution model to have area 1
+                convolved=convolved+ comp.area.value*resolution_model.evaluate(x-offset.value) #TODO: Normalize the resolution model to have area 1
 
         return convolved
 
