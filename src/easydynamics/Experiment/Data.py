@@ -159,3 +159,52 @@ class Data(ExperimentBase):
         GGG_data_450mK = sc.DataArray(data=intensity, coords={'energy': energy})
 
         return GGG_data_450mK
+
+
+    @staticmethod
+    def load_example_anesthetics_data_lowT():
+        data = np.loadtxt('../examples/Anesthetics/data/BVC2K_q4.inx', skiprows=4)
+
+        # Extract columns
+        E = data[:, 0]    # Energy
+        I = data[:, 1]    # Intensity
+        dI = data[:, 2]   # Error
+
+        # Create Scipp DataArray
+        da = sc.DataArray(
+            data=sc.array(dims=['energy'], values=I, variances=dI**2),
+            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+        )
+        return da
+    
+    @staticmethod
+    def load_example_anesthetics_data_midT():
+        data = np.loadtxt('../examples/Anesthetics/data/BVC50K_q4.inx', skiprows=4)
+
+        # Extract columns
+        E = data[:, 0]    # Energy
+        I = data[:, 1]    # Intensity
+        dI = data[:, 2]   # Error
+
+        # Create Scipp DataArray
+        da = sc.DataArray(
+            data=sc.array(dims=['energy'], values=I, variances=dI**2),
+            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+        )
+        return da
+    
+    @staticmethod
+    def load_example_anesthetics_data_highT():
+        data = np.loadtxt('../examples/Anesthetics/data/BVC250K_q4.inx', skiprows=4)
+
+        # Extract columns
+        E = data[:, 0]    # Energy
+        I = data[:, 1]    # Intensity
+        dI = data[:, 2]   # Error
+
+        # Create Scipp DataArray
+        da = sc.DataArray(
+            data=sc.array(dims=['energy'], values=I, variances=dI**2),
+            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+        )
+        return da

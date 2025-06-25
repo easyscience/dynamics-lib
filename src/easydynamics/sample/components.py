@@ -10,7 +10,6 @@ from easyscience.base_classes import ObjBase
 
 
 #TODO: Allow specification of units for parameters in components
-#TODO: Handle area and amplitude if user specifies area
 
 class ModelComponent(ObjBase):
     """

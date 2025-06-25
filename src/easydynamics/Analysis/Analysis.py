@@ -20,33 +20,7 @@ class Analysis(AnalysisBase):
         self._experiment= None
 
 
-    # def plot_data_and_model(self,plot_individual_components=False):
-    #     """
-    #     Plot the data and the fit result.
-    #     """
-    #     # Plotting using matplotlib
 
-
-    #     fig= plt.figure(figsize=(10, 6))
-    #     x, y, e = self._experiment.extract_xye_data(self._experiment._data)
-    #     plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None',markerfacecolor='none')
-
-
-    #     fit_y = self.calculate_theory(x)
-    #     plt.plot(x, fit_y, label='Fit', color='red')
-
-    #     if plot_individual_components:
-    #         # Plot individual components of the sample model. Need to handle resolution
-    #         for comp in self._theory.components.values():
-    #             comp_y = comp.evaluate(x-self._theory.offset.value)
-    #             plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
-
-
-    #     plt.xlabel('Energy (meV)') #TODO: Handle units properly
-    #     plt.ylabel('Intensity')
-    #     plt.legend()
-    #     plt.show()
-    #     return fig
 
 
     def plot_data_and_model(self, plot_individual_components: bool = False):
