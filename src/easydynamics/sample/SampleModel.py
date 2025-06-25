@@ -141,3 +141,12 @@ class SampleModel(ObjBase):
             name (str): New name for the sample model.
         """
         self.name = name
+
+    def __repr__(self):
+        """
+        String representation of the SampleModel object.
+
+        Returns:
+            str: Representation of the SampleModel object.
+        """
+        return f"SampleModel"

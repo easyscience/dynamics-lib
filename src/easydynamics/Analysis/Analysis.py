@@ -74,6 +74,7 @@ class Analysis(AnalysisBase):
         plt.plot(x, fit_y, label='Fit', color='red')
 
         # Plot individual components, shifted by offset
+        #TODO: handle resolution convolution
         if plot_individual_components:
             offset = getattr(self._experiment, "offset", None)
             shift = offset.value if offset else 0.0
@@ -82,7 +83,7 @@ class Analysis(AnalysisBase):
                 plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
 
         # Labels and legend
-        plt.xlabel('Energy (meV)')  # TODO: Handle units programmatically
+        plt.xlabel('Energy (meV)')  # TODO: Handle units 
         plt.ylabel('Intensity')
         plt.legend()
         plt.tight_layout()

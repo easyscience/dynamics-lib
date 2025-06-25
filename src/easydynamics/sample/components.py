@@ -92,9 +92,9 @@ class LorentzianComponent(ModelComponent):
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.width = Parameter(name=name + 'width', value=width, unit=unit)
+        self.width = Parameter(name=name + 'width', value=width, unit=unit,min=0.0)
 
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
             #TODO: Handle units properly
@@ -242,7 +242,7 @@ class DeltaFunctionComponent(ModelComponent):
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
 
 
     def evaluate(self, x):

@@ -44,7 +44,7 @@ class ResolutionHandler:
         # Handle delta functions in the sample model
         for name, comp in sample_model.components.items():
             if isinstance(comp,DeltaFunctionComponent):                
-                convolved=convolved+ resolution_model.evaluate(x)
+                convolved=convolved+ comp.area.value*resolution_model.evaluate(x) #TODO: Normalize the resolution model to have area 1
 
         return convolved
 
