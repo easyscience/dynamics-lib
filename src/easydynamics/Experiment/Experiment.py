@@ -41,6 +41,13 @@ class Experiment(ExperimentBase):
             raise TypeError("Resolution model must be an instance of SampleModel.")
         self._resolution_model = resolution
 
+        if self._resolution_model is not None:
+            self.normalize_resolution()
+
+    def normalize_resolution(self):
+
+        self._resolution_model.normalize_area()
+
     def set_data(self, data: Data):
         if not isinstance(data, Data):
             raise TypeError("Data must be an instance of Data.")

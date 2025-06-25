@@ -110,6 +110,29 @@ class SampleModel(ObjBase):
             result *= self.detailed_balance_factor(x, self._temperature.value)
 
         return result
+    
+
+    def normalize_area(self):
+        """
+        Normalize the SampleModel so the total area of all components sums to 1.
+        This modifies the area parameters in-place.
+        """
+        area_params = []
+        total_area = 0.0
+
+        for component in self.components.values():
+            for param in component.get_parameters():
+                if 'area' in param.name.lower():
+                    area_params.append(param)
+                    total_area += param.value
+
+        if total_area == 0:
+            raise ValueError("Total area is zero; cannot normalize.")
+
+        for param in area_params:
+            param.value /= total_area
+
+
 
     @staticmethod
     def detailed_balance_factor(omega_meV, temperature_K):

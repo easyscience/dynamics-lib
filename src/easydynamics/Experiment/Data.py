@@ -170,10 +170,13 @@ class Data(ExperimentBase):
         I = data[:, 1]    # Intensity
         dI = data[:, 2]   # Error
 
+
+        indices=np.where(E>-2.0)
+
         # Create Scipp DataArray
         da = sc.DataArray(
-            data=sc.array(dims=['energy'], values=I, variances=dI**2),
-            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+            data=sc.array(dims=['energy'], values=I[indices], variances=dI[indices]**2),
+            coords={'energy': sc.array(dims=['energy'], values=E[indices], unit='meV')}
         )
         return da
     
@@ -186,10 +189,12 @@ class Data(ExperimentBase):
         I = data[:, 1]    # Intensity
         dI = data[:, 2]   # Error
 
+        indices=np.where(E>-2.0)
+
         # Create Scipp DataArray
         da = sc.DataArray(
-            data=sc.array(dims=['energy'], values=I, variances=dI**2),
-            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+            data=sc.array(dims=['energy'], values=I[indices], variances=dI[indices]**2),
+            coords={'energy': sc.array(dims=['energy'], values=E[indices], unit='meV')}
         )
         return da
     
@@ -202,9 +207,11 @@ class Data(ExperimentBase):
         I = data[:, 1]    # Intensity
         dI = data[:, 2]   # Error
 
+        indices=np.where(E>-2.0)
+
         # Create Scipp DataArray
         da = sc.DataArray(
-            data=sc.array(dims=['energy'], values=I, variances=dI**2),
-            coords={'energy': sc.array(dims=['energy'], values=E, unit='meV')}
+            data=sc.array(dims=['energy'], values=I[indices], variances=dI[indices]**2),
+            coords={'energy': sc.array(dims=['energy'], values=E[indices], unit='meV')}
         )
         return da
