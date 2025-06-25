@@ -10,7 +10,6 @@ from easyscience.base_classes import ObjBase
 
 
 #TODO: Allow specification of units for parameters in components
-#TODO: Handle area and amplitude if user specifies area
 
 class ModelComponent(ObjBase):
     """
@@ -92,9 +91,9 @@ class LorentzianComponent(ModelComponent):
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.width = Parameter(name=name + 'width', value=width, unit=unit)
+        self.width = Parameter(name=name + 'width', value=width, unit=unit,min=0.0)
 
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
             #TODO: Handle units properly
@@ -242,7 +241,7 @@ class DeltaFunctionComponent(ModelComponent):
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
             self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
 
 
     def evaluate(self, x):
@@ -280,44 +279,3 @@ class UserDefinedComponent(ModelComponent):
         return self.func(x, self.params)
 
 
-def DetailedBalance(omega_meV, temperature_K):
-    """
-    Compute ω * (n + 1), where n is the Bose-Einstein occupation number.
-    
-    This expression arises in detailed balance factors in neutron and light scattering.
-
-    Parameters
-    ----------
-    omega_meV : float or np.ndarray
-        Energy transfer (ω) in meV.
-    temperature_K : float
-        Temperature in Kelvin. Must be >= 0.
-    
-    Returns
-    -------
-    result : float or np.ndarray
-        The value of ω * (n + 1), safely evaluated even for T=0.
-    """
-    if temperature_K < 0:
-        raise ValueError("Temperature must be non-negative.")
-
-    omega_meV = np.asarray(omega_meV, dtype=np.float64)
-
-    if temperature_K == 0:
-        return  np.maximum(omega_meV, 0.0)
-
-    k_B_meV_per_K = 8.617333262e-2  # Boltzmann constant in meV/K
-
-    beta = 1.0 / (k_B_meV_per_K * temperature_K)
-    x = beta * omega_meV
-
-    result = np.empty_like(omega_meV)
-
-    with np.errstate(over='ignore', divide='ignore', invalid='ignore'):
-        exp_x = np.exp(x)
-        denom = np.expm1(x)  # More stable than exp(x) - 1
-        safe = denom != 0
-        result[safe] = omega_meV[safe] * exp_x[safe] / denom[safe]
-        result[~safe] = k_B_meV_per_K * temperature_K  # Limit as ω → 0
-
-    return result

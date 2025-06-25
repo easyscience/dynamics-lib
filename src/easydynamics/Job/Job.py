@@ -42,5 +42,8 @@ class Job(JobBase):
     
     def theoretical_model(self):
         return self._theory
+    
+    def get_fit_parameters(self):
+        return self._analysis.get_fit_parameters()
 
 
