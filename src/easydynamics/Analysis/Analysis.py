@@ -7,6 +7,9 @@ from easyscience.variable import Parameter
 
 from easydynamics.resolution import ResolutionHandler
 
+from easydynamics.sample.components import DeltaFunctionComponent
+
+
 import numpy as np
 
 import scipp as sc
@@ -50,11 +53,19 @@ class Analysis(AnalysisBase):
         # Plot individual components, shifted by offset
         #TODO: handle resolution convolution
         if plot_individual_components:
-            offset = getattr(self._experiment, "offset", None)
-            shift = offset.value if offset else 0.0
             for comp in self._theory.components.values():
-                comp_y = comp.evaluate(x - shift)
-                plt.plot(x, comp_y, label=f'Component: {comp.name}', linestyle='--')
+                # comp_y = comp.evaluate(x - shift)
+
+                if self._experiment._resolution_model is None:
+                    y = comp.evaluate(x- self._experiment.offset.value)
+                else:
+                    resolution_handler = ResolutionHandler()
+                    y = resolution_handler.numerical_convolve(x, comp, self._experiment._resolution_model, self._experiment.offset)
+                    # If detailed balance is used, calculate the detailed balance factor. TODO: This should be handled before convolution.
+                    if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunctionComponent):
+                        y*=self._theory.detailed_balance_factor(x- self._experiment.offset.value, self._theory._temperature.value)
+
+                plt.plot(x, y, label=f'Component: {comp.name}', linestyle='--')
 
         # Labels and legend
         plt.xlabel('Energy (meV)')  # TODO: Handle units 
