@@ -6,6 +6,10 @@ from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
 from easyscience.variable import Parameter
+
+from typing import Union
+from easydynamics.sample.components import ModelComponent
+
 class ResolutionHandler:
     """
     Convolution handler that uses analytical expressions where possible:
@@ -17,7 +21,7 @@ class ResolutionHandler:
     """
 
 
-    def numerical_convolve(self, x: np.ndarray, sample_model: SampleModel, resolution_model: SampleModel,offset:Parameter) -> np.ndarray:
+    def numerical_convolve(self, x: np.ndarray, sample_model: Union[SampleModel,ModelComponent], resolution_model: SampleModel,offset:Parameter) -> np.ndarray:
         """
         Perform numerical convolution using FFT.
 
@@ -43,9 +47,14 @@ class ResolutionHandler:
 
 
         # Handle delta functions in the sample model
-        for name, comp in sample_model.components.items():
-            if isinstance(comp,DeltaFunctionComponent):                
-                convolved=convolved+ comp.area.value*resolution_model.evaluate(x-offset.value) #TODO: Normalize the resolution model to have area 1
+
+        if isinstance(sample_model, SampleModel):
+            for name, comp in sample_model.components.items():
+                if isinstance(comp,DeltaFunctionComponent):                
+                    convolved=convolved+ comp.area.value*resolution_model.evaluate(x-offset.value) 
+        else:
+            if isinstance(sample_model, DeltaFunctionComponent):
+                convolved += sample_model.area.value * resolution_model.evaluate(x-offset.value)
 
         return convolved
 

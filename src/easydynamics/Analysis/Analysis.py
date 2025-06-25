@@ -80,9 +80,6 @@ class Analysis(AnalysisBase):
         and adding the background model.
         """
 
-        # if self._experiment is not None:
-            # x=x- self._experiment.offset.value #TODO: offset is not handled properly here! Both resolution and sample are being shifted this way, which is both incorrect and creates shifts when delta functions are used
-
         if self._experiment._resolution_model is None:
             y = self._theory.evaluate(x- self._experiment.offset.value)
         else:
