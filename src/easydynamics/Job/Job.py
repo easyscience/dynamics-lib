@@ -34,7 +34,6 @@ class Job(JobBase):
         return self._analysis
     
     def calculate_theory(self, x):
-
         return self._analysis.calculate_theory(x,_experiment=self._experiment, theory=self._theory)
     
     def experiment(self):
@@ -45,5 +44,8 @@ class Job(JobBase):
     
     def get_fit_parameters(self):
         return self._analysis.get_fit_parameters()
+    
+    def get_parameters(self):
+        return self._analysis.get_parameters()
 
 
