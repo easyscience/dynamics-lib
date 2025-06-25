@@ -20,7 +20,8 @@ class SampleModel(ObjBase):
     def __init__(self,name):
         self.components: Dict[str, ModelComponent] = {}
         super().__init__(name=name)
-
+        self._temperature=Parameter(name="temperature", value=-1, unit='K',fixed=True)  # Default temperature in Kelvin
+        self.use_detailed_balance = True
 
     def add_component(self, component: ModelComponent):
         """
@@ -58,16 +59,34 @@ class SampleModel(ObjBase):
         self.components[key] = value
 
 
-    def temperature(self, temperature: float):
+    def temperature(self, temperature: float, unit='K'):
         """
-        Set the temperature for all components in the model.
+        Set the temperature for the SampleModel.
 
         Args:
             temperature (float): Temperature value to set.
         """
-        for comp in self.components:
-            if hasattr(comp, 'temperature'):
-                comp.temperature = temperature
+        self._temperature.convert_unit(unit)
+        self._temperature.value = temperature
+
+
+    def get_temperature(self) -> Parameter:
+        """
+        Get the current temperature of the SampleModel.
+
+        Returns:
+            Parameter: The temperature
+        """
+        return self._temperature
+    
+    def use_detailed_balance(self, use: bool = True):
+        """
+        Set whether to use detailed balance in the model evaluation.
+
+        Args:
+            use (bool): If True, detailed balance is used.
+        """
+        self.use_detailed_balance = use
 
 
 
@@ -85,10 +104,55 @@ class SampleModel(ObjBase):
 
         for component in self.components.values():
             # result += component.evaluate( x - self.offset.value)
-            result += component.evaluate( x)
+            result += component.evaluate(x)
+
+        if self.use_detailed_balance and self._temperature.value >= 0:
+            result *= self.detailed_balance_factor(x, self._temperature.value)
 
         return result
 
+    @staticmethod
+    def detailed_balance_factor(omega_meV, temperature_K):
+        """
+        Compute ω * (n + 1), where n is the Bose-Einstein occupation number.
+        
+        This expression arises in detailed balance factors in neutron and light scattering.
+
+        Parameters
+        ----------
+        omega_meV : float or np.ndarray
+            Energy transfer in meV.
+        temperature_K : float
+            Temperature in Kelvin. Must be >= 0.
+        
+        Returns
+        -------
+        result : float or np.ndarray
+            The value of ω * (n + 1), safely evaluated even for T=0.
+        """
+        if temperature_K < 0:
+            raise ValueError("Temperature must be non-negative.")
+
+        omega_meV = np.asarray(omega_meV, dtype=np.float64)
+
+        if temperature_K == 0:
+            return  np.maximum(omega_meV, 0.0)
+
+        k_B_meV_per_K = 8.617333262e-2  # Boltzmann constant in meV/K
+
+        beta = 1.0 / (k_B_meV_per_K * temperature_K)
+        x = beta * omega_meV
+
+        result = np.empty_like(omega_meV)
+
+        with np.errstate(over='ignore', divide='ignore', invalid='ignore'):
+            exp_x = np.exp(x)
+            denom = np.expm1(x)  # More stable than exp(x) - 1
+            safe = denom != 0
+            result[safe] = omega_meV[safe] * exp_x[safe] / denom[safe]
+            result[~safe] = k_B_meV_per_K * temperature_K  # Limit as ω → 0
+
+        return result
     
     def evaluate_component(self, name: str, x: np.ndarray) -> np.ndarray:
         """
@@ -109,7 +173,11 @@ class SampleModel(ObjBase):
         
         component = self.components[name]
         # return component.evaluate(x - self.offset.value)
-        return component.evaluate(x)
+        result = component.evaluate(x)
+        if self.use_detailed_balance and self._temperature.value >= 0:
+            result *= self.detailed_balance_factor(x, self._temperature.value)
+
+        return result
 
     
     def get_parameters(self):
@@ -141,6 +209,10 @@ class SampleModel(ObjBase):
             name (str): New name for the sample model.
         """
         self.name = name
+
+
+
+
 
     def __repr__(self):
         """
