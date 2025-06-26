@@ -19,6 +19,27 @@ class ModelComponent(ObjBase):
     def __init__(self, name='ModelComponent'):
         super().__init__(name=name)
 
+    def fix_all_parameters(self):
+        """Fix all parameters in the model component."""
+        for p in self.get_parameters():
+            p.fixed = True
+
+    def fit_all_parameters(self):
+        """Fit all parameters in the model component."""
+        for p in self.get_parameters():
+            p.fixed = False
+
+    def convert_unit(self, unit):
+        """
+        Convert the unit of the Parameters in the component.
+        
+        Args:
+            unit (str): The new unit to convert to.
+        """
+        self.area.convert_unit(unit)
+        self.center.convert_unit(unit)
+        self.width.convert_unit(unit)
+
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
@@ -61,6 +82,7 @@ class GaussianComponent(ModelComponent):
     def evaluate(self, x):
         #TODO: Handle units properly
         return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
+    
 
     def get_parameters(self):
         """
@@ -197,7 +219,7 @@ class PolynomialComponent(ModelComponent):
             raise ValueError("At least one coefficient must be provided.")
 
         self.coefficients = [
-            Parameter(name=f"{name}_c{i}", value=coef, unit='meV')
+            Parameter(name=f"{name}_c{i}", value=coef)
             for i, coef in enumerate(coefficients)
         ]
 
@@ -221,6 +243,9 @@ class PolynomialComponent(ModelComponent):
     def __repr__(self):
         coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
         return f"PolynomialComponent(name={self.name}, coefficients=[{coeffs_str}])"
+    
+    def convert_unit(self, unit):
+        raise ValueError("PolynomialComponent does not support unit conversion. Coefficients are dimensionless.")
 
 
 
@@ -256,6 +281,16 @@ class DeltaFunctionComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return [self.area, self.center]
+    
+    def convert_unit(self, unit):
+        """
+        Convert the unit of the Parameters in the component.
+        
+        Args:
+            unit (str): The new unit to convert to.
+        """
+        self.area.convert_unit(unit)
+        self.center.convert_unit(unit)    
 
     def __repr__(self):
         return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"

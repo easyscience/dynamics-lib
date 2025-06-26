@@ -210,7 +210,7 @@ class SampleModel(ObjBase):
         Returns:
             List[Parameter]: List of parameters from all components.
         """
-        params = []
+        params = [self._temperature]
         for comp in self.components.values():
             params.extend(comp.get_parameters())
         return params
