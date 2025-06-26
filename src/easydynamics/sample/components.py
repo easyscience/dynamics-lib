@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
-import numpy as np
 from typing import Callable, Dict
 
+import numpy as np
 from scipy.special import voigt_profile
 
-from easyscience.variable import Parameter 
-
+from easyscience.variable import Parameter
 from easyscience.base_classes import ObjBase
-
 
 #TODO: Allow specification of units for parameters in components
 
@@ -319,5 +317,3 @@ class UserDefinedComponent(ModelComponent):
 
     def evaluate(self, x):
         return self.func(x, self.params)
-
-
