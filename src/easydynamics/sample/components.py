@@ -19,6 +19,16 @@ class ModelComponent(ObjBase):
     def __init__(self, name='ModelComponent'):
         super().__init__(name=name)
 
+    def fix_all_parameters(self):
+        """Fix all parameters in the model component."""
+        for p in self.get_parameters():
+            p.fixed = True
+
+    def fit_all_parameters(self):
+        """Fit all parameters in the model component."""
+        for p in self.get_parameters():
+            p.fixed = False
+
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
