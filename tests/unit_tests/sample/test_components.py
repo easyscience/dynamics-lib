@@ -44,6 +44,16 @@ class TestModelComponent:
         # THEN EXPECT
         assert all(not p.fixed for p in dummy.get_parameters())
 
+    def test_convert_unit(self, dummy):
+        dummy.convert_unit("eV")
+        assert dummy.area.unit == "eV"
+        assert dummy.center.unit == "eV"
+        assert dummy.width.unit == "eV"
+        assert dummy.area.value == 1.0 * 1e-3  # 1 meV = 0.001 eV
+        assert dummy.center.value == 2.0 * 1e-3  # 2 meV = 0.002 eV
+        assert dummy.width.value == 3.0 * 1e-3  # 3 meV = 0.003 eV
+     
+
 
 class TestGaussianComponent:
 
@@ -224,7 +234,6 @@ class TestPolynomialComponent:
     def polynomial(self):
         return PolynomialComponent(name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
 
-
     def test_initialization(self, polynomial: PolynomialComponent):
         assert polynomial.name == 'TestPolynomial'
         assert polynomial.coefficients[0].value==1.0
@@ -244,3 +253,13 @@ class TestPolynomialComponent:
         assert params[1].name == 'TestPolynomial_c1'
         assert params[2].name == 'TestPolynomial_c2'
         assert all(isinstance(param, Parameter) for param in params)
+
+
+    def test_convert_unit_raises_for_polynomial(self, polynomial):
+        with pytest.raises(ValueError, match="PolynomialComponent does not support unit conversion"):
+            polynomial.convert_unit("eV")        
+
+@pytest.mark.skip(reason="UserDefinedComponent not implemented yet")
+class TestUserDefinedComponent:
+    def test_placeholder(self):
+        pass
