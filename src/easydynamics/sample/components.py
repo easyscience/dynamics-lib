@@ -18,6 +18,7 @@ class ModelComponent(ObjBase):
 
     def __init__(self, name='ModelComponent'):
         super().__init__(name=name)
+        self.unit=None  # Default unit, can be set later
 
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
@@ -39,6 +40,7 @@ class ModelComponent(ObjBase):
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
         self.width.convert_unit(unit)
+        self.unit = unit  # Update the unit of the component
 
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
@@ -69,6 +71,7 @@ class GaussianComponent(ModelComponent):
 
     def __init__(self, name='Gaussian', area=1.0, center=None, width=1.0, unit='meV'):
         super().__init__(name=name)
+        self.unit = unit  # Set the unit for the component
 
         if center is None:
             self.center = Parameter(name= name+ 'center', value=0.0, unit=unit,fixed=True)
@@ -108,7 +111,7 @@ class LorentzianComponent(ModelComponent):
 
     def __init__(self, name='Lorentzian', area=1.0, center=None, width=1.0, unit='meV'):
         super().__init__(name=name)
-
+        self.unit = unit  # Set the unit for the component
         if center is None:
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
@@ -147,6 +150,7 @@ class VoigtComponent(ModelComponent):
 
     def __init__(self, name='Voigt', area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
         super().__init__(name=name)
+        self.unit = unit  # Set the unit for the component
         if center is None:
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
@@ -183,6 +187,7 @@ class DHOComponent(ModelComponent):
 
     def __init__(self, name='DHO', center=1.0, width=1.0, area=1.0,unit='meV'):
         super().__init__(name=name)
+        self.unit = unit  # Set the unit for the component
         self.center = Parameter(name=name + 'center', value=center, unit=unit)
         self.width = Parameter(name=name + 'width', value=width, unit=unit)
         self.area = Parameter(name=name + 'area', value=area, unit=unit)
@@ -213,7 +218,8 @@ class PolynomialComponent(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    def __init__(self, name='Polynomial', coefficients=(0.0,)):
+    # def __init__(self, name='Polynomial', coefficients=(0.0,)):
+    def __init__(self, name='Polynomial', coefficients: list[float] = [0.0]):
         super().__init__(name=name)
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
@@ -262,6 +268,7 @@ class DeltaFunctionComponent(ModelComponent):
 
     def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
         super().__init__(name=name)
+        self.unit = unit
         if center is None:
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
         else:
