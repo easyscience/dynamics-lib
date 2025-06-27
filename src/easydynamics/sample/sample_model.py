@@ -115,7 +115,7 @@ class SampleModel(ObjBase):
     def normalize_area(self):
         """
         Normalize the SampleModel so the total area of all components sums to 1.
-        This modifies the area parameters in-place.
+        This modifies the area parameters.
         """
         area_params = []
         total_area = 0.0
@@ -171,23 +171,23 @@ class SampleModel(ObjBase):
             params.extend(comp.get_parameters())
         return params
     
-    def name(self):
-        """
-        Get the name of the sample model.
+    # def name(self):
+    #     """
+    #     Get the name of the sample model.
 
-        Returns:
-            str: Name of the sample model.
-        """
-        return self.name
+    #     Returns:
+    #         str: Name of the sample model.
+    #     """
+    #     return self.name
     
-    def set_name(self, name: str):
-        """
-        Set the name of the sample model.
+    # def set_name(self, name: str):
+    #     """
+    #     Set the name of the sample model.
 
-        Args:
-            name (str): New name for the sample model.
-        """
-        self.name = name
+    #     Args:
+    #         name (str): New name for the sample model.
+    #     """
+    #     self.name = name
 
 
 

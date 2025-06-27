@@ -68,6 +68,12 @@ class GaussianComponent(ModelComponent):
     """
 
     def __init__(self, name='Gaussian', area=1.0, center=None, width=1.0, unit='meV'):
+
+        if width <= 0:
+            raise ValueError("Width must be greater than 0 for Gaussian.")
+        if area < 0:
+            raise Warning("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
+        
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
 
@@ -82,6 +88,10 @@ class GaussianComponent(ModelComponent):
 
     def evaluate(self, x):
         #TODO: Handle units properly
+        if self.width.value <= 0:
+            raise ValueError("Width must be greater than 0 for Gaussian.")
+        if self.area.value < 0:
+            raise Warning("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(self.name))
         return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
     
 
@@ -108,6 +118,11 @@ class LorentzianComponent(ModelComponent):
     """
 
     def __init__(self, name='Lorentzian', area=1.0, center=None, width=1.0, unit='meV'):
+
+        if width <= 0:
+            raise ValueError("Width must be greater than 0 for Lorentzian.")
+        if area < 0:
+            raise Warning("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
         if center is None:
@@ -120,6 +135,10 @@ class LorentzianComponent(ModelComponent):
 
     def evaluate(self, x):
             #TODO: Handle units properly
+        if self.width.value <= 0:
+            raise ValueError("Width must be greater than 0 for Lorentzian.")
+        if self.area.value < 0:
+            raise Warning("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(self.name))
         return self.area.value * (self.width.value/np.pi / ((x - self.center.value)**2 + self.width.value**2))
 
 
@@ -148,6 +167,14 @@ class VoigtComponent(ModelComponent):
 
     def __init__(self, name='Voigt', area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
         super().__init__(name=name)
+
+        if Gwidth <= 0:
+            raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
+        if Lwidth <= 0:
+            raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
+        if area < 0:
+            raise Warning("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
+        
         self.unit = unit  # Set the unit for the component
         if center is None:
             self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
@@ -159,6 +186,13 @@ class VoigtComponent(ModelComponent):
         self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
     def evaluate(self, x):
+
+        if self.Gwidth.value <= 0:
+            raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
+        if self.Lwidth.value <= 0:
+            raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
+        if self.area.value < 0:
+            raise Warning("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(self.name))
         return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)    
 
     def get_parameters(self):
@@ -184,6 +218,12 @@ class DHOComponent(ModelComponent):
     """
 
     def __init__(self, name='DHO', center=1.0, width=1.0, area=1.0,unit='meV'):
+
+
+        if width <= 0:
+            raise ValueError("Width must be greater than 0 for DHO.")
+        if area < 0:
+            raise Warning("The area of the DHO with name {} is negative, which may not be physically meaningful.".format(name))
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
         self.center = Parameter(name=name + 'center', value=center, unit=unit)
@@ -191,6 +231,11 @@ class DHOComponent(ModelComponent):
         self.area = Parameter(name=name + 'area', value=area, unit=unit)
 
     def evaluate(self, x):
+
+        if self.width.value <= 0:
+            raise ValueError("Width must be greater than 0 for DHO.")
+        if self.area.value < 0:
+            raise Warning("The area of the DHO with name {} is negative, which may not be physically meaningful.".format(self.name))
         return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
             (x**2 - self.center.value**2) ** 2 + (2*self.width.value * x) ** 2
         )
@@ -231,6 +276,9 @@ class PolynomialComponent(ModelComponent):
         result = np.zeros_like(x, dtype=float)
         for i, param in enumerate(self.coefficients):
             result += param.value * np.power(x, i)
+
+        if any(result < 0):
+            raise Warning("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
         return result
 
     def degree(self):
@@ -265,6 +313,9 @@ class DeltaFunctionComponent(ModelComponent):
     """
 
     def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
+
+        if area < 0:
+            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
         super().__init__(name=name)
         self.unit = unit
         if center is None:
@@ -275,6 +326,9 @@ class DeltaFunctionComponent(ModelComponent):
 
 
     def evaluate(self, x):
+
+        if self.area.value < 0:
+            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
         #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
         return 0*x
     
