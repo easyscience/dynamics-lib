@@ -1,4 +1,4 @@
-from .Experiment import Experiment
-from .Data import Data
+from .experiment import Experiment
+from .data import Data
 
 __all__ = ['Experiment', 'Data']

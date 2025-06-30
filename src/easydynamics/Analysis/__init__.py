@@ -1,3 +1,3 @@
-from .Analysis import Analysis
+from .analysis import Analysis
 
 __all__ = ['Analysis']

@@ -1,4 +1,4 @@
-from .SampleModel import SampleModel
+from .sample_model import SampleModel
 from .components import GaussianComponent
 from .components import LorentzianComponent
 from .components import VoigtComponent

@@ -3,7 +3,7 @@ from easyscience.job.experiment import ExperimentBase
 
 from easyscience.variable import Parameter
 
-from easydynamics.Experiment.Data import Data
+from easydynamics.experiment .data import Data
 from easydynamics.sample import SampleModel
 
 import numpy as np
