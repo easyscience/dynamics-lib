@@ -1,4 +1,3 @@
 from .convolution import ResolutionHandler
 
-__all__ = [
-    "ResolutionHandler"]
+__all__ = ['ResolutionHandler']
