@@ -22,10 +22,6 @@ class Analysis(AnalysisBase):
         self._theory= None
         self._experiment= None
 
-
-
-
-
     def plot_data_and_model(self, plot_individual_components: bool = False):
         """
         Plot the experimental data and the theoretical fit.
@@ -75,8 +71,6 @@ class Analysis(AnalysisBase):
         plt.show()
 
         return fig
-
-
 
     def set_theory(self, theory):
         self._theory = theory
