@@ -170,12 +170,12 @@ class SampleModel(ObjBase):
 
         self._temperature.value = value
 
-        if not self.detailed_balance_enabled:
-            self.detailed_balance_enabled = value >= 0
-            print(f"Detailed balance set to {self.detailed_balance_enabled} for temperature {value} K")
+        if not self.use_detailed_balance:
+            self.use_detailed_balance = value >= 0
+            print(f"Detailed balance set to {self.use_detailed_balance} for temperature {value} K")
 
     @property
-    def detailed_balance_enabled(self) -> bool:
+    def use_detailed_balance(self) -> bool:
         """
         Indicates whether detailed balance is enabled.
 
@@ -185,8 +185,8 @@ class SampleModel(ObjBase):
         """
         return self._use_detailed_balance
 
-    @detailed_balance_enabled.setter
-    def detailed_balance_enabled(self, value: bool):
+    @use_detailed_balance.setter
+    def use_detailed_balance(self, value: bool):
         """
         Enable or disable the use of detailed balance.
 
@@ -215,7 +215,7 @@ class SampleModel(ObjBase):
         for component in self.components.values():
             result += component.evaluate(x)
 
-        if self.detailed_balance_enabled and self._temperature.value >= 0:
+        if self.use_detailed_balance and self._temperature.value >= 0:
             result *= detailed_balance_factor(x, self._temperature.value)
 
         return result
