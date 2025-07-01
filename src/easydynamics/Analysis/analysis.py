@@ -9,6 +9,10 @@ from easydynamics.resolution import ResolutionHandler
 
 from easydynamics.sample.components import DeltaFunctionComponent
 
+from easydynamics.sample import SampleModel
+
+from easydynamics.experiment import Experiment
+
 
 import numpy as np
 
@@ -72,11 +76,23 @@ class Analysis(AnalysisBase):
 
         return fig
 
-    def set_theory(self, theory):
+    def set_theory(self, theory: SampleModel):
+        """ Set the model to be fitted.
+        Args:
+            theory (SampleModel): The theoretical model to be used in the analysis.
+        """
+        if not isinstance(theory, SampleModel):
+            raise TypeError("The theory must be an instance of SampleModel.")
         self._theory = theory
 
-    def set_experiment(self, experiment):
-        self._experiment = experiment   
+    def set_experiment(self, experiment: Experiment):
+        """ Set the experimental for the analysis.
+        Args:
+            experiment (Experiment): The experimental model to be used in the analysis.
+        """
+        if not isinstance(experiment, Experiment):
+            raise TypeError("The experiment must be an instance of Experiment.")
+        self._experiment = experiment
 
 
     def calculate_theory(self, x) -> np.ndarray:

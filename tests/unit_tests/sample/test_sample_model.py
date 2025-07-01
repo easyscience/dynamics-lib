@@ -245,3 +245,21 @@ class TestSampleModel:
         # Expect
         assert "SampleModel" in rep
         assert "TestGaussian" in rep
+
+    def test_repr_no_components(self, sample_model):
+        # When Then
+        rep = repr(sample_model)
+        # Expect
+        assert "SampleModel" in rep
+        assert "Components: None" in rep
+
+    def test_str_contains_name_and_components(self, sample_model):
+        # When
+        component = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        sample_model.add_component(component)
+        # Then
+        str_repr = str(sample_model)
+        # Expect
+        assert "SampleModel" in str_repr
+        assert "TestGaussian" in str_repr
+

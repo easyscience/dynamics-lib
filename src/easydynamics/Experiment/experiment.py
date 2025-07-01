@@ -22,16 +22,16 @@ class Experiment(ExperimentBase):
         self.offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def set_background_model(self, background:SampleModel):
-        """ Set the background model for the experiment.
+        """ Set the model for the background.
         Args:
-            background (SampleModel): The background model to be used in the experiment.
+            background (SampleModel): The background model.
         """
         if not isinstance(background, SampleModel):
             raise TypeError("Background model must be an instance of SampleModel.")
         self._background_model = background
 
     def set_resolution_model(self, resolution:SampleModel):
-        """        Set the resolution model for the experiment.
+        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
         Args:
             resolution (SampleModel): The resolution model to be used in the experiment.
         """
@@ -45,10 +45,16 @@ class Experiment(ExperimentBase):
             self.normalize_resolution()
 
     def normalize_resolution(self):
-
+        """ Normalize the resolution model to have an area of 1.
+        """
         self._resolution_model.normalize_area()
 
     def set_data(self, data: Data):
+        """ Set the experimental data.
+        Args:
+            data (Data): The experimental data to be used in the analysis.
+        """
+        
         if not isinstance(data, Data):
             raise TypeError("Data must be an instance of Data.")
         self._data = data
