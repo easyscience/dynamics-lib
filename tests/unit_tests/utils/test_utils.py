@@ -33,7 +33,7 @@ class TestDetailedBalanceFactor:
     def test_small_omega_limit(self):
         # When
         T = 300
-        omega = np.full(5, 1e-10)
+        omega = np.array([1e-5, 1e-6, 1e-7, 1e-8, 1e-9])
         # Then
         result = detailed_balance_factor(omega, T)
         # Expect
