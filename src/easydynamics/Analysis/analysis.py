@@ -25,7 +25,7 @@ class Analysis(AnalysisBase):
         super().__init__(name, *args, **kwargs)
         self._theory= None
         self._experiment= None
-        self.offset=Parameter(name='offset', value=0.0, unit='meV')
+        self._offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def plot_data_and_model(self, plot_individual_components: bool = False):
         """
@@ -58,13 +58,13 @@ class Analysis(AnalysisBase):
                 # comp_y = comp.evaluate(x - shift)
 
                 if self._experiment._resolution_model is None:
-                    y = comp.evaluate(x- self._experiment.offset.value)
+                    y = comp.evaluate(x- self._offset.value)
                 else:
                     resolution_handler = ResolutionHandler()
-                    y = resolution_handler.numerical_convolve(x, comp, self._experiment._resolution_model, self._experiment.offset)
+                    y = resolution_handler.numerical_convolve(x, comp, self._experiment._resolution_model, self._offset)
                     # If detailed balance is used, calculate the detailed balance factor. TODO: This should be handled before convolution.
                     if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunctionComponent):
-                        y*=self._theory.detailed_balance_factor(x- self._experiment.offset.value, self._theory._temperature.value)
+                        y*=self._theory.detailed_balance_factor(x- self._offset.value, self._theory._temperature.value)
 
                 plt.plot(x, y, label=f'Component: {comp.name}', linestyle='--')
 
@@ -103,10 +103,10 @@ class Analysis(AnalysisBase):
         """
 
         if self._experiment._resolution_model is None:
-            y = self._theory.evaluate(x- self._experiment.offset.value)
+            y = self._theory.evaluate(x- self._offset.value)
         else:
             resolution_handler = ResolutionHandler()
-            y = resolution_handler.numerical_convolve(x, self._theory, self._experiment._resolution_model, self._experiment.offset)
+            y = resolution_handler.numerical_convolve(x, self._theory, self._experiment._resolution_model, self._offset)
 
         if self._experiment._background_model is not None:
             y += self._experiment._background_model.evaluate(x)
@@ -183,7 +183,7 @@ class Analysis(AnalysisBase):
             if self._experiment._background_model is not None:
                 params.extend(self._experiment._background_model.get_parameters())
             if hasattr(self._experiment, "offset"):
-                params.append(self._experiment.offset)
+                params.append(self._offset)
 
         return params
 
