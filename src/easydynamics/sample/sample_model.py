@@ -283,3 +283,24 @@ class SampleModel(ObjBase):
         for comp in self.components.values():
             params.extend(comp.get_parameters())
         return params
+    
+    def copy(self) -> "SampleModel":
+        """
+        Create a deep copy of the SampleModel with independent parameters.
+
+        Returns
+        -------
+        SampleModel
+            A new instance with copied components and parameters.
+        """
+        new_model = SampleModel(name=self.name)
+        new_model.temperature = self._temperature.value
+        new_model.use_detailed_balance = self._use_detailed_balance
+
+
+        for comp in self.components.values():
+            new_model.add_component(comp.copy())
+
+            
+
+        return new_model
