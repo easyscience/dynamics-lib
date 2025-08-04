@@ -49,6 +49,33 @@ class Data(ExperimentBase):
         """
         raise NotImplementedError("Outlier removal is not implemented yet.")
     
+    def create_binned_data_1D(self, Q_bins=None, energy_bins=None):
+        """
+        Create a 1D data array from the existing data.
+        
+        Args:
+            Q_bins (int): Number of Q bins.
+            energy_bins (int): Number of energy bins.
+        
+        Returns:
+            sc.DataArray: 1D data array with Q and energy as coordinates.
+        """
+        if self.data is None:
+            raise ValueError("No data available to create 1D data.")
+        
+        # Assuming self.data is a 2D DataArray with dimensions ['Q', 'energy']
+        # TODO: Don't make this assumption
+        # This needs a lot of cleaning and to work with all sorts of data - this is just a proof of concept
+
+        if Q_bins is not None and energy_bins is not None:
+            binned_data=self.data.flatten(to='dummy').bin(energy=energy_bins,Q=Q_bins).bins.mean()
+        else:
+            binned_data=self.data
+
+        self.binned_data=binned_data
+        
+
+    
     def __repr__(self):
         """
         String representation of the Data object.
