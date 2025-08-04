@@ -66,69 +66,69 @@ class ResolutionHandler:
 #     - Gaussian ⊗ Lorentzian → Voigt profile
 #     - Fallback: Numerical FFT-based convolution
 #     """
-#     def numerical_convolve(self, 
-#                         x: np.ndarray,
-#                         sample_model: Union[SampleModel, ModelComponent],
-#                         resolution_model: SampleModel,
-#                         offset: Parameter,
-#                         upsample_factor: int = 0) -> np.ndarray:
-#         """
-#         Perform numerical convolution using FFT, with optional upsampling and extended evaluation range.
+    def numerical_convolve(self, 
+                        x: np.ndarray,
+                        sample_model: Union[SampleModel, ModelComponent],
+                        resolution_model: SampleModel,
+                        offset: Parameter,
+                        upsample_factor: int = 5) -> np.ndarray: #TODO: remove standard value
+        """
+        Perform numerical convolution using FFT, with optional upsampling and extended evaluation range.
 
-#         Args:
-#             x (np.ndarray): Evaluation points.
-#             sample_model (SampleModel or ModelComponent): Signal model.
-#             resolution_model (SampleModel): Resolution model.
-#             offset (Parameter): Offset parameter for alignment.
-#             upsample_factor (int): Factor by which to upsample (0 = no upsampling).
+        Args:
+            x (np.ndarray): Evaluation points.
+            sample_model (SampleModel or ModelComponent): Signal model.
+            resolution_model (SampleModel): Resolution model.
+            offset (Parameter): Offset parameter for alignment.
+            upsample_factor (int): Factor by which to upsample (0 = no upsampling).
 
-#         Returns:
-#             np.ndarray: Convolved model evaluated on x.
-#         """
+        Returns:
+            np.ndarray: Convolved model evaluated on x.
+        """
 
-#         def is_uniform(x, rtol=1e-5):
-#             dx = np.diff(x)
-#             return np.allclose(dx, dx[0], rtol=rtol)
+        def is_uniform(x, rtol=1e-5):
+            dx = np.diff(x)
+            return np.allclose(dx, dx[0], rtol=rtol)
 
-#         if upsample_factor == 0:
-#             if not is_uniform(x):
-#                 raise ValueError("Input array `x` must be uniformly spaced if upsample_factor = 0.")
-#             x_dense = x
-#         else:
-#             # Extend range by 20% of the total width to improve accuracy at the edges
-#             x_min, x_max = x.min(), x.max()
-#             dx = (x_max - x_min)
-#             extra = 0.2 * dx
-#             extended_min = x_min - extra
-#             extended_max = x_max + extra
+        if upsample_factor == 0:
+            if not is_uniform(x):
+                raise ValueError("Input array `x` must be uniformly spaced if upsample_factor = 0.")
+            x_dense = x
+        else:
+            # Extend range by 20% of the total width to improve accuracy at the edges
+            x_min, x_max = x.min(), x.max()
+            dx = (x_max - x_min)
+            extra = 0.2 * dx
+            extended_min = x_min - extra
+            extended_max = x_max + extra
 
-#             # Use more points on the dense grid
-#             num_points = len(x) * upsample_factor
-#             x_dense = np.linspace(extended_min, extended_max, num_points)
+            # Use more points on the dense grid
+            num_points = len(x) * upsample_factor
+            x_dense = np.linspace(extended_min, extended_max, num_points)
 
-#         # Evaluate on dense grid
-#         sample_vals = sample_model.evaluate(x_dense - offset.value)
-#         resolution_vals = resolution_model.evaluate(x_dense)
+        # Evaluate on dense grid
+        sample_vals = sample_model.evaluate(x_dense - offset.value)
+        resolution_vals = resolution_model.evaluate(x_dense)
 
-#         # Convolution
-#         convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
-#         convolved *= (x_dense[1] - x_dense[0])  # Normalize
+        # Convolution
+        convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
+        convolved *= (x_dense[1] - x_dense[0])  # Normalize
 
-#         # Add delta contributions
-#         if isinstance(sample_model, SampleModel):
-#             for comp in sample_model.components.values():
-#                 if isinstance(comp, DeltaFunctionComponent):
-#                     convolved += comp.area.value * resolution_model.evaluate(x_dense - offset.value)
-#         elif isinstance(sample_model, DeltaFunctionComponent):
-#             convolved += sample_model.area.value * resolution_model.evaluate(x_dense - offset.value)
+        # Add delta contributions
+        if isinstance(sample_model, SampleModel):
+            for comp in sample_model.components.values():
+                if isinstance(comp, DeltaFunctionComponent):
+                    convolved += comp.area.value * resolution_model.evaluate(x_dense - offset.value)
+        elif isinstance(sample_model, DeltaFunctionComponent):
+            convolved += sample_model.area.value * resolution_model.evaluate(x_dense - offset.value)
 
-#         # Interpolate back if upsampled
-#         if upsample_factor > 0:
-#             from scipy.interpolate import interp1d
-#             interp_func = interp1d(x_dense, convolved, kind='linear', bounds_error=False, fill_value=0.0)
-#             return interp_func(x)
-#         else:
-#             return convolved
+        # Interpolate back if upsampled
+        if upsample_factor > 0:
+            from scipy.interpolate import interp1d
+            interp_func = interp1d(x_dense, convolved, kind='linear', bounds_error=False, fill_value=0.0)
+            return interp_func(x)
+        else:
+            return convolved
 
 
 

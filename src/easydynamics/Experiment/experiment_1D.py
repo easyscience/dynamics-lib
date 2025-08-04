@@ -19,7 +19,7 @@ class Experiment(ExperimentBase):
         self._data = None
         self._resolution_model = None
         self._background_model = None
-
+        self.offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def set_background_model(self, background:SampleModel):
         """ Set the model for the background.

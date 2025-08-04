@@ -59,7 +59,7 @@ class Data(ExperimentBase):
         return f"Data(data={self.name})"
     
     def plot(self):
-        raise NotImplementedError("Plotting is not implemented yet. Use a plotting library to visualize the data.")
+        raise NotImplementedError("Plotting is not implemented yet.")
     
 
     
@@ -73,7 +73,7 @@ class Data(ExperimentBase):
         """
         NUMBER_OF_Q_POINTS=16
         NUMBER_OF_E_POINTS=1024
-        # TODO Add the correct Q values
+        Q_values = [  0.5708,    0.7002,    0.8262 ,   0.9485 ,   1.0664  ,  1.1793   , 1.2868 ,   1.3883 ,   1.4833 ,   1.5716  ,  1.6525  ,  1.7258  ,  1.7910 ,   1.8480  ,  1.8965 ,   1.9361]
         # [  0.5708,    0.7002,    0.8262 ,   0.9485 ,   1.0664  ,  1.1793   , 1.2868 ,   1.3883 ,   1.4833 ,   1.5716  ,  1.6525  ,  1.7258  ,  1.7910 ,   1.8480  ,  1.8965 ,   1.9361],unit='1/angstrom'
 
 
@@ -92,7 +92,7 @@ class Data(ExperimentBase):
             error_values[Q,:]=data_array[:,2]
 
         # Define energy, q and intensity as scipp variables with units, and make a DataArray
-        Q=sc.array(dims=['Q'],values=range(NUMBER_OF_Q_POINTS))
+        Q=sc.array(dims=['Q'],values=Q_values, unit='1/angstrom')
         energy=sc.array(dims=['energy'],values=energy_values/1000,unit='meV')
         intensity=sc.array(dims=['Q','energy'],values=intensity_values,variances=error_values*error_values) #The variance is the square of the uncertainty!
 
