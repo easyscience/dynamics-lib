@@ -53,6 +53,13 @@ class ModelComponent(ObjBase):
         """
         pass
 
+    @abstractmethod
+    def copy(self) -> "ModelComponent":
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        pass
+
     def __repr__(self):
         return f"{self.__class__.__name__}(name={self.name})"
 
@@ -102,6 +109,16 @@ class GaussianComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return [self.area, self.center, self.width]
+    
+    def copy(self) -> "ModelComponent":
+
+        return GaussianComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            width=self.width.value,
+            unit=self.unit
+        )
 
     def __repr__(self):
         return f"GaussianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
@@ -149,6 +166,15 @@ class LorentzianComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return [self.area, self.center, self.width]
+    
+    def copy(self) -> "ModelComponent":
+        return LorentzianComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            width=self.width.value,
+            unit=self.unit
+        )
 
     def __repr__(self):
         return f"LorentzianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
@@ -202,6 +228,16 @@ class VoigtComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return [self.area, self.center, self.Gwidth, self.Lwidth]
+    
+    def copy(self) -> "ModelComponent":
+        return VoigtComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            Gwidth=self.Gwidth.value,
+            Lwidth=self.Lwidth.value,
+            unit=self.unit
+        )
 
     def __repr__(self):
         return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
@@ -247,6 +283,15 @@ class DHOComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return [self.area, self.center, self.width]
+    
+    def copy(self) -> "ModelComponent":
+        return DHOComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            width=self.width.value,
+            unit=self.unit
+        )
 
 
     def __repr__(self):
@@ -291,6 +336,15 @@ class PolynomialComponent(ModelComponent):
         List[Parameter]: List of parameters in the component.
         """ 
         return self.coefficients
+    
+    def copy(self) -> "ModelComponent":
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        return PolynomialComponent(
+            name=self.name,
+            coefficients=[param.value for param in self.coefficients]
+        )
 
     def __repr__(self):
         coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
@@ -350,6 +404,18 @@ class DeltaFunctionComponent(ModelComponent):
         """
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)    
+        self.unit = unit  # Update the unit of the component
+
+    def copy(self) -> "ModelComponent":
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        return DeltaFunctionComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            unit=self.unit
+        )
 
     def __repr__(self):
         return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
