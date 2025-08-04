@@ -25,6 +25,7 @@ class Analysis(AnalysisBase):
         super().__init__(name, *args, **kwargs)
         self._theory= None
         self._experiment= None
+        self.offset=Parameter(name='offset', value=0.0, unit='meV')
 
     def plot_data_and_model(self, plot_individual_components: bool = False):
         """
@@ -111,6 +112,17 @@ class Analysis(AnalysisBase):
             y += self._experiment._background_model.evaluate(x)
 
         return y
+    
+    
+
+    def set_offset(self, offset: float):
+        # TODO: handle units properly
+        
+        self.offset.value= offset
+
+    def fix_offset(self, fix: bool = True):
+    
+        self.offset.fixed = fix
 
 
     def fit(self):

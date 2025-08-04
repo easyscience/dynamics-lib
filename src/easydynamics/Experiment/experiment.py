@@ -76,13 +76,3 @@ class Experiment(ExperimentBase):
             e = np.sqrt(data.variances)
 
         return x, y, e
-
-
-    def set_offset(self, offset: float):
-        # TODO: handle units properly
-        
-        self.offset.value= offset
-
-    def fix_offset(self, fix: bool = True):
-    
-        self.offset.fixed = fix
