@@ -182,8 +182,8 @@ class Analysis(AnalysisBase):
                 params.extend(self._experiment._resolution_model.get_parameters())
             if self._experiment._background_model is not None:
                 params.extend(self._experiment._background_model.get_parameters())
-            if hasattr(self._experiment, "offset"):
-                params.append(self._offset)
+
+        params.append(self._offset)
 
         return params
 
