@@ -112,13 +112,18 @@ class GaussianComponent(ModelComponent):
     
     def copy(self) -> "ModelComponent":
 
-        return GaussianComponent(
+        ModelCopy=GaussianComponent(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
             unit=self.unit
         )
+
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed
+        ModelCopy.width.fixed = self.width.fixed
+        return ModelCopy
 
     def __repr__(self):
         return f"GaussianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
@@ -168,13 +173,19 @@ class LorentzianComponent(ModelComponent):
         return [self.area, self.center, self.width]
     
     def copy(self) -> "ModelComponent":
-        return LorentzianComponent(
-            name=self.name,
+
+        ModelCopy =LorentzianComponent(
+            name=self.name, 
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
             unit=self.unit
-        )
+        )   
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed 
+        ModelCopy.width.fixed = self.width.fixed
+        return ModelCopy
+
 
     def __repr__(self):
         return f"LorentzianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
@@ -230,7 +241,8 @@ class VoigtComponent(ModelComponent):
         return [self.area, self.center, self.Gwidth, self.Lwidth]
     
     def copy(self) -> "ModelComponent":
-        return VoigtComponent(
+
+        ModelCopy = VoigtComponent(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
@@ -238,6 +250,12 @@ class VoigtComponent(ModelComponent):
             Lwidth=self.Lwidth.value,
             unit=self.unit
         )
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed
+        ModelCopy.Gwidth.fixed = self.Gwidth.fixed
+        ModelCopy.Lwidth.fixed = self.Lwidth.fixed
+
+        return ModelCopy
 
     def __repr__(self):
         return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
@@ -285,13 +303,20 @@ class DHOComponent(ModelComponent):
         return [self.area, self.center, self.width]
     
     def copy(self) -> "ModelComponent":
-        return DHOComponent(
+
+
+
+        ModelCopy = DHOComponent(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
             unit=self.unit
         )
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed
+        ModelCopy.width.fixed = self.width.fixed
+        return ModelCopy
 
 
     def __repr__(self):
@@ -341,10 +366,15 @@ class PolynomialComponent(ModelComponent):
         """
         Return a deep copy of this component with independent parameters.
         """
-        return PolynomialComponent(
+
+
+        ModelCopy = PolynomialComponent(
             name=self.name,
             coefficients=[param.value for param in self.coefficients]
         )
+        for i, param in enumerate(ModelCopy.coefficients):
+            param.fixed = self.coefficients[i].fixed
+        return ModelCopy
 
     def __repr__(self):
         coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
@@ -410,12 +440,15 @@ class DeltaFunctionComponent(ModelComponent):
         """
         Return a deep copy of this component with independent parameters.
         """
-        return DeltaFunctionComponent(
+        ModelCopy = DeltaFunctionComponent(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
             unit=self.unit
         )
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed
+        return ModelCopy
 
     def __repr__(self):
         return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
