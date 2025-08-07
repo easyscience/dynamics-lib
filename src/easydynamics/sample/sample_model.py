@@ -21,7 +21,7 @@ class SampleModel(ObjBase):
     components : dict
         Dictionary of model components keyed by name.
     """
-    def __init__(self, name):
+    def __init__(self, name="MySampleModel"):
         """
         Initialize a new SampleModel.
 
