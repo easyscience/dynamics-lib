@@ -17,37 +17,6 @@ class Experiment(ExperimentBase):
         """
         super().__init__(name)
         self._data = None
-        self._resolution_model = None
-        self._background_model = None
-
-
-    def set_background_model(self, background:SampleModel):
-        """ Set the model for the background.
-        Args:
-            background (SampleModel): The background model.
-        """
-        if not isinstance(background, SampleModel):
-            raise TypeError("Background model must be an instance of SampleModel.")
-        self._background_model = background
-
-    def set_resolution_model(self, resolution:SampleModel):
-        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
-        Args:
-            resolution (SampleModel): The resolution model to be used in the experiment.
-        """
-        # TODO: allow resolution to be DataArray or SampleModel
-
-        if resolution is not None and not isinstance(resolution, SampleModel):
-            raise TypeError("Resolution model must be an instance of SampleModel.")
-        self._resolution_model = resolution
-
-        if self._resolution_model is not None:
-            self.normalize_resolution()
-
-    def normalize_resolution(self):
-        """ Normalize the resolution model to have an area of 1.
-        """
-        self._resolution_model.normalize_area()
 
     def set_data(self, data: Data):
         """ Set the experimental data.
