@@ -9,7 +9,7 @@ class Data(ExperimentBase):
         data : The experimental data.
     """
     
-    def __init__(self, name):
+    def __init__(self, name="MyData"):
         super().__init__(name)
         self.data = None
 

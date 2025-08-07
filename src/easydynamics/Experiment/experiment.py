@@ -11,7 +11,7 @@ import scipp as sc
 
 class Experiment(ExperimentBase):
 
-    def __init__ (self,name):
+    def __init__ (self,name="MyExperiment"):
         """
         Initialize the Experiment class.
         """

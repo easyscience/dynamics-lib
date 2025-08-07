@@ -21,7 +21,7 @@ import scipp as sc
 import matplotlib.pyplot as plt
 
 class Analysis(AnalysisBase):
-    def __init__(self, name: str, interface=None, *args, **kwargs):
+    def __init__(self, name="MyAnalysis", interface=None, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
         self._theory= None
         self._experiment= None
