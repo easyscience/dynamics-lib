@@ -166,13 +166,13 @@ class SampleModel(ObjBase):
         """
         if value < 0:
             self._use_detailed_balance = False
-            warnings.warn("Temperature is negative. Disabling detailed balance.")
+            # warnings.warn("Temperature is negative. Disabling detailed balance.") #TODO: Uncomment this line if you want to enable the warning
 
         self._temperature.value = value
 
         if not self.use_detailed_balance:
             self.use_detailed_balance = value >= 0
-            print(f"Detailed balance set to {self.use_detailed_balance} for temperature {value} K")
+            # print(f"Detailed balance set to {self.use_detailed_balance} for temperature {value} K") # #TODO: Uncomment this line if you want to enable the warning
 
     @property
     def use_detailed_balance(self) -> bool:

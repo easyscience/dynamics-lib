@@ -140,6 +140,13 @@ class Analysis(AnalysisBase):
         if self._resolution_model is not None:
             self.normalize_resolution()
 
+    def fix_resolution_parameters(self):
+        """ Fix all parameters in the resolution model.
+        """
+        if self._resolution_model is not None:
+            for param in self._resolution_model.get_parameters():
+                param.fixed = True
+
     def normalize_resolution(self):
         """ Normalize the resolution model to have an area of 1.
         """
