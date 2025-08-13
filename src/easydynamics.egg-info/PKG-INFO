@@ -11,6 +11,8 @@ Requires-Dist: easyscience@ git+https://github.com/easyscience/corelib.git@devel
 Requires-Dist: scipp
 Requires-Dist: plopp
 Requires-Dist: ipympl
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
 
 # EasyQENSLib
 QENS data analysis library

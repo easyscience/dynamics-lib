@@ -5,6 +5,9 @@ from easydynamics.experiment import Experiment
 from easydynamics.analysis import Analysis
 from easydynamics.experiment.data import Data
 
+import scipp as sc
+import plopp as pp
+
 
 class Job(JobBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -74,8 +77,10 @@ class Job(JobBase):
             this_analysis=Analysis()
             this_analysis.set_theory(self._theory.copy())
 
-            this_analysis.set_background_model(self._background_model.copy())
-            this_analysis.set_resolution_model(self._resolution_model.copy())
+            if self._background_model is not None:
+                this_analysis.set_background_model(self._background_model.copy())
+            if self._resolution_model is not None:
+                this_analysis.set_resolution_model(self._resolution_model.copy())
 
             this_experiment=Experiment()
             this_data=Data()
@@ -84,6 +89,34 @@ class Job(JobBase):
 
             this_analysis.set_experiment(this_experiment)
             self._analysis.append(this_analysis)
+
+    def plot_data_and_model(self):
+
+        model = sc.zeros_like(self._experiment._data.data)
+
+        # data['Q',i]
+        for i in range(len(self._analysis)):
+            model['Q',i].values = self._analysis[i].calculate_theory(model['Q',i].coords['energy'].values)
+
+
+        data_and_fit = sc.DataGroup({'Data': self._experiment._data.data,
+                                    'Fit': model})
+
+
+        INTENSITY_MIN_VANADIUM=0.0
+        INTENSITY_MAX_VANADIUM=0.06
+
+        ENERGY_MIN_VANADIUM = -0.02 * sc.Unit('meV')
+        ENERGY_MAX_VANADIUM = 0.02 * sc.Unit('meV')
+        plot=pp.slicer(data_and_fit['energy',ENERGY_MIN_VANADIUM:ENERGY_MAX_VANADIUM],
+                vmin=INTENSITY_MIN_VANADIUM,vmax=INTENSITY_MAX_VANADIUM,
+                    keep=['energy'],
+            linestyle=         {'Data': 'none',    'Fit': '-'},
+            marker=            {'Data': 'o',       'Fit':'none'},
+            markerfacecolor=   {'Data': 'none',    'Fit':'red'},
+            color=             {'Data': 'black',   'Fit':'red'})
+
+        return plot
 
 
     
