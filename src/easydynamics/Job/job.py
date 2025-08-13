@@ -10,11 +10,12 @@ import plopp as pp
 
 from collections import defaultdict, Counter
 
+import numpy as np
+
+from itertools import product
 
 import math
-# import scipp as sc
-# from collections import defaultdict, Counter
-
+from collections import defaultdict, Counter
 
 class Job(JobBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -72,41 +73,186 @@ class Job(JobBase):
         if self._theory is not None:
             self._analysis[-1].set_theory(self._theory)
 
-    def fit(self):
-        if self._analysis is None:
+    # def fit(self):
+    #     if self._analysis is None:
+    #         raise RuntimeError("Analysis is not set in Job.")
+
+    #     for i in range(len(self._analysis)):
+    #         self._analysis[i].fit()
+    #     # return self._analysis.fit()
+
+    def fit(self, **kwargs):
+        """
+        Call .fit() on every Analysis in self._analysis, regardless of nesting.
+        Extra kwargs are forwarded to Analysis.fit().
+        """
+        if not getattr(self, '_analysis', None):
             raise RuntimeError("Analysis is not set in Job.")
 
-        for i in range(len(self._analysis)):
-            self._analysis[i].fit()
-        # return self._analysis.fit()
+        def _walk(x):
+            if isinstance(x, (list, tuple)):
+                for xi in x:
+                    _walk(xi)
+            else:
+                x.fit(**kwargs)
+
+        _walk(self._analysis)
 
         self._fit_parameters=self.get_parameters_as_data_group()
 
-    def generate_analysis_for_cuts(self):
-        for i in range(self._experiment._data.data.sizes['Q']):
-            this_analysis=Analysis()
-            this_analysis.set_theory(self._theory.copy())
+        return self
 
+
+
+    # def generate_analysis_for_cuts(self):
+    #     for i in range(self._experiment._data.data.sizes['Q']):
+    #         this_analysis=Analysis()
+    #         this_analysis.set_theory(self._theory.copy())
+
+    #         if self._background_model is not None:
+    #             this_analysis.set_background_model(self._background_model.copy())
+    #         if self._resolution_model is not None:
+    #             this_analysis.set_resolution_model(self._resolution_model.copy())
+
+    #         this_experiment=Experiment()
+    #         this_data=Data()
+    #         this_data.append(self._experiment._data.data['Q',i])
+    #         this_experiment.set_data(this_data)
+
+    #         this_analysis.set_experiment(this_experiment)
+    #         self._analysis.append(this_analysis)
+
+
+    def generate_analysis_for_cuts(self, keep=('energy',)):
+        """
+        Create a nested structure of Analysis objects by cutting the experiment data
+        over all dims NOT in `keep` (default keeps 'energy').
+
+        Result:
+        self._analysis  -> nested list with one level per cut-dimension, in the
+                            same order as they appear in the data (excluding `keep`).
+                            e.g. data.dims = ('Temperature','Q','energy')
+                                -> self._analysis[ti][qi]
+        self._analysis_meta -> metadata about the grid.
+        Each Analysis gets:
+            - _cut_indices : dict {dim: index}
+            - _cut_coords  : dict {dim: coord value/variable}
+        """
+        data = self._experiment._data.data
+
+        # Normalize `keep` to a tuple
+        if isinstance(keep, str):
+            keep = (keep,)
+        else:
+            keep = tuple(keep)
+
+        # Dims we cut over = all dims not kept
+        dims_to_cut = [d for d in data.dims if d not in keep]
+        sizes = {d: data.sizes[d] for d in dims_to_cut}
+        coords = {d: data.coords.get(d, None) for d in dims_to_cut}
+
+        # Helper: make one Analysis for a given index tuple over dims_to_cut
+        def make_analysis(idx_tuple):
+            # Slice 1D/kept-dims-only spectrum
+            da = data
+            for d, i in zip(dims_to_cut, idx_tuple):
+                da = da[d, i]
+
+            # Build analysis (copy models)
+            ana = Analysis(name=f'Analysis{idx_tuple}')
+            ana.set_theory(self._theory.copy())
             if self._background_model is not None:
-                this_analysis.set_background_model(self._background_model.copy())
+                ana.set_background_model(self._background_model.copy())
             if self._resolution_model is not None:
-                this_analysis.set_resolution_model(self._resolution_model.copy())
+                ana.set_resolution_model(self._resolution_model.copy())
 
-            this_experiment=Experiment()
-            this_data=Data()
-            this_data.append(self._experiment._data.data['Q',i])
-            this_experiment.set_data(this_data)
+            # Attach sliced data via Experiment/Data
+            exp = Experiment()
+            dat = Data()
+            dat.append(da)
+            exp.set_data(dat)
+            ana.set_experiment(exp)
 
-            this_analysis.set_experiment(this_experiment)
-            self._analysis.append(this_analysis)
+            # Annotate for traceability
+            ana._cut_indices = dict(zip(dims_to_cut, idx_tuple))
+            ana._cut_coords = {}
+            for d, i in zip(dims_to_cut, idx_tuple):
+                c = coords[d]
+                if c is None:
+                    ana._cut_coords[d] = None
+                else:
+                    try:
+                        # Prefer scalar value if available
+                        ana._cut_coords[d] = c[i].value
+                    except Exception:
+                        # Fall back to Variable/DataArray slice
+                        ana._cut_coords[d] = c[i]
+            return ana
+
+        # Build a nested list with one level per cut dimension
+        def build_level(level, prefix):
+            if level == len(dims_to_cut):
+                return make_analysis(prefix)
+            d = dims_to_cut[level]
+            return [build_level(level + 1, prefix + (i,)) for i in range(sizes[d])]
+
+        # Construct the grid (or a single Analysis if there are no cut dims)
+        analysis_grid = build_level(0, ())
+
+        # Save results
+        self._analysis = analysis_grid
+        self._analysis_meta = {
+            'dims': tuple(dims_to_cut),       # order of nesting
+            'sizes': sizes,                   # size per cut-dim
+            'keep': tuple(keep),              # dims left intact in each slice
+        }
+        return self
+
+
+
+
 
     def plot_data_and_model(self,intensity_min=0.0, intensity_max=0.06,
                             energy_min=-0.02, energy_max=0.02):
 
-        model = sc.zeros_like(self._experiment._data.data)
+        data = self._experiment._data.data
+        energy_dim = 'energy'
 
-        for i in range(len(self._analysis)):
-            model['Q',i].values = self._analysis[i].calculate_theory(model['Q',i].coords['energy'].values)
+        # same shape/coords as data
+        model = sc.zeros_like(data)
+
+        # all non-energy dims (e.g. ['Temperature','Q'] or just ['Q'])
+        loop_dims = [d for d in data.dims if d != energy_dim]
+
+        if not loop_dims:
+            # Only energy present
+            E = model.coords[energy_dim].values
+            ana = self._analysis[0] if isinstance(self._analysis, (list, tuple)) else self._analysis
+            model.values = ana.calculate_theory(E)
+        else:
+            ranges = [range(data.sizes[d]) for d in loop_dims]
+            for combo in product(*ranges):
+                # Chain slices: model['Temperature', ti]['Q', qi] ...
+                msel = model
+                for d, i in zip(loop_dims, combo):
+                    msel = msel[d, i]
+
+                # Energy for this slice
+                E = msel.coords[energy_dim].values
+
+                # Matching Analysis (nested in the same order as loop_dims)
+                ana = self._analysis
+                for i in combo:
+                    ana = ana[i]
+
+                # Fill model slice
+                msel.values = ana.calculate_theory(E)
+
+
+        # model = sc.zeros_like(self._experiment._data.data)
+
+        # for i in range(len(self._analysis)):
+        #     model['Q',i].values = self._analysis[i].calculate_theory(model['Q',i].coords['energy'].values)
 
 
         data_and_fit = sc.DataGroup({'Data': self._experiment._data.data,
@@ -145,26 +291,110 @@ class Job(JobBase):
         if parameter_name is not None:
             if parameter_name not in self._fit_parameters:
                 raise KeyError(f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(self._fit_parameters.keys())}")
-            return pp.plot(self._fit_parameters[parameter_name])
+            # return pp.plot(self._fit_parameters[parameter_name]['value'])
+            return pp.slicer(self._fit_parameters[parameter_name]['value'],keep='Q')
 
 
 
 
-    def use_fit_as_resolution(self,job):
+    # def use_fit_as_resolution(self,job):
+    #     """
+    #     Use the fit from a Job as the resolution model.
+    #     Args:
+    #         job (Job): The Job containing the fit to be used as resolution.
+    #     """
+    #     if not isinstance(job, Job):
+    #         raise TypeError("Job must be an instance of Job.")
+        
+    #     if job._analysis is None or len(job._analysis) == 0:
+    #         raise RuntimeError("No analysis found in the provided job.")
+
+    #     for i in range(len(self._analysis)):
+    #         self._analysis[i].set_resolution_model(job._analysis[i]._theory.copy())
+    #         self._analysis[i].fix_resolution_parameters()
+
+
+
+    def use_fit_as_resolution(self, job):
         """
-        Use the fit from a Job as the resolution model.
-        Args:
-            job (Job): The Job containing the fit to be used as resolution.
+        Copy the fitted model from `job` (1D over Q) into every slice of `self`
+        that shares the same Q index, across all other dims (e.g. Temperature).
+        Energies are not checked.
         """
+        # --- basic checks
         if not isinstance(job, Job):
             raise TypeError("Job must be an instance of Job.")
-        
-        if job._analysis is None or len(job._analysis) == 0:
+        if not getattr(job, '_analysis', None):
             raise RuntimeError("No analysis found in the provided job.")
+        if not getattr(self, '_analysis', None):
+            raise RuntimeError("No analysis found in 'self'.")
+        if not hasattr(self, '_analysis_meta') or not hasattr(job, '_analysis_meta'):
+            raise RuntimeError("Both jobs must have _analysis_meta; call generate_analysis_for_cuts() first.")
 
-        for i in range(len(self._analysis)):
-            self._analysis[i].set_resolution_model(job._analysis[i]._theory.copy())
-            self._analysis[i].fix_resolution_parameters()
+        # --- meta / dims
+        dims_self = tuple(self._analysis_meta.get('dims', ()))
+        sizes_self = dict(self._analysis_meta.get('sizes', {}))
+        dims_job  = tuple(job._analysis_meta.get('dims', ()))
+        sizes_job = dict(job._analysis_meta.get('sizes', {}))
+
+        if 'Q' not in dims_self or 'Q' not in dims_job:
+            raise RuntimeError("Both jobs must include 'Q' in their cut dimensions.")
+
+        # Source job must be 1D over Q (as per your setup)
+        if dims_job != ('Q',):
+            raise RuntimeError("Source job is expected to be 1D over Q (job._analysis[q]).")
+
+        nq_self = sizes_self['Q']
+        nq_job  = sizes_job['Q']
+        if nq_self != nq_job:
+            raise RuntimeError("Mismatch in number of Q points between jobs.")
+
+        # --- Q coord check (unit-aware)
+        q_self = self._experiment._data.data.coords.get('Q', None)
+        q_job  = job._experiment._data.data.coords.get('Q', None)
+        if q_self is None or q_job is None:
+            raise RuntimeError("Both jobs must have a 'Q' coordinate in their data.")
+        try:
+            q_job_cmp = q_job.to(unit=q_self.unit)
+        except Exception:
+            q_job_cmp = q_job
+        if not np.allclose(q_self.values, q_job_cmp.values, rtol=0.0, atol=1e-12):
+            raise RuntimeError("Q coordinates differ between jobs.")
+
+        # --- helpers for nested indexing
+        def _get_nested(obj, idx_tuple):
+            cur = obj
+            for i in idx_tuple:
+                cur = cur[i]
+            return cur
+
+        # Where is Q in the self nesting?
+        q_level_self = dims_self.index('Q')
+        other_dims = [d for d in dims_self if d != 'Q']
+        other_ranges = [range(sizes_self[d]) for d in other_dims]
+
+        # --- main loop: for each Q, copy into all slices over other dims
+        for qi in range(nq_self):
+            src_ana = job._analysis[qi]  # source is 1D over Q
+            # iterate over cartesian product of other dims (or just once if none)
+            for combo in (product(*other_ranges) if other_dims else [()]):
+                # build full index tuple in the same order as dims_self
+                full_idx = [None] * len(dims_self)
+                # place Q index
+                full_idx[q_level_self] = qi
+                # place other dims
+                for d, i in zip(other_dims, combo):
+                    full_idx[dims_self.index(d)] = i
+                tgt_ana = _get_nested(self._analysis, tuple(full_idx))
+
+                tgt_ana.set_resolution_model(src_ana._theory.copy())
+                tgt_ana.fix_resolution_parameters()
+
+        return self
+
+
+
+
 
     @property
     def analysis(self):
@@ -188,79 +418,235 @@ class Job(JobBase):
 
 
 
+    # def get_parameters_as_data_group(self):
+    #     N = len(self._analysis)
+    #     q_coord = self._experiment._data.data.coords.get('Q', sc.arange('Q', N))
+
+    #     # Inspect the first analysis to detect duplicate names
+    #     first_params = self._analysis[0].get_parameters()
+    #     name_counts = Counter(p.name for p in first_params)
+    #     def key_for(name, idx):
+    #         return name if name_counts[name] == 1 else f'{name}[{idx}]'
+
+    #     # Template/specs
+    #     template_seen = defaultdict(int)
+    #     param_specs = []
+    #     for p in first_params:
+    #         occ = template_seen[p.name]
+    #         template_seen[p.name] += 1
+    #         param_specs.append((key_for(p.name, occ), p.name, occ))
+
+    #     # Storage
+    #     store = {}
+    #     for key, _, _ in param_specs:
+    #         store[key] = {'values': [float('nan')]*N,
+    #                     'vars':   [None]*N,
+    #                     'unit':   None}
+
+    #     # Fill
+    #     for i, ana in enumerate(self._analysis):
+    #         seen = defaultdict(int)
+    #         for p in ana.get_parameters():
+    #             occ = seen[p.name]
+    #             seen[p.name] += 1
+
+    #             if p.name not in name_counts:
+    #                 name_counts[p.name] = 1
+    #                 if p.name not in store:
+    #                     store[p.name] = {'values': [float('nan')]*N,
+    #                                     'vars':   [None]*N,
+    #                                     'unit':   None}
+
+    #             key = key_for(p.name, occ) if name_counts[p.name] > 1 else p.name
+    #             if key not in store:  # late duplicate discovery
+    #                 key = f'{p.name}[{occ}]'
+    #                 if key not in store:
+    #                     store[key] = {'values': [float('nan')]*N,
+    #                                 'vars':   [None]*N,
+    #                                 'unit':   None}
+
+    #             store[key]['values'][i] = p.value
+    #             err = getattr(p, 'error', None)
+    #             if err is not None:
+    #                 store[key]['vars'][i] = err**2
+    #             u = getattr(p, 'unit', None)
+    #             if store[key]['unit'] is None and u is not None:
+    #                 try:
+    #                     store[key]['unit'] = sc.Unit(str(u))
+    #                 except Exception:
+    #                     store[key]['unit'] = None
+
+    #     # Build DataGroup (coords go on DataArray, not sc.array)
+    #     dg = {}
+    #     for key, buf in store.items():
+    #         include_vars = all(v is not None for v in buf['vars'])  # only include if none are missing
+    #         data_kwargs = {}
+    #         if buf['unit'] is not None:
+    #             data_kwargs['unit'] = buf['unit']
+    #         if include_vars:
+    #             data_kwargs['variances'] = buf['vars']
+
+    #         data = sc.array(dims=['Q'], values=buf['values'], **data_kwargs)
+    #         da = sc.DataArray(data=data, coords={'Q': q_coord})
+    #         dg[key] = da
+
+    #     return sc.DataGroup(dg)
+
+
+
+
+
     def get_parameters_as_data_group(self):
-        N = len(self._analysis)
-        q_coord = self._experiment._data.data.coords.get('Q', sc.arange('Q', N))
+        """
+        Collect parameters from every Analysis in self._analysis (nested or flat)
+        and return a Scipp DataGroup with per-parameter DataArrays over all
+        non-energy dims (e.g. ['Temperature','Q'] or just ['Q']).
 
-        # Inspect the first analysis to detect duplicate names
-        first_params = self._analysis[0].get_parameters()
+        Output shape follows the order of dims in self._experiment._data.data
+        excluding 'energy'.
+        """
+        data = self._experiment._data.data
+        energy_dim = 'energy'
+        dims_out = [d for d in data.dims if d != energy_dim]
+        shape = tuple(data.sizes[d] for d in dims_out)
+        coords_out = {d: data.coords[d] for d in dims_out}
+
+        # --- Walk the nested _analysis, yielding (index_tuple, Analysis)
+        def _walk(node, idx_prefix=()):
+            if isinstance(node, (list, tuple)):
+                for i, child in enumerate(node):
+                    yield from _walk(child, idx_prefix + (i,))
+            else:
+                yield idx_prefix, node
+
+        # --- Find the first leaf Analysis to inspect parameter names
+        first_leaf = next(_walk(self._analysis))[1]
+        first_params = first_leaf.get_parameters()
+
+        # Duplicate-name handling based on the first leaf
         name_counts = Counter(p.name for p in first_params)
-        def key_for(name, idx):
-            return name if name_counts[name] == 1 else f'{name}[{idx}]'
+        def key_for(name, occ_idx):
+            return name if name_counts[name] == 1 else f'{name}[{occ_idx}]'
 
-        # Template/specs
+        # Build a template order (name occurrences) from the first leaf
         template_seen = defaultdict(int)
-        param_specs = []
+        specs = []  # (key, base_name, occ_idx)
         for p in first_params:
             occ = template_seen[p.name]
             template_seen[p.name] += 1
-            param_specs.append((key_for(p.name, occ), p.name, occ))
+            specs.append((key_for(p.name, occ), p.name, occ))
 
-        # Storage
-        store = {}
-        for key, _, _ in param_specs:
-            store[key] = {'values': [float('nan')]*N,
-                        'vars':   [None]*N,
-                        'unit':   None}
+        # Buffers for each parameter key
+        def _new_buf():
+            return {
+                'values': np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
+                'vars':   np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
+                'min':    np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
+                'max':    np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
+                'fixed':  np.zeros(shape or (1,), dtype=bool).reshape(shape or (1,)),
+                'unit':   None,
+            }
 
-        # Fill
-        for i, ana in enumerate(self._analysis):
+        store = {key: _new_buf() for key, _, _ in specs}
+
+        # Helpers to read bounds/fixed/unit
+        def _bounds_of(p):
+            lo = getattr(p, 'min', getattr(p, 'minimum', None))
+            hi = getattr(p, 'max', getattr(p, 'maximum', None))
+            b = getattr(p, 'bounds', None)
+            if (lo is None or hi is None) and b is not None and len(b) == 2:
+                lo = b[0] if lo is None else lo
+                hi = b[1] if hi is None else hi
+            return lo, hi
+
+        def _fixed_of(p):
+            return bool(getattr(p, 'fixed', False))
+
+        def _unit_to_sc(u):
+            if u is None: return None
+            try: return sc.Unit(str(u))
+            except Exception: return None
+
+        # --- Fill buffers for every leaf Analysis
+        for idx_tuple, ana in _walk(self._analysis):
+            # Sanity: idx_tuple must match number of non-energy dims
+            if len(dims_out) != len(idx_tuple):
+                # If self._analysis nests fewer levels (e.g. only Q), pad to match shape
+                # assuming trailing dims vary in the data but not in analyses; keep simple:
+                if len(dims_out) == 1 and len(idx_tuple) == 0:
+                    idx_tuple = (0,)
+                else:
+                    raise RuntimeError(
+                        f"Analysis nesting depth {len(idx_tuple)} does not match "
+                        f"non-energy dims {dims_out}"
+                    )
+
             seen = defaultdict(int)
             for p in ana.get_parameters():
-                occ = seen[p.name]
-                seen[p.name] += 1
+                occ = seen[p.name]; seen[p.name] += 1
 
+                # Register late-seen names (not present in first leaf)
                 if p.name not in name_counts:
                     name_counts[p.name] = 1
-                    if p.name not in store:
-                        store[p.name] = {'values': [float('nan')]*N,
-                                        'vars':   [None]*N,
-                                        'unit':   None}
+                    store.setdefault(p.name, _new_buf())
 
                 key = key_for(p.name, occ) if name_counts[p.name] > 1 else p.name
                 if key not in store:  # late duplicate discovery
                     key = f'{p.name}[{occ}]'
-                    if key not in store:
-                        store[key] = {'values': [float('nan')]*N,
-                                    'vars':   [None]*N,
-                                    'unit':   None}
+                    store.setdefault(key, _new_buf())
 
-                store[key]['values'][i] = p.value
+                # Fill numeric fields
+                store[key]['values'][idx_tuple] = getattr(p, 'value', math.nan)
                 err = getattr(p, 'error', None)
-                if err is not None:
-                    store[key]['vars'][i] = err**2
-                u = getattr(p, 'unit', None)
-                if store[key]['unit'] is None and u is not None:
-                    try:
-                        store[key]['unit'] = sc.Unit(str(u))
-                    except Exception:
-                        store[key]['unit'] = None
+                store[key]['vars'][idx_tuple] = (err**2) if (err is not None) else math.nan
+                lo, hi = _bounds_of(p)
+                store[key]['min'][idx_tuple] = lo if lo is not None else math.nan
+                store[key]['max'][idx_tuple] = hi if hi is not None else math.nan
+                store[key]['fixed'][idx_tuple] = _fixed_of(p)
 
-        # Build DataGroup (coords go on DataArray, not sc.array)
-        dg = {}
+                # Unit (first non-None wins)
+                if store[key]['unit'] is None:
+                    store[key]['unit'] = _unit_to_sc(getattr(p, 'unit', None))
+
+        # --- Build the DataGroup
+        out = {}
         for key, buf in store.items():
-            include_vars = all(v is not None for v in buf['vars'])  # only include if none are missing
-            data_kwargs = {}
-            if buf['unit'] is not None:
-                data_kwargs['unit'] = buf['unit']
-            if include_vars:
-                data_kwargs['variances'] = buf['vars']
+            u = buf['unit']
+            # values with variances
+            if u is not None:
+                val = sc.array(dims=dims_out or ['_'], values=buf['values'],
+                            variances=buf['vars'], unit=u)
+            else:
+                val = sc.array(dims=dims_out or ['_'], values=buf['values'],
+                            variances=buf['vars'])
+            da_value = sc.DataArray(val, coords=coords_out if dims_out else {})
 
-            data = sc.array(dims=['Q'], values=buf['values'], **data_kwargs)
-            da = sc.DataArray(data=data, coords={'Q': q_coord})
-            dg[key] = da
+            # min/max share unit; fixed is bool
+            da_min = sc.DataArray(
+                sc.array(dims=dims_out or ['_'], values=buf['min'], unit=u) if u is not None
+                else sc.array(dims=dims_out or ['_'], values=buf['min']),
+                coords=coords_out if dims_out else {}
+            )
+            da_max = sc.DataArray(
+                sc.array(dims=dims_out or ['_'], values=buf['max'], unit=u) if u is not None
+                else sc.array(dims=dims_out or ['_'], values=buf['max']),
+                coords=coords_out if dims_out else {}
+            )
+            da_fixed = sc.DataArray(
+                sc.array(dims=dims_out or ['_'], values=buf['fixed'], dtype='bool'),
+                coords=coords_out if dims_out else {}
+            )
 
-        return sc.DataGroup(dg)
+            out[key] = sc.DataGroup({
+                'value': da_value,
+                'min':   da_min,
+                'max':   da_max,
+                'fixed': da_fixed,
+            })
+
+        return sc.DataGroup(out)
+
+
 
 
     # def get_parameters_as_data_group_with_bounds(self):
