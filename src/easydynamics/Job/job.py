@@ -8,6 +8,7 @@ from easydynamics.experiment.data import Data
 import scipp as sc
 import plopp as pp
 
+from collections import defaultdict, Counter
 
 class Job(JobBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -138,5 +139,99 @@ class Job(JobBase):
     
     def get_parameters(self):
         return self._analysis.get_parameters()
+
+    # def get_parameters_as_data_group(self):
+    #     q_coords = self._experiment._data.data.coords['Q']
+    #     vals = []
+    #     errs = []
+    #     for ana in self._analysis:
+    #         for p in ana.get_parameters():
+    #                 vals.append(p.value)
+    #                 errs.append(getattr(p, 'error', None))
+    #     da = sc.array(
+    #         dims=['Q'],
+    #         values=vals,
+    #         variances=[e**2 if e is not None else None for e in errs],
+    #         coords={'Q': q_coords}
+    #     )
+    #     return da
+
+
+
+
+
+    def get_parameters_as_data_group(self):
+        N = len(self._analysis)
+        q_coord = self._experiment._data.data.coords.get('Q', sc.arange('Q', N))
+
+        # Inspect the first analysis to detect duplicate names
+        first_params = self._analysis[0].get_parameters()
+        name_counts = Counter(p.name for p in first_params)
+        def key_for(name, idx):
+            return name if name_counts[name] == 1 else f'{name}[{idx}]'
+
+        # Template/specs
+        template_seen = defaultdict(int)
+        param_specs = []
+        for p in first_params:
+            occ = template_seen[p.name]
+            template_seen[p.name] += 1
+            param_specs.append((key_for(p.name, occ), p.name, occ))
+
+        # Storage
+        store = {}
+        for key, _, _ in param_specs:
+            store[key] = {'values': [float('nan')]*N,
+                        'vars':   [None]*N,
+                        'unit':   None}
+
+        # Fill
+        for i, ana in enumerate(self._analysis):
+            seen = defaultdict(int)
+            for p in ana.get_parameters():
+                occ = seen[p.name]
+                seen[p.name] += 1
+
+                if p.name not in name_counts:
+                    name_counts[p.name] = 1
+                    if p.name not in store:
+                        store[p.name] = {'values': [float('nan')]*N,
+                                        'vars':   [None]*N,
+                                        'unit':   None}
+
+                key = key_for(p.name, occ) if name_counts[p.name] > 1 else p.name
+                if key not in store:  # late duplicate discovery
+                    key = f'{p.name}[{occ}]'
+                    if key not in store:
+                        store[key] = {'values': [float('nan')]*N,
+                                    'vars':   [None]*N,
+                                    'unit':   None}
+
+                store[key]['values'][i] = p.value
+                err = getattr(p, 'error', None)
+                if err is not None:
+                    store[key]['vars'][i] = err**2
+                u = getattr(p, 'unit', None)
+                if store[key]['unit'] is None and u is not None:
+                    try:
+                        store[key]['unit'] = sc.Unit(str(u))
+                    except Exception:
+                        store[key]['unit'] = None
+
+        # Build DataGroup (coords go on DataArray, not sc.array)
+        dg = {}
+        for key, buf in store.items():
+            include_vars = all(v is not None for v in buf['vars'])  # only include if none are missing
+            data_kwargs = {}
+            if buf['unit'] is not None:
+                data_kwargs['unit'] = buf['unit']
+            if include_vars:
+                data_kwargs['variances'] = buf['vars']
+
+            data = sc.array(dims=['Q'], values=buf['values'], **data_kwargs)
+            da = sc.DataArray(data=data, coords={'Q': q_coord})
+            dg[key] = da
+
+        return sc.DataGroup(dg)
 
 
