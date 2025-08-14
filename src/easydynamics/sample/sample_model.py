@@ -174,6 +174,9 @@ class SampleModel(ObjBase):
             return
             # warnings.warn("Temperature is negative. Disabling detailed balance.") #TODO: Uncomment this line if you want to enable the warning
 
+        if value < 0:
+            raise ValueError("Temperature must be non-negative.")
+
         if isinstance(self._temperature, Parameter):
             self._temperature.value = value
         else:
