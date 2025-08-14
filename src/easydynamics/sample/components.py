@@ -348,7 +348,7 @@ class PolynomialComponent(ModelComponent):
             result += param.value * np.power(x, i)
 
         if any(result < 0):
-            raise Warning("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
+            Warning("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
         return result
 
     def degree(self):

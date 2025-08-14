@@ -15,7 +15,6 @@ import numpy as np
 from itertools import product
 
 import math
-from collections import defaultdict, Counter
 
 class Job(JobBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -26,6 +25,7 @@ class Job(JobBase):
         self._background_model = None
         self._experiment = None
         self._analysis = []
+        self._analysis_meta = None  
         self._summary = None
         self._info = None
         self._fit_parameters = None
@@ -55,7 +55,7 @@ class Job(JobBase):
         # TODO: allow resolution to be DataArray or SampleModel
 
         if resolution is not None and not isinstance(resolution, SampleModel):
-            raise TypeError("Resolution model must be an instance of SampleModel.")
+            raise TypeError("Resolution model must be None or an instance of SampleModel.")
         self._resolution_model = resolution
 
         if self._resolution_model is not None:
@@ -66,62 +66,117 @@ class Job(JobBase):
         """
         self._resolution_model.normalize_area()        
 
-    def set_analysis(self, analysis):
+    def append_analysis(self, analysis):
         self._analysis.append(analysis)
         if self._experiment is not None:
             self._analysis[-1].set_experiment(self._experiment)
         if self._theory is not None:
             self._analysis[-1].set_theory(self._theory)
 
-    # def fit(self):
-    #     if self._analysis is None:
-    #         raise RuntimeError("Analysis is not set in Job.")
+    def fit(self,
+                sequential=None,
+                *,
+                seed_domains=("theory", "background"),
+                copy_offset=False,
+                include_temperature=False,
+                only_unfixed=True,
+                strict_components=True,
+                strict_params=True,
+                require_same_units=True,
+                convert_units=False):
+            """
+            Simple, meta-driven fitter.
 
-    #     for i in range(len(self._analysis)):
-    #         self._analysis[i].fit()
-    #     # return self._analysis.fit()
+            `_analysis_meta` MUST be set and correct:
+                - 'dims': tuple of nesting order (outer -> inner), e.g. ('Temperature','Q') or ('Q',)
+                - 'sizes': dict with lengths for each dim
+            """
 
-    def fit(self, **kwargs):
-        """
-        Call .fit() on every Analysis in self._analysis, regardless of nesting.
-        Extra kwargs are forwarded to Analysis.fit().
-        """
-        if not getattr(self, '_analysis', None):
-            raise RuntimeError("Analysis is not set in Job.")
+            if not self._analysis:
+                raise RuntimeError("No analyses to fit. Build or generate analyses first.")
+            if not self._analysis_meta or 'dims' not in self._analysis_meta or 'sizes' not in self._analysis_meta:
+                raise RuntimeError("Missing _analysis_meta. Call generate_analysis_for_cuts() or set_analysis_meta().")
 
-        def _walk(x):
-            if isinstance(x, (list, tuple)):
-                for xi in x:
-                    _walk(xi)
-            else:
-                x.fit(**kwargs)
+            axis_dims: list[str] = list(self._analysis_meta['dims'])
+            sizes: dict[str, int] = dict(self._analysis_meta['sizes'])
 
-        _walk(self._analysis)
+            # --- helpers ----------------------------------------------------------
+            def _walk_all(node):
+                """Yield every leaf Analysis in the nested structure."""
+                stack = [node]
+                while stack:
+                    x = stack.pop()
+                    if isinstance(x, (list, tuple)):
+                        stack.extend(x)
+                    else:
+                        yield x
 
-        self._fit_parameters=self.get_parameters_as_data_group()
+            def _get_by_map(idx_map: dict[str, int]):
+                """Index self._analysis using axis_dims order and a {dim: idx} map."""
+                obj = self._analysis
+                for d in axis_dims:
+                    if d in idx_map:
+                        obj = obj[idx_map[d]]
+                return obj
 
-        return self
+            def _resolve_sweep_dim(tag: str) -> str:
+                """Map tags like 'T' to actual dim name found in axis_dims."""
+                if tag in axis_dims:
+                    return tag
+                if tag == 'T':
+                    for cand in ('Temperature', 'Temp', 'T'):
+                        if cand in axis_dims:
+                            return cand
+                if tag == 'Q' and 'Q' in axis_dims:
+                    return 'Q'
+                raise ValueError(f"sweep dim '{tag}' not present in analysis dims {axis_dims}")
 
+            # --- independent fits -------------------------------------------------
+            if sequential is None:
+                for ana in _walk_all(self._analysis):
+                    ana.fit()
+                return
 
+            # --- sequential sweeps ------------------------------------------------
+            valid = {'Q', '-Q', 'T', '-T'}
+            if sequential not in valid:
+                raise ValueError(f"sequential must be one of {sorted(valid)} or None, got {sequential!r}")
 
-    # def generate_analysis_for_cuts(self):
-    #     for i in range(self._experiment._data.data.sizes['Q']):
-    #         this_analysis=Analysis()
-    #         this_analysis.set_theory(self._theory.copy())
+            backwards = sequential.startswith('-')
+            tag = sequential.lstrip('-')
+            sweep_dim = _resolve_sweep_dim(tag)
 
-    #         if self._background_model is not None:
-    #             this_analysis.set_background_model(self._background_model.copy())
-    #         if self._resolution_model is not None:
-    #             this_analysis.set_resolution_model(self._resolution_model.copy())
+            # outer dims = all other dims in nesting order (could be 0D or >1D)
+            outer_dims = [d for d in axis_dims if d != sweep_dim]
 
-    #         this_experiment=Experiment()
-    #         this_data=Data()
-    #         this_data.append(self._experiment._data.data['Q',i])
-    #         this_experiment.set_data(this_data)
+            # ranges
+            inner_range = range(sizes[sweep_dim]-1, -1, -1) if backwards else range(sizes[sweep_dim])
+            outer_ranges = [range(sizes[d]) for d in outer_dims] or [range(1)]
 
-    #         this_analysis.set_experiment(this_experiment)
-    #         self._analysis.append(this_analysis)
+            for outer_combo in product(*outer_ranges):
+                idx_map = {}
+                for d, i in zip(outer_dims, outer_combo):
+                    idx_map[d] = i
 
+                prev_ana = None
+                for i in inner_range:
+                    idx_map[sweep_dim] = i
+                    ana = _get_by_map(idx_map)
+
+                    if prev_ana is not None:
+                        ana.seed_from(
+                            prev_ana,
+                            domains=seed_domains,
+                            only_unfixed=only_unfixed,
+                            strict_components=strict_components,
+                            strict_params=strict_params,
+                            include_temperature=include_temperature,
+                            require_same_units=require_same_units,
+                            convert_units=convert_units,
+                            copy_offset=copy_offset,
+                        )
+                    ana.fit()
+                    prev_ana = ana
 
     def generate_analysis_for_cuts(self, keep=('energy',)):
         """
@@ -371,8 +426,9 @@ class Job(JobBase):
         pp.Plot
             The plot of the fit parameters.
         """
+        self._fit_parameters = self.get_parameters_as_data_group()
         if self._fit_parameters is None:
-            raise RuntimeError("Fit parameters are not available. Run fit() first.")
+            raise RuntimeError("No fit parameters found.")
 
         if parameter_name is not None:
             if parameter_name not in self._fit_parameters:

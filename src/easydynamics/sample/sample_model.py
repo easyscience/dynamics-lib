@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 
 import numpy as np
 
@@ -8,6 +8,8 @@ from easyscience.base_classes import ObjBase
 
 from easydynamics.utils import detailed_balance_factor
 from .components import ModelComponent
+
+
 
 class SampleModel(ObjBase):
     """
@@ -298,6 +300,138 @@ class SampleModel(ObjBase):
         for comp in self.components.values():
             params.extend(comp.get_parameters())
         return params
+    
+    def get_fit_parameters(self):
+        """
+        Get all fit parameters, filtering out fixed parameters.
+
+        Returns:
+            List[Parameter]: A list of unfixed fit parameters.
+        """
+        return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
+    
+
+    def update_values_from(
+        self,
+        other: "SampleModel",
+        *,
+        only_unfixed: bool = True,
+        strict_components: bool = True,
+        strict_params: bool = True,
+        include_temperature: bool = False,
+        require_same_units: bool = True,
+        convert_units: bool = False,
+    )-> Dict[str, Tuple[float, float]]:
+        """
+        Overwrite this model's Parameter.values from another SampleModel, matching by
+        component name and Parameter.name.
+
+        Parameters
+        ----------
+        other : SampleModel
+            Source of values.
+        only_unfixed : bool, default True
+            If True, skip Parameters in *self* that are fixed.
+        strict_components : bool, default True
+            If True, require identical component name sets; else use intersection.
+        strict_params : bool, default True
+            If True, require identical parameter name sets per component; else use intersection.
+        include_temperature : bool, default False
+            If True, also copy temperature (if present on both).
+        require_same_units : bool, default True
+            If True, fail on unit mismatch; otherwise allow.
+        convert_units : bool, default False
+            If True and units differ, attempt self-param conversion to other's unit.
+
+        Returns
+        -------
+        Dict[str, Tuple[float, float]]
+            Mapping key -> (old_value, new_value), where key is
+            "temperature" or "<component>.<Parameter.name>".
+
+        Notes
+        -----
+        - Only .value is overwritten. Parameter objects are not replaced.
+        - Parameter matching uses the full Parameter.name as you define it
+          in components (e.g. 'Lorentziancenter', 'Gaussianwidth', 'Polynomial_c0').
+        """
+        if not isinstance(other, SampleModel):
+            raise TypeError("other must be a SampleModel")
+
+        report: Dict[str, Tuple[float, float]] = {}
+
+        # --- Component set checks
+        self_names = set(self.components.keys())
+        other_names = set(other.components.keys())
+
+        if strict_components and self_names != other_names:
+            missing = self_names - other_names
+            extra   = other_names - self_names
+            raise ValueError(
+                f"Component name mismatch.\n"
+                f"  Missing in source: {missing or '{}'}\n"
+                f"  Extra in source:   {extra or '{}'}"
+            )
+
+        common_components = self_names & other_names if not strict_components else self_names
+
+        # --- Optional: temperature
+        if include_temperature and isinstance(self._temperature, Parameter) and isinstance(other._temperature, Parameter):
+            if (not only_unfixed) or (not getattr(self._temperature, "fixed", False)):
+                if getattr(self._temperature, "unit", None) != getattr(other._temperature, "unit", None):
+                    if require_same_units and not convert_units:
+                        raise ValueError(
+                            f"Unit mismatch for temperature: {self._temperature.unit} vs {other._temperature.unit}"
+                        )
+                    if convert_units and hasattr(self._temperature, "convert_unit"):
+                        self._temperature.convert_unit(other._temperature.unit)
+                old = self._temperature.value
+                self._temperature.value = other._temperature.value
+                report["temperature"] = (old, self._temperature.value)
+
+        # --- Per-component parameters
+        for cname in common_components:
+            c_self  = self.components[cname]
+            c_other = other.components[cname]
+
+            self_params  = {p.name: p for p in c_self.get_parameters()}
+            other_params = {p.name: p for p in c_other.get_parameters()}
+
+            if strict_params and set(self_params) != set(other_params):
+                missing = set(self_params) - set(other_params)
+                extra   = set(other_params) - set(self_params)
+                raise ValueError(
+                    f"Parameter name mismatch in component '{cname}'.\n"
+                    f"  Missing in source: {missing or '{}'}\n"
+                    f"  Extra in source:   {extra or '{}'}"
+                )
+
+            common_param_names = set(self_params) & set(other_params) if not strict_params else set(self_params)
+
+            for pname in common_param_names:
+                p_self  = self_params[pname]
+                p_other = other_params[pname]
+
+                if only_unfixed and getattr(p_self, "fixed", False):
+                    continue
+
+                # Units (best effort)
+                u_self  = getattr(p_self, "unit", None)
+                u_other = getattr(p_other, "unit", None)
+                if u_self != u_other:
+                    if require_same_units and not convert_units:
+                        raise ValueError(
+                            f"Unit mismatch for {cname}.{pname}: {u_self} vs {u_other}"
+                        )
+                    if convert_units and hasattr(p_self, "convert_unit") and u_other is not None:
+                        p_self.convert_unit(u_other)
+
+                old = p_self.value
+                p_self.value = p_other.value
+                report[f"{cname}.{pname}"] = (old, p_self.value)
+
+        return report
+
     
     def copy(self) -> "SampleModel":
         """

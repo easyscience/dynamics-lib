@@ -17,7 +17,7 @@ class ResolutionHandler:
                  x: np.ndarray,
                     sample_model: Union[SampleModel, ModelComponent],
                     resolution_model: SampleModel,
-                    offset: Parameter,
+                    offset: Union[Parameter, None] = None,
                     method: str = 'auto',
                     upsample_factor: int = 0) -> np.ndarray:
         """        Convolve a sample model with a resolution model using analytical expressions or numerical FFT.
@@ -70,7 +70,7 @@ class ResolutionHandler:
                         x: np.ndarray,
                         sample_model: Union[SampleModel, ModelComponent],
                         resolution_model: SampleModel,
-                        offset: Parameter,
+                        offset: Union[Parameter,None] = None,
                         upsample_factor: int = 5) -> np.ndarray: #TODO: remove standard value
         """
         Perform numerical convolution using FFT, with optional upsampling and extended evaluation range.
@@ -106,8 +106,10 @@ class ResolutionHandler:
             num_points = len(x) * upsample_factor
             x_dense = np.linspace(extended_min, extended_max, num_points)
 
+        offset_value = offset.value if offset is not None else 0.0
+
         # Evaluate on dense grid
-        sample_vals = sample_model.evaluate(x_dense - offset.value)
+        sample_vals = sample_model.evaluate(x_dense - offset_value)
         resolution_vals = resolution_model.evaluate(x_dense)
 
         # Convolution
@@ -118,9 +120,9 @@ class ResolutionHandler:
         if isinstance(sample_model, SampleModel):
             for comp in sample_model.components.values():
                 if isinstance(comp, DeltaFunctionComponent):
-                    convolved += comp.area.value * resolution_model.evaluate(x_dense - offset.value)
+                    convolved += comp.area.value * resolution_model.evaluate(x_dense - offset_value)
         elif isinstance(sample_model, DeltaFunctionComponent):
-            convolved += sample_model.area.value * resolution_model.evaluate(x_dense - offset.value)
+            convolved += sample_model.area.value * resolution_model.evaluate(x_dense - offset_value)
 
         # Interpolate back if upsampled
         if upsample_factor > 0:
