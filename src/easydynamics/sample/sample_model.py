@@ -305,8 +305,8 @@ class SampleModel(ObjBase):
         SampleModel
             A new instance with copied components and parameters.
         """
-        new_model = SampleModel(name=self.name)
-        new_model.temperature = self._temperature.value
+        new_model = SampleModel(name=self.name, temperature=self._temperature.value if self._temperature else None)
+        # new_model.temperature = self._temperature.value
         new_model.use_detailed_balance = self._use_detailed_balance
 
 

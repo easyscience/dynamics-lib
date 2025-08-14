@@ -157,10 +157,16 @@ class Job(JobBase):
             da = data
             for d, i in zip(dims_to_cut, idx_tuple):
                 da = da[d, i]
-
             # Build analysis (copy models)
             ana = Analysis(name=f'Analysis{idx_tuple}')
-            ana.set_theory(self._theory.copy())
+            theory_copy = self._theory.copy()
+            if 'Temperature' in da.coords:
+                # print(da.coords['Temperature'].value)
+                # theory_copy.temperature
+                theory_copy.temperature= da.coords['Temperature'].value
+                # theory_copy.temperature(value=da.coords['Temperature'].value)
+
+            ana.set_theory(theory_copy)
             if self._background_model is not None:
                 ana.set_background_model(self._background_model.copy())
             if self._resolution_model is not None:
