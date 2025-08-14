@@ -249,11 +249,6 @@ class Job(JobBase):
                 msel.values = ana.calculate_theory(E)
 
 
-        # model = sc.zeros_like(self._experiment._data.data)
-
-        # for i in range(len(self._analysis)):
-        #     model['Q',i].values = self._analysis[i].calculate_theory(model['Q',i].coords['energy'].values)
-
 
         data_and_fit = sc.DataGroup({'Data': self._experiment._data.data,
                                     'Fit': model})

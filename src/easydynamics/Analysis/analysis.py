@@ -116,6 +116,47 @@ class Analysis(AnalysisBase):
 
         return y
     
+    def calculate_individual_components(self, x=None) -> dict:
+        """
+        Calculate the individual components of the theory model.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Energy axis (e.g., in meV).
+
+        Returns
+        -------
+        dict
+            A dictionary with component names as keys and evaluated values as values.
+        """
+
+        if self._theory is None:
+            raise RuntimeError("Theory model must be set before calculating components.")
+
+        # standard: use experimental data x if not provided
+        if x is None:
+            if self._experiment is None or self._experiment._data is None:
+                raise RuntimeError("No x values provided and no experiment data set.")
+            x, _, _ = self._experiment.extract_xye_data(self._experiment._data)
+
+        components = {}
+        all_components = list(self._theory.components.items())
+        if self._background_model:
+            all_components.extend(self._background_model.components.items())
+
+        if self._resolution_model is not None:
+            resolution_handler = ResolutionHandler()
+
+        for name, component in all_components:
+            if self._resolution_model is None:
+                components[name] = component.evaluate(x - self._offset.value)
+            else:
+                components[name] = resolution_handler.numerical_convolve(x, component, self._resolution_model, self._offset)
+
+        return components
+
+    
 
     def set_background_model(self, background:SampleModel):
         """ Set the model for the background.
@@ -157,11 +198,11 @@ class Analysis(AnalysisBase):
     def set_offset(self, offset: float):
         # TODO: handle units properly
         
-        self.offset.value= offset
+        self._offset.value= offset
 
     def fix_offset(self, fix: bool = True):
-    
-        self.offset.fixed = fix
+
+        self._offset.fixed = fix
 
 
     def fit(self):
