@@ -116,7 +116,7 @@ class Analysis(AnalysisBase):
 
         return y
     
-    def calculate_individual_components(self, x=None) -> dict:
+    def calculate_individual_components(self, x=None,add_background=True) -> dict:
         """
         Calculate the individual components of the theory model.
 
@@ -140,19 +140,27 @@ class Analysis(AnalysisBase):
                 raise RuntimeError("No x values provided and no experiment data set.")
             x, _, _ = self._experiment.extract_xye_data(self._experiment._data)
 
+
+
         components = {}
-        all_components = list(self._theory.components.items())
-        if self._background_model:
-            all_components.extend(self._background_model.components.items())
 
         if self._resolution_model is not None:
             resolution_handler = ResolutionHandler()
 
-        for name, component in all_components:
+        for name, component in self._theory.components.items():
             if self._resolution_model is None:
                 components[name] = component.evaluate(x - self._offset.value)
             else:
                 components[name] = resolution_handler.numerical_convolve(x, component, self._resolution_model, self._offset)
+
+            if add_background and self._background_model is not None:
+                components[name] += self._background_model.evaluate(x - self._offset.value)
+
+        # If background model is set, add its components
+        if self._background_model is not None:
+            background_components = self._background_model.components.items()
+            for name, component in background_components:
+                components[name] = component.evaluate(x - self._offset.value)
 
         return components
 

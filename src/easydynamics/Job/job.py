@@ -161,10 +161,8 @@ class Job(JobBase):
             ana = Analysis(name=f'Analysis{idx_tuple}')
             theory_copy = self._theory.copy()
             if 'Temperature' in da.coords:
-                # print(da.coords['Temperature'].value)
-                # theory_copy.temperature
                 theory_copy.temperature= da.coords['Temperature'].value
-                # theory_copy.temperature(value=da.coords['Temperature'].value)
+                theory_copy._use_detailed_balance = False #TODO users should be allowed to set this
 
             ana.set_theory(theory_copy)
             if self._background_model is not None:
@@ -217,59 +215,146 @@ class Job(JobBase):
 
 
 
-
-    def plot_data_and_model(self,intensity_min=0.0, intensity_max=0.06,
-                            energy_min=-0.02, energy_max=0.02):
+    def plot_data_and_model(self,
+                            intensity_min=0.0, intensity_max=0.06,
+                            energy_min=-0.02, energy_max=0.02,
+                            plot_individual_components=True):
 
         data = self._experiment._data.data
         energy_dim = 'energy'
 
         # same shape/coords as data
-        model = sc.zeros_like(data)
+        fit_total = sc.zeros_like(data)
+        component_arrays = {} if plot_individual_components else None
 
         # all non-energy dims (e.g. ['Temperature','Q'] or just ['Q'])
         loop_dims = [d for d in data.dims if d != energy_dim]
 
         if not loop_dims:
-            # Only energy present
-            E = model.coords[energy_dim].values
+            E = fit_total.coords[energy_dim].values
             ana = self._analysis[0] if isinstance(self._analysis, (list, tuple)) else self._analysis
-            model.values = ana.calculate_theory(E)
+
+            if plot_individual_components:
+                comps = ana.calculate_individual_components(E)  # dict
+                for name, vals in comps.items():
+                    if name not in component_arrays:
+                        component_arrays[name] = sc.zeros_like(data)
+                    component_arrays[name].values = vals
+            fit_total.values = ana.calculate_theory(E)
+
         else:
             ranges = [range(data.sizes[d]) for d in loop_dims]
             for combo in product(*ranges):
-                # Chain slices: model['Temperature', ti]['Q', qi] ...
-                msel = model
+                fsel = fit_total
                 for d, i in zip(loop_dims, combo):
-                    msel = msel[d, i]
+                    fsel = fsel[d, i]
+                E = fsel.coords[energy_dim].values
 
-                # Energy for this slice
-                E = msel.coords[energy_dim].values
-
-                # Matching Analysis (nested in the same order as loop_dims)
                 ana = self._analysis
                 for i in combo:
                     ana = ana[i]
 
-                # Fill model slice
-                msel.values = ana.calculate_theory(E)
+                if plot_individual_components:
+                    comps = ana.calculate_individual_components(E)
+                    for name, vals in comps.items():
+                        if name not in component_arrays:
+                            component_arrays[name] = sc.zeros_like(data)
+                        csel = component_arrays[name]
+                        for d, i in zip(loop_dims, combo):
+                            csel = csel[d, i]
+                        csel.values = vals
+                fsel.values = ana.calculate_theory(E)
 
+        # Build plot group
+        data_and_fit = {'Data': self._experiment._data.data, 'Fit': fit_total}
+        if plot_individual_components and component_arrays:
+            data_and_fit.update(component_arrays)
+        data_and_fit = sc.DataGroup(data_and_fit)
 
-
-        data_and_fit = sc.DataGroup({'Data': self._experiment._data.data,
-                                    'Fit': model})
-
+        # Apply energy window
         energy_min = energy_min * sc.Unit('meV')
         energy_max = energy_max * sc.Unit('meV')
-        plot=pp.slicer(data_and_fit['energy',energy_min:energy_max],
-                vmin=intensity_min,vmax=intensity_max,
-                    keep=['energy'],
-            linestyle=         {'Data': 'none',    'Fit': '-'},
-            marker=            {'Data': 'o',       'Fit':'none'},
-            markerfacecolor=   {'Data': 'none',    'Fit':'red'},
-            color=             {'Data': 'black',   'Fit':'red'})
+
+        # Styling
+        linestyle = {'Data': 'none', 'Fit': '-'}
+        marker = {'Data': 'o', 'Fit': 'none'}
+        markerfacecolor = {'Data': 'none', 'Fit': 'none'}
+        color = {'Data': 'black', 'Fit': 'red'}
+
+        if plot_individual_components and component_arrays:
+            for name in component_arrays:
+                linestyle[name] = '--'
+                marker[name] = 'none'
+                markerfacecolor[name] = 'none'
+
+        plot = pp.slicer(
+            data_and_fit['energy', energy_min:energy_max],
+            vmin=intensity_min, vmax=intensity_max,
+            keep=['energy'],
+            linestyle=linestyle,
+            marker=marker,
+            markerfacecolor=markerfacecolor,
+            color=color
+        )
 
         return plot
+
+
+
+    # def plot_data_and_model(self,intensity_min=0.0, intensity_max=0.06,
+    #                         energy_min=-0.02, energy_max=0.02, plot_individual_components=True):
+
+    #     data = self._experiment._data.data
+    #     energy_dim = 'energy'
+
+    #     # same shape/coords as data
+    #     model = sc.zeros_like(data)
+
+        
+
+    #     # all non-energy dims (e.g. ['Temperature','Q'] or just ['Q'])
+    #     loop_dims = [d for d in data.dims if d != energy_dim]
+
+    #     if not loop_dims:
+    #         # Only energy present
+    #         E = model.coords[energy_dim].values
+    #         ana = self._analysis[0] if isinstance(self._analysis, (list, tuple)) else self._analysis
+    #         model.values = ana.calculate_theory(E)
+    #     else:
+    #         ranges = [range(data.sizes[d]) for d in loop_dims]
+    #         for combo in product(*ranges):
+    #             # Chain slices: model['Temperature', ti]['Q', qi] ...
+    #             msel = model
+    #             for d, i in zip(loop_dims, combo):
+    #                 msel = msel[d, i]
+
+    #             # Energy for this slice
+    #             E = msel.coords[energy_dim].values
+
+    #             # Matching Analysis (nested in the same order as loop_dims)
+    #             ana = self._analysis
+    #             for i in combo:
+    #                 ana = ana[i]
+
+    #             # Fill model slice
+    #             msel.values = ana.calculate_theory(E)
+
+
+
+    #     data_and_fit = sc.DataGroup({'Data': self._experiment._data.data,
+    #                                 'Fit': model})
+
+    #     energy_min = energy_min * sc.Unit('meV')
+    #     energy_max = energy_max * sc.Unit('meV')
+    #     plot=pp.slicer(data_and_fit['energy',energy_min:energy_max],
+    #             vmin=intensity_min,vmax=intensity_max,
+    #                 keep=['energy'],
+    #         linestyle=         {'Data': 'none',    'Fit': '-'},
+    #         marker=            {'Data': 'o',       'Fit':'none'},
+    #         markerfacecolor=   {'Data': 'none',    'Fit':'red'},
+    #         color=             {'Data': 'black',   'Fit':'red'})
+
+    #     return plot
     
     def plot_fit_parameters(self, parameter_name):
         """
