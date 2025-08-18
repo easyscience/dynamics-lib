@@ -14,7 +14,6 @@ from easyscience.variable import Parameter
 
 
 class ResolutionHandler:
-    # ------------------------- public API -------------------------
 
     def convolve(
         self,
@@ -22,49 +21,21 @@ class ResolutionHandler:
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Union[Parameter, None] = None,
-        method: str = 'auto',
+        method: str = 'analytical',
         upsample_factor: int = 0
     ) -> np.ndarray:
         """
         Convolve a sample model with a resolution model using analytical expressions or numerical FFT.
         Accepts SampleModel or single ModelComponent for both sample and resolution.
         """
-        if method == 'auto':
-            chosen = self.auto_decide_method(sample_model, resolution_model)
-            if chosen == 'analytical':
-                return self.analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
-            elif chosen == 'numerical':
-                return self.numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
-            # Fallback
-            return self.numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
 
         if method == 'analytical':
             return self.analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
-
         if method == 'numerical':
             return self.numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+        if method not in ['analytical', 'numerical']:
+            raise ValueError(f"Unknown method: {method}. Choose from 'analytical', or 'numerical'.")
 
-        raise ValueError(f"Unknown method: {method}. Choose from 'auto', 'analytical', or 'numerical'.")
-
-    def auto_decide_method(
-        self,
-        sample_model: Union[SampleModel, ModelComponent],
-        resolution_model: Union[SampleModel, ModelComponent]
-    ) -> str:
-        """
-        Heuristic:
-         - If sample_model is a single ModelComponent, prefer analytical.
-         - If sample_model._use_detailed_balance is False (when present), prefer analytical.
-         - Otherwise prefer numerical.
-        """
-        if isinstance(sample_model, ModelComponent):
-            return 'analytical'
-
-        if isinstance(sample_model, SampleModel):
-            if getattr(sample_model, "_use_detailed_balance", False) is False:
-                return 'analytical'
-
-        return 'numerical'
 
     def numerical_convolve(
         self,
@@ -110,12 +81,18 @@ class ResolutionHandler:
         convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
         convolved *= (x_dense[1] - x_dense[0])  # normalize
 
+        # Add delta contributions
+        if isinstance(sample_model, SampleModel):
+            for comp in sample_model.components.values():
+                if isinstance(comp, DeltaFunctionComponent):
+                    convolved += comp.area.value * resolution_model.evaluate(x_dense - off)
+        elif isinstance(sample_model, DeltaFunctionComponent):
+            convolved += sample_model.area.value * resolution_model.evaluate(x_dense - off)
+
         if upsample_factor > 0:
             return interp1d(x_dense, convolved, kind='linear', bounds_error=False, fill_value=0.0)(x)
         else:
             return convolved
-
-    # --------------------- hybrid analytical path --------------------
 
     def analytical_convolve(
         self,
@@ -123,7 +100,7 @@ class ResolutionHandler:
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Union[Parameter, None] = None,
-        upsample_factor: int = 0
+        upsample_factor: int = 5
     ) -> np.ndarray:
         """
         Convolve sample with resolution. Accepts SampleModel or single ModelComponent for each.
@@ -169,8 +146,6 @@ class ResolutionHandler:
 
         return total
 
-    # ---------------------- analytic registry ---------------------
-
     def _try_analytic_pair(
         self,
         x: np.ndarray,
@@ -182,30 +157,28 @@ class ResolutionHandler:
         Attempt an analytic convolution for component pair (s, r).
         Returns (True, contribution) if handled, else (False, zeros).
         """
-        # Delta rules (generic)
-        # δ(center=cs, area=As) ⊛ f(x) = As * f(x - cs - off)
+        # Delta functions
         if isinstance(s, DeltaFunctionComponent):
-            return True, s.area.value * r.evaluate(x - (s.center.value + off))
+            return True, s.area.value * r.evaluate(x - s.center.value - off)
 
-        # f ⊛ δ(center=cr, area=Ar) = Ar * f(x - cr - off)
         if isinstance(r, DeltaFunctionComponent):
-            return True, r.area.value * s.evaluate(x - (r.center.value + off))
+            return True, r.area.value * s.evaluate(x - r.center.value - off)
 
-        # Gaussian + Gaussian -> Gaussian
+        # Gaussian + Gaussian --> Gaussian
         if isinstance(s, GaussianComponent) and isinstance(r, GaussianComponent):
             width = np.sqrt(s.width.value**2 + r.width.value**2)
             area  = s.area.value * r.area.value
             center = (s.center.value + r.center.value) + off
             return True, self.gaussian_eval(x, center, width, area)
 
-        # Lorentzian + Lorentzian -> Lorentzian
+        # Lorentzian + Lorentzian --> Lorentzian
         if isinstance(s, LorentzianComponent) and isinstance(r, LorentzianComponent):
             width = s.width.value + r.width.value
             area  = s.area.value * r.area.value
             center = (s.center.value + r.center.value) + off
             return True, self.lorentzian_eval(x, center, width, area)
 
-        # Gaussian + Lorentzian -> Voigt (commutative)
+        # Gaussian + Lorentzian --> Voigt 
         if (isinstance(s, GaussianComponent) and isinstance(r, LorentzianComponent)) or \
            (isinstance(s, LorentzianComponent) and isinstance(r, GaussianComponent)):
             if isinstance(s, GaussianComponent):
@@ -216,20 +189,17 @@ class ResolutionHandler:
             area   = G.area.value * L.area.value
             return True, self.voigt_eval(x, center, G.width.value, L.width.value, area)
 
-        # Extend here with more closures (e.g., Voigt combos, DHO, etc.)
         return False, np.zeros_like(x, dtype=float)
 
     # ---------------------- helpers & evals -----------------------
 
     @staticmethod
     def gaussian_eval(x, center, width, area):
-        norm = area / (width * np.sqrt(2 * np.pi))
-        return norm * np.exp(-0.5 * ((x - center) / width) ** 2)
+        return area * 1/(np.sqrt(2 * np.pi) * width) * np.exp(-0.5 * ((x - center) / width) ** 2)
 
     @staticmethod
     def lorentzian_eval(x, center, width, area):
-        norm = area / (np.pi * width)
-        return norm / (1 + ((x - center) / width) ** 2)
+        return area * width/np.pi / ((x - center)**2 + width**2)
 
     @staticmethod
     def voigt_eval(x, center, g_width, l_width, area):
