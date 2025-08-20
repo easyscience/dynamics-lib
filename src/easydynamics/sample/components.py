@@ -28,14 +28,67 @@ class ModelComponent(ObjBase):
         for p in self.get_parameters():
             p.fixed = False
 
-    def get_parameter(self,parameter_name):
+    def get_parameter(self, parameter_name):
         """
-        Get a specific parameter by name.
+        Get a specific parameter by name (explicit or partial match).
+        
+        Args:
+            parameter_name (str): Name of the parameter, or partial name to match.
+        
+        Returns:
+            Parameter: The matched parameter.
+        
+        Raises:
+            ValueError: If no matching or ambiguous parameter is found.
         """
+        # First, attempt exact match
         for p in self.get_parameters():
             if p.name == parameter_name:
                 return p
-        raise ValueError(f"Parameter '{parameter_name}' not found.")
+
+        # If exact match is not found, attempt partial match
+        matches = [p for p in self.get_parameters() if parameter_name in p.name]
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) > 1:
+            raise ValueError(f"Ambiguous parameter name '{parameter_name}' matches multiple parameters: {[p.name for p in matches]}")
+        else:
+            raise ValueError(f"Parameter '{parameter_name}' not found.")
+
+    def set_parameter_value(self, parameter_name, value, unit=None):
+        """
+        Set the value of a specific parameter by name.
+        """
+        param = self.get_parameter(parameter_name)
+        if unit is not None:
+            param.convert_unit(unit)
+        param.value = value
+
+    def set_parameter_bounds(self, parameter_name, min=None, max=None, unit=None):
+        """
+        Set the bounds of a specific parameter by name.
+        """
+        param = self.get_parameter(parameter_name)
+        if unit is not None:
+            param.convert_unit(unit)
+        if min is not None:
+            param.min = min
+        if max is not None:
+            param.max = max
+
+    def fix_parameter(self, parameter_name):
+        """
+        Fix a specific parameter by name.
+        """
+        param = self.get_parameter(parameter_name)
+        param.fixed = True
+
+    def free_parameter(self, parameter_name):
+        """
+        Free a specific parameter by name.
+        """
+        param = self.get_parameter(parameter_name)
+        param.fixed = False
 
     def convert_unit(self, unit):
         """
@@ -106,13 +159,13 @@ class GaussianComponent(ModelComponent):
         self.unit = unit  # Set the unit for the component
 
         if center is None:
-            self.center = Parameter(name= name+ 'center', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name= name+ ' center', value=0.0, unit=unit,fixed=True)
         else:
-            self.center = Parameter(name=name+ 'center', value=center, unit=unit)
+            self.center = Parameter(name=name+ ' center', value=center, unit=unit)
 
-        self.width = Parameter(name=name+ 'width', value=width, unit=unit,min=0.0)
+        self.width = Parameter(name=name+ ' width', value=width, unit=unit,min=0.0)
 
-        self.area = Parameter(name=name+ 'area', value=area, unit=unit,min=0.0)
+        self.area = Parameter(name=name+ ' area', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
         #TODO: Handle units properly
@@ -169,12 +222,12 @@ class LorentzianComponent(ModelComponent):
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
         if center is None:
-            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
         else:
-            self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.width = Parameter(name=name + 'width', value=width, unit=unit,min=0.0)
+            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+        self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
 
-        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
+        self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
 
     def evaluate(self, x):
             #TODO: Handle units properly
@@ -235,13 +288,13 @@ class VoigtComponent(ModelComponent):
         
         self.unit = unit  # Set the unit for the component
         if center is None:
-            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
         else:
-            self.center = Parameter(name=name + 'center', value=center, unit=unit)
+            self.center = Parameter(name=name + ' center', value=center, unit=unit)
 
-        self.Gwidth = Parameter(name=name + 'Gwidth', value=Gwidth, unit=unit)
-        self.Lwidth = Parameter(name=name + 'Lwidth', value=Lwidth, unit=unit)
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.Gwidth = Parameter(name=name + ' Gwidth', value=Gwidth, unit=unit)
+        self.Lwidth = Parameter(name=name + ' Lwidth', value=Lwidth, unit=unit)
+        self.area = Parameter(name=name + ' area', value=area, unit=unit)
 
     def evaluate(self, x):
 
@@ -301,9 +354,9 @@ class DHOComponent(ModelComponent):
             raise Warning("The area of the DHO with name {} is negative, which may not be physically meaningful.".format(name))
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
-        self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.width = Parameter(name=name + 'width', value=width, unit=unit)
-        self.area = Parameter(name=name + 'area', value=area, unit=unit)
+        self.center = Parameter(name=name + ' center', value=center, unit=unit)
+        self.width = Parameter(name=name + ' width', value=width, unit=unit)
+        self.area = Parameter(name=name + ' area', value=area, unit=unit)
 
     def evaluate(self, x):
 
@@ -424,10 +477,10 @@ class DeltaFunctionComponent(ModelComponent):
         super().__init__(name=name)
         self.unit = unit
         if center is None:
-            self.center = Parameter(name=name + 'center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
         else:
-            self.center = Parameter(name=name + 'center', value=center, unit=unit)
-        self.area = Parameter(name=name + 'area', value=area, unit=unit,min=0.0)
+            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+        self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
 
 
     def evaluate(self, x):
