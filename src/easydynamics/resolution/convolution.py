@@ -127,13 +127,31 @@ class ResolutionHandler:
         else:
             off2 = 0.0
 
+        span = x_dense.max() - x_dense.min()
         # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
         if not np.isclose(x_dense.mean(), 0.0):
-            span = x_dense.max() - x_dense.min()
             x_dense_resolution = np.linspace(-0.5 * span, 0.5 * span, len(x_dense))
         else:
             x_dense_resolution = x_dense
         
+        LARGE_WIDTH_THRESHOLD=0.2 #if a component is wider than ~20% of the x range, we have problems
+        if isinstance(sample_model, SampleModel):
+            for comp in sample_model.components.values():
+                if hasattr(comp, 'width') and comp.width.value > LARGE_WIDTH_THRESHOLD * span:
+                    Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+        else:
+            if hasattr(sample_model, 'width') and sample_model.width.value > LARGE_WIDTH_THRESHOLD * span:
+                Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
+
+        # Also check the resolution model
+        if isinstance(resolution_model, SampleModel):
+            for comp in resolution_model.components.values():
+                if hasattr(comp, 'width') and comp.width.value > 0.2 * span:
+                    Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+        else:
+            if hasattr(resolution_model, 'width') and resolution_model.width.value > 0.2 * span:
+                Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
+
         # Evaluate on dense grid
         sample_vals = self._evaluate_any(sample_model, x_dense - off - off2, selected_component_name)
         resolution_vals = self._evaluate_any(resolution_model, x_dense_resolution)
