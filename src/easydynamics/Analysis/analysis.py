@@ -1,13 +1,11 @@
 from easyscience.job.analysis import AnalysisBase
 from easyscience.fitting import AvailableMinimizers
-from easyscience.fitting import FitResults
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 
 from easyscience.variable import Parameter
 
 from easydynamics.resolution import ResolutionHandler
 
-from easydynamics.sample.components import DeltaFunctionComponent
 
 from easydynamics.sample import SampleModel
 
@@ -32,44 +30,6 @@ class Analysis(AnalysisBase):
         self._resolution_model = None
         self._background_model = None
 
-    def plot_data_and_model(self, plot_individual_components: bool = False):
-        """
-        Plot the experimental data and the theoretical fit.
-
-        Args:
-            plot_individual_components (bool): If True, plots individual components of the theory model.
-        """
-        if self._experiment is None or self._theory is None:
-            raise RuntimeError("Experiment and theory must be set before plotting.")
-
-        if self._experiment._data is None:
-            raise RuntimeError("No data has been set in the experiment.")
-
-        # Extract data
-        x, y, e = self._experiment.extract_xye_data(self._experiment._data)
-
-        # Start plot
-        fig = plt.figure(figsize=(10, 6))
-        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None', markerfacecolor='none')
-
-        # Compute and plot fit
-        fit_y = self.calculate_theory(x)
-        plt.plot(x, fit_y, label='Fit', color='red')
-
-        if plot_individual_components:
-            components=self.calculate_individual_components()
-            for name, y in components.items():
-                plt.plot(x, y, label=f' {name}', linestyle='--')
-
-        # Labels and legend
-        plt.xlabel('Energy (meV)')  # TODO: Handle units 
-        plt.ylabel('Intensity')
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
-
-        return fig
-
     def set_theory(self, theory: SampleModel):
         """ Set the model to be fitted.
         Args:
@@ -78,8 +38,6 @@ class Analysis(AnalysisBase):
         if not isinstance(theory, SampleModel):
             raise TypeError("The theory must be an instance of SampleModel.")
         self._theory = theory
-
-        
 
     def set_experiment(self, experiment: Experiment):
         """ Set the experimental for the analysis.
@@ -90,6 +48,47 @@ class Analysis(AnalysisBase):
             raise TypeError("The experiment must be an instance of Experiment.")
         self._experiment = experiment
 
+    def set_background_model(self, background:SampleModel):
+        """ Set the model for the background.
+        Args:
+            background (SampleModel): The background model.
+        """
+        if not isinstance(background, SampleModel):
+            raise TypeError("Background model must be an instance of SampleModel.")
+        self._background_model = background
+
+    def set_resolution_model(self, resolution:SampleModel):
+        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
+        Args:
+            resolution (SampleModel): The resolution model to be used in the experiment.
+        """
+        # TODO: allow resolution to be DataArray or SampleModel
+
+        if resolution is not None and not isinstance(resolution, SampleModel):
+            raise TypeError("Resolution model must be an instance of SampleModel.")
+        self._resolution_model = resolution
+
+        if self._resolution_model is not None:
+            self.normalize_resolution()
+
+    def fix_resolution_parameters(self):
+        """ Fix all parameters in the resolution model.
+        """
+        if self._resolution_model is not None:
+            for param in self._resolution_model.get_parameters():
+                param.fixed = True
+
+    def normalize_resolution(self):
+        """ Normalize the resolution model to have an area of 1.
+        """
+        self._resolution_model.normalize_area()
+
+    def set_offset(self, offset: float,unit):
+        # TODO: handle units properly
+        self._offset.value = offset
+
+    def fix_offset(self, fix: bool = True):
+        self._offset.fixed = fix
 
     def calculate_theory(self, x) -> np.ndarray:
         """
@@ -109,7 +108,6 @@ class Analysis(AnalysisBase):
         return y
     
     def calculate_individual_components(self, x=None,add_background=True) -> dict:
-        # TODO: add/check handling of detailed balance
         """
         Calculate the individual components of the theory model.
 
@@ -155,55 +153,6 @@ class Analysis(AnalysisBase):
 
         return components
 
-    
-
-    def set_background_model(self, background:SampleModel):
-        """ Set the model for the background.
-        Args:
-            background (SampleModel): The background model.
-        """
-        if not isinstance(background, SampleModel):
-            raise TypeError("Background model must be an instance of SampleModel.")
-        self._background_model = background
-
-    def set_resolution_model(self, resolution:SampleModel):
-        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
-        Args:
-            resolution (SampleModel): The resolution model to be used in the experiment.
-        """
-        # TODO: allow resolution to be DataArray or SampleModel
-
-        if resolution is not None and not isinstance(resolution, SampleModel):
-            raise TypeError("Resolution model must be an instance of SampleModel.")
-        self._resolution_model = resolution
-
-        if self._resolution_model is not None:
-            self.normalize_resolution()
-
-    def fix_resolution_parameters(self):
-        """ Fix all parameters in the resolution model.
-        """
-        if self._resolution_model is not None:
-            for param in self._resolution_model.get_parameters():
-                param.fixed = True
-
-    def normalize_resolution(self):
-        """ Normalize the resolution model to have an area of 1.
-        """
-        self._resolution_model.normalize_area()
-
-
-
-    def set_offset(self, offset: float):
-        # TODO: handle units properly
-        
-        self._offset.value= offset
-
-    def fix_offset(self, fix: bool = True):
-
-        self._offset.fixed = fix
-
-
     def fit(self):
 
         x, y, e = self._experiment.extract_xye_data(self._experiment._data)
@@ -235,6 +184,43 @@ class Analysis(AnalysisBase):
 
         return fit_result
     
+    def plot_data_and_model(self, plot_individual_components: bool = False):
+        """
+        Plot the experimental data and the theoretical fit.
+
+        Args:
+            plot_individual_components (bool): If True, plots individual components of the theory model.
+        """
+        if self._experiment is None or self._theory is None:
+            raise RuntimeError("Experiment and theory must be set before plotting.")
+
+        if self._experiment._data is None:
+            raise RuntimeError("No data has been set in the experiment.")
+
+        # Extract data
+        x, y, e = self._experiment.extract_xye_data(self._experiment._data)
+
+        # Start plot
+        fig = plt.figure(figsize=(10, 6))
+        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None', markerfacecolor='none')
+
+        # Compute and plot fit
+        fit_y = self.calculate_theory(x)
+        plt.plot(x, fit_y, label='Model', color='red')
+
+        if plot_individual_components:
+            components=self.calculate_individual_components()
+            for name, y in components.items():
+                plt.plot(x, y, label=f' {name}', linestyle='--')
+
+        # Labels and legend
+        plt.xlabel('Energy (meV)')  # TODO: Handle units 
+        plt.ylabel('Intensity')
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+        return fig    
 
     def seed_from(
         self,
