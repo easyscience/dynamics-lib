@@ -56,22 +56,10 @@ class Analysis(AnalysisBase):
         fit_y = self.calculate_theory(x)
         plt.plot(x, fit_y, label='Fit', color='red')
 
-        # Plot individual components, shifted by offset
-        #TODO: handle resolution convolution
         if plot_individual_components:
-            for comp in self._theory.components.values():
-                # comp_y = comp.evaluate(x - shift)
-
-                if self._resolution_model is None:
-                    y = comp.evaluate(x- self._offset.value)
-                else:
-                    resolution_handler = ResolutionHandler()
-                    y = resolution_handler.convolve(x, comp, self._resolution_model, self._offset)
-                    # If detailed balance is used, calculate the detailed balance factor. TODO: This should be handled before convolution.
-                    if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunctionComponent):
-                        y*=self._theory.detailed_balance_factor(x- self._offset.value, self._theory._temperature.value)
-
-                plt.plot(x, y, label=f'Component: {comp.name}', linestyle='--')
+            components=self.calculate_individual_components()
+            for name, y in components.items():
+                plt.plot(x, y, label=f' {name}', linestyle='--')
 
         # Labels and legend
         plt.xlabel('Energy (meV)')  # TODO: Handle units 
@@ -145,8 +133,6 @@ class Analysis(AnalysisBase):
                 raise RuntimeError("No x values provided and no experiment data set.")
             x, _, _ = self._experiment.extract_xye_data(self._experiment._data)
 
-
-
         components = {}
 
         if self._resolution_model is not None:
@@ -156,7 +142,7 @@ class Analysis(AnalysisBase):
             if self._resolution_model is None:
                 components[name] = component.evaluate(x - self._offset.value)
             else:
-                components[name] = resolution_handler.convolve(x, component, self._resolution_model, self._offset)
+                components[name] = resolution_handler.convolve(x=x, sample_model=self._theory, resolution_model=self._resolution_model, offset=self._offset, selected_component_name=name)
 
             if add_background and self._background_model is not None:
                 components[name] += self._background_model.evaluate(x - self._offset.value)

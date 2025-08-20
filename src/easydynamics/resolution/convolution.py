@@ -22,7 +22,8 @@ class ResolutionHandler:
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Union[Parameter, float, None] = None,
         method: str = 'analytical',
-        upsample_factor: int = 0
+        upsample_factor: int = 0,
+        selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
         Convolve a sample model with a resolution model using analytical expressions or numerical FFT.
@@ -44,10 +45,10 @@ class ResolutionHandler:
         if method == 'analytical':
             if isinstance(sample_model,SampleModel) and sample_model._use_detailed_balance:
                 raise ValueError("Analytical convolution is not supported with detailed balance.")
-            return self._analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+            return self._analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor,selected_component_name)
         
         if method == 'numerical':
-            return self._numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+            return self._numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor,selected_component_name)
         
         if method not in ['analytical', 'numerical']:
             raise ValueError(f"Unknown convolution method: {method}. Choose from 'analytical', or 'numerical'.")
@@ -59,7 +60,8 @@ class ResolutionHandler:
         sample_model: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]],
         resolution_model: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]],
         offset: Union[Parameter, np.ndarray, None] = None,
-        upsample_factor: int = 5
+        upsample_factor: int = 5,
+        selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
         Numerical convolution using FFT with optional upsampling + extended range.
@@ -114,9 +116,9 @@ class ResolutionHandler:
             x_dense_resolution = np.linspace(-0.5 * span, 0.5 * span, len(x_dense))
         else:
             x_dense_resolution = x_dense
-
+        
         # Evaluate on dense grid
-        sample_vals = self._evaluate_any(sample_model, x_dense - off - off2 )
+        sample_vals = self._evaluate_any(sample_model, x_dense - off - off2, selected_component_name)
         resolution_vals = self._evaluate_any(resolution_model, x_dense_resolution)
 
         # Convolution
@@ -127,7 +129,8 @@ class ResolutionHandler:
         if isinstance(sample_model, SampleModel):
             for comp in sample_model.components.values():
                 if isinstance(comp, DeltaFunctionComponent):
-                    convolved += comp.area.value * self._evaluate_any(resolution_model, x_dense - off - comp.center.value)
+                    if selected_component_name is None or comp.name == selected_component_name:
+                        convolved += comp.area.value * self._evaluate_any(resolution_model, x_dense - off - comp.center.value)
         elif isinstance(sample_model, DeltaFunctionComponent):
             convolved += sample_model.area.value * self._evaluate_any(resolution_model, x_dense - off - sample_model.center.value)
 
@@ -151,7 +154,8 @@ class ResolutionHandler:
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Union[Parameter, float, None] = None,
-        upsample_factor: int = 5
+        upsample_factor: int = 5,
+        selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
         Convolve sample with resolution. Accepts SampleModel or single ModelComponent for each.
@@ -176,9 +180,11 @@ class ResolutionHandler:
         else:
             raise TypeError(f"Expected offset to be Parameter, float, or None, got {type(offset)}")
 
-
         # make into lists of components
-        sample_components = self._flatten_to_components(sample_model)
+        if selected_component_name is not None:
+            sample_components=self._flatten_to_components(sample_model[selected_component_name])
+        else:
+            sample_components = self._flatten_to_components(sample_model)
         resolution_components = self._flatten_to_components(resolution_model)
 
         total = np.zeros_like(x, dtype=float)
@@ -280,10 +286,12 @@ class ResolutionHandler:
             raise TypeError(f"Expected SampleModel or ModelComponent, got {type(m)}")
 
     @staticmethod
-    def _evaluate_any(m: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]], x: np.ndarray) -> np.ndarray:
+    def _evaluate_any(m: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]], x: np.ndarray, selected_component_name: Union[str, None] = None) -> np.ndarray:
         if callable(m):
             return m(x)
         if isinstance(m, (SampleModel, ModelComponent)):
+            if selected_component_name is not None:
+                return m.evaluate_component(x, name=selected_component_name)
             return m.evaluate(x)
         raise TypeError(f"Expected SampleModel, ModelComponent, or callable, got {type(m)}")
 
