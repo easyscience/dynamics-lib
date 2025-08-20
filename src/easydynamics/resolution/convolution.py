@@ -120,37 +120,51 @@ class ResolutionHandler:
             off=offset
         else:
             raise TypeError(f"Expected offset to be Parameter, float, or None, got {type(offset)}")
-
+        
+        dx= (x_dense[1] - x_dense[0])
+        span = x_dense.max() - x_dense.min()
         # Handle offset for even length of x in convolution
         if len(x_dense) %2  == 0:
-            off2 = -0.5 * (x_dense[1] - x_dense[0])
+            off2 = -0.5 * dx
         else:
             off2 = 0.0
 
-        span = x_dense.max() - x_dense.min()
         # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
         if not np.isclose(x_dense.mean(), 0.0):
             x_dense_resolution = np.linspace(-0.5 * span, 0.5 * span, len(x_dense))
         else:
             x_dense_resolution = x_dense
         
-        LARGE_WIDTH_THRESHOLD=0.2 #if a component is wider than ~20% of the x range, we have problems
+        LARGE_WIDTH_THRESHOLD=0.2 #if a component is wider than ~20% of the x range, we have problems. 
+        SMALL_WIDTH_THRESHOLD=2.0 # if a component is narrower than ~2 times the bin size, we have problems
         if isinstance(sample_model, SampleModel):
             for comp in sample_model.components.values():
-                if hasattr(comp, 'width') and comp.width.value > LARGE_WIDTH_THRESHOLD * span:
-                    Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+                if hasattr(comp, 'width'):
+                    if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
+                        Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+                    if comp.width.value < SMALL_WIDTH_THRESHOLD*dx:
+                        Warning("The width of the sample model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
         else:
-            if hasattr(sample_model, 'width') and sample_model.width.value > LARGE_WIDTH_THRESHOLD * span:
-                Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
+            if hasattr(sample_model, 'width'):
+                if sample_model.width.value > LARGE_WIDTH_THRESHOLD * span:
+                    Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
+                if sample_model.width.value < SMALL_WIDTH_THRESHOLD * dx:
+                    Warning("The width of the sample model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
 
-        # Also check the resolution model
+        # also check the resolution model
         if isinstance(resolution_model, SampleModel):
             for comp in resolution_model.components.values():
-                if hasattr(comp, 'width') and comp.width.value > 0.2 * span:
-                    Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+                if hasattr(comp, 'width'):
+                    if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
+                        Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
+                    if comp.width.value < SMALL_WIDTH_THRESHOLD * dx:
+                        Warning("The width of the resolution model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
         else:
-            if hasattr(resolution_model, 'width') and resolution_model.width.value > 0.2 * span:
-                Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
+            if hasattr(resolution_model, 'width'):
+                if resolution_model.width.value > LARGE_WIDTH_THRESHOLD * span:
+                    Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
+                if resolution_model.width.value < SMALL_WIDTH_THRESHOLD * dx:
+                    Warning("The width of the resolution model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
 
         # Evaluate on dense grid
         sample_vals = self._evaluate_any(sample_model, x_dense - off - off2, selected_component_name)
@@ -190,6 +204,7 @@ class ResolutionHandler:
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Union[Parameter, float, None] = None,
         upsample_factor: int = 5,
+        extension_factor: float = 0.2,
         selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
@@ -247,7 +262,8 @@ class ResolutionHandler:
                     sample_model=s,                 # single component
                     resolution_model=rsum,          # sum of components that cannot be handled analytically
                     offset=offset,
-                    upsample_factor=upsample_factor
+                    upsample_factor=upsample_factor,
+                    extension_factor=extension_factor,
                 )
 
         return total

@@ -362,10 +362,10 @@ class Job(JobBase):
         energy_max = energy_max * sc.Unit('meV')
 
         # Styling
-        linestyle = {'Data': 'none', 'Fit': '-'}
-        marker = {'Data': 'o', 'Fit': 'none'}
-        markerfacecolor = {'Data': 'none', 'Fit': 'none'}
-        color = {'Data': 'black', 'Fit': 'red'}
+        linestyle = {'Data': 'none', 'Model': '-'}
+        marker = {'Data': 'o', 'Model': 'none'}
+        markerfacecolor = {'Data': 'none', 'Model': 'none'}
+        color = {'Data': 'black', 'Model': 'red'}
 
         if plot_individual_components and component_arrays:
             for name in component_arrays:
