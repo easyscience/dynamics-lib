@@ -20,7 +20,7 @@ class ResolutionHandler:
         x: np.ndarray,
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
-        offset: Union[Parameter, np.ndarray, None] = None,
+        offset: Union[Parameter, float, None] = None,
         method: str = 'analytical',
         upsample_factor: int = 0
     ) -> np.ndarray:
@@ -60,6 +60,8 @@ class ResolutionHandler:
           - Callable: f(x: np.ndarray) -> np.ndarray
         """
 
+
+        #TODO: Handle when x is even.
         #TODO: Add support for more span for the dense grid
         def is_uniform(xarr, rtol=1e-5):
             dx = np.diff(xarr)
@@ -82,14 +84,19 @@ class ResolutionHandler:
             off=0.0
         elif isinstance(offset, Parameter):
             off=offset.value
-        elif isinstance(offset, np.ndarray):
+        elif isinstance(offset, float):
             off=offset
         else:
-            raise TypeError(f"Expected offset to be Parameter, np.ndarray, or None, got {type(offset)}")
+            raise TypeError(f"Expected offset to be Parameter, float, or None, got {type(offset)}")
 
+        if len(x_dense) %2  == 0:
+            off2 = -0.5 * (x_dense[1] - x_dense[0])
+        else:
+            off2 = 0.0
+        print(off2)
 
         # Evaluate on dense grid
-        sample_vals = self._evaluate_any(sample_model, x_dense - off)
+        sample_vals = self._evaluate_any(sample_model, x_dense - off - off2)
         resolution_vals = self._evaluate_any(resolution_model, x_dense)
 
         # Convolution
@@ -100,16 +107,16 @@ class ResolutionHandler:
         if isinstance(sample_model, SampleModel):
             for comp in sample_model.components.values():
                 if isinstance(comp, DeltaFunctionComponent):
-                    convolved += comp.area.value * self._evaluate_any(resolution_model, x_dense-off)
+                    convolved += comp.area.value * self._evaluate_any(resolution_model, x_dense - off - comp.center.value)
         elif isinstance(sample_model, DeltaFunctionComponent):
-            convolved += sample_model.area.value * self._evaluate_any(resolution_model, x_dense - off)
+            convolved += sample_model.area.value * self._evaluate_any(resolution_model, x_dense - off - sample_model.center.value)
 
         if isinstance(resolution_model, SampleModel):
             for comp in resolution_model.components.values():
                 if isinstance(comp, DeltaFunctionComponent):
-                    convolved += comp.area.value * self._evaluate_any(sample_model, x_dense - off)
+                    convolved += comp.area.value * self._evaluate_any(sample_model, x_dense - off - comp.center.value)
         elif isinstance(resolution_model, DeltaFunctionComponent):
-            convolved += resolution_model.area.value * self._evaluate_any(sample_model, x_dense - off)
+            convolved += resolution_model.area.value * self._evaluate_any(sample_model, x_dense - off - resolution_model.center.value)
 
         #TODO: if both resolution and sample are delta functions, we should let the user know that they are wrong.
 
@@ -123,7 +130,7 @@ class ResolutionHandler:
         x: np.ndarray,
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
-        offset: Union[Parameter, None] = None,
+        offset: Union[Parameter, float, None] = None,
         upsample_factor: int = 5
     ) -> np.ndarray:
         """
@@ -138,10 +145,10 @@ class ResolutionHandler:
             off=0.0
         elif isinstance(offset, Parameter):
             off=offset.value
-        elif isinstance(offset, np.ndarray):
+        elif isinstance(offset, float):
             off=offset
         else:
-            raise TypeError(f"Expected offset to be Parameter, np.ndarray, or None, got {type(offset)}")
+            raise TypeError(f"Expected offset to be Parameter, float, or None, got {type(offset)}")
 
 
         # make into lists of components
