@@ -32,6 +32,14 @@ class ResolutionHandler:
         x = np.asarray(x, dtype=float)
         if x.ndim != 1 or not np.all(np.isfinite(x)):
             raise ValueError("`x` must be a 1D finite array.")
+        
+        if isinstance(sample_model,SampleModel):
+            if not sample_model.components:
+                raise ValueError("SampleModel must have at least one component.")
+            
+        if isinstance(resolution_model,SampleModel):
+            if not resolution_model.components:
+                raise ValueError("ResolutionModel must have at least one component.")
 
         if method == 'analytical':
             if isinstance(sample_model,SampleModel) and sample_model._use_detailed_balance:
@@ -59,9 +67,12 @@ class ResolutionHandler:
           - ModelComponent
           - Callable: f(x: np.ndarray) -> np.ndarray
         """
+        
+        x = np.asarray(x, dtype=float)
+        if x.ndim != 1 or not np.all(np.isfinite(x)):
+            raise ValueError("`x` must be a 1D finite array.")
 
 
-        #TODO: Handle when x is even.
         #TODO: Add support for more span for the dense grid
         def is_uniform(xarr, rtol=1e-5):
             dx = np.diff(xarr)
@@ -89,15 +100,22 @@ class ResolutionHandler:
         else:
             raise TypeError(f"Expected offset to be Parameter, float, or None, got {type(offset)}")
 
+        # Handle offset for even length of x in convolution
         if len(x_dense) %2  == 0:
             off2 = -0.5 * (x_dense[1] - x_dense[0])
         else:
             off2 = 0.0
-        print(off2)
+
+        # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
+        if not np.isclose(x_dense.mean(), 0.0):
+            span = x_dense.max() - x_dense.min()
+            x_dense_resolution = np.linspace(-0.5 * span, 0.5 * span, len(x_dense))
+        else:
+            x_dense_resolution = x_dense
 
         # Evaluate on dense grid
-        sample_vals = self._evaluate_any(sample_model, x_dense - off - off2)
-        resolution_vals = self._evaluate_any(resolution_model, x_dense)
+        sample_vals = self._evaluate_any(sample_model, x_dense - off - off2 )
+        resolution_vals = self._evaluate_any(resolution_model, x_dense_resolution)
 
         # Convolution
         convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
@@ -141,6 +159,12 @@ class ResolutionHandler:
           (passing a callable for the summed resolution).
         - Handles delta functions analytically.
         """
+
+        
+        x = np.asarray(x, dtype=float)
+        if x.ndim != 1 or not np.all(np.isfinite(x)):
+            raise ValueError("`x` must be a 1D finite array.")
+        
         if offset is None:
             off=0.0
         elif isinstance(offset, Parameter):
