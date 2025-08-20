@@ -488,3 +488,82 @@ class TestConvolution:
         #THEN
         with pytest.raises(ValueError, match="ResolutionModel must have at least one component."):
             resolution_handler.convolve(x=np.array([0, 1, 2]), sample_model=sample_model, resolution_model=resolution_model)
+
+
+    def test_numerical_convolution_wide_sample_peak_gives_warning(self):
+        #WHEN
+        x=np.linspace(-2, 2, 20001)
+
+        sample_gauss1 = GaussianComponent(center=0.1, width=1.9, area=2,name="SampleGauss")
+        resolution_gauss = GaussianComponent(center=0.3, width=0.5, area=4)
+
+        sample= SampleModel(name="SampleModel")
+        sample.add_component(sample_gauss1)
+
+        resolution = SampleModel(name="ResolutionModel")
+        resolution.add_component(resolution_gauss)
+
+        resolution_handler = ResolutionHandler()
+
+        # #THEN EXPECT
+        with pytest.warns(UserWarning, match=r"The width of the sample model component 'SampleGauss' \(1.9\) is large"):
+            resolution_handler.convolve(x=x, sample_model=sample, resolution_model=resolution, method='numerical',upsample_factor=0)
+
+    def test_numerical_convolution_wide_resolution_peak_gives_warning(self):
+        #WHEN
+        x=np.linspace(-2, 2, 20001)
+
+        sample_gauss1 = GaussianComponent(center=0.1, width=0.1, area=2,name="SampleGauss")
+        resolution_gauss = GaussianComponent(center=0.3, width=1.9, area=4,name='ResolutionGauss')
+
+        sample= SampleModel(name="SampleModel")
+        sample.add_component(sample_gauss1)
+
+        resolution = SampleModel(name="ResolutionModel")
+        resolution.add_component(resolution_gauss)
+
+        resolution_handler = ResolutionHandler()
+
+        # #THEN EXPECT
+        with pytest.warns(UserWarning, match=r"The width of the resolution model component 'ResolutionGauss' \(1.9\) is large"):
+            resolution_handler.convolve(x=x, sample_model=sample, resolution_model=resolution, method='numerical',upsample_factor=0)
+
+
+    def test_numerical_convolution_narrow_sample_peak_gives_warning(self):
+        #WHEN
+        x=np.linspace(-2, 2, 201)
+
+        sample_gauss1 = GaussianComponent(center=0.1, width=1e-3, area=2,name="SampleGauss")
+        resolution_gauss = GaussianComponent(center=0.3, width=0.5, area=4)
+
+        sample= SampleModel(name="SampleModel")
+        sample.add_component(sample_gauss1)
+
+        resolution = SampleModel(name="ResolutionModel")
+        resolution.add_component(resolution_gauss)
+
+        resolution_handler = ResolutionHandler()
+
+        # #THEN EXPECT
+        with pytest.warns(UserWarning, match=r"The width of the sample model component 'SampleGauss' \(0.001\) is small"):
+            resolution_handler.convolve(x=x, sample_model=sample, resolution_model=resolution, method='numerical',upsample_factor=0)
+
+
+    def test_numerical_convolution_narrow_resolution_peak_gives_warning(self):
+        #WHEN
+        x=np.linspace(-2, 2, 201)
+
+        sample_gauss1 = GaussianComponent(center=0.1, width=0.2, area=2,name="SampleGauss")
+        resolution_gauss = GaussianComponent(center=0.3, width=1e-3, area=4,name="ResolutionGauss")
+
+        sample= SampleModel(name="SampleModel")
+        sample.add_component(sample_gauss1)
+
+        resolution = SampleModel(name="ResolutionModel")
+        resolution.add_component(resolution_gauss)
+
+        resolution_handler = ResolutionHandler()
+
+        # #THEN EXPECT
+        with pytest.warns(UserWarning, match=r"The width of the resolution model component 'ResolutionGauss' \(0.001\) is small"):
+            resolution_handler.convolve(x=x, sample_model=sample, resolution_model=resolution, method='numerical',upsample_factor=0)

@@ -12,6 +12,7 @@ from easydynamics.sample import SampleModel
 
 from easyscience.variable import Parameter
 
+import warnings
 
 class ResolutionHandler:
 
@@ -135,36 +136,9 @@ class ResolutionHandler:
         else:
             x_dense_resolution = x_dense
         
-        LARGE_WIDTH_THRESHOLD=0.2 #if a component is wider than ~20% of the x range, we have problems. 
-        SMALL_WIDTH_THRESHOLD=2.0 # if a component is narrower than ~2 times the bin size, we have problems
-        if isinstance(sample_model, SampleModel):
-            for comp in sample_model.components.values():
-                if hasattr(comp, 'width'):
-                    if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
-                        Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
-                    if comp.width.value < SMALL_WIDTH_THRESHOLD*dx:
-                        Warning("The width of the sample model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
-        else:
-            if hasattr(sample_model, 'width'):
-                if sample_model.width.value > LARGE_WIDTH_THRESHOLD * span:
-                    Warning("The width of the sample model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
-                if sample_model.width.value < SMALL_WIDTH_THRESHOLD * dx:
-                    Warning("The width of the sample model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(sample_model.name))
-
-        # also check the resolution model
-        if isinstance(resolution_model, SampleModel):
-            for comp in resolution_model.components.values():
-                if hasattr(comp, 'width'):
-                    if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
-                        Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
-                    if comp.width.value < SMALL_WIDTH_THRESHOLD * dx:
-                        Warning("The width of the resolution model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(comp.name))
-        else:
-            if hasattr(resolution_model, 'width'):
-                if resolution_model.width.value > LARGE_WIDTH_THRESHOLD * span:
-                    Warning("The width of the resolution model component {} is large compared to the span of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
-                if resolution_model.width.value < SMALL_WIDTH_THRESHOLD * dx:
-                    Warning("The width of the resolution model component {} is very small compared to the spacing of the input array. This may lead to inaccuracies in the convolution.".format(resolution_model.name))
+        # Give warnings if peaks are very wide or very narrow
+        self._check_width_thresholds(sample_model, span, dx, "sample model")
+        self._check_width_thresholds(resolution_model, span, dx, "resolution model")
 
         # Evaluate on dense grid
         sample_vals = self._evaluate_any(sample_model, x_dense - off - off2, selected_component_name)
@@ -346,4 +320,36 @@ class ResolutionHandler:
             return m.evaluate(x)
         raise TypeError(f"Expected SampleModel, ModelComponent, or callable, got {type(m)}")
 
-
+    @staticmethod
+    def _check_width_thresholds(model, span, dx, model_type):
+        """
+        Helper function to check and warn about width thresholds for a given model or component.
+        Parameters:
+        - model: ModelComponent or SampleModel
+        - span: Range of the input data
+        - dx: Bin spacing of the input data
+        - model_type: 'sample model' or 'resolution model' for proper warning messages
+        """
+        LARGE_WIDTH_THRESHOLD = 0.1  # Threshold for large widths compared to span
+        SMALL_WIDTH_THRESHOLD = 0.5  # Threshold for small widths compared to bin spacing
+        
+        # Handle SampleModel or ModelComponent
+        if isinstance(model, SampleModel):
+            components = model.components.values()
+        else:
+            components = [model]  # Treat single ModelComponent as a list of one
+        
+        for comp in components:
+            if hasattr(comp, 'width'):
+                if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
+                    warnings.warn(
+                        f"The width of the {model_type} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
+                        f"array ({span}). This may lead to inaccuracies in the convolution.",
+                        UserWarning
+                    )
+                if comp.width.value < SMALL_WIDTH_THRESHOLD * dx:
+                    warnings.warn(
+                        f"The width of the {model_type} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
+                        f"array ({dx}). This may lead to inaccuracies in the convolution.",
+                        UserWarning
+                    )
