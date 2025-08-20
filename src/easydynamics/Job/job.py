@@ -85,7 +85,6 @@ class Job(JobBase):
                 require_same_units=True,
                 convert_units=False):
             """
-            Simple, meta-driven fitter.
 
             `_analysis_meta` MUST be set and correct:
                 - 'dims': tuple of nesting order (outer -> inner), e.g. ('Temperature','Q') or ('Q',)
@@ -94,6 +93,11 @@ class Job(JobBase):
 
             if not self._analysis:
                 raise RuntimeError("No analyses to fit. Build or generate analyses first.")
+            
+            if len(self._analysis) == 1:
+                self._analysis[0].fit()
+                return
+
             if not self._analysis_meta or 'dims' not in self._analysis_meta or 'sizes' not in self._analysis_meta:
                 raise RuntimeError("Missing _analysis_meta. Call generate_analysis_for_cuts() or set_analysis_meta().")
 

@@ -1,18 +1,16 @@
 import pytest
 import numpy as np
-from scipy.integrate import simpson
 
 from scipy.special import voigt_profile
 
 from easyscience.variable import Parameter
 from easydynamics.sample import SampleModel, GaussianComponent, LorentzianComponent, DeltaFunctionComponent
-from easydynamics.sample.components import ModelComponent
 
 
 from easydynamics.resolution import ResolutionHandler
 
  
-
+# Numerical convolutions are not very accurate
 NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE = 1e-6
 NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE = 1e-5
 
@@ -233,7 +231,6 @@ class TestConvolution:
         np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
 
 # Test convolution of SampleModel
-
     @pytest.mark.parametrize(
         "offset_obj, expected_shift",
         [
@@ -248,7 +245,7 @@ class TestConvolution:
         ["analytical", "numerical"],
         ids=["analytical", "numerical"]
     )
-    def test_models_gauss_gauss_gauss(self, x, offset_obj, expected_shift, method):
+    def test_model_gauss_gauss_resolution_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
         sample_gauss1 = GaussianComponent(center=0.1, width=0.3, area=2,name="SampleGauss1")
         sample_gauss2 = GaussianComponent(center=0.2, width=0.4, area=3,name="SampleGauss2")
@@ -279,6 +276,33 @@ class TestConvolution:
             expected_area2 * np.exp(-0.5 * ((x - expected_center2) / expected_width2)**2) / (np.sqrt(2 * np.pi) * expected_width2)
         )
         np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
+
+    @pytest.mark.parametrize(
+        "method",
+        ["analytical", "numerical"],
+        ids=["analytical", "numerical"]
+    )
+    def test_model_lorentzian_delta_resolution_gauss(self, x, method):
+        #WHEN
+        sample_lorentzian = LorentzianComponent(center=0.1, width=0.3, area=2, name="SampleLorentzian")
+        sample_delta = DeltaFunctionComponent(center=0.5, area=4, name="SampleDelta")
+        resolution_gauss = GaussianComponent(center=-0.3, width=0.4, area=3, name="ResolutionGauss")
+        sample = SampleModel(name="SampleModel")
+        sample.add_component(sample_lorentzian)
+        sample.add_component(sample_delta)
+        resolution = SampleModel(name="ResolutionModel")
+        resolution.add_component(resolution_gauss)
+        resolution_handler = ResolutionHandler()
+        # THEN
+        x = np.linspace(-10, 10, 20001)
+        convolution = resolution_handler.convolve(x=x, sample_model=sample, resolution_model=resolution, method=method, upsample_factor=5)
+
+        #EXPECT: Combine Gaussian, Lorentzian, and Delta functions contributions
+        expected_voigt = 2*3*voigt_profile(x-(0.1-0.3),0.4,0.3)
+        expected_gauss_center = -0.3+0.5
+        expected_gauss = 3 *4* np.exp(-0.5 * ((x - (expected_gauss_center)) / 0.4)**2) / (np.sqrt(2 * np.pi) * 0.4)
+        expected_result = expected_voigt + expected_gauss
+        np.testing.assert_allclose(convolution, expected_result, atol = NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE, rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE)
 
 # Test numerical convolution
     @pytest.mark.parametrize(
@@ -433,7 +457,6 @@ class TestConvolution:
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
             resolution_handler.convolve(x=np.array([1, 2, np.inf]), sample_model=sample_model, resolution_model=resolution_model)
 
-
     def test_numerical_convolve_requires_uniform_grid_if_no_upsample(self):
         #WHEN
         x = np.array([0, 1, 2, 4, 5])  # Non-uniform grid
@@ -445,3 +468,23 @@ class TestConvolution:
         #THEN
         with pytest.raises(ValueError, match="Input array `x` must be uniformly spaced if upsample_factor = 0."):
             resolution_handler.convolve(x=x, sample_model=sample_model, resolution_model=resolution_model, method='numerical', upsample_factor=0)
+
+    def test_sample_model_must_have_components(self):
+        #WHEN
+        sample_model = SampleModel(name="SampleModel")
+        resolution_model = SampleModel(name="ResolutionModel")
+        resolution_model.add_component(GaussianComponent(center=0.2, width=0.3, area=3))
+        resolution_handler = ResolutionHandler()
+        #THEN
+        with pytest.raises(ValueError, match="SampleModel must have at least one component."):
+            resolution_handler.convolve(x=np.array([0, 1, 2]), sample_model=sample_model, resolution_model=resolution_model)
+
+    def test_resolution_model_must_have_components(self):
+        #WHEN
+        sample_model = SampleModel(name="SampleModel")
+        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        resolution_model = SampleModel(name="ResolutionModel")
+        resolution_handler = ResolutionHandler()
+        #THEN
+        with pytest.raises(ValueError, match="ResolutionModel must have at least one component."):
+            resolution_handler.convolve(x=np.array([0, 1, 2]), sample_model=sample_model, resolution_model=resolution_model)

@@ -66,7 +66,7 @@ class Analysis(AnalysisBase):
                     y = comp.evaluate(x- self._offset.value)
                 else:
                     resolution_handler = ResolutionHandler()
-                    y = resolution_handler.numerical_convolve(x, comp, self._resolution_model, self._offset)
+                    y = resolution_handler.convolve(x, comp, self._resolution_model, self._offset)
                     # If detailed balance is used, calculate the detailed balance factor. TODO: This should be handled before convolution.
                     if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunctionComponent):
                         y*=self._theory.detailed_balance_factor(x- self._offset.value, self._theory._temperature.value)
@@ -113,7 +113,7 @@ class Analysis(AnalysisBase):
             y = self._theory.evaluate(x- self._offset.value)
         else:
             resolution_handler = ResolutionHandler()
-            y = resolution_handler.numerical_convolve(x, self._theory, self._resolution_model, self._offset)
+            y = resolution_handler.convolve(x, self._theory, self._resolution_model, self._offset)
 
         if self._background_model is not None:
             y += self._background_model.evaluate(x)
@@ -121,6 +121,7 @@ class Analysis(AnalysisBase):
         return y
     
     def calculate_individual_components(self, x=None,add_background=True) -> dict:
+        # TODO: add/check handling of detailed balance
         """
         Calculate the individual components of the theory model.
 
@@ -155,7 +156,7 @@ class Analysis(AnalysisBase):
             if self._resolution_model is None:
                 components[name] = component.evaluate(x - self._offset.value)
             else:
-                components[name] = resolution_handler.numerical_convolve(x, component, self._resolution_model, self._offset)
+                components[name] = resolution_handler.convolve(x, component, self._resolution_model, self._offset)
 
             if add_background and self._background_model is not None:
                 components[name] += self._background_model.evaluate(x - self._offset.value)

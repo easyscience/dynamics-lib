@@ -44,14 +44,16 @@ class ResolutionHandler:
         if method == 'analytical':
             if isinstance(sample_model,SampleModel) and sample_model._use_detailed_balance:
                 raise ValueError("Analytical convolution is not supported with detailed balance.")
-            return self.analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+            return self._analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+        
         if method == 'numerical':
-            return self.numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+            return self._numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor)
+        
         if method not in ['analytical', 'numerical']:
             raise ValueError(f"Unknown convolution method: {method}. Choose from 'analytical', or 'numerical'.")
 
 
-    def numerical_convolve(
+    def _numerical_convolve(
         self,
         x: np.ndarray,
         sample_model: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]],
@@ -143,7 +145,7 @@ class ResolutionHandler:
         else:
             return convolved
 
-    def analytical_convolve(
+    def _analytical_convolve(
         self,
         x: np.ndarray,
         sample_model: Union[SampleModel, ModelComponent],
@@ -199,7 +201,7 @@ class ResolutionHandler:
                         out += rr.evaluate(xx)
                     return out
 
-                total += self.numerical_convolve(
+                total += self._numerical_convolve(
                     x=x,
                     sample_model=s,                 # single component
                     resolution_model=rsum,          # sum of components that cannot be handled analytically
