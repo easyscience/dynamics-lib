@@ -23,11 +23,13 @@ class ResolutionHandler:
         offset: Union[Parameter, float, None] = None,
         method: str = 'analytical',
         upsample_factor: int = 0,
+        extension_factor: float = 0.2,
         selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
         Convolve a sample model with a resolution model using analytical expressions or numerical FFT.
         Accepts SampleModel or ModelComponent for both sample and resolution.
+        The analytical method silently falls back to numerical convolution if no analytical expression is found.
         """
 
         x = np.asarray(x, dtype=float)
@@ -45,11 +47,23 @@ class ResolutionHandler:
         if method == 'analytical':
             if isinstance(sample_model,SampleModel) and sample_model._use_detailed_balance:
                 raise ValueError("Analytical convolution is not supported with detailed balance.")
-            return self._analytical_convolve(x, sample_model, resolution_model, offset, upsample_factor,selected_component_name)
-        
+            return self._analytical_convolve(x=x, 
+                                             sample_model=sample_model, 
+                                             resolution_model=resolution_model, 
+                                             offset=offset, 
+                                             upsample_factor=upsample_factor, 
+                                             extension_factor=extension_factor, 
+                                             selected_component_name=selected_component_name)
+
         if method == 'numerical':
-            return self._numerical_convolve(x, sample_model, resolution_model, offset, upsample_factor,selected_component_name)
-        
+            return self._numerical_convolve(x=x, 
+                                             sample_model=sample_model, 
+                                             resolution_model=resolution_model, 
+                                             offset=offset, 
+                                             upsample_factor=upsample_factor, 
+                                             extension_factor=extension_factor, 
+                                             selected_component_name=selected_component_name)
+
         if method not in ['analytical', 'numerical']:
             raise ValueError(f"Unknown convolution method: {method}. Choose from 'analytical', or 'numerical'.")
 
@@ -61,6 +75,7 @@ class ResolutionHandler:
         resolution_model: Union[SampleModel, ModelComponent, Callable[[np.ndarray], np.ndarray]],
         offset: Union[Parameter, np.ndarray, None] = None,
         upsample_factor: int = 5,
+        extension_factor: float = 0.2,
         selected_component_name: Union[str, None] = None
     ) -> np.ndarray:
         """
@@ -70,14 +85,16 @@ class ResolutionHandler:
           - SampleModel
           - ModelComponent
           - Callable: f(x: np.ndarray) -> np.ndarray
+        offset: Union[Parameter, np.ndarray, None]: The offset on the x axis
+        upsample_factor: int: The factor by which to upsample the input array to improve resolution
+        extension_factor: float: The factor by which to extend the range of the input array to improve accuracy at the edges
+        selected_component_name: Union[str, None]: If provided, the name of the component to be selected for evaluation
         """
         
         x = np.asarray(x, dtype=float)
         if x.ndim != 1 or not np.all(np.isfinite(x)):
             raise ValueError("`x` must be a 1D finite array.")
 
-
-        #TODO: Add support for more span for the dense grid
         def is_uniform(xarr, rtol=1e-5):
             dx = np.diff(xarr)
             return np.allclose(dx, dx[0], rtol=rtol)
@@ -90,7 +107,7 @@ class ResolutionHandler:
         else:
             x_min, x_max = x.min(), x.max()
             span = (x_max - x_min)
-            extra = 0.2 * span
+            extra = extension_factor * span
             extended_min = x_min - extra
             extended_max = x_max + extra
             num_points = len(x) * upsample_factor
