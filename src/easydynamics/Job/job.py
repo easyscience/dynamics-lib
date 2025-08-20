@@ -80,6 +80,25 @@ class Job(JobBase):
         if self._theory is not None:
             self._analysis[-1].set_theory(self._theory)
 
+        # Update analysis_meta
+        if self._analysis_meta is None:
+            self._analysis_meta = {
+                'dims': (),
+                'sizes': {},
+            }
+
+        # Generate metadata dynamically
+        current_dims = self._experiment._data.data.dims if self._experiment is not None else []
+        energy_dim = 'energy'
+
+        # Exclude the 'energy' dimension and build metadata for other dimensions
+        dims_to_track = [d for d in current_dims if d != energy_dim]
+        sizes_to_track = {d: self._experiment._data.data.sizes[d] for d in dims_to_track if self._experiment is not None}
+
+        # Update _analysis_meta for dimensionality and sizes
+        self._analysis_meta['dims'] = tuple(dims_to_track)
+        self._analysis_meta['sizes'] = sizes_to_track            
+
     def fit(self,
                 sequential=None,
                 *,

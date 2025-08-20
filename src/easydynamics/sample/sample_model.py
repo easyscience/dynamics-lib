@@ -310,6 +310,65 @@ class SampleModel(ObjBase):
         """
         return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
     
+    def fix_all_parameters(self):
+        """
+        Fix all unfixed parameters in the model.
+        """
+        for param in self.get_parameters():
+            param.fixed = True
+
+    def free_all_parameters(self):
+        """
+        Free all fixed parameters in the model.
+        """
+        for param in self.get_parameters():
+            param.fixed = False
+
+    def fix_all_component_parameters(self,component_name):
+        """
+        Fix all unfixed parameters in the specified component.
+        """
+        if component_name not in self.components:
+            raise ValueError(f"Component '{component_name}' not found.")
+        
+        self.components[component_name].fix_all_parameters()
+
+    def free_all_component_parameters(self, component_name):
+        """
+        Free all fixed parameters in the specified component.
+        """
+        if component_name not in self.components:
+            raise ValueError(f"Component '{component_name}' not found.")
+
+        self.components[component_name].free_all_parameters()
+
+    def fix_component_parameter(self,component_name,parameter_name):
+        """
+        Fix a specific parameter in the specified component.
+        """
+        if component_name not in self.components:
+            raise ValueError(f"Component '{component_name}' not found.")
+
+        component = self.components[component_name]
+        param = component.get_parameter(parameter_name)
+        if param is None:
+            raise ValueError(f"Parameter '{parameter_name}' not found in component '{component_name}'.")
+
+        param.fixed = True
+
+    def free_component_parameter(self, component_name, parameter_name):
+        """
+        Free a specific parameter in the specified component.
+        """
+        if component_name not in self.components:
+            raise ValueError(f"Component '{component_name}' not found.")
+
+        component = self.components[component_name]
+        param = component.get_parameter(parameter_name)
+        if param is None:
+            raise ValueError(f"Parameter '{parameter_name}' not found in component '{component_name}'.")
+
+        param.fixed = False
 
     def update_values_from(
         self,

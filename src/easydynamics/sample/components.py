@@ -28,6 +28,15 @@ class ModelComponent(ObjBase):
         for p in self.get_parameters():
             p.fixed = False
 
+    def get_parameter(self,parameter_name):
+        """
+        Get a specific parameter by name.
+        """
+        for p in self.get_parameters():
+            if p.name == parameter_name:
+                return p
+        raise ValueError(f"Parameter '{parameter_name}' not found.")
+
     def convert_unit(self, unit):
         """
         Convert the unit of the Parameters in the component.
@@ -50,6 +59,18 @@ class ModelComponent(ObjBase):
 
         Returns:
             np.ndarray: Evaluated function values.
+        """
+        pass
+
+    @abstractmethod
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+
+        Returns
+        -------
+        List[Parameter]
+            List of parameters in the component.
         """
         pass
 
