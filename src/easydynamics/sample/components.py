@@ -7,6 +7,8 @@ from scipy.special import voigt_profile
 from easyscience.variable import Parameter
 from easyscience.base_classes import ObjBase
 
+import warnings
+
 #TODO: Allow specification of units for parameters in components
 
 class ModelComponent(ObjBase):
@@ -16,7 +18,7 @@ class ModelComponent(ObjBase):
 
     def __init__(self, name='ModelComponent'):
         super().__init__(name=name)
-        self.unit=None  # Default unit, can be set later
+        self.unit=None  
 
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
@@ -100,7 +102,7 @@ class ModelComponent(ObjBase):
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
         self.width.convert_unit(unit)
-        self.unit = unit  # Update the unit of the component
+        self.unit = unit  
 
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
@@ -153,7 +155,7 @@ class GaussianComponent(ModelComponent):
         if width <= 0:
             raise ValueError("Width must be greater than 0 for Gaussian.")
         if area < 0:
-            raise Warning("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
+            warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
         
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
@@ -172,7 +174,7 @@ class GaussianComponent(ModelComponent):
         if self.width.value <= 0:
             raise ValueError("Width must be greater than 0 for Gaussian.")
         if self.area.value < 0:
-            raise Warning("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(self.name))
+            warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(self.name))
         return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
     
 
@@ -234,7 +236,7 @@ class LorentzianComponent(ModelComponent):
         if self.width.value <= 0:
             raise ValueError("Width must be greater than 0 for Lorentzian.")
         if self.area.value < 0:
-            raise Warning("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(self.name))
+            warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(self.name))
         return self.area.value * (self.width.value/np.pi / ((x - self.center.value)**2 + self.width.value**2))
 
 
@@ -284,8 +286,8 @@ class VoigtComponent(ModelComponent):
         if Lwidth <= 0:
             raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
         if area < 0:
-            raise Warning("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
-        
+            warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
+
         self.unit = unit  # Set the unit for the component
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
@@ -303,8 +305,8 @@ class VoigtComponent(ModelComponent):
         if self.Lwidth.value <= 0:
             raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
         if self.area.value < 0:
-            raise Warning("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(self.name))
-        return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)    
+            warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(self.name))
+        return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)
 
     def get_parameters(self):
         """
@@ -422,7 +424,7 @@ class PolynomialComponent(ModelComponent):
             result += param.value * np.power(x, i)
 
         if any(result < 0):
-            Warning("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
+            warnings.warn("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
         return result
 
     def degree(self):
@@ -486,7 +488,7 @@ class DeltaFunctionComponent(ModelComponent):
     def evaluate(self, x):
 
         if self.area.value < 0:
-            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
+            warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
         #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
         return 0*x
     
@@ -508,7 +510,7 @@ class DeltaFunctionComponent(ModelComponent):
         """
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)    
-        self.unit = unit  # Update the unit of the component
+        self.unit = unit  
 
     def copy(self) -> "ModelComponent":
         """
