@@ -32,6 +32,8 @@ class ResolutionHandler:
         Accepts SampleModel or ModelComponent for both sample and resolution.
         The analytical method silently falls back to numerical convolution if no analytical expression is found.
         """
+        if not isinstance(x, np.ndarray):
+            raise TypeError(f"`x` is an instance of {type(x).__name__}, but must be a numpy array.")
 
         x = np.asarray(x, dtype=float)
         if x.ndim != 1 or not np.all(np.isfinite(x)):

@@ -106,7 +106,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
     """ Lorentzian model with half width half maximum equal to :math:`Dq^2`
     """
      
-    def __init__ (self, name="BrownianTranslationalDiffusion", diffusion_coefficient=1e-10):
+    def __init__ (self, name="BrownianTranslationalDiffusion", diffusion_coefficient=1e-10,scale=1.0):
          """
          Initialize a new BrownianTranslationalDiffusion model.
 
@@ -119,11 +119,12 @@ class BrownianTranslationalDiffusion(DiffusionModel):
          """
          super().__init__(name=name)
          self.diffusion_coefficient = Parameter(name="diffusion_coefficient", value=diffusion_coefficient, unit='m^2/s', fixed=False)
-         self._HWHM=None
+         self.scale = Parameter(name="scale", value=scale, unit='', fixed=False)
+         self._width=None
          self._EISF=None
          self._QISF=None
 
-    def calculate_HWHM(self, q: np.ndarray) -> np.ndarray:
+    def calculate_width(self, q: np.ndarray) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the Brownian translational diffusion model.
 
@@ -138,8 +139,8 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             HWHM values.
         """
         D = self.diffusion_coefficient.value  #TODO: handle units properly
-        self._HWHM = D * q**2
-        return self._HWHM
+        self._width = D * q**2
+        return self._width
 
     def calculate_EISF(self,q: np.ndarray) -> np.ndarray:
         """
