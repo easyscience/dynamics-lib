@@ -6,6 +6,8 @@ from .components import DeltaFunctionComponent
 from .components import DHOComponent
 from .components import PolynomialComponent
 
+from .diffusion_model import BrownianTranslationalDiffusion
+
 __all__ = [
     "SampleModel",
     "GaussianComponent",
@@ -13,4 +15,6 @@ __all__ = [
     "VoigtComponent",
     "DeltaFunctionComponent",
     "DHOComponent",
-    "PolynomialComponent"]
+    "PolynomialComponent",
+    "BrownianTranslationalDiffusion"
+]
