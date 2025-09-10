@@ -188,8 +188,8 @@ class TestDeltaFunctionComponent:
     def test_get_parameters(self, delta_function: DeltaFunctionComponent):
         params = delta_function.get_parameters()
         assert len(params) == 2
-        assert params[0].name == 'TestDeltaFunctionarea'
-        assert params[1].name == 'TestDeltaFunctioncenter'
+        assert params[0].name == 'TestDeltaFunction area'
+        assert params[1].name == 'TestDeltaFunction center'
         assert all(isinstance(param, Parameter) for param in params)
 
 

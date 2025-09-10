@@ -5,6 +5,9 @@ from easydynamics.experiment import Experiment
 from easydynamics.analysis import Analysis
 from easydynamics.experiment.data import Data
 
+from easydynanmics.sample import DiffusionModel
+
+
 import scipp as sc
 import plopp as pp
 
@@ -568,6 +571,101 @@ class Job(JobBase):
             'sizes': sizes,                   # size per cut-dim
             'keep': tuple(keep),              # dims left intact in each slice
         }
+        return self
+    
+    def set_resolution_model_for_all_analyses(self, resolution=None):
+        """ Set the resolution model for all analyses in self._analysis.
+        Args:
+            resolution (SampleModel): The resolution model to be used in the experiment.
+        """
+        if resolution is None:
+            resolution = self._resolution_model
+
+        if not isinstance(resolution, SampleModel):
+            raise TypeError("Resolution model must be an instance of SampleModel.")
+        
+        def _walk_all(node):
+            """Yield every Analysis in the nested structure."""
+            stack = [node]
+            while stack:
+                x = stack.pop()
+                if isinstance(x, (list, tuple)):
+                    stack.extend(x)
+                else:
+                    yield x
+
+        for ana in _walk_all(self._analysis):
+            ana.set_resolution_model(resolution.copy())
+            ana.fix_resolution_parameters()
+
+        return self
+    
+    def set_background_model_for_all_analyses(self, background=None):
+        """ Set the background model for all analyses in self._analysis.
+        Args:
+            background (SampleModel): The background model to be used in the experiment.
+        """
+        if background is None:
+            background = self._background_model
+
+        if not isinstance(background, SampleModel):
+            raise TypeError("Background model must be an instance of SampleModel.")
+        
+        def _walk_all(node):
+            """Yield every Analysis in the nested structure."""
+            stack = [node]
+            while stack:
+                x = stack.pop()
+                if isinstance(x, (list, tuple)):
+                    stack.extend(x)
+                else:
+                    yield x
+
+        for ana in _walk_all(self._analysis):
+            ana.set_background_model(background.copy())
+
+        return self
+    
+    def set_theory_for_all_analyses(self, theory=None):
+
+        if theory is None:
+            theory = self._theory
+        if isinstance(theory,DiffusionModel):
+            # diffusion_job._experiment._data.data.coords.get('Q').values
+            Q=self._experiment._data.data.coords.get('Q').values
+            components=theory.create_components(Q)
+
+            # dims = self._analysis_meta['dims']  # Tuple of dimensions
+            # sizes = self._analysis_meta['sizes']  # Sizes for each dimension
+            # shape = tuple(sizes[dim] for dim in dims)  # Shape of the array
+            iterator=np.ndindex(tuple(self._analysis_meta['sizes'][dim] for dim in self._analysis_meta['dims']))
+
+             # Identify the position of `Q` in the dimension order (to map to `Q_index`)
+            dims = self._analysis_meta['dims']
+            Q_dim_index = dims.index('Q')  # Position of Q in the dimension tuple
+
+            for idx in iterator:
+                Q_index = idx[Q_dim_index]
+                ana=self._analysis(idx)
+                if ana._theory is None:
+                    sample_model=SampleModel()
+                else:
+                    sample_model=ana._theory 
+                for comp in components[Q_index]:
+                    sample_model.add_component(comp)
+                ana.set_theory(sample_model)
+
+            
+    
+    def set_diffusion_model(self,diffusion_model):
+        """ Set the diffusion model for all analyses in self._analysis.
+        Args:
+            diffusion_model (): The diffusion model to be used in the experiment.
+        """
+
+        
+
+
         return self
 
 

@@ -6,6 +6,7 @@ from .components import DeltaFunctionComponent
 from .components import DHOComponent
 from .components import PolynomialComponent
 
+from .diffusion_model import DiffusionModel
 from .diffusion_model import BrownianTranslationalDiffusion
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "DeltaFunctionComponent",
     "DHOComponent",
     "PolynomialComponent",
+    "DiffusionModel",
     "BrownianTranslationalDiffusion"
 ]

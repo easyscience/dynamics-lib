@@ -639,7 +639,6 @@ class PolynomialComponent(ModelComponent):
         Return a deep copy of this component with independent parameters.
         """
 
-
         ModelCopy = PolynomialComponent(
             name=self.name,
             coefficients=[param.value for param in self.coefficients]
