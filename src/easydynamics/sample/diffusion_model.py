@@ -106,7 +106,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
     """ Lorentzian model with half width half maximum equal to :math:`Dq^2`
     """
      
-    def __init__ (self, name="BrownianTranslationalDiffusion", diffusion_coefficient=1e-10,scale=1.0):
+    def __init__ (self, name="BrownianTranslationalDiffusion", diffusion_coefficient=1,scale=1.0,unit=None):
          """
          Initialize a new BrownianTranslationalDiffusion model.
 
@@ -118,8 +118,8 @@ class BrownianTranslationalDiffusion(DiffusionModel):
              Diffusion coefficient .
          """
          super().__init__(name=name)
-         self.diffusion_coefficient = Parameter(name="diffusion_coefficient", value=diffusion_coefficient, unit='m^2/s', fixed=False)
-         self.scale = Parameter(name="scale", value=scale, unit='', fixed=False)
+         self.diffusion_coefficient = Parameter(name="diffusion_coefficient", value=diffusion_coefficient, fixed=False)
+         self.scale = Parameter(name="scale", value=scale, fixed=False)
          self._width=None
          self._EISF=None
          self._QISF=None
@@ -141,7 +141,17 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         D = self.diffusion_coefficient.value  #TODO: handle units properly
         self._width = D * q**2
         return self._width
+    
 
+    def write_width_dependency_expression(self,q) -> str:
+
+        return f"D * {q}**2"
+
+    def write_dependency_map_expression(self) -> Dict[str,str]:
+
+         return {"D": self.diffusion_coefficient}
+    
+                 
     def calculate_EISF(self,q: np.ndarray) -> np.ndarray:
         """
         Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational diffusion model.

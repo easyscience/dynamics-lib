@@ -9,6 +9,8 @@ from easyscience.base_classes import ObjBase
 
 import warnings
 
+from numbers import Number
+
 #TODO: Allow specification of units for parameters in components
 
 class ModelComponent(ObjBase):
@@ -152,29 +154,29 @@ class GaussianComponent(ModelComponent):
 
     def __init__(self, name='Gaussian', area=1.0, center=None, width=1.0, unit='meV'):
         
-        # Validate inputs
-        if type(area) not in [float,int,Parameter]:
+        # Validate inputs - throw errors before any Parameters are created
+        if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
 
-        if center is not None and type(center) not in [float,int,Parameter]:
+        if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
-        
-        if type(width) not in [float,int,Parameter]:
+
+        if not isinstance(width, (Number, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
-        
-        if type(width) is int:
+
+        if isinstance(width,Number):
             width=float(width)
 
         if width <= 0:
             raise ValueError("The width of a Gaussian must be greater than zero.")
 
-        if type(area) is int:
+        if isinstance(area,Number):
             area = float(area)
 
         if area < 0:
             warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
 
-        if type(center) is int:
+        if isinstance(center,Number):
             center = float(center)
         
         super().__init__(name=name)
@@ -183,17 +185,17 @@ class GaussianComponent(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name= name+ ' center', value=0.0, unit=unit,fixed=True)
-        elif type(center) is float:
+        elif isinstance(center,Number):
             self.center = Parameter(name=name+ ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if type(width) is float:
+        if isinstance(width,Number):
             self.width = Parameter(name=name+ ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
-        if type(area) is float:
+        if isinstance(area,Number):
             self.area = Parameter(name=name+ ' area', value=area, unit=unit,min=0.0)
         else:
             self.area=area
@@ -248,28 +250,28 @@ class LorentzianComponent(ModelComponent):
 
         
         # Validate inputs
-        if type(area) not in [float,int,Parameter]:
+        if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
 
-        if center is not None and type(center) not in [float,int,Parameter]:
+        if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
-        
-        if type(width) not in [float,int,Parameter]:
+
+        if not isinstance(width, (Number, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
-        
-        if type(width) is int:
+
+        if isinstance(width, Number):
             width=float(width)
 
         if width <= 0:
             raise ValueError("The width of a Lorentzian must be greater than zero.")
 
-        if type(area) is int:
+        if isinstance(area, Number):
             area = float(area)
 
         if area < 0:
             warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
 
-        if type(center) is int:
+        if isinstance(center, Number):
             center = float(center)
 
         super().__init__(name=name)
@@ -278,17 +280,17 @@ class LorentzianComponent(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif type(center) is float:
+        elif isinstance(center, Number):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if type(width) is float:
+        if isinstance(width, Number):
             self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
-        if type(area) is float:
+        if isinstance(area, Number):
             self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
         else:
             self.area=area
@@ -342,19 +344,19 @@ class VoigtComponent(ModelComponent):
 
     def __init__(self, name='Voigt', area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
         # Validate inputs
-        if type(area) not in [float,int,Parameter]:
+        if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
-        if center is not None and type(center) not in [float,int,Parameter]:
+        if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
-        if type(Gwidth) not in [float,int,Parameter]:
+        if not isinstance(Gwidth, (Number, Parameter)):
             raise TypeError("Gwidth must be a number or an EasyScience Parameter.")
-        if type(Lwidth) not in [float,int,Parameter]:
+        if not isinstance(Lwidth, (Number, Parameter)):
             raise TypeError("Lwidth must be a number or an EasyScience Parameter.")
-        if type(Gwidth) is int:
+        if isinstance(Gwidth, Number):
             Gwidth=float(Gwidth)
-        if type(Lwidth) is int:
+        if isinstance(Lwidth, Number):
             Lwidth=float(Lwidth)
-        if type(area) is int:
+        if isinstance(area, Number):
             area = float(area)
         if Gwidth <= 0:
             raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
@@ -370,20 +372,20 @@ class VoigtComponent(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif type(center) is float:
+        elif isinstance(center, Number):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
 
-        if type(Gwidth) is float:
+        if isinstance(Gwidth, Number):
             self.Gwidth = Parameter(name=name + ' Gwidth', value=Gwidth, unit=unit,min=0.0)
         else:
             self.Gwidth=Gwidth
 
-        if type(Lwidth) is float:
+        if isinstance(Lwidth, Number):
             self.Lwidth = Parameter(name=name + ' Lwidth', value=Lwidth, unit=unit,min=0.0)
         else:
             self.Lwidth=Lwidth
 
-        if type(area) is float:
+        if isinstance(area, Number):
             self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
         else:
             self.area=area
@@ -426,6 +428,87 @@ class VoigtComponent(ModelComponent):
         return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
 
 
+class DeltaFunctionComponent(ModelComponent):
+    """
+    Delta function.
+
+    Args:
+        center (float): Mean of the Gaussian.
+        area (float): Total area under the curve.
+    """
+
+    def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
+        # Validate inputs
+        if not isinstance(area, (Number, Parameter)):
+            raise TypeError("area must be a number or an EasyScience Parameter.")
+        if center is not None and not isinstance(center, (Number, Parameter)):
+            raise TypeError("center must be None, a number or an EasyScience Parameter.")
+        if isinstance(area, Number):
+            area = float(area)
+        if isinstance(center, Number):
+            center = float(center)
+        if area < 0:
+            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
+        super().__init__(name=name)
+        self.unit = unit
+        # Create Parameters from floats, or set Parameters if already provided
+        if center is None:
+            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
+        elif isinstance(center, Number):
+            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+        else:
+            self.center=center
+
+        if isinstance(area, Number):
+            self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
+        else:
+            self.area=area
+
+
+    def evaluate(self, x):
+
+        if self.area.value < 0:
+            warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
+        #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
+        return 0*x
+    
+    
+    def get_parameters(self):
+        """
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
+        """ 
+        return [self.area, self.center]
+    
+    def convert_unit(self, unit):
+        """
+        Convert the unit of the Parameters in the component.
+        
+        Args:
+            unit (str): The new unit to convert to.
+        """
+        self.area.convert_unit(unit)
+        self.center.convert_unit(unit)    
+        self.unit = unit  
+
+    def copy(self) -> "DeltaFunctionComponent":
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        ModelCopy = DeltaFunctionComponent(
+            name=self.name,
+            area=self.area.value,
+            center=self.center.value,
+            unit=self.unit
+        )
+        ModelCopy.area.fixed = self.area.fixed
+        ModelCopy.center.fixed = self.center.fixed
+        return ModelCopy
+
+    def __repr__(self):
+        return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
+
 class DHOComponent(ModelComponent):
     """
     Damped Harmonic Oscillator (DHO) component.
@@ -438,17 +521,17 @@ class DHOComponent(ModelComponent):
 
     def __init__(self, name='DHO', center=1.0, width=1.0, area=1.0,unit='meV'):
         # Validate inputs
-        if type(area) not in [float,int,Parameter]:
+        if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
-        if type(center) not in [float,int,Parameter]:
+        if not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be a number or an EasyScience Parameter.")
-        if type(width) not in [float,int,Parameter]:
+        if not isinstance(width, (Number, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
-        if type(width) is int:
+        if isinstance(width, Number):
             width=float(width)
-        if type(area) is int:
+        if isinstance(area, Number):
             area = float(area)
-        if type(center) is int:
+        if isinstance(center, Number):
             center = float(center)
         if width <= 0:
             raise ValueError("Width must be greater than 0 for DHO.")
@@ -458,17 +541,17 @@ class DHOComponent(ModelComponent):
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
-        if type(center) is float:
+        if isinstance(center, Number):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if type(width) is float:
+        if isinstance(width, Number):
             self.width = Parameter(name=name + ' width', value=width, unit=unit)
         else:
             self.width = width
 
-        if type(area) is float:
+        if isinstance(area, Number):
             self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area = area
@@ -575,87 +658,6 @@ class PolynomialComponent(ModelComponent):
         raise ValueError("PolynomialComponent does not support unit conversion. Coefficients are dimensionless.")
 
 
-
-class DeltaFunctionComponent(ModelComponent):
-    """
-    Delta function.
-
-    Args:
-        center (float): Mean of the Gaussian.
-        area (float): Total area under the curve.
-    """
-
-    def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
-        # Validate inputs
-        if type(area) not in [float,int,Parameter]:
-            raise TypeError("area must be a number or an EasyScience Parameter.")
-        if center is not None and type(center) not in [float,int,Parameter]:
-            raise TypeError("center must be None, a number or an EasyScience Parameter.")
-        if type(area) is int:
-            area = float(area)
-        if type(center) is int:
-            center = float(center)
-        if area < 0:
-            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
-        super().__init__(name=name)
-        self.unit = unit
-        # Create Parameters from floats, or set Parameters if already provided
-        if center is None:
-            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif type(center) is float:
-            self.center = Parameter(name=name + ' center', value=center, unit=unit)
-        else:
-            self.center=center
-
-        if type(area) is float:
-            self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
-        else:
-            self.area=area
-
-
-    def evaluate(self, x):
-
-        if self.area.value < 0:
-            warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
-        #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
-        return 0*x
-    
-    
-    def get_parameters(self):
-        """
-        Get all parameters from the model component.
-        Returns:
-        List[Parameter]: List of parameters in the component.
-        """ 
-        return [self.area, self.center]
-    
-    def convert_unit(self, unit):
-        """
-        Convert the unit of the Parameters in the component.
-        
-        Args:
-            unit (str): The new unit to convert to.
-        """
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)    
-        self.unit = unit  
-
-    def copy(self) -> "DeltaFunctionComponent":
-        """
-        Return a deep copy of this component with independent parameters.
-        """
-        ModelCopy = DeltaFunctionComponent(
-            name=self.name,
-            area=self.area.value,
-            center=self.center.value,
-            unit=self.unit
-        )
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed
-        return ModelCopy
-
-    def __repr__(self):
-        return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
 
 
 class UserDefinedComponent(ModelComponent):
