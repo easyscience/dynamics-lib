@@ -9,7 +9,9 @@ from easyscience.base_classes import ObjBase
 from easydynamics.utils import detailed_balance_factor
 from .components import ModelComponent
 
+from .components import LorentzianComponent
 
+from numbers import Number
 
 class DiffusionModel(ObjBase):
     """
@@ -40,9 +42,6 @@ class DiffusionModel(ObjBase):
         """
 
         return f"DiffusionModel(name={self.name}, parameters={self.get_parameters()})"
-    
-
-
 
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
@@ -60,10 +59,10 @@ class DiffusionModel(ObjBase):
         -------
         List[Parameter]
         """
-        if isinstance(self._temperature, Parameter):
-            params = [self._temperature]
-        else:
-            params = []
+        # if isinstance(self._temperature, Parameter):
+        #     params = [self._temperature]
+        # else:
+        params = []
         for comp in self.components.values():
             params.extend(comp.get_parameters())
         return params
@@ -124,13 +123,13 @@ class BrownianTranslationalDiffusion(DiffusionModel):
          self._EISF=None
          self._QISF=None
 
-    def calculate_width(self, q: np.ndarray) -> np.ndarray:
+    def calculate_width(self, Q: np.ndarray) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the Brownian translational diffusion model.
 
         Parameters
         ----------
-        q : np.ndarray
+        Q : np.ndarray
             Scattering vector 
 
         Returns
@@ -139,26 +138,31 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             HWHM values.
         """
         D = self.diffusion_coefficient.value  #TODO: handle units properly
-        self._width = D * q**2
+        self._width = D * Q**2
         return self._width
     
 
-    def write_width_dependency_expression(self,q) -> str:
+    def write_width_dependency_expression(self,Q) -> str:
+        """
+        Write the dependency expression for the width as a function of q to make dependent Parameters.
+        """
 
-        return f"D * {q}**2"
+        return f"D * {Q}**2"
 
-    def write_dependency_map_expression(self) -> Dict[str,str]:
+    def write_width_dependency_map_expression(self) -> Dict[str,str]:
+        """
+        Write the dependency map expression for the width as a function of q to make dependent Parameters.
+        """
+        return {"D": self.diffusion_coefficient}
 
-         return {"D": self.diffusion_coefficient}
-    
-                 
-    def calculate_EISF(self,q: np.ndarray) -> np.ndarray:
+
+    def calculate_EISF(self,Q: np.ndarray) -> np.ndarray:
         """
         Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational diffusion model.
 
         Parameters
         ----------
-        q : np.ndarray
+        Q : np.ndarray
             Scattering vector 
 
         Returns
@@ -166,16 +170,38 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         np.ndarray
             EISF values (dimensionless).
         """
-        self._EISF = np.zeros_like(q)
+        self._EISF = np.zeros_like(Q)
         return self._EISF
+
+    def create_components(self,Q: Union[Number, list, np.ndarray]) -> List[List[ModelComponent]]:
+
+        if isinstance(Q,(Number,list)):
+            Q=np.array(Q)
+        components = [[] for _ in range(len(Q))]
+
+
+        # Create a Lorentzian component for each q-value, with width D*q^2 and area equal to scale. No delta function, as the EISF is 0.        
+        for i in range(len(Q)):
+            dependency_expression=self.write_width_dependency_expression(Q[i])
+            dependency_map=self.write_width_dependency_map_expression()
+            width=Parameter.from_dependency(name="Gamma",dependency_expression=dependency_expression,dependency_map=dependency_map)
+
+            lorentzian_component=LorentzianComponent(name=f"Lorentzian_{i}",width=width,area=self.scale)
+
+            components[i].append(lorentzian_component)
+        return components
+
+
+
+
     
-    def calculate_QISF(self,q: np.ndarray) -> np.ndarray:
+    def calculate_QISF(self,Q: np.ndarray) -> np.ndarray:
         """
         Calculate the Quasi-Elastic Incoherent Structure Factor (QISF) for the Brownian translational diffusion model.
 
         Parameters
         ----------
-        q : np.ndarray
+        Q : np.ndarray
             Scattering vector 
 
         Returns
@@ -184,6 +210,16 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             QISF values (dimensionless).
         """
 
-        self._QISF = np.ones_like(q)
+        self._QISF = np.ones_like(Q)
         return self._QISF
 
+    def get_parameters(self) -> List[Parameter]:
+            """
+            Return all parameters from the model.
+
+            Returns
+            -------
+            List[Parameter]
+            """
+            params = [self.diffusion_coefficient,self.scale]
+            return params

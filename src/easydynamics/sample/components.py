@@ -165,16 +165,15 @@ class GaussianComponent(ModelComponent):
             raise TypeError("width must be a number or an EasyScience Parameter.")
 
         if isinstance(width,Number):
+            if width <= 0:
+                raise ValueError("The width of a Gaussian must be greater than zero.")
             width=float(width)
 
-        if width <= 0:
-            raise ValueError("The width of a Gaussian must be greater than zero.")
-
         if isinstance(area,Number):
+            if area < 0:
+                warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
 
-        if area < 0:
-            warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
 
         if isinstance(center,Number):
             center = float(center)
@@ -260,16 +259,15 @@ class LorentzianComponent(ModelComponent):
             raise TypeError("width must be a number or an EasyScience Parameter.")
 
         if isinstance(width, Number):
+            if width <= 0:
+                raise ValueError("The width of a Lorentzian must be greater than zero.")
             width=float(width)
 
-        if width <= 0:
-            raise ValueError("The width of a Lorentzian must be greater than zero.")
-
         if isinstance(area, Number):
+            if area < 0:
+                warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
 
-        if area < 0:
-            warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
 
         if isinstance(center, Number):
             center = float(center)
@@ -353,17 +351,17 @@ class VoigtComponent(ModelComponent):
         if not isinstance(Lwidth, (Number, Parameter)):
             raise TypeError("Lwidth must be a number or an EasyScience Parameter.")
         if isinstance(Gwidth, Number):
+            if Gwidth <= 0:
+                raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
             Gwidth=float(Gwidth)
         if isinstance(Lwidth, Number):
+            if Lwidth <= 0:
+                raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
             Lwidth=float(Lwidth)
         if isinstance(area, Number):
+            if area < 0:
+                warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
-        if Gwidth <= 0:
-            raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
-        if Lwidth <= 0:
-            raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
-        if area < 0:
-            warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
         
         super().__init__(name=name)
 
@@ -444,11 +442,11 @@ class DeltaFunctionComponent(ModelComponent):
         if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
         if isinstance(area, Number):
+            if area < 0:
+                warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
         if isinstance(center, Number):
             center = float(center)
-        if area < 0:
-            raise Warning("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
         super().__init__(name=name)
         self.unit = unit
         # Create Parameters from floats, or set Parameters if already provided
