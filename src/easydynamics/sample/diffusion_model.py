@@ -173,11 +173,12 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         self._EISF = np.zeros_like(Q)
         return self._EISF
 
-    def create_components(self,Q: Union[Number, list, np.ndarray]) -> List[List[ModelComponent]]:
+    def create_components(self,Q: Union[Number, list, np.ndarray],component_name='Lorentzian') -> List[List[ModelComponent]]:
 
         if isinstance(Q,(Number,list)):
             Q=np.array(Q)
         components = [[] for _ in range(len(Q))]
+        # TODO: make names more general
 
 
         # Create a Lorentzian component for each q-value, with width D*q^2 and area equal to scale. No delta function, as the EISF is 0.        
@@ -186,7 +187,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             dependency_map=self.write_width_dependency_map_expression()
             width=Parameter.from_dependency(name="Gamma",dependency_expression=dependency_expression,dependency_map=dependency_map)
 
-            lorentzian_component=LorentzianComponent(name=f"Lorentzian_{i}",width=width,area=self.scale)
+            lorentzian_component=LorentzianComponent(name=f"{component_name}",width=width,area=self.scale)
 
             components[i].append(lorentzian_component)
         return components

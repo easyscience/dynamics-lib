@@ -5,7 +5,9 @@ from easydynamics.experiment import Experiment
 from easydynamics.analysis import Analysis
 from easydynamics.experiment.data import Data
 
-from easydynanmics.sample import DiffusionModel
+from easydynamics.sample import ModelComponent
+
+from easydynamics.sample import DiffusionModel
 
 
 import scipp as sc
@@ -627,6 +629,20 @@ class Job(JobBase):
         return self
     
     def set_theory_for_all_analyses(self, theory=None):
+        def _iter_nested(container, dims, sizes, depth=0, prefix=()):
+            """
+            Yields (index_tuple, leaf_item) for an N-D rectangular nested list/array.
+            dims: tuple like ('T','Q', 'something', ...)
+            sizes: dict mapping dim -> length
+            """
+            if depth == len(dims):
+                yield prefix, container
+                return
+            dim = dims[depth]
+            n = sizes[dim]
+            for i in range(n):
+                # assumes rectangular indexing: container[i] is defined
+                yield from _iter_nested(container[i], dims, sizes, depth+1, prefix + (i,))
 
         if theory is None:
             theory = self._theory
@@ -635,25 +651,56 @@ class Job(JobBase):
             Q=self._experiment._data.data.coords.get('Q').values
             components=theory.create_components(Q)
 
-            # dims = self._analysis_meta['dims']  # Tuple of dimensions
-            # sizes = self._analysis_meta['sizes']  # Sizes for each dimension
-            # shape = tuple(sizes[dim] for dim in dims)  # Shape of the array
-            iterator=np.ndindex(tuple(self._analysis_meta['sizes'][dim] for dim in self._analysis_meta['dims']))
+            dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
+            sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
+            q_axis = dims.index('Q')                     # works for any position
 
-             # Identify the position of `Q` in the dimension order (to map to `Q_index`)
-            dims = self._analysis_meta['dims']
-            Q_dim_index = dims.index('Q')  # Position of Q in the dimension tuple
-
-            for idx in iterator:
-                Q_index = idx[Q_dim_index]
-                ana=self._analysis(idx)
+            for idx, ana in _iter_nested(self._analysis, dims, sizes):
+                q_i = idx[q_axis]                        # the Q index for this analysis
                 if ana._theory is None:
-                    sample_model=SampleModel()
+                    sample_model = SampleModel()
                 else:
-                    sample_model=ana._theory 
-                for comp in components[Q_index]:
+                    sample_model = ana._theory
+
+                for comp in components[q_i]:
                     sample_model.add_component(comp)
-                ana.set_theory(sample_model)
+                    
+                    ana.set_theory(sample_model)
+
+        if isinstance(theory,ModelComponent):
+            dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
+            sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
+
+            for idx, ana in _iter_nested(self._analysis, dims, sizes):
+                if ana._theory is None:
+                    sample_model = SampleModel()
+                else:
+                    sample_model = ana._theory
+
+                    sample_model.add_component(theory)
+                    
+                    ana.set_theory(sample_model)
+
+
+        #     # dims = self._analysis_meta['dims']  # Tuple of dimensions
+        #     # sizes = self._analysis_meta['sizes']  # Sizes for each dimension
+        #     # shape = tuple(sizes[dim] for dim in dims)  # Shape of the array
+        #     iterator=np.ndindex(tuple(self._analysis_meta['sizes'][dim] for dim in self._analysis_meta['dims']))
+
+        #      # Identify the position of `Q` in the dimension order (to map to `Q_index`)
+        #     dims = self._analysis_meta['dims']
+        #     Q_dim_index = dims.index('Q')  # Position of Q in the dimension tuple
+
+        #     for idx in iterator:
+        #         Q_index = idx[Q_dim_index]
+        #         ana=self._analysis(idx)
+        #         if ana._theory is None:
+        #             sample_model=SampleModel()
+        #         else:
+        #             sample_model=ana._theory 
+        #         for comp in components[Q_index]:
+        #             sample_model.add_component(comp)
+        #         ana.set_theory(sample_model)
 
             
     
