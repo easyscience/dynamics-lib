@@ -488,6 +488,89 @@ class Job(JobBase):
         return self
 
 
+    # def generate_diffusion_analysis(self,diffusion_model):
+
+    def generate_empty_analysis_array(self,keep=('energy')):
+        """
+        Create a nested structure of Analysis objects by cutting the experiment data
+        over all dims NOT in `keep` (default keeps 'energy'). No theory or background is added here.
+
+        Result:
+        self._analysis  -> nested list with one level per cut-dimension, in the
+                            same order as they appear in the data (excluding `keep`).
+                            e.g. data.dims = ('Temperature','Q','energy')
+                                -> self._analysis[ti][qi]
+        self._analysis_meta -> metadata about the grid.
+        Each Analysis gets:
+            - _cut_indices : dict {dim: index}
+            - _cut_coords  : dict {dim: coord value/variable}
+        """
+        data = self._experiment._data.data
+
+        # Normalize `keep` to a tuple
+        if isinstance(keep, str):
+            keep = (keep,)
+        else:
+            keep = tuple(keep)
+
+        # Dims we cut over = all dims not kept
+        dims_to_cut = [d for d in data.dims if d not in keep]
+        sizes = {d: data.sizes[d] for d in dims_to_cut}
+        coords = {d: data.coords.get(d, None) for d in dims_to_cut}
+
+        # Helper: make one Analysis for a given index tuple over dims_to_cut
+        def make_analysis(idx_tuple):
+            # Slice 1D/kept-dims-only spectrum
+            da = data
+            for d, i in zip(dims_to_cut, idx_tuple):
+                da = da[d, i]
+            # Build analysis (copy models)
+            ana = Analysis(name=f'Analysis{idx_tuple}')
+
+
+            # Attach sliced data via Experiment/Data
+            exp = Experiment()
+            dat = Data()
+            dat.append(da)
+            exp.set_data(dat)
+            ana.set_experiment(exp)
+
+            # Annotate for traceability
+            ana._cut_indices = dict(zip(dims_to_cut, idx_tuple))
+            ana._cut_coords = {}
+            for d, i in zip(dims_to_cut, idx_tuple):
+                c = coords[d]
+                if c is None:
+                    ana._cut_coords[d] = None
+                else:
+                    try:
+                        # Prefer scalar value if available
+                        ana._cut_coords[d] = c[i].value
+                    except Exception:
+                        # Fall back to Variable/DataArray slice
+                        ana._cut_coords[d] = c[i]
+            return ana
+
+        # Build a nested list with one level per cut dimension
+        def build_level(level, prefix):
+            if level == len(dims_to_cut):
+                return make_analysis(prefix)
+            d = dims_to_cut[level]
+            return [build_level(level + 1, prefix + (i,)) for i in range(sizes[d])]
+
+        # Construct the grid (or a single Analysis if there are no cut dims)
+        analysis_grid = build_level(0, ())
+
+        # Save results
+        self._analysis = analysis_grid
+        self._analysis_meta = {
+            'dims': tuple(dims_to_cut),       # order of nesting
+            'sizes': sizes,                   # size per cut-dim
+            'keep': tuple(keep),              # dims left intact in each slice
+        }
+        return self
+
+
     @property
     def analysis(self):
         return self._analysis
