@@ -8,6 +8,7 @@ from easydynamics.resolution import ResolutionHandler
 
 
 from easydynamics.sample import SampleModel
+from easydynamics.sample import DiffusionModel
 
 from easydynamics.experiment import Experiment
 
@@ -26,9 +27,20 @@ class Analysis(AnalysisBase):
         self._theory= None
         self._experiment= None
         self._offset=Parameter(name='offset', value=0.0, unit='meV')
+        self._diffusion_model=None
 
         self._resolution_model = None
         self._background_model = None
+
+
+    def set_diffusion_model(self, diffusion_model:DiffusionModel):
+        """ Set the diffusion model for the analysis.
+        Args:
+            diffusion_model (DiffusionModel): The diffusion model to be used in the analysis.
+        """
+        if not isinstance(diffusion_model, DiffusionModel):
+            raise TypeError("The diffusion model must be an instance of DiffusionModel.")
+        self._diffusion_model = diffusion_model
 
     def set_theory(self, theory: SampleModel):
         """ Set the model to be fitted.
@@ -323,6 +335,9 @@ class Analysis(AnalysisBase):
         if self._theory is not None:
             params.extend(self._theory.get_parameters())
 
+        if self._diffusion_model is not None:
+            params.extend(self._diffusion_model.get_parameters())
+
         if self._experiment is not None:
             if self._resolution_model is not None:
                 params.extend(self._resolution_model.get_parameters())
@@ -341,4 +356,9 @@ class Analysis(AnalysisBase):
         Returns:
             List[Parameter]: A list of unfixed fit parameters.
         """
-        return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
+        # return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
+        return [
+            param 
+            for param in self.get_parameters() 
+            if not getattr(param, 'fixed', False) and getattr(param, '_independent', True)
+        ]

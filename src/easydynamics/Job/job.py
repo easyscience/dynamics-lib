@@ -9,6 +9,8 @@ from easydynamics.sample import ModelComponent
 
 from easydynamics.sample import DiffusionModel
 
+from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
+
 
 import scipp as sc
 import plopp as pp
@@ -34,7 +36,18 @@ class Job(JobBase):
         self._summary = None
         self._info = None
         self._fit_parameters = None
+        self._diffusion_model = None
 
+    
+    def set_diffusion_model(self, diffusion_model:DiffusionModel):
+        """ Set the diffusion model for the analysis.
+        Args:
+            diffusion_model (DiffusionModel): The diffusion model to be used in the analysis.
+        """
+        if not isinstance(diffusion_model, DiffusionModel):
+            raise TypeError("The diffusion model must be an instance of DiffusionModel.")
+        self._diffusion_model = diffusion_model
+        self.set_theory_for_all_analyses(diffusion_model)
 
     def set_theory(self, theory):
         """ Set the theoretical model.
@@ -213,6 +226,64 @@ class Job(JobBase):
                         )
                     ana.fit()
                     prev_ana = ana
+
+
+
+    def fit_simultaneous(self):
+        """
+        Fit all analyses simultaneously.
+            """
+        def _iter_nested(container, dims, sizes, depth=0, prefix=()):
+                """
+                Yields (index_tuple, leaf_item) for an N-D rectangular nested list/array.
+                dims: tuple like ('T','Q', 'something', ...)
+                sizes: dict mapping dim -> length
+                """
+                if depth == len(dims):
+                    yield prefix, container
+                    return
+                dim = dims[depth]
+                n = sizes[dim]
+                for i in range(n):
+                    # assumes rectangular indexing: container[i] is defined
+                    yield from _iter_nested(container[i], dims, sizes, depth+1, prefix + (i,))
+
+        x_data = []
+        y_data = []
+        e_data = []
+        fit_objects = []
+        fit_functions = []
+
+
+        dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
+        sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
+        # q_axis = dims.index('Q')                     # works for any position
+
+        for idx, ana in _iter_nested(self._analysis, dims, sizes):
+            
+        # for ana in self._analysis:
+            # x, y, e = ana._experiment.extract_xye_data(self._experiment._data)
+            y=ana._experiment._data.data.values
+            x=ana._experiment._data.data.coords['energy'].values
+            e=np.sqrt(ana._experiment._data.data.variances)
+            x_data.append(x)
+            y_data.append(y)
+            e_data.append(e)
+            fit_objects.append(ana)
+            fit_functions.append(ana.calculate_theory)
+
+        multi_fitter = EasyScienceMultiFitter(
+            fit_objects=fit_objects,
+            fit_functions=fit_functions,
+        )
+            # x, y, e = self._experiment.extract_xye_data(self._experiment._data)
+
+
+        # Perform the fit
+        fit_result = multi_fitter.fit(x=x_data, y=y_data, weights=[1.0 / e for e in e_data])
+
+        return fit_result
+
 
     def generate_analysis_for_cuts(self, keep=('energy',)):
         """
@@ -666,6 +737,7 @@ class Job(JobBase):
                     sample_model.add_component(comp)
                     
                     ana.set_theory(sample_model)
+                    ana.set_diffusion_model(theory)
 
         if isinstance(theory,ModelComponent):
             dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
@@ -704,16 +776,16 @@ class Job(JobBase):
 
             
     
-    def set_diffusion_model(self,diffusion_model):
-        """ Set the diffusion model for all analyses in self._analysis.
-        Args:
-            diffusion_model (): The diffusion model to be used in the experiment.
-        """
+    # def set_diffusion_model(self,diffusion_model):
+    #     """ Set the diffusion model for all analyses in self._analysis.
+    #     Args:
+    #         diffusion_model (): The diffusion model to be used in the experiment.
+    #     """
 
         
 
 
-        return self
+    #     return self
 
 
     @property
