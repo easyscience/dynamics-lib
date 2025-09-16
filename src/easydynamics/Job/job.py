@@ -10,6 +10,8 @@ from easydynamics.sample import ModelComponent
 from easydynamics.sample import DiffusionModel
 
 from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
+from easyscience.base_classes import ObjBase
+from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 
 
 import scipp as sc
@@ -782,11 +784,47 @@ class Job(JobBase):
     #         diffusion_model (): The diffusion model to be used in the experiment.
     #     """
 
+
+    def fit_diffusion_width(self,parameter_name):
+        pars=self.get_parameters_as_data_group()
+        if parameter_name not in pars:
+            raise KeyError(f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(pars.keys())}")
+        
+        diffusion_width=pars[parameter_name]['value'].values
+        diffusion_width_var=pars[parameter_name]['value'].variances
+        Q=self._experiment._data.data.coords.get('Q').values
+
+        def fit_func(Q_vals):
+            return self._diffusion_model.calculate_width(Q_vals)
         
 
+        #TODO: generalize to multiple parameters        
+        fit_obj=ObjBase(name='diffusion_width', diffusion_coefficient=self._diffusion_model.diffusion_coefficient)
 
-    #     return self
+        fitter=EasyScienceFitter(
+            fit_object=fit_obj,
+            fit_function=fit_func,
+        )
 
+        fit_result = fitter.fit(x=Q, y=diffusion_width, weights=1.0 / np.sqrt(diffusion_width_var))
+
+        return fit_result
+    
+    def plot_diffusion_fit_result(self,parameter_name):
+        pars=self.get_parameters_as_data_group()
+        diffusion_width=pars[parameter_name]['value'].values
+        diffusion_width_var=pars[parameter_name]['value'].variances
+        Q=self._experiment._data.data.coords.get('Q').values
+
+        theory_width=self._diffusion_model.calculate_width(Q)
+        import matplotlib.pyplot as plt
+        # Plotting code goes here
+        plt.errorbar(Q, diffusion_width, yerr=np.sqrt(diffusion_width_var), fmt='o', label='Fitted Width')
+        plt.plot(Q, theory_width, '-', label='Diffusion Model')
+        plt.xlabel('Q')
+        plt.ylabel('Width')
+        plt.legend()
+        plt.show()
 
     @property
     def analysis(self):
