@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import voigt_profile
 
 from easyscience.variable import Parameter
-from easydynamics.sample import SampleModel, Gaussian, LorentzianComponent, DeltaFunctionComponent
+from easydynamics.sample import SampleModel, Gaussian, Lorentzian, DeltaFunctionComponent
 
 
 from easydynamics.resolution import ResolutionHandler
@@ -18,7 +18,7 @@ class TestConvolution:
     @pytest.fixture
     def sample_model(self):
         test_sample_model = SampleModel(name="TestSampleModel")
-        test_sample_model.add_component(LorentzianComponent(center=0.1, width=0.2, area=2.0))
+        test_sample_model.add_component(Lorentzian(center=0.1, width=0.2, area=2.0))
         return test_sample_model
 
     @pytest.fixture
@@ -82,8 +82,8 @@ class TestConvolution:
     )
     def test_components_lorentzian_lorentzian(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_lorentzian = LorentzianComponent(center=0.1, width=0.3, area=2)
-        resolution_lorentzian = LorentzianComponent(center=0.2, width=0.4, area=3)
+        sample_lorentzian = Lorentzian(center=0.1, width=0.3, area=2)
+        resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -115,7 +115,7 @@ class TestConvolution:
     def test_components_gauss_lorentzian(self, x, offset_obj, expected_shift, method):
         #WHEN
         sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
-        resolution_lorentzian = LorentzianComponent(center=0.2, width=0.4, area=3)
+        resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -150,7 +150,7 @@ class TestConvolution:
     def test_components_lorentzian_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
         resolution_gauss = Gaussian(center=0.1, width=0.3, area=2)
-        sample_lorentzian = LorentzianComponent(center=0.2, width=0.4, area=3)
+        sample_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -284,7 +284,7 @@ class TestConvolution:
     )
     def test_model_lorentzian_delta_resolution_gauss(self, x, method):
         #WHEN
-        sample_lorentzian = LorentzianComponent(center=0.1, width=0.3, area=2, name="SampleLorentzian")
+        sample_lorentzian = Lorentzian(center=0.1, width=0.3, area=2, name="SampleLorentzian")
         sample_delta = DeltaFunctionComponent(center=0.5, area=4, name="SampleDelta")
         resolution_gauss = Gaussian(center=-0.3, width=0.4, area=3, name="ResolutionGauss")
         sample = SampleModel(name="SampleModel")

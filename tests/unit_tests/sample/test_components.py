@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, LorentzianComponent, VoigtComponent, DeltaFunctionComponent, DHOComponent, PolynomialComponent
+from easydynamics.sample import Gaussian, Lorentzian, VoigtComponent, DeltaFunctionComponent, DHOComponent, PolynomialComponent
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -95,22 +95,22 @@ class TestLorentzianComponent:
 
     @pytest.fixture
     def lorentzian(self):
-        return LorentzianComponent(name='TestLorentzian', area=2.0, center=0.5, width=0.6, unit='meV')
+        return Lorentzian(name='TestLorentzian', area=2.0, center=0.5, width=0.6, unit='meV')
 
-    def test_initialization(self, lorentzian: LorentzianComponent):
+    def test_initialization(self, lorentzian: Lorentzian):
         assert lorentzian.name == 'TestLorentzian'
         assert lorentzian.area.value == 2.0
         assert lorentzian.center.value == 0.5
         assert lorentzian.width.value == 0.6
         assert lorentzian.unit == 'meV'
 
-    def test_evaluate(self, lorentzian: LorentzianComponent):
+    def test_evaluate(self, lorentzian: Lorentzian):
         x = np.array([0.0, 0.5, 1.0])
         expected = lorentzian.evaluate(x)
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, lorentzian: LorentzianComponent):
+    def test_get_parameters(self, lorentzian: Lorentzian):
         params = lorentzian.get_parameters()
         assert len(params) == 3
         assert params[0].name == 'TestLorentzian area'
@@ -118,7 +118,7 @@ class TestLorentzianComponent:
         assert params[2].name == 'TestLorentzian width'
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_area_matches_parameter(self, lorentzian: LorentzianComponent):
+    def test_area_matches_parameter(self, lorentzian: Lorentzian):
         # WHEN
         x = np.linspace(lorentzian.center.value - 500 * lorentzian.width.value, lorentzian.center.value + 500 * lorentzian.width.value, 20000) #Lorentzians have very long tails
         y = lorentzian.evaluate(x)

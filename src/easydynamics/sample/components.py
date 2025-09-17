@@ -230,6 +230,9 @@ class Gaussian(ModelComponent):
         return [self.area, self.center, self.width]
     
     def copy(self) -> "Gaussian":
+        """
+        Return a deep copy of this component with independent parameters.
+        """
 
         ModelCopy=Gaussian(
             name=self.name,
@@ -248,7 +251,7 @@ class Gaussian(ModelComponent):
         return f"GaussianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
 
-class LorentzianComponent(ModelComponent):
+class Lorentzian(ModelComponent):
     """
     Lorentzian function. Creates new EasyScience Parameters if floats are provided, otherwise uses the provided Parameters.
 
@@ -258,7 +261,12 @@ class LorentzianComponent(ModelComponent):
         width (float): HWHM (Half Width at Half Maximum).
     """
 
-    def __init__(self, name='Lorentzian', area=1.0, center=None, width=1.0, unit='meV'):
+    def __init__(self, 
+                 name: str = 'Lorentzian', 
+                 area: Union[float, Parameter] = 1.0, 
+                 center: Union[float, Parameter, None] = None, 
+                 width: Union[float, Parameter] = 1.0, 
+                 unit: str = 'meV'):
 
         
         # Validate inputs
@@ -280,7 +288,6 @@ class LorentzianComponent(ModelComponent):
             if area < 0:
                 warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
-
 
         if isinstance(center, Number):
             center = float(center)
@@ -306,13 +313,21 @@ class LorentzianComponent(ModelComponent):
         else:
             self.area=area
 
-    def evaluate(self, x):
-            #TODO: Handle units properly
+    def evaluate(self, x:Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
         if self.width.value <= 0:
             raise ValueError("Width must be greater than 0 for Lorentzian.")
         if self.area.value < 0:
             warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(self.name))
-        return self.area.value * (self.width.value/np.pi / ((x - self.center.value)**2 + self.width.value**2))
+
+        # Handle units
+        if isinstance(x, sc.array):
+            x_in = x.values
+            if self.unit is not None and x.unit != self.unit:
+                warnings.warn(f"Input x has unit {x.unit}, but Lorentzian component has unit {self.unit}. Converting Lorentzian to {x.unit}.")
+                self.convert_unit(x.unit)
+        else:
+            x_in = x    
+        return self.area.value * (self.width.value/np.pi / ((x_in - self.center.value)**2 + self.width.value**2))
 
 
     def get_parameters(self):
@@ -323,9 +338,9 @@ class LorentzianComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.width]
     
-    def copy(self) -> "LorentzianComponent":
+    def copy(self) -> "Lorentzian":
 
-        ModelCopy =LorentzianComponent(
+        ModelCopy =Lorentzian(
             name=self.name, 
             area=self.area.value,
             center=self.center.value,

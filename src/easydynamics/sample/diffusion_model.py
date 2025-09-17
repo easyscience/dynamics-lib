@@ -9,7 +9,7 @@ from easyscience.base_classes import ObjBase
 from easydynamics.utils import detailed_balance_factor
 from .components import ModelComponent
 
-from .components import LorentzianComponent
+from .components import Lorentzian
 
 from numbers import Number
 
@@ -187,7 +187,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             dependency_map=self.write_width_dependency_map_expression()
             width=Parameter.from_dependency(name="Gamma",dependency_expression=dependency_expression,dependency_map=dependency_map)
 
-            lorentzian_component=LorentzianComponent(name=f"{component_name}",width=width,area=self.scale)
+            lorentzian_component=Lorentzian(name=f"{component_name}",width=width,area=self.scale)
 
             components[i].append(lorentzian_component)
         return components
