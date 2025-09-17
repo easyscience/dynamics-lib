@@ -3,13 +3,13 @@ from easyscience.job.job import JobBase
 from easydynamics.sample import SampleModel
 from easydynamics.experiment import Experiment
 from easydynamics.analysis import Analysis
-from easydynamics.experiment.data import Data
 
 from easydynamics.sample import ModelComponent
 
 from easydynamics.sample import DiffusionModel
 
 from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
+import numpy as np
 from easyscience.base_classes import ObjBase
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 
@@ -19,7 +19,8 @@ import plopp as pp
 
 from collections import defaultdict, Counter
 
-import numpy as np
+from easydynamics.experiment.data import Data
+
 
 from itertools import product
 
@@ -333,6 +334,7 @@ class Job(JobBase):
                 ana.set_background_model(self._background_model.copy())
             if self._resolution_model is not None:
                 ana.set_resolution_model(self._resolution_model.copy())
+                ana.fix_resolution_parameters()
 
             # Attach sliced data via Experiment/Data
             exp = Experiment()
