@@ -221,9 +221,9 @@ class TestSampleModel:
         parameters = sample_model.get_parameters()
         # Expect
         assert len(parameters) == 3
-        assert parameters[0].name == 'TestGaussianarea'
-        assert parameters[1].name == 'TestGaussiancenter'
-        assert parameters[2].name == 'TestGaussianwidth'
+        assert parameters[0].name == 'TestGaussian area'
+        assert parameters[1].name == 'TestGaussian center'
+        assert parameters[2].name == 'TestGaussian width'
         assert all(isinstance(param, Parameter) for param in parameters)
 
     def test_get_parameters_no_components(self, sample_model):

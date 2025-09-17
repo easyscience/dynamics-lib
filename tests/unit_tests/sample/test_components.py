@@ -77,9 +77,9 @@ class TestGaussianComponent:
     def test_get_parameters(self, gaussian: GaussianComponent):
         params = gaussian.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestGaussianarea'
-        assert params[1].name == 'TestGaussiancenter'
-        assert params[2].name == 'TestGaussianwidth'
+        assert params[0].name == 'TestGaussian area'
+        assert params[1].name == 'TestGaussian center'
+        assert params[2].name == 'TestGaussian width'
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, gaussian: GaussianComponent):
@@ -113,9 +113,9 @@ class TestLorentzianComponent:
     def test_get_parameters(self, lorentzian: LorentzianComponent):
         params = lorentzian.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestLorentzianarea'
-        assert params[1].name == 'TestLorentziancenter'
-        assert params[2].name == 'TestLorentzianwidth'
+        assert params[0].name == 'TestLorentzian area'
+        assert params[1].name == 'TestLorentzian center'
+        assert params[2].name == 'TestLorentzian width'
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, lorentzian: LorentzianComponent):
@@ -150,10 +150,10 @@ class TestVoigtComponent:
     def test_get_parameters(self, voigt: VoigtComponent):
         params = voigt.get_parameters()
         assert len(params) == 4
-        assert params[0].name == 'TestVoigtarea'
-        assert params[1].name == 'TestVoigtcenter'
-        assert params[2].name == 'TestVoigtGwidth'
-        assert params[3].name == 'TestVoigtLwidth'
+        assert params[0].name == 'TestVoigt area'
+        assert params[1].name == 'TestVoigt center'
+        assert params[2].name == 'TestVoigt Gwidth'
+        assert params[3].name == 'TestVoigt Lwidth'
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, voigt: VoigtComponent):   
@@ -214,9 +214,9 @@ class TestDHOComponent:
     def test_get_parameters(self, dho: DHOComponent):
         params = dho.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestDHOarea'
-        assert params[1].name == 'TestDHOcenter'
-        assert params[2].name == 'TestDHOwidth'
+        assert params[0].name == 'TestDHO area'
+        assert params[1].name == 'TestDHO center'
+        assert params[2].name == 'TestDHO width'
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, dho: DHOComponent):
