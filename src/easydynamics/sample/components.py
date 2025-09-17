@@ -204,14 +204,14 @@ class Gaussian(ModelComponent):
         else:
             self.area=area
 
-    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> Union[float,np.ndarray]:
         if self.width.value <= 0:
             raise ValueError("The width of a Gaussian must be greater than zero.")
         if self.area.value < 0:
             warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(self.name))
 
         # Handle units
-        if isinstance(x, sc.array):
+        if isinstance(x, sc.Variable):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Gaussian component has unit {self.unit}. Converting Gaussian to {x.unit}.")
@@ -313,14 +313,14 @@ class Lorentzian(ModelComponent):
         else:
             self.area=area
 
-    def evaluate(self, x:Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
+    def evaluate(self, x:Union[float,np.ndarray,sc.Variable]) -> Union[float,np.ndarray]:
         if self.width.value <= 0:
             raise ValueError("Width must be greater than 0 for Lorentzian.")
         if self.area.value < 0:
             warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(self.name))
 
         # Handle units
-        if isinstance(x, sc.array):
+        if isinstance(x, sc.Variable):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Lorentzian component has unit {self.unit}. Converting Lorentzian to {x.unit}.")
@@ -438,7 +438,7 @@ class Voigt(ModelComponent):
             warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(self.name))
 
         # Handle units
-        if isinstance(x, sc.array):
+        if isinstance(x, sc.Variable):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Voigt component has unit {self.unit}. Converting Voigt to {x.unit}.")
@@ -623,7 +623,7 @@ class DampedHarmonicOscillator(ModelComponent):
         else:
             self.area = area
 
-    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> Union[float,np.ndarray]:
 
         if self.width.value <= 0:
             raise ValueError("Width of a Damped Harmonic Oscillator must be greater than 0.")
@@ -631,7 +631,7 @@ class DampedHarmonicOscillator(ModelComponent):
             raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(self.name))
         
         # Handle units
-        if isinstance(x, sc.array):
+        if isinstance(x, sc.Variable):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but DHO component has unit {self.unit}. Converting DHO to {x.unit}.")
@@ -696,9 +696,9 @@ class Polynomial(ModelComponent):
             for i, coef in enumerate(coefficients)
         ]
 
-    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
 
-        if isinstance(x, sc.array):
+        if isinstance(x, sc.Variable):
             x_in = x.values
         else:
             x_in = x

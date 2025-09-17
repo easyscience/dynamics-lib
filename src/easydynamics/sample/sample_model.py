@@ -200,7 +200,7 @@ class SampleModel(ObjBase):
         """
         self._use_detailed_balance = value
 
-    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
         """
         Evaluate the sum of all components, optionally applying detailed balance.
 
@@ -223,7 +223,7 @@ class SampleModel(ObjBase):
 
         return result
 
-    def evaluate_component(self, name: str, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
+    def evaluate_component(self, name: str, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
         """
         Evaluate a single component by name, optionally applying detailed balance.
 
