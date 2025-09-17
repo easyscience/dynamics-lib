@@ -18,7 +18,7 @@ import pytest
 
 # from easydynamics.resolution import ResolutionHandler
 
-# from easydynamics.sample.components import DeltaFunctionComponent
+# from easydynamics.sample.components import DeltaFunction
 
 
 # import numpy as np
@@ -69,7 +69,7 @@ import pytest
 #                     resolution_handler = ResolutionHandler()
 #                     y = resolution_handler.numerical_convolve(x, comp, self._experiment._resolution_model, self._experiment.offset)
 #                     # If detailed balance is used, calculate the detailed balance factor. TODO: This should be handled before convolution.
-#                     if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunctionComponent):
+#                     if self._theory.use_detailed_balance and self._theory._temperature.value >= 0 and not isinstance(comp, DeltaFunction):
 #                         y*=self._theory.detailed_balance_factor(x- self._experiment.offset.value, self._theory._temperature.value)
 
 #                 plt.plot(x, y, label=f'Component: {comp.name}', linestyle='--')

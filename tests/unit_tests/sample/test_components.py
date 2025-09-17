@@ -55,7 +55,7 @@ class TestModelComponent:
      
 
 
-class TestGaussianComponent:
+class TestGaussian:
 
     @pytest.fixture
     def gaussian(self):
@@ -91,7 +91,7 @@ class TestGaussianComponent:
         # THEN EXPECT
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
-class TestLorentzianComponent:
+class TestLorentzian:
 
     @pytest.fixture
     def lorentzian(self):
@@ -127,7 +127,7 @@ class TestLorentzianComponent:
         # THEN EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
-class TestVoigtComponent:
+class TestVoigt:
 
     @pytest.fixture
     def voigt(self):
@@ -165,7 +165,7 @@ class TestVoigtComponent:
         # THEN EXPECT
         assert numerical_area == pytest.approx(voigt.area.value, rel=2e-3)
 
-class TestDeltaFunctionComponent:
+class TestDeltaFunction:
 
     @pytest.fixture
     def delta_function(self):
@@ -177,7 +177,7 @@ class TestDeltaFunctionComponent:
         assert delta_function.center.value == 0.5
         assert delta_function.unit == 'meV'
 
-    @pytest.mark.xfail(reason="DeltaFunctionComponent.evaluate is not implemented yet without resolution convolution")
+    @pytest.mark.xfail(reason="DeltaFunction.evaluate is not implemented yet without resolution convolution")
     def test_evaluate(self, delta_function: DeltaFunction):
         x = np.array([0.0, 0.5, 1.0])
         expected = delta_function.evaluate(x)
@@ -193,7 +193,7 @@ class TestDeltaFunctionComponent:
         assert all(isinstance(param, Parameter) for param in params)
 
 
-class TestDHOComponent: 
+class TestDampedHarmonicOscillator: 
     @pytest.fixture
     def dho(self):  
         return DampedHarmonicOscillator(name='TestDHO', area=2.0, center=1.5, width=0.3, unit='meV')
@@ -229,7 +229,7 @@ class TestDHOComponent:
         assert numerical_area == pytest.approx(dho.area.value, rel=2e-3)
 
 
-class TestPolynomialComponent:
+class TestPolynomial:
     @pytest.fixture
     def polynomial(self):
         return Polynomial(name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
@@ -256,7 +256,7 @@ class TestPolynomialComponent:
 
 
     def test_convert_unit_raises_for_polynomial(self, polynomial):
-        with pytest.raises(ValueError, match="PolynomialComponent does not support unit conversion"):
+        with pytest.raises(ValueError, match="Polynomial does not support unit conversion"):
             polynomial.convert_unit("eV")        
 
 @pytest.mark.skip(reason="UserDefinedComponent not implemented yet")

@@ -9,6 +9,7 @@ from easyscience.base_classes import ObjBase
 from easydynamics.utils import detailed_balance_factor
 from .components import ModelComponent
 
+import scipp as sc
 
 
 class SampleModel(ObjBase):
@@ -199,14 +200,13 @@ class SampleModel(ObjBase):
         """
         self._use_detailed_balance = value
 
-    def evaluate(self, x: np.ndarray) -> np.ndarray:
+    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
         """
         Evaluate the sum of all components, optionally applying detailed balance.
 
         Parameters
         ----------
-        x : np.ndarray
-            Energy axis (e.g., in meV).
+        x : np.ndarray or scipp.array
 
         Returns
         -------
@@ -217,12 +217,13 @@ class SampleModel(ObjBase):
         for component in self.components.values():
             result += component.evaluate(x)
 
+        #TODO: handle units properly
         if self.use_detailed_balance and self._temperature.value >= 0:
             result *= detailed_balance_factor(x, self._temperature.value)
 
         return result
 
-    def evaluate_component(self, name: str, x: np.ndarray) -> np.ndarray:
+    def evaluate_component(self, name: str, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
         """
         Evaluate a single component by name, optionally applying detailed balance.
 

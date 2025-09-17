@@ -670,7 +670,7 @@ class DampedHarmonicOscillator(ModelComponent):
 
 
     def __repr__(self):
-        return f"DHOComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"DampedHarmonicOscillator(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
 class Polynomial(ModelComponent):
     """
