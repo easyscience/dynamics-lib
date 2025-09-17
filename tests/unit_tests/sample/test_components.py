@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunctionComponent, DHOComponent, PolynomialComponent
+from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DHOComponent, PolynomialComponent
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -169,23 +169,23 @@ class TestDeltaFunctionComponent:
 
     @pytest.fixture
     def delta_function(self):
-        return DeltaFunctionComponent(name='TestDeltaFunction', area=2.0, center=0.5, unit='meV')
+        return DeltaFunction(name='TestDeltaFunction', area=2.0, center=0.5, unit='meV')
 
-    def test_initialization(self, delta_function: DeltaFunctionComponent):
+    def test_initialization(self, delta_function: DeltaFunction):
         assert delta_function.name == 'TestDeltaFunction'
         assert delta_function.area.value == 2.0
         assert delta_function.center.value == 0.5
         assert delta_function.unit == 'meV'
 
     @pytest.mark.xfail(reason="DeltaFunctionComponent.evaluate is not implemented yet without resolution convolution")
-    def test_evaluate(self, delta_function: DeltaFunctionComponent):
+    def test_evaluate(self, delta_function: DeltaFunction):
         x = np.array([0.0, 0.5, 1.0])
         expected = delta_function.evaluate(x)
         expected_result = np.zeros_like(x)
         # expected_result[x == 0.5] = 2.0
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, delta_function: DeltaFunctionComponent):
+    def test_get_parameters(self, delta_function: DeltaFunction):
         params = delta_function.get_parameters()
         assert len(params) == 2
         assert params[0].name == 'TestDeltaFunction area'

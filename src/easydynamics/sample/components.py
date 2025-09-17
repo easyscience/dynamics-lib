@@ -476,27 +476,35 @@ class Voigt(ModelComponent):
         return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
 
 
-class DeltaFunctionComponent(ModelComponent):
+class DeltaFunction(ModelComponent):
     """
-    Delta function.
+    Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
 
     Args:
-        center (float): Mean of the Gaussian.
+        center (float): Center of the delta function.
         area (float): Total area under the curve.
     """
 
-    def __init__(self, name='DeltaFunction', center=None, area=1.0, unit='meV'):
+    def __init__(self, 
+                 name:str='DeltaFunction', 
+                 center:Union[None, float, Parameter]=None, 
+                 area:Union[float, Parameter]=1.0, 
+                 unit='meV'):
         # Validate inputs
         if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
+        
         if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
+        
         if isinstance(area, Number):
             if area < 0:
                 warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
+
         if isinstance(center, Number):
             center = float(center)
+
         super().__init__(name=name)
         self.unit = unit
         # Create Parameters from floats, or set Parameters if already provided
@@ -517,7 +525,7 @@ class DeltaFunctionComponent(ModelComponent):
 
         if self.area.value < 0:
             warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(self.name))
-        #TODO: Handle units properly. Also handle area if we want users to be able to plot it without resolution convolution
+        #TODO: Consider adding support for evaluation without resolution convolution
         return 0*x
     
     
@@ -540,11 +548,11 @@ class DeltaFunctionComponent(ModelComponent):
         self.center.convert_unit(unit)    
         self.unit = unit  
 
-    def copy(self) -> "DeltaFunctionComponent":
+    def copy(self) -> "DeltaFunction":
         """
         Return a deep copy of this component with independent parameters.
         """
-        ModelCopy = DeltaFunctionComponent(
+        ModelCopy = DeltaFunction(
             name=self.name,
             area=self.area.value,
             center=self.center.value,

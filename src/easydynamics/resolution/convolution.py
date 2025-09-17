@@ -4,7 +4,7 @@ from scipy.signal import fftconvolve
 from scipy.interpolate import interp1d
 from scipy.special import voigt_profile
 
-from easydynamics.sample import DeltaFunctionComponent
+from easydynamics.sample import DeltaFunction
 from easydynamics.sample.components import ModelComponent  
 from easydynamics.sample import Gaussian 
 from easydynamics.sample import Lorentzian
@@ -153,17 +153,17 @@ class ResolutionHandler:
         # Add delta contributions
         if isinstance(sample_model, SampleModel):
             for comp in sample_model.components.values():
-                if isinstance(comp, DeltaFunctionComponent):
+                if isinstance(comp, DeltaFunction):
                     if selected_component_name is None or comp.name == selected_component_name:
                         convolved += comp.area.value * self._evaluate_any(resolution_model, x_dense - off - comp.center.value)
-        elif isinstance(sample_model, DeltaFunctionComponent):
+        elif isinstance(sample_model, DeltaFunction):
             convolved += sample_model.area.value * self._evaluate_any(resolution_model, x_dense - off - sample_model.center.value)
 
         if isinstance(resolution_model, SampleModel):
             for comp in resolution_model.components.values():
-                if isinstance(comp, DeltaFunctionComponent):
+                if isinstance(comp, DeltaFunction):
                     convolved += comp.area.value * self._evaluate_any(sample_model, x_dense - off - comp.center.value)
-        elif isinstance(resolution_model, DeltaFunctionComponent):
+        elif isinstance(resolution_model, DeltaFunction):
             convolved += resolution_model.area.value * self._evaluate_any(sample_model, x_dense - off - resolution_model.center.value)
 
         #TODO: if both resolution and sample are delta functions, we should let the user know that they are wrong.
@@ -256,10 +256,10 @@ class ResolutionHandler:
         Returns (True, contribution) if handled, else (False, zeros).
         """
         # Delta functions
-        if isinstance(s, DeltaFunctionComponent):
+        if isinstance(s, DeltaFunction):
             return True, s.area.value * r.evaluate(x - s.center.value - off)
 
-        if isinstance(r, DeltaFunctionComponent):
+        if isinstance(r, DeltaFunction):
             return True, r.area.value * s.evaluate(x - r.center.value - off)
 
         # Gaussian + Gaussian --> Gaussian

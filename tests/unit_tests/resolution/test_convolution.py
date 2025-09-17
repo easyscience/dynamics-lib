@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import voigt_profile
 
 from easyscience.variable import Parameter
-from easydynamics.sample import SampleModel, Gaussian, Lorentzian, DeltaFunctionComponent
+from easydynamics.sample import SampleModel, Gaussian, Lorentzian, DeltaFunction
 
 
 from easydynamics.resolution import ResolutionHandler
@@ -184,7 +184,7 @@ class TestConvolution:
     )
     def test_components_delta_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_delta = DeltaFunctionComponent(name="Delta", center=0.1, area=2)
+        sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
         resolution_gauss = Gaussian(center=0.2, width=0.3, area=3)
 
         resolution_handler = ResolutionHandler()
@@ -216,7 +216,7 @@ class TestConvolution:
     def test_components_gauss_delta(self, x, offset_obj, expected_shift, method):
         #WHEN
         sample_gauss = Gaussian(center=0.1, width=0.2, area=2)
-        resolution_delta = DeltaFunctionComponent(name="Delta", center=0.2, area=3)
+        resolution_delta = DeltaFunction(name="Delta", center=0.2, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -285,7 +285,7 @@ class TestConvolution:
     def test_model_lorentzian_delta_resolution_gauss(self, x, method):
         #WHEN
         sample_lorentzian = Lorentzian(center=0.1, width=0.3, area=2, name="SampleLorentzian")
-        sample_delta = DeltaFunctionComponent(center=0.5, area=4, name="SampleDelta")
+        sample_delta = DeltaFunction(center=0.5, area=4, name="SampleDelta")
         resolution_gauss = Gaussian(center=-0.3, width=0.4, area=3, name="ResolutionGauss")
         sample = SampleModel(name="SampleModel")
         sample.add_component(sample_lorentzian)
