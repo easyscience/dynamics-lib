@@ -13,17 +13,15 @@ from .components import ModelComponent
 
 class SampleModel(ObjBase):
     """
-    Represents a combined model composed of multiple model components.
-
-    This class allows components to be added, removed, and evaluated together.
-    Optionally applies detailed balancing. 
+    A model of the scattering from a sample, combining multiple model components.
+    Optionally applies detailed balancing.
 
     Attributes
     ----------
     components : dict
         Dictionary of model components keyed by name.
     """
-    def __init__(self, name="MySampleModel", temperature=None):
+    def __init__(self, name: str = "MySampleModel", temperature: Union[float, None] = None):
         """
         Initialize a new SampleModel.
 
@@ -31,6 +29,7 @@ class SampleModel(ObjBase):
         ----------
         name : str
             Name of the sample model.
+        temperature : float or None, optional
         """
                 
         self.components: Dict[str, ModelComponent] = {}
@@ -44,12 +43,7 @@ class SampleModel(ObjBase):
 
     def add_component(self, component: ModelComponent):
         """
-        Add a model component to the SampleModel.
-
-        Raises
-        ------
-        ValueError
-            If a component with the same name already exists.
+        Add a model component to the SampleModel. Component names must be unique.
         """
         if component.name in self.components:
             raise ValueError(f"Component with name '{component.name}' already exists.")
@@ -64,10 +58,6 @@ class SampleModel(ObjBase):
         name : str
             Name of the component to remove.
 
-        Raises
-        ------
-        KeyError
-            If the component does not exist.
         """
         if name not in self.components:
             raise KeyError(f"No component named '{name}' exists in the model.")
@@ -92,7 +82,7 @@ class SampleModel(ObjBase):
 
     def __getitem__(self, key: str) -> ModelComponent:
         """
-        Access a component by name using dictionary-like indexing.
+        Access a component by name.
 
         Parameters
         ----------
@@ -159,22 +149,21 @@ class SampleModel(ObjBase):
         return self._temperature
 
     @temperature.setter
-    def temperature(self, value: Union[float, None]):
+    def temperature(self, value: Union[float, None], unit: str = 'K'):
         """
-        Set the temperature.
-
-        If a negative value is provided, detailed balance is disabled and a warning is issued.
+        Set the temperature and enables detailed balance if value is non-negative.
 
         Parameters
         ----------
         value : float
-            Temperature value in Kelvin.
+            Temperature value.
+        unit : str, default 'K'
+            Unit of the temperature.
         """
         if value is None:
             self._use_detailed_balance = False
             self._temperature = None
             return
-            # warnings.warn("Temperature is negative. Disabling detailed balance.") #TODO: Uncomment this line if you want to enable the warning
 
         if value < 0:
             raise ValueError("Temperature must be non-negative.")
@@ -182,11 +171,10 @@ class SampleModel(ObjBase):
         if isinstance(self._temperature, Parameter):
             self._temperature.value = value
         else:
-            self._temperature = Parameter(name="temperature", value=value, unit='K', fixed=True)
+            self._temperature = Parameter(name="temperature", value=value, unit=unit, fixed=True)
 
         if not self.use_detailed_balance:
             self.use_detailed_balance = value >= 0
-            # print(f"Detailed balance set to {self.use_detailed_balance} for temperature {value} K") # #TODO: Uncomment this line if you want to enable the warning
 
     @property
     def use_detailed_balance(self) -> bool:
@@ -267,8 +255,6 @@ class SampleModel(ObjBase):
     def normalize_area(self):
         """
         Normalize the areas of all components so they sum to 1.
-
-        Modifies the 'area' parameters directly. Raises an error if total area is zero.
         """
         area_params = []
         total_area = 0.0
@@ -303,12 +289,24 @@ class SampleModel(ObjBase):
     
     def get_fit_parameters(self):
         """
-        Get all fit parameters, filtering out fixed parameters.
+        Get all fit parameters, removing fixed and dependent parameters.
 
         Returns:
-            List[Parameter]: A list of unfixed fit parameters.
+            List[Parameter]: A list of fit parameters.
         """
-        return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
+
+        parameters = self.get_parameters()
+        fit_parameters = []
+        
+        for parameter in parameters:
+            is_not_fixed = not getattr(parameter, 'fixed', False)
+            is_independent = getattr(parameter, '_independent', True)
+            
+            if is_not_fixed and is_independent:
+                fit_parameters.append(parameter)
+        
+        return fit_parameters
+
     
     def fix_all_parameters(self):
         """
@@ -324,7 +322,7 @@ class SampleModel(ObjBase):
         for param in self.get_parameters():
             param.fixed = False
 
-    def fix_all_component_parameters(self,component_name):
+    def fix_all_component_parameters(self,component_name: str):
         """
         Fix all unfixed parameters in the specified component.
         """
@@ -333,7 +331,7 @@ class SampleModel(ObjBase):
         
         self.components[component_name].fix_all_parameters()
 
-    def free_all_component_parameters(self, component_name):
+    def free_all_component_parameters(self, component_name: str):
         """
         Free all fixed parameters in the specified component.
         """
@@ -342,7 +340,7 @@ class SampleModel(ObjBase):
 
         self.components[component_name].free_all_parameters()
 
-    def fix_component_parameter(self,component_name,parameter_name):
+    def fix_component_parameter(self,component_name: str, parameter_name: str):
         """
         Fix a specific parameter in the specified component.
         """
@@ -356,7 +354,7 @@ class SampleModel(ObjBase):
 
         param.fixed = True
 
-    def free_component_parameter(self, component_name, parameter_name):
+    def free_component_parameter(self, component_name: str, parameter_name: str):
         """
         Free a specific parameter in the specified component.
         """
@@ -374,56 +372,36 @@ class SampleModel(ObjBase):
         self,
         other: "SampleModel",
         *,
-        only_unfixed: bool = True,
-        strict_components: bool = True,
-        strict_params: bool = True,
-        include_temperature: bool = False,
-        require_same_units: bool = True,
-        convert_units: bool = False,
+        only_free: bool = True,
     )-> Dict[str, Tuple[float, float]]:
         """
         Overwrite this model's Parameter.values from another SampleModel, matching by
-        component name and Parameter.name.
+        component name and Parameter.name. This is used to copy fit results when doing sequential fitting.  
 
         Parameters
         ----------
         other : SampleModel
             Source of values.
-        only_unfixed : bool, default True
+        only_free : bool, default True
             If True, skip Parameters in *self* that are fixed.
-        strict_components : bool, default True
-            If True, require identical component name sets; else use intersection.
-        strict_params : bool, default True
-            If True, require identical parameter name sets per component; else use intersection.
-        include_temperature : bool, default False
-            If True, also copy temperature (if present on both).
-        require_same_units : bool, default True
-            If True, fail on unit mismatch; otherwise allow.
-        convert_units : bool, default False
-            If True and units differ, attempt self-param conversion to other's unit.
 
         Returns
         -------
         Dict[str, Tuple[float, float]]
             Mapping key -> (old_value, new_value), where key is
-            "temperature" or "<component>.<Parameter.name>".
+             "<component>.<Parameter.name>".
 
-        Notes
-        -----
-        - Only .value is overwritten. Parameter objects are not replaced.
-        - Parameter matching uses the full Parameter.name as you define it
-          in components (e.g. 'Lorentziancenter', 'Gaussianwidth', 'Polynomial_c0').
         """
         if not isinstance(other, SampleModel):
             raise TypeError("other must be a SampleModel")
 
         report: Dict[str, Tuple[float, float]] = {}
 
-        # --- Component set checks
+        # Check that components are the same
         self_names = set(self.components.keys())
         other_names = set(other.components.keys())
 
-        if strict_components and self_names != other_names:
+        if self_names != other_names:
             missing = self_names - other_names
             extra   = other_names - self_names
             raise ValueError(
@@ -432,31 +410,17 @@ class SampleModel(ObjBase):
                 f"  Extra in source:   {extra or '{}'}"
             )
 
-        common_components = self_names & other_names if not strict_components else self_names
 
-        # --- Optional: temperature
-        if include_temperature and isinstance(self._temperature, Parameter) and isinstance(other._temperature, Parameter):
-            if (not only_unfixed) or (not getattr(self._temperature, "fixed", False)):
-                if getattr(self._temperature, "unit", None) != getattr(other._temperature, "unit", None):
-                    if require_same_units and not convert_units:
-                        raise ValueError(
-                            f"Unit mismatch for temperature: {self._temperature.unit} vs {other._temperature.unit}"
-                        )
-                    if convert_units and hasattr(self._temperature, "convert_unit"):
-                        self._temperature.convert_unit(other._temperature.unit)
-                old = self._temperature.value
-                self._temperature.value = other._temperature.value
-                report["temperature"] = (old, self._temperature.value)
-
-        # --- Per-component parameters
-        for cname in common_components:
+        # Go through components
+        for cname in self_names:
             c_self  = self.components[cname]
             c_other = other.components[cname]
 
+            # Check that parameters are the same
             self_params  = {p.name: p for p in c_self.get_parameters()}
             other_params = {p.name: p for p in c_other.get_parameters()}
 
-            if strict_params and set(self_params) != set(other_params):
+            if set(self_params) != set(other_params):
                 missing = set(self_params) - set(other_params)
                 extra   = set(other_params) - set(self_params)
                 raise ValueError(
@@ -465,31 +429,27 @@ class SampleModel(ObjBase):
                     f"  Extra in source:   {extra or '{}'}"
                 )
 
-            common_param_names = set(self_params) & set(other_params) if not strict_params else set(self_params)
 
-            for pname in common_param_names:
+            for pname in set(self_params):
                 p_self  = self_params[pname]
                 p_other = other_params[pname]
 
-                if only_unfixed and getattr(p_self, "fixed", False):
+                if only_free and getattr(p_self, "fixed", False):
                     continue
 
-                # Units (best effort)
+                # Units: convert units to other's unit if they differ
                 u_self  = getattr(p_self, "unit", None)
                 u_other = getattr(p_other, "unit", None)
                 if u_self != u_other:
-                    if require_same_units and not convert_units:
-                        raise ValueError(
-                            f"Unit mismatch for {cname}.{pname}: {u_self} vs {u_other}"
-                        )
-                    if convert_units and hasattr(p_self, "convert_unit") and u_other is not None:
-                        p_self.convert_unit(u_other)
+                    p_self.convert_unit(u_other)
 
+                # Update value, but save the old one.
                 old = p_self.value
                 p_self.value = p_other.value
                 report[f"{cname}.{pname}"] = (old, p_self.value)
 
         return report
+
 
     
     def copy(self) -> "SampleModel":
@@ -501,14 +461,12 @@ class SampleModel(ObjBase):
         SampleModel
             A new instance with copied components and parameters.
         """
+        
         new_model = SampleModel(name=self.name, temperature=self._temperature.value if self._temperature else None)
-        # new_model.temperature = self._temperature.value
-        new_model.use_detailed_balance = self._use_detailed_balance
 
+        new_model.use_detailed_balance = self._use_detailed_balance
 
         for comp in self.components.values():
             new_model.add_component(comp.copy())
-
-            
 
         return new_model
