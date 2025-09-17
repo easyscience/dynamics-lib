@@ -215,7 +215,7 @@ class Gaussian(ModelComponent):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Gaussian component has unit {self.unit}. Converting Gaussian to {x.unit}.")
-                self.convert_unit(x.unit)
+                self.convert_unit(x.unit.name)
         else:
             x_in = x
         return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x_in - self.center.value) / self.width.value) ** 2)
@@ -324,7 +324,7 @@ class Lorentzian(ModelComponent):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Lorentzian component has unit {self.unit}. Converting Lorentzian to {x.unit}.")
-                self.convert_unit(x.unit)
+                self.convert_unit(x.unit.name)
         else:
             x_in = x    
         return self.area.value * (self.width.value/np.pi / ((x_in - self.center.value)**2 + self.width.value**2))
@@ -442,7 +442,7 @@ class Voigt(ModelComponent):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but Voigt component has unit {self.unit}. Converting Voigt to {x.unit}.")
-                self.convert_unit(x.unit)
+                self.convert_unit(x.unit.name)
         else:
             x_in = x
         return self.area.value * voigt_profile(x_in - self.center.value, self.Gwidth.value, self.Lwidth.value)
@@ -635,7 +635,7 @@ class DampedHarmonicOscillator(ModelComponent):
             x_in = x.values
             if self.unit is not None and x.unit != self.unit:
                 warnings.warn(f"Input x has unit {x.unit}, but DHO component has unit {self.unit}. Converting DHO to {x.unit}.")
-                self.convert_unit(x.unit)
+                self.convert_unit(x.unit.name)
         else:
             x_in = x
         return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
