@@ -413,6 +413,8 @@ class Voigt(ModelComponent):
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
         elif isinstance(center, Number):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
+        else:
+            self.center=center
 
         if isinstance(Gwidth, Number):
             self.Gwidth = Parameter(name=name + ' Gwidth', value=Gwidth, unit=unit,min=0.0)
@@ -446,6 +448,19 @@ class Voigt(ModelComponent):
         else:
             x_in = x
         return self.area.value * voigt_profile(x_in - self.center.value, self.Gwidth.value, self.Lwidth.value)
+
+    def convert_unit(self, unit: str):
+        """
+        Convert the unit of the Parameters in the component.
+        
+        Args:
+            unit (str): The new unit to convert to.
+        """
+        self.area.convert_unit(unit)
+        self.center.convert_unit(unit)
+        self.Gwidth.convert_unit(unit)
+        self.Lwidth.convert_unit(unit)
+        self.unit = unit
 
     def get_parameters(self):
         """
