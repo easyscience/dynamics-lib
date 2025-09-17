@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Callable, Dict
+from typing import Callable, Dict, Union, List, Tuple
 
 import numpy as np
 from scipy.special import voigt_profile
@@ -11,7 +11,8 @@ import warnings
 
 from numbers import Number
 
-#TODO: Allow specification of units for parameters in components
+import scipp as sc
+
 
 class ModelComponent(ObjBase):
     """
@@ -32,7 +33,7 @@ class ModelComponent(ObjBase):
         for p in self.get_parameters():
             p.fixed = False
 
-    def get_parameter(self, parameter_name):
+    def get_parameter(self, parameter_name: str) -> Parameter:
         """
         Get a specific parameter by name (explicit or partial match).
         
@@ -59,7 +60,7 @@ class ModelComponent(ObjBase):
         else:
             raise ValueError(f"Parameter '{parameter_name}' not found.")
 
-    def set_parameter_value(self, parameter_name, value, unit=None):
+    def set_parameter_value(self, parameter_name: str, value: float, unit: str = None):
         """
         Set the value of a specific parameter by name.
         """
@@ -68,7 +69,7 @@ class ModelComponent(ObjBase):
             param.convert_unit(unit)
         param.value = value
 
-    def set_parameter_bounds(self, parameter_name, min=None, max=None, unit=None):
+    def set_parameter_bounds(self, parameter_name: str, min: Union[float,None] = None, max: Union[float, None] = None, unit: str = None):
         """
         Set the bounds of a specific parameter by name.
         """
@@ -80,21 +81,21 @@ class ModelComponent(ObjBase):
         if max is not None:
             param.max = max
 
-    def fix_parameter(self, parameter_name):
+    def fix_parameter(self, parameter_name: str):
         """
         Fix a specific parameter by name.
         """
         param = self.get_parameter(parameter_name)
         param.fixed = True
 
-    def free_parameter(self, parameter_name):
+    def free_parameter(self, parameter_name: str):
         """
         Free a specific parameter by name.
         """
         param = self.get_parameter(parameter_name)
         param.fixed = False
 
-    def convert_unit(self, unit):
+    def convert_unit(self, unit: str):
         """
         Convert the unit of the Parameters in the component.
         
@@ -109,7 +110,7 @@ class ModelComponent(ObjBase):
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         """
-        Evaluate the model component at positions x.
+        Evaluate the model component at input x.
 
         Args:
             x (np.ndarray): Input values.
@@ -142,18 +143,23 @@ class ModelComponent(ObjBase):
         return f"{self.__class__.__name__}(name={self.name})"
 
 
-class GaussianComponent(ModelComponent):
+class Gaussian(ModelComponent):
     """
     Gaussian function. Creates new EasyScience Parameters if floats are provided, otherwise uses the provided Parameters.
 
     Args:
-        area (float): area of the Gaussian.
+        area (float): Area of the Gaussian. Has the same unit as the x axis
         center (float): Center of the Gaussian. If None, defaults to 0 and is fixed
         width (float): Standard deviation.
     """
 
-    def __init__(self, name='Gaussian', area=1.0, center=None, width=1.0, unit='meV'):
-        
+    def __init__(self, 
+                 name: str='Gaussian', 
+                 area: Union[float,Parameter]=1.0, 
+                 center: Union[float,Parameter,None]=None, 
+                 width: Union[float,Parameter]=1.0, 
+                 unit: str='meV'):
+
         # Validate inputs - throw errors before any Parameters are created
         if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
@@ -173,7 +179,6 @@ class GaussianComponent(ModelComponent):
             if area < 0:
                 warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
-
 
         if isinstance(center,Number):
             center = float(center)
@@ -199,14 +204,22 @@ class GaussianComponent(ModelComponent):
         else:
             self.area=area
 
-    def evaluate(self, x):
-        #TODO: Handle units properly
+    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
         if self.width.value <= 0:
             raise ValueError("The width of a Gaussian must be greater than zero.")
         if self.area.value < 0:
             warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(self.name))
-        return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x - self.center.value) / self.width.value) ** 2)
-    
+
+        # Handle units
+        if isinstance(x, sc.array):
+            x_in = x.values
+            if self.unit is not None and x.unit != self.unit:
+                warnings.warn(f"Input x has unit {x.unit}, but Gaussian component has unit {self.unit}. Converting Gaussian to {x.unit}.")
+                self.convert_unit(x.unit)
+        else:
+            x_in = x
+        return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x_in - self.center.value) / self.width.value) ** 2)
+
 
     def get_parameters(self):
         """
@@ -216,9 +229,9 @@ class GaussianComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.width]
     
-    def copy(self) -> "GaussianComponent":
+    def copy(self) -> "Gaussian":
 
-        ModelCopy=GaussianComponent(
+        ModelCopy=Gaussian(
             name=self.name,
             area=self.area.value,
             center=self.center.value,

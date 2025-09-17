@@ -6,7 +6,7 @@ from scipy.special import voigt_profile
 
 from easydynamics.sample import DeltaFunctionComponent
 from easydynamics.sample.components import ModelComponent  
-from easydynamics.sample import GaussianComponent 
+from easydynamics.sample import Gaussian 
 from easydynamics.sample import LorentzianComponent
 from easydynamics.sample import SampleModel
 
@@ -263,7 +263,7 @@ class ResolutionHandler:
             return True, r.area.value * s.evaluate(x - r.center.value - off)
 
         # Gaussian + Gaussian --> Gaussian
-        if isinstance(s, GaussianComponent) and isinstance(r, GaussianComponent):
+        if isinstance(s, Gaussian) and isinstance(r, Gaussian):
             width = np.sqrt(s.width.value**2 + r.width.value**2)
             area  = s.area.value * r.area.value
             center = (s.center.value + r.center.value) + off
@@ -277,9 +277,9 @@ class ResolutionHandler:
             return True, self.lorentzian_eval(x, center, width, area)
 
         # Gaussian + Lorentzian --> Voigt 
-        if (isinstance(s, GaussianComponent) and isinstance(r, LorentzianComponent)) or \
-           (isinstance(s, LorentzianComponent) and isinstance(r, GaussianComponent)):
-            if isinstance(s, GaussianComponent):
+        if (isinstance(s, Gaussian) and isinstance(r, LorentzianComponent)) or \
+           (isinstance(s, LorentzianComponent) and isinstance(r, Gaussian)):
+            if isinstance(s, Gaussian):
                 G, L = s, r
             else:
                 G, L = r, s

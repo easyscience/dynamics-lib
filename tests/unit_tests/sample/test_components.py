@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import GaussianComponent, LorentzianComponent, VoigtComponent, DeltaFunctionComponent, DHOComponent, PolynomialComponent
+from easydynamics.sample import Gaussian, LorentzianComponent, VoigtComponent, DeltaFunctionComponent, DHOComponent, PolynomialComponent
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -59,22 +59,22 @@ class TestGaussianComponent:
 
     @pytest.fixture
     def gaussian(self):
-        return GaussianComponent(name='TestGaussian', area=2.0, center=0.5, width=0.6, unit='meV')
+        return Gaussian(name='TestGaussian', area=2.0, center=0.5, width=0.6, unit='meV')
     
-    def test_initialization(self, gaussian: GaussianComponent):
+    def test_initialization(self, gaussian: Gaussian):
         assert gaussian.name == 'TestGaussian'
         assert gaussian.area.value == 2.0
         assert gaussian.center.value == 0.5
         assert gaussian.width.value == 0.6
         assert gaussian.unit == 'meV'
 
-    def test_evaluate(self, gaussian: GaussianComponent):
+    def test_evaluate(self, gaussian: Gaussian):
         x = np.array([0.0, 0.5, 1.0])
         expected = gaussian.evaluate(x)
         expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, gaussian: GaussianComponent):
+    def test_get_parameters(self, gaussian: Gaussian):
         params = gaussian.get_parameters()
         assert len(params) == 3
         assert params[0].name == 'TestGaussian area'
@@ -82,7 +82,7 @@ class TestGaussianComponent:
         assert params[2].name == 'TestGaussian width'
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_area_matches_parameter(self, gaussian: GaussianComponent):
+    def test_area_matches_parameter(self, gaussian: Gaussian):
         # WHEN
         x = np.linspace(gaussian.center.value - 10 * gaussian.width.value, gaussian.center.value + 10 * gaussian.width.value, 1000)
         y = gaussian.evaluate(x)

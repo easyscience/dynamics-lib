@@ -3,7 +3,7 @@ import numpy as np
 from scipy.integrate import simpson
 
 from easyscience.variable import Parameter
-from easydynamics.sample import SampleModel, GaussianComponent, LorentzianComponent
+from easydynamics.sample import SampleModel, Gaussian, LorentzianComponent
 from easydynamics.sample.components import ModelComponent
 from easydynamics.utils import detailed_balance_factor
 
@@ -16,7 +16,7 @@ class TestSampleModel:
 
     def test_add_component(self, sample_model):
         #When
-        component = GaussianComponent(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
         #Then
         sample_model.add_component(component)
         #Expect
@@ -24,7 +24,7 @@ class TestSampleModel:
 
     def test_add_duplicate_component_raises(self, sample_model):
         #When
-        component = GaussianComponent(name="Dup", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="Dup", area=1.0, center=0.0, width=1.0, unit='meV')
         #Then
         sample_model.add_component(component)
         #Expect
@@ -33,7 +33,7 @@ class TestSampleModel:
 
     def test_remove_component(self, sample_model):
         #When
-        component = GaussianComponent(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
         #Then
         sample_model.add_component(component)
         sample_model.remove_component("TestComponent")
@@ -47,7 +47,7 @@ class TestSampleModel:
 
     def test_getitem(self, sample_model):
         #When
-        component = GaussianComponent(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestComponent", area=1.0, center=0.0, width=1.0, unit='meV')
         #Then
         sample_model.add_component(component)
         #Expect
@@ -63,7 +63,7 @@ class TestSampleModel:
 
     def test_contains_component(self, sample_model):
         #When
-        component = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         #Then
         sample_model.add_component(component)
         #Expect
@@ -72,8 +72,8 @@ class TestSampleModel:
 
     def test_list_components(self, sample_model):
         #When
-        component1 = GaussianComponent(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
-        component2 = GaussianComponent(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
+        component1 = Gaussian(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
+        component2 = Gaussian(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
         #Then
@@ -85,8 +85,8 @@ class TestSampleModel:
 
     def test_clear_components(self, sample_model):
         #when
-        component1 = GaussianComponent(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
-        component2 = GaussianComponent(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
+        component1 = Gaussian(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
+        component2 = Gaussian(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
         #Then
@@ -129,7 +129,7 @@ class TestSampleModel:
 
     def test_evaluate(self, sample_model):
         # When
-        component1 = GaussianComponent(name="Gaussian1", area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name="Gaussian1", area=1.0, center=0.0, width=1.0, unit='meV')
         component2 = LorentzianComponent(name="Lorentzian1", area=2.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
@@ -143,7 +143,7 @@ class TestSampleModel:
     def test_evaluate_with_detailed_balance(self, sample_model):
         # When
         sample_model.temperature = 300
-        component1 = GaussianComponent(name="Gaussian1", area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name="Gaussian1", area=1.0, center=0.0, width=1.0, unit='meV')
         component2 = LorentzianComponent(name="Lorentzian1", area=2.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
@@ -157,7 +157,7 @@ class TestSampleModel:
 
     def test_evaluate_component(self, sample_model):
         # When
-        component1 = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         component2 = LorentzianComponent(name="TestLorentzian", area=2.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
@@ -174,7 +174,7 @@ class TestSampleModel:
 
     def test_evaluate_component_with_detailed_balance(self, sample_model):
         # When
-        component1 = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         component2 = LorentzianComponent(name="TestLorentzian", area=2.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
@@ -201,8 +201,8 @@ class TestSampleModel:
 
     def test_normalize_area(self, sample_model):
         # When
-        component1 = GaussianComponent(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
-        component2 = GaussianComponent(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
+        component1 = Gaussian(name="TestGaussian1", area=2.0, center=0.0, width=1.0, unit='meV')
+        component2 = Gaussian(name="TestGaussian2", area=3.0, center=1.0, width=0.5, unit='meV')
         sample_model.add_component(component1)
         sample_model.add_component(component2)
         # Then
@@ -215,7 +215,7 @@ class TestSampleModel:
 
     def test_get_parameters(self, sample_model):
         # When
-        component = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         sample_model.add_component(component)
         # Then
         parameters = sample_model.get_parameters()
@@ -234,7 +234,7 @@ class TestSampleModel:
 
     def test_repr_contains_name_and_components(self, sample_model):
         # When
-        component = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         sample_model.add_component(component)
         # Then
         rep = repr(sample_model)
@@ -251,7 +251,7 @@ class TestSampleModel:
 
     def test_str_contains_name_and_components(self, sample_model):
         # When
-        component = GaussianComponent(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name="TestGaussian", area=1.0, center=0.0, width=1.0, unit='meV')
         sample_model.add_component(component)
         # Then
         str_repr = str(sample_model)

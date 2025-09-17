@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import voigt_profile
 
 from easyscience.variable import Parameter
-from easydynamics.sample import SampleModel, GaussianComponent, LorentzianComponent, DeltaFunctionComponent
+from easydynamics.sample import SampleModel, Gaussian, LorentzianComponent, DeltaFunctionComponent
 
 
 from easydynamics.resolution import ResolutionHandler
@@ -24,7 +24,7 @@ class TestConvolution:
     @pytest.fixture
     def resolution_model(self):
         test_resolution_model = SampleModel(name="TestResolutionModel")
-        test_resolution_model.add_component(GaussianComponent(center=0.2, width=0.3, area=3.0))
+        test_resolution_model.add_component(Gaussian(center=0.2, width=0.3, area=3.0))
         return test_resolution_model
        
     @pytest.fixture
@@ -50,8 +50,8 @@ class TestConvolution:
     )
     def test_components_gauss_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_gauss = GaussianComponent(center=0.1, width=0.3, area=2)
-        resolution_gauss = GaussianComponent(center=0.2, width=0.4, area=3)
+        sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
+        resolution_gauss = Gaussian(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -114,7 +114,7 @@ class TestConvolution:
     )
     def test_components_gauss_lorentzian(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_gauss = GaussianComponent(center=0.1, width=0.3, area=2)
+        sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
         resolution_lorentzian = LorentzianComponent(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
@@ -149,7 +149,7 @@ class TestConvolution:
     )
     def test_components_lorentzian_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
-        resolution_gauss = GaussianComponent(center=0.1, width=0.3, area=2)
+        resolution_gauss = Gaussian(center=0.1, width=0.3, area=2)
         sample_lorentzian = LorentzianComponent(center=0.2, width=0.4, area=3)
 
         resolution_handler = ResolutionHandler()
@@ -185,7 +185,7 @@ class TestConvolution:
     def test_components_delta_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
         sample_delta = DeltaFunctionComponent(name="Delta", center=0.1, area=2)
-        resolution_gauss = GaussianComponent(center=0.2, width=0.3, area=3)
+        resolution_gauss = Gaussian(center=0.2, width=0.3, area=3)
 
         resolution_handler = ResolutionHandler()
 
@@ -215,7 +215,7 @@ class TestConvolution:
     )
     def test_components_gauss_delta(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_gauss = GaussianComponent(center=0.1, width=0.2, area=2)
+        sample_gauss = Gaussian(center=0.1, width=0.2, area=2)
         resolution_delta = DeltaFunctionComponent(name="Delta", center=0.2, area=3)
 
         resolution_handler = ResolutionHandler()
@@ -247,9 +247,9 @@ class TestConvolution:
     )
     def test_model_gauss_gauss_resolution_gauss(self, x, offset_obj, expected_shift, method):
         #WHEN
-        sample_gauss1 = GaussianComponent(center=0.1, width=0.3, area=2,name="SampleGauss1")
-        sample_gauss2 = GaussianComponent(center=0.2, width=0.4, area=3,name="SampleGauss2")
-        resolution_gauss = GaussianComponent(center=0.3, width=0.5, area=4)
+        sample_gauss1 = Gaussian(center=0.1, width=0.3, area=2,name="SampleGauss1")
+        sample_gauss2 = Gaussian(center=0.2, width=0.4, area=3,name="SampleGauss2")
+        resolution_gauss = Gaussian(center=0.3, width=0.5, area=4)
 
         sample= SampleModel(name="SampleModel")
         sample.add_component(sample_gauss1)
@@ -286,7 +286,7 @@ class TestConvolution:
         #WHEN
         sample_lorentzian = LorentzianComponent(center=0.1, width=0.3, area=2, name="SampleLorentzian")
         sample_delta = DeltaFunctionComponent(center=0.5, area=4, name="SampleDelta")
-        resolution_gauss = GaussianComponent(center=-0.3, width=0.4, area=3, name="ResolutionGauss")
+        resolution_gauss = Gaussian(center=-0.3, width=0.4, area=3, name="ResolutionGauss")
         sample = SampleModel(name="SampleModel")
         sample.add_component(sample_lorentzian)
         sample.add_component(sample_delta)
@@ -316,10 +316,10 @@ class TestConvolution:
     def test_numerical_convolve_x_length_even_and_odd(self, x):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -339,10 +339,10 @@ class TestConvolution:
     def test_numerical_convolve_upsample_factor(self, x, upsample_factor):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -371,10 +371,10 @@ class TestConvolution:
     def test_numerical_convolve_x_not_symmetric(self, x,upsample_factor):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=9, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=9, width=0.3, area=2))
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -390,9 +390,9 @@ class TestConvolution:
 
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
         resolution_handler = ResolutionHandler()
 
         x_1=np.linspace(-2,0,1000)
@@ -411,11 +411,11 @@ class TestConvolution:
     def test_analytical_convolution_fails_with_detailed_balance(self, x):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
         sample_model.temperature=300
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -426,10 +426,10 @@ class TestConvolution:
     def test_convolution_only_accepts_analytical_and_numerical_methods(self, x):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -440,10 +440,10 @@ class TestConvolution:
     def test_x_must_be_1d_finite_array(self):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
 
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         resolution_handler = ResolutionHandler()
 
@@ -461,9 +461,9 @@ class TestConvolution:
         #WHEN
         x = np.array([0, 1, 2, 4, 5])  # Non-uniform grid
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.4, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
         resolution_handler = ResolutionHandler()
         #THEN
         with pytest.raises(ValueError, match="Input array `x` must be uniformly spaced if upsample_factor = 0."):
@@ -473,7 +473,7 @@ class TestConvolution:
         #WHEN
         sample_model = SampleModel(name="SampleModel")
         resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(GaussianComponent(center=0.2, width=0.3, area=3))
+        resolution_model.add_component(Gaussian(center=0.2, width=0.3, area=3))
         resolution_handler = ResolutionHandler()
         #THEN
         with pytest.raises(ValueError, match="SampleModel must have at least one component."):
@@ -482,7 +482,7 @@ class TestConvolution:
     def test_resolution_model_must_have_components(self):
         #WHEN
         sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(GaussianComponent(center=0.1, width=0.3, area=2))
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
         resolution_model = SampleModel(name="ResolutionModel")
         resolution_handler = ResolutionHandler()
         #THEN
@@ -494,8 +494,8 @@ class TestConvolution:
         #WHEN
         x=np.linspace(-2, 2, 20001)
 
-        sample_gauss1 = GaussianComponent(center=0.1, width=1.9, area=2,name="SampleGauss")
-        resolution_gauss = GaussianComponent(center=0.3, width=0.5, area=4)
+        sample_gauss1 = Gaussian(center=0.1, width=1.9, area=2,name="SampleGauss")
+        resolution_gauss = Gaussian(center=0.3, width=0.5, area=4)
 
         sample= SampleModel(name="SampleModel")
         sample.add_component(sample_gauss1)
@@ -513,8 +513,8 @@ class TestConvolution:
         #WHEN
         x=np.linspace(-2, 2, 20001)
 
-        sample_gauss1 = GaussianComponent(center=0.1, width=0.1, area=2,name="SampleGauss")
-        resolution_gauss = GaussianComponent(center=0.3, width=1.9, area=4,name='ResolutionGauss')
+        sample_gauss1 = Gaussian(center=0.1, width=0.1, area=2,name="SampleGauss")
+        resolution_gauss = Gaussian(center=0.3, width=1.9, area=4,name='ResolutionGauss')
 
         sample= SampleModel(name="SampleModel")
         sample.add_component(sample_gauss1)
@@ -533,8 +533,8 @@ class TestConvolution:
         #WHEN
         x=np.linspace(-2, 2, 201)
 
-        sample_gauss1 = GaussianComponent(center=0.1, width=1e-3, area=2,name="SampleGauss")
-        resolution_gauss = GaussianComponent(center=0.3, width=0.5, area=4)
+        sample_gauss1 = Gaussian(center=0.1, width=1e-3, area=2,name="SampleGauss")
+        resolution_gauss = Gaussian(center=0.3, width=0.5, area=4)
 
         sample= SampleModel(name="SampleModel")
         sample.add_component(sample_gauss1)
@@ -553,8 +553,8 @@ class TestConvolution:
         #WHEN
         x=np.linspace(-2, 2, 201)
 
-        sample_gauss1 = GaussianComponent(center=0.1, width=0.2, area=2,name="SampleGauss")
-        resolution_gauss = GaussianComponent(center=0.3, width=1e-3, area=4,name="ResolutionGauss")
+        sample_gauss1 = Gaussian(center=0.1, width=0.2, area=2,name="SampleGauss")
+        resolution_gauss = Gaussian(center=0.3, width=1e-3, area=4,name="ResolutionGauss")
 
         sample= SampleModel(name="SampleModel")
         sample.add_component(sample_gauss1)
