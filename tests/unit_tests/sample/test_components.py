@@ -256,8 +256,8 @@ class TestPolynomial:
 
 
     def test_convert_unit_raises_for_polynomial(self, polynomial):
-        with pytest.raises(ValueError, match="Polynomial does not support unit conversion"):
-            polynomial.convert_unit("eV")        
+        with pytest.raises(NotImplementedError, match="Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units."):
+            polynomial.convert_unit("eV")
 
 @pytest.mark.skip(reason="UserDefinedComponent not implemented yet")
 class TestUserDefinedComponent:

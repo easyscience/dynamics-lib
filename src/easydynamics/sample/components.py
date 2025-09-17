@@ -674,7 +674,7 @@ class DampedHarmonicOscillator(ModelComponent):
 
 class Polynomial(ModelComponent):
     """
-    Polynomial function component.
+    Polynomial function component. Supports units, but not conversion between units.
 
     Args:
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
@@ -683,7 +683,8 @@ class Polynomial(ModelComponent):
 
     def __init__(self, 
                  name: str='Polynomial', 
-                 coefficients: Union[list[float],np.ndarray] = [0.0]):
+                 coefficients: Union[list[float],np.ndarray] = [0.0],
+                 unit: str = 'meV'):
         if not isinstance(coefficients,(list,tuple,np.ndarray)):
             raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
         
@@ -692,14 +693,19 @@ class Polynomial(ModelComponent):
             raise ValueError("At least one coefficient must be provided.")
 
         self.coefficients = [
-            Parameter(name=f"{name}_c{i}", value=coef)
-            for i, coef in enumerate(coefficients)
+        Parameter(
+        name=f"{name}_c{i}",
+        value=coef,    )
+    for i, coef in enumerate(coefficients)
         ]
+        self.unit = unit  
 
     def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
 
         if isinstance(x, sc.Variable):
             x_in = x.values
+            if self.unit is not None and x.unit != self.unit:
+                raise ValueError(f"Input x has unit {x.unit}, but DHO component has unit {self.unit}. Change the unit of the DHO and try again. ")
         else:
             x_in = x
         result = np.zeros_like(x_in, dtype=float)
@@ -739,7 +745,7 @@ class Polynomial(ModelComponent):
         return f"Polynomial(name={self.name}, coefficients=[{coeffs_str}])"
     
     def convert_unit(self, unit):
-        raise ValueError("Polynomial does not support unit conversion. Coefficients are dimensionless.")
+        raise NotImplementedError("Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units. ")
 
 
 
