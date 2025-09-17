@@ -256,9 +256,9 @@ class Lorentzian(ModelComponent):
     Lorentzian function. Creates new EasyScience Parameters if floats are provided, otherwise uses the provided Parameters.
 
     Args:
-        area (float): Area of the Lorentzian.
-        center (float): Peak center.
-        width (float): HWHM (Half Width at Half Maximum).
+        area (float or Parameter): Area of the Lorentzian.
+        center (float or Parameter or None): Peak center. If None, defaults to 0 and is fixed.
+        width (float or Parameter): Half Width at Half Maximum (HWHM)
     """
 
     def __init__(self, 
@@ -357,35 +357,48 @@ class Lorentzian(ModelComponent):
         return f"LorentzianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
 
-class VoigtComponent(ModelComponent):
+class Voigt(ModelComponent):
     """
     Voigt profile, a convolution of Gaussian and Lorentzian.
 
     Args:
         center (float): Center of the Voigt profile.
-        width (float): Standard deviation of the Gaussian part.
-        gamma (float): HWHM of the Lorentzian part.
+        Gwidth (float): Standard deviation of the Gaussian part.
+        Lwidth (float): HWHM of the Lorentzian part.
         area (float): Total area under the curve.
     """
 
-    def __init__(self, name='Voigt', area=1.0, center=None, Gwidth=1.0, Lwidth=1.0, unit='meV'):
+    def __init__(self, 
+                 name: str = 'Voigt', 
+                 area: Union[float, Parameter] = 1.0, 
+                 center: Union[float, Parameter, None] = None, 
+                 Gwidth: Union[float, Parameter] = 1.0, 
+                 Lwidth: Union[float, Parameter] = 1.0, 
+                 unit: str = 'meV'):
+        
         # Validate inputs
         if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
+        
         if center is not None and not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
+        
         if not isinstance(Gwidth, (Number, Parameter)):
             raise TypeError("Gwidth must be a number or an EasyScience Parameter.")
+        
         if not isinstance(Lwidth, (Number, Parameter)):
             raise TypeError("Lwidth must be a number or an EasyScience Parameter.")
+        
         if isinstance(Gwidth, Number):
             if Gwidth <= 0:
                 raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
             Gwidth=float(Gwidth)
+
         if isinstance(Lwidth, Number):
             if Lwidth <= 0:
                 raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
             Lwidth=float(Lwidth)
+
         if isinstance(area, Number):
             if area < 0:
                 warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
@@ -423,7 +436,16 @@ class VoigtComponent(ModelComponent):
             raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
         if self.area.value < 0:
             warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(self.name))
-        return self.area.value * voigt_profile(x - self.center.value, self.Gwidth.value, self.Lwidth.value)
+
+        # Handle units
+        if isinstance(x, sc.array):
+            x_in = x.values
+            if self.unit is not None and x.unit != self.unit:
+                warnings.warn(f"Input x has unit {x.unit}, but Voigt component has unit {self.unit}. Converting Voigt to {x.unit}.")
+                self.convert_unit(x.unit)
+        else:
+            x_in = x
+        return self.area.value * voigt_profile(x_in - self.center.value, self.Gwidth.value, self.Lwidth.value)
 
     def get_parameters(self):
         """
@@ -433,9 +455,9 @@ class VoigtComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.Gwidth, self.Lwidth]
     
-    def copy(self) -> "VoigtComponent":
+    def copy(self) -> "Voigt":
 
-        ModelCopy = VoigtComponent(
+        ModelCopy = Voigt(
             name=self.name,
             area=self.area.value,
             center=self.center.value,

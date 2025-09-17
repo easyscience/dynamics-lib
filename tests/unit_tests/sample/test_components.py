@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, Lorentzian, VoigtComponent, DeltaFunctionComponent, DHOComponent, PolynomialComponent
+from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunctionComponent, DHOComponent, PolynomialComponent
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -131,9 +131,9 @@ class TestVoigtComponent:
 
     @pytest.fixture
     def voigt(self):
-        return VoigtComponent(name='TestVoigt', area=2.0, center=0.5, Gwidth=0.6, Lwidth=0.7, unit='meV')
+        return Voigt(name='TestVoigt', area=2.0, center=0.5, Gwidth=0.6, Lwidth=0.7, unit='meV')
 
-    def test_initialization(self, voigt: VoigtComponent):
+    def test_initialization(self, voigt: Voigt):
         assert voigt.name == 'TestVoigt'
         assert voigt.area.value == 2.0
         assert voigt.center.value == 0.5
@@ -141,13 +141,13 @@ class TestVoigtComponent:
         assert voigt.Lwidth.value == 0.7
         assert voigt.unit == 'meV'
 
-    def test_evaluate(self, voigt: VoigtComponent):
+    def test_evaluate(self, voigt: Voigt):
         x = np.array([0.0, 0.5, 1.0])
         expected = voigt.evaluate(x)
         expected_result = 2.0 * voigt_profile(x - 0.5, 0.6, 0.7)
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, voigt: VoigtComponent):
+    def test_get_parameters(self, voigt: Voigt):
         params = voigt.get_parameters()
         assert len(params) == 4
         assert params[0].name == 'TestVoigt area'
@@ -156,7 +156,7 @@ class TestVoigtComponent:
         assert params[3].name == 'TestVoigt Lwidth'
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_area_matches_parameter(self, voigt: VoigtComponent):   
+    def test_area_matches_parameter(self, voigt: Voigt):   
         # WHEN
         x = np.linspace(voigt.center.value - 100 * voigt.Gwidth.value-300*voigt.Lwidth.value, voigt.center.value + 100 * voigt.Gwidth.value+300*voigt.Lwidth.value, 20000) #Voigts have very long tails
         y = voigt.evaluate(x)

@@ -1,7 +1,7 @@
 from .sample_model import SampleModel
 from .components import Gaussian
 from .components import Lorentzian
-from .components import VoigtComponent
+from .components import Voigt
 from .components import DeltaFunctionComponent
 from .components import DHOComponent
 from .components import PolynomialComponent
@@ -14,7 +14,7 @@ __all__ = [
     "SampleModel",
     "Gaussian",
     "Lorentzian",
-    "VoigtComponent",
+    "Voigt",
     "DeltaFunctionComponent",
     "DHOComponent",
     "PolynomialComponent",
