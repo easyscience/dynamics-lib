@@ -248,7 +248,7 @@ class Gaussian(ModelComponent):
         return ModelCopy
 
     def __repr__(self):
-        return f"GaussianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"Gaussian(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
 
 class Lorentzian(ModelComponent):
@@ -354,7 +354,7 @@ class Lorentzian(ModelComponent):
 
 
     def __repr__(self):
-        return f"LorentzianComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"Lorentzian(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
 
 class Voigt(ModelComponent):
@@ -473,7 +473,7 @@ class Voigt(ModelComponent):
         return ModelCopy
 
     def __repr__(self):
-        return f"VoigtComponent(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
+        return f"Voigt(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
 
 
 class DeltaFunction(ModelComponent):
@@ -563,7 +563,7 @@ class DeltaFunction(ModelComponent):
         return ModelCopy
 
     def __repr__(self):
-        return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
+        return f"DeltaFunction(name={self.name}, area={self.area}, center={self.center})"
 
 class DampedHarmonicOscillator(ModelComponent):
     """
@@ -651,7 +651,9 @@ class DampedHarmonicOscillator(ModelComponent):
         return [self.area, self.center, self.width]
     
     def copy(self) -> "DampedHarmonicOscillator":
-
+        """
+        Return a deep copy of this component with independent parameters.
+        """
 
 
         ModelCopy = DampedHarmonicOscillator(
@@ -670,7 +672,7 @@ class DampedHarmonicOscillator(ModelComponent):
     def __repr__(self):
         return f"DHOComponent(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
 
-class PolynomialComponent(ModelComponent):
+class Polynomial(ModelComponent):
     """
     Polynomial function component.
 
@@ -679,9 +681,11 @@ class PolynomialComponent(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    def __init__(self, name='Polynomial', coefficients: list[float] = [0.0]):
-        if not isinstance(coefficients,(list,tuple)):
-            raise TypeError("coefficients must be a list or tuple of floats.")
+    def __init__(self, 
+                 name: str='Polynomial', 
+                 coefficients: Union[list[float],np.ndarray] = [0.0]):
+        if not isinstance(coefficients,(list,tuple,np.ndarray)):
+            raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
         
         super().__init__(name=name)
         if not coefficients:
@@ -692,10 +696,15 @@ class PolynomialComponent(ModelComponent):
             for i, coef in enumerate(coefficients)
         ]
 
-    def evaluate(self, x: np.ndarray) -> np.ndarray:
-        result = np.zeros_like(x, dtype=float)
+    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> np.ndarray:
+
+        if isinstance(x, sc.array):
+            x_in = x.values
+        else:
+            x_in = x
+        result = np.zeros_like(x_in, dtype=float)
         for i, param in enumerate(self.coefficients):
-            result += param.value * np.power(x, i)
+            result += param.value * np.power(x_in, i)
 
         if any(result < 0):
             warnings.warn("The polynomial with name {} has negative values, which may not be physically meaningful.".format(self.name))
@@ -712,12 +721,12 @@ class PolynomialComponent(ModelComponent):
         """ 
         return self.coefficients
     
-    def copy(self) -> "PolynomialComponent":
+    def copy(self) -> "Polynomial":
         """
         Return a deep copy of this component with independent parameters.
         """
 
-        ModelCopy = PolynomialComponent(
+        ModelCopy = Polynomial(
             name=self.name,
             coefficients=[param.value for param in self.coefficients]
         )
@@ -727,10 +736,10 @@ class PolynomialComponent(ModelComponent):
 
     def __repr__(self):
         coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
-        return f"PolynomialComponent(name={self.name}, coefficients=[{coeffs_str}])"
+        return f"Polynomial(name={self.name}, coefficients=[{coeffs_str}])"
     
     def convert_unit(self, unit):
-        raise ValueError("PolynomialComponent does not support unit conversion. Coefficients are dimensionless.")
+        raise ValueError("Polynomial does not support unit conversion. Coefficients are dimensionless.")
 
 
 

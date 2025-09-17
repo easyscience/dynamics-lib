@@ -4,7 +4,7 @@ from .components import Lorentzian
 from .components import Voigt
 from .components import DeltaFunction
 from .components import DampedHarmonicOscillator
-from .components import PolynomialComponent
+from .components import Polynomial
 from .components import ModelComponent
 
 from .diffusion_model import DiffusionModel
@@ -17,7 +17,7 @@ __all__ = [
     "Voigt",
     "DeltaFunction",
     "DampedHarmonicOscillator",
-    "PolynomialComponent",
+    "Polynomial",
     "ModelComponent",
     "DiffusionModel",
     "BrownianTranslationalDiffusion"

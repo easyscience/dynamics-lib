@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DampedHarmonicOscillator, PolynomialComponent
+from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DampedHarmonicOscillator, Polynomial
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -232,21 +232,21 @@ class TestDHOComponent:
 class TestPolynomialComponent:
     @pytest.fixture
     def polynomial(self):
-        return PolynomialComponent(name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
+        return Polynomial(name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
 
-    def test_initialization(self, polynomial: PolynomialComponent):
+    def test_initialization(self, polynomial: Polynomial):
         assert polynomial.name == 'TestPolynomial'
         assert polynomial.coefficients[0].value==1.0
         assert polynomial.coefficients[1].value==-2.0
         assert polynomial.coefficients[2].value==3.0
 
-    def test_evaluate(self, polynomial: PolynomialComponent):
+    def test_evaluate(self, polynomial: Polynomial):
         x = np.array([0.0, 1.0, 2.0])
         expected = polynomial.evaluate(x)
         expected_result = 1.0 - 2.0 * x + 3.0 * x**2
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, polynomial: PolynomialComponent):
+    def test_get_parameters(self, polynomial: Polynomial):
         params = polynomial.get_parameters()
         assert len(params) == 3
         assert params[0].name == 'TestPolynomial_c0'
