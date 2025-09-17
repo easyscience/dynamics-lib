@@ -200,7 +200,7 @@ class Gaussian(ModelComponent):
             self.width=width
 
         if isinstance(area,Number):
-            self.area = Parameter(name=name+ ' area', value=area, unit=unit,min=0.0)
+            self.area = Parameter(name=name+ ' area', value=area, unit=unit)
         else:
             self.area=area
 
@@ -309,7 +309,7 @@ class Lorentzian(ModelComponent):
             self.width=width
 
         if isinstance(area, Number):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
+            self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area=area
 
@@ -425,7 +425,7 @@ class Voigt(ModelComponent):
             self.Lwidth=Lwidth
 
         if isinstance(area, Number):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
+            self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area=area
 
@@ -565,7 +565,7 @@ class DeltaFunction(ModelComponent):
     def __repr__(self):
         return f"DeltaFunctionComponent(name={self.name}, area={self.area}, center={self.center})"
 
-class DHOComponent(ModelComponent):
+class DampedHarmonicOscillator(ModelComponent):
     """
     Damped Harmonic Oscillator (DHO) component.
 
@@ -575,24 +575,35 @@ class DHOComponent(ModelComponent):
         area (float): Area of DHO.
     """
 
-    def __init__(self, name='DHO', center=1.0, width=1.0, area=1.0,unit='meV'):
+    def __init__(self, 
+                 name: str = 'DHO', 
+                 center: Union[float, Parameter] = 1.0, 
+                 width: Union[float, Parameter] = 1.0,
+                 area: Union[float, Parameter] = 1.0, 
+                 unit: str = 'meV'):
         # Validate inputs
         if not isinstance(area, (Number, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
+        
         if not isinstance(center, (Number, Parameter)):
             raise TypeError("center must be a number or an EasyScience Parameter.")
+        
         if not isinstance(width, (Number, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
+        
         if isinstance(width, Number):
             width=float(width)
+
         if isinstance(area, Number):
             area = float(area)
+
         if isinstance(center, Number):
             center = float(center)
+
         if width <= 0:
-            raise ValueError("Width must be greater than 0 for DHO.")
+            raise ValueError("Width of a Damped Harmonic Oscillator must be greater than 0.")
         if area < 0:
-            raise Warning("The area of the DHO with name {} is negative, which may not be physically meaningful.".format(name))
+            raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(name))
         
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
@@ -603,7 +614,7 @@ class DHOComponent(ModelComponent):
             self.center=center
 
         if isinstance(width, Number):
-            self.width = Parameter(name=name + ' width', value=width, unit=unit)
+            self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width = width
 
@@ -612,14 +623,23 @@ class DHOComponent(ModelComponent):
         else:
             self.area = area
 
-    def evaluate(self, x):
+    def evaluate(self, x: Union[float,np.ndarray,sc.array]) -> Union[float,np.ndarray]:
 
         if self.width.value <= 0:
-            raise ValueError("Width must be greater than 0 for DHO.")
+            raise ValueError("Width of a Damped Harmonic Oscillator must be greater than 0.")
         if self.area.value < 0:
-            raise Warning("The area of the DHO with name {} is negative, which may not be physically meaningful.".format(self.name))
+            raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(self.name))
+        
+        # Handle units
+        if isinstance(x, sc.array):
+            x_in = x.values
+            if self.unit is not None and x.unit != self.unit:
+                warnings.warn(f"Input x has unit {x.unit}, but DHO component has unit {self.unit}. Converting DHO to {x.unit}.")
+                self.convert_unit(x.unit)
+        else:
+            x_in = x
         return 2*self.area.value*self.center.value**2*self.width.value/np.pi/ (
-            (x**2 - self.center.value**2) ** 2 + (2*self.width.value * x) ** 2
+            (x_in**2 - self.center.value**2) ** 2 + (2*self.width.value * x_in) ** 2
         )
     
     def get_parameters(self):
@@ -630,11 +650,11 @@ class DHOComponent(ModelComponent):
         """ 
         return [self.area, self.center, self.width]
     
-    def copy(self) -> "DHOComponent":
+    def copy(self) -> "DampedHarmonicOscillator":
 
 
 
-        ModelCopy = DHOComponent(
+        ModelCopy = DampedHarmonicOscillator(
             name=self.name,
             area=self.area.value,
             center=self.center.value,

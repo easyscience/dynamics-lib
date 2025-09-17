@@ -4,7 +4,7 @@ import numpy as np
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DHOComponent, PolynomialComponent
+from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DampedHarmonicOscillator, PolynomialComponent
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -196,22 +196,22 @@ class TestDeltaFunctionComponent:
 class TestDHOComponent: 
     @pytest.fixture
     def dho(self):  
-        return DHOComponent(name='TestDHO', area=2.0, center=1.5, width=0.3, unit='meV')
+        return DampedHarmonicOscillator(name='TestDHO', area=2.0, center=1.5, width=0.3, unit='meV')
     
-    def test_initialization(self, dho: DHOComponent):
+    def test_initialization(self, dho: DampedHarmonicOscillator):
         assert dho.name == 'TestDHO'
         assert dho.area.value == 2.0
         assert dho.center.value == 1.5
         assert dho.width.value == 0.3
         assert dho.unit == 'meV'
 
-    def test_evaluate(self, dho: DHOComponent):
+    def test_evaluate(self, dho: DampedHarmonicOscillator):
         x = np.array([0.0, 1.5, 3.0])
         expected = dho.evaluate(x)
         expected_result = 2*2.0 * (1.5**2) * (0.3) / np.pi / (((x**2 - 1.5**2) ** 2 + (2*0.3 * x) ** 2))
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, dho: DHOComponent):
+    def test_get_parameters(self, dho: DampedHarmonicOscillator):
         params = dho.get_parameters()
         assert len(params) == 3
         assert params[0].name == 'TestDHO area'
@@ -219,7 +219,7 @@ class TestDHOComponent:
         assert params[2].name == 'TestDHO width'
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_area_matches_parameter(self, dho: DHOComponent):
+    def test_area_matches_parameter(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.linspace(-dho.center.value - 20 * dho.width.value, dho.center.value + 20 * dho.width.value, 5000)
         y = dho.evaluate(x)
