@@ -1,6 +1,8 @@
 
 from typing import Dict, List, Union, Tuple
-
+from typing import Optional
+from numbers import Number
+from numbers import Real
 import numpy as np
 
 from easyscience.variable import Parameter
@@ -22,7 +24,7 @@ class SampleModel(ObjBase):
     components : dict
         Dictionary of model components keyed by name.
     """
-    def __init__(self, name: str = "MySampleModel", temperature: Union[float, None] = None):
+    def __init__(self, name: str = "MySampleModel", temperature: Optional[Real] = None):
         """
         Initialize a new SampleModel.
 
@@ -133,13 +135,16 @@ class SampleModel(ObjBase):
         str
         """
         comp_names = ", ".join(self.components.keys()) or "No components"
-        temp_str = (f" | Temperature: {self._temperature.value} {self._temperature.unit}"
-                    if self._use_detailed_balance else "")
+        if self._temperature is None:
+            temp_str = ""
+        else:   
+            temp_str = f" | Temperature: {self._temperature.value} {self._temperature.unit}"
+                    
         return (f"<SampleModel name='{self.name}' | "
                 f"Components: {comp_names}{temp_str}>")
 
     @property
-    def temperature(self) -> Parameter:
+    def temperature(self) -> Union[Parameter, None]:
         """
         Access the temperature parameter.
 
@@ -150,7 +155,7 @@ class SampleModel(ObjBase):
         return self._temperature
 
     @temperature.setter
-    def temperature(self, value: Union[float, None], unit: str = 'K'):
+    def temperature(self, value: Union[Real, None], unit: str = 'K'):
         """
         Set the temperature and enables detailed balance if value is non-negative.
 
@@ -165,6 +170,7 @@ class SampleModel(ObjBase):
             self._use_detailed_balance = False
             self._temperature = None
             return
+        
 
         if value < 0:
             raise ValueError("Temperature must be non-negative.")
@@ -175,7 +181,7 @@ class SampleModel(ObjBase):
             self._temperature = Parameter(name="temperature", value=value, unit=unit, fixed=True)
 
         if not self.use_detailed_balance:
-            self.use_detailed_balance = value >= 0
+            self.use_detailed_balance = float(value) >= 0
 
     @property
     def use_detailed_balance(self) -> bool:
@@ -218,8 +224,9 @@ class SampleModel(ObjBase):
             result += component.evaluate(x)
 
         #TODO: handle units properly
-        if self.use_detailed_balance and self._temperature.value >= 0:
-            result *= detailed_balance_factor(x, self._temperature.value)
+        if self.use_detailed_balance and self._temperature is not None:
+            if float(self._temperature.value) >= 0:
+                result *= detailed_balance_factor(x, self._temperature.value)
 
         return result
 
@@ -332,14 +339,14 @@ class SampleModel(ObjBase):
         
         self.components[component_name].fix_all_parameters()
 
-    def free_all_component_parameters(self, component_name: str):
+    def fit_all_component_parameters(self, component_name: str):
         """
         Free all fixed parameters in the specified component.
         """
         if component_name not in self.components:
             raise ValueError(f"Component '{component_name}' not found.")
 
-        self.components[component_name].free_all_parameters()
+        self.components[component_name].fit_all_parameters()
 
     def fix_component_parameter(self,component_name: str, parameter_name: str):
         """
@@ -368,88 +375,6 @@ class SampleModel(ObjBase):
             raise ValueError(f"Parameter '{parameter_name}' not found in component '{component_name}'.")
 
         param.fixed = False
-
-    def update_values_from(
-        self,
-        other: "SampleModel",
-        *,
-        only_free: bool = True,
-    )-> Dict[str, Tuple[float, float]]:
-        """
-        Overwrite this model's Parameter.values from another SampleModel, matching by
-        component name and Parameter.name. This is used to copy fit results when doing sequential fitting.  
-
-        Parameters
-        ----------
-        other : SampleModel
-            Source of values.
-        only_free : bool, default True
-            If True, skip Parameters in *self* that are fixed.
-
-        Returns
-        -------
-        Dict[str, Tuple[float, float]]
-            Mapping key -> (old_value, new_value), where key is
-             "<component>.<Parameter.name>".
-
-        """
-        if not isinstance(other, SampleModel):
-            raise TypeError("other must be a SampleModel")
-
-        report: Dict[str, Tuple[float, float]] = {}
-
-        # Check that components are the same
-        self_names = set(self.components.keys())
-        other_names = set(other.components.keys())
-
-        if self_names != other_names:
-            missing = self_names - other_names
-            extra   = other_names - self_names
-            raise ValueError(
-                f"Component name mismatch.\n"
-                f"  Missing in source: {missing or '{}'}\n"
-                f"  Extra in source:   {extra or '{}'}"
-            )
-
-
-        # Go through components
-        for cname in self_names:
-            c_self  = self.components[cname]
-            c_other = other.components[cname]
-
-            # Check that parameters are the same
-            self_params  = {p.name: p for p in c_self.get_parameters()}
-            other_params = {p.name: p for p in c_other.get_parameters()}
-
-            if set(self_params) != set(other_params):
-                missing = set(self_params) - set(other_params)
-                extra   = set(other_params) - set(self_params)
-                raise ValueError(
-                    f"Parameter name mismatch in component '{cname}'.\n"
-                    f"  Missing in source: {missing or '{}'}\n"
-                    f"  Extra in source:   {extra or '{}'}"
-                )
-
-
-            for pname in set(self_params):
-                p_self  = self_params[pname]
-                p_other = other_params[pname]
-
-                if only_free and getattr(p_self, "fixed", False):
-                    continue
-
-                # Units: convert units to other's unit if they differ
-                u_self  = getattr(p_self, "unit", None)
-                u_other = getattr(p_other, "unit", None)
-                if u_self != u_other:
-                    p_self.convert_unit(u_other)
-
-                # Update value, but save the old one.
-                old = p_self.value
-                p_self.value = p_other.value
-                report[f"{cname}.{pname}"] = (old, p_self.value)
-
-        return report
 
 
     
