@@ -7,9 +7,6 @@ from .components import DampedHarmonicOscillator
 from .components import Polynomial
 from .components import ModelComponent
 
-from .diffusion_model import DiffusionModel
-from .diffusion_model import BrownianTranslationalDiffusion
-
 __all__ = [
     "SampleModel",
     "Gaussian",
@@ -19,6 +16,4 @@ __all__ = [
     "DampedHarmonicOscillator",
     "Polynomial",
     "ModelComponent",
-    "DiffusionModel",
-    "BrownianTranslationalDiffusion"
 ]

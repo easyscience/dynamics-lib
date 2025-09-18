@@ -25,8 +25,13 @@ class ModelComponent(ObjBase):
 
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
-        for p in self.get_parameters():
-            p.fixed = True
+
+        pars = self.get_parameters()
+        if pars is None or len(pars) == 0:
+            raise ValueError("No parameters found to fix.")
+        else:
+            for p in pars:
+                p.fixed = True
 
     def fit_all_parameters(self):
         """Fit all parameters in the model component."""
@@ -102,18 +107,19 @@ class ModelComponent(ObjBase):
         Args:
             unit (str): The new unit to convert to.
         """
+        
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
         self.width.convert_unit(unit)
         self.unit = unit  
 
     @abstractmethod
-    def evaluate(self, x: np.ndarray) -> np.ndarray:
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
         """
         Evaluate the model component at input x.
 
         Args:
-            x (np.ndarray): Input values.
+            x (Union[float, np.ndarray, sc.Variable]): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.
@@ -121,7 +127,7 @@ class ModelComponent(ObjBase):
         pass
 
     @abstractmethod
-    def get_parameters(self):
+    def get_parameters(self) -> List[Parameter]:
         """
         Get all parameters from the model component.
 
@@ -171,9 +177,9 @@ class Gaussian(ModelComponent):
             raise TypeError("width must be a number or an EasyScience Parameter.")
 
         if isinstance(width,Number):
+            width=float(width)
             if width <= 0:
                 raise ValueError("The width of a Gaussian must be greater than zero.")
-            width=float(width)
 
         if isinstance(area,Number):
             if area < 0:
@@ -221,7 +227,7 @@ class Gaussian(ModelComponent):
         return self.area.value * 1/(np.sqrt(2 * np.pi) * self.width.value) * np.exp(-0.5 * ((x_in - self.center.value) / self.width.value) ** 2)
 
 
-    def get_parameters(self):
+    def get_parameters(self) -> List[Parameter]:
         """
         Get all parameters from the model component.
         Returns:
