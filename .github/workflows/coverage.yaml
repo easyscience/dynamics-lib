@@ -46,7 +46,11 @@ jobs:
           pip install ".[dev]"
 
       - name: Run unit tests with coverage
-        run: pytest tests/unit_tests --cov-report=xml:coverage-unit.xml
+        run: >
+          pytest tests/unit_tests 
+          --cov=src/easydynamics 
+          --cov-report=term-missing 
+          --cov-report=xml:coverage-unit.xml
 
       - name: Upload unit tests coverage to Codecov
         if: ${{ !cancelled() }}
