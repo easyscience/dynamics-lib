@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "easydynamics"
+version = "0.0.0"
+description = "A QENS python package built on the EasyScience framework."
+authors = [{ name = "Henrik Jacobsen", email = "henrik.jacobsen@ess.eu" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+
+requires-python = ">=3.10"
+dependencies = [
+"numpy", 
+"scipy",
+"easyscience @ git+https://github.com/easyscience/corelib.git@develop",
+"scipp",
+"plopp",
+"ipympl"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+    ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
