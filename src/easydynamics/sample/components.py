@@ -10,6 +10,7 @@ from easyscience.base_classes import ObjBase
 import warnings
 
 from numbers import Number
+from numbers import Real
 
 import scipp as sc
 
@@ -167,26 +168,26 @@ class Gaussian(ModelComponent):
                  unit: str='meV'):
 
         # Validate inputs - throw errors before any Parameters are created
-        if not isinstance(area, (Number, Parameter)):
+        if not isinstance(area, (Real, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
 
-        if center is not None and not isinstance(center, (Number, Parameter)):
+        if center is not None and not isinstance(center, (Real, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
 
-        if not isinstance(width, (Number, Parameter)):
+        if not isinstance(width, (Real, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
 
-        if isinstance(width,Number):
+        if isinstance(width, Real):
             width=float(width)
             if width <= 0:
                 raise ValueError("The width of a Gaussian must be greater than zero.")
 
-        if isinstance(area,Number):
+        if isinstance(area, Real):
             if area < 0:
                 warnings.warn("The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
 
-        if isinstance(center,Number):
+        if isinstance(center, Real):
             center = float(center)
         
         super().__init__(name=name)
@@ -195,17 +196,17 @@ class Gaussian(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name= name+ ' center', value=0.0, unit=unit,fixed=True)
-        elif isinstance(center,Number):
+        elif isinstance(center, Real):
             self.center = Parameter(name=name+ ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(width,Number):
+        if isinstance(width, Real):
             self.width = Parameter(name=name+ ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
-        if isinstance(area,Number):
+        if isinstance(area, Real):
             self.area = Parameter(name=name+ ' area', value=area, unit=unit)
         else:
             self.area=area
@@ -276,26 +277,26 @@ class Lorentzian(ModelComponent):
 
         
         # Validate inputs
-        if not isinstance(area, (Number, Parameter)):
+        if not isinstance(area, (Real, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
 
-        if center is not None and not isinstance(center, (Number, Parameter)):
+        if center is not None and not isinstance(center, (Real, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
 
-        if not isinstance(width, (Number, Parameter)):
+        if not isinstance(width, (Real, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
 
-        if isinstance(width, Number):
+        if isinstance(width, Real):
             if width <= 0:
                 raise ValueError("The width of a Lorentzian must be greater than zero.")
             width=float(width)
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             if area < 0:
                 warnings.warn("The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
 
-        if isinstance(center, Number):
+        if isinstance(center, Real):
             center = float(center)
 
         super().__init__(name=name)
@@ -304,17 +305,17 @@ class Lorentzian(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif isinstance(center, Number):
+        elif isinstance(center, Real):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(width, Number):
+        if isinstance(width, Real):
             self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area=area
@@ -383,29 +384,29 @@ class Voigt(ModelComponent):
                  unit: str = 'meV'):
         
         # Validate inputs
-        if not isinstance(area, (Number, Parameter)):
+        if not isinstance(area, (Real, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
-        
-        if center is not None and not isinstance(center, (Number, Parameter)):
+
+        if center is not None and not isinstance(center, (Real, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
         
-        if not isinstance(Gwidth, (Number, Parameter)):
+        if not isinstance(Gwidth, (Real, Parameter)):
             raise TypeError("Gwidth must be a number or an EasyScience Parameter.")
         
-        if not isinstance(Lwidth, (Number, Parameter)):
+        if not isinstance(Lwidth, (Real, Parameter)):
             raise TypeError("Lwidth must be a number or an EasyScience Parameter.")
         
-        if isinstance(Gwidth, Number):
+        if isinstance(Gwidth, Real):
             if Gwidth <= 0:
                 raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
             Gwidth=float(Gwidth)
 
-        if isinstance(Lwidth, Number):
+        if isinstance(Lwidth, Real):
             if Lwidth <= 0:
                 raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
             Lwidth=float(Lwidth)
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             if area < 0:
                 warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
@@ -417,22 +418,22 @@ class Voigt(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif isinstance(center, Number):
+        elif isinstance(center, Real):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(Gwidth, Number):
+        if isinstance(Gwidth, Real):
             self.Gwidth = Parameter(name=name + ' Gwidth', value=Gwidth, unit=unit,min=0.0)
         else:
             self.Gwidth=Gwidth
 
-        if isinstance(Lwidth, Number):
+        if isinstance(Lwidth, Real):
             self.Lwidth = Parameter(name=name + ' Lwidth', value=Lwidth, unit=unit,min=0.0)
         else:
             self.Lwidth=Lwidth
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area=area
@@ -512,18 +513,18 @@ class DeltaFunction(ModelComponent):
                  area:Union[float, Parameter]=1.0, 
                  unit='meV'):
         # Validate inputs
-        if not isinstance(area, (Number, Parameter)):
+        if not isinstance(area, (Real, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
         
-        if center is not None and not isinstance(center, (Number, Parameter)):
+        if center is not None and not isinstance(center, (Real, Parameter)):
             raise TypeError("center must be None, a number or an EasyScience Parameter.")
         
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             if area < 0:
                 warnings.warn("The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
 
-        if isinstance(center, Number):
+        if isinstance(center, Real):
             center = float(center)
 
         super().__init__(name=name)
@@ -531,12 +532,12 @@ class DeltaFunction(ModelComponent):
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
-        elif isinstance(center, Number):
+        elif isinstance(center, Real):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
         else:
             self.area=area
@@ -603,22 +604,22 @@ class DampedHarmonicOscillator(ModelComponent):
                  area: Union[float, Parameter] = 1.0, 
                  unit: str = 'meV'):
         # Validate inputs
-        if not isinstance(area, (Number, Parameter)):
+        if not isinstance(area, (Real, Parameter)):
             raise TypeError("area must be a number or an EasyScience Parameter.")
         
-        if not isinstance(center, (Number, Parameter)):
+        if not isinstance(center, (Real, Parameter)):
             raise TypeError("center must be a number or an EasyScience Parameter.")
         
-        if not isinstance(width, (Number, Parameter)):
+        if not isinstance(width, (Real, Parameter)):
             raise TypeError("width must be a number or an EasyScience Parameter.")
         
-        if isinstance(width, Number):
+        if isinstance(width, Real):
             width=float(width)
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             area = float(area)
 
-        if isinstance(center, Number):
+        if isinstance(center, Real):
             center = float(center)
 
         if width <= 0:
@@ -629,17 +630,17 @@ class DampedHarmonicOscillator(ModelComponent):
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
-        if isinstance(center, Number):
+        if isinstance(center, Real):
             self.center = Parameter(name=name + ' center', value=center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(width, Number):
+        if isinstance(width, Real):
             self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width = width
 
-        if isinstance(area, Number):
+        if isinstance(area, Real):
             self.area = Parameter(name=name + ' area', value=area, unit=unit)
         else:
             self.area = area
