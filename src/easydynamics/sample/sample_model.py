@@ -1,7 +1,6 @@
 
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union
 from typing import Optional
-from numbers import Number
 from numbers import Real
 import numpy as np
 
@@ -223,9 +222,8 @@ class SampleModel(ObjBase):
         for component in self.components.values():
             result += component.evaluate(x)
 
-        #TODO: handle units properly
         if self.use_detailed_balance and self._temperature is not None:
-            if float(self._temperature.value) >= 0:
+            if self._temperature.value >= 0:
                 result *= detailed_balance_factor(x, self._temperature.value)
 
         return result
@@ -255,7 +253,7 @@ class SampleModel(ObjBase):
             raise KeyError(f"No component named '{name}' exists.")
 
         result = self.components[name].evaluate(x)
-        if self._use_detailed_balance and self._temperature.value >= 0:
+        if self._use_detailed_balance and self._temperature is not None:
             result *= detailed_balance_factor(x, self._temperature.value)
 
         return result
