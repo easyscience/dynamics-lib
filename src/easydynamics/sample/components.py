@@ -631,17 +631,16 @@ class DampedHarmonicOscillator(ModelComponent):
         
         if isinstance(width, Numeric):
             width=float(width)
+            if width <= 0:
+                raise ValueError("The width of a DampedHarmonicOscillator must be greater than zero.")
 
         if isinstance(area, Numeric):
             area = float(area)
+            if area < 0:
+                raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(name))
 
         if isinstance(center, Numeric):
             center = float(center)
-
-        if width <= 0:
-            raise ValueError("Width of a Damped Harmonic Oscillator must be greater than 0.")
-        if area < 0:
-            raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(name))
         
         super().__init__(name=name)
         self.unit = unit  # Set the unit for the component

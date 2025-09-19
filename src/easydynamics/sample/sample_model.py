@@ -42,6 +42,7 @@ class SampleModel(ObjBase):
         else:
             self._temperature=None
             self._use_detailed_balance = False
+        self._detailed_balance_divide_by_T = False
 
     def add_component(self, component: ModelComponent):
         """
@@ -205,6 +206,31 @@ class SampleModel(ObjBase):
         """
         self._use_detailed_balance = value
 
+
+    @property
+    def detailed_balance_divide_by_T(self) -> bool:
+        """
+        Indicates whether detailed balance is enabled.
+
+        Returns
+        -------
+        bool
+        """
+        return self._detailed_balance_divide_by_T
+    
+    @detailed_balance_divide_by_T.setter
+    def detailed_balance_divide_by_T(self, value: bool):
+        """
+        Enable or disable dividing the detailed balance factor by kB*T.
+
+        Parameters
+        ----------
+        value : bool
+        """
+        self._detailed_balance_divide_by_T = value
+
+
+
     def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
         """
         Evaluate the sum of all components, optionally applying detailed balance.
@@ -224,9 +250,10 @@ class SampleModel(ObjBase):
 
         if self.use_detailed_balance and self._temperature is not None:
             if self._temperature.value >= 0:
-                result *= detailed_balance_factor(x, self._temperature.value)
+                result *= detailed_balance_factor(energy=x, temperature=self._temperature, divide_by_T=self._detailed_balance_divide_by_T)
 
         return result
+
 
     def evaluate_component(self, name: str, x: Union[float,np.ndarray,sc.Variable]) -> np.ndarray:
         """

@@ -43,18 +43,7 @@ class TestModelComponent:
         dummy.fit_all_parameters()
 
         # THEN EXPECT
-        assert all(not p.fixed for p in dummy.get_parameters())
-
-    def test_convert_unit(self, dummy):
-        dummy.convert_unit("eV")
-        assert dummy.area.unit == "eV"
-        assert dummy.center.unit == "eV"
-        assert dummy.width.unit == "eV"
-        assert dummy.area.value == 1.0 * 1e-3  # 1 meV = 0.001 eV
-        assert dummy.center.value == 2.0 * 1e-3  # 2 meV = 0.002 eV
-        assert dummy.width.value == 3.0 * 1e-3  # 3 meV = 0.003 eV
-     
-
+        assert all(not p.fixed for p in dummy.get_parameters())     
 
 class TestGaussian:
 

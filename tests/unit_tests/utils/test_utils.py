@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 
-from easydynamics.utils import detailed_balance_factor  # adjust path if needed
+from easydynamics.utils import detailed_balance_factor  
 
+import scipp as sc
 class TestDetailedBalanceFactor:
 
     def test_zero_temperature(self):
@@ -29,6 +30,18 @@ class TestDetailedBalanceFactor:
         # Expect
         assert isinstance(result, np.ndarray)
         assert result.shape == omega.shape
+
+
+    def test_scipp_variable_input(self):
+        # When
+        omega = sc.array(dims=['x'], values=[-2.0, 0.0, 2.0], unit='meV')
+        T = sc.scalar(value=50, unit='K')
+        # Then
+        result = detailed_balance_factor(omega, T)
+        # Expect
+        assert isinstance(result, np.ndarray)
+        assert result.shape == omega.shape
+
 
     def test_small_omega_limit(self):
         # When
@@ -61,3 +74,14 @@ class TestDetailedBalanceFactor:
         # Expect
         expected_ratio = np.exp(omega / (8.617333262e-2 * T))  # k_B in meV/K
         np.testing.assert_allclose(ratio, expected_ratio, rtol=1e-5)
+
+    def test_divide_by_T_option(self):
+        # When
+        T = 50
+        omega = np.linspace(-10, 10, 100)
+        # Then
+        result_divide_by_T = detailed_balance_factor(omega, T, divide_by_T=True)
+        result_no_divide = detailed_balance_factor(omega, T, divide_by_T=False)
+        # Expect
+        expected_divide_by_T = result_no_divide / (8.617333262e-2 * T)  # k_B * T
+        np.testing.assert_allclose(result_divide_by_T, expected_divide_by_T, rtol=1e-5)
