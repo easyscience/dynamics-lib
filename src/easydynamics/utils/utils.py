@@ -1,14 +1,18 @@
+from easyscience import Parameter
+
 import numpy as np
 
 import scipp as sc
 
 from typing import Union
-from easyscience import Parameter
 
-def detailed_balance_factor(omega: Union[int,float, np.ndarray, sc.Variable], 
-                            temperature: Union[int,float, sc.Variable, Parameter], 
+Numeric = Union[float, int]
+
+
+def detailed_balance_factor(omega: Union[Numeric, list, np.ndarray, sc.Variable], 
+                            temperature: Union[Numeric, sc.Variable, Parameter], 
                             omega_unit: str = 'meV', 
-                            temperature_unit: str = 'K',divide_by_T=True) -> sc.Variable:
+                            temperature_unit: str = 'K', divide_by_T=True) -> Union[Numeric,np.ndarray]:
     """
     Compute the detailed balance factor:
     DBF(omega, T) = omega / (1 - exp(-omega / (kB*T)))
@@ -24,26 +28,48 @@ def detailed_balance_factor(omega: Union[int,float, np.ndarray, sc.Variable],
         DBF : sc array or scalar, depending on omega
             Detailed balance factor
     """
-    if temperature < 0:
+
+    # Make a scipp variable of temperature for unit handling
+    if not isinstance(temperature,sc.Variable):
+        if isinstance(temperature,Parameter):
+            temperature=temperature.value
+            temperature_unit=temperature.unit
+        temperature=sc.scalar(value=float(temperature), unit=temperature_unit)
+
+
+    # Handle special cases first
+    if temperature.value < 0:
         raise ValueError("Temperature must be non-negative.")
 
-    if temperature==0:
+    if temperature.value==0:
         # At T=0, only positive omega contributes
-        if isinstance(omega, (int, float)):
 
-            DBF = sc.scalar(value=max(omega, 0.0),unit=omega_unit)
-        elif isinstance(omega, (list, tuple, np.ndarray)):
-            DBF = sc.array(dims=['x'], values=[max(o, 0.0) for o in omega], unit=omega_unit)
+        #TODO: decide if I want to return scipp variable instead - for now I want numpy array.
 
+        # if isinstance(omega, Numeric):
+        #     DBF = sc.scalar(value=max(omega, 0.0),unit=omega_unit)
+        # elif isinstance(omega, (list, np.ndarray)):
+        #     DBF = sc.array(dims=['x'], values=[max(o, 0.0) for o in omega], unit=omega_unit)
+        # elif isinstance(omega, sc.Variable):
+        #     DBF = sc.where(omega < 0, 0.0, omega)
+
+        if isinstance(omega, Numeric):
+            DBF = max(omega, 0.0)
+        elif isinstance(omega, (list, np.ndarray)):  # Check if omega is iterable
+            DBF = np.array([max(o, 0.0) for o in omega])
         elif isinstance(omega, sc.Variable):
             DBF = sc.where(omega < 0, 0.0, omega)
+            DBF = DBF.values
 
         return DBF
 
+
+    # Now handle non-zero temperature
     kB=sc.scalar(value=8.617333262145e-2, unit='meV/K')  # Boltzmann constant in meV/K
 
+    # Convert omega to scipp variable if needed for unit handling
     if not isinstance(omega, sc.Variable):
-        if isinstance(omega, (int, float)):  # Check if omega is an int or float
+        if isinstance(omega, Numeric): 
             omega = sc.scalar(value=float(omega), unit=omega_unit)
         elif isinstance(omega, (list, tuple, np.ndarray)):  # Check if omega is iterable
             if len(omega) == 1:
@@ -51,23 +77,19 @@ def detailed_balance_factor(omega: Union[int,float, np.ndarray, sc.Variable],
             else:
                 omega = sc.array(dims=['x'], values=omega, unit=omega_unit)
 
-    if not isinstance(temperature,sc.Variable):
-        if isinstance(temperature,Parameter):
-            temperature=temperature.value
-            temperature_unit=temperature.unit
-        temperature=sc.scalar(value=float(temperature), unit=temperature_unit)
 
     x = omega / (kB * temperature)
 
-    # Use masks for different regimes
+    # Very large and very small x need special handling to avoid numerical issues    
+
     DBF = sc.zeros_like(omega)
 
-    # Small omega: Taylor expansion
+    # Small x: Taylor expansion
     small = sc.abs(x) < 0.01
 
     DBF = sc.where(small, kB * temperature + omega / 2 + omega**2 / (12 * kB * temperature), DBF)
 
-    # Large omega: asymptotic form
+    # Large x: asymptotic form
     large = x > 50
     DBF = sc.where(large, omega, DBF)
 
@@ -78,4 +100,6 @@ def detailed_balance_factor(omega: Union[int,float, np.ndarray, sc.Variable],
     if divide_by_T:
     # Normalize by kB*T to get dimensionless - also makes the value 1 at omega=0
         DBF=DBF/(kB*temperature)
+
+    DBF=DBF.values  # Return as numpy array 
     return DBF

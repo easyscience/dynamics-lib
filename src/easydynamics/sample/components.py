@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from typing import Callable, Dict, Union, List, Optional
-from numbers import Number
 
 
 import numpy as np
@@ -76,7 +75,11 @@ class ModelComponent(ObjBase):
             param.convert_unit(unit)
         param.value = value
 
-    def set_parameter_bounds(self, parameter_name: str, min: Union[float,None] = None, max: Union[float, None] = None, unit: Optional[str] = None):
+    def set_parameter_bounds(self, 
+                             parameter_name: str, 
+                             min: Union[float,None] = None, 
+                             max: Union[float, None] = None, 
+                             unit: Optional[str] = None):
         """
         Set the bounds of a specific parameter by name.
         """
