@@ -1,5 +1,5 @@
 
-from typing import Dict, List, Union
+from typing import Dict, List, Union, SupportsFloat
 from typing import Optional
 from numbers import Real
 import numpy as np
@@ -23,7 +23,7 @@ class SampleModel(ObjBase):
     components : dict
         Dictionary of model components keyed by name.
     """
-    def __init__(self, name: str = "MySampleModel", temperature: Optional[Real] = None):
+    def __init__(self, name: str = "MySampleModel", temperature: Optional[SupportsFloat] = None):
         """
         Initialize a new SampleModel.
 
@@ -37,7 +37,7 @@ class SampleModel(ObjBase):
         self.components: Dict[str, ModelComponent] = {}
         super().__init__(name=name)
         if temperature is not None:
-            self._temperature = Parameter(name="temperature", value=temperature, unit='K', fixed=True)
+            self._temperature = Parameter(name="temperature", value=float(temperature), unit='K', fixed=True)
             self._use_detailed_balance = True
         else:
             self._temperature=None
