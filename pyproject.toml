@@ -1,0 +1,33 @@
+[build-system]
+build-backend = 'hatchling.build'
+requires = ['hatchling']
+
+[project]
+name = "easydynamics"
+version = "0.0.1"
+description = "A QENS python package built on the EasyScience framework."
+authors = [{ name = "Henrik Jacobsen", email = "henrik.jacobsen@ess.eu" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+
+requires-python = ">=3.10"
+dependencies = [
+    "numpy", 
+    "scipy",
+    "easyscience @ git+https://github.com/easyscience/corelib.git@develop",
+    "scipp",
+    "plopp",
+    "ipympl"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ['src/easydynamics']
+
+[tool.hatch.metadata]
+allow-direct-references = true
