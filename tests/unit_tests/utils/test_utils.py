@@ -44,6 +44,18 @@ class TestDetailedBalanceFactor:
         assert result.shape == energy.shape
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
+    def test_single_value_array_input(self):
+        # When
+        energy = np.array([2.0])
+        T = 100
+        # Then
+        result = detailed_balance_factor(energy, T)
+        # Expect
+        expected = energy[0] / (1 - np.exp(-energy[0] / (kB_meV_per_K * T))) / (kB_meV_per_K * T)  
+
+        assert isinstance(result, float)
+        np.testing.assert_allclose(result, expected, rtol=1e-5)
+
     def test_scalar_input(self):
         # When
         energy = 2.0
