@@ -48,7 +48,7 @@ jobs:
       - name: Run unit tests with coverage
         run: >
           pytest tests/unit_tests 
-          --cov=src/easydynamics 
+          --cov=easydynamics 
           --cov-report=term-missing 
           --cov-report=xml:coverage-unit.xml
 
