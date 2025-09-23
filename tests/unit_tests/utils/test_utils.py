@@ -1,11 +1,12 @@
 import numpy as np
 import pytest
 import scipp as sc
+from scipp.constants import Boltzmann as kB
 from easyscience import Parameter
 
 from easydynamics.utils import detailed_balance_factor  
 
-kB_meV_per_K = 8.617333262145e-2  # meV / K
+kB_meV_per_K = sc.to_unit(kB, 'meV/K').value
 
 class TestDetailedBalanceFactor:
     # Input validation tests
@@ -202,7 +203,7 @@ class TestDetailedBalanceFactor:
         # When
         energy = np.linspace(1e3,10*1e3,100)
         energy_unit='microeV'
-        T = 100/1000  
+        T = 100  
         # Then
         result = detailed_balance_factor(energy=energy, temperature=T,divide_by_temperature=False, energy_unit=energy_unit)
         # Expect
@@ -211,9 +212,9 @@ class TestDetailedBalanceFactor:
 
     def test_energy_unit_warning(self):
         # When
-        energy = sc.linspace('energy', 1e3, 100e3, num=100, unit='microeV')
+        energy = sc.linspace('energy', 1e3, 10*1e3, num=100, unit='microeV')
         energy_unit='meV'
-        T = 100  
+        T = 100
 
         # Then
         with pytest.warns(UserWarning, match="Input energy has unit µeV, but energy_unit was set to meV. Using µeV."):
@@ -233,5 +234,16 @@ class TestDetailedBalanceFactor:
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * temperature/1000)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
+    def test_temperature_unit_warning(self):
+        # When
+        energy = np.linspace(1,10,100)
+        temperature = sc.scalar(value=100, unit='mK')
+        temperature_unit = 'K'
+        # Then
+        with pytest.warns(UserWarning, match="Input temperature has unit mK, but temperature_unit was set to K. Using mK."):
+            result = detailed_balance_factor(energy=energy, temperature=temperature, temperature_unit=temperature_unit,divide_by_temperature=False)
+        # Expect
+        expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * 0.1)))
+        np.testing.assert_allclose(result, expected, rtol=1e-5)
 
 

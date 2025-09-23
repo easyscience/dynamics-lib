@@ -6,6 +6,13 @@ from typing import Union
 from easyscience import Parameter
 
 import warnings
+from scipp.constants import Boltzmann as kB
+
+# Small and large values of x need special treatment. 
+SMALL_THRESHOLD = 0.001 # For small values of x, the denominator is close to zero, which can give numerical issues. The issues don't start until x<~1e-6, but we use a larger threshold to be safe.
+LARGE_THRESHOLD = 100 # For large values of x, the exponential term becomes negligible. This happens around x>~10, but we use a larger threshold to be safe. At very large x, exp(-x) can be rounded to 0, which can give numerical issues.
+
+
 
 def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variable], 
                             temperature: Union[int,float, sc.Variable, Parameter], 
@@ -26,7 +33,7 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
             Unit for energy if energy is given as a number or list. Default is 'meV'
         temperature_unit : str, optional
             Unit for temperature if temperature is given as a number. Default is 'K'
-        divide_by_T : bool, optional
+        divide_by_temperature : bool, optional
             If True, divide the result by kB*T to make it dimensionless and have value 1 at energy=0. Default is True.
 
     Returns:
@@ -49,31 +56,25 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
     if not isinstance(temperature_unit, str):
         raise ValueError("temperature_unit must be a string.")
 
-    # First convert temperature to sc variable to make units easy to handle
-    if not isinstance(temperature,sc.Variable):
-        if isinstance(temperature,Parameter):
-            temperature_unit = temperature.unit
-            temperature = temperature.value
-        temperature = sc.scalar(value=float(temperature), unit=temperature_unit)
+    # First convert temperature to sc variable to make units easy to handle  
+    temperature = _convert_to_scipp_variable(temperature, temperature_unit, "temperature")
 
     if temperature.value < 0:
         raise ValueError("Temperature must be non-negative.")
     
     # Convert energy to sc variable to make units easy to handle
-    if not isinstance(energy, sc.Variable):
-        if isinstance(energy, (int, float)): 
-            energy = sc.scalar(value=float(energy), unit=energy_unit)
-        elif isinstance(energy, (list, np.ndarray)):  # Check if energy is iterable
-            if len(energy) == 1:
-                energy = sc.scalar(value=energy[0], unit=energy_unit)
-            else:
-                energy = sc.array(dims=['x'], values=energy, unit=energy_unit)
+    energy = _convert_to_scipp_variable(energy, energy_unit, "energy")
 
-    # We give users the option to specify the energy, but if the input has a unit, they might clash
+    # We give users the option to specify the unit of the energy, but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(f"Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. Using {energy.unit}.")
         energy_unit = energy.unit
 
+    # Same for temperature
+    if temperature.unit != temperature_unit:
+        warnings.warn(f"Input temperature has unit {temperature.unit}, but temperature_unit was set to {temperature_unit}. Using {temperature.unit}.")
+        temperature_unit = temperature.unit
+ 
     # Zero temperature deserves special treatment
     if temperature.value == 0:
         if divide_by_temperature:
@@ -81,21 +82,16 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
         DBF = sc.where(energy < 0.0*sc.Unit(energy_unit), 0.0*sc.Unit(energy_unit), energy)
             
         if DBF.sizes == {}:  
-            DBF_values = DBF.value
+            DBF_values = np.array(DBF.value)
         else:
             DBF_values = DBF.values
         return DBF_values
-
-    kB=sc.scalar(value=8.617333262145e-2, unit='meV/K')  # Boltzmann constant in meV/K
 
 
     # Work with dimensionless x = energy/(kB*T). Here, we have divided by kB*T
     x = energy / (kB * temperature)
     x = sc.to_unit(x, unit = '1')  # Make sure the unit is 1 and not e.g. 1e3
 
-    # Small and large values of x need special treatment. The general case seems to work well within these limits.
-    SMALL_THRESHOLD = 0.01 
-    LARGE_THRESHOLD = 50
     DBF = sc.zeros_like(x)
 
     # Small x (small energy and/or high temperature): Taylor expansion
@@ -121,3 +117,29 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
     else:
         DBF_values = DBF.values
     return DBF_values
+
+def _convert_to_scipp_variable(value: Union[int, float, list, np.ndarray, Parameter, sc.Variable], unit: str, name: str = "value") -> sc.Variable:
+    """Convert various input types to a scipp Variable with proper units."""
+    if isinstance(value, sc.Variable):
+        return value
+    
+    # Convert to numpy array first for consistent handling
+    if isinstance(value, (int, float)):
+        array_value = np.array(value)
+    elif isinstance(value, (list, tuple)):
+        array_value = np.array(value)
+    elif isinstance(value, np.ndarray):
+        array_value = value
+    elif isinstance(value, Parameter):
+        array_value = np.array(value.value)
+        unit = value.unit
+    else:
+        raise TypeError(f"{name} must be a number, list, numpy array, Parameter or scipp Variable")
+    
+    # Create appropriate scipp variable based on shape
+    if array_value.shape == () or (array_value.shape == (1,)):
+        # Scalar or single-element array
+        return sc.scalar(value=float(array_value.flat[0]), unit=unit)
+    else:
+        # Multi-element array
+        return sc.array(dims=['x'], values=array_value, unit=unit)
