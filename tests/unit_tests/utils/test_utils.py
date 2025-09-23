@@ -27,6 +27,16 @@ class TestDetailedBalanceFactor:
         with pytest.raises(ValueError, match="Cannot divide by T when T=0"):
             detailed_balance_factor(energy, temperature, divide_by_T=True)
 
+    def test_zero_temperature_single_value(self):
+        # When
+        temperature = 0
+        energy = 2.0
+        # Then
+        result = detailed_balance_factor(energy, temperature, divide_by_T=False)
+        # Expect
+        expected = 2.0
+        assert result == expected
+
     def test_negative_temperature_raises(self):
         # When Then Expect
         with pytest.raises(ValueError, match="Temperature must be non-negative"):
