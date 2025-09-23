@@ -10,12 +10,13 @@ import warnings
 def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variable], 
                             temperature: Union[int,float, sc.Variable, Parameter], 
                             energy_unit: str = 'meV', 
-                            temperature_unit: str = 'K',divide_by_T=True) -> np.ndarray:
+                            temperature_unit: str = 'K',
+                            divide_by_temperature: bool = True) -> np.ndarray:
     """
     Compute the detailed balance factor:
-    DBF(energy, T) = energy*(n(b)+1)=energy / (1 - exp(-energy / (kB*T)))
-    If divide_by_T is True, the result is normalized by kB*T to have value 1 at energy=0.
-    
+    DBF(energy, T) = energy*(n(b)+1)=energy / (1 - exp(-energy / (kB*T))), where n(b) is the Bose-Einstein distribution.
+    If divide_by_temperature is True, the result is normalized by kB*T to have value 1 at energy=0.
+
     Args:
         energy : number, list, np.ndarray, or scipp Variable. If number, assumed to be in meV unless energy_unit is set.
             Energy transfer
@@ -31,13 +32,29 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
     Returns:
         DBF : np.ndarray (may be changed to scipp Variable in the future)
             Detailed balance factor
+
+    Examples
+    --------
+    >>> detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
+    >>> detailed_balance_factor(energy=[1.0, 2.0], temperature=300, energy_unit='microeV', temperature_unit='K', divide_by_temperature=False)            
     """
+
+    # Input validation
+    if not isinstance(divide_by_temperature, bool):
+        raise ValueError("divide_by_temperature must be a boolean.")
+    
+    if not isinstance(energy_unit, str):
+        raise ValueError("energy_unit must be a string.")
+    
+    if not isinstance(temperature_unit, str):
+        raise ValueError("temperature_unit must be a string.")
+
     # First convert temperature to sc variable to make units easy to handle
     if not isinstance(temperature,sc.Variable):
         if isinstance(temperature,Parameter):
-            temperature_unit=temperature.unit
-            temperature=temperature.value
-        temperature=sc.scalar(value=float(temperature), unit=temperature_unit)
+            temperature_unit = temperature.unit
+            temperature = temperature.value
+        temperature = sc.scalar(value=float(temperature), unit=temperature_unit)
 
     if temperature.value < 0:
         raise ValueError("Temperature must be non-negative.")
@@ -55,11 +72,11 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
     # We give users the option to specify the energy, but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(f"Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. Using {energy.unit}.")
-        energy_unit=energy.unit
+        energy_unit = energy.unit
 
     # Zero temperature deserves special treatment
-    if temperature.value==0:
-        if divide_by_T:
+    if temperature.value == 0:
+        if divide_by_temperature:
             raise ValueError("Cannot divide by T when T=0.")
         DBF = sc.where(energy < 0.0*sc.Unit(energy_unit), 0.0*sc.Unit(energy_unit), energy)
             
@@ -71,40 +88,36 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
 
     kB=sc.scalar(value=8.617333262145e-2, unit='meV/K')  # Boltzmann constant in meV/K
 
+
+    # Work with dimensionless x = energy/(kB*T). Here, we have divided by kB*T
     x = energy / (kB * temperature)
-    x = sc.to_unit(x, unit='1')  # Make sure the unit is 1 and not e.g. 1e3
+    x = sc.to_unit(x, unit = '1')  # Make sure the unit is 1 and not e.g. 1e3
 
-    # Small and large values of x need special treatment
-    SMALL_THRESHOLD=0.01
-    LARGE_THRESHOLD=50
-    DBF = sc.zeros_like(energy)
+    # Small and large values of x need special treatment. The general case seems to work well within these limits.
+    SMALL_THRESHOLD = 0.01 
+    LARGE_THRESHOLD = 50
+    DBF = sc.zeros_like(x)
 
-    # Small energy: Taylor expansion
+    # Small x (small energy and/or high temperature): Taylor expansion
     small = sc.abs(x) < SMALL_THRESHOLD
 
-    first_order_term_a= kB * temperature
-    first_order_term_b= energy / 2
-    second_order_term= energy**2 / (12 * kB * temperature)
+    DBF = sc.where(small, 1+x/2 + x**2/12, DBF) 
 
-    DBF = sc.where(small, sc.to_unit(first_order_term_a, energy_unit) + sc.to_unit(first_order_term_b, energy_unit) + sc.to_unit(second_order_term, energy_unit), DBF) # can't add terms with different units
-
-    # Large energy: asymptotic form
+    # Large x (large energy and/or low temperature): asymptotic form
     large = x > LARGE_THRESHOLD
-    DBF = sc.where(large, energy, DBF)
+    DBF = sc.where(large, x, DBF)
 
     # General case: exact formula
     mid = ~small & ~large
-    DBF = sc.where(mid, energy / (1 - sc.exp(-x)), DBF)
+    DBF = sc.where(mid, x / (1 - sc.exp(-x)), DBF)
 
-    DBF=sc.to_unit(DBF, unit=energy_unit)
-
-    if divide_by_T:
-    # Normalize by kB*T to get dimensionless - also makes the value 1 at energy=0
-        DBF=DBF/(kB*temperature)
-        DBF=sc.to_unit(DBF, unit='1')
+    # 
+    if not divide_by_temperature:
+        DBF=DBF*(kB*temperature)
+        DBF=sc.to_unit(DBF, unit = energy_unit)
 
     if DBF.sizes == {}:  
-        DBF_values = DBF.value
+        DBF_values = np.array(DBF.value)
     else:
         DBF_values = DBF.values
     return DBF_values
