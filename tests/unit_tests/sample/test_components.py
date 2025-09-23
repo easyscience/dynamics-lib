@@ -181,7 +181,7 @@ class TestVoigt:
 
     @pytest.fixture
     def voigt(self):
-        return Voigt(name='TestVoigt', area=2.0, center=0.5, Gwidth=0.6, Lwidth=0.7, unit='meV')
+        return Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=0.6, lorentzian_width=0.7, unit='meV')
 
     def test_initialization(self, voigt: Voigt):
         assert voigt.name == 'TestVoigt'
@@ -210,7 +210,7 @@ class TestVoigt:
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_center_is_fixed_if_set_to_None(self):
-        test_voigt=Voigt(name='TestVoigt', area=2.0, center=None, Gwidth=0.6, Lwidth=0.7, unit='meV')
+        test_voigt=Voigt(name='TestVoigt', area=2.0, center=None, gaussian_width=0.6, lorentzian_width=0.7, unit='meV')
         assert test_voigt.center.value ==0.0
         assert test_voigt.center.fixed is True
 
@@ -219,7 +219,7 @@ class TestVoigt:
         param_center=Parameter(name='center_param',value=0.5,unit='meV')
         param_Gwidth=Parameter(name='Gwidth_param',value=0.6,unit='meV')
         param_Lwidth=Parameter(name='Lwidth_param',value=0.7,unit='meV')
-        test_voigt=Voigt(name='TestVoigt', area=param_area, center=param_center, Gwidth=param_Gwidth, Lwidth=param_Lwidth, unit='meV')
+        test_voigt=Voigt(name='TestVoigt', area=param_area, center=param_center, gaussian_width=param_Gwidth, lorentzian_width=param_Lwidth, unit='meV')
         assert test_voigt.area==param_area
         assert test_voigt.center==param_center
         assert test_voigt.Gwidth==param_Gwidth
@@ -227,10 +227,10 @@ class TestVoigt:
 
     def test_negative_width_raises(self):
         with pytest.raises(ValueError, match="Gwidth must be greater than 0 for Voigt profile."):
-            Voigt(name='TestVoigt', area=2.0, center=0.5, Gwidth=-0.6, Lwidth=0.7, unit='meV')
+            Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=-0.6, lorentzian_width=0.7, unit='meV')
 
         with pytest.raises(ValueError, match="Lwidth must be greater than 0 for Voigt profile."):
-            Voigt(name='TestVoigt', area=2.0, center=0.5, Gwidth=0.6, Lwidth=-0.7, unit='meV')
+            Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=0.6, lorentzian_width=-0.7, unit='meV')
 
     def test_get_parameters(self, voigt: Voigt):
         params = voigt.get_parameters()

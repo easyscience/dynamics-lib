@@ -21,7 +21,7 @@ class ModelComponent(ObjBase):
     """
 
     def __init__(self, name='ModelComponent'):
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.unit=None  
 
     def fix_all_parameters(self):
@@ -160,13 +160,13 @@ class Gaussian(ModelComponent):
 
         # Validate inputs - throw errors before any Parameters are created
         if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or an EasyScience Parameter.")
+            raise TypeError("area must be a number or a Parameter.")
 
         if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or an EasyScience Parameter.")
+            raise TypeError("center must be None, a number or a Parameter.")
 
         if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or an EasyScience Parameter.")
+            raise TypeError("width must be a number or a Parameter.")
 
         if isinstance(width, Numeric):
             if width <= 0:
@@ -179,24 +179,24 @@ class Gaussian(ModelComponent):
             area = float(area)
 
         
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.unit = unit  # Set the unit for the component
 
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
-            self.center = Parameter(name= name+ ' center', value=0.0, unit=unit,fixed=True)
+            self.center = Parameter(name= name+ ' center', value = 0.0, unit=unit,fixed=True)
         elif isinstance(center, Numeric):
-            self.center = Parameter(name=name+ ' center', value=center, unit=unit)
+            self.center = Parameter(name = name+ ' center', value = center, unit=unit)
         else:
             self.center=center
 
         if isinstance(width, Numeric):
-            self.width = Parameter(name=name+ ' width', value=width, unit=unit,min=0.0)
+            self.width = Parameter(name = name+ ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name+ ' area', value=area, unit=unit)
+            self.area = Parameter(name = name+ ' area', value=area, unit=unit)
         else:
             self.area=area
 
@@ -244,7 +244,7 @@ class Gaussian(ModelComponent):
         Return a deep copy of this component with independent parameters.
         """
 
-        ModelCopy=Gaussian(
+        model_copy=Gaussian(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
@@ -252,10 +252,10 @@ class Gaussian(ModelComponent):
             unit=self.unit
         )
 
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed
-        ModelCopy.width.fixed = self.width.fixed
-        return ModelCopy
+        model_copy.area.fixed = self.area.fixed
+        model_copy.center.fixed = self.center.fixed
+        model_copy.width.fixed = self.width.fixed
+        return model_copy
 
     def __repr__(self):
         return f"Gaussian(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
@@ -281,13 +281,13 @@ class Lorentzian(ModelComponent):
         
         # Validate inputs
         if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or an EasyScience Parameter.")
+            raise TypeError("area must be a number or a Parameter.")
 
         if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or an EasyScience Parameter.")
+            raise TypeError("center must be None, a number or a Parameter.")
 
         if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or an EasyScience Parameter.")
+            raise TypeError("width must be a number or a Parameter.")
 
         if isinstance(width, Numeric):
             if width <= 0:
@@ -302,24 +302,24 @@ class Lorentzian(ModelComponent):
         if isinstance(center, Numeric):
             center = float(center)
 
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.unit = unit  # Set the unit for the component
 
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
-            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name = name + ' center', value = 0.0, unit=unit, fixed=True)
         elif isinstance(center, Numeric):
-            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+            self.center = Parameter(name = name + ' center', value = center, unit=unit)
         else:
             self.center=center
 
         if isinstance(width, Numeric):
-            self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
+            self.width = Parameter(name = name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width=width
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit)
+            self.area = Parameter(name = name + ' area', value=area, unit=unit)
         else:
             self.area=area
 
@@ -363,17 +363,17 @@ class Lorentzian(ModelComponent):
 
     def copy(self) -> "Lorentzian":
 
-        ModelCopy =Lorentzian(
+        model_copy =Lorentzian(
             name=self.name, 
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
             unit=self.unit
         )   
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed 
-        ModelCopy.width.fixed = self.width.fixed
-        return ModelCopy
+        model_copy.area.fixed = self.area.fixed
+        model_copy.center.fixed = self.center.fixed 
+        model_copy.width.fixed = self.width.fixed
+        return model_copy
 
 
     def __repr__(self):
@@ -386,8 +386,8 @@ class Voigt(ModelComponent):
 
     Args:
         center (float): Center of the Voigt profile.
-        Gwidth (float): Standard deviation of the Gaussian part.
-        Lwidth (float): HWHM of the Lorentzian part.
+        gaussian_width (float): Standard deviation of the Gaussian part.
+        lorentzian_width (float): HWHM of the Lorentzian part.
         area (float): Total area under the curve.
     """
 
@@ -395,66 +395,66 @@ class Voigt(ModelComponent):
                  name: str = 'Voigt', 
                  area: Union[Numeric, Parameter] = 1.0, 
                  center: Union[Numeric, Parameter, None] = None, 
-                 Gwidth: Union[Numeric, Parameter] = 1.0, 
-                 Lwidth: Union[Numeric, Parameter] = 1.0, 
+                 gaussian_width: Union[Numeric, Parameter] = 1.0, 
+                 lorentzian_width: Union[Numeric, Parameter] = 1.0, 
                  unit: str = 'meV'):
         
         # Validate inputs
         if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or an EasyScience Parameter.")
+            raise TypeError("area must be a number or a Parameter.")
 
         if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or an EasyScience Parameter.")
+            raise TypeError("center must be None, a number or a Parameter.")
         
-        if not isinstance(Gwidth, (Numeric, Parameter)):
-            raise TypeError("Gwidth must be a number or an EasyScience Parameter.")
+        if not isinstance(gaussian_width, (Numeric, Parameter)):
+            raise TypeError("Gwidth must be a number or a Parameter.")
         
-        if not isinstance(Lwidth, (Numeric, Parameter)):
-            raise TypeError("Lwidth must be a number or an EasyScience Parameter.")
+        if not isinstance(lorentzian_width, (Numeric, Parameter)):
+            raise TypeError("Lwidth must be a number or a Parameter.")
         
-        if isinstance(Gwidth, Numeric):
-            if Gwidth <= 0:
+        if isinstance(gaussian_width, Numeric):
+            if gaussian_width <= 0:
                 raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
-            Gwidth=float(Gwidth)
+            gaussian_width=float(gaussian_width)
 
-        if isinstance(Lwidth, Numeric):
-            if Lwidth <= 0:
+        if isinstance(lorentzian_width, Numeric):
+            if lorentzian_width <= 0:
                 raise ValueError("Lwidth must be greater than 0 for Voigt profile.")
-            Lwidth=float(Lwidth)
+            lorentzian_width=float(lorentzian_width)
 
         if isinstance(area, Numeric):
             if area < 0:
                 warnings.warn("The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(name))
             area = float(area)
         
-        super().__init__(name=name)
+        super().__init__(name = name)
 
 
         self.unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
-            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name = name + ' center', value = 0.0, unit=unit, fixed=True)
         elif isinstance(center, Numeric):
-            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+            self.center = Parameter(name = name + ' center', value = center, unit=unit)
         else:
             self.center=center
 
-        if isinstance(Gwidth, Numeric):
-            self.Gwidth = Parameter(name=name + ' Gwidth', value=Gwidth, unit=unit,min=0.0)
+        if isinstance(gaussian_width, Numeric):
+            self.Gwidth = Parameter(name = name + ' Gwidth', value=gaussian_width, unit=unit,min=0.0)
         else:
-            self.Gwidth=Gwidth
+            self.Gwidth=gaussian_width
 
-        if isinstance(Lwidth, Numeric):
-            self.Lwidth = Parameter(name=name + ' Lwidth', value=Lwidth, unit=unit,min=0.0)
+        if isinstance(lorentzian_width, Numeric):
+            self.Lwidth = Parameter(name = name + ' Lwidth', value=lorentzian_width, unit=unit,min=0.0)
         else:
-            self.Lwidth=Lwidth
+            self.Lwidth=lorentzian_width
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit)
+            self.area = Parameter(name = name + ' area', value=area, unit=unit)
         else:
             self.area=area
 
-    def evaluate(self, x):
+    def evaluate(self, x: Union[float,np.ndarray,sc.Variable]) -> Union[float,np.ndarray]:
         if self.Gwidth.value <= 0:
             raise ValueError("Gwidth must be greater than 0 for Voigt profile.")
         if self.Lwidth.value <= 0:
@@ -495,20 +495,20 @@ class Voigt(ModelComponent):
     
     def copy(self) -> "Voigt":
 
-        ModelCopy = Voigt(
+        model_copy = Voigt(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
-            Gwidth=self.Gwidth.value,
-            Lwidth=self.Lwidth.value,
+            gaussian_width=self.Gwidth.value,
+            lorentzian_width=self.Lwidth.value,
             unit=self.unit
         )
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed
-        ModelCopy.Gwidth.fixed = self.Gwidth.fixed
-        ModelCopy.Lwidth.fixed = self.Lwidth.fixed
+        model_copy.area.fixed = self.area.fixed
+        model_copy.center.fixed = self.center.fixed
+        model_copy.Gwidth.fixed = self.Gwidth.fixed
+        model_copy.Lwidth.fixed = self.Lwidth.fixed
 
-        return ModelCopy
+        return model_copy
 
     def __repr__(self):
         return f"Voigt(name={self.name}, area={self.area}, center={self.center}, Gwidth={self.Gwidth}, Lwidth={self.Lwidth})"
@@ -530,10 +530,10 @@ class DeltaFunction(ModelComponent):
                  unit='meV'):
         # Validate inputs
         if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or an EasyScience Parameter.")
+            raise TypeError("area must be a number or a Parameter.")
         
         if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or an EasyScience Parameter.")
+            raise TypeError("center must be None, a number or a Parameter.")
         
         if isinstance(area, Numeric):
             if area < 0:
@@ -543,18 +543,18 @@ class DeltaFunction(ModelComponent):
         if isinstance(center, Numeric):
             center = float(center)
 
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.unit = unit
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
-            self.center = Parameter(name=name + ' center', value=0.0, unit=unit, fixed=True)
+            self.center = Parameter(name = name + ' center', value = 0.0, unit=unit, fixed=True)
         elif isinstance(center, Numeric):
-            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+            self.center = Parameter(name = name + ' center', value = center, unit=unit)
         else:
             self.center=center
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit,min=0.0)
+            self.area = Parameter(name = name + ' area', value=area, unit=unit,min=0.0)
         else:
             self.area=area
 
@@ -590,15 +590,15 @@ class DeltaFunction(ModelComponent):
         """
         Return a deep copy of this component with independent parameters.
         """
-        ModelCopy = DeltaFunction(
+        model_copy = DeltaFunction(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
             unit=self.unit
         )
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed
-        return ModelCopy
+        model_copy.area.fixed = self.area.fixed
+        model_copy.center.fixed = self.center.fixed
+        return model_copy
 
     def __repr__(self):
         return f"DeltaFunction(name={self.name}, area={self.area}, center={self.center})"
@@ -621,13 +621,13 @@ class DampedHarmonicOscillator(ModelComponent):
                  unit: str = 'meV'):
         # Validate inputs
         if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or an EasyScience Parameter.")
+            raise TypeError("area must be a number or a Parameter.")
         
         if not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be a number or an EasyScience Parameter.")
+            raise TypeError("center must be a number or a Parameter.")
         
         if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or an EasyScience Parameter.")
+            raise TypeError("width must be a number or a Parameter.")
         
         if isinstance(width, Numeric):
             width=float(width)
@@ -637,26 +637,26 @@ class DampedHarmonicOscillator(ModelComponent):
         if isinstance(area, Numeric):
             area = float(area)
             if area < 0:
-                raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(name))
+                warnings.warn("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(name))
 
         if isinstance(center, Numeric):
             center = float(center)
         
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
         if isinstance(center, Numeric):
-            self.center = Parameter(name=name + ' center', value=center, unit=unit)
+            self.center = Parameter(name = name + ' center', value = center, unit=unit)
         else:
             self.center=center
 
         if isinstance(width, Numeric):
-            self.width = Parameter(name=name + ' width', value=width, unit=unit,min=0.0)
+            self.width = Parameter(name = name + ' width', value=width, unit=unit,min=0.0)
         else:
             self.width = width
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name + ' area', value=area, unit=unit)
+            self.area = Parameter(name = name + ' area', value=area, unit=unit)
         else:
             self.area = area
 
@@ -665,7 +665,7 @@ class DampedHarmonicOscillator(ModelComponent):
         if self.width.value <= 0:
             raise ValueError("Width of a Damped Harmonic Oscillator must be greater than 0.")
         if self.area.value < 0:
-            raise Warning("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(self.name))
+            warnings.warn("The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(self.name))
         
         # Handle units
         if isinstance(x, sc.Variable):
@@ -706,17 +706,17 @@ class DampedHarmonicOscillator(ModelComponent):
         """
 
 
-        ModelCopy = DampedHarmonicOscillator(
+        model_copy = DampedHarmonicOscillator(
             name=self.name,
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
             unit=self.unit
         )
-        ModelCopy.area.fixed = self.area.fixed
-        ModelCopy.center.fixed = self.center.fixed
-        ModelCopy.width.fixed = self.width.fixed
-        return ModelCopy
+        model_copy.area.fixed = self.area.fixed
+        model_copy.center.fixed = self.center.fixed
+        model_copy.width.fixed = self.width.fixed
+        return model_copy
 
 
     def __repr__(self):
@@ -738,7 +738,7 @@ class Polynomial(ModelComponent):
         if not isinstance(coefficients,(list,tuple,np.ndarray)):
             raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
         
-        super().__init__(name=name)
+        super().__init__(name = name)
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
 
@@ -782,13 +782,13 @@ class Polynomial(ModelComponent):
         Return a deep copy of this component with independent parameters.
         """
 
-        ModelCopy = Polynomial(
+        model_copy = Polynomial(
             name=self.name,
             coefficients=[param.value for param in self.coefficients]
         )
-        for i, param in enumerate(ModelCopy.coefficients):
+        for i, param in enumerate(model_copy.coefficients):
             param.fixed = self.coefficients[i].fixed
-        return ModelCopy
+        return model_copy
 
     def __repr__(self):
         coeffs_str = ', '.join(f"{param.name}={param.value}" for param in self.coefficients)
@@ -810,7 +810,7 @@ class UserDefinedComponent(ModelComponent):
     """
 
     def __init__(self, name, func: Callable[[np.ndarray, Dict], np.ndarray], params: Dict):
-        super().__init__(name=name)
+        super().__init__(name = name)
         self.func = func
         self.params = params
 
