@@ -25,6 +25,8 @@ def detailed_balance_factor(energy: Union[int,float, list, np.ndarray, sc.Variab
             Unit for energy if energy is given as a number or list. Default is 'meV'
         temperature_unit : str, optional
             Unit for temperature if temperature is given as a number. Default is 'K'
+        divide_by_T : bool, optional
+            If True, divide the result by kB*T to make it dimensionless and have value 1 at energy=0. Default is True.
 
     Returns:
         DBF : np.ndarray (may be changed to scipp Variable in the future)
