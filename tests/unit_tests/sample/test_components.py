@@ -178,9 +178,27 @@ class TestGaussian:
         ):
             Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
 
+    def test_negative_width_raises_in_evaluate(self):
+        test_gaussian = Gaussian(
+            name="TestGaussian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
+        test_gaussian.width.value = -0.6
+        with pytest.raises(
+            ValueError, match="The width of a Gaussian must be greater than zero."
+        ):
+            test_gaussian.evaluate(np.array([0.0, 0.5, 1.0]))
+
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
+
+    def test_negative_area_warns_in_evaluate(self):
+        test_gaussian = Gaussian(
+            name="TestGaussian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
+        test_gaussian.area.value = -2.0
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            test_gaussian.evaluate(np.array([0.0, 0.5, 1.0]))
 
     def test_evaluate(self, gaussian: Gaussian):
         x = np.array([0.0, 0.5, 1.0])
@@ -248,6 +266,14 @@ class TestGaussian:
 
         # THEN EXPECT
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
+
+    def test_convert_unit(self, gaussian: Gaussian):
+        gaussian.convert_unit("microeV")
+
+        assert gaussian.unit == "microeV"
+        assert gaussian.area.value == 2 * 1e3
+        assert gaussian.center.value == 0.5 * 1e3
+        assert gaussian.width.value == 0.6 * 1e3
 
     def test_copy(self, gaussian: Gaussian):
         gaussian_copy = gaussian.copy()
@@ -318,11 +344,29 @@ class TestLorentzian:
                 name="TestLorentzian", area=2.0, center=0.5, width=-0.6, unit="meV"
             )
 
+    def test_negative_width_raises_in_evaluate(self):
+        test_lorentzian = Lorentzian(
+            name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
+        test_lorentzian.width.value = -0.6
+        with pytest.raises(
+            ValueError, match="The width of a Lorentzian must be greater than zero."
+        ):
+            test_lorentzian.evaluate(np.array([0.0, 0.5, 1.0]))
+
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Lorentzian(
                 name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
             )
+
+    def test_negative_area_warns_in_evaluate(self):
+        test_lorentzian = Lorentzian(
+            name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
+        test_lorentzian.area.value = -2.0
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            test_lorentzian.evaluate(np.array([0.0, 0.5, 1.0]))
 
     def test_evaluate(self, lorentzian: Lorentzian):
         x = np.array([0.0, 0.5, 1.0])
@@ -386,6 +430,14 @@ class TestLorentzian:
 
         # THEN EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
+
+    def test_convert_unit(self, lorentzian: Lorentzian):
+        lorentzian.convert_unit("microeV")
+
+        assert lorentzian.unit == "microeV"
+        assert lorentzian.area.value == 2 * 1e3
+        assert lorentzian.center.value == 0.5 * 1e3
+        assert lorentzian.width.value == 0.6 * 1e3
 
     def test_copy(self, lorentzian: Lorentzian):
         lorentzian_copy = lorentzian.copy()
@@ -501,6 +553,21 @@ class TestVoigt:
                 unit="meV",
             )
 
+    def test_negative_gaussian_width_raises_in_evaluate(self):
+        test_voigt = Voigt(
+            name="TestVoigt",
+            area=2.0,
+            center=0.5,
+            gaussian_width=0.6,
+            lorentzian_width=0.7,
+            unit="meV",
+        )
+        test_voigt.gaussian_width.value = -0.6
+        with pytest.raises(
+            ValueError, match="The gaussian_width of a Voigt must be greater than."
+        ):
+            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
+
     def test_negative_lorentzian_width_raises(self):
         with pytest.raises(
             ValueError,
@@ -515,6 +582,22 @@ class TestVoigt:
                 unit="meV",
             )
 
+    def test_negative_lorentzian_width_raises_in_evaluate(self):
+        test_voigt = Voigt(
+            name="TestVoigt",
+            area=2.0,
+            center=0.5,
+            gaussian_width=0.6,
+            lorentzian_width=0.7,
+            unit="meV",
+        )
+        test_voigt.lorentzian_width.value = -0.7
+        with pytest.raises(
+            ValueError,
+            match="The lorentzian_width of a Voigt must be greater than zero.",
+        ):
+            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
+
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Voigt(
@@ -525,6 +608,19 @@ class TestVoigt:
                 lorentzian_width=0.7,
                 unit="meV",
             )
+
+    def test_negative_area_warns_in_evaluate(self):
+        test_voigt = Voigt(
+            name="TestVoigt",
+            area=2.0,
+            center=0.5,
+            gaussian_width=0.6,
+            lorentzian_width=0.7,
+            unit="meV",
+        )
+        test_voigt.area.value = -2.0
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
 
     def test_evaluate(self, voigt: Voigt):
         x = np.array([0.0, 0.5, 1.0])
@@ -580,31 +676,14 @@ class TestVoigt:
         assert test_voigt.gaussian_width == param_gaussian_width
         assert test_voigt.lorentzian_width == param_lorentzian_width
 
-    def test_negative_width_raises(self):
-        with pytest.raises(
-            ValueError, match="The gaussian_width of a Voigt must be greater than zero"
-        ):
-            Voigt(
-                name="TestVoigt",
-                area=2.0,
-                center=0.5,
-                gaussian_width=-0.6,
-                lorentzian_width=0.7,
-                unit="meV",
-            )
+    def test_convert_unit(self, voigt: Voigt):
+        voigt.convert_unit("microeV")
 
-        with pytest.raises(
-            ValueError,
-            match="The lorentzian_width of a Voigt must be greater than zero",
-        ):
-            Voigt(
-                name="TestVoigt",
-                area=2.0,
-                center=0.5,
-                gaussian_width=0.6,
-                lorentzian_width=-0.7,
-                unit="meV",
-            )
+        assert voigt.unit == "microeV"
+        assert voigt.area.value == 2 * 1e3
+        assert voigt.center.value == 0.5 * 1e3
+        assert voigt.gaussian_width.value == 0.6 * 1e3
+        assert voigt.lorentzian_width.value == 0.7 * 1e3
 
     def test_get_parameters(self, voigt: Voigt):
         params = voigt.get_parameters()
@@ -730,6 +809,13 @@ class TestDeltaFunction:
         assert params[1].name == "TestDeltaFunction center"
         assert all(isinstance(param, Parameter) for param in params)
 
+    def test_convert_unit(self, delta_function: DeltaFunction):
+        delta_function.convert_unit("microeV")
+
+        assert delta_function.unit == "microeV"
+        assert delta_function.area.value == 2 * 1e3
+        assert delta_function.center.value == 0.5 * 1e3
+
     def test_copy(self, delta_function: DeltaFunction):
         delta_copy = delta_function.copy()
         assert delta_copy is not delta_function
@@ -816,6 +902,21 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
+    def test_negative_width_raises_in_evaluate(self):
+        test_dho = DampedHarmonicOscillator(
+            name="TestDampedHarmonicOscillator",
+            area=2.0,
+            center=0.5,
+            width=0.6,
+            unit="meV",
+        )
+        test_dho.width.value = -0.6
+        with pytest.raises(
+            ValueError,
+            match="The width of a DampedHarmonicOscillator must be greater than zero.",
+        ):
+            test_dho.evaluate(np.array([0.0, 1.5, 3.0]))
+
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DampedHarmonicOscillator(
@@ -825,6 +926,18 @@ class TestDampedHarmonicOscillator:
                 width=0.6,
                 unit="meV",
             )
+
+    def test_negative_area_warns_in_evaluate(self):
+        test_dho = DampedHarmonicOscillator(
+            name="TestDampedHarmonicOscillator",
+            area=2.0,
+            center=0.5,
+            width=0.6,
+            unit="meV",
+        )
+        test_dho.area.value = -2.0
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            test_dho.evaluate(np.array([0.0, 1.5, 3.0]))
 
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         x = np.array([0.0, 1.5, 3.0])
@@ -902,6 +1015,14 @@ class TestDampedHarmonicOscillator:
         # THEN EXPECT
         assert numerical_area == pytest.approx(dho.area.value, rel=2e-3)
 
+    def test_convert_unit(self, dho: DampedHarmonicOscillator):
+        dho.convert_unit("microeV")
+
+        assert dho.unit == "microeV"
+        assert dho.area.value == 2 * 1e3
+        assert dho.center.value == 1.5 * 1e3
+        assert dho.width.value == 0.3 * 1e3
+
     def test_copy(self, dho: DampedHarmonicOscillator):
         dho_copy = dho.copy()
         assert dho_copy is not dho
@@ -956,7 +1077,7 @@ class TestPolynomial:
         ):
             Polynomial(name="TestPolynomial", coefficients=[])
 
-    def test_negative_value_warns(self):
+    def test_negative_value_warns_in_evaluate(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             test_polynomial = Polynomial(name="TestPolynomial", coefficients=[-1.0])
             test_polynomial.evaluate(np.array([0.0, 1.0, 2.0]))
@@ -966,6 +1087,24 @@ class TestPolynomial:
         expected = polynomial.evaluate(x)
         expected_result = 1.0 - 2.0 * x + 3.0 * x**2
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+
+    def test_evaluate_scipp_array(self, polynomial: Polynomial):
+        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="meV")
+        expected = polynomial.evaluate(x)
+        expected_result = 1.0 - 2.0 * x.values + 3.0 * x.values**2
+        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_error(self, polynomial: Polynomial):
+        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
+
+        with pytest.raises(
+            ValueError,
+            match="Change the unit of the Polynomial and try again",
+        ):
+            polynomial.evaluate(x)
+
+    def test_degree(self, polynomial: Polynomial):
+        assert polynomial.degree() == 2
 
     def test_get_parameters(self, polynomial: Polynomial):
         params = polynomial.get_parameters()

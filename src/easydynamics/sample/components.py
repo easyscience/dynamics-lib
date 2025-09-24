@@ -364,7 +364,7 @@ class Lorentzian(ModelComponent):
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.width.value <= 0:
-            raise ValueError("Width must be greater than zero for Lorentzian.")
+            raise ValueError("The width of a Lorentzian must be greater than zero.")
         if self.area.value < 0:
             warnings.warn(
                 "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
@@ -522,12 +522,10 @@ class Voigt(ModelComponent):
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.gaussian_width.value <= 0:
-            raise ValueError(
-                "gaussian_width must be greater than zero for Voigt profile."
-            )
+            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
         if self.lorentzian_width.value <= 0:
             raise ValueError(
-                "lorentzian_width must be greater than zero for Voigt profile."
+                "The lorentzian_width of a Voigt must be greater than zero."
             )
         if self.area.value < 0:
             warnings.warn(
@@ -768,11 +766,11 @@ class DampedHarmonicOscillator(ModelComponent):
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.width.value <= 0:
             raise ValueError(
-                "Width of a Damped Harmonic Oscillator must be greater than zero."
+                "The width of a DampedHarmonicOscillator must be greater than zero."
             )
         if self.area.value < 0:
             warnings.warn(
-                "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
+                "The area of the DampedHarmonicOscillator with name {} is negative, which may not be physically meaningful.".format(
                     self.name
                 )
             )
