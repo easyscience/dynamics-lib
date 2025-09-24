@@ -60,6 +60,7 @@ class ModelComponent(ObjBase):
 
         # If exact match is not found, attempt partial match
         matches = [p for p in self.get_parameters() if parameter_name in p.name]
+
         if len(matches) == 1:
             return matches[0]
         elif len(matches) > 1:
@@ -175,6 +176,9 @@ class Gaussian(ModelComponent):
 
         if not isinstance(width, (Numeric, Parameter)):
             raise TypeError("width must be a number or a Parameter.")
+
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
 
         if isinstance(width, Numeric):
             if width <= 0:

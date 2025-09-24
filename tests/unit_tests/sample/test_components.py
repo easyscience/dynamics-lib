@@ -5,7 +5,14 @@ import scipp as sc
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import Gaussian, Lorentzian, Voigt, DeltaFunction, DampedHarmonicOscillator, Polynomial
+from easydynamics.sample import (
+    Gaussian,
+    Lorentzian,
+    Voigt,
+    DeltaFunction,
+    DampedHarmonicOscillator,
+    Polynomial,
+)
 from easydynamics.sample.components import ModelComponent
 
 from easyscience.variable import Parameter
@@ -20,9 +27,10 @@ class TestModelComponent:
             self.area = Parameter(name="area", value=1.0, unit="meV")
             self.center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
             self.width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
+            self.second_area = Parameter(name="second_area", value=4.0, unit="meV")
 
         def get_parameters(self):
-            return [self.area, self.center, self.width]
+            return [self.area, self.center, self.width, self.second_area]
 
         def evaluate(self, x):
             return np.zeros_like(x)
@@ -43,86 +51,224 @@ class TestModelComponent:
         dummy.fit_all_parameters()
 
         # THEN EXPECT
-        assert all(not p.fixed for p in dummy.get_parameters())     
+        assert all(not p.fixed for p in dummy.get_parameters())
+
+    def test_get_parameter_exact_match(self, dummy):
+        # WHEN
+        param = dummy.get_parameter("width")
+
+        # THEN EXPECT
+        assert param is dummy.width
+
+    def test_get_parameter_partial_match(self, dummy):
+        # WHEN
+        param = dummy.get_parameter("wid")
+
+        # THEN EXPECT
+        assert param is dummy.width
+
+    def test_get_parameter_no_match_raises(self, dummy):
+        # WHEN / THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match="not found",
+        ):
+            dummy.get_parameter("nonexistent")
+
+    def test_get_parameter_ambiguous_match_raises(self, dummy):
+        # WHEN / THEN EXPECT
+        with pytest.raises(ValueError, match="Ambiguous parameter name"):
+            dummy.get_parameter("are")
+
+    def test_set_parameter_value(self, dummy):
+        # WHEN
+        dummy.set_parameter_value("width", 10.0)
+
+        # THEN EXPECT
+        assert dummy.width.value == 10.0
+
+    def test_set_parameter_bounds_min(self, dummy):
+        # WHEN
+        dummy.set_parameter_bounds("width", min=1.0)
+
+        # THEN EXPECT
+        assert dummy.width.min == 1.0
+        assert dummy.width.max == np.inf
+
+    def test_set_parameter_bounds_max(self, dummy):
+        # WHEN
+        dummy.set_parameter_bounds("width", max=5.0)
+
+        # THEN EXPECT
+        assert dummy.width.min == -np.inf
+        assert dummy.width.max == 5.0
+
+    def test_set_parameter_bounds_min_max(self, dummy):
+        # WHEN
+        dummy.set_parameter_bounds("width", min=1.0, max=5.0)
+
+        # THEN EXPECT
+        assert dummy.width.min == 1.0
+        assert dummy.width.max == 5.0
+
+    def test_set_parameter_bounds_with_unit_conversion(self, dummy):
+        # WHEN
+        dummy.set_parameter_bounds("width", min=1000.0, max=5000.0, unit="microeV")
+
+        # THEN EXPECT
+        assert dummy.width.min == 1000
+        assert dummy.width.max == 5000
+        assert dummy.width.unit == "µeV"
+
+    def test_fix_parameter(self, dummy):
+        # WHEN
+        dummy.fix_parameter("width")
+
+        # THEN EXPECT
+        assert dummy.width.fixed is True
+
+    def test_free_parameter(self, dummy):
+        # WHEN
+        dummy.fix_parameter("width")
+        # THEN
+        dummy.free_parameter("width")
+        # EXPECT
+        assert dummy.width.fixed is False
+
+    def test_repr(self, dummy):
+        repr_str = repr(dummy)
+        assert "DummyComponent" in repr_str
+
 
 class TestGaussian:
-
     @pytest.fixture
     def gaussian(self):
-        return Gaussian(name='TestGaussian', area=2.0, center=0.5, width=0.6, unit='meV')
-    
+        return Gaussian(
+            name="TestGaussian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
+
     def test_initialization(self, gaussian: Gaussian):
-        assert gaussian.name == 'TestGaussian'
+        assert gaussian.name == "TestGaussian"
         assert gaussian.area.value == 2.0
         assert gaussian.center.value == 0.5
         assert gaussian.width.value == 0.6
-        assert gaussian.unit == 'meV'
+        assert gaussian.unit == "meV"
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+            Gaussian(
+                name="TestGaussian", area="invalid", center=0.5, width=0.6, unit="meV"
+            )
+        with pytest.raises(
+            TypeError, match="center must be None, a number or a Parameter"
+        ):
+            Gaussian(
+                name="TestGaussian", area=2.0, center="invalid", width=0.6, unit="meV"
+            )
+        with pytest.raises(TypeError, match="width must be a number or a Parameter"):
+            Gaussian(
+                name="TestGaussian", area=2.0, center=0.5, width="invalid", unit="meV"
+            )
+        with pytest.raises(TypeError, match="unit must be a string"):
+            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=0.6, unit=123)
+
+    def test_negative_width_raises(self):
+        with pytest.raises(
+            ValueError, match="The width of a Gaussian must be greater than zero."
+        ):
+            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
+
+    def test_negative_area_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
 
     def test_evaluate(self, gaussian: Gaussian):
         x = np.array([0.0, 0.5, 1.0])
         expected = gaussian.evaluate(x)
-        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - 0.5) / 0.6) ** 2)
+        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * ((x - 0.5) / 0.6) ** 2
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, gaussian: Gaussian):
-        x = sc.array(dims=['x'], values=[0.0, 0.5, 1.0], unit='meV')
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
         expected = gaussian.evaluate(x)
-        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x.values - 0.5) / 0.6) ** 2)
+        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * ((x.values - 0.5) / 0.6) ** 2
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, gaussian: Gaussian):
-        x = sc.array(dims=['x'], values=[0.0, 500.0, 1000.0], unit='microeV')
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
         expected = gaussian.evaluate(x)
-        expected_result = (2.0*1e3 / (0.6*1e3 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x.values - 500.0) / (0.6*1e3)) ** 2)
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)    
+        expected_result = (2.0 * 1e3 / (0.6 * 1e3 * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * ((x.values - 500.0) / (0.6 * 1e3)) ** 2
+        )
+        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_center_is_fixed_if_set_to_None(self):
-        test_gaussian=Gaussian(name='TestGaussian', area=2.0, center=None, width=0.6, unit='meV')
-        assert test_gaussian.center.value ==0.0
+        test_gaussian = Gaussian(
+            name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"
+        )
+        assert test_gaussian.center.value == 0.0
         assert test_gaussian.center.fixed is True
 
     def test_input_as_parameter(self):
-        param_area=Parameter(name='area_param',value=2.0,unit='meV')
-        param_center=Parameter(name='center_param',value=0.5,unit='meV')
-        param_width=Parameter(name='width_param',value=0.6,unit='meV')
-        test_gaussian=Gaussian(name='TestGaussian', area=param_area, center=param_center, width=param_width, unit='meV')
-        assert test_gaussian.area==param_area
-        assert test_gaussian.center==param_center
-        assert test_gaussian.width==param_width
+        param_area = Parameter(name="area_param", value=2.0, unit="meV")
+        param_center = Parameter(name="center_param", value=0.5, unit="meV")
+        param_width = Parameter(name="width_param", value=0.6, unit="meV")
+        test_gaussian = Gaussian(
+            name="TestGaussian",
+            area=param_area,
+            center=param_center,
+            width=param_width,
+            unit="meV",
+        )
+        assert test_gaussian.area == param_area
+        assert test_gaussian.center == param_center
+        assert test_gaussian.width == param_width
 
     def test_negative_width_raises(self):
-        with pytest.raises(ValueError, match="The width of a Gaussian must be greater than zero."):
-            Gaussian(name='TestGaussian', area=2.0, center=0.5, width=-0.6, unit='meV')
+        with pytest.raises(
+            ValueError, match="The width of a Gaussian must be greater than zero."
+        ):
+            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
 
     def test_get_parameters(self, gaussian: Gaussian):
         params = gaussian.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestGaussian area'
-        assert params[1].name == 'TestGaussian center'
-        assert params[2].name == 'TestGaussian width'
+        assert params[0].name == "TestGaussian area"
+        assert params[1].name == "TestGaussian center"
+        assert params[2].name == "TestGaussian width"
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, gaussian: Gaussian):
         # WHEN
-        x = np.linspace(gaussian.center.value - 10 * gaussian.width.value, gaussian.center.value + 10 * gaussian.width.value, 1000)
+        x = np.linspace(
+            gaussian.center.value - 10 * gaussian.width.value,
+            gaussian.center.value + 10 * gaussian.width.value,
+            1000,
+        )
         y = gaussian.evaluate(x)
         numerical_area = simpson(y, x)
 
         # THEN EXPECT
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
-class TestLorentzian:
 
+class TestLorentzian:
     @pytest.fixture
     def lorentzian(self):
-        return Lorentzian(name='TestLorentzian', area=2.0, center=0.5, width=0.6, unit='meV')
+        return Lorentzian(
+            name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
+        )
 
     def test_initialization(self, lorentzian: Lorentzian):
-        assert lorentzian.name == 'TestLorentzian'
+        assert lorentzian.name == "TestLorentzian"
         assert lorentzian.area.value == 2.0
         assert lorentzian.center.value == 0.5
         assert lorentzian.width.value == 0.6
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.unit == "meV"
 
     def test_evaluate(self, lorentzian: Lorentzian):
         x = np.array([0.0, 0.5, 1.0])
@@ -131,65 +277,90 @@ class TestLorentzian:
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, lorentzian: Lorentzian):
-        x = sc.array(dims=['x'], values=[0.0, 0.5, 1.0], unit='meV')
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
         expected = lorentzian.evaluate(x)
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x.values - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, lorentzian: Lorentzian):
-        x = sc.array(dims=['x'], values=[0.0, 500.0, 1000.0], unit='microeV')
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
         expected = lorentzian.evaluate(x)
-        expected_result = (2.0*1e3 / (np.pi * 0.6*1e3)) / (1 + ((x.values - 0.5*1e3) / (0.6*1e3)) ** 2)
+        expected_result = (2.0 * 1e3 / (np.pi * 0.6 * 1e3)) / (
+            1 + ((x.values - 0.5 * 1e3) / (0.6 * 1e3)) ** 2
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_center_is_fixed_if_set_to_None(self):
-        test_lorentzian=Lorentzian(name='TestLorentzian', area=2.0, center=None, width=0.6, unit='meV')
-        assert test_lorentzian.center.value ==0.0
+        test_lorentzian = Lorentzian(
+            name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"
+        )
+        assert test_lorentzian.center.value == 0.0
         assert test_lorentzian.center.fixed is True
 
     def test_input_as_parameter(self):
-        param_area=Parameter(name='area_param',value=2.0,unit='meV')
-        param_center=Parameter(name='center_param',value=0.5,unit='meV')
-        param_width=Parameter(name='width_param',value=0.6,unit='meV')
-        test_lorentzian=Lorentzian(name='TestLorentzian', area=param_area, center=param_center, width=param_width, unit='meV')
-        assert test_lorentzian.area==param_area
-        assert test_lorentzian.center==param_center
-        assert test_lorentzian.width==param_width
+        param_area = Parameter(name="area_param", value=2.0, unit="meV")
+        param_center = Parameter(name="center_param", value=0.5, unit="meV")
+        param_width = Parameter(name="width_param", value=0.6, unit="meV")
+        test_lorentzian = Lorentzian(
+            name="TestLorentzian",
+            area=param_area,
+            center=param_center,
+            width=param_width,
+            unit="meV",
+        )
+        assert test_lorentzian.area == param_area
+        assert test_lorentzian.center == param_center
+        assert test_lorentzian.width == param_width
 
     def test_negative_width_raises(self):
-        with pytest.raises(ValueError, match="The width of a Lorentzian must be greater than zero."):
-            Lorentzian(name='TestLorentzian', area=2.0, center=0.5, width=-0.6, unit='meV')
+        with pytest.raises(
+            ValueError, match="The width of a Lorentzian must be greater than zero."
+        ):
+            Lorentzian(
+                name="TestLorentzian", area=2.0, center=0.5, width=-0.6, unit="meV"
+            )
 
     def test_get_parameters(self, lorentzian: Lorentzian):
         params = lorentzian.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestLorentzian area'
-        assert params[1].name == 'TestLorentzian center'
-        assert params[2].name == 'TestLorentzian width'
+        assert params[0].name == "TestLorentzian area"
+        assert params[1].name == "TestLorentzian center"
+        assert params[2].name == "TestLorentzian width"
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, lorentzian: Lorentzian):
         # WHEN
-        x = np.linspace(lorentzian.center.value - 500 * lorentzian.width.value, lorentzian.center.value + 500 * lorentzian.width.value, 20000) #Lorentzians have very long tails
+        x = np.linspace(
+            lorentzian.center.value - 500 * lorentzian.width.value,
+            lorentzian.center.value + 500 * lorentzian.width.value,
+            20000,
+        )  # Lorentzians have very long tails
         y = lorentzian.evaluate(x)
         numerical_area = simpson(y, x)
 
         # THEN EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
-class TestVoigt:
 
+class TestVoigt:
     @pytest.fixture
     def voigt(self):
-        return Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=0.6, lorentzian_width=0.7, unit='meV')
+        return Voigt(
+            name="TestVoigt",
+            area=2.0,
+            center=0.5,
+            gaussian_width=0.6,
+            lorentzian_width=0.7,
+            unit="meV",
+        )
 
     def test_initialization(self, voigt: Voigt):
-        assert voigt.name == 'TestVoigt'
+        assert voigt.name == "TestVoigt"
         assert voigt.area.value == 2.0
         assert voigt.center.value == 0.5
-        assert voigt.Gwidth.value == 0.6
-        assert voigt.Lwidth.value == 0.7
-        assert voigt.unit == 'meV'
+        assert voigt.gaussian_width.value == 0.6
+        assert voigt.lorentzian_width.value == 0.7
+        assert voigt.unit == "meV"
 
     def test_evaluate(self, voigt: Voigt):
         x = np.array([0.0, 0.5, 1.0])
@@ -198,71 +369,120 @@ class TestVoigt:
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, voigt: Voigt):
-        x = sc.array(dims=['x'], values=[0.0, 0.5, 1.0], unit='meV')
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
         expected = voigt.evaluate(x)
         expected_result = 2.0 * voigt_profile(x.values - 0.5, 0.6, 0.7)
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, voigt: Voigt):
-        x = sc.array(dims=['x'], values=[0.0, 500.0, 1000.0], unit='microeV')
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
         expected = voigt.evaluate(x)
-        expected_result = 2.0*1e3 * voigt_profile(x.values - 0.5*1e3, 0.6*1e3, 0.7*1e3)
+        expected_result = (
+            2.0 * 1e3 * voigt_profile(x.values - 0.5 * 1e3, 0.6 * 1e3, 0.7 * 1e3)
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_center_is_fixed_if_set_to_None(self):
-        test_voigt=Voigt(name='TestVoigt', area=2.0, center=None, gaussian_width=0.6, lorentzian_width=0.7, unit='meV')
-        assert test_voigt.center.value ==0.0
+        test_voigt = Voigt(
+            name="TestVoigt",
+            area=2.0,
+            center=None,
+            gaussian_width=0.6,
+            lorentzian_width=0.7,
+            unit="meV",
+        )
+        assert test_voigt.center.value == 0.0
         assert test_voigt.center.fixed is True
 
     def test_input_as_parameter(self):
-        param_area=Parameter(name='area_param',value=2.0,unit='meV')
-        param_center=Parameter(name='center_param',value=0.5,unit='meV')
-        param_Gwidth=Parameter(name='Gwidth_param',value=0.6,unit='meV')
-        param_Lwidth=Parameter(name='Lwidth_param',value=0.7,unit='meV')
-        test_voigt=Voigt(name='TestVoigt', area=param_area, center=param_center, gaussian_width=param_Gwidth, lorentzian_width=param_Lwidth, unit='meV')
-        assert test_voigt.area==param_area
-        assert test_voigt.center==param_center
-        assert test_voigt.Gwidth==param_Gwidth
-        assert test_voigt.Lwidth==param_Lwidth
+        param_area = Parameter(name="area_param", value=2.0, unit="meV")
+        param_center = Parameter(name="center_param", value=0.5, unit="meV")
+        param_gaussian_width = Parameter(
+            name="gaussian_width_param", value=0.6, unit="meV"
+        )
+        param_lorentzian_width = Parameter(
+            name="lorentzian_width_param", value=0.7, unit="meV"
+        )
+        test_voigt = Voigt(
+            name="TestVoigt",
+            area=param_area,
+            center=param_center,
+            gaussian_width=param_gaussian_width,
+            lorentzian_width=param_lorentzian_width,
+            unit="meV",
+        )
+        assert test_voigt.area == param_area
+        assert test_voigt.center == param_center
+        assert test_voigt.gaussian_width == param_gaussian_width
+        assert test_voigt.lorentzian_width == param_lorentzian_width
 
     def test_negative_width_raises(self):
-        with pytest.raises(ValueError, match="Gwidth must be greater than 0 for Voigt profile."):
-            Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=-0.6, lorentzian_width=0.7, unit='meV')
+        with pytest.raises(
+            ValueError, match="gaussian_width must be greater than 0 for Voigt profile."
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=-0.6,
+                lorentzian_width=0.7,
+                unit="meV",
+            )
 
-        with pytest.raises(ValueError, match="Lwidth must be greater than 0 for Voigt profile."):
-            Voigt(name='TestVoigt', area=2.0, center=0.5, gaussian_width=0.6, lorentzian_width=-0.7, unit='meV')
+        with pytest.raises(
+            ValueError,
+            match="lorentzian_width must be greater than 0 for Voigt profile.",
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width=-0.7,
+                unit="meV",
+            )
 
     def test_get_parameters(self, voigt: Voigt):
         params = voigt.get_parameters()
         assert len(params) == 4
-        assert params[0].name == 'TestVoigt area'
-        assert params[1].name == 'TestVoigt center'
-        assert params[2].name == 'TestVoigt Gwidth'
-        assert params[3].name == 'TestVoigt Lwidth'
+        assert params[0].name == "TestVoigt area"
+        assert params[1].name == "TestVoigt center"
+        assert params[2].name == "TestVoigt gaussian_width"
+        assert params[3].name == "TestVoigt lorentzian_width"
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_area_matches_parameter(self, voigt: Voigt):   
+    def test_area_matches_parameter(self, voigt: Voigt):
         # WHEN
-        x = np.linspace(voigt.center.value - 100 * voigt.Gwidth.value-300*voigt.Lwidth.value, voigt.center.value + 100 * voigt.Gwidth.value+300*voigt.Lwidth.value, 20000) #Voigts have very long tails
+        x = np.linspace(
+            voigt.center.value
+            - 100 * voigt.gaussian_width.value
+            - 300 * voigt.lorentzian_width.value,
+            voigt.center.value
+            + 100 * voigt.gaussian_width.value
+            + 300 * voigt.lorentzian_width.value,
+            20000,
+        )  # Voigts have very long tails
         y = voigt.evaluate(x)
         numerical_area = simpson(y, x)
 
         # THEN EXPECT
         assert numerical_area == pytest.approx(voigt.area.value, rel=2e-3)
 
-class TestDeltaFunction:
 
+class TestDeltaFunction:
     @pytest.fixture
     def delta_function(self):
-        return DeltaFunction(name='TestDeltaFunction', area=2.0, center=0.5, unit='meV')
+        return DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit="meV")
 
     def test_initialization(self, delta_function: DeltaFunction):
-        assert delta_function.name == 'TestDeltaFunction'
+        assert delta_function.name == "TestDeltaFunction"
         assert delta_function.area.value == 2.0
         assert delta_function.center.value == 0.5
-        assert delta_function.unit == 'meV'
+        assert delta_function.unit == "meV"
 
-    @pytest.mark.xfail(reason="DeltaFunction.evaluate is not implemented yet without resolution convolution")
+    @pytest.mark.xfail(
+        reason="DeltaFunction.evaluate is not implemented yet without resolution convolution"
+    )
     def test_evaluate(self, delta_function: DeltaFunction):
         x = np.array([0.0, 0.5, 1.0])
         expected = delta_function.evaluate(x)
@@ -270,83 +490,123 @@ class TestDeltaFunction:
         # expected_result[x == 0.5] = 2.0
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-
     def test_center_is_fixed_if_set_to_None(self):
-        test_delta=DeltaFunction(name='TestDeltaFunction', area=2.0, center=None, unit='meV')
-        assert test_delta.center.value ==0.0
+        test_delta = DeltaFunction(
+            name="TestDeltaFunction", area=2.0, center=None, unit="meV"
+        )
+        assert test_delta.center.value == 0.0
         assert test_delta.center.fixed is True
 
     def test_input_as_parameter(self):
-        param_area=Parameter(name='area_param',value=2.0,unit='meV')
-        param_center=Parameter(name='center_param',value=0.5,unit='meV')
-        test_delta=DeltaFunction(name='TestDeltaFunction', area=param_area, center=param_center, unit='meV')
-        assert test_delta.area==param_area
-        assert test_delta.center==param_center
+        param_area = Parameter(name="area_param", value=2.0, unit="meV")
+        param_center = Parameter(name="center_param", value=0.5, unit="meV")
+        test_delta = DeltaFunction(
+            name="TestDeltaFunction", area=param_area, center=param_center, unit="meV"
+        )
+        assert test_delta.area == param_area
+        assert test_delta.center == param_center
 
     def test_get_parameters(self, delta_function: DeltaFunction):
         params = delta_function.get_parameters()
         assert len(params) == 2
-        assert params[0].name == 'TestDeltaFunction area'
-        assert params[1].name == 'TestDeltaFunction center'
+        assert params[0].name == "TestDeltaFunction area"
+        assert params[1].name == "TestDeltaFunction center"
         assert all(isinstance(param, Parameter) for param in params)
 
 
-class TestDampedHarmonicOscillator: 
+class TestDampedHarmonicOscillator:
     @pytest.fixture
-    def dho(self):  
-        return DampedHarmonicOscillator(name='TestDHO', area=2.0, center=1.5, width=0.3, unit='meV')
-    
+    def dho(self):
+        return DampedHarmonicOscillator(
+            name="TestDHO", area=2.0, center=1.5, width=0.3, unit="meV"
+        )
+
     def test_initialization(self, dho: DampedHarmonicOscillator):
-        assert dho.name == 'TestDHO'
+        assert dho.name == "TestDHO"
         assert dho.area.value == 2.0
         assert dho.center.value == 1.5
         assert dho.width.value == 0.3
-        assert dho.unit == 'meV'
+        assert dho.unit == "meV"
 
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         x = np.array([0.0, 1.5, 3.0])
         expected = dho.evaluate(x)
-        expected_result = 2*2.0 * (1.5**2) * (0.3) / np.pi / (((x**2 - 1.5**2) ** 2 + (2*0.3 * x) ** 2))
+        expected_result = (
+            2
+            * 2.0
+            * (1.5**2)
+            * (0.3)
+            / np.pi
+            / ((x**2 - 1.5**2) ** 2 + (2 * 0.3 * x) ** 2)
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
-
     def test_evaluate_scipp_array(self, dho: DampedHarmonicOscillator):
-        x = sc.array(dims=['x'], values=[0.0, 1.5, 3.0], unit='meV')
+        x = sc.array(dims=["x"], values=[0.0, 1.5, 3.0], unit="meV")
         expected = dho.evaluate(x)
-        expected_result = 2*2.0 * (1.5**2) * (0.3) / np.pi / (((x.values**2 - 1.5**2) ** 2 + (2*0.3 * x.values) ** 2))
+        expected_result = (
+            2
+            * 2.0
+            * (1.5**2)
+            * (0.3)
+            / np.pi
+            / ((x.values**2 - 1.5**2) ** 2 + (2 * 0.3 * x.values) ** 2)
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, dho: DampedHarmonicOscillator):
-        x = sc.array(dims=['x'], values=[0.0, 500.0, 1000.0], unit='microeV')
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
         expected = dho.evaluate(x)
-        expected_result = 2*2.0*1e3 * ((1.5*1e3)**2) * (0.3*1e3) / np.pi / (((x.values**2 - (1.5*1e3)**2) ** 2 + (2*0.3*1e3 * x.values) ** 2))
+        expected_result = (
+            2
+            * 2.0
+            * 1e3
+            * ((1.5 * 1e3) ** 2)
+            * (0.3 * 1e3)
+            / np.pi
+            / ((x.values**2 - (1.5 * 1e3) ** 2) ** 2 + (2 * 0.3 * 1e3 * x.values) ** 2)
+        )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
     def test_input_as_parameter(self):
-        param_area=Parameter(name='area_param',value=2.0,unit='meV')
-        param_center=Parameter(name='center_param',value=0.5,unit='meV')
-        param_width=Parameter(name='width_param',value=0.6,unit='meV')
-        test_dho=DampedHarmonicOscillator(name='TestDHO', area=param_area, center=param_center, width=param_width, unit='meV')
-        assert test_dho.area==param_area
-        assert test_dho.center==param_center
-        assert test_dho.width==param_width
+        param_area = Parameter(name="area_param", value=2.0, unit="meV")
+        param_center = Parameter(name="center_param", value=0.5, unit="meV")
+        param_width = Parameter(name="width_param", value=0.6, unit="meV")
+        test_dho = DampedHarmonicOscillator(
+            name="TestDHO",
+            area=param_area,
+            center=param_center,
+            width=param_width,
+            unit="meV",
+        )
+        assert test_dho.area == param_area
+        assert test_dho.center == param_center
+        assert test_dho.width == param_width
 
     def test_negative_width_raises(self):
-        with pytest.raises(ValueError, match="The width of a DampedHarmonicOscillator must be greater than zero."):
-            DampedHarmonicOscillator(name='TestDHO', area=2.0, center=0.5, width=-0.6, unit='meV')
-
+        with pytest.raises(
+            ValueError,
+            match="The width of a DampedHarmonicOscillator must be greater than zero.",
+        ):
+            DampedHarmonicOscillator(
+                name="TestDHO", area=2.0, center=0.5, width=-0.6, unit="meV"
+            )
 
     def test_get_parameters(self, dho: DampedHarmonicOscillator):
         params = dho.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestDHO area'
-        assert params[1].name == 'TestDHO center'
-        assert params[2].name == 'TestDHO width'
+        assert params[0].name == "TestDHO area"
+        assert params[1].name == "TestDHO center"
+        assert params[2].name == "TestDHO width"
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, dho: DampedHarmonicOscillator):
         # WHEN
-        x = np.linspace(-dho.center.value - 20 * dho.width.value, dho.center.value + 20 * dho.width.value, 5000)
+        x = np.linspace(
+            -dho.center.value - 20 * dho.width.value,
+            dho.center.value + 20 * dho.width.value,
+            5000,
+        )
         y = dho.evaluate(x)
         numerical_area = simpson(y, x)
 
@@ -357,13 +617,13 @@ class TestDampedHarmonicOscillator:
 class TestPolynomial:
     @pytest.fixture
     def polynomial(self):
-        return Polynomial(name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
+        return Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0])
 
     def test_initialization(self, polynomial: Polynomial):
-        assert polynomial.name == 'TestPolynomial'
-        assert polynomial.coefficients[0].value==1.0
-        assert polynomial.coefficients[1].value==-2.0
-        assert polynomial.coefficients[2].value==3.0
+        assert polynomial.name == "TestPolynomial"
+        assert polynomial.coefficients[0].value == 1.0
+        assert polynomial.coefficients[1].value == -2.0
+        assert polynomial.coefficients[2].value == 3.0
 
     def test_evaluate(self, polynomial: Polynomial):
         x = np.array([0.0, 1.0, 2.0])
@@ -374,15 +634,18 @@ class TestPolynomial:
     def test_get_parameters(self, polynomial: Polynomial):
         params = polynomial.get_parameters()
         assert len(params) == 3
-        assert params[0].name == 'TestPolynomial_c0'
-        assert params[1].name == 'TestPolynomial_c1'
-        assert params[2].name == 'TestPolynomial_c2'
+        assert params[0].name == "TestPolynomial_c0"
+        assert params[1].name == "TestPolynomial_c1"
+        assert params[2].name == "TestPolynomial_c2"
         assert all(isinstance(param, Parameter) for param in params)
 
-
     def test_convert_unit_raises_for_polynomial(self, polynomial):
-        with pytest.raises(NotImplementedError, match="Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units."):
+        with pytest.raises(
+            NotImplementedError,
+            match="Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units.",
+        ):
             polynomial.convert_unit("eV")
+
 
 @pytest.mark.skip(reason="UserDefinedComponent not implemented yet")
 class TestUserDefinedComponent:
