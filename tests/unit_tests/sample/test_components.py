@@ -228,12 +228,6 @@ class TestGaussian:
         assert test_gaussian.center == param_center
         assert test_gaussian.width == param_width
 
-    def test_negative_width_raises(self):
-        with pytest.raises(
-            ValueError, match="The width of a Gaussian must be greater than zero."
-        ):
-            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
-
     def test_get_parameters(self, gaussian: Gaussian):
         params = gaussian.get_parameters()
         assert len(params) == 3
@@ -255,6 +249,31 @@ class TestGaussian:
         # THEN EXPECT
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
+    def test_copy(self, gaussian: Gaussian):
+        gaussian_copy = gaussian.copy()
+        assert gaussian_copy is not gaussian
+        assert gaussian_copy.name == gaussian.name
+
+        assert gaussian_copy.area.value == gaussian.area.value
+        assert gaussian_copy.area.fixed == gaussian.area.fixed
+
+        assert gaussian_copy.center.value == gaussian.center.value
+        assert gaussian_copy.center.fixed == gaussian.center.fixed
+
+        assert gaussian_copy.width.value == gaussian.width.value
+        assert gaussian_copy.width.fixed == gaussian.width.fixed
+
+        assert gaussian_copy.unit == gaussian.unit
+
+    def test_repr(self, gaussian: Gaussian):
+        repr_str = repr(gaussian)
+        assert "Gaussian" in repr_str
+        assert "name = TestGaussian" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "width =" in repr_str
+
 
 class TestLorentzian:
     @pytest.fixture
@@ -269,6 +288,41 @@ class TestLorentzian:
         assert lorentzian.center.value == 0.5
         assert lorentzian.width.value == 0.6
         assert lorentzian.unit == "meV"
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+            Lorentzian(
+                name="TestLorentzian", area="invalid", center=0.5, width=0.6, unit="meV"
+            )
+
+        with pytest.raises(
+            TypeError, match="center must be None, a number or a Parameter"
+        ):
+            Lorentzian(
+                name="TestLorentzian", area=2.0, center="invalid", width=0.6, unit="meV"
+            )
+
+        with pytest.raises(TypeError, match="width must be a number or a Parameter"):
+            Lorentzian(
+                name="TestLorentzian", area=2.0, center=0.5, width="invalid", unit="meV"
+            )
+
+        with pytest.raises(TypeError, match="unit must be a string"):
+            Lorentzian(name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit=123)
+
+    def test_negative_width_raises(self):
+        with pytest.raises(
+            ValueError, match="The width of a Lorentzian must be greater than zero."
+        ):
+            Lorentzian(
+                name="TestLorentzian", area=2.0, center=0.5, width=-0.6, unit="meV"
+            )
+
+    def test_negative_area_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            Lorentzian(
+                name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
+            )
 
     def test_evaluate(self, lorentzian: Lorentzian):
         x = np.array([0.0, 0.5, 1.0])
@@ -312,14 +366,6 @@ class TestLorentzian:
         assert test_lorentzian.center == param_center
         assert test_lorentzian.width == param_width
 
-    def test_negative_width_raises(self):
-        with pytest.raises(
-            ValueError, match="The width of a Lorentzian must be greater than zero."
-        ):
-            Lorentzian(
-                name="TestLorentzian", area=2.0, center=0.5, width=-0.6, unit="meV"
-            )
-
     def test_get_parameters(self, lorentzian: Lorentzian):
         params = lorentzian.get_parameters()
         assert len(params) == 3
@@ -341,6 +387,31 @@ class TestLorentzian:
         # THEN EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
+    def test_copy(self, lorentzian: Lorentzian):
+        lorentzian_copy = lorentzian.copy()
+        assert lorentzian_copy is not lorentzian
+        assert lorentzian_copy.name == lorentzian.name
+
+        assert lorentzian_copy.area.value == lorentzian.area.value
+        assert lorentzian_copy.area.fixed == lorentzian.area.fixed
+
+        assert lorentzian_copy.center.value == lorentzian.center.value
+        assert lorentzian_copy.center.fixed == lorentzian.center.fixed
+
+        assert lorentzian_copy.width.value == lorentzian.width.value
+        assert lorentzian_copy.width.fixed == lorentzian.width.fixed
+
+        assert lorentzian_copy.unit == lorentzian.unit
+
+    def test_repr(self, lorentzian: Lorentzian):
+        repr_str = repr(lorentzian)
+        assert "Lorentzian" in repr_str
+        assert "name = TestLorentzian" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "width =" in repr_str
+
 
 class TestVoigt:
     @pytest.fixture
@@ -361,6 +432,99 @@ class TestVoigt:
         assert voigt.gaussian_width.value == 0.6
         assert voigt.lorentzian_width.value == 0.7
         assert voigt.unit == "meV"
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+            Voigt(
+                name="TestVoigt",
+                area="invalid",
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width=0.7,
+                unit="meV",
+            )
+
+        with pytest.raises(
+            TypeError, match="center must be None, a number or a Parameter"
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center="invalid",
+                gaussian_width=0.6,
+                lorentzian_width=0.7,
+                unit="meV",
+            )
+
+        with pytest.raises(
+            TypeError, match="gaussian_width must be a number or a Parameter"
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width="invalid",
+                lorentzian_width=0.7,
+                unit="meV",
+            )
+        with pytest.raises(
+            TypeError, match="lorentzian_width must be a number or a Parameter"
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width="invalid",
+                unit="meV",
+            )
+        with pytest.raises(TypeError, match="unit must be a string"):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width=0.7,
+                unit=123,
+            )
+
+    def test_negative_gaussian_width_raises(self):
+        with pytest.raises(
+            ValueError, match="The gaussian_width of a Voigt must be greater than."
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=-0.6,
+                lorentzian_width=0.7,
+                unit="meV",
+            )
+
+    def test_negative_lorentzian_width_raises(self):
+        with pytest.raises(
+            ValueError,
+            match="The lorentzian_width of a Voigt must be greater than zero.",
+        ):
+            Voigt(
+                name="TestVoigt",
+                area=2.0,
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width=-0.7,
+                unit="meV",
+            )
+
+    def test_negative_area_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            Voigt(
+                name="TestVoigt",
+                area=-2.0,
+                center=0.5,
+                gaussian_width=0.6,
+                lorentzian_width=0.7,
+                unit="meV",
+            )
 
     def test_evaluate(self, voigt: Voigt):
         x = np.array([0.0, 0.5, 1.0])
@@ -418,7 +582,7 @@ class TestVoigt:
 
     def test_negative_width_raises(self):
         with pytest.raises(
-            ValueError, match="gaussian_width must be greater than 0 for Voigt profile."
+            ValueError, match="The gaussian_width of a Voigt must be greater than zero"
         ):
             Voigt(
                 name="TestVoigt",
@@ -431,7 +595,7 @@ class TestVoigt:
 
         with pytest.raises(
             ValueError,
-            match="lorentzian_width must be greater than 0 for Voigt profile.",
+            match="The lorentzian_width of a Voigt must be greater than zero",
         ):
             Voigt(
                 name="TestVoigt",
@@ -468,6 +632,35 @@ class TestVoigt:
         # THEN EXPECT
         assert numerical_area == pytest.approx(voigt.area.value, rel=2e-3)
 
+    def test_copy(self, voigt: Voigt):
+        voigt_copy = voigt.copy()
+        assert voigt_copy is not voigt
+        assert voigt_copy.name == voigt.name
+
+        assert voigt_copy.area.value == voigt.area.value
+        assert voigt_copy.area.fixed == voigt.area.fixed
+
+        assert voigt_copy.center.value == voigt.center.value
+        assert voigt_copy.center.fixed == voigt.center.fixed
+
+        assert voigt_copy.gaussian_width.value == voigt.gaussian_width.value
+        assert voigt_copy.gaussian_width.fixed == voigt.gaussian_width.fixed
+
+        assert voigt_copy.lorentzian_width.value == voigt.lorentzian_width.value
+        assert voigt_copy.lorentzian_width.fixed == voigt.lorentzian_width.fixed
+
+        assert voigt_copy.unit == voigt.unit
+
+    def test_repr(self, voigt: Voigt):
+        repr_str = repr(voigt)
+        assert "Voigt" in repr_str
+        assert "name = TestVoigt" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "gaussian_width =" in repr_str
+        assert "lorentzian_width =" in repr_str
+
 
 class TestDeltaFunction:
     @pytest.fixture
@@ -479,6 +672,30 @@ class TestDeltaFunction:
         assert delta_function.area.value == 2.0
         assert delta_function.center.value == 0.5
         assert delta_function.unit == "meV"
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+            DeltaFunction(
+                name="TestDeltaFunction",
+                area="invalid",
+                center=0.5,
+                unit="meV",
+            )
+        with pytest.raises(
+            TypeError, match="center must be None, a number or a Parameter"
+        ):
+            DeltaFunction(
+                name="TestDeltaFunction",
+                area=2.0,
+                center="invalid",
+                unit="meV",
+            )
+        with pytest.raises(TypeError, match="unit must be a string"):
+            DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit=123)
+
+    def test_negative_area_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
 
     @pytest.mark.xfail(
         reason="DeltaFunction.evaluate is not implemented yet without resolution convolution"
@@ -513,6 +730,27 @@ class TestDeltaFunction:
         assert params[1].name == "TestDeltaFunction center"
         assert all(isinstance(param, Parameter) for param in params)
 
+    def test_copy(self, delta_function: DeltaFunction):
+        delta_copy = delta_function.copy()
+        assert delta_copy is not delta_function
+        assert delta_copy.name == delta_function.name
+
+        assert delta_copy.area.value == delta_function.area.value
+        assert delta_copy.area.fixed == delta_function.area.fixed
+
+        assert delta_copy.center.value == delta_function.center.value
+        assert delta_copy.center.fixed == delta_function.center.fixed
+
+        assert delta_copy.unit == delta_function.unit
+
+    def test_repr(self, delta_function: DeltaFunction):
+        repr_str = repr(delta_function)
+        assert "DeltaFunction" in repr_str
+        assert "name = TestDeltaFunction" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+
 
 class TestDampedHarmonicOscillator:
     @pytest.fixture
@@ -527,6 +765,66 @@ class TestDampedHarmonicOscillator:
         assert dho.center.value == 1.5
         assert dho.width.value == 0.3
         assert dho.unit == "meV"
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area="invalid",
+                center=0.5,
+                width=0.6,
+                unit="meV",
+            )
+
+        with pytest.raises(TypeError, match="center must be a number or a Parameter"):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area=2.0,
+                center="invalid",
+                width=0.6,
+                unit="meV",
+            )
+
+        with pytest.raises(TypeError, match="width must be a number or a Parameter"):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area=2.0,
+                center=0.5,
+                width="invalid",
+                unit="meV",
+            )
+
+        with pytest.raises(TypeError, match="unit must be a string"):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area=2.0,
+                center=0.5,
+                width=0.6,
+                unit=123,
+            )
+
+    def test_negative_width_raises(self):
+        with pytest.raises(
+            ValueError,
+            match="The width of a DampedHarmonicOscillator must be greater than zero.",
+        ):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area=2.0,
+                center=0.5,
+                width=-0.6,
+                unit="meV",
+            )
+
+    def test_negative_area_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            DampedHarmonicOscillator(
+                name="TestDampedHarmonicOscillator",
+                area=-2.0,
+                center=0.5,
+                width=0.6,
+                unit="meV",
+            )
 
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         x = np.array([0.0, 1.5, 3.0])
@@ -583,15 +881,6 @@ class TestDampedHarmonicOscillator:
         assert test_dho.center == param_center
         assert test_dho.width == param_width
 
-    def test_negative_width_raises(self):
-        with pytest.raises(
-            ValueError,
-            match="The width of a DampedHarmonicOscillator must be greater than zero.",
-        ):
-            DampedHarmonicOscillator(
-                name="TestDHO", area=2.0, center=0.5, width=-0.6, unit="meV"
-            )
-
     def test_get_parameters(self, dho: DampedHarmonicOscillator):
         params = dho.get_parameters()
         assert len(params) == 3
@@ -613,6 +902,31 @@ class TestDampedHarmonicOscillator:
         # THEN EXPECT
         assert numerical_area == pytest.approx(dho.area.value, rel=2e-3)
 
+    def test_copy(self, dho: DampedHarmonicOscillator):
+        dho_copy = dho.copy()
+        assert dho_copy is not dho
+        assert dho_copy.name == dho.name
+
+        assert dho_copy.area.value == dho.area.value
+        assert dho_copy.area.fixed == dho.area.fixed
+
+        assert dho_copy.center.value == dho.center.value
+        assert dho_copy.center.fixed == dho.center.fixed
+
+        assert dho_copy.width.value == dho.width.value
+        assert dho_copy.width.fixed == dho.width.fixed
+
+        assert dho_copy.unit == dho.unit
+
+    def test_repr(self, dho: DampedHarmonicOscillator):
+        repr_str = repr(dho)
+        assert "DampedHarmonicOscillator" in repr_str
+        assert "name = TestDHO" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "width =" in repr_str
+
 
 class TestPolynomial:
     @pytest.fixture
@@ -624,6 +938,28 @@ class TestPolynomial:
         assert polynomial.coefficients[0].value == 1.0
         assert polynomial.coefficients[1].value == -2.0
         assert polynomial.coefficients[2].value == 3.0
+
+    def test_input_type_validation_raises(self):
+        with pytest.raises(
+            TypeError, match="coefficients must be a list, tuple or ndarray of floats."
+        ):
+            Polynomial(name="TestPolynomial", coefficients="invalid")
+
+        with pytest.raises(TypeError, match="All coefficients must be numbers."):
+            Polynomial(name="TestPolynomial", coefficients=[1.0, "invalid", 3.0])
+
+        with pytest.raises(TypeError, match="unit must be a string"):
+            Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0], unit=123)
+
+        with pytest.raises(
+            ValueError, match="At least one coefficient must be provided"
+        ):
+            Polynomial(name="TestPolynomial", coefficients=[])
+
+    def test_negative_value_warns(self):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+            test_polynomial = Polynomial(name="TestPolynomial", coefficients=[-1.0])
+            test_polynomial.evaluate(np.array([0.0, 1.0, 2.0]))
 
     def test_evaluate(self, polynomial: Polynomial):
         x = np.array([0.0, 1.0, 2.0])
@@ -646,8 +982,25 @@ class TestPolynomial:
         ):
             polynomial.convert_unit("eV")
 
+    def test_copy(self, polynomial: Polynomial):
+        polynomial_copy = polynomial.copy()
+        assert polynomial_copy is not polynomial
+        assert polynomial_copy.name == polynomial.name
+        assert len(polynomial_copy.coefficients) == len(polynomial.coefficients)
+        for original_coeff, copied_coeff in zip(
+            polynomial.coefficients, polynomial_copy.coefficients
+        ):
+            assert copied_coeff.value == original_coeff.value
+            assert copied_coeff.fixed == original_coeff.fixed
 
-@pytest.mark.skip(reason="UserDefinedComponent not implemented yet")
-class TestUserDefinedComponent:
-    def test_placeholder(self):
-        pass
+    def test_repr(self, polynomial: Polynomial):
+        repr_str = repr(polynomial)
+        assert "Polynomial" in repr_str
+        assert "name = TestPolynomial" in repr_str
+        assert "coefficients =" in repr_str
+
+
+# @pytest.mark.skip(reason="UserDefinedComponent not implemented yet")
+# class TestUserDefinedComponent:
+#     def test_placeholder(self):
+#         pass

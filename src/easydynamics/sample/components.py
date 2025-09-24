@@ -286,7 +286,7 @@ class Gaussian(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"Gaussian(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"Gaussian(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
 
 
 class Lorentzian(ModelComponent):
@@ -321,6 +321,9 @@ class Lorentzian(ModelComponent):
             if width <= 0:
                 raise ValueError("The width of a Lorentzian must be greater than zero.")
             width = float(width)
+
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
 
         if isinstance(area, Numeric):
             if area < 0:
@@ -361,7 +364,7 @@ class Lorentzian(ModelComponent):
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.width.value <= 0:
-            raise ValueError("Width must be greater than 0 for Lorentzian.")
+            raise ValueError("Width must be greater than zero for Lorentzian.")
         if self.area.value < 0:
             warnings.warn(
                 "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
@@ -420,7 +423,7 @@ class Lorentzian(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"Lorentzian(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"Lorentzian(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
 
 
 class Voigt(ModelComponent):
@@ -456,17 +459,20 @@ class Voigt(ModelComponent):
         if not isinstance(lorentzian_width, (Numeric, Parameter)):
             raise TypeError("lorentzian_width must be a number or a Parameter.")
 
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
+
         if isinstance(gaussian_width, Numeric):
             if gaussian_width <= 0:
                 raise ValueError(
-                    "gaussian_width must be greater than 0 for Voigt profile."
+                    "The gaussian_width of a Voigt must be greater than zero."
                 )
             gaussian_width = float(gaussian_width)
 
         if isinstance(lorentzian_width, Numeric):
             if lorentzian_width <= 0:
                 raise ValueError(
-                    "lorentzian_width must be greater than 0 for Voigt profile."
+                    "The lorentzian_width of a Voigt must be greater than zero."
                 )
             lorentzian_width = float(lorentzian_width)
 
@@ -516,10 +522,12 @@ class Voigt(ModelComponent):
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.gaussian_width.value <= 0:
-            raise ValueError("gaussian_width must be greater than 0 for Voigt profile.")
+            raise ValueError(
+                "gaussian_width must be greater than zero for Voigt profile."
+            )
         if self.lorentzian_width.value <= 0:
             raise ValueError(
-                "lorentzian_width must be greater than 0 for Voigt profile."
+                "lorentzian_width must be greater than zero for Voigt profile."
             )
         if self.area.value < 0:
             warnings.warn(
@@ -582,7 +590,7 @@ class Voigt(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"Voigt(name={self.name}, area={self.area}, center={self.center}, gaussian_width={self.gaussian_width}, lorentzian_width={self.lorentzian_width})"
+        return f"Voigt(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
 
 
 class DeltaFunction(ModelComponent):
@@ -607,6 +615,9 @@ class DeltaFunction(ModelComponent):
 
         if center is not None and not isinstance(center, (Numeric, Parameter)):
             raise TypeError("center must be None, a number or a Parameter.")
+
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
 
         if isinstance(area, Numeric):
             if area < 0:
@@ -633,7 +644,7 @@ class DeltaFunction(ModelComponent):
             self.center = center
 
         if isinstance(area, Numeric):
-            self.area = Parameter(name=name + " area", value=area, unit=unit, min=0.0)
+            self.area = Parameter(name=name + " area", value=area, unit=unit)
         else:
             self.area = area
 
@@ -681,9 +692,7 @@ class DeltaFunction(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return (
-            f"DeltaFunction(name={self.name}, area={self.area}, center={self.center})"
-        )
+        return f"DeltaFunction(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center}"
 
 
 class DampedHarmonicOscillator(ModelComponent):
@@ -713,6 +722,9 @@ class DampedHarmonicOscillator(ModelComponent):
 
         if not isinstance(width, (Numeric, Parameter)):
             raise TypeError("width must be a number or a Parameter.")
+
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
 
         if isinstance(width, Numeric):
             width = float(width)
@@ -756,7 +768,7 @@ class DampedHarmonicOscillator(ModelComponent):
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.width.value <= 0:
             raise ValueError(
-                "Width of a Damped Harmonic Oscillator must be greater than 0."
+                "Width of a Damped Harmonic Oscillator must be greater than zero."
             )
         if self.area.value < 0:
             warnings.warn(
@@ -826,7 +838,7 @@ class DampedHarmonicOscillator(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"DampedHarmonicOscillator(name={self.name}, area={self.area}, center={self.center}, width={self.width})"
+        return f"DampedHarmonicOscillator(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
 
 
 class Polynomial(ModelComponent):
@@ -846,6 +858,12 @@ class Polynomial(ModelComponent):
     ):
         if not isinstance(coefficients, (list, tuple, np.ndarray)):
             raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
+
+        if not all(isinstance(c, Numeric) for c in coefficients):
+            raise TypeError("All coefficients must be numbers.")
+
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
 
         super().__init__(name=name)
         if not coefficients:
@@ -908,7 +926,7 @@ class Polynomial(ModelComponent):
         coeffs_str = ", ".join(
             f"{param.name}={param.value}" for param in self.coefficients
         )
-        return f"Polynomial(name={self.name}, coefficients=[{coeffs_str}])"
+        return f"Polynomial(name = {self.name}, unit = {self.unit},\n coefficients = [{coeffs_str}])"
 
     def convert_unit(self, unit):
         raise NotImplementedError(
