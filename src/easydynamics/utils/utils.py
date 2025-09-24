@@ -3,10 +3,10 @@ import numpy as np
 import scipp as sc
 
 from typing import Union
+from scipp.constants import Boltzmann as kB
 from easyscience import Parameter
 
 import warnings
-from scipp.constants import Boltzmann as kB
 
 # Small and large values of x need special treatment. 
 SMALL_THRESHOLD = 0.001 # For small values of x, the denominator is close to zero, which can give numerical issues. The issues don't start until x<~1e-6, but we use a larger threshold to be safe.
