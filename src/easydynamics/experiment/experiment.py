@@ -26,6 +26,18 @@ class Experiment(ExperimentBase):
 
         # TODO: Add checks of dimensions etc.
 
+    def save_hdf5(self, name: str, filename: str):
+        """Save a single dataset to HDF5."""
+        sc.io.to_hdf5(self._data[name], filename)
+
+    def save_all_hdf5(self, folder: str):
+        """Save all datasets to individual HDF5 files in a folder."""
+        import os
+
+        os.makedirs(folder, exist_ok=True)
+        for name, data in self._data.items():
+            sc.io.to_hdf5(data, os.path.join(folder, f"{name}.h5"))
+
     def append_data(self, new_data: sc.DataArray, name: str):
         """Append data with a name."""
         self._data[name] = new_data
@@ -56,6 +68,19 @@ class Experiment(ExperimentBase):
             fig = pp.plot(data.transpose(), title=f"{name}")
             display(fig)
 
+    # Helpful methods
+    def items(self):
+        """Return (name, data) pairs, like dict.items()."""
+        return self._data.items()
+
+    def values(self):
+        """Return all DataArrays, like dict.values()."""
+        return self._data.values()
+
+    def keys(self):
+        """Return all dataset names, like dict.keys()."""
+        return self._data.keys()
+
     # Dunder methods
     def __getitem__(self, key: str):
         """Allow dictionary-style access: my_exp['vanadium']"""
@@ -75,3 +100,10 @@ class Experiment(ExperimentBase):
 
     def __repr__(self):
         return f"Experiment(name = {self.name}, datasets={list(self._data.keys())})"
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __iter__(self):
+        """Iterate over dataset names."""
+        return iter(self._data)
