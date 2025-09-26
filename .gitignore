@@ -2,3 +2,5 @@ examples/QENS_example/*
 examples/INS_example/*
 examples/Anesthetics
 src/easydynamics/__pycache__
+.vscode/*
+**/__pycache__/*
