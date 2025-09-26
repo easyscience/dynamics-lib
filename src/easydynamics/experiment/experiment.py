@@ -28,7 +28,7 @@ class Experiment(ExperimentBase):
 
     def save_hdf5(self, name: str, filename: str):
         """Save a single dataset to HDF5."""
-        sc.io.to_hdf5(self._data[name], filename)
+        sc.io.save_hdf5(self._data[name], filename)
 
     def save_all_hdf5(self, folder: str):
         """Save all datasets to individual HDF5 files in a folder."""
@@ -36,7 +36,7 @@ class Experiment(ExperimentBase):
 
         os.makedirs(folder, exist_ok=True)
         for name, data in self._data.items():
-            sc.io.to_hdf5(data, os.path.join(folder, f"{name}.h5"))
+            sc.io.save_hdf5(data, os.path.join(folder, f"{name}.h5"))
 
     def append_data(self, new_data: sc.DataArray, name: str):
         """Append data with a name."""

@@ -19,7 +19,10 @@ class TestExperiment:
         return experiment
 
     def test_get_data(self, experiment):
+        # WHEN
         data = experiment.get_data("test_data")
+
+        # THEN EXPECT
         assert isinstance(data, sc.DataArray)
         assert "Q" in data.dims
         assert "energy" in data.dims
@@ -27,4 +30,82 @@ class TestExperiment:
         assert data.sizes["energy"] == 11
         assert sc.identical(
             data.data, sc.array(dims=["Q", "energy"], values=np.ones((10, 11)))
+        )
+
+    def test_remove_all_data(self, experiment):
+        # WHEN
+        experiment.remove_all_data()
+        data = experiment.get_data()
+
+        # THEN EXPECT
+        assert data == {}
+
+    def test_get_all_data(self, experiment):
+        # WHEN
+        data = experiment.get_data()
+
+        # THEN EXPECT
+        assert isinstance(data, dict)
+        assert "test_data" in data
+        assert isinstance(data["test_data"], sc.DataArray)
+
+    def test_load_hdf5(self, tmp_path, experiment):
+        # WHEN
+        filename = tmp_path / "test.h5"
+        data_to_save = experiment.get_data("test_data")
+        sc.io.save_hdf5(data_to_save, filename)
+
+        # THEN
+        new_experiment = Experiment("new_experiment")
+        new_experiment.load_hdf5(str(filename), "loaded_data")
+        loaded_data = new_experiment.get_data("loaded_data")
+
+        # EXPECT
+        assert sc.identical(data_to_save, loaded_data)
+
+    def test_save_hdf5(self, tmp_path, experiment):
+        # WHEN THEN
+        filename = tmp_path / "saved_data.h5"
+        experiment.save_hdf5("test_data", str(filename))
+
+        # EXPECT
+        loaded_data = sc.io.load_hdf5(str(filename))
+        original_data = experiment.get_data("test_data")
+        assert sc.identical(original_data, loaded_data)
+
+    def test_save_all_hdf5(self, tmp_path, experiment):
+        # WHEN THEN
+        folder = tmp_path / "data_folder"
+        experiment.save_all_hdf5(str(folder))
+
+        # EXPECT
+        import os
+
+        files = os.listdir(folder)
+        assert "test_data.h5" in files
+        loaded_data = sc.io.load_hdf5(str(folder / "test_data.h5"))
+        original_data = experiment.get_data("test_data")
+        assert sc.identical(original_data, loaded_data)
+
+    def test_append_data(self, experiment):
+        # WHEN
+        name = "new_data"
+        Q = sc.linspace("Q", 1.0, 2.0, num=5, unit="1/Angstrom")
+        energy = sc.linspace("energy", -10, 10, num=6, unit="meV")
+        values = sc.array(dims=["Q", "energy"], values=np.ones((5, 6)) * 2)
+        new_data = sc.DataArray(data=values, coords={"Q": Q, "energy": energy})
+
+        # THEN
+        experiment.append_data(new_data, name)
+
+        # EXPECT
+        assert experiment._data.keys() == {"test_data", "new_data"}
+        data = experiment.get_data(name)
+        assert isinstance(data, sc.DataArray)
+        assert "Q" in data.dims
+        assert "energy" in data.dims
+        assert data.sizes["Q"] == 5
+        assert data.sizes["energy"] == 6
+        assert sc.identical(
+            data.data, sc.array(dims=["Q", "energy"], values=np.ones((5, 6)) * 2)
         )
