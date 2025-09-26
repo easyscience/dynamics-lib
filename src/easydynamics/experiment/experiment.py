@@ -1,7 +1,5 @@
 from easyscience.job.experiment import ExperimentBase
 
-
-import numpy as np
 import scipp as sc
 
 
