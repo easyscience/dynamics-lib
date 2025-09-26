@@ -1,8 +1,8 @@
 from easyscience.job.job import JobBase
 
 from easydynamics.sample import SampleModel
-from easydynamics.experiment import Experiment
-from easydynamics.analysis import Analysis
+from easydynamics.Experiment import Experiment
+from easydynamics.Analysis import Analysis
 
 from easydynamics.sample import ModelComponent
 
@@ -19,12 +19,13 @@ import plopp as pp
 
 from collections import defaultdict, Counter
 
-from easydynamics.experiment.data import Data
+from easydynamics.Experiment.data import Data
 
 
 from itertools import product
 
 import math
+
 
 class Job(JobBase):
     def __init__(self, name: str, interface=None, *args, **kwargs):
@@ -35,39 +36,38 @@ class Job(JobBase):
         self._background_model = None
         self._experiment = None
         self._analysis = []
-        self._analysis_meta = None  
+        self._analysis_meta = None
         self._summary = None
         self._info = None
         self._fit_parameters = None
         self._diffusion_model = None
 
-    
-    def set_diffusion_model(self, diffusion_model:DiffusionModel):
-        """ Set the diffusion model for the analysis.
+    def set_diffusion_model(self, diffusion_model: DiffusionModel):
+        """Set the diffusion model for the analysis.
         Args:
             diffusion_model (DiffusionModel): The diffusion model to be used in the analysis.
         """
         if not isinstance(diffusion_model, DiffusionModel):
-            raise TypeError("The diffusion model must be an instance of DiffusionModel.")
+            raise TypeError(
+                "The diffusion model must be an instance of DiffusionModel."
+            )
         self._diffusion_model = diffusion_model
         self.set_theory_for_all_analyses(diffusion_model)
 
     def set_theory(self, theory):
-        """ Set the theoretical model.
-        """
+        """Set the theoretical model."""
         if not isinstance(theory, SampleModel):
             raise TypeError("Theory model must be an instance of SampleModel.")
         self._theory = theory
 
     def set_experiment(self, experiment):
-        """ Set the experimental model.
-        """
+        """Set the experimental model."""
         if not isinstance(experiment, Experiment):
             raise TypeError("Experiment model must be an instance of Experiment.")
         self._experiment = experiment
 
-    def set_background_model(self, background:SampleModel):
-        """ Set the model for the background.
+    def set_background_model(self, background: SampleModel):
+        """Set the model for the background.
         Args:
             background (SampleModel): The background model.
         """
@@ -75,24 +75,25 @@ class Job(JobBase):
             raise TypeError("Background model must be an instance of SampleModel.")
         self._background_model = background
 
-    def set_resolution_model(self, resolution:SampleModel):
-        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
+    def set_resolution_model(self, resolution: SampleModel):
+        """Set the resolution model for the experiment. The resolution will be normalised to have area 1.
         Args:
             resolution (SampleModel): The resolution model to be used in the experiment.
         """
         # TODO: allow resolution to be DataArray or SampleModel
 
         if resolution is not None and not isinstance(resolution, SampleModel):
-            raise TypeError("Resolution model must be None or an instance of SampleModel.")
+            raise TypeError(
+                "Resolution model must be None or an instance of SampleModel."
+            )
         self._resolution_model = resolution
 
         if self._resolution_model is not None:
             self.normalize_resolution()
 
     def normalize_resolution(self):
-        """ Normalize the resolution model to have an area of 1.
-        """
-        self._resolution_model.normalize_area()        
+        """Normalize the resolution model to have an area of 1."""
+        self._resolution_model.normalize_area()
 
     def append_analysis(self, analysis):
         self._analysis.append(analysis)
@@ -104,152 +105,175 @@ class Job(JobBase):
         # Update analysis_meta
         if self._analysis_meta is None:
             self._analysis_meta = {
-                'dims': (),
-                'sizes': {},
+                "dims": (),
+                "sizes": {},
             }
 
         # Generate metadata dynamically
-        current_dims = self._experiment._data.data.dims if self._experiment is not None else []
-        energy_dim = 'energy'
+        current_dims = (
+            self._experiment._data.data.dims if self._experiment is not None else []
+        )
+        energy_dim = "energy"
 
         # Exclude the 'energy' dimension and build metadata for other dimensions
         dims_to_track = [d for d in current_dims if d != energy_dim]
-        sizes_to_track = {d: self._experiment._data.data.sizes[d] for d in dims_to_track if self._experiment is not None}
+        sizes_to_track = {
+            d: self._experiment._data.data.sizes[d]
+            for d in dims_to_track
+            if self._experiment is not None
+        }
 
         # Update _analysis_meta for dimensionality and sizes
-        self._analysis_meta['dims'] = tuple(dims_to_track)
-        self._analysis_meta['sizes'] = sizes_to_track            
+        self._analysis_meta["dims"] = tuple(dims_to_track)
+        self._analysis_meta["sizes"] = sizes_to_track
 
-    def fit(self,
-                sequential=None,
-                *,
-                seed_domains=("theory", "background"),
-                copy_offset=False,
-                include_temperature=False,
-                only_unfixed=True,
-                strict_components=True,
-                strict_params=True,
-                require_same_units=True,
-                convert_units=False):
-            """
+    def fit(
+        self,
+        sequential=None,
+        *,
+        seed_domains=("theory", "background"),
+        copy_offset=False,
+        include_temperature=False,
+        only_unfixed=True,
+        strict_components=True,
+        strict_params=True,
+        require_same_units=True,
+        convert_units=False,
+    ):
+        """
 
-            `_analysis_meta` MUST be set and correct:
-                - 'dims': tuple of nesting order (outer -> inner), e.g. ('Temperature','Q') or ('Q',)
-                - 'sizes': dict with lengths for each dim
-            """
+        `_analysis_meta` MUST be set and correct:
+            - 'dims': tuple of nesting order (outer -> inner), e.g. ('Temperature','Q') or ('Q',)
+            - 'sizes': dict with lengths for each dim
+        """
 
-            if not self._analysis:
-                raise RuntimeError("No analyses to fit. Build or generate analyses first.")
-            
-            # If we have just a single analysis object, we don't need to go through a list
-            if len(self._analysis) == 1: 
-                self._analysis[0].fit()
-                return
+        if not self._analysis:
+            raise RuntimeError("No analyses to fit. Build or generate analyses first.")
 
-            if not self._analysis_meta or 'dims' not in self._analysis_meta or 'sizes' not in self._analysis_meta:
-                raise RuntimeError("Missing _analysis_meta. Call generate_analysis_for_cuts() or set_analysis_meta().")
+        # If we have just a single analysis object, we don't need to go through a list
+        if len(self._analysis) == 1:
+            self._analysis[0].fit()
+            return
 
-            axis_dims: list[str] = list(self._analysis_meta['dims'])
-            sizes: dict[str, int] = dict(self._analysis_meta['sizes'])
+        if (
+            not self._analysis_meta
+            or "dims" not in self._analysis_meta
+            or "sizes" not in self._analysis_meta
+        ):
+            raise RuntimeError(
+                "Missing _analysis_meta. Call generate_analysis_for_cuts() or set_analysis_meta()."
+            )
 
-            # --- helpers ----------------------------------------------------------
-            def _walk_all(node):
-                """Yield every Analysis in the nested structure."""
-                stack = [node]
-                while stack:
-                    x = stack.pop()
-                    if isinstance(x, (list, tuple)):
-                        stack.extend(x)
-                    else:
-                        yield x
+        axis_dims: list[str] = list(self._analysis_meta["dims"])
+        sizes: dict[str, int] = dict(self._analysis_meta["sizes"])
 
-            def _get_by_map(idx_map: dict[str, int]):
-                """Index self._analysis using axis_dims order and a {dim: idx} map."""
-                obj = self._analysis
-                for d in axis_dims:
-                    if d in idx_map:
-                        obj = obj[idx_map[d]]
-                return obj
+        # --- helpers ----------------------------------------------------------
+        def _walk_all(node):
+            """Yield every Analysis in the nested structure."""
+            stack = [node]
+            while stack:
+                x = stack.pop()
+                if isinstance(x, (list, tuple)):
+                    stack.extend(x)
+                else:
+                    yield x
 
-            def _resolve_sweep_dim(tag: str) -> str:
-                """Map tags like 'T' to actual dim name found in axis_dims."""
-                if tag in axis_dims:
-                    return tag
-                if tag == 'T':
-                    for cand in ('Temperature', 'Temp', 'T'):
-                        if cand in axis_dims:
-                            return cand
-                if tag == 'Q' and 'Q' in axis_dims:
-                    return 'Q'
-                raise ValueError(f"sweep dim '{tag}' not present in analysis dims {axis_dims}")
+        def _get_by_map(idx_map: dict[str, int]):
+            """Index self._analysis using axis_dims order and a {dim: idx} map."""
+            obj = self._analysis
+            for d in axis_dims:
+                if d in idx_map:
+                    obj = obj[idx_map[d]]
+            return obj
 
-            # --- independent fits -------------------------------------------------
-            if sequential is None:
-                for ana in _walk_all(self._analysis):
-                    ana.fit()
-                return
+        def _resolve_sweep_dim(tag: str) -> str:
+            """Map tags like 'T' to actual dim name found in axis_dims."""
+            if tag in axis_dims:
+                return tag
+            if tag == "T":
+                for cand in ("Temperature", "Temp", "T"):
+                    if cand in axis_dims:
+                        return cand
+            if tag == "Q" and "Q" in axis_dims:
+                return "Q"
+            raise ValueError(
+                f"sweep dim '{tag}' not present in analysis dims {axis_dims}"
+            )
 
-            # --- sequential sweeps ------------------------------------------------
-            valid = {'Q', '-Q', 'T', '-T'}
-            if sequential not in valid:
-                raise ValueError(f"sequential must be one of {sorted(valid)} or None, got {sequential!r}")
+        # --- independent fits -------------------------------------------------
+        if sequential is None:
+            for ana in _walk_all(self._analysis):
+                ana.fit()
+            return
 
-            backwards = sequential.startswith('-')
-            tag = sequential.lstrip('-')
-            sweep_dim = _resolve_sweep_dim(tag)
+        # --- sequential sweeps ------------------------------------------------
+        valid = {"Q", "-Q", "T", "-T"}
+        if sequential not in valid:
+            raise ValueError(
+                f"sequential must be one of {sorted(valid)} or None, got {sequential!r}"
+            )
 
-            # outer dims = all other dims in nesting order (could be 0D or >1D)
-            outer_dims = [d for d in axis_dims if d != sweep_dim]
+        backwards = sequential.startswith("-")
+        tag = sequential.lstrip("-")
+        sweep_dim = _resolve_sweep_dim(tag)
 
-            # ranges
-            inner_range = range(sizes[sweep_dim]-1, -1, -1) if backwards else range(sizes[sweep_dim])
-            outer_ranges = [range(sizes[d]) for d in outer_dims] or [range(1)]
+        # outer dims = all other dims in nesting order (could be 0D or >1D)
+        outer_dims = [d for d in axis_dims if d != sweep_dim]
 
-            for outer_combo in product(*outer_ranges):
-                idx_map = {}
-                for d, i in zip(outer_dims, outer_combo):
-                    idx_map[d] = i
+        # ranges
+        inner_range = (
+            range(sizes[sweep_dim] - 1, -1, -1)
+            if backwards
+            else range(sizes[sweep_dim])
+        )
+        outer_ranges = [range(sizes[d]) for d in outer_dims] or [range(1)]
 
-                prev_ana = None
-                for i in inner_range:
-                    idx_map[sweep_dim] = i
-                    ana = _get_by_map(idx_map)
+        for outer_combo in product(*outer_ranges):
+            idx_map = {}
+            for d, i in zip(outer_dims, outer_combo):
+                idx_map[d] = i
 
-                    if prev_ana is not None:
-                        ana.seed_from(
-                            prev_ana,
-                            domains=seed_domains,
-                            only_unfixed=only_unfixed,
-                            strict_components=strict_components,
-                            strict_params=strict_params,
-                            include_temperature=include_temperature,
-                            require_same_units=require_same_units,
-                            convert_units=convert_units,
-                            copy_offset=copy_offset,
-                        )
-                    ana.fit()
-                    prev_ana = ana
+            prev_ana = None
+            for i in inner_range:
+                idx_map[sweep_dim] = i
+                ana = _get_by_map(idx_map)
 
-
+                if prev_ana is not None:
+                    ana.seed_from(
+                        prev_ana,
+                        domains=seed_domains,
+                        only_unfixed=only_unfixed,
+                        strict_components=strict_components,
+                        strict_params=strict_params,
+                        include_temperature=include_temperature,
+                        require_same_units=require_same_units,
+                        convert_units=convert_units,
+                        copy_offset=copy_offset,
+                    )
+                ana.fit()
+                prev_ana = ana
 
     def fit_simultaneous(self):
         """
         Fit all analyses simultaneously.
-            """
+        """
+
         def _iter_nested(container, dims, sizes, depth=0, prefix=()):
-                """
-                Yields (index_tuple, leaf_item) for an N-D rectangular nested list/array.
-                dims: tuple like ('T','Q', 'something', ...)
-                sizes: dict mapping dim -> length
-                """
-                if depth == len(dims):
-                    yield prefix, container
-                    return
-                dim = dims[depth]
-                n = sizes[dim]
-                for i in range(n):
-                    # assumes rectangular indexing: container[i] is defined
-                    yield from _iter_nested(container[i], dims, sizes, depth+1, prefix + (i,))
+            """
+            Yields (index_tuple, leaf_item) for an N-D rectangular nested list/array.
+            dims: tuple like ('T','Q', 'something', ...)
+            sizes: dict mapping dim -> length
+            """
+            if depth == len(dims):
+                yield prefix, container
+                return
+            dim = dims[depth]
+            n = sizes[dim]
+            for i in range(n):
+                # assumes rectangular indexing: container[i] is defined
+                yield from _iter_nested(
+                    container[i], dims, sizes, depth + 1, prefix + (i,)
+                )
 
         x_data = []
         y_data = []
@@ -257,18 +281,16 @@ class Job(JobBase):
         fit_objects = []
         fit_functions = []
 
-
-        dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
-        sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
+        dims = tuple(self._analysis_meta["dims"])  # e.g. ('T','Q',...)
+        sizes = dict(self._analysis_meta["sizes"])  # {'T':4,'Q':16,...}
         # q_axis = dims.index('Q')                     # works for any position
 
         for idx, ana in _iter_nested(self._analysis, dims, sizes):
-            
-        # for ana in self._analysis:
+            # for ana in self._analysis:
             # x, y, e = ana._experiment.extract_xye_data(self._experiment._data)
-            y=ana._experiment._data.data.values
-            x=ana._experiment._data.data.coords['energy'].values
-            e=np.sqrt(ana._experiment._data.data.variances)
+            y = ana._experiment._data.data.values
+            x = ana._experiment._data.data.coords["energy"].values
+            e = np.sqrt(ana._experiment._data.data.variances)
             x_data.append(x)
             y_data.append(y)
             e_data.append(e)
@@ -279,16 +301,16 @@ class Job(JobBase):
             fit_objects=fit_objects,
             fit_functions=fit_functions,
         )
-            # x, y, e = self._experiment.extract_xye_data(self._experiment._data)
-
+        # x, y, e = self._experiment.extract_xye_data(self._experiment._data)
 
         # Perform the fit
-        fit_result = multi_fitter.fit(x=x_data, y=y_data, weights=[1.0 / e for e in e_data])
+        fit_result = multi_fitter.fit(
+            x=x_data, y=y_data, weights=[1.0 / e for e in e_data]
+        )
 
         return fit_result
 
-
-    def generate_analysis_for_cuts(self, keep=('energy',)):
+    def generate_analysis_for_cuts(self, keep=("energy",)):
         """
         Create a nested structure of Analysis objects by cutting the experiment data
         over all dims NOT in `keep` (default keeps 'energy').
@@ -323,11 +345,13 @@ class Job(JobBase):
             for d, i in zip(dims_to_cut, idx_tuple):
                 da = da[d, i]
             # Build analysis (copy models)
-            ana = Analysis(name=f'Analysis{idx_tuple}')
+            ana = Analysis(name=f"Analysis{idx_tuple}")
             theory_copy = self._theory.copy()
-            if 'Temperature' in da.coords:
-                theory_copy.temperature= da.coords['Temperature'].value
-                theory_copy._use_detailed_balance = False #TODO users should be allowed to set this
+            if "Temperature" in da.coords:
+                theory_copy.temperature = da.coords["Temperature"].value
+                theory_copy._use_detailed_balance = (
+                    False  # TODO users should be allowed to set this
+                )
 
             ana.set_theory(theory_copy)
             if self._background_model is not None:
@@ -372,22 +396,22 @@ class Job(JobBase):
         # Save results
         self._analysis = analysis_grid
         self._analysis_meta = {
-            'dims': tuple(dims_to_cut),       # order of nesting
-            'sizes': sizes,                   # size per cut-dim
-            'keep': tuple(keep),              # dims left intact in each slice
+            "dims": tuple(dims_to_cut),  # order of nesting
+            "sizes": sizes,  # size per cut-dim
+            "keep": tuple(keep),  # dims left intact in each slice
         }
         return self
 
-
-
-
-    def plot_data_and_model(self,
-                            intensity_min=0.0, intensity_max=0.06,
-                            energy_min=-0.02, energy_max=0.02,
-                            plot_individual_components=True):
-
+    def plot_data_and_model(
+        self,
+        intensity_min=0.0,
+        intensity_max=0.06,
+        energy_min=-0.02,
+        energy_max=0.02,
+        plot_individual_components=True,
+    ):
         data = self._experiment._data.data
-        energy_dim = 'energy'
+        energy_dim = "energy"
 
         # same shape/coords as data
         fit_total = sc.zeros_like(data)
@@ -398,7 +422,11 @@ class Job(JobBase):
 
         if not loop_dims:
             E = fit_total.coords[energy_dim].values
-            ana = self._analysis[0] if isinstance(self._analysis, (list, tuple)) else self._analysis
+            ana = (
+                self._analysis[0]
+                if isinstance(self._analysis, (list, tuple))
+                else self._analysis
+            )
 
             if plot_individual_components:
                 comps = ana.calculate_individual_components(E)  # dict
@@ -432,40 +460,40 @@ class Job(JobBase):
                 fsel.values = ana.calculate_theory(E)
 
         # Build plot group
-        data_and_model = {'Data': self._experiment._data.data, 'Model': fit_total}
+        data_and_model = {"Data": self._experiment._data.data, "Model": fit_total}
         if plot_individual_components and component_arrays:
             data_and_model.update(component_arrays)
         data_and_model = sc.DataGroup(data_and_model)
 
         # Apply energy window
-        energy_min = energy_min * sc.Unit('meV')
-        energy_max = energy_max * sc.Unit('meV')
+        energy_min = energy_min * sc.Unit("meV")
+        energy_max = energy_max * sc.Unit("meV")
 
         # Styling
-        linestyle = {'Data': 'none', 'Model': '-'}
-        marker = {'Data': 'o', 'Model': 'none'}
-        markerfacecolor = {'Data': 'none', 'Model': 'none'}
-        color = {'Data': 'black', 'Model': 'red'}
+        linestyle = {"Data": "none", "Model": "-"}
+        marker = {"Data": "o", "Model": "none"}
+        markerfacecolor = {"Data": "none", "Model": "none"}
+        color = {"Data": "black", "Model": "red"}
 
         if plot_individual_components and component_arrays:
             for name in component_arrays:
-                linestyle[name] = '--'
-                marker[name] = 'none'
-                markerfacecolor[name] = 'none'
+                linestyle[name] = "--"
+                marker[name] = "none"
+                markerfacecolor[name] = "none"
 
         plot = pp.slicer(
-            data_and_model['energy', energy_min:energy_max],
-            vmin=intensity_min, vmax=intensity_max,
-            keep=['energy'],
+            data_and_model["energy", energy_min:energy_max],
+            vmin=intensity_min,
+            vmax=intensity_max,
+            keep=["energy"],
             linestyle=linestyle,
             marker=marker,
             markerfacecolor=markerfacecolor,
-            color=color
+            color=color,
         )
 
         return plot
 
-    
     def plot_fit_parameters(self, parameter_name):
         """
         Plot the fit parameters of the analysis.
@@ -487,9 +515,10 @@ class Job(JobBase):
 
         if parameter_name is not None:
             if parameter_name not in self._fit_parameters:
-                raise KeyError(f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(self._fit_parameters.keys())}")
-            return pp.slicer(self._fit_parameters[parameter_name]['value'],keep='Q')
-
+                raise KeyError(
+                    f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(self._fit_parameters.keys())}"
+                )
+            return pp.slicer(self._fit_parameters[parameter_name]["value"], keep="Q")
 
     def use_fit_as_resolution(self, job):
         """
@@ -499,34 +528,38 @@ class Job(JobBase):
         # --- basic checks
         if not isinstance(job, Job):
             raise TypeError("Job must be an instance of Job.")
-        if not getattr(job, '_analysis', None):
+        if not getattr(job, "_analysis", None):
             raise RuntimeError("No analysis found in the provided job.")
-        if not getattr(self, '_analysis', None):
+        if not getattr(self, "_analysis", None):
             raise RuntimeError("No analysis found in 'self'.")
-        if not hasattr(self, '_analysis_meta') or not hasattr(job, '_analysis_meta'):
-            raise RuntimeError("Both jobs must have _analysis_meta; call generate_analysis_for_cuts() first.")
+        if not hasattr(self, "_analysis_meta") or not hasattr(job, "_analysis_meta"):
+            raise RuntimeError(
+                "Both jobs must have _analysis_meta; call generate_analysis_for_cuts() first."
+            )
 
         # --- meta / dims
-        dims_self = tuple(self._analysis_meta.get('dims', ()))
-        sizes_self = dict(self._analysis_meta.get('sizes', {}))
-        dims_job  = tuple(job._analysis_meta.get('dims', ()))
-        sizes_job = dict(job._analysis_meta.get('sizes', {}))
+        dims_self = tuple(self._analysis_meta.get("dims", ()))
+        sizes_self = dict(self._analysis_meta.get("sizes", {}))
+        dims_job = tuple(job._analysis_meta.get("dims", ()))
+        sizes_job = dict(job._analysis_meta.get("sizes", {}))
 
-        if 'Q' not in dims_self or 'Q' not in dims_job:
+        if "Q" not in dims_self or "Q" not in dims_job:
             raise RuntimeError("Both jobs must include 'Q' in their cut dimensions.")
 
         # Source job must be 1D over Q
-        if dims_job != ('Q',):
-            raise RuntimeError("Source job is expected to be 1D over Q (job._analysis[q]).")
+        if dims_job != ("Q",):
+            raise RuntimeError(
+                "Source job is expected to be 1D over Q (job._analysis[q])."
+            )
 
-        nq_self = sizes_self['Q']
-        nq_job  = sizes_job['Q']
+        nq_self = sizes_self["Q"]
+        nq_job = sizes_job["Q"]
         if nq_self != nq_job:
             raise RuntimeError("Mismatch in number of Q points between jobs.")
 
-        # Q coord check 
-        q_self = self._experiment._data.data.coords.get('Q', None)
-        q_job  = job._experiment._data.data.coords.get('Q', None)
+        # Q coord check
+        q_self = self._experiment._data.data.coords.get("Q", None)
+        q_job = job._experiment._data.data.coords.get("Q", None)
         if q_self is None or q_job is None:
             raise RuntimeError("Both jobs must have a 'Q' coordinate in their data.")
         try:
@@ -544,15 +577,15 @@ class Job(JobBase):
             return cur
 
         # Where is Q in the self nesting?
-        q_level_self = dims_self.index('Q')
-        other_dims = [d for d in dims_self if d != 'Q']
+        q_level_self = dims_self.index("Q")
+        other_dims = [d for d in dims_self if d != "Q"]
         other_ranges = [range(sizes_self[d]) for d in other_dims]
 
         # --- main loop: for each Q, copy into all slices over other dims
         for qi in range(nq_self):
             src_ana = job._analysis[qi]  # source is 1D over Q
             # iterate over cartesian product of other dims (or just once if none)
-            for combo in (product(*other_ranges) if other_dims else [()]):
+            for combo in product(*other_ranges) if other_dims else [()]:
                 # build full index tuple in the same order as dims_self
                 full_idx = [None] * len(dims_self)
                 # place Q index
@@ -567,10 +600,9 @@ class Job(JobBase):
 
         return self
 
-
     # def generate_diffusion_analysis(self,diffusion_model):
 
-    def generate_empty_analysis_array(self,keep=('energy')):
+    def generate_empty_analysis_array(self, keep=("energy")):
         """
         Create a nested structure of Analysis objects by cutting the experiment data
         over all dims NOT in `keep` (default keeps 'energy'). No theory or background is added here.
@@ -605,8 +637,7 @@ class Job(JobBase):
             for d, i in zip(dims_to_cut, idx_tuple):
                 da = da[d, i]
             # Build analysis (copy models)
-            ana = Analysis(name=f'Analysis{idx_tuple}')
-
+            ana = Analysis(name=f"Analysis{idx_tuple}")
 
             # Attach sliced data via Experiment/Data
             exp = Experiment()
@@ -644,14 +675,14 @@ class Job(JobBase):
         # Save results
         self._analysis = analysis_grid
         self._analysis_meta = {
-            'dims': tuple(dims_to_cut),       # order of nesting
-            'sizes': sizes,                   # size per cut-dim
-            'keep': tuple(keep),              # dims left intact in each slice
+            "dims": tuple(dims_to_cut),  # order of nesting
+            "sizes": sizes,  # size per cut-dim
+            "keep": tuple(keep),  # dims left intact in each slice
         }
         return self
-    
+
     def set_resolution_model_for_all_analyses(self, resolution=None):
-        """ Set the resolution model for all analyses in self._analysis.
+        """Set the resolution model for all analyses in self._analysis.
         Args:
             resolution (SampleModel): The resolution model to be used in the experiment.
         """
@@ -660,7 +691,7 @@ class Job(JobBase):
 
         if not isinstance(resolution, SampleModel):
             raise TypeError("Resolution model must be an instance of SampleModel.")
-        
+
         def _walk_all(node):
             """Yield every Analysis in the nested structure."""
             stack = [node]
@@ -676,9 +707,9 @@ class Job(JobBase):
             ana.fix_resolution_parameters()
 
         return self
-    
+
     def set_background_model_for_all_analyses(self, background=None):
-        """ Set the background model for all analyses in self._analysis.
+        """Set the background model for all analyses in self._analysis.
         Args:
             background (SampleModel): The background model to be used in the experiment.
         """
@@ -687,7 +718,7 @@ class Job(JobBase):
 
         if not isinstance(background, SampleModel):
             raise TypeError("Background model must be an instance of SampleModel.")
-        
+
         def _walk_all(node):
             """Yield every Analysis in the nested structure."""
             stack = [node]
@@ -702,7 +733,7 @@ class Job(JobBase):
             ana.set_background_model(background.copy())
 
         return self
-    
+
     def set_theory_for_all_analyses(self, theory=None):
         def _iter_nested(container, dims, sizes, depth=0, prefix=()):
             """
@@ -717,21 +748,23 @@ class Job(JobBase):
             n = sizes[dim]
             for i in range(n):
                 # assumes rectangular indexing: container[i] is defined
-                yield from _iter_nested(container[i], dims, sizes, depth+1, prefix + (i,))
+                yield from _iter_nested(
+                    container[i], dims, sizes, depth + 1, prefix + (i,)
+                )
 
         if theory is None:
             theory = self._theory
-        if isinstance(theory,DiffusionModel):
+        if isinstance(theory, DiffusionModel):
             # diffusion_job._experiment._data.data.coords.get('Q').values
-            Q=self._experiment._data.data.coords.get('Q').values
-            components=theory.create_components(Q)
+            Q = self._experiment._data.data.coords.get("Q").values
+            components = theory.create_components(Q)
 
-            dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
-            sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
-            q_axis = dims.index('Q')                     # works for any position
+            dims = tuple(self._analysis_meta["dims"])  # e.g. ('T','Q',...)
+            sizes = dict(self._analysis_meta["sizes"])  # {'T':4,'Q':16,...}
+            q_axis = dims.index("Q")  # works for any position
 
             for idx, ana in _iter_nested(self._analysis, dims, sizes):
-                q_i = idx[q_axis]                        # the Q index for this analysis
+                q_i = idx[q_axis]  # the Q index for this analysis
                 if ana._theory is None:
                     sample_model = SampleModel()
                 else:
@@ -739,13 +772,13 @@ class Job(JobBase):
 
                 for comp in components[q_i]:
                     sample_model.add_component(comp)
-                    
+
                     ana.set_theory(sample_model)
                     ana.set_diffusion_model(theory)
 
-        if isinstance(theory,ModelComponent):
-            dims  = tuple(self._analysis_meta['dims'])   # e.g. ('T','Q',...)
-            sizes = dict(self._analysis_meta['sizes'])   # {'T':4,'Q':16,...}
+        if isinstance(theory, ModelComponent):
+            dims = tuple(self._analysis_meta["dims"])  # e.g. ('T','Q',...)
+            sizes = dict(self._analysis_meta["sizes"])  # {'T':4,'Q':16,...}
 
             for idx, ana in _iter_nested(self._analysis, dims, sizes):
                 if ana._theory is None:
@@ -754,9 +787,8 @@ class Job(JobBase):
                     sample_model = ana._theory
 
                     sample_model.add_component(theory)
-                    
-                    ana.set_theory(sample_model)
 
+                    ana.set_theory(sample_model)
 
         #     # dims = self._analysis_meta['dims']  # Tuple of dimensions
         #     # sizes = self._analysis_meta['sizes']  # Sizes for each dimension
@@ -773,77 +805,89 @@ class Job(JobBase):
         #         if ana._theory is None:
         #             sample_model=SampleModel()
         #         else:
-        #             sample_model=ana._theory 
+        #             sample_model=ana._theory
         #         for comp in components[Q_index]:
         #             sample_model.add_component(comp)
         #         ana.set_theory(sample_model)
 
-            
-    
     # def set_diffusion_model(self,diffusion_model):
     #     """ Set the diffusion model for all analyses in self._analysis.
     #     Args:
     #         diffusion_model (): The diffusion model to be used in the experiment.
     #     """
 
-
-    def fit_diffusion_width(self,parameter_name):
-        pars=self.get_parameters_as_data_group()
+    def fit_diffusion_width(self, parameter_name):
+        pars = self.get_parameters_as_data_group()
         if parameter_name not in pars:
-            raise KeyError(f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(pars.keys())}")
-        
-        diffusion_width=pars[parameter_name]['value'].values
-        diffusion_width_var=pars[parameter_name]['value'].variances
-        Q=self._experiment._data.data.coords.get('Q').values
+            raise KeyError(
+                f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(pars.keys())}"
+            )
+
+        diffusion_width = pars[parameter_name]["value"].values
+        diffusion_width_var = pars[parameter_name]["value"].variances
+        Q = self._experiment._data.data.coords.get("Q").values
 
         def fit_func(Q_vals):
             return self._diffusion_model.calculate_width(Q_vals)
-        
 
-        #TODO: generalize to multiple parameters        
-        fit_obj=ObjBase(name='diffusion_width', diffusion_coefficient=self._diffusion_model.diffusion_coefficient)
+        # TODO: generalize to multiple parameters
+        fit_obj = ObjBase(
+            name="diffusion_width",
+            diffusion_coefficient=self._diffusion_model.diffusion_coefficient,
+        )
 
-        fitter=EasyScienceFitter(
+        fitter = EasyScienceFitter(
             fit_object=fit_obj,
             fit_function=fit_func,
         )
 
-        fit_result = fitter.fit(x=Q, y=diffusion_width, weights=1.0 / np.sqrt(diffusion_width_var))
+        fit_result = fitter.fit(
+            x=Q, y=diffusion_width, weights=1.0 / np.sqrt(diffusion_width_var)
+        )
 
         return fit_result
-    
-    def plot_diffusion_fit_result(self,parameter_name):
-        pars=self.get_parameters_as_data_group()
-        diffusion_width=pars[parameter_name]['value'].values
-        diffusion_width_var=pars[parameter_name]['value'].variances
-        Q=self._experiment._data.data.coords.get('Q').values
 
-        theory_width=self._diffusion_model.calculate_width(Q)
+    def plot_diffusion_fit_result(self, parameter_name):
+        pars = self.get_parameters_as_data_group()
+        diffusion_width = pars[parameter_name]["value"].values
+        diffusion_width_var = pars[parameter_name]["value"].variances
+        Q = self._experiment._data.data.coords.get("Q").values
+
+        theory_width = self._diffusion_model.calculate_width(Q)
         import matplotlib.pyplot as plt
+
         # Plotting code goes here
-        plt.errorbar(Q, diffusion_width, yerr=np.sqrt(diffusion_width_var), fmt='o', label='Fitted Width')
-        plt.plot(Q, theory_width, '-', label='Diffusion Model')
-        plt.xlabel('Q')
-        plt.ylabel('Width')
+        plt.errorbar(
+            Q,
+            diffusion_width,
+            yerr=np.sqrt(diffusion_width_var),
+            fmt="o",
+            label="Fitted Width",
+        )
+        plt.plot(Q, theory_width, "-", label="Diffusion Model")
+        plt.xlabel("Q")
+        plt.ylabel("Width")
         plt.legend()
         plt.show()
 
     @property
     def analysis(self):
         return self._analysis
-    
+
     def calculate_theory(self, x):
-        return self._analysis.calculate_theory(x,_experiment=self._experiment, theory=self._theory)
-    
+        return self._analysis.calculate_theory(
+            x, _experiment=self._experiment, theory=self._theory
+        )
+
     def experiment(self):
         return self._experiment
-    
+
     def theoretical_model(self):
         return self._theory
-    
+
     def get_fit_parameters(self):
         return self._analysis.get_fit_parameters()
-    
+
     def get_parameters(self):
         return self._analysis.get_parameters()
 
@@ -857,7 +901,7 @@ class Job(JobBase):
         excluding 'energy'.
         """
         data = self._experiment._data.data
-        energy_dim = 'energy'
+        energy_dim = "energy"
         dims_out = [d for d in data.dims if d != energy_dim]
         shape = tuple(data.sizes[d] for d in dims_out)
         coords_out = {d: data.coords[d] for d in dims_out}
@@ -876,8 +920,9 @@ class Job(JobBase):
 
         # Duplicate-name handling based on the first leaf
         name_counts = Counter(p.name for p in first_params)
+
         def key_for(name, occ_idx):
-            return name if name_counts[name] == 1 else f'{name}[{occ_idx}]'
+            return name if name_counts[name] == 1 else f"{name}[{occ_idx}]"
 
         # Build a template order (name occurrences) from the first leaf
         template_seen = defaultdict(int)
@@ -890,33 +935,44 @@ class Job(JobBase):
         # Buffers for each parameter key
         def _new_buf():
             return {
-                'values': np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
-                'vars':   np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
-                'min':    np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
-                'max':    np.full(shape or (1,), np.nan, dtype=float).reshape(shape or (1,)),
-                'fixed':  np.zeros(shape or (1,), dtype=bool).reshape(shape or (1,)),
-                'unit':   None,
+                "values": np.full(shape or (1,), np.nan, dtype=float).reshape(
+                    shape or (1,)
+                ),
+                "vars": np.full(shape or (1,), np.nan, dtype=float).reshape(
+                    shape or (1,)
+                ),
+                "min": np.full(shape or (1,), np.nan, dtype=float).reshape(
+                    shape or (1,)
+                ),
+                "max": np.full(shape or (1,), np.nan, dtype=float).reshape(
+                    shape or (1,)
+                ),
+                "fixed": np.zeros(shape or (1,), dtype=bool).reshape(shape or (1,)),
+                "unit": None,
             }
 
         store = {key: _new_buf() for key, _, _ in specs}
 
         # Helpers to read bounds/fixed/unit
         def _bounds_of(p):
-            lo = getattr(p, 'min', getattr(p, 'minimum', None))
-            hi = getattr(p, 'max', getattr(p, 'maximum', None))
-            b = getattr(p, 'bounds', None)
+            lo = getattr(p, "min", getattr(p, "minimum", None))
+            hi = getattr(p, "max", getattr(p, "maximum", None))
+            b = getattr(p, "bounds", None)
             if (lo is None or hi is None) and b is not None and len(b) == 2:
                 lo = b[0] if lo is None else lo
                 hi = b[1] if hi is None else hi
             return lo, hi
 
         def _fixed_of(p):
-            return bool(getattr(p, 'fixed', False))
+            return bool(getattr(p, "fixed", False))
 
         def _unit_to_sc(u):
-            if u is None: return None
-            try: return sc.Unit(str(u))
-            except Exception: return None
+            if u is None:
+                return None
+            try:
+                return sc.Unit(str(u))
+            except Exception:
+                return None
 
         # --- Fill buffers for every leaf Analysis
         for idx_tuple, ana in _walk(self._analysis):
@@ -934,7 +990,8 @@ class Job(JobBase):
 
             seen = defaultdict(int)
             for p in ana.get_parameters():
-                occ = seen[p.name]; seen[p.name] += 1
+                occ = seen[p.name]
+                seen[p.name] += 1
 
                 # Register late-seen names (not present in first leaf)
                 if p.name not in name_counts:
@@ -943,56 +1000,67 @@ class Job(JobBase):
 
                 key = key_for(p.name, occ) if name_counts[p.name] > 1 else p.name
                 if key not in store:  # late duplicate discovery
-                    key = f'{p.name}[{occ}]'
+                    key = f"{p.name}[{occ}]"
                     store.setdefault(key, _new_buf())
 
                 # Fill numeric fields
-                store[key]['values'][idx_tuple] = getattr(p, 'value', math.nan)
-                err = getattr(p, 'error', None)
-                store[key]['vars'][idx_tuple] = (err**2) if (err is not None) else math.nan
+                store[key]["values"][idx_tuple] = getattr(p, "value", math.nan)
+                err = getattr(p, "error", None)
+                store[key]["vars"][idx_tuple] = (
+                    (err**2) if (err is not None) else math.nan
+                )
                 lo, hi = _bounds_of(p)
-                store[key]['min'][idx_tuple] = lo if lo is not None else math.nan
-                store[key]['max'][idx_tuple] = hi if hi is not None else math.nan
-                store[key]['fixed'][idx_tuple] = _fixed_of(p)
+                store[key]["min"][idx_tuple] = lo if lo is not None else math.nan
+                store[key]["max"][idx_tuple] = hi if hi is not None else math.nan
+                store[key]["fixed"][idx_tuple] = _fixed_of(p)
 
                 # Unit (first non-None wins)
-                if store[key]['unit'] is None:
-                    store[key]['unit'] = _unit_to_sc(getattr(p, 'unit', None))
+                if store[key]["unit"] is None:
+                    store[key]["unit"] = _unit_to_sc(getattr(p, "unit", None))
 
         # --- Build the DataGroup
         out = {}
         for key, buf in store.items():
-            u = buf['unit']
+            u = buf["unit"]
             # values with variances
             if u is not None:
-                val = sc.array(dims=dims_out or ['_'], values=buf['values'],
-                            variances=buf['vars'], unit=u)
+                val = sc.array(
+                    dims=dims_out or ["_"],
+                    values=buf["values"],
+                    variances=buf["vars"],
+                    unit=u,
+                )
             else:
-                val = sc.array(dims=dims_out or ['_'], values=buf['values'],
-                            variances=buf['vars'])
+                val = sc.array(
+                    dims=dims_out or ["_"], values=buf["values"], variances=buf["vars"]
+                )
             da_value = sc.DataArray(val, coords=coords_out if dims_out else {})
 
             # min/max share unit; fixed is bool
             da_min = sc.DataArray(
-                sc.array(dims=dims_out or ['_'], values=buf['min'], unit=u) if u is not None
-                else sc.array(dims=dims_out or ['_'], values=buf['min']),
-                coords=coords_out if dims_out else {}
+                sc.array(dims=dims_out or ["_"], values=buf["min"], unit=u)
+                if u is not None
+                else sc.array(dims=dims_out or ["_"], values=buf["min"]),
+                coords=coords_out if dims_out else {},
             )
             da_max = sc.DataArray(
-                sc.array(dims=dims_out or ['_'], values=buf['max'], unit=u) if u is not None
-                else sc.array(dims=dims_out or ['_'], values=buf['max']),
-                coords=coords_out if dims_out else {}
+                sc.array(dims=dims_out or ["_"], values=buf["max"], unit=u)
+                if u is not None
+                else sc.array(dims=dims_out or ["_"], values=buf["max"]),
+                coords=coords_out if dims_out else {},
             )
             da_fixed = sc.DataArray(
-                sc.array(dims=dims_out or ['_'], values=buf['fixed'], dtype='bool'),
-                coords=coords_out if dims_out else {}
+                sc.array(dims=dims_out or ["_"], values=buf["fixed"], dtype="bool"),
+                coords=coords_out if dims_out else {},
             )
 
-            out[key] = sc.DataGroup({
-                'value': da_value,
-                'min':   da_min,
-                'max':   da_max,
-                'fixed': da_fixed,
-            })
+            out[key] = sc.DataGroup(
+                {
+                    "value": da_value,
+                    "min": da_min,
+                    "max": da_max,
+                    "fixed": da_fixed,
+                }
+            )
 
         return sc.DataGroup(out)

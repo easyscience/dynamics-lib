@@ -10,7 +10,7 @@ from easydynamics.resolution import ResolutionHandler
 from easydynamics.sample import SampleModel
 from easydynamics.sample import DiffusionModel
 
-from easydynamics.experiment import Experiment
+from easydynamics.Experiment import Experiment
 
 from typing import Iterable, Dict, Tuple, Optional
 
@@ -21,29 +21,31 @@ import scipp as sc
 
 import matplotlib.pyplot as plt
 
+
 class Analysis(AnalysisBase):
     def __init__(self, name="MyAnalysis", interface=None, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
-        self._theory= None
-        self._experiment= None
-        self._offset=Parameter(name='offset', value=0.0, unit='meV')
-        self._diffusion_model=None
+        self._theory = None
+        self._experiment = None
+        self._offset = Parameter(name="offset", value=0.0, unit="meV")
+        self._diffusion_model = None
 
         self._resolution_model = None
         self._background_model = None
 
-
-    def set_diffusion_model(self, diffusion_model:DiffusionModel):
-        """ Set the diffusion model for the analysis.
+    def set_diffusion_model(self, diffusion_model: DiffusionModel):
+        """Set the diffusion model for the analysis.
         Args:
             diffusion_model (DiffusionModel): The diffusion model to be used in the analysis.
         """
         if not isinstance(diffusion_model, DiffusionModel):
-            raise TypeError("The diffusion model must be an instance of DiffusionModel.")
+            raise TypeError(
+                "The diffusion model must be an instance of DiffusionModel."
+            )
         self._diffusion_model = diffusion_model
 
     def set_theory(self, theory: SampleModel):
-        """ Set the model to be fitted.
+        """Set the model to be fitted.
         Args:
             theory (SampleModel): The theoretical model to be used in the analysis.
         """
@@ -52,7 +54,7 @@ class Analysis(AnalysisBase):
         self._theory = theory
 
     def set_experiment(self, experiment: Experiment):
-        """ Set the experimental for the analysis.
+        """Set the experimental for the analysis.
         Args:
             experiment (Experiment): The experimental model to be used in the analysis.
         """
@@ -60,8 +62,8 @@ class Analysis(AnalysisBase):
             raise TypeError("The experiment must be an instance of Experiment.")
         self._experiment = experiment
 
-    def set_background_model(self, background:SampleModel):
-        """ Set the model for the background.
+    def set_background_model(self, background: SampleModel):
+        """Set the model for the background.
         Args:
             background (SampleModel): The background model.
         """
@@ -69,8 +71,8 @@ class Analysis(AnalysisBase):
             raise TypeError("Background model must be an instance of SampleModel.")
         self._background_model = background
 
-    def set_resolution_model(self, resolution:SampleModel):
-        """        Set the resolution model for the experiment. The resolution will be normalised to have area 1.
+    def set_resolution_model(self, resolution: SampleModel):
+        """Set the resolution model for the experiment. The resolution will be normalised to have area 1.
         Args:
             resolution (SampleModel): The resolution model to be used in the experiment.
         """
@@ -84,18 +86,16 @@ class Analysis(AnalysisBase):
             self.normalize_resolution()
 
     def fix_resolution_parameters(self):
-        """ Fix all parameters in the resolution model.
-        """
+        """Fix all parameters in the resolution model."""
         if self._resolution_model is not None:
             for param in self._resolution_model.get_parameters():
                 param.fixed = True
 
     def normalize_resolution(self):
-        """ Normalize the resolution model to have an area of 1.
-        """
+        """Normalize the resolution model to have an area of 1."""
         self._resolution_model.normalize_area()
 
-    def set_offset(self, offset: float,unit):
+    def set_offset(self, offset: float, unit):
         # TODO: handle units properly
         self._offset.value = offset
 
@@ -109,17 +109,19 @@ class Analysis(AnalysisBase):
         """
 
         if self._resolution_model is None:
-            y = self._theory.evaluate(x- self._offset.value)
+            y = self._theory.evaluate(x - self._offset.value)
         else:
             resolution_handler = ResolutionHandler()
-            y = resolution_handler.convolve(x, self._theory, self._resolution_model, self._offset)
+            y = resolution_handler.convolve(
+                x, self._theory, self._resolution_model, self._offset
+            )
 
         if self._background_model is not None:
             y += self._background_model.evaluate(x)
 
         return y
-    
-    def calculate_individual_components(self, x=None,add_background=True) -> dict:
+
+    def calculate_individual_components(self, x=None, add_background=True) -> dict:
         """
         Calculate the individual components of the theory model.
 
@@ -135,7 +137,9 @@ class Analysis(AnalysisBase):
         """
 
         if self._theory is None:
-            raise RuntimeError("Theory model must be set before calculating components.")
+            raise RuntimeError(
+                "Theory model must be set before calculating components."
+            )
 
         # standard: use experimental data x if not provided
         if x is None:
@@ -152,10 +156,18 @@ class Analysis(AnalysisBase):
             if self._resolution_model is None:
                 components[name] = component.evaluate(x - self._offset.value)
             else:
-                components[name] = resolution_handler.convolve(x=x, sample_model=self._theory, resolution_model=self._resolution_model, offset=self._offset, selected_component_name=name)
+                components[name] = resolution_handler.convolve(
+                    x=x,
+                    sample_model=self._theory,
+                    resolution_model=self._resolution_model,
+                    offset=self._offset,
+                    selected_component_name=name,
+                )
 
             if add_background and self._background_model is not None:
-                components[name] += self._background_model.evaluate(x - self._offset.value)
+                components[name] += self._background_model.evaluate(
+                    x - self._offset.value
+                )
 
         # If background model is set, add its components
         if self._background_model is not None:
@@ -166,7 +178,6 @@ class Analysis(AnalysisBase):
         return components
 
     def fit(self):
-
         x, y, e = self._experiment.extract_xye_data(self._experiment._data)
 
         def fit_func(x_vals):
@@ -177,16 +188,13 @@ class Analysis(AnalysisBase):
         #     fit_functions=[fit_func],
         # )
 
-
         # # Perform the fit
         # fit_result = multi_fitter.fit(x=[x], y=[y], weights=[1.0 / e])
 
-
         fitter = EasyScienceFitter(
-        fit_object=self,
-        fit_function=fit_func,
+            fit_object=self,
+            fit_function=fit_func,
         )
-
 
         # Perform the fit
         fit_result = fitter.fit(x=x, y=y, weights=1.0 / e)
@@ -195,7 +203,7 @@ class Analysis(AnalysisBase):
         self.fit_result = fit_result
 
         return fit_result
-    
+
     def plot_data_and_model(self, plot_individual_components: bool = False):
         """
         Plot the experimental data and the theoretical fit.
@@ -214,25 +222,34 @@ class Analysis(AnalysisBase):
 
         # Start plot
         fig = plt.figure(figsize=(10, 6))
-        plt.errorbar(x, y, yerr=e, label='Data', color='black', marker='o', linestyle='None', markerfacecolor='none')
+        plt.errorbar(
+            x,
+            y,
+            yerr=e,
+            label="Data",
+            color="black",
+            marker="o",
+            linestyle="None",
+            markerfacecolor="none",
+        )
 
         # Compute and plot fit
         fit_y = self.calculate_theory(x)
-        plt.plot(x, fit_y, label='Model', color='red')
+        plt.plot(x, fit_y, label="Model", color="red")
 
         if plot_individual_components:
-            components=self.calculate_individual_components()
+            components = self.calculate_individual_components()
             for name, y in components.items():
-                plt.plot(x, y, label=f' {name}', linestyle='--')
+                plt.plot(x, y, label=f" {name}", linestyle="--")
 
         # Labels and legend
-        plt.xlabel('Energy (meV)')  # TODO: Handle units 
-        plt.ylabel('Intensity')
+        plt.xlabel("Energy (meV)")  # TODO: Handle units
+        plt.ylabel("Intensity")
         plt.legend()
         plt.tight_layout()
         plt.show()
 
-        return fig    
+        return fig
 
     def seed_from(
         self,
@@ -281,9 +298,11 @@ class Analysis(AnalysisBase):
 
         report: Dict[str, Dict[str, Tuple[float, float]]] = {}
 
-        def _maybe_update(domain_name: str,
-                          this_model: Optional[SampleModel],
-                          other_model: Optional[SampleModel]):
+        def _maybe_update(
+            domain_name: str,
+            this_model: Optional[SampleModel],
+            other_model: Optional[SampleModel],
+        ):
             if this_model is None or other_model is None:
                 return
             rep = this_model.update_values_from(
@@ -322,11 +341,10 @@ class Analysis(AnalysisBase):
         """
         self.easy_science_multi_fitter.switch_minimizer(minimizer)
 
- 
     def get_parameters(self):
         """
         Get all parameters from the theory, resolution, background models, and experiment offset.
-        
+
         Returns:
             List[Parameter]: A list of all parameters.
         """
@@ -358,7 +376,8 @@ class Analysis(AnalysisBase):
         """
         # return [param for param in self.get_parameters() if not getattr(param, 'fixed', False)]
         return [
-            param 
-            for param in self.get_parameters() 
-            if not getattr(param, 'fixed', False) and getattr(param, '_independent', True)
+            param
+            for param in self.get_parameters()
+            if not getattr(param, "fixed", False)
+            and getattr(param, "_independent", True)
         ]
