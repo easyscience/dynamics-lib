@@ -5,7 +5,7 @@ import scipp as sc
 
 from scipy.integrate import simpson
 
-from easydynamics.sample import (
+from easydynamics.sample_model import (
     Gaussian,
     Lorentzian,
     Voigt,
@@ -13,7 +13,7 @@ from easydynamics.sample import (
     DampedHarmonicOscillator,
     Polynomial,
 )
-from easydynamics.sample.components import ModelComponent
+from easydynamics.sample_model.components import ModelComponent
 
 from easyscience.variable import Parameter
 
