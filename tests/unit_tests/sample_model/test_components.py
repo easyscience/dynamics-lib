@@ -13,7 +13,7 @@ from easydynamics.sample_model import (
     DampedHarmonicOscillator,
     Polynomial,
 )
-from easydynamics.sample_model.components import ModelComponent
+from easydynamics.sample_model.components.model_component import ModelComponent
 
 from easyscience.variable import Parameter
 

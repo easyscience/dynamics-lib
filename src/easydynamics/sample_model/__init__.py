@@ -12,5 +12,5 @@ __all__ = [
     "Voigt",
     "DeltaFunction",
     "DampedHarmonicOscillator",
-    "Polynomial"
+    "Polynomial",
 ]
