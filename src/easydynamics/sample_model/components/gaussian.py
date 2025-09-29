@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union, List
 
 import numpy as np
@@ -131,7 +133,7 @@ class Gaussian(ModelComponent):
         self.width.convert_unit(unit)
         self.unit = unit
 
-    def copy(self) -> "Gaussian":
+    def copy(self) -> Gaussian:
         """
         Return a deep copy of this component with independent parameters.
         """

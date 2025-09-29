@@ -46,9 +46,9 @@ class TestModelComponent:
         # THEN EXPECT
         assert all(p.fixed for p in dummy.get_parameters())
 
-    def test_fit_all_parameters_sets_all_to_unfixed(self, dummy):
+    def test_free_all_parameters_sets_all_to_unfixed(self, dummy):
         # WHEN
-        dummy.fit_all_parameters()
+        dummy.free_all_parameters()
 
         # THEN EXPECT
         assert all(not p.fixed for p in dummy.get_parameters())

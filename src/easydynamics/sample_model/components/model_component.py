@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 
-from typing import Union, List, Optional
+from typing import Union, List
 
 import numpy as np
 
@@ -25,14 +27,11 @@ class ModelComponent(ObjBase):
         """Fix all parameters in the model component."""
 
         pars = self.get_parameters()
-        if pars is None or len(pars) == 0:
-            raise ValueError("No parameters found to fix.")
-        else:
-            for p in pars:
-                p.fixed = True
+        for p in pars:
+            p.fixed = True
 
-    def fit_all_parameters(self):
-        """Fit all parameters in the model component."""
+    def free_all_parameters(self):
+        """Free all parameters in the model component."""
         for p in self.get_parameters():
             p.fixed = False
 
@@ -66,49 +65,6 @@ class ModelComponent(ObjBase):
         else:
             raise ValueError(f"Parameter '{parameter_name}' not found.")
 
-    def set_parameter_value(
-        self, parameter_name: str, value: float, unit: Optional[str] = None
-    ):
-        """
-        Set the value of a specific parameter by name.
-        """
-        param = self.get_parameter(parameter_name)
-        if unit is not None:
-            param.convert_unit(unit)
-        param.value = value
-
-    def set_parameter_bounds(
-        self,
-        parameter_name: str,
-        min: Union[float, None] = None,
-        max: Union[float, None] = None,
-        unit: Optional[str] = None,
-    ):
-        """
-        Set the bounds of a specific parameter by name.
-        """
-        param = self.get_parameter(parameter_name)
-        if unit is not None:
-            param.convert_unit(unit)
-        if min is not None:
-            param.min = min
-        if max is not None:
-            param.max = max
-
-    def fix_parameter(self, parameter_name: str):
-        """
-        Fix a specific parameter by name.
-        """
-        param = self.get_parameter(parameter_name)
-        param.fixed = True
-
-    def free_parameter(self, parameter_name: str):
-        """
-        Free a specific parameter by name.
-        """
-        param = self.get_parameter(parameter_name)
-        param.fixed = False
-
     @abstractmethod
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
         """
@@ -135,7 +91,7 @@ class ModelComponent(ObjBase):
         pass
 
     @abstractmethod
-    def copy(self) -> "ModelComponent":
+    def copy(self) -> ModelComponent:
         """
         Return a deep copy of this component with independent parameters.
         """

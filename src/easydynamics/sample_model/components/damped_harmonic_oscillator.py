@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 import numpy as np
@@ -138,7 +140,7 @@ class DampedHarmonicOscillator(ModelComponent):
         self.width.convert_unit(unit)
         self.unit = unit
 
-    def copy(self) -> "DampedHarmonicOscillator":
+    def copy(self) -> DampedHarmonicOscillator:
         """
         Return a deep copy of this component with independent parameters.
         """

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 import numpy as np
@@ -133,7 +135,7 @@ class Lorentzian(ModelComponent):
         self.width.convert_unit(unit)
         self.unit = unit
 
-    def copy(self) -> "Lorentzian":
+    def copy(self) -> Lorentzian:
         model_copy = Lorentzian(
             name=self.name,
             area=self.area.value,

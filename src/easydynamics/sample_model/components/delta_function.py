@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 from easyscience.variable import Parameter
@@ -94,7 +96,7 @@ class DeltaFunction(ModelComponent):
         self.center.convert_unit(unit)
         self.unit = unit
 
-    def copy(self) -> "DeltaFunction":
+    def copy(self) -> DeltaFunction:
         """
         Return a deep copy of this component with independent parameters.
         """

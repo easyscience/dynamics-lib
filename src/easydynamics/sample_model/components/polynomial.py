@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 import numpy as np
@@ -82,7 +84,7 @@ class Polynomial(ModelComponent):
         """
         return self.coefficients
 
-    def copy(self) -> "Polynomial":
+    def copy(self) -> Polynomial:
         """
         Return a deep copy of this component with independent parameters.
         """

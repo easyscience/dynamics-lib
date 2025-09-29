@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from scipy.special import voigt_profile
 
 from typing import Union
@@ -160,7 +162,7 @@ class Voigt(ModelComponent):
         """
         return [self.area, self.center, self.gaussian_width, self.lorentzian_width]
 
-    def copy(self) -> "Voigt":
+    def copy(self) -> Voigt:
         model_copy = Voigt(
             name=self.name,
             area=self.area.value,
