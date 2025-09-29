@@ -6,7 +6,7 @@ import numpy as np
 
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.model_component import ModelComponent
+from .model_component import ModelComponent
 
 import scipp as sc
 
@@ -61,7 +61,7 @@ class Gaussian(ModelComponent):
             area = float(area)
 
         super().__init__(name=name)
-        self.unit = unit  # Set the unit for the component
+        self._unit = unit  # Set the unit for the component
 
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
@@ -98,9 +98,9 @@ class Gaussian(ModelComponent):
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
-            if self.unit is not None and x.unit != self.unit:
+            if self._unit is not None and x.unit != self._unit:
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but Gaussian component has unit {self.unit}. Converting Gaussian to {x.unit}."
+                    f"Input x has unit {x.unit}, but Gaussian component has unit {self._unit}. Converting Gaussian to {x.unit}."
                 )
                 self.convert_unit(x.unit.name)
         else:
@@ -131,7 +131,7 @@ class Gaussian(ModelComponent):
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
         self.width.convert_unit(unit)
-        self.unit = unit
+        self._unit = unit
 
     def copy(self) -> Gaussian:
         """
@@ -143,7 +143,7 @@ class Gaussian(ModelComponent):
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
-            unit=self.unit,
+            unit=self._unit,
         )
 
         model_copy.area.fixed = self.area.fixed
@@ -152,4 +152,4 @@ class Gaussian(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"Gaussian(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Gaussian(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

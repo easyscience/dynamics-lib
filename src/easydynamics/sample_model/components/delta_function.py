@@ -4,7 +4,7 @@ from typing import Union
 
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.model_component import ModelComponent
+from .model_component import ModelComponent
 
 
 import warnings
@@ -51,7 +51,7 @@ class DeltaFunction(ModelComponent):
             center = float(center)
 
         super().__init__(name=name)
-        self.unit = unit
+        self._unit = unit
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(
@@ -94,7 +94,7 @@ class DeltaFunction(ModelComponent):
         """
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
-        self.unit = unit
+        self._unit = unit
 
     def copy(self) -> DeltaFunction:
         """
@@ -104,11 +104,11 @@ class DeltaFunction(ModelComponent):
             name=self.name,
             area=self.area.value,
             center=self.center.value,
-            unit=self.unit,
+            unit=self._unit,
         )
         model_copy.area.fixed = self.area.fixed
         model_copy.center.fixed = self.center.fixed
         return model_copy
 
     def __repr__(self):
-        return f"DeltaFunction(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center}"
+        return f"DeltaFunction(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"

@@ -6,7 +6,7 @@ import numpy as np
 
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.model_component import ModelComponent
+from .model_component import ModelComponent
 
 import scipp as sc
 
@@ -50,14 +50,14 @@ class Polynomial(ModelComponent):
             )
             for i, coef in enumerate(coefficients)
         ]
-        self.unit = unit
+        self._unit = unit
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
         if isinstance(x, sc.Variable):
             x_in = x.values
-            if self.unit is not None and x.unit != self.unit:
+            if self._unit is not None and x.unit != self._unit:
                 raise ValueError(
-                    f"Input x has unit {x.unit}, but Polynomial component has unit {self.unit}. Change the unit of the Polynomial and try again. "
+                    f"Input x has unit {x.unit}, but Polynomial component has unit {self._unit}. Change the unit of the Polynomial and try again. "
                 )
         else:
             x_in = x
@@ -100,7 +100,7 @@ class Polynomial(ModelComponent):
         coeffs_str = ", ".join(
             f"{param.name}={param.value}" for param in self.coefficients
         )
-        return f"Polynomial(name = {self.name}, unit = {self.unit},\n coefficients = [{coeffs_str}])"
+        return f"Polynomial(name = {self.name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
     def convert_unit(self, unit):
         raise NotImplementedError(

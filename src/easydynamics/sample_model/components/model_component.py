@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from typing import Union, List
+from typing import Union, List, Optional
 
 import numpy as np
 
@@ -19,9 +19,27 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
-    def __init__(self, name="ModelComponent"):
+    def __init__(self, name="ModelComponent", unit: Optional[str] = None):
         super().__init__(name=name)
-        self.unit = None
+        self._unit = unit
+
+    @property
+    def unit(self) -> str:
+        """
+        Get the unit.
+
+        :return: Unit as a string.
+        """
+        return str(self._unit)
+
+    @unit.setter
+    def unit(self, unit_str: str) -> None:
+        raise AttributeError(
+            (
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
+            )
+        )  # noqa: E501
 
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""

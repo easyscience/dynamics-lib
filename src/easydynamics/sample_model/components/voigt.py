@@ -8,7 +8,7 @@ import numpy as np
 
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.model_component import ModelComponent
+from .model_component import ModelComponent
 
 import scipp as sc
 
@@ -78,7 +78,7 @@ class Voigt(ModelComponent):
 
         super().__init__(name=name)
 
-        self.unit = unit  # Set the unit for the component
+        self._unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
         if center is None:
             self.center = Parameter(
@@ -128,9 +128,9 @@ class Voigt(ModelComponent):
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
-            if self.unit is not None and x.unit != self.unit:
+            if self._unit is not None and x.unit != self._unit:
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but Voigt component has unit {self.unit}. Converting Voigt to {x.unit}."
+                    f"Input x has unit {x.unit}, but Voigt component has unit {self._unit}. Converting Voigt to {x.unit}."
                 )
                 self.convert_unit(x.unit.name)
         else:
@@ -152,7 +152,7 @@ class Voigt(ModelComponent):
         self.center.convert_unit(unit)
         self.gaussian_width.convert_unit(unit)
         self.lorentzian_width.convert_unit(unit)
-        self.unit = unit
+        self._unit = unit
 
     def get_parameters(self):
         """
@@ -169,7 +169,7 @@ class Voigt(ModelComponent):
             center=self.center.value,
             gaussian_width=self.gaussian_width.value,
             lorentzian_width=self.lorentzian_width.value,
-            unit=self.unit,
+            unit=self._unit,
         )
         model_copy.area.fixed = self.area.fixed
         model_copy.center.fixed = self.center.fixed
@@ -179,4 +179,4 @@ class Voigt(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"Voigt(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
+        return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"

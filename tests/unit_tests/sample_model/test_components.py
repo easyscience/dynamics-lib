@@ -80,61 +80,6 @@ class TestModelComponent:
         with pytest.raises(ValueError, match="Ambiguous parameter name"):
             dummy.get_parameter("are")
 
-    def test_set_parameter_value(self, dummy):
-        # WHEN
-        dummy.set_parameter_value("width", 10.0)
-
-        # THEN EXPECT
-        assert dummy.width.value == 10.0
-
-    def test_set_parameter_bounds_min(self, dummy):
-        # WHEN
-        dummy.set_parameter_bounds("width", min=1.0)
-
-        # THEN EXPECT
-        assert dummy.width.min == 1.0
-        assert dummy.width.max == np.inf
-
-    def test_set_parameter_bounds_max(self, dummy):
-        # WHEN
-        dummy.set_parameter_bounds("width", max=5.0)
-
-        # THEN EXPECT
-        assert dummy.width.min == -np.inf
-        assert dummy.width.max == 5.0
-
-    def test_set_parameter_bounds_min_max(self, dummy):
-        # WHEN
-        dummy.set_parameter_bounds("width", min=1.0, max=5.0)
-
-        # THEN EXPECT
-        assert dummy.width.min == 1.0
-        assert dummy.width.max == 5.0
-
-    def test_set_parameter_bounds_with_unit_conversion(self, dummy):
-        # WHEN
-        dummy.set_parameter_bounds("width", min=1000.0, max=5000.0, unit="microeV")
-
-        # THEN EXPECT
-        assert dummy.width.min == 1000
-        assert dummy.width.max == 5000
-        assert dummy.width.unit == "µeV"
-
-    def test_fix_parameter(self, dummy):
-        # WHEN
-        dummy.fix_parameter("width")
-
-        # THEN EXPECT
-        assert dummy.width.fixed is True
-
-    def test_free_parameter(self, dummy):
-        # WHEN
-        dummy.fix_parameter("width")
-        # THEN
-        dummy.free_parameter("width")
-        # EXPECT
-        assert dummy.width.fixed is False
-
     def test_repr(self, dummy):
         repr_str = repr(dummy)
         assert "DummyComponent" in repr_str

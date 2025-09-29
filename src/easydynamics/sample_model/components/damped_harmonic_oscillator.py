@@ -6,7 +6,7 @@ import numpy as np
 
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.model_component import ModelComponent
+from .model_component import ModelComponent
 
 import scipp as sc
 
@@ -66,7 +66,7 @@ class DampedHarmonicOscillator(ModelComponent):
             center = float(center)
 
         super().__init__(name=name)
-        self.unit = unit  # Set the unit for the component
+        self._unit = unit  # Set the unit for the component
         # Create Parameters from floats, or set Parameters if already provided
         if isinstance(center, Numeric):
             self.center = Parameter(name=name + " center", value=center, unit=unit)
@@ -100,9 +100,9 @@ class DampedHarmonicOscillator(ModelComponent):
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
-            if self.unit is not None and x.unit != self.unit:
+            if self._unit is not None and x.unit != self._unit:
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but DHO component has unit {self.unit}. Converting DHO to {x.unit}."
+                    f"Input x has unit {x.unit}, but DHO component has unit {self._unit}. Converting DHO to {x.unit}."
                 )
                 self.convert_unit(x.unit.name)
         else:
@@ -138,7 +138,7 @@ class DampedHarmonicOscillator(ModelComponent):
         self.area.convert_unit(unit)
         self.center.convert_unit(unit)
         self.width.convert_unit(unit)
-        self.unit = unit
+        self._unit = unit
 
     def copy(self) -> DampedHarmonicOscillator:
         """
@@ -150,7 +150,7 @@ class DampedHarmonicOscillator(ModelComponent):
             area=self.area.value,
             center=self.center.value,
             width=self.width.value,
-            unit=self.unit,
+            unit=self._unit,
         )
         model_copy.area.fixed = self.area.fixed
         model_copy.center.fixed = self.center.fixed
@@ -158,4 +158,4 @@ class DampedHarmonicOscillator(ModelComponent):
         return model_copy
 
     def __repr__(self):
-        return f"DampedHarmonicOscillator(name = {self.name}, unit = {self.unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"DampedHarmonicOscillator(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
