@@ -94,6 +94,14 @@ class TestGaussian:
         )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
+    def test_evaluate_with_incompatible_unit(self, gaussian: Gaussian):
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
+        with pytest.raises(
+            ValueError,
+            match="Input x has unit nm, but Gaussian component has unit meV. Failed to convert Gaussian to nm.",
+        ):
+            gaussian.evaluate(x)
+
     def test_center_is_fixed_if_set_to_None(self):
         test_gaussian = Gaussian(
             name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"

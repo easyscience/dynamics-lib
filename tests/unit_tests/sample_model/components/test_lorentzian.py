@@ -96,6 +96,14 @@ class TestLorentzian:
         )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
+    def test_evaluate_with_incompatible_unit(self, lorentzian: Lorentzian):
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
+        with pytest.raises(
+            ValueError,
+            match="Input x has unit nm, but Lorentzian component has unit meV. Failed to convert Lorentzian to nm.",
+        ):
+            lorentzian.evaluate(x)
+
     def test_center_is_fixed_if_set_to_None(self):
         test_lorentzian = Lorentzian(
             name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"

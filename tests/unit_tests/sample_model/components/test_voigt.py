@@ -189,6 +189,14 @@ class TestVoigt:
         )
         np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
 
+    def test_evaluate_with_incompatible_unit(self, voigt: Voigt):
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
+        with pytest.raises(
+            ValueError,
+            match="Input x has unit nm, but Voigt component has unit meV. Failed to convert Voigt to nm.",
+        ):
+            voigt.evaluate(x)
+
     def test_center_is_fixed_if_set_to_None(self):
         test_voigt = Voigt(
             name="TestVoigt",
