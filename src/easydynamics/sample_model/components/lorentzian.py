@@ -47,6 +47,9 @@ class Lorentzian(ModelComponent):
             if width <= 0:
                 raise ValueError("The width of a Lorentzian must be greater than zero.")
             width = float(width)
+        elif isinstance(width, Parameter):
+            if width.value <= 0:
+                raise ValueError("The width of a Lorentzian must be greater than zero.")
 
         if not isinstance(unit, str):
             raise TypeError("unit must be a string.")
@@ -59,6 +62,13 @@ class Lorentzian(ModelComponent):
                     )
                 )
             area = float(area)
+        elif isinstance(area, Parameter):
+            if area.value < 0:
+                warnings.warn(
+                    "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
+                        name
+                    )
+                )
 
         if isinstance(center, Numeric):
             center = float(center)

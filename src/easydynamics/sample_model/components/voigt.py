@@ -59,6 +59,11 @@ class Voigt(ModelComponent):
                     "The gaussian_width of a Voigt must be greater than zero."
                 )
             gaussian_width = float(gaussian_width)
+        elif isinstance(gaussian_width, Parameter):
+            if gaussian_width.value <= 0:
+                raise ValueError(
+                    "The gaussian_width of a Voigt must be greater than zero."
+                )
 
         if isinstance(lorentzian_width, Numeric):
             if lorentzian_width <= 0:
@@ -66,6 +71,11 @@ class Voigt(ModelComponent):
                     "The lorentzian_width of a Voigt must be greater than zero."
                 )
             lorentzian_width = float(lorentzian_width)
+        elif isinstance(lorentzian_width, Parameter):
+            if lorentzian_width.value <= 0:
+                raise ValueError(
+                    "The lorentzian_width of a Voigt must be greater than zero."
+                )
 
         if isinstance(area, Numeric):
             if area < 0:
@@ -75,6 +85,13 @@ class Voigt(ModelComponent):
                     )
                 )
             area = float(area)
+        elif isinstance(area, Parameter):
+            if area.value < 0:
+                warnings.warn(
+                    "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
+                        name
+                    )
+                )
 
         super().__init__(name=name)
 

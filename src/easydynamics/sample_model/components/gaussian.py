@@ -50,6 +50,9 @@ class Gaussian(ModelComponent):
             if width <= 0:
                 raise ValueError("The width of a Gaussian must be greater than zero.")
             width = float(width)
+        elif isinstance(width, Parameter):
+            if width.value <= 0:
+                raise ValueError("The width of a Gaussian must be greater than zero.")
 
         if isinstance(area, Numeric):
             if area < 0:
@@ -59,6 +62,13 @@ class Gaussian(ModelComponent):
                     )
                 )
             area = float(area)
+        elif isinstance(area, Parameter):
+            if area.value < 0:
+                warnings.warn(
+                    "The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(
+                        name
+                    )
+                )
 
         super().__init__(name=name)
         self._unit = unit  # Set the unit for the component

@@ -46,6 +46,13 @@ class DeltaFunction(ModelComponent):
                     )
                 )
             area = float(area)
+        elif isinstance(area, Parameter):
+            if area.value < 0:
+                warnings.warn(
+                    "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
+                        name
+                    )
+                )
 
         if isinstance(center, Numeric):
             center = float(center)

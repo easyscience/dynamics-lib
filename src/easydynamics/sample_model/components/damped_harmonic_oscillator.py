@@ -52,10 +52,22 @@ class DampedHarmonicOscillator(ModelComponent):
                 raise ValueError(
                     "The width of a DampedHarmonicOscillator must be greater than zero."
                 )
+        elif isinstance(width, Parameter):
+            if width.value <= 0:
+                raise ValueError(
+                    "The width of a DampedHarmonicOscillator must be greater than zero."
+                )
 
         if isinstance(area, Numeric):
             area = float(area)
             if area < 0:
+                warnings.warn(
+                    "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
+                        name
+                    )
+                )
+        elif isinstance(area, Parameter):
+            if area.value < 0:
                 warnings.warn(
                     "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
                         name
