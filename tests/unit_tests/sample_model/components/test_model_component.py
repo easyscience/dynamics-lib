@@ -40,33 +40,6 @@ class TestModelComponent:
         # THEN EXPECT
         assert all(not p.fixed for p in dummy.get_parameters())
 
-    def test_get_parameter_exact_match(self, dummy):
-        # WHEN
-        param = dummy.get_parameter("width")
-
-        # THEN EXPECT
-        assert param is dummy.width
-
-    def test_get_parameter_partial_match(self, dummy):
-        # WHEN
-        param = dummy.get_parameter("wid")
-
-        # THEN EXPECT
-        assert param is dummy.width
-
-    def test_get_parameter_no_match_raises(self, dummy):
-        # WHEN / THEN EXPECT
-        with pytest.raises(
-            ValueError,
-            match="not found",
-        ):
-            dummy.get_parameter("nonexistent")
-
-    def test_get_parameter_ambiguous_match_raises(self, dummy):
-        # WHEN / THEN EXPECT
-        with pytest.raises(ValueError, match="Ambiguous parameter name"):
-            dummy.get_parameter("are")
-
     def test_repr(self, dummy):
         repr_str = repr(dummy)
         assert "DummyComponent" in repr_str

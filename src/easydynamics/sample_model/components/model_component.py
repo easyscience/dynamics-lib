@@ -53,36 +53,6 @@ class ModelComponent(ObjBase):
         for p in self.get_parameters():
             p.fixed = False
 
-    def get_parameter(self, parameter_name: str) -> Parameter:
-        """
-        Get a specific parameter by name (explicit or partial match).
-
-        Args:
-            parameter_name (str): Name of the parameter, or partial name to match.
-
-        Returns:
-            Parameter: The matched parameter.
-
-        Raises:
-            ValueError: If no matching or ambiguous parameter is found.
-        """
-        # First, attempt exact match
-        for p in self.get_parameters():
-            if p.name == parameter_name:
-                return p
-
-        # If exact match is not found, attempt partial match
-        matches = [p for p in self.get_parameters() if parameter_name in p.name]
-
-        if len(matches) == 1:
-            return matches[0]
-        elif len(matches) > 1:
-            raise ValueError(
-                f"Ambiguous parameter name '{parameter_name}' matches multiple parameters: {[p.name for p in matches]}"
-            )
-        else:
-            raise ValueError(f"Parameter '{parameter_name}' not found.")
-
     @abstractmethod
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
         """
