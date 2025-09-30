@@ -2,6 +2,7 @@ import pytest
 
 import numpy as np
 import scipp as sc
+from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
 
@@ -57,7 +58,7 @@ class TestPolynomial:
         x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
 
         with pytest.raises(
-            ValueError,
+            UnitError,
             match="Change the unit of the Polynomial and try again",
         ):
             polynomial.evaluate(x)

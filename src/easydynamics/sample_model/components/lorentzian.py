@@ -49,7 +49,7 @@ class Lorentzian(ModelComponent):
             )
 
         if center is not None and not isinstance(center, Numeric):
-            raise TypeError("center must be None, a number.")
+            raise TypeError("center must be None or a number.")
 
         if isinstance(center, Numeric):
             center = float(center)

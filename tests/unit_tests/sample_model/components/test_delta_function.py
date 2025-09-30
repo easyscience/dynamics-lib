@@ -1,6 +1,7 @@
 import pytest
 
 import numpy as np
+from scipp import UnitError
 
 from easydynamics.sample_model import DeltaFunction
 from easyscience.variable import Parameter
@@ -13,21 +14,19 @@ class TestDeltaFunction:
 
     def test_initialization(self, delta_function: DeltaFunction):
         assert delta_function.name == "TestDeltaFunction"
-        assert delta_function.area.value == 2.0
-        assert delta_function.center.value == 0.5
+        assert delta_function._area.value == 2.0
+        assert delta_function._center.value == 0.5
         assert delta_function.unit == "meV"
 
     def test_input_type_validation_raises(self):
-        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+        with pytest.raises(TypeError, match="area must be a number"):
             DeltaFunction(
                 name="TestDeltaFunction",
                 area="invalid",
                 center=0.5,
                 unit="meV",
             )
-        with pytest.raises(
-            TypeError, match="center must be None, a number or a Parameter"
-        ):
+        with pytest.raises(TypeError, match="center must be None or a number"):
             DeltaFunction(
                 name="TestDeltaFunction",
                 area=2.0,
@@ -55,17 +54,8 @@ class TestDeltaFunction:
         test_delta = DeltaFunction(
             name="TestDeltaFunction", area=2.0, center=None, unit="meV"
         )
-        assert test_delta.center.value == 0.0
-        assert test_delta.center.fixed is True
-
-    def test_input_as_parameter(self):
-        param_area = Parameter(name="area_param", value=2.0, unit="meV")
-        param_center = Parameter(name="center_param", value=0.5, unit="meV")
-        test_delta = DeltaFunction(
-            name="TestDeltaFunction", area=param_area, center=param_center, unit="meV"
-        )
-        assert test_delta.area == param_area
-        assert test_delta.center == param_center
+        assert test_delta._center.value == 0.0
+        assert test_delta._center.fixed is True
 
     def test_get_parameters(self, delta_function: DeltaFunction):
         params = delta_function.get_parameters()
@@ -78,19 +68,19 @@ class TestDeltaFunction:
         delta_function.convert_unit("microeV")
 
         assert delta_function.unit == "microeV"
-        assert delta_function.area.value == 2 * 1e3
-        assert delta_function.center.value == 0.5 * 1e3
+        assert delta_function._area.value == 2 * 1e3
+        assert delta_function._center.value == 0.5 * 1e3
 
     def test_copy(self, delta_function: DeltaFunction):
         delta_copy = delta_function.copy()
         assert delta_copy is not delta_function
-        assert delta_copy.name == delta_function.name
+        assert delta_copy.name == "copy of " + delta_function.name
 
-        assert delta_copy.area.value == delta_function.area.value
-        assert delta_copy.area.fixed == delta_function.area.fixed
+        assert delta_copy._area.value == delta_function._area.value
+        assert delta_copy._area.fixed == delta_function._area.fixed
 
-        assert delta_copy.center.value == delta_function.center.value
-        assert delta_copy.center.fixed == delta_function.center.fixed
+        assert delta_copy._center.value == delta_function._center.value
+        assert delta_copy._center.fixed == delta_function._center.fixed
 
         assert delta_copy.unit == delta_function.unit
 

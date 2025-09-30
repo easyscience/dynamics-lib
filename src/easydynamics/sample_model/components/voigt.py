@@ -36,8 +36,8 @@ class Voigt(ModelComponent):
         name: str = "Voigt",
         area: Numeric = 1.0,
         center: Union[Numeric, None] = None,
-        _gaussian_width: Numeric = 1.0,
-        _lorentzian_width: Numeric = 1.0,
+        gaussian_width: Numeric = 1.0,
+        lorentzian_width: Numeric = 1.0,
         unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs
@@ -58,22 +58,20 @@ class Voigt(ModelComponent):
         if isinstance(center, Numeric):
             center = float(center)
 
-        if not isinstance(_gaussian_width, Numeric):
-            raise TypeError("_gaussian_width must be a number.")
+        if not isinstance(gaussian_width, Numeric):
+            raise TypeError("gaussian_width must be a number.")
 
-        _gaussian_width = float(_gaussian_width)
-        if _gaussian_width <= 0:
+        gaussian_width = float(gaussian_width)
+        if gaussian_width <= 0:
+            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
+
+        if not isinstance(lorentzian_width, Numeric):
+            raise TypeError("lorentzian_width must be a number.")
+
+        lorentzian_width = float(lorentzian_width)
+        if lorentzian_width <= 0:
             raise ValueError(
-                "The _gaussian_width of a Voigt must be greater than zero."
-            )
-
-        if not isinstance(_lorentzian_width, Numeric):
-            raise TypeError("_lorentzian_width must be a number.")
-
-        _lorentzian_width = float(_lorentzian_width)
-        if _lorentzian_width <= 0:
-            raise ValueError(
-                "The _lorentzian_width of a Voigt must be greater than zero."
+                "The lorentzian_width of a Voigt must be greater than zero."
             )
 
         if not isinstance(unit, (str, sc.Unit)):
@@ -96,15 +94,15 @@ class Voigt(ModelComponent):
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
         self._gaussian_width = Parameter(
-            name=name + " _gaussian_width",
-            value=_gaussian_width,
+            name=name + " gaussian_width",
+            value=gaussian_width,
             unit=unit,
             min=MINIMUM_WIDTH,
         )
 
         self._lorentzian_width = Parameter(
-            name=name + " _lorentzian_width",
-            value=_lorentzian_width,
+            name=name + " lorentzian_width",
+            value=lorentzian_width,
             unit=unit,
             min=MINIMUM_WIDTH,
         )
@@ -174,14 +172,14 @@ class Voigt(ModelComponent):
             name=name,
             area=self._area.value,
             center=self._center.value,
-            _gaussian_width=self._gaussian_width.value,
-            _lorentzian_width=self._lorentzian_width.value,
+            gaussian_width=self._gaussian_width.value,
+            lorentzian_width=self._lorentzian_width.value,
             unit=self._unit,
         )
         model_copy._area.fixed = self._area.fixed
         model_copy._center.fixed = self._center.fixed
-        model_copy.__gaussian_width.fixed = self._gaussian_width.fixed
-        model_copy.__lorentzian_width.fixed = self._lorentzian_width.fixed
+        model_copy._gaussian_width.fixed = self._gaussian_width.fixed
+        model_copy._lorentzian_width.fixed = self._lorentzian_width.fixed
 
         return model_copy
 

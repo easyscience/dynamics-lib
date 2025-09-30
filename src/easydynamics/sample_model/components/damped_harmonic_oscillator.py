@@ -92,10 +92,10 @@ class DampedHarmonicOscillator(ModelComponent):
                     self.convert_unit(x.unit.name)
                 except Exception as e:
                     raise UnitError(
-                        f"Input x has unit {x.unit}, but DHO component has unit {self._unit}. Failed to convert DHO to {x.unit}."
+                        f"Input x has unit {x.unit}, but DampedHarmonicOscillator component has unit {self._unit}. Failed to convert DampedHarmonicOscillator to {x.unit}."
                     ) from e
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but DHO component has unit {self._unit}. Converting DHO to {x.unit}."
+                    f"Input x has unit {x.unit}, but DampedHarmonicOscillator component has unit {self._unit}. Converting DampedHarmonicOscillator to {x.unit}."
                 )
         else:
             x_in = x

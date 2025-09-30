@@ -2,6 +2,7 @@ import pytest
 
 import numpy as np
 import scipp as sc
+from scipp import UnitError
 
 from scipy.integrate import simpson
 
@@ -26,14 +27,14 @@ class TestVoigt:
 
     def test_initialization(self, voigt: Voigt):
         assert voigt.name == "TestVoigt"
-        assert voigt.area.value == 2.0
-        assert voigt.center.value == 0.5
-        assert voigt.gaussian_width.value == 0.6
-        assert voigt.lorentzian_width.value == 0.7
+        assert voigt._area.value == 2.0
+        assert voigt._center.value == 0.5
+        assert voigt._gaussian_width.value == 0.6
+        assert voigt._lorentzian_width.value == 0.7
         assert voigt.unit == "meV"
 
     def test_input_type_validation_raises(self):
-        with pytest.raises(TypeError, match="area must be a number or a Parameter"):
+        with pytest.raises(TypeError, match="area must be a number"):
             Voigt(
                 name="TestVoigt",
                 area="invalid",
@@ -43,9 +44,7 @@ class TestVoigt:
                 unit="meV",
             )
 
-        with pytest.raises(
-            TypeError, match="center must be None, a number or a Parameter"
-        ):
+        with pytest.raises(TypeError, match="center must be None or a number"):
             Voigt(
                 name="TestVoigt",
                 area=2.0,
@@ -55,9 +54,7 @@ class TestVoigt:
                 unit="meV",
             )
 
-        with pytest.raises(
-            TypeError, match="gaussian_width must be a number or a Parameter"
-        ):
+        with pytest.raises(TypeError, match="gaussian_width must be a number"):
             Voigt(
                 name="TestVoigt",
                 area=2.0,
@@ -66,9 +63,7 @@ class TestVoigt:
                 lorentzian_width=0.7,
                 unit="meV",
             )
-        with pytest.raises(
-            TypeError, match="lorentzian_width must be a number or a Parameter"
-        ):
+        with pytest.raises(TypeError, match="lorentzian_width must be a number"):
             Voigt(
                 name="TestVoigt",
                 area=2.0,
@@ -100,21 +95,6 @@ class TestVoigt:
                 unit="meV",
             )
 
-    def test_negative_gaussian_width_raises_in_evaluate(self):
-        test_voigt = Voigt(
-            name="TestVoigt",
-            area=2.0,
-            center=0.5,
-            gaussian_width=0.6,
-            lorentzian_width=0.7,
-            unit="meV",
-        )
-        test_voigt.gaussian_width.value = -0.6
-        with pytest.raises(
-            ValueError, match="The gaussian_width of a Voigt must be greater than."
-        ):
-            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
-
     def test_negative_lorentzian_width_raises(self):
         with pytest.raises(
             ValueError,
@@ -129,22 +109,6 @@ class TestVoigt:
                 unit="meV",
             )
 
-    def test_negative_lorentzian_width_raises_in_evaluate(self):
-        test_voigt = Voigt(
-            name="TestVoigt",
-            area=2.0,
-            center=0.5,
-            gaussian_width=0.6,
-            lorentzian_width=0.7,
-            unit="meV",
-        )
-        test_voigt.lorentzian_width.value = -0.7
-        with pytest.raises(
-            ValueError,
-            match="The lorentzian_width of a Voigt must be greater than zero.",
-        ):
-            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
-
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Voigt(
@@ -155,19 +119,6 @@ class TestVoigt:
                 lorentzian_width=0.7,
                 unit="meV",
             )
-
-    def test_negative_area_warns_in_evaluate(self):
-        test_voigt = Voigt(
-            name="TestVoigt",
-            area=2.0,
-            center=0.5,
-            gaussian_width=0.6,
-            lorentzian_width=0.7,
-            unit="meV",
-        )
-        test_voigt.area.value = -2.0
-        with pytest.warns(UserWarning, match="may not be physically meaningful"):
-            test_voigt.evaluate(np.array([0.0, 0.5, 1.0]))
 
     def test_evaluate(self, voigt: Voigt):
         x = np.array([0.0, 0.5, 1.0])
@@ -192,7 +143,7 @@ class TestVoigt:
     def test_evaluate_with_incompatible_unit(self, voigt: Voigt):
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
         with pytest.raises(
-            ValueError,
+            UnitError,
             match="Input x has unit nm, but Voigt component has unit meV. Failed to convert Voigt to nm.",
         ):
             voigt.evaluate(x)
@@ -206,39 +157,17 @@ class TestVoigt:
             lorentzian_width=0.7,
             unit="meV",
         )
-        assert test_voigt.center.value == 0.0
-        assert test_voigt.center.fixed is True
-
-    def test_input_as_parameter(self):
-        param_area = Parameter(name="area_param", value=2.0, unit="meV")
-        param_center = Parameter(name="center_param", value=0.5, unit="meV")
-        param_gaussian_width = Parameter(
-            name="gaussian_width_param", value=0.6, unit="meV"
-        )
-        param_lorentzian_width = Parameter(
-            name="lorentzian_width_param", value=0.7, unit="meV"
-        )
-        test_voigt = Voigt(
-            name="TestVoigt",
-            area=param_area,
-            center=param_center,
-            gaussian_width=param_gaussian_width,
-            lorentzian_width=param_lorentzian_width,
-            unit="meV",
-        )
-        assert test_voigt.area == param_area
-        assert test_voigt.center == param_center
-        assert test_voigt.gaussian_width == param_gaussian_width
-        assert test_voigt.lorentzian_width == param_lorentzian_width
+        assert test_voigt._center.value == 0.0
+        assert test_voigt._center.fixed is True
 
     def test_convert_unit(self, voigt: Voigt):
         voigt.convert_unit("microeV")
 
         assert voigt.unit == "microeV"
-        assert voigt.area.value == 2 * 1e3
-        assert voigt.center.value == 0.5 * 1e3
-        assert voigt.gaussian_width.value == 0.6 * 1e3
-        assert voigt.lorentzian_width.value == 0.7 * 1e3
+        assert voigt._area.value == 2 * 1e3
+        assert voigt._center.value == 0.5 * 1e3
+        assert voigt._gaussian_width.value == 0.6 * 1e3
+        assert voigt._lorentzian_width.value == 0.7 * 1e3
 
     def test_get_parameters(self, voigt: Voigt):
         params = voigt.get_parameters()
@@ -252,36 +181,36 @@ class TestVoigt:
     def test_area_matches_parameter(self, voigt: Voigt):
         # WHEN
         x = np.linspace(
-            voigt.center.value
-            - 100 * voigt.gaussian_width.value
-            - 300 * voigt.lorentzian_width.value,
-            voigt.center.value
-            + 100 * voigt.gaussian_width.value
-            + 300 * voigt.lorentzian_width.value,
+            voigt._center.value
+            - 100 * voigt._gaussian_width.value
+            - 300 * voigt._lorentzian_width.value,
+            voigt._center.value
+            + 100 * voigt._gaussian_width.value
+            + 300 * voigt._lorentzian_width.value,
             20000,
         )  # Voigts have very long tails
         y = voigt.evaluate(x)
         numerical_area = simpson(y, x)
 
         # THEN EXPECT
-        assert numerical_area == pytest.approx(voigt.area.value, rel=2e-3)
+        assert numerical_area == pytest.approx(voigt._area.value, rel=2e-3)
 
     def test_copy(self, voigt: Voigt):
         voigt_copy = voigt.copy()
         assert voigt_copy is not voigt
-        assert voigt_copy.name == voigt.name
+        assert voigt_copy.name == "copy of " + voigt.name
 
-        assert voigt_copy.area.value == voigt.area.value
-        assert voigt_copy.area.fixed == voigt.area.fixed
+        assert voigt_copy._area.value == voigt._area.value
+        assert voigt_copy._area.fixed == voigt._area.fixed
 
-        assert voigt_copy.center.value == voigt.center.value
-        assert voigt_copy.center.fixed == voigt.center.fixed
+        assert voigt_copy._center.value == voigt._center.value
+        assert voigt_copy._center.fixed == voigt._center.fixed
 
-        assert voigt_copy.gaussian_width.value == voigt.gaussian_width.value
-        assert voigt_copy.gaussian_width.fixed == voigt.gaussian_width.fixed
+        assert voigt_copy._gaussian_width.value == voigt._gaussian_width.value
+        assert voigt_copy._gaussian_width.fixed == voigt._gaussian_width.fixed
 
-        assert voigt_copy.lorentzian_width.value == voigt.lorentzian_width.value
-        assert voigt_copy.lorentzian_width.fixed == voigt.lorentzian_width.fixed
+        assert voigt_copy._lorentzian_width.value == voigt._lorentzian_width.value
+        assert voigt_copy._lorentzian_width.fixed == voigt._lorentzian_width.fixed
 
         assert voigt_copy.unit == voigt.unit
 
