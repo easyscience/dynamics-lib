@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from scipy.special import voigt_profile
 
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
 
@@ -25,8 +25,8 @@ class Voigt(ModelComponent):
 
     Args:
         center (Int or float or None): Center of the Voigt profile.
-        gaussian_width (Int or float): Standard deviation of the Gaussian part.
-        lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
+        _gaussian_width (Int or float): Standard deviation of the Gaussian part.
+        _lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
         area (Int or float): Total area under the curve.
     """
 
@@ -35,8 +35,8 @@ class Voigt(ModelComponent):
         name: str = "Voigt",
         area: Numeric = 1.0,
         center: Union[Numeric, None] = None,
-        gaussian_width: Numeric = 1.0,
-        lorentzian_width: Numeric = 1.0,
+        _gaussian_width: Numeric = 1.0,
+        _lorentzian_width: Numeric = 1.0,
         unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs
@@ -57,20 +57,22 @@ class Voigt(ModelComponent):
         if isinstance(center, Numeric):
             center = float(center)
 
-        if not isinstance(gaussian_width, Numeric):
-            raise TypeError("gaussian_width must be a number.")
+        if not isinstance(_gaussian_width, Numeric):
+            raise TypeError("_gaussian_width must be a number.")
 
-        gaussian_width = float(gaussian_width)
-        if gaussian_width <= 0:
-            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
-
-        if not isinstance(lorentzian_width, Numeric):
-            raise TypeError("lorentzian_width must be a number.")
-
-        lorentzian_width = float(lorentzian_width)
-        if lorentzian_width <= 0:
+        _gaussian_width = float(_gaussian_width)
+        if _gaussian_width <= 0:
             raise ValueError(
-                "The lorentzian_width of a Voigt must be greater than zero."
+                "The _gaussian_width of a Voigt must be greater than zero."
+            )
+
+        if not isinstance(_lorentzian_width, Numeric):
+            raise TypeError("_lorentzian_width must be a number.")
+
+        _lorentzian_width = float(_lorentzian_width)
+        if _lorentzian_width <= 0:
+            raise ValueError(
+                "The _lorentzian_width of a Voigt must be greater than zero."
             )
 
         if not isinstance(unit, (str, sc.Unit)):
@@ -92,26 +94,28 @@ class Voigt(ModelComponent):
         else:
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
-        self.gaussian_width = Parameter(
-            name=name + " gaussian_width",
-            value=gaussian_width,
+        self._gaussian_width = Parameter(
+            name=name + " _gaussian_width",
+            value=_gaussian_width,
             unit=unit,
             min=MINIMUM_WIDTH,
         )
 
-        self.lorentzian_width = Parameter(
-            name=name + " lorentzian_width",
-            value=lorentzian_width,
+        self._lorentzian_width = Parameter(
+            name=name + " _lorentzian_width",
+            value=_lorentzian_width,
             unit=unit,
             min=MINIMUM_WIDTH,
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
-        if self.gaussian_width.value <= 0:
-            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
-        if self.lorentzian_width.value <= 0:
+        if self._gaussian_width.value <= 0:
             raise ValueError(
-                "The lorentzian_width of a Voigt must be greater than zero."
+                "The _gaussian_width of a Voigt must be greater than zero."
+            )
+        if self._lorentzian_width.value <= 0:
+            raise ValueError(
+                "The _lorentzian_width of a Voigt must be greater than zero."
             )
         if self._area.value < 0:
             warnings.warn(
@@ -137,8 +141,8 @@ class Voigt(ModelComponent):
             x_in = x
         return self._area.value * voigt_profile(
             x_in - self._center.value,
-            self.gaussian_width.value,
-            self.lorentzian_width.value,
+            self._gaussian_width.value,
+            self._lorentzian_width.value,
         )
 
     def convert_unit(self, unit: str):
@@ -150,8 +154,8 @@ class Voigt(ModelComponent):
         """
         self._area.convert_unit(unit)
         self._center.convert_unit(unit)
-        self.gaussian_width.convert_unit(unit)
-        self.lorentzian_width.convert_unit(unit)
+        self._gaussian_width.convert_unit(unit)
+        self._lorentzian_width.convert_unit(unit)
         self._unit = unit
 
     def get_parameters(self):
@@ -160,23 +164,29 @@ class Voigt(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return [self._area, self._center, self.gaussian_width, self.lorentzian_width]
+        return [self._area, self._center, self._gaussian_width, self._lorentzian_width]
 
-    def copy(self) -> Voigt:
+    def copy(self, name: Optional[str] = None) -> Voigt:
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        if name is None:
+            name = "copy of " + self.name
+
         model_copy = Voigt(
-            name=self.name,
+            name=name,
             area=self._area.value,
             center=self._center.value,
-            gaussian_width=self.gaussian_width.value,
-            lorentzian_width=self.lorentzian_width.value,
+            _gaussian_width=self._gaussian_width.value,
+            _lorentzian_width=self._lorentzian_width.value,
             unit=self._unit,
         )
-        model_copy.area.fixed = self._area.fixed
-        model_copy.center.fixed = self._center.fixed
-        model_copy.gaussian_width.fixed = self.gaussian_width.fixed
-        model_copy.lorentzian_width.fixed = self.lorentzian_width.fixed
+        model_copy._area.fixed = self._area.fixed
+        model_copy._center.fixed = self._center.fixed
+        model_copy.__gaussian_width.fixed = self._gaussian_width.fixed
+        model_copy.__lorentzian_width.fixed = self._lorentzian_width.fixed
 
         return model_copy
 
     def __repr__(self):
-        return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
+        return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n _gaussian_width = {self._gaussian_width},\n _lorentzian_width = {self._lorentzian_width})"

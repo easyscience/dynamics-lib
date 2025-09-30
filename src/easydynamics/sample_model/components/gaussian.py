@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union, List
+from typing import Union, List, Optional
 
 import numpy as np
 
@@ -137,22 +137,24 @@ class Gaussian(ModelComponent):
         self._width.convert_unit(unit)
         self._unit = unit
 
-    def copy(self) -> Gaussian:
+    def copy(self, name: Optional[str] = None) -> Gaussian:
         """
         Return a deep copy of this component with independent parameters.
         """
+        if name is None:
+            name = "copy of " + self.name
 
         model_copy = Gaussian(
-            name=self.name,
+            name=name,
             area=self._area.value,
             center=self._center.value,
             width=self._width.value,
             unit=self._unit,
         )
 
-        model_copy.area.fixed = self._area.fixed
-        model_copy.center.fixed = self._center.fixed
-        model_copy.width.fixed = self._width.fixed
+        model_copy._area.fixed = self._area.fixed
+        model_copy._center.fixed = self._center.fixed
+        model_copy._width.fixed = self._width.fixed
         return model_copy
 
     def __repr__(self):
