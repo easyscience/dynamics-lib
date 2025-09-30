@@ -23,9 +23,11 @@ class Lorentzian(ModelComponent):
     Lorentzian function: area*width / (pi * ( (x - center)^2 + width^2 ) )
 
     Args:
+        name (str): Name of the component.
         area (Int or float): Area of the Lorentzian.
         center (Int or float or None): Peak center. If None, defaults to 0 and is fixed.
         width (Int or float): Half Width at Half Maximum (HWHM)
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(

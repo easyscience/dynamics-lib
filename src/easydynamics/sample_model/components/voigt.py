@@ -25,10 +25,12 @@ class Voigt(ModelComponent):
     Voigt profile, a convolution of Gaussian and Lorentzian.
 
     Args:
+        name (str): Name of the component.
         center (Int or float or None): Center of the Voigt profile.
-        _gaussian_width (Int or float): Standard deviation of the Gaussian part.
-        _lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
+        gaussian_width (Int or float): Standard deviation of the Gaussian part.
+        lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
         area (Int or float): Total area under the curve.
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(

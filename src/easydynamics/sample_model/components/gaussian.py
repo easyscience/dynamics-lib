@@ -23,9 +23,11 @@ class Gaussian(ModelComponent):
     Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
 
     Args:
-        area (Int or float): Area of the Gaussian. Has the same unit as the x axis
+        name (str): Name of the component.
+        area (Int or float): Area of the Gaussian.
         center (Int or float or None): Center of the Gaussian. If None, defaults to 0 and is fixed
         width (Int or float): Standard deviation.
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(

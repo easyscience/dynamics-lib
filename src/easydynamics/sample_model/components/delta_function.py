@@ -21,8 +21,10 @@ class DeltaFunction(ModelComponent):
     Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
 
     Args:
+        name (str): Name of the component.
         center (Int or float or None): Center of the delta function. If None, defaults to 0 and is fixed.
         area (Int or float): Total area under the curve.
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(

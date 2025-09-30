@@ -23,9 +23,11 @@ class DampedHarmonicOscillator(ModelComponent):
     Damped Harmonic Oscillator (DHO). 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )
 
     Args:
+        name (str): Name of the component.
         center (Int or float): Resonance frequency, approximately the peak position.
         width (Int or float): Damping constant, approximately the half width at half max (HWHM) of the peaks.
         area (Int or float): Area under the curve.
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(
