@@ -99,17 +99,21 @@ class DampedHarmonicOscillator(ModelComponent):
                 )
         else:
             x_in = x
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
+        normalization = 2 * self._center.value**2 * self._width.value / np.pi
+
         return (
-            2
-            * self._area.value
-            * self._center.value**2
-            * self._width.value
+            self._area.value
+            * normalization
             / (
-                np.pi
-                * (
-                    (x_in**2 - self._center.value**2) ** 2
-                    + (2 * self._width.value * x_in) ** 2
-                )
+                (x_in**2 - self._center.value**2) ** 2
+                + (2 * self._width.value * x_in) ** 2
             )
         )
 

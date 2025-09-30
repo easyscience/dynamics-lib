@@ -129,6 +129,13 @@ class Voigt(ModelComponent):
                 )
         else:
             x_in = x
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
         return self._area.value * voigt_profile(
             x_in - self._center.value,
             self._gaussian_width.value,

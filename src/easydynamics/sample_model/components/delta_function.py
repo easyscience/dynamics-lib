@@ -9,6 +9,8 @@ from .model_component import ModelComponent
 import scipp as sc
 from scipp import UnitError
 
+import numpy as np
+
 import warnings
 
 Numeric = Union[float, int]
@@ -70,7 +72,31 @@ class DeltaFunction(ModelComponent):
         """ "Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
         # TODO: Consider adding support for evaluation without resolution convolution
-        return 0 * x
+
+        # Handle units
+        if isinstance(x, sc.Variable):
+            x_in = x.values
+            if self._unit is not None and x.unit != self._unit:
+                try:
+                    self.convert_unit(x.unit.name)
+                except Exception as e:
+                    raise UnitError(
+                        f"Input x has unit {x.unit}, but DeltaFunction component has unit {self._unit}. Failed to convert DeltaFunction to {x.unit}."
+                    ) from e
+
+                warnings.warn(
+                    f"Input x has unit {x.unit}, but DeltaFunction component has unit {self._unit}. Converting DeltaFunction to {x.unit}."
+                )
+        else:
+            x_in = x
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
+        return 0 * x_in
 
     def get_parameters(self):
         """

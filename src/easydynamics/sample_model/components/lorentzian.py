@@ -103,9 +103,19 @@ class Lorentzian(ModelComponent):
                 )
         else:
             x_in = x
-        return self._area.value * (
-            self._width.value
-            / (np.pi * ((x_in - self._center.value) ** 2 + self._width.value**2))
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
+        normalization = self._width.value / np.pi
+
+        return (
+            self._area.value
+            * normalization
+            / ((x_in - self._center.value) ** 2 + self._width.value**2)
         )
 
     def get_parameters(self):

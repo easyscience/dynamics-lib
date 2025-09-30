@@ -111,10 +111,10 @@ class Gaussian(ModelComponent):
         if any(np.isinf(x_in)):
             raise ValueError("Input x contains infinite values.")
 
-        normalization = np.sqrt(2 * np.pi) * self._width.value
+        normalization = 1 / np.sqrt(2 * np.pi) * self._width.value
         exponent = -0.5 * ((x_in - self._center.value) / self._width.value) ** 2
 
-        return self._area.value / normalization * np.exp(exponent)
+        return self._area.value * normalization * np.exp(exponent)
 
     def get_parameters(self) -> List[Parameter]:
         """
