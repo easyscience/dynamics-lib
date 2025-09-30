@@ -111,12 +111,9 @@ class Lorentzian(ModelComponent):
             raise ValueError("Input x contains infinite values.")
 
         normalization = self._width.value / np.pi
+        denominator = (x_in - self._center.value) ** 2 + self._width.value**2
 
-        return (
-            self._area.value
-            * normalization
-            / ((x_in - self._center.value) ** 2 + self._width.value**2)
-        )
+        return self._area.value * normalization / denominator
 
     def get_parameters(self):
         """

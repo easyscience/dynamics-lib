@@ -107,15 +107,11 @@ class DampedHarmonicOscillator(ModelComponent):
             raise ValueError("Input x contains infinite values.")
 
         normalization = 2 * self._center.value**2 * self._width.value / np.pi
+        denominator = (x_in**2 - self._center.value**2) ** 2 + (
+            2 * self._width.value * x_in
+        ) ** 2
 
-        return (
-            self._area.value
-            * normalization
-            / (
-                (x_in**2 - self._center.value**2) ** 2
-                + (2 * self._width.value * x_in) ** 2
-            )
-        )
+        return self._area.value * normalization / (denominator)
 
     def get_parameters(self):
         """
