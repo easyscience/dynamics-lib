@@ -14,6 +14,8 @@ import warnings
 
 Numeric = Union[float, int]
 
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+
 
 class DampedHarmonicOscillator(ModelComponent):
     """
@@ -70,7 +72,9 @@ class DampedHarmonicOscillator(ModelComponent):
 
         self._center = Parameter(name=name + " center", value=center, unit=unit)
 
-        self._width = Parameter(name=name + " width", value=width, unit=unit, min=0.0)
+        self._width = Parameter(
+            name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
+        )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self._width.value <= 0:

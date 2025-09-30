@@ -14,6 +14,8 @@ import warnings
 
 Numeric = Union[float, int]
 
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+
 
 class Gaussian(ModelComponent):
     """
@@ -76,9 +78,13 @@ class Gaussian(ModelComponent):
         else:
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
-        self._width = Parameter(name=name + " width", value=width, unit=unit, min=0.0)
+        self._width = Parameter(
+            name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
+        )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+        """Evaluate the Gaussian at the given x values. If x is a scipp Variable, the unit of the Gaussian will be converted to match x."""
+
         if self._width.value <= 0:
             raise ValueError("The width of a Gaussian must be greater than zero.")
         if self._area.value < 0:

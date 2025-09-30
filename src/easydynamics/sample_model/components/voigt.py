@@ -16,6 +16,8 @@ import warnings
 
 Numeric = Union[float, int]
 
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+
 
 class Voigt(ModelComponent):
     """
@@ -89,14 +91,17 @@ class Voigt(ModelComponent):
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
         self.gaussian_width = Parameter(
-            name=name + " gaussian_width", value=gaussian_width, unit=unit, min=0.0
+            name=name + " gaussian_width",
+            value=gaussian_width,
+            unit=unit,
+            min=MINIMUM_WIDTH,
         )
 
         self.lorentzian_width = Parameter(
             name=name + " lorentzian_width",
             value=lorentzian_width,
             unit=unit,
-            min=0.0,
+            min=MINIMUM_WIDTH,
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
