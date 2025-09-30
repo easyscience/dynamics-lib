@@ -17,7 +17,7 @@ Numeric = Union[float, int]
 
 class Gaussian(ModelComponent):
     """
-    Gaussian function. Creates new EasyScience Parameters if floats are provided, otherwise uses the provided Parameters.
+    Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
 
     Args:
         area (Int or float): Area of the Gaussian. Has the same unit as the x axis

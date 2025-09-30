@@ -17,7 +17,7 @@ Numeric = Union[float, int]
 
 class Lorentzian(ModelComponent):
     """
-    Lorentzian function. Creates new EasyScience Parameters if floats are provided, otherwise uses the provided Parameters.
+    Lorentzian function: area*width / (pi * ( (x - center)^2 + width^2 ) )
 
     Args:
         area (Int or float): Area of the Lorentzian.

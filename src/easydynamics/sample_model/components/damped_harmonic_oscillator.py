@@ -17,7 +17,7 @@ Numeric = Union[float, int]
 
 class DampedHarmonicOscillator(ModelComponent):
     """
-    Damped Harmonic Oscillator (DHO) component.
+    Damped Harmonic Oscillator (DHO). 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )
 
     Args:
         center (Int or float): Resonance frequency, approximately the peak position.

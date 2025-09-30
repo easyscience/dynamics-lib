@@ -17,7 +17,7 @@ Numeric = Union[float, int]
 
 class Polynomial(ModelComponent):
     """
-    Polynomial function component. Supports units, but not conversion between units.
+    Polynomial function component. c0 + c1*x + c2*x^2 + ... + cN*x^N
 
     Args:
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
