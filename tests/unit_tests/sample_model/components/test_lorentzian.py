@@ -41,7 +41,7 @@ class TestLorentzian:
                 name="TestLorentzian", area=2.0, center=0.5, width="invalid", unit="meV"
             )
 
-        with pytest.raises(TypeError, match="unit must be a string"):
+        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Lorentzian(name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit=123)
 
     def test_negative_width_raises(self):

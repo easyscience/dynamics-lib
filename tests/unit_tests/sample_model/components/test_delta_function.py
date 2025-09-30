@@ -34,7 +34,7 @@ class TestDeltaFunction:
                 center="invalid",
                 unit="meV",
             )
-        with pytest.raises(TypeError, match="unit must be a string"):
+        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit=123)
 
     def test_negative_area_warns(self):

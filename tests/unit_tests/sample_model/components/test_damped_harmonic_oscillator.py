@@ -52,7 +52,7 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
-        with pytest.raises(TypeError, match="unit must be a string"):
+        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             DampedHarmonicOscillator(
                 name="TestDampedHarmonicOscillator",
                 area=2.0,

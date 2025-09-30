@@ -6,6 +6,7 @@ from easyscience.variable import Parameter
 
 from .model_component import ModelComponent
 
+import scipp as sc
 
 import warnings
 
@@ -17,62 +18,49 @@ class DeltaFunction(ModelComponent):
     Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
 
     Args:
-        center (Numeric or Parameter or None): Center of the delta function. If None, defaults to 0 and is fixed.
-        area (Numeric or Parameter): Total area under the curve.
+        center (Int or float or None): Center of the delta function. If None, defaults to 0 and is fixed.
+        area (Int or float): Total area under the curve.
     """
 
     def __init__(
         self,
         name: str = "DeltaFunction",
         center: Union[None, Numeric, Parameter] = None,
-        area: Union[Numeric, Parameter] = 1.0,
+        area: Numeric = 1.0,
         unit="meV",
     ):
         # Validate inputs
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
+        if not isinstance(area, Numeric):
+            raise TypeError("area must be a number.")
 
-        if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or a Parameter.")
-
-        if not isinstance(unit, str):
-            raise TypeError("unit must be a string.")
-
-        if isinstance(area, Numeric):
-            if area < 0:
-                warnings.warn(
-                    "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
+        if area < 0:
+            warnings.warn(
+                "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
+                    name
                 )
-            area = float(area)
-        elif isinstance(area, Parameter):
-            if area.value < 0:
-                warnings.warn(
-                    "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
-                )
+            )
+        area = float(area)
+
+        if center is not None and not isinstance(center, Numeric):
+            raise TypeError("center must be None or a number.")
 
         if isinstance(center, Numeric):
             center = float(center)
 
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+
         super().__init__(name=name)
         self._unit = unit
+
         # Create Parameters from floats, or set Parameters if already provided
+        self.area = Parameter(name=name + " area", value=area, unit=unit)
         if center is None:
             self.center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
             )
-        elif isinstance(center, Numeric):
+        else:
             self.center = Parameter(name=name + " center", value=center, unit=unit)
-        else:
-            self.center = center
-
-        if isinstance(area, Numeric):
-            self.area = Parameter(name=name + " area", value=area, unit=unit)
-        else:
-            self.area = area
 
     def evaluate(self, x):
         if self.area.value < 0:

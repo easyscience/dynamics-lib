@@ -77,7 +77,7 @@ class TestVoigt:
                 lorentzian_width="invalid",
                 unit="meV",
             )
-        with pytest.raises(TypeError, match="unit must be a string"):
+        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Voigt(
                 name="TestVoigt",
                 area=2.0,

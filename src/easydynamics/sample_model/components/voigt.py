@@ -22,111 +22,82 @@ class Voigt(ModelComponent):
     Voigt profile, a convolution of Gaussian and Lorentzian.
 
     Args:
-        center (Numeric or Parameter or None): Center of the Voigt profile.
-        gaussian_width (Numeric or Parameter): Standard deviation of the Gaussian part.
-        lorentzian_width (Numeric or Parameter): Half width at half max (HWHM) of the Lorentzian part.
-        area (Numeric or Parameter): Total area under the curve.
+        center (Int or float or None): Center of the Voigt profile.
+        gaussian_width (Int or float): Standard deviation of the Gaussian part.
+        lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
+        area (Int or float): Total area under the curve.
     """
 
     def __init__(
         self,
         name: str = "Voigt",
-        area: Union[Numeric, Parameter] = 1.0,
-        center: Union[Numeric, Parameter, None] = None,
-        gaussian_width: Union[Numeric, Parameter] = 1.0,
-        lorentzian_width: Union[Numeric, Parameter] = 1.0,
-        unit: str = "meV",
+        area: Numeric = 1.0,
+        center: Union[Numeric, None] = None,
+        gaussian_width: Numeric = 1.0,
+        lorentzian_width: Numeric = 1.0,
+        unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
+        if not isinstance(area, Numeric):
+            raise TypeError("area must be a number.")
 
-        if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number or a Parameter.")
-
-        if not isinstance(gaussian_width, (Numeric, Parameter)):
-            raise TypeError("gaussian_width must be a number or a Parameter.")
-
-        if not isinstance(lorentzian_width, (Numeric, Parameter)):
-            raise TypeError("lorentzian_width must be a number or a Parameter.")
-
-        if not isinstance(unit, str):
-            raise TypeError("unit must be a string.")
-
-        if isinstance(gaussian_width, Numeric):
-            if gaussian_width <= 0:
-                raise ValueError(
-                    "The gaussian_width of a Voigt must be greater than zero."
+        area = float(area)
+        if area < 0:
+            warnings.warn(
+                "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
+                    name
                 )
-            gaussian_width = float(gaussian_width)
-        elif isinstance(gaussian_width, Parameter):
-            if gaussian_width.value <= 0:
-                raise ValueError(
-                    "The gaussian_width of a Voigt must be greater than zero."
-                )
+            )
 
-        if isinstance(lorentzian_width, Numeric):
-            if lorentzian_width <= 0:
-                raise ValueError(
-                    "The lorentzian_width of a Voigt must be greater than zero."
-                )
-            lorentzian_width = float(lorentzian_width)
-        elif isinstance(lorentzian_width, Parameter):
-            if lorentzian_width.value <= 0:
-                raise ValueError(
-                    "The lorentzian_width of a Voigt must be greater than zero."
-                )
+        if center is not None and not isinstance(center, Numeric):
+            raise TypeError("center must be None or a number.")
 
-        if isinstance(area, Numeric):
-            if area < 0:
-                warnings.warn(
-                    "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
-                )
-            area = float(area)
-        elif isinstance(area, Parameter):
-            if area.value < 0:
-                warnings.warn(
-                    "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
-                )
+        if isinstance(center, Numeric):
+            center = float(center)
+
+        if not isinstance(gaussian_width, Numeric):
+            raise TypeError("gaussian_width must be a number.")
+
+        gaussian_width = float(gaussian_width)
+        if gaussian_width <= 0:
+            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
+
+        if not isinstance(lorentzian_width, Numeric):
+            raise TypeError("lorentzian_width must be a number.")
+
+        lorentzian_width = float(lorentzian_width)
+        if lorentzian_width <= 0:
+            raise ValueError(
+                "The lorentzian_width of a Voigt must be greater than zero."
+            )
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
 
         super().__init__(name=name)
 
         self._unit = unit  # Set the unit for the component
-        # Create Parameters from floats, or set Parameters if already provided
+
+        # Create Parameters from floats
+        self.area = Parameter(name=name + " area", value=area, unit=unit)
+
         if center is None:
             self.center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
             )
-        elif isinstance(center, Numeric):
+        else:
             self.center = Parameter(name=name + " center", value=center, unit=unit)
-        else:
-            self.center = center
 
-        if isinstance(gaussian_width, Numeric):
-            self.gaussian_width = Parameter(
-                name=name + " gaussian_width", value=gaussian_width, unit=unit, min=0.0
-            )
-        else:
-            self.gaussian_width = gaussian_width
+        self.gaussian_width = Parameter(
+            name=name + " gaussian_width", value=gaussian_width, unit=unit, min=0.0
+        )
 
-        if isinstance(lorentzian_width, Numeric):
-            self.lorentzian_width = Parameter(
-                name=name + " lorentzian_width",
-                value=lorentzian_width,
-                unit=unit,
-                min=0.0,
-            )
-        else:
-            self.lorentzian_width = lorentzian_width
-
-        if isinstance(area, Numeric):
-            self.area = Parameter(name=name + " area", value=area, unit=unit)
-        else:
-            self.area = area
+        self.lorentzian_width = Parameter(
+            name=name + " lorentzian_width",
+            value=lorentzian_width,
+            unit=unit,
+            min=0.0,
+        )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.gaussian_width.value <= 0:

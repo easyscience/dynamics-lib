@@ -20,82 +20,57 @@ class DampedHarmonicOscillator(ModelComponent):
     Damped Harmonic Oscillator (DHO) component.
 
     Args:
-        center (Numeric or Parameter): Resonance frequency, approximately the peak position.
-        width (Numeric or Parameter): Damping constant, approximately the half width at half max (HWHM) of the peaks.
-        area (Numeric or Parameter): Area under the curve.
+        center (Int or float): Resonance frequency, approximately the peak position.
+        width (Int or float): Damping constant, approximately the half width at half max (HWHM) of the peaks.
+        area (Int or float): Area under the curve.
     """
 
     def __init__(
         self,
         name: str = "DHO",
-        center: Union[Numeric, Parameter] = 1.0,
-        width: Union[Numeric, Parameter] = 1.0,
-        area: Union[Numeric, Parameter] = 1.0,
-        unit: str = "meV",
+        center: Numeric = 1.0,
+        width: Numeric = 1.0,
+        area: Numeric = 1.0,
+        unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
-
-        if not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be a number or a Parameter.")
-
-        if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or a Parameter.")
-
-        if not isinstance(unit, str):
-            raise TypeError("unit must be a string.")
-
-        if isinstance(width, Numeric):
-            width = float(width)
-            if width <= 0:
-                raise ValueError(
-                    "The width of a DampedHarmonicOscillator must be greater than zero."
+        if not isinstance(area, Numeric):
+            raise TypeError("area must be a number.")
+        area = float(area)
+        if area < 0:
+            warnings.warn(
+                "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
+                    name
                 )
-        elif isinstance(width, Parameter):
-            if width.value <= 0:
-                raise ValueError(
-                    "The width of a DampedHarmonicOscillator must be greater than zero."
-                )
+            )
 
-        if isinstance(area, Numeric):
-            area = float(area)
-            if area < 0:
-                warnings.warn(
-                    "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
-                )
-        elif isinstance(area, Parameter):
-            if area.value < 0:
-                warnings.warn(
-                    "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
-                        name
-                    )
-                )
+        if not isinstance(center, Numeric):
+            raise TypeError("center must be a number.")
 
         if isinstance(center, Numeric):
             center = float(center)
 
+        if not isinstance(width, Numeric):
+            raise TypeError("width must be a number.")
+
+        width = float(width)
+        if width <= 0:
+            raise ValueError(
+                "The width of a DampedHarmonicOscillator must be greater than zero."
+            )
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+
         super().__init__(name=name)
         self._unit = unit  # Set the unit for the component
-        # Create Parameters from floats, or set Parameters if already provided
-        if isinstance(center, Numeric):
-            self.center = Parameter(name=name + " center", value=center, unit=unit)
-        else:
-            self.center = center
 
-        if isinstance(width, Numeric):
-            self.width = Parameter(
-                name=name + " width", value=width, unit=unit, min=0.0
-            )
-        else:
-            self.width = width
+        # Create Parameters from floats
+        self.area = Parameter(name=name + " area", value=area, unit=unit)
 
-        if isinstance(area, Numeric):
-            self.area = Parameter(name=name + " area", value=area, unit=unit)
-        else:
-            self.area = area
+        self.center = Parameter(name=name + " center", value=center, unit=unit)
+
+        self.width = Parameter(name=name + " width", value=width, unit=unit, min=0.0)
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         if self.width.value <= 0:

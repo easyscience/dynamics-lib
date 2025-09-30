@@ -28,7 +28,7 @@ class TestPolynomial:
         with pytest.raises(TypeError, match="All coefficients must be numbers."):
             Polynomial(name="TestPolynomial", coefficients=[1.0, "invalid", 3.0])
 
-        with pytest.raises(TypeError, match="unit must be a string"):
+        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0], unit=123)
 
         with pytest.raises(

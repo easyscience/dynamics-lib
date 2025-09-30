@@ -28,7 +28,7 @@ class Polynomial(ModelComponent):
         self,
         name: str = "Polynomial",
         coefficients: Union[list[float], np.ndarray] = [0.0],
-        unit: str = "meV",
+        unit: Union[str, sc.Unit] = "meV",
     ):
         if not isinstance(coefficients, (list, tuple, np.ndarray)):
             raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
@@ -36,8 +36,8 @@ class Polynomial(ModelComponent):
         if not all(isinstance(c, Numeric) for c in coefficients):
             raise TypeError("All coefficients must be numbers.")
 
-        if not isinstance(unit, str):
-            raise TypeError("unit must be a string.")
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
 
         super().__init__(name=name)
         if not coefficients:
