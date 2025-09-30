@@ -112,7 +112,6 @@ class Gaussian(ModelComponent):
             x_in = x
         return (
             self._area.value
-            * 1
             / (np.sqrt(2 * np.pi) * self._width.value)
             * np.exp(-0.5 * ((x_in - self._center.value) / self._width.value) ** 2)
         )

@@ -110,10 +110,12 @@ class DampedHarmonicOscillator(ModelComponent):
             * self._area.value
             * self._center.value**2
             * self._width.value
-            / np.pi
             / (
-                (x_in**2 - self._center.value**2) ** 2
-                + (2 * self._width.value * x_in) ** 2
+                np.pi
+                * (
+                    (x_in**2 - self._center.value**2) ** 2
+                    + (2 * self._width.value * x_in) ** 2
+                )
             )
         )
 

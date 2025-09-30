@@ -109,8 +109,7 @@ class Lorentzian(ModelComponent):
             x_in = x
         return self._area.value * (
             self._width.value
-            / np.pi
-            / ((x_in - self._center.value) ** 2 + self._width.value**2)
+            / (np.pi * ((x_in - self._center.value) ** 2 + self._width.value**2))
         )
 
     def get_parameters(self):
