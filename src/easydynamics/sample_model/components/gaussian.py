@@ -83,6 +83,48 @@ class Gaussian(ModelComponent):
             name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
         )
 
+    @property
+    def area(self) -> Parameter:
+        """Return the area parameter."""
+        return self._area
+
+    @area.setter
+    def area(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+        """Set the area parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("area must be a number.")
+        self._area.value = float(value)
+        if unit is not None:
+            self._area._unit = unit
+
+    @property
+    def center(self) -> Parameter:
+        """Return the center parameter."""
+        return self._center
+
+    @center.setter
+    def center(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+        """Set the center parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("center must be a number.")
+        self._center.value = float(value)
+        if unit is not None:
+            self._center._unit = unit
+
+    @property
+    def width(self) -> Parameter:
+        """Return the width parameter."""
+        return self._width
+
+    @width.setter
+    def width(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+        """Set the width parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("width must be a number.")
+        self._width.value = float(value)
+        if unit is not None:
+            self._width._unit = unit
+
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         """Evaluate the Gaussian at the given x values.
         If x is a scipp Variable, the unit of the Gaussian will be converted to match x.
