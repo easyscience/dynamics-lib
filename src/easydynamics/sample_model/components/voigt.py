@@ -110,6 +110,10 @@ class Voigt(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+        """Evaluate the Voigt at the given x values.
+        If x is a scipp Variable, the unit of the Voigt will be converted to match x.
+        The Voigt evaluates to the convolution of a Gaussian with sigma gaussian_width and a Lorentzian with half width at half max lorentzian_width, centered at center, with area equal to area."""
+
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values

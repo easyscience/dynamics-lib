@@ -84,7 +84,9 @@ class Gaussian(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
-        """Evaluate the Gaussian at the given x values. If x is a scipp Variable, the unit of the Gaussian will be converted to match x."""
+        """Evaluate the Gaussian at the given x values.
+        If x is a scipp Variable, the unit of the Gaussian will be converted to match x.
+        The Gaussian evaluates to area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)"""
 
         # Handle units
         if isinstance(x, sc.Variable):

@@ -84,6 +84,10 @@ class Lorentzian(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+        """Evaluate the Lorentzian at the given x values.
+        If x is a scipp Variable, the unit of the Lorentzian will be converted to match x.
+        The Lorentzian evaluates to area*width / (pi * ( (x - center)^2 + width^2 ) )"""
+
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values

@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from .model_component import ModelComponent
 
 import scipp as sc
+from scipp import UnitError
 
 import warnings
 
@@ -53,10 +54,14 @@ class Polynomial(ModelComponent):
         self._unit = unit
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
+        """Evaluate the Polynomial at the given x values.
+        If x is a scipp Variable, the unit of the Polynomial will be converted to match x.
+        The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
+        """
         if isinstance(x, sc.Variable):
             x_in = x.values
             if self._unit is not None and x.unit != self._unit:
-                raise ValueError(
+                raise UnitError(
                     f"Input x has unit {x.unit}, but Polynomial component has unit {self._unit}. Change the unit of the Polynomial and try again. "
                 )
         else:
@@ -74,6 +79,7 @@ class Polynomial(ModelComponent):
         return result
 
     def degree(self):
+        """Return the degree of the polynomial."""
         return len(self.coefficients) - 1
 
     def get_parameters(self):

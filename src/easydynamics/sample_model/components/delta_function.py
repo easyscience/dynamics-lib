@@ -67,6 +67,8 @@ class DeltaFunction(ModelComponent):
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
     def evaluate(self, x):
+        """ "Evaluate the Delta function at the given x values.
+        The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
         # TODO: Consider adding support for evaluation without resolution convolution
         return 0 * x
 

@@ -80,6 +80,10 @@ class DampedHarmonicOscillator(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+        """Evaluate the Damped Harmonic Oscillator at the given x values.
+        If x is a scipp Variable, the unit of the DHO will be converted to
+        match x. The DHO evaluates to 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )"""
+
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
