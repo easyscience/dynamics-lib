@@ -70,6 +70,30 @@ class DeltaFunction(ModelComponent):
         else:
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
+    @property
+    def area(self) -> Parameter:
+        """Return the area parameter."""
+        return self._area
+
+    @area.setter
+    def area(self, value: Numeric):
+        """Set the area parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("area must be a number.")
+        self._area.value = float(value)
+
+    @property
+    def center(self) -> Parameter:
+        """Return the center parameter."""
+        return self._center
+
+    @center.setter
+    def center(self, value: Numeric):
+        """Set the center parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("center must be a number.")
+        self._center.value = float(value)
+
     def evaluate(self, x):
         """ "Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""

@@ -91,13 +91,11 @@ class Gaussian(ModelComponent):
         return self._area
 
     @area.setter
-    def area(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+    def area(self, value: Numeric):
         """Set the area parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("area must be a number.")
         self._area.value = float(value)
-        if unit is not None:
-            self._area._unit = unit
 
     @property
     def center(self) -> Parameter:
@@ -105,13 +103,11 @@ class Gaussian(ModelComponent):
         return self._center
 
     @center.setter
-    def center(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+    def center(self, value: Numeric):
         """Set the center parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
-        if unit is not None:
-            self._center._unit = unit
 
     @property
     def width(self) -> Parameter:
@@ -119,13 +115,11 @@ class Gaussian(ModelComponent):
         return self._width
 
     @width.setter
-    def width(self, value: Numeric, unit: Optional[Union[str, sc.Unit]] = None):
+    def width(self, value: Numeric):
         """Set the width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
         self._width.value = float(value)
-        if unit is not None:
-            self._width._unit = unit
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         """Evaluate the Gaussian at the given x values.

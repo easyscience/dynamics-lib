@@ -109,6 +109,54 @@ class Voigt(ModelComponent):
             min=MINIMUM_WIDTH,
         )
 
+    @property
+    def area(self) -> Parameter:
+        """Return the area parameter."""
+        return self._area
+
+    @area.setter
+    def area(self, value: Numeric):
+        """Set the area parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("area must be a number.")
+        self._area.value = float(value)
+
+    @property
+    def center(self) -> Parameter:
+        """Return the center parameter."""
+        return self._center
+
+    @center.setter
+    def center(self, value: Numeric):
+        """Set the center parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("center must be a number.")
+        self._center.value = float(value)
+
+    @property
+    def gaussian_width(self) -> Parameter:
+        """Return the gaussian_width parameter."""
+        return self._gaussian_width
+
+    @gaussian_width.setter
+    def gaussian_width(self, value: Numeric):
+        """Set the gaussian_width parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("width must be a number.")
+        self._width.value = float(value)
+
+    @property
+    def lorentzian_width(self) -> Parameter:
+        """Return the lorentzian_width parameter."""
+        return self._lorentzian_width
+
+    @lorentzian_width.setter
+    def lorentzian_width(self, value: Numeric):
+        """Set the lorentzian_width parameter."""
+        if not isinstance(value, Numeric):
+            raise TypeError("width must be a number.")
+        self._lorentzian_width.value = float(value)
+
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         """Evaluate the Voigt at the given x values.
         If x is a scipp Variable, the unit of the Voigt will be converted to match x.
