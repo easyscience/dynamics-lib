@@ -85,6 +85,43 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
+    def test_area_property_getter(self, dho: DampedHarmonicOscillator):
+        assert dho.area.value == 2.0
+
+    def test_area_property_setter(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        dho.area = 3.0
+
+        # THEN EXPECT
+        assert dho.area.value == 3.0
+        with pytest.raises(TypeError, match="area must be a number."):
+            dho.area = "invalid"
+
+    def test_center_property_getter(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
+        assert dho.center.value == 0.5
+
+    def test_center_property_setter(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        dho.center = 0.6
+
+        # THEN EXPECT
+        assert dho.center.value == 0.6
+        with pytest.raises(TypeError, match="center must be a number."):
+            dho.center = "invalid"
+
+    def test_width_property_getter(self, dho: DampedHarmonicOscillator):
+        assert dho.width.value == 0.6
+
+    def test_width_property_setter(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        dho.width = 0.7
+
+        # THEN EXPECT
+        assert dho.width.value == 0.7
+        with pytest.raises(TypeError, match="width must be a number."):
+            dho.width = "invalid"
+
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         x = np.array([0.0, 1.5, 3.0])
         expected = dho.evaluate(x)
