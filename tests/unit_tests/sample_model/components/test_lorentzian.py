@@ -57,6 +57,43 @@ class TestLorentzian:
                 name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
             )
 
+    def test_area_property_getter(self, lorentzian: Lorentzian):
+        assert lorentzian.area.value == 2.0
+
+    def test_area_property_setter(self, lorentzian: Lorentzian):
+        # WHEN
+        lorentzian.area = 3.0
+
+        # THEN EXPECT
+        assert lorentzian.area.value == 3.0
+        with pytest.raises(TypeError, match="area must be a number."):
+            lorentzian.area = "invalid"
+
+    def test_center_property_getter(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        assert lorentzian.center.value == 0.5
+
+    def test_center_property_setter(self, lorentzian: Lorentzian):
+        # WHEN
+        lorentzian.center = 0.6
+
+        # THEN EXPECT
+        assert lorentzian.center.value == 0.6
+        with pytest.raises(TypeError, match="center must be a number."):
+            lorentzian.center = "invalid"
+
+    def test_width_property_getter(self, lorentzian: Lorentzian):
+        assert lorentzian.width.value == 0.6
+
+    def test_width_property_setter(self, lorentzian: Lorentzian):
+        # WHEN
+        lorentzian.width = 0.7
+
+        # THEN EXPECT
+        assert lorentzian.width.value == 0.7
+        with pytest.raises(TypeError, match="width must be a number."):
+            lorentzian.width = "invalid"
+
     def test_evaluate(self, lorentzian: Lorentzian):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])

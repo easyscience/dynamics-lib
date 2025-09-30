@@ -143,7 +143,7 @@ class Voigt(ModelComponent):
         """Set the gaussian_width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
-        self._width.value = float(value)
+        self._gaussian_width.value = float(value)
 
     @property
     def lorentzian_width(self) -> Parameter:

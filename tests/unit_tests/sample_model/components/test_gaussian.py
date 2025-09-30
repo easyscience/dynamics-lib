@@ -64,6 +64,7 @@ class TestGaussian:
             gaussian.area = "invalid"
 
     def test_center_property_getter(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
         assert gaussian.center.value == 0.5
 
     def test_center_property_setter(self, gaussian: Gaussian):

@@ -1,7 +1,6 @@
 import pytest
 
 import numpy as np
-from scipp import UnitError
 
 from easydynamics.sample_model import DeltaFunction
 from easyscience.variable import Parameter
@@ -39,6 +38,31 @@ class TestDeltaFunction:
     def test_negative_area_warns(self):
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
+
+    def test_area_property_getter(self, delta_function: DeltaFunction):
+        assert delta_function.area.value == 2.0
+
+    def test_area_property_setter(self, delta_function: DeltaFunction):
+        # WHEN
+        delta_function.area = 3.0
+
+        # THEN EXPECT
+        assert delta_function.area.value == 3.0
+        with pytest.raises(TypeError, match="area must be a number."):
+            delta_function.area = "invalid"
+
+    def test_center_property_getter(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
+        assert delta_function.center.value == 0.5
+
+    def test_center_property_setter(self, delta_function: DeltaFunction):
+        # WHEN
+        delta_function.center = 0.6
+
+        # THEN EXPECT
+        assert delta_function.center.value == 0.6
+        with pytest.raises(TypeError, match="center must be a number."):
+            delta_function.center = "invalid"
 
     @pytest.mark.xfail(
         reason="DeltaFunction.evaluate is not implemented yet without resolution convolution"

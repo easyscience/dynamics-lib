@@ -12,6 +12,8 @@ from easyscience.variable import Parameter
 
 from scipy.special import voigt_profile
 
+from easydynamics.sample_model.components.lorentzian import Lorentzian
+
 
 class TestVoigt:
     @pytest.fixture
@@ -122,6 +124,56 @@ class TestVoigt:
                 lorentzian_width=0.7,
                 unit="meV",
             )
+
+    def test_area_property_getter(self, voigt: Voigt):
+        assert voigt.area.value == 2.0
+
+    def test_area_property_setter(self, voigt: Voigt):
+        # WHEN
+        voigt.area = 3.0
+
+        # THEN EXPECT
+        assert voigt.area.value == 3.0
+        with pytest.raises(TypeError, match="area must be a number."):
+            voigt.area = "invalid"
+
+    def test_center_property_getter(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        assert voigt.center.value == 0.5
+
+    def test_center_property_setter(self, voigt: Voigt):
+        # WHEN
+        voigt.center = 0.6
+
+        # THEN EXPECT
+        assert voigt.center.value == 0.6
+        with pytest.raises(TypeError, match="center must be a number."):
+            voigt.center = "invalid"
+
+    def test_gaussian_width_property_getter(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        assert voigt.gaussian_width.value == 0.6
+
+    def test_gaussian_width_property_setter(self, voigt: Voigt):
+        # WHEN
+        voigt.gaussian_width = 0.7
+
+        # THEN EXPECT
+        assert voigt.gaussian_width.value == 0.7
+
+    def test_lorentzian_width_property_getter(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        assert voigt.lorentzian_width.value == 0.7
+
+    def test_lorentzian_width_property_setter(self, voigt: Voigt):
+        # WHEN
+        voigt.lorentzian_width = 0.8
+
+        # THEN EXPECT
+        assert voigt.lorentzian_width.value == 0.8
+
+        with pytest.raises(TypeError, match="width must be a number."):
+            voigt.lorentzian_width = "invalid"
 
     def test_evaluate(self, voigt: Voigt):
         # WHEN
