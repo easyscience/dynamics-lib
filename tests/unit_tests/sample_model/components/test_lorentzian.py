@@ -58,27 +58,45 @@ class TestLorentzian:
             )
 
     def test_evaluate(self, lorentzian: Lorentzian):
+        # WHEN
         x = np.array([0.0, 0.5, 1.0])
-        expected = lorentzian.evaluate(x)
+
+        # THEN
+        result = lorentzian.evaluate(x)
+
+        # EXPECT
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x - 0.5) / 0.6) ** 2)
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, lorentzian: Lorentzian):
+        # WHEN
         x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-        expected = lorentzian.evaluate(x)
+
+        # THEN
+        result = lorentzian.evaluate(x)
+
+        # EXPECT
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x.values - 0.5) / 0.6) ** 2)
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, lorentzian: Lorentzian):
+        # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-        expected = lorentzian.evaluate(x)
+
+        # THEN
+        result = lorentzian.evaluate(x)
+
+        # EXPECT
         expected_result = (2.0 * 1e3 / (np.pi * 0.6 * 1e3)) / (
             1 + ((x.values - 0.5 * 1e3) / (0.6 * 1e3)) ** 2
         )
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_incompatible_unit(self, lorentzian: Lorentzian):
+        # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
+
+        # THEN EXPECT
         with pytest.raises(
             UnitError,
             match="Input x has unit nm, but Lorentzian component has unit meV. Failed to convert Lorentzian to nm.",
@@ -86,14 +104,20 @@ class TestLorentzian:
             lorentzian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
+        # WHEN
         test_lorentzian = Lorentzian(
             name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"
         )
+
+        # THEN EXPECT
         assert test_lorentzian._center.value == 0.0
         assert test_lorentzian._center.fixed is True
 
     def test_get_parameters(self, lorentzian: Lorentzian):
+        # WHEN THEN
         params = lorentzian.get_parameters()
+
+        # EXPECT
         assert len(params) == 3
         assert params[0].name == "TestLorentzian area"
         assert params[1].name == "TestLorentzian center"
@@ -114,15 +138,20 @@ class TestLorentzian:
         assert numerical_area == pytest.approx(lorentzian._area.value, rel=2e-3)
 
     def test_convert_unit(self, lorentzian: Lorentzian):
+        # WHEN THEN
         lorentzian.convert_unit("microeV")
 
+        # EXPECT
         assert lorentzian.unit == "microeV"
         assert lorentzian._area.value == 2 * 1e3
         assert lorentzian._center.value == 0.5 * 1e3
         assert lorentzian._width.value == 0.6 * 1e3
 
     def test_copy(self, lorentzian: Lorentzian):
+        # WHEN THEN
         lorentzian_copy = lorentzian.copy()
+
+        # EXPECT
         assert lorentzian_copy is not lorentzian
         assert lorentzian_copy.name == "copy of " + lorentzian.name
 
@@ -138,7 +167,10 @@ class TestLorentzian:
         assert lorentzian_copy.unit == lorentzian.unit
 
     def test_repr(self, lorentzian: Lorentzian):
+        # WHEN THEN
         repr_str = repr(lorentzian)
+
+        # EXPECT
         assert "Lorentzian" in repr_str
         assert "name = TestLorentzian" in repr_str
         assert "unit = meV" in repr_str

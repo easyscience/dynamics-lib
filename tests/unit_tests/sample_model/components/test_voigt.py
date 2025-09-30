@@ -83,6 +83,7 @@ class TestVoigt:
             )
 
     def test_negative_gaussian_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="The gaussian_width of a Voigt must be greater than."
         ):
@@ -96,6 +97,7 @@ class TestVoigt:
             )
 
     def test_negative_lorentzian_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
             match="The lorentzian_width of a Voigt must be greater than zero.",
@@ -110,6 +112,7 @@ class TestVoigt:
             )
 
     def test_negative_area_warns(self):
+        # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Voigt(
                 name="TestVoigt",
@@ -121,26 +124,42 @@ class TestVoigt:
             )
 
     def test_evaluate(self, voigt: Voigt):
+        # WHEN
         x = np.array([0.0, 0.5, 1.0])
-        expected = voigt.evaluate(x)
+
+        # THEN
+        result = voigt.evaluate(x)
+
+        # EXPECT
         expected_result = 2.0 * voigt_profile(x - 0.5, 0.6, 0.7)
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, voigt: Voigt):
+        # WHEN
         x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-        expected = voigt.evaluate(x)
+
+        # THEN
+        result = voigt.evaluate(x)
+
+        # EXPECT
         expected_result = 2.0 * voigt_profile(x.values - 0.5, 0.6, 0.7)
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit(self, voigt: Voigt):
+        # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-        expected = voigt.evaluate(x)
+
+        # THEN
+        result = voigt.evaluate(x)
+
+        # EXPECT
         expected_result = (
             2.0 * 1e3 * voigt_profile(x.values - 0.5 * 1e3, 0.6 * 1e3, 0.7 * 1e3)
         )
-        np.testing.assert_allclose(expected, expected_result, rtol=1e-5)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_incompatible_unit(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
         with pytest.raises(
             UnitError,
@@ -149,6 +168,7 @@ class TestVoigt:
             voigt.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
+        # WHEN THEN
         test_voigt = Voigt(
             name="TestVoigt",
             area=2.0,
@@ -157,12 +177,16 @@ class TestVoigt:
             lorentzian_width=0.7,
             unit="meV",
         )
+
+        # EXPECT
         assert test_voigt._center.value == 0.0
         assert test_voigt._center.fixed is True
 
     def test_convert_unit(self, voigt: Voigt):
+        # WHEN THEN
         voigt.convert_unit("microeV")
 
+        # EXPECT
         assert voigt.unit == "microeV"
         assert voigt._area.value == 2 * 1e3
         assert voigt._center.value == 0.5 * 1e3
@@ -170,7 +194,10 @@ class TestVoigt:
         assert voigt._lorentzian_width.value == 0.7 * 1e3
 
     def test_get_parameters(self, voigt: Voigt):
+        # WHEN THEN
         params = voigt.get_parameters()
+
+        # EXPECT
         assert len(params) == 4
         assert params[0].name == "TestVoigt area"
         assert params[1].name == "TestVoigt center"
@@ -196,7 +223,10 @@ class TestVoigt:
         assert numerical_area == pytest.approx(voigt._area.value, rel=2e-3)
 
     def test_copy(self, voigt: Voigt):
+        # WHEN THEN
         voigt_copy = voigt.copy()
+
+        # EXPECT
         assert voigt_copy is not voigt
         assert voigt_copy.name == "copy of " + voigt.name
 
@@ -215,7 +245,10 @@ class TestVoigt:
         assert voigt_copy.unit == voigt.unit
 
     def test_repr(self, voigt: Voigt):
+        # WHEN THEN
         repr_str = repr(voigt)
+
+        # EXPECT
         assert "Voigt" in repr_str
         assert "name = TestVoigt" in repr_str
         assert "unit = meV" in repr_str
