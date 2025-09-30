@@ -1,7 +1,8 @@
 import pytest
 
 import numpy as np
-
+import scipp as sc
+from scipp import UnitError
 from easydynamics.sample_model import DeltaFunction
 from easyscience.variable import Parameter
 
@@ -64,9 +65,6 @@ class TestDeltaFunction:
         with pytest.raises(TypeError, match="center must be a number."):
             delta_function.center = "invalid"
 
-    @pytest.mark.xfail(
-        reason="DeltaFunction.evaluate is not implemented yet without resolution convolution"
-    )
     def test_evaluate(self, delta_function: DeltaFunction):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])
@@ -77,6 +75,54 @@ class TestDeltaFunction:
         # EXPECT
         expected_result = np.zeros_like(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_scipp_array(self, delta_function: DeltaFunction):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
+
+        # THEN
+        result = delta_function.evaluate(x)
+
+        # EXPECT
+        expected_result = np.zeros_like(x.values)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit(self, delta_function: DeltaFunction):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="microeV")
+
+        # THEN
+        result = delta_function.evaluate(x)
+
+        # EXPECT
+        expected_result = np.zeros_like(x.values)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_incompatible_unit(self, delta_function: DeltaFunction):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="nm")
+        # THEN EXPECT
+        with pytest.raises(
+            UnitError,
+            match="Input x has unit nm, but DeltaFunction component has unit meV. Failed to convert DeltaFunction to nm.",
+        ):
+            delta_function.evaluate(x)
+
+    def test_evaluate_with_nan_input(self, delta_function: DeltaFunction):
+        # WHEN
+        x = np.array([0.0, np.nan, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains NaN values."):
+            delta_function.evaluate(x)
+
+    def test_evaluate_with_infinite_input(self, delta_function: DeltaFunction):
+        # WHEN
+        x = np.array([0.0, np.inf, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains infinite values."):
+            delta_function.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN

@@ -160,6 +160,8 @@ class TestVoigt:
 
         # THEN EXPECT
         assert voigt.gaussian_width.value == 0.7
+        with pytest.raises(TypeError, match="width must be a number."):
+            voigt.gaussian_width = "invalid"
 
     def test_lorentzian_width_property_getter(self, voigt: Voigt):
         # WHEN THEN EXPECT

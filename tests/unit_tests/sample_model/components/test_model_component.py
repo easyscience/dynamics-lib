@@ -26,6 +26,11 @@ class TestModelComponent:
     def dummy(self):
         return self.DummyComponent()
 
+    def test_unit_cannot_be_set_directly(self, dummy: ModelComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match="Unit is read-only"):
+            dummy.unit = "K"
+
     def test_fix_all_parameters_sets_all_to_fixed(self, dummy):
         # WHEN
         dummy.fix_all_parameters()
