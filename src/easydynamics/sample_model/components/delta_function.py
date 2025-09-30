@@ -54,16 +54,16 @@ class DeltaFunction(ModelComponent):
         self._unit = unit
 
         # Create Parameters from floats, or set Parameters if already provided
-        self.area = Parameter(name=name + " area", value=area, unit=unit)
+        self._area = Parameter(name=name + " area", value=area, unit=unit)
         if center is None:
-            self.center = Parameter(
+            self._center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
             )
         else:
-            self.center = Parameter(name=name + " center", value=center, unit=unit)
+            self._center = Parameter(name=name + " center", value=center, unit=unit)
 
     def evaluate(self, x):
-        if self.area.value < 0:
+        if self._area.value < 0:
             warnings.warn(
                 "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
                     self.name
@@ -78,7 +78,7 @@ class DeltaFunction(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return [self.area, self.center]
+        return [self._area, self._center]
 
     def convert_unit(self, unit):
         """
@@ -87,8 +87,8 @@ class DeltaFunction(ModelComponent):
         Args:
             unit (str): The new unit to convert to.
         """
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
+        self._area.convert_unit(unit)
+        self._center.convert_unit(unit)
         self._unit = unit
 
     def copy(self) -> DeltaFunction:
@@ -97,13 +97,13 @@ class DeltaFunction(ModelComponent):
         """
         model_copy = DeltaFunction(
             name=self.name,
-            area=self.area.value,
-            center=self.center.value,
+            area=self._area.value,
+            center=self._center.value,
             unit=self._unit,
         )
-        model_copy.area.fixed = self.area.fixed
-        model_copy.center.fixed = self.center.fixed
+        model_copy.area.fixed = self._area.fixed
+        model_copy.center.fixed = self._center.fixed
         return model_copy
 
     def __repr__(self):
-        return f"DeltaFunction(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"
+        return f"DeltaFunction(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center}"

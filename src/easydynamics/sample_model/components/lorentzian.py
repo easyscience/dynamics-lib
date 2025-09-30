@@ -65,21 +65,21 @@ class Lorentzian(ModelComponent):
         self._unit = unit  # Set the unit for the component
 
         # Create Parameters from floats
-        self.area = Parameter(name=name + " area", value=area, unit=unit)
+        self._area = Parameter(name=name + " area", value=area, unit=unit)
 
         if center is None:
-            self.center = Parameter(
+            self._center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
             )
         else:
-            self.center = Parameter(name=name + " center", value=center, unit=unit)
+            self._center = Parameter(name=name + " center", value=center, unit=unit)
 
-        self.width = Parameter(name=name + " width", value=width, unit=unit, min=0.0)
+        self._width = Parameter(name=name + " width", value=width, unit=unit, min=0.0)
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
-        if self.width.value <= 0:
+        if self._width.value <= 0:
             raise ValueError("The width of a Lorentzian must be greater than zero.")
-        if self.area.value < 0:
+        if self._area.value < 0:
             warnings.warn(
                 "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
                     self.name
@@ -101,10 +101,10 @@ class Lorentzian(ModelComponent):
                 )
         else:
             x_in = x
-        return self.area.value * (
-            self.width.value
+        return self._area.value * (
+            self._width.value
             / np.pi
-            / ((x_in - self.center.value) ** 2 + self.width.value**2)
+            / ((x_in - self._center.value) ** 2 + self._width.value**2)
         )
 
     def get_parameters(self):
@@ -113,7 +113,7 @@ class Lorentzian(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return [self.area, self.center, self.width]
+        return [self._area, self._center, self._width]
 
     def convert_unit(self, unit: str):
         """
@@ -123,23 +123,23 @@ class Lorentzian(ModelComponent):
             unit (str): The new unit to convert to.
         """
 
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
-        self.width.convert_unit(unit)
+        self._area.convert_unit(unit)
+        self._center.convert_unit(unit)
+        self._width.convert_unit(unit)
         self._unit = unit
 
     def copy(self) -> Lorentzian:
         model_copy = Lorentzian(
             name=self.name,
-            area=self.area.value,
-            center=self.center.value,
-            width=self.width.value,
+            area=self._area.value,
+            center=self._center.value,
+            width=self._width.value,
             unit=self._unit,
         )
-        model_copy.area.fixed = self.area.fixed
-        model_copy.center.fixed = self.center.fixed
-        model_copy.width.fixed = self.width.fixed
+        model_copy.area.fixed = self._area.fixed
+        model_copy.center.fixed = self._center.fixed
+        model_copy.width.fixed = self._width.fixed
         return model_copy
 
     def __repr__(self):
-        return f"Lorentzian(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Lorentzian(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n width = {self._width})"

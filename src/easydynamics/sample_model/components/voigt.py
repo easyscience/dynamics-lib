@@ -79,14 +79,14 @@ class Voigt(ModelComponent):
         self._unit = unit  # Set the unit for the component
 
         # Create Parameters from floats
-        self.area = Parameter(name=name + " area", value=area, unit=unit)
+        self._area = Parameter(name=name + " area", value=area, unit=unit)
 
         if center is None:
-            self.center = Parameter(
+            self._center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
             )
         else:
-            self.center = Parameter(name=name + " center", value=center, unit=unit)
+            self._center = Parameter(name=name + " center", value=center, unit=unit)
 
         self.gaussian_width = Parameter(
             name=name + " gaussian_width", value=gaussian_width, unit=unit, min=0.0
@@ -106,7 +106,7 @@ class Voigt(ModelComponent):
             raise ValueError(
                 "The lorentzian_width of a Voigt must be greater than zero."
             )
-        if self.area.value < 0:
+        if self._area.value < 0:
             warnings.warn(
                 "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
                     self.name
@@ -128,8 +128,8 @@ class Voigt(ModelComponent):
                 )
         else:
             x_in = x
-        return self.area.value * voigt_profile(
-            x_in - self.center.value,
+        return self._area.value * voigt_profile(
+            x_in - self._center.value,
             self.gaussian_width.value,
             self.lorentzian_width.value,
         )
@@ -141,8 +141,8 @@ class Voigt(ModelComponent):
         Args:
             unit (str): The new unit to convert to.
         """
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
+        self._area.convert_unit(unit)
+        self._center.convert_unit(unit)
         self.gaussian_width.convert_unit(unit)
         self.lorentzian_width.convert_unit(unit)
         self._unit = unit
@@ -153,23 +153,23 @@ class Voigt(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return [self.area, self.center, self.gaussian_width, self.lorentzian_width]
+        return [self._area, self._center, self.gaussian_width, self.lorentzian_width]
 
     def copy(self) -> Voigt:
         model_copy = Voigt(
             name=self.name,
-            area=self.area.value,
-            center=self.center.value,
+            area=self._area.value,
+            center=self._center.value,
             gaussian_width=self.gaussian_width.value,
             lorentzian_width=self.lorentzian_width.value,
             unit=self._unit,
         )
-        model_copy.area.fixed = self.area.fixed
-        model_copy.center.fixed = self.center.fixed
+        model_copy.area.fixed = self._area.fixed
+        model_copy.center.fixed = self._center.fixed
         model_copy.gaussian_width.fixed = self.gaussian_width.fixed
         model_copy.lorentzian_width.fixed = self.lorentzian_width.fixed
 
         return model_copy
 
     def __repr__(self):
-        return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
+        return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
