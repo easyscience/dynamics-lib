@@ -7,6 +7,7 @@ from easyscience.variable import Parameter
 from .model_component import ModelComponent
 
 import scipp as sc
+from scipp import UnitError
 
 import warnings
 
@@ -66,12 +67,6 @@ class DeltaFunction(ModelComponent):
             self._center = Parameter(name=name + " center", value=center, unit=unit)
 
     def evaluate(self, x):
-        if self._area.value < 0:
-            warnings.warn(
-                "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
-                )
-            )
         # TODO: Consider adding support for evaluation without resolution convolution
         return 0 * x
 

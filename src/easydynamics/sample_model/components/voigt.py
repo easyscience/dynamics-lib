@@ -11,6 +11,7 @@ from easyscience.variable import Parameter
 from .model_component import ModelComponent
 
 import scipp as sc
+from scipp import UnitError
 
 import warnings
 
@@ -109,21 +110,6 @@ class Voigt(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
-        if self._gaussian_width.value <= 0:
-            raise ValueError(
-                "The _gaussian_width of a Voigt must be greater than zero."
-            )
-        if self._lorentzian_width.value <= 0:
-            raise ValueError(
-                "The _lorentzian_width of a Voigt must be greater than zero."
-            )
-        if self._area.value < 0:
-            warnings.warn(
-                "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
-                )
-            )
-
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
@@ -131,7 +117,7 @@ class Voigt(ModelComponent):
                 try:
                     self.convert_unit(x.unit.name)
                 except Exception as e:
-                    raise ValueError(
+                    raise UnitError(
                         f"Input x has unit {x.unit}, but Voigt component has unit {self._unit}. Failed to convert Voigt to {x.unit}."
                     ) from e
                 warnings.warn(

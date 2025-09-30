@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from .model_component import ModelComponent
 
 import scipp as sc
+from scipp import UnitError
 
 import warnings
 
@@ -85,15 +86,6 @@ class Gaussian(ModelComponent):
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         """Evaluate the Gaussian at the given x values. If x is a scipp Variable, the unit of the Gaussian will be converted to match x."""
 
-        if self._width.value <= 0:
-            raise ValueError("The width of a Gaussian must be greater than zero.")
-        if self._area.value < 0:
-            warnings.warn(
-                "The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
-                )
-            )
-
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
@@ -101,7 +93,7 @@ class Gaussian(ModelComponent):
                 try:
                     self.convert_unit(x.unit.name)
                 except Exception as e:
-                    raise ValueError(
+                    raise UnitError(
                         f"Input x has unit {x.unit}, but Gaussian component has unit {self._unit}. Failed to convert Gaussian to {x.unit}."
                     ) from e
 

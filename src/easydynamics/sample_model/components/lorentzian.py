@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 from .model_component import ModelComponent
 
 import scipp as sc
+from scipp import UnitError
 
 import warnings
 
@@ -83,15 +84,6 @@ class Lorentzian(ModelComponent):
         )
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
-        if self._width.value <= 0:
-            raise ValueError("The width of a Lorentzian must be greater than zero.")
-        if self._area.value < 0:
-            warnings.warn(
-                "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
-                )
-            )
-
         # Handle units
         if isinstance(x, sc.Variable):
             x_in = x.values
@@ -99,7 +91,7 @@ class Lorentzian(ModelComponent):
                 try:
                     self.convert_unit(x.unit.name)
                 except Exception as e:
-                    raise ValueError(
+                    raise UnitError(
                         f"Input x has unit {x.unit}, but Lorentzian component has unit {self._unit}. Failed to convert Lorentzian to {x.unit}."
                     ) from e
                 warnings.warn(
