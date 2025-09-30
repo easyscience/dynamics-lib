@@ -75,6 +75,22 @@ class TestPolynomial:
         ):
             polynomial.evaluate(x)
 
+    def test_evaluate_with_nan_input(self, polynomial: Polynomial):
+        # WHEN
+        x = np.array([0.0, np.nan, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains NaN values."):
+            polynomial.evaluate(x)
+
+    def test_evaluate_with_infinite_input(self, polynomial: Polynomial):
+        # WHEN
+        x = np.array([0.0, np.inf, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains infinite values."):
+            polynomial.evaluate(x)
+
     def test_degree(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.degree() == 2

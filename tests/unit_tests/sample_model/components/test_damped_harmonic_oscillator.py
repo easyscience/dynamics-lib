@@ -99,7 +99,7 @@ class TestDampedHarmonicOscillator:
 
     def test_center_property_getter(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        assert dho.center.value == 0.5
+        assert dho.center.value == 1.5
 
     def test_center_property_setter(self, dho: DampedHarmonicOscillator):
         # WHEN
@@ -111,7 +111,7 @@ class TestDampedHarmonicOscillator:
             dho.center = "invalid"
 
     def test_width_property_getter(self, dho: DampedHarmonicOscillator):
-        assert dho.width.value == 0.6
+        assert dho.width.value == 0.3
 
     def test_width_property_setter(self, dho: DampedHarmonicOscillator):
         # WHEN
@@ -168,6 +168,22 @@ class TestDampedHarmonicOscillator:
             UnitError,
             match="Input x has unit nm, but DampedHarmonicOscillator component has unit meV. Failed to convert DampedHarmonicOscillator to nm.",
         ):
+            dho.evaluate(x)
+
+    def test_evaluate_with_nan_input(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        x = np.array([0.0, np.nan, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains NaN values."):
+            dho.evaluate(x)
+
+    def test_evaluate_with_infinite_input(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        x = np.array([0.0, np.inf, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains infinite values."):
             dho.evaluate(x)
 
     def test_get_parameters(self, dho: DampedHarmonicOscillator):

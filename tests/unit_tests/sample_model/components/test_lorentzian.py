@@ -140,6 +140,24 @@ class TestLorentzian:
         ):
             lorentzian.evaluate(x)
 
+    def test_evaluate_with_nan_input(self, lorentzian: Lorentzian):
+        # WHEN
+        x = np.array([0.0, np.nan, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains NaN values."):
+            lorentzian.evaluate(x)
+
+    def test_evaluate_with_infinite_input(self, lorentzian: Lorentzian):
+        # WHEN
+        x = np.array([0.0, np.inf, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains infinite values."):
+            lorentzian.evaluate(x)
+
+            lorentzian.evaluate(x)
+
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN
         test_lorentzian = Lorentzian(

@@ -66,6 +66,13 @@ class Polynomial(ModelComponent):
                 )
         else:
             x_in = x
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
         result = np.zeros_like(x_in, dtype=float)
         for i, param in enumerate(self.coefficients):
             result += param.value * np.power(x_in, i)

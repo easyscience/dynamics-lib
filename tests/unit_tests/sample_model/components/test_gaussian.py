@@ -138,6 +138,22 @@ class TestGaussian:
         ):
             gaussian.evaluate(x)
 
+    def test_evaluate_with_nan_input(self, gaussian: Gaussian):
+        # WHEN
+        x = np.array([0.0, np.nan, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains NaN values."):
+            gaussian.evaluate(x)
+
+    def test_evaluate_with_infinite_input(self, gaussian: Gaussian):
+        # WHEN
+        x = np.array([0.0, np.inf, 1.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Input x contains infinite values."):
+            gaussian.evaluate(x)
+
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN
         test_gaussian = Gaussian(
