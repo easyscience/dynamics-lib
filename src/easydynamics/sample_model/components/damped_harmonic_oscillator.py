@@ -69,6 +69,8 @@ class DampedHarmonicOscillator(ModelComponent):
 
         # Create Parameters from floats
         self._area = Parameter(name=name + " area", value=area, unit=unit)
+        if area > 0:
+            self._area.min = 0.0
 
         self._center = Parameter(name=name + " center", value=center, unit=unit)
 

@@ -55,6 +55,9 @@ class DeltaFunction(ModelComponent):
 
         # Create Parameters from floats, or set Parameters if already provided
         self._area = Parameter(name=name + " area", value=area, unit=unit)
+        if area > 0:
+            self._area.min = 0.0
+
         if center is None:
             self._center = Parameter(
                 name=name + " center", value=0.0, unit=unit, fixed=True
