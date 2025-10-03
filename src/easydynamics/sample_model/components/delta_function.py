@@ -91,7 +91,7 @@ class DeltaFunction(ModelComponent):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
 
-    def evaluate(self, x):
+    def evaluate(self, x: Union[np.ndarray, sc.Variable]) -> np.ndarray:
         """ "Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
         # TODO: Consider adding support for evaluation without resolution convolution
@@ -129,12 +129,12 @@ class DeltaFunction(ModelComponent):
         """
         return [self._area, self._center]
 
-    def convert_unit(self, unit):
+    def convert_unit(self, unit: Union[str, sc.Unit]):
         """
         Convert the unit of the Parameters in the component.
 
         Args:
-            unit (str): The new unit to convert to.
+            unit (str or sc.Unit): The new unit to convert to.
         """
         self._area.convert_unit(unit)
         self._center.convert_unit(unit)

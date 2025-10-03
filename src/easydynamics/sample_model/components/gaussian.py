@@ -159,12 +159,12 @@ class Gaussian(ModelComponent):
         """
         return [self._area, self._center, self._width]
 
-    def convert_unit(self, unit: str):
+    def convert_unit(self, unit: Union[str, sc.Unit]):
         """
         Convert the unit of the Parameters in the component.
 
         Args:
-            unit (str): The new unit to convert to.
+            unit (str or sc.Unit): The new unit to convert to.
         """
 
         self._area.convert_unit(unit)
