@@ -1,22 +1,18 @@
+import warnings
+from typing import Optional, Union
+
 import numpy as np
-
-from easyscience import Parameter
-
 import scipp as sc
+from easyscience import Parameter
 from scipp import UnitError
 from scipp.constants import Boltzmann as kB
-
-
-from typing import Union, Optional
-import warnings
-
 
 # Small and large values of x need special treatment.
 SMALL_THRESHOLD = 0.001  # For small values of x, the denominator is close to zero, which can give numerical issues. The issues don't start until x<~1e-6, but we use a larger threshold to be safe.
 LARGE_THRESHOLD = 100  # For large values of x, the exponential term becomes negligible. This happens around x>~10, but we use a larger threshold to be safe. At very large x, exp(-x) can be rounded to 0, which can give numerical issues.
 
 
-def detailed_balance_factor(
+def _detailed_balance_factor(
     energy: Union[int, float, list, np.ndarray, sc.Variable],
     temperature: Union[int, float, sc.Variable, Parameter],
     energy_unit: str = "meV",
@@ -98,7 +94,9 @@ def detailed_balance_factor(
             DBF_values = DBF.values
         return DBF_values
 
-    # Work with dimensionless x = energy/(kB*T). Here, we have divided by kB*T
+    # Now work with finite temperatures. Here, it helps to work with dimensionless x = energy/(kB*T), where we have divided by kB*T
+    # We first check if the units are OK.
+
     x = energy / (kB * temperature)
 
     try:
@@ -108,20 +106,22 @@ def detailed_balance_factor(
             f"Error converting energy/(kB*T) to dimensionless units: {e}. Check that energy and temperature have compatible units."
         )
 
-    DBF = sc.zeros_like(x)
+    # Now compute DBF. First handle small and large x, then the general case.
 
     # Small x (small energy and/or high temperature): Taylor expansion
     small = sc.abs(x) < SMALL_THRESHOLD
 
-    DBF = sc.where(small, 1 + x / 2 + x**2 / 12, DBF)
+    DBF = sc.where(small, 1 + x / 2 + x**2 / 12, sc.zeros_like(x))
 
     # Large x (large energy and/or low temperature): asymptotic form
     large = x > LARGE_THRESHOLD
     DBF = sc.where(large, x, DBF)
 
     # General case: exact formula
-    mid = ~small & ~large
-    DBF = sc.where(mid, x / (1 - sc.exp(-x)), DBF)
+    mid = sc.logical_not(small) & sc.logical_not(large)
+    DBF = sc.where(
+        mid, x / (1 - sc.exp(-x)), DBF
+    )  # zeros in x are handled by SMALL_THRESHOLD
 
     #
     if not divide_by_temperature:
@@ -137,7 +137,7 @@ def detailed_balance_factor(
 
 def _convert_to_scipp_variable(
     value: Union[int, float, list, np.ndarray, Parameter, sc.Variable],
-    unit: Optional[str],
+    unit: Optional[str] = None,
     name: str = "value",
 ) -> sc.Variable:
     """Convert various input types to a scipp Variable with proper units."""
@@ -169,11 +169,11 @@ def _convert_to_scipp_variable(
         # Scalar or single-element array
         try:
             return sc.scalar(value=float(array_value.flat[0]), unit=unit)
-        except sc.UnitError as e:
+        except UnitError as e:
             raise UnitError(f"Invalid unit string '{unit}' for {name}: {e}")
     else:
         # Multi-element array
         try:
             return sc.array(dims=["x"], values=array_value, unit=unit)
-        except sc.UnitError as e:
+        except UnitError as e:
             raise UnitError(f"Invalid unit string '{unit}' for {name}: {e}")
