@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+import warnings
+from typing import Optional, Union
 
 import numpy as np
-
-from easyscience.variable import Parameter
-
-from .model_component import ModelComponent
-
 import scipp as sc
+from easyscience.variable import Parameter
 from scipp import UnitError
 
-import warnings
+from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 

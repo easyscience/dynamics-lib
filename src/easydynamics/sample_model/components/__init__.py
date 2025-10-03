@@ -1,9 +1,9 @@
+from .damped_harmonic_oscillator import DampedHarmonicOscillator
+from .delta_function import DeltaFunction
 from .gaussian import Gaussian
 from .lorentzian import Lorentzian
-from .voigt import Voigt
-from .delta_function import DeltaFunction
-from .damped_harmonic_oscillator import DampedHarmonicOscillator
 from .polynomial import Polynomial
+from .voigt import Voigt
 
 __all__ = [
     "Gaussian",

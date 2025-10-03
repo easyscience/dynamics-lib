@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
-
-from easyscience.variable import Parameter
-from easyscience.base_classes import ObjBase
-
 import scipp as sc
+from easyscience.base_classes import ObjBase
+from easyscience.variable import Parameter
 
 Numeric = Union[float, int]
 

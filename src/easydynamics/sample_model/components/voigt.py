@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-from scipy.special import voigt_profile
-
-from typing import Union, Optional
+import warnings
+from typing import Optional, Union
 
 import numpy as np
-
+import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
+from scipy.special import voigt_profile
 
 from .model_component import ModelComponent
-
-import scipp as sc
-from scipp import UnitError
-
-import warnings
 
 Numeric = Union[float, int]
 
