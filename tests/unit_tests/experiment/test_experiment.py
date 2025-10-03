@@ -1,8 +1,8 @@
+import numpy as np
 import pytest
+import scipp as sc
 
 from easydynamics.experiment import Experiment
-import scipp as sc
-import numpy as np
 
 
 class TestExperiment:
@@ -15,7 +15,6 @@ class TestExperiment:
         values = sc.array(dims=["Q", "energy"], values=np.ones((10, 11)))
         data = sc.DataArray(data=values, coords={"Q": Q, "energy": energy})
         experiment.append_data(data, name)
-        experiment.plot_data(name)
         return experiment
 
     def test_get_data(self, experiment):
