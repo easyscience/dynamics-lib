@@ -239,7 +239,7 @@ class Experiment(ExperimentBase):
 
     def __str__(self):
         """Return a user-friendly string representation."""
-        return f"Experiment: {self.name}, Datasets: {list(self._data.keys())}"
+        return f"Experiment(name = {self.name}, datasets={list(self._data.keys())})"
 
     def __iter__(self):
         """Iterate over dataset names."""
