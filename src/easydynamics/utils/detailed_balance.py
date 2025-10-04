@@ -58,34 +58,32 @@ def _detailed_balance_factor(
 
     # Convert temperature and energy to sc variables to make units easy to handle
     temperature = _convert_to_scipp_variable(
-        temperature, temperature_unit, "temperature"
+        value=temperature, unit=temperature_unit, name="temperature"
     )
 
     if temperature.value < 0:
         raise ValueError("Temperature must be non-negative.")
 
-    energy = _convert_to_scipp_variable(energy, energy_unit, "energy")
+    energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name="energy")
 
     # We give users the option to specify the unit of the energy, but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(
             f"Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. Using {energy.unit}."
         )
-        energy_unit = energy.unit
 
     # Same for temperature
     if temperature.unit != temperature_unit:
         warnings.warn(
             f"Input temperature has unit {temperature.unit}, but temperature_unit was set to {temperature_unit}. Using {temperature.unit}."
         )
-        temperature_unit = temperature.unit
 
     # Zero temperature deserves special treatment. Here, DBF is 0 for energy<0 and energy for energy>0
     if temperature.value == 0:
         if divide_by_temperature:
             raise ZeroDivisionError("Cannot divide by T when T = 0.")
         DBF = sc.where(
-            energy < 0.0 * sc.Unit(energy_unit), 0.0 * sc.Unit(energy_unit), energy
+            energy < 0.0 * sc.Unit(energy.unit), 0.0 * sc.Unit(energy.unit), energy
         )
 
         if DBF.sizes == {}:
@@ -108,12 +106,12 @@ def _detailed_balance_factor(
 
     # Now compute DBF. First handle small and large x, then the general case.
 
-    # Small x (small energy and/or high temperature): Taylor expansion
+    # Small x (small energy and/or high temperature): Taylor expansion. Works and is needed for both positive and negative energies
     small = sc.abs(x) < SMALL_THRESHOLD
 
     DBF = sc.where(small, 1 + x / 2 + x**2 / 12, sc.zeros_like(x))
 
-    # Large x (large energy and/or low temperature): asymptotic form
+    # Large x (large positive energy and/or low temperature): asymptotic form. Only needed for positive energies.
     large = x > LARGE_THRESHOLD
     DBF = sc.where(large, x, DBF)
 
@@ -126,7 +124,7 @@ def _detailed_balance_factor(
     #
     if not divide_by_temperature:
         DBF = DBF * (kB * temperature)
-        DBF = sc.to_unit(DBF, unit=energy_unit)
+        DBF = sc.to_unit(DBF, unit=energy.unit)
 
     if DBF.sizes == {}:
         DBF_values = np.array(DBF.value)
@@ -137,8 +135,8 @@ def _detailed_balance_factor(
 
 def _convert_to_scipp_variable(
     value: Union[int, float, list, np.ndarray, Parameter, sc.Variable],
+    name: str,
     unit: Optional[str] = None,
-    name: str = "value",
 ) -> sc.Variable:
     """Convert various input types to a scipp Variable with proper units."""
     if isinstance(value, sc.Variable):
