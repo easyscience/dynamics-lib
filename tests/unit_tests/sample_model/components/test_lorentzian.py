@@ -1,13 +1,11 @@
-import pytest
-
 import numpy as np
+import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 from scipp import UnitError
-
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Lorentzian
-from easyscience.variable import Parameter
 
 
 class TestLorentzian:
@@ -18,32 +16,41 @@ class TestLorentzian:
         )
 
     def test_initialization(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         assert lorentzian.name == "TestLorentzian"
         assert lorentzian._area.value == 2.0
         assert lorentzian._center.value == 0.5
         assert lorentzian._width.value == 0.6
         assert lorentzian.unit == "meV"
 
-    def test_input_type_validation_raises(self):
+    def test_input_type_validation_area_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="area must be a number"):
             Lorentzian(
                 name="TestLorentzian", area="invalid", center=0.5, width=0.6, unit="meV"
             )
 
+    def test_input_type_validation_center_width_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="center must be None or a number"):
             Lorentzian(
                 name="TestLorentzian", area=2.0, center="invalid", width=0.6, unit="meV"
             )
 
+    def test_input_type_validation_width_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="width must be a number"):
             Lorentzian(
                 name="TestLorentzian", area=2.0, center=0.5, width="invalid", unit="meV"
             )
 
+    def test_input_type_validation_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Lorentzian(name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit=123)
 
     def test_negative_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="The width of a Lorentzian must be greater than zero."
         ):
@@ -52,12 +59,14 @@ class TestLorentzian:
             )
 
     def test_negative_area_warns(self):
+        # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Lorentzian(
                 name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
             )
 
     def test_area_property_getter(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         assert lorentzian.area.value == 2.0
 
     def test_area_property_setter(self, lorentzian: Lorentzian):
@@ -74,22 +83,23 @@ class TestLorentzian:
         assert lorentzian.center.value == 0.5
 
     def test_center_property_setter(self, lorentzian: Lorentzian):
-        # WHEN
+        # WHEN THEN
         lorentzian.center = 0.6
 
-        # THEN EXPECT
+        # EXPECT
         assert lorentzian.center.value == 0.6
         with pytest.raises(TypeError, match="center must be a number."):
             lorentzian.center = "invalid"
 
     def test_width_property_getter(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         assert lorentzian.width.value == 0.6
 
     def test_width_property_setter(self, lorentzian: Lorentzian):
-        # WHEN
+        # WHEN THEN
         lorentzian.width = 0.7
 
-        # THEN EXPECT
+        # EXPECT
         assert lorentzian.width.value == 0.7
         with pytest.raises(TypeError, match="width must be a number."):
             lorentzian.width = "invalid"
@@ -141,30 +151,28 @@ class TestLorentzian:
             lorentzian.evaluate(x)
 
     def test_evaluate_with_nan_input(self, lorentzian: Lorentzian):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.nan, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             lorentzian.evaluate(x)
 
     def test_evaluate_with_infinite_input(self, lorentzian: Lorentzian):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.inf, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains infinite values."):
             lorentzian.evaluate(x)
 
-            lorentzian.evaluate(x)
-
     def test_center_is_fixed_if_set_to_None(self):
-        # WHEN
+        # WHEN THEN
         test_lorentzian = Lorentzian(
             name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"
         )
 
-        # THEN EXPECT
+        # EXPECT
         assert test_lorentzian._center.value == 0.0
         assert test_lorentzian._center.fixed is True
 
@@ -180,7 +188,7 @@ class TestLorentzian:
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, lorentzian: Lorentzian):
-        # WHEN
+        # WHEN THEN
         x = np.linspace(
             lorentzian._center.value - 500 * lorentzian._width.value,
             lorentzian._center.value + 500 * lorentzian._width.value,
@@ -189,7 +197,7 @@ class TestLorentzian:
         y = lorentzian.evaluate(x)
         numerical_area = simpson(y, x)
 
-        # THEN EXPECT
+        # EXPECT
         assert numerical_area == pytest.approx(lorentzian._area.value, rel=2e-3)
 
     def test_convert_unit(self, lorentzian: Lorentzian):

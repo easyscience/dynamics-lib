@@ -16,6 +16,7 @@ class TestGaussian:
         )
 
     def test_initialization(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
         assert gaussian.name == "TestGaussian"
         assert gaussian._area.value == 2.0
         assert gaussian._center.value == 0.5
