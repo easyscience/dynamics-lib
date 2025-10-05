@@ -1,18 +1,12 @@
-import pytest
-
 import numpy as np
+import pytest
 import scipp as sc
-from scipp import UnitError
-
-from scipy.integrate import simpson
-
-from easydynamics.sample_model import Voigt
-
 from easyscience.variable import Parameter
-
+from scipp import UnitError
+from scipy.integrate import simpson
 from scipy.special import voigt_profile
 
-from easydynamics.sample_model.components.lorentzian import Lorentzian
+from easydynamics.sample_model import Voigt
 
 
 class TestVoigt:
@@ -28,6 +22,7 @@ class TestVoigt:
         )
 
     def test_initialization(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         assert voigt.name == "TestVoigt"
         assert voigt._area.value == 2.0
         assert voigt._center.value == 0.5
@@ -35,7 +30,8 @@ class TestVoigt:
         assert voigt._lorentzian_width.value == 0.7
         assert voigt.unit == "meV"
 
-    def test_input_type_validation_raises(self):
+    def test_input_type_validation_area_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="area must be a number"):
             Voigt(
                 name="TestVoigt",
@@ -46,6 +42,8 @@ class TestVoigt:
                 unit="meV",
             )
 
+    def test_input_type_validation_center_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="center must be None or a number"):
             Voigt(
                 name="TestVoigt",
@@ -56,6 +54,8 @@ class TestVoigt:
                 unit="meV",
             )
 
+    def test_input_type_validation_gaussian_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="gaussian_width must be a number"):
             Voigt(
                 name="TestVoigt",
@@ -65,6 +65,9 @@ class TestVoigt:
                 lorentzian_width=0.7,
                 unit="meV",
             )
+
+    def test_input_type_validation_lorentzian_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="lorentzian_width must be a number"):
             Voigt(
                 name="TestVoigt",
@@ -74,6 +77,9 @@ class TestVoigt:
                 lorentzian_width="invalid",
                 unit="meV",
             )
+
+    def test_input_type_validation_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Voigt(
                 name="TestVoigt",
@@ -126,6 +132,7 @@ class TestVoigt:
             )
 
     def test_area_property_getter(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         assert voigt.area.value == 2.0
 
     def test_area_property_setter(self, voigt: Voigt):
@@ -155,10 +162,10 @@ class TestVoigt:
         assert voigt.gaussian_width.value == 0.6
 
     def test_gaussian_width_property_setter(self, voigt: Voigt):
-        # WHEN
+        # WHEN THEN
         voigt.gaussian_width = 0.7
 
-        # THEN EXPECT
+        # EXPECT
         assert voigt.gaussian_width.value == 0.7
         with pytest.raises(TypeError, match="width must be a number."):
             voigt.gaussian_width = "invalid"
@@ -168,10 +175,10 @@ class TestVoigt:
         assert voigt.lorentzian_width.value == 0.7
 
     def test_lorentzian_width_property_setter(self, voigt: Voigt):
-        # WHEN
+        # WHEN THEN
         voigt.lorentzian_width = 0.8
 
-        # THEN EXPECT
+        # EXPECT
         assert voigt.lorentzian_width.value == 0.8
 
         with pytest.raises(TypeError, match="width must be a number."):
@@ -213,8 +220,10 @@ class TestVoigt:
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_incompatible_unit(self, voigt: Voigt):
-        # WHEN THEN EXPECT
+        # WHEN THEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
+
+        # EXPECT
         with pytest.raises(
             UnitError,
             match="Input x has unit nm, but Voigt component has unit meV. Failed to convert Voigt to nm.",
@@ -222,18 +231,18 @@ class TestVoigt:
             voigt.evaluate(x)
 
     def test_evaluate_with_nan_input(self, voigt: Voigt):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.nan, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             voigt.evaluate(x)
 
     def test_evaluate_with_infinite_input(self, voigt: Voigt):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.inf, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains infinite values."):
             voigt.evaluate(x)
 
@@ -276,7 +285,7 @@ class TestVoigt:
         assert all(isinstance(param, Parameter) for param in params)
 
     def test_area_matches_parameter(self, voigt: Voigt):
-        # WHEN
+        # WHEN THEN
         x = np.linspace(
             voigt._center.value
             - 100 * voigt._gaussian_width.value
@@ -289,7 +298,7 @@ class TestVoigt:
         y = voigt.evaluate(x)
         numerical_area = simpson(y, x)
 
-        # THEN EXPECT
+        # EXPECT
         assert numerical_area == pytest.approx(voigt._area.value, rel=2e-3)
 
     def test_copy(self, voigt: Voigt):

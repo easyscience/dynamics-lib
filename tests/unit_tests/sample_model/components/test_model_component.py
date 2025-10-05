@@ -1,10 +1,8 @@
-import pytest
-
 import numpy as np
+import pytest
+from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.model_component import ModelComponent
-
-from easyscience.variable import Parameter
 
 
 class TestModelComponent:
@@ -46,5 +44,6 @@ class TestModelComponent:
         assert all(not p.fixed for p in dummy.get_parameters())
 
     def test_repr(self, dummy):
+        # WHEN THEN EXPECT
         repr_str = repr(dummy)
         assert "DummyComponent" in repr_str

@@ -1,12 +1,10 @@
-import pytest
-
 import numpy as np
+import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
-
-from easyscience.variable import Parameter
 
 
 class TestPolynomial:
@@ -15,29 +13,38 @@ class TestPolynomial:
         return Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0])
 
     def test_initialization(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
         assert polynomial.name == "TestPolynomial"
         assert polynomial.coefficients[0].value == 1.0
         assert polynomial.coefficients[1].value == -2.0
         assert polynomial.coefficients[2].value == 3.0
 
-    def test_input_type_validation_raises(self):
+    def test_input_type_validation_coefficients_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             TypeError, match="coefficients must be a list, tuple or ndarray of floats."
         ):
             Polynomial(name="TestPolynomial", coefficients="invalid")
 
+    def test_input_type_validation_coefficients_elements_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="All coefficients must be numbers."):
             Polynomial(name="TestPolynomial", coefficients=[1.0, "invalid", 3.0])
 
+    def test_input_type_validation_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0], unit=123)
 
+    def test_no_coefficients_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="At least one coefficient must be provided"
         ):
             Polynomial(name="TestPolynomial", coefficients=[])
 
     def test_negative_value_warns_in_evaluate(self):
+        # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             test_polynomial = Polynomial(name="TestPolynomial", coefficients=[-1.0])
             test_polynomial.evaluate(np.array([0.0, 1.0, 2.0]))
