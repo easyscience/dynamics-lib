@@ -1,14 +1,11 @@
-import pytest
-
 import numpy as np
+import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 from scipp import UnitError
-
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian
-
-from easyscience.variable import Parameter
 
 
 class TestGaussian:
@@ -25,33 +22,46 @@ class TestGaussian:
         assert gaussian._width.value == 0.6
         assert gaussian.unit == "meV"
 
-    def test_input_type_validation_raises(self):
+    def test_input_type_validation_area_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="area must be a number"):
             Gaussian(
                 name="TestGaussian", area="invalid", center=0.5, width=0.6, unit="meV"
             )
+
+    def test_input_type_validation_center_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="center must be None or a number"):
             Gaussian(
                 name="TestGaussian", area=2.0, center="invalid", width=0.6, unit="meV"
             )
+
+    def test_input_type_validation_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="width must be a number"):
             Gaussian(
                 name="TestGaussian", area=2.0, center=0.5, width="invalid", unit="meV"
             )
+
+    def test_input_type_validation_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             Gaussian(name="TestGaussian", area=2.0, center=0.5, width=0.6, unit=123)
 
     def test_negative_width_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="The width of a Gaussian must be greater than zero."
         ):
             Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
 
     def test_negative_area_warns(self):
+        # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
 
     def test_area_property_getter(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
         assert gaussian.area.value == 2.0
 
     def test_area_property_setter(self, gaussian: Gaussian):
@@ -77,6 +87,7 @@ class TestGaussian:
             gaussian.center = "invalid"
 
     def test_width_property_getter(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
         assert gaussian.width.value == 0.6
 
     def test_width_property_setter(self, gaussian: Gaussian):
@@ -128,10 +139,10 @@ class TestGaussian:
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_incompatible_unit(self, gaussian: Gaussian):
-        # WHEN
+        # WHEN THEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(
             UnitError,
             match="Input x has unit nm, but Gaussian component has unit meV. Failed to convert Gaussian to nm.",
@@ -139,27 +150,27 @@ class TestGaussian:
             gaussian.evaluate(x)
 
     def test_evaluate_with_nan_input(self, gaussian: Gaussian):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.nan, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             gaussian.evaluate(x)
 
     def test_evaluate_with_infinite_input(self, gaussian: Gaussian):
-        # WHEN
+        # WHEN THEN
         x = np.array([0.0, np.inf, 1.0])
 
-        # THEN EXPECT
+        # EXPECT
         with pytest.raises(ValueError, match="Input x contains infinite values."):
             gaussian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
-        # WHEN
+        # WHEN THEN
         test_gaussian = Gaussian(
             name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"
         )
-        # THEN EXPECT
+        # EXPECT
         assert test_gaussian._center.value == 0.0
         assert test_gaussian._center.fixed is True
 
