@@ -65,7 +65,6 @@ def _detailed_balance_factor(
         raise ValueError("Temperature must be non-negative.")
 
     energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name="energy")
-
     # We give users the option to specify the unit of the energy, but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(
@@ -82,9 +81,7 @@ def _detailed_balance_factor(
     if temperature.value == 0:
         if divide_by_temperature:
             raise ZeroDivisionError("Cannot divide by T when T = 0.")
-        DBF = sc.where(
-            energy < 0.0 * sc.Unit(energy.unit), 0.0 * sc.Unit(energy.unit), energy
-        )
+        DBF = sc.where(energy < 0.0 * energy.unit, 0.0 * energy.unit, energy)
 
         if DBF.sizes == {}:
             DBF_values = np.array(DBF.value)
