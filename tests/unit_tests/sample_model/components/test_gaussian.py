@@ -126,6 +126,9 @@ class TestGaussian:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but Gaussian component has unit meV.*:UserWarning"
+    )
     def test_evaluate_with_different_unit(self, gaussian: Gaussian):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
@@ -138,6 +141,17 @@ class TestGaussian:
             -0.5 * ((x.values - 500.0) / (0.6 * 1e3)) ** 2
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warns(self, gaussian: Gaussian):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but Gaussian component has unit meV. Converting Gaussian to µeV.",
+        ):
+            gaussian.evaluate(x)
 
     def test_evaluate_with_incompatible_unit(self, gaussian: Gaussian):
         # WHEN THEN

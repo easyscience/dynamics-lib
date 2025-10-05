@@ -97,6 +97,9 @@ class TestDeltaFunction:
         expected_result = np.zeros_like(x.values)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but DeltaFunction component has unit meV.*:UserWarning"
+    )
     def test_evaluate_with_different_unit(self, delta_function: DeltaFunction):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="microeV")
@@ -107,6 +110,17 @@ class TestDeltaFunction:
         # EXPECT
         expected_result = np.zeros_like(x.values)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warns(self, delta_function: DeltaFunction):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="microeV")
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but DeltaFunction component has unit meV. Converting DeltaFunction to µeV.",
+        ):
+            delta_function.evaluate(x)
 
     def test_evaluate_with_incompatible_unit(self, delta_function: DeltaFunction):
         # WHEN

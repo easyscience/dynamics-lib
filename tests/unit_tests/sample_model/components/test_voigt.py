@@ -206,6 +206,9 @@ class TestVoigt:
         expected_result = 2.0 * voigt_profile(x.values - 0.5, 0.6, 0.7)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but Voigt component has unit meV.*:UserWarning"
+    )
     def test_evaluate_with_different_unit(self, voigt: Voigt):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
@@ -218,6 +221,17 @@ class TestVoigt:
             2.0 * 1e3 * voigt_profile(x.values - 0.5 * 1e3, 0.6 * 1e3, 0.7 * 1e3)
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warns(self, voigt: Voigt):
+        # WHEN THEN
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
+
+        # EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but Voigt component has unit meV. Converting Voigt to µeV.",
+        ):
+            voigt.evaluate(x)
 
     def test_evaluate_with_incompatible_unit(self, voigt: Voigt):
         # WHEN THEN

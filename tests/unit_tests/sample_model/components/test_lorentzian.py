@@ -126,6 +126,9 @@ class TestLorentzian:
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x.values - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but Lorentzian component has unit meV.*:UserWarning"
+    )
     def test_evaluate_with_different_unit(self, lorentzian: Lorentzian):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
@@ -138,6 +141,17 @@ class TestLorentzian:
             1 + ((x.values - 0.5 * 1e3) / (0.6 * 1e3)) ** 2
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warns(self, lorentzian: Lorentzian):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but Lorentzian component has unit meV. Converting Lorentzian to µeV.",
+        ):
+            lorentzian.evaluate(x)
 
     def test_evaluate_with_incompatible_unit(self, lorentzian: Lorentzian):
         # WHEN

@@ -127,6 +127,7 @@ class Lorentzian(ModelComponent):
         if isinstance(x, sc.Variable):
             x_in = x.values
             if self._unit is not None and x.unit != self._unit:
+                self_unit_for_warning = self._unit
                 try:
                     self.convert_unit(x.unit.name)
                 except Exception as e:
@@ -134,7 +135,7 @@ class Lorentzian(ModelComponent):
                         f"Input x has unit {x.unit}, but Lorentzian component has unit {self._unit}. Failed to convert Lorentzian to {x.unit}."
                     ) from e
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but Lorentzian component has unit {self._unit}. Converting Lorentzian to {x.unit}."
+                    f"Input x has unit {x.unit}, but Lorentzian component has unit {self_unit_for_warning}. Converting Lorentzian to {x.unit}."
                 )
         else:
             x_in = x

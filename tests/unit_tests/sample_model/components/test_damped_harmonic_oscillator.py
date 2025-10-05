@@ -166,6 +166,9 @@ class TestDampedHarmonicOscillator:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but DampedHarmonicOscillator component has unit meV.*:UserWarning"
+    )
     def test_evaluate_with_different_unit(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
@@ -184,6 +187,17 @@ class TestDampedHarmonicOscillator:
             / ((x.values**2 - (1.5 * 1e3) ** 2) ** 2 + (2 * 0.3 * 1e3 * x.values) ** 2)
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warning(self, dho: DampedHarmonicOscillator):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but DampedHarmonicOscillator component has unit meV. Converting DampedHarmonicOscillator to µeV.",
+        ):
+            dho.evaluate(x)
 
     def test_evaluate_with_incompatible_unit(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
