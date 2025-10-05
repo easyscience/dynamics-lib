@@ -28,8 +28,8 @@ class Polynomial(ModelComponent):
         coefficients: Union[list[float], np.ndarray] = [0.0],
         unit: Union[str, sc.Unit] = "meV",
     ):
-        if not isinstance(coefficients, (list, tuple, np.ndarray)):
-            raise TypeError("coefficients must be a list, tuple or ndarray of floats.")
+        if not isinstance(coefficients, (list, np.ndarray)):
+            raise TypeError("coefficients must be a list or ndarray of floats.")
 
         if not all(isinstance(c, Numeric) for c in coefficients):
             raise TypeError("All coefficients must be numbers.")
@@ -41,25 +41,42 @@ class Polynomial(ModelComponent):
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
 
-        self.coefficients = [
-            Parameter(
-                name=f"{name}_c{i}",
-                value=coef,
+        dimless = sc.units.dimensionless
+
+        # Build Parameters with appropriate units
+        self.coefficients = []
+        for i, coef in enumerate(coefficients):
+            coef_unit = dimless if i == 0 else f"1 / ({unit}**{i})"
+            self.coefficients.append(
+                Parameter(name=f"{name}_c{i}", value=coef, unit=coef_unit)
             )
-            for i, coef in enumerate(coefficients)
-        ]
+
+        for i, coef in enumerate(coefficients):
+            coef_unit = f"1 / ({unit}**{i})"
+            if i == 0:
+                continue  # dimensionless, no scaling
+            self.coefficients[i].convert_unit(coef_unit)
+            self.coefficients[i].value = coef
+
         self._unit = unit
 
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
-        If x is a scipp Variable, the unit of the Polynomial will be converted to match x.
         The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
         """
         if isinstance(x, sc.Variable):
             x_in = x.values
             if self._unit is not None and x.unit != self._unit:
-                raise UnitError(
-                    f"Input x has unit {x.unit}, but Polynomial component has unit {self._unit}. Change the unit of the Polynomial and try again. "
+                self_unit_for_warning = self._unit
+                try:
+                    self.convert_unit(x.unit)
+                except Exception as e:
+                    raise UnitError(
+                        f"Input x has unit {x.unit}, but Polynomial component has unit {self._unit}. Failed to convert Polynomial to {x.unit}."
+                    ) from e
+
+                warnings.warn(
+                    f"Input x has unit {x.unit}, but Polynomial component has unit {self_unit_for_warning}. Converting Polynomial to {x.unit}."
                 )
         else:
             x_in = x
@@ -112,10 +129,24 @@ class Polynomial(ModelComponent):
         )
         return f"Polynomial(name = {self.name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
-    def convert_unit(self, unit):
-        raise NotImplementedError(
-            "Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units. "
-        )
+    def convert_unit(self, unit: Union[str, sc.Unit]):
+        """Convert the unit of the polynomial.
+        Args:
+            unit (str or sc.Unit): The target unit to convert to.
+        """
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise UnitError("unit must be a string or a scipp unit.")
+
+        for i, param in enumerate(self.coefficients):
+            if i == 0:
+                continue  # dimensionless, no scaling
+            print(
+                f"Converting coefficient {param.name} from {param.unit} to 1 / ({unit}**{i})"
+            )
+            param.convert_unit(f"1 / ({unit}**{i})")
+
+        self._unit = unit
 
 
 # from typing import Callable, Dict

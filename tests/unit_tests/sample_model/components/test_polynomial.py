@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
 
@@ -22,7 +21,7 @@ class TestPolynomial:
     def test_input_type_validation_coefficients_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
-            TypeError, match="coefficients must be a list, tuple or ndarray of floats."
+            TypeError, match="coefficients must be a list or ndarray of floats."
         ):
             Polynomial(name="TestPolynomial", coefficients="invalid")
 
@@ -71,14 +70,28 @@ class TestPolynomial:
         expected_result = 1.0 - 2.0 * x.values + 3.0 * x.values**2
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_evaluate_with_different_unit_error(self, polynomial: Polynomial):
+    @pytest.mark.filterwarnings(
+        "ignore:Input x has unit µeV, but Polynomial component has unit meV.*:UserWarning"
+    )
+    def test_evaluate_with_different_unit(self, polynomial: Polynomial):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
+
+        # THEN
+        result = polynomial.evaluate(x)
+
+        # EXPECT
+        expected_result = 1.0 - (2.0 * 1e-3) * x.values + 3.0 * 1e-6 * x.values**2
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_with_different_unit_warns(self, polynomial: Polynomial):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
 
         # THEN EXPECT
-        with pytest.raises(
-            UnitError,
-            match="Change the unit of the Polynomial and try again",
+        with pytest.warns(
+            UserWarning,
+            match="Input x has unit µeV, but Polynomial component has unit meV. Converting Polynomial to µeV.",
         ):
             polynomial.evaluate(x)
 
@@ -113,13 +126,15 @@ class TestPolynomial:
         assert params[2].name == "TestPolynomial_c2"
         assert all(isinstance(param, Parameter) for param in params)
 
-    def test_convert_unit_raises_for_polynomial(self, polynomial):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            NotImplementedError,
-            match="Unit conversion is not implemented for Polynomial components. The automatic unit converter does not like powers of units.",
-        ):
-            polynomial.convert_unit("eV")
+    def test_convert_unit(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.convert_unit("microeV")
+
+        # THEN EXPECT
+        assert polynomial._unit == "microeV"
+        assert np.isclose(polynomial.coefficients[0].value, 1.0)
+        assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
+        assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
