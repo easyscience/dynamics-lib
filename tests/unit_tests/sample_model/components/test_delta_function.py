@@ -1,10 +1,10 @@
-import pytest
-
 import numpy as np
+import pytest
 import scipp as sc
-from scipp import UnitError
-from easydynamics.sample_model import DeltaFunction
 from easyscience.variable import Parameter
+from scipp import UnitError
+
+from easydynamics.sample_model import DeltaFunction
 
 
 class TestDeltaFunction:
@@ -13,12 +13,14 @@ class TestDeltaFunction:
         return DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit="meV")
 
     def test_initialization(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
         assert delta_function.name == "TestDeltaFunction"
         assert delta_function._area.value == 2.0
         assert delta_function._center.value == 0.5
         assert delta_function.unit == "meV"
 
-    def test_input_type_validation_raises(self):
+    def test_input_type_validation_area_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="area must be a number"):
             DeltaFunction(
                 name="TestDeltaFunction",
@@ -26,6 +28,9 @@ class TestDeltaFunction:
                 center=0.5,
                 unit="meV",
             )
+
+    def test_input_type_validation_center_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="center must be None or a number"):
             DeltaFunction(
                 name="TestDeltaFunction",
@@ -33,14 +38,19 @@ class TestDeltaFunction:
                 center="invalid",
                 unit="meV",
             )
+
+    def test_input_type_validation_unit_raises(self):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit=123)
 
     def test_negative_area_warns(self):
+        # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
 
     def test_area_property_getter(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
         assert delta_function.area.value == 2.0
 
     def test_area_property_setter(self, delta_function: DeltaFunction):

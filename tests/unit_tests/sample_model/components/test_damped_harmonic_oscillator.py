@@ -23,7 +23,7 @@ class TestDampedHarmonicOscillator:
         assert dho._width.value == 0.3
         assert dho._unit == "meV"
 
-    def test_input_type_validation_raises_area(self):
+    def test_input_type_validation_area_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="area must be a number"):
             DampedHarmonicOscillator(
@@ -34,7 +34,7 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
-    def test_input_type_validation_raises_center(self):
+    def test_input_type_validation_center_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="center must be a number"):
             DampedHarmonicOscillator(
@@ -45,7 +45,7 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
-    def test_input_type_validation_raises_width(self):
+    def test_input_type_validation_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="width must be a number"):
             DampedHarmonicOscillator(
@@ -56,7 +56,7 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
-    def test_input_type_validation_raises_unit(self):
+    def test_input_type_validation_unit_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
             DampedHarmonicOscillator(
