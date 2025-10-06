@@ -50,7 +50,9 @@ class Polynomial(ModelComponent):
             self.coefficients.append(
                 Parameter(name=f"{name}_c{i}", value=coef, unit=coef_unit)
             )
-
+        # scipp converts units like "1 / (meV**2)" to SI units (3.89e+43 1/J**2)
+        # EasyScience then converts this to 1/J**2 when setting the Parameter, and the value is scaled accordingly.
+        # We therefore convert back to 1 / (meV**2), which becomes (3.89e+43 1/J**2), and set the value again
         for i, coef in enumerate(coefficients):
             coef_unit = f"1 / ({unit}**{i})"
             if i == 0:
