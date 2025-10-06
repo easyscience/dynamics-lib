@@ -15,8 +15,8 @@ LARGE_THRESHOLD = 100  # For large values of x, the exponential term becomes neg
 def _detailed_balance_factor(
     energy: Union[int, float, list, np.ndarray, sc.Variable],
     temperature: Union[int, float, sc.Variable, Parameter],
-    energy_unit: str = "meV",
-    temperature_unit: str = "K",
+    energy_unit: Union[str, sc.Unit] = "meV",
+    temperature_unit: Union[str, sc.Unit] = "K",
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
     """
@@ -50,11 +50,11 @@ def _detailed_balance_factor(
     if not isinstance(divide_by_temperature, bool):
         raise TypeError("divide_by_temperature must be True or False.")
 
-    if not isinstance(energy_unit, str):
-        raise TypeError("energy_unit must be a string.")
+    if not isinstance(energy_unit, (str, sc.Unit)):
+        raise TypeError("energy_unit must be a string or scipp.Unit.")
 
-    if not isinstance(temperature_unit, str):
-        raise TypeError("temperature_unit must be a string.")
+    if not isinstance(temperature_unit, (str, sc.Unit)):
+        raise TypeError("temperature_unit must be a string or scipp.Unit.")
 
     # Convert temperature and energy to sc variables to make units easy to handle
     temperature = _convert_to_scipp_variable(

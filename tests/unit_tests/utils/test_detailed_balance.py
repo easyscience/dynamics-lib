@@ -207,10 +207,12 @@ class TestDetailedBalanceFactor:
         expected_ratio = np.exp(energy / (kB_meV_per_K * T))
         np.testing.assert_allclose(ratio, expected_ratio, rtol=1e-5)
 
-    def test_energy_unit(self):
+    @pytest.mark.parametrize(
+        "energy_unit", ["microeV", sc.Unit("microeV")], ids=["str", "scipp.Unit"]
+    )
+    def test_energy_unit(self, energy_unit):
         # When
         energy = np.linspace(1e3, 10 * 1e3, 100)
-        energy_unit = "microeV"
         T = 100
         # Then
         result = _detailed_balance_factor(
@@ -246,7 +248,10 @@ class TestDetailedBalanceFactor:
         )
         np.testing.assert_allclose(result, expected, rtol=1e-5)
 
-    def test_temperature_unit(self):
+    @pytest.mark.parametrize(
+        "temperature_unit", ["mK", sc.Unit("mK")], ids=["str", "scipp.Unit"]
+    )
+    def test_temperature_unit(self, temperature_unit):
         # When
         energy = np.linspace(1, 10, 100)
         temperature = 100 * 1000
