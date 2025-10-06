@@ -65,6 +65,14 @@ def _detailed_balance_factor(
         raise ValueError("Temperature must be non-negative.")
 
     energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name="energy")
+
+    # What if people give units that don't make sense?
+    try:
+        sc.to_unit(energy, unit="meV")
+    except Exception as e:
+        raise UnitError(
+            f"The unit of energy is wrong: {energy.unit}: {e} Check that energy has a valid unit."
+        )
     # We give users the option to specify the unit of the energy, but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(
@@ -72,6 +80,13 @@ def _detailed_balance_factor(
         )
 
     # Same for temperature
+    try:
+        sc.to_unit(temperature, unit="K")
+    except Exception as e:
+        raise UnitError(
+            f"The unit of temperature is wrong: {temperature.unit}: {e} Check that temperature has a valid unit."
+        )
+
     if temperature.unit != temperature_unit:
         warnings.warn(
             f"Input temperature has unit {temperature.unit}, but temperature_unit was set to {temperature_unit}. Using {temperature.unit}."
@@ -84,7 +99,7 @@ def _detailed_balance_factor(
         DBF = sc.where(energy < 0.0 * energy.unit, 0.0 * energy.unit, energy)
 
         if DBF.sizes == {}:
-            DBF_values = np.array(DBF.value)
+            DBF_values = np.array([DBF.value])
         else:
             DBF_values = DBF.values
         return DBF_values
@@ -94,12 +109,7 @@ def _detailed_balance_factor(
 
     x = energy / (kB * temperature)
 
-    try:
-        x = sc.to_unit(x, unit="1")  # Make sure the unit is 1 and not e.g. 1e3
-    except Exception as e:
-        raise UnitError(
-            f"Error converting energy/(kB*T) to dimensionless units: {e}. Check that energy and temperature have compatible units."
-        )
+    x = sc.to_unit(x, unit="1")  # Make sure the unit is 1 and not e.g. 1e3
 
     # Now compute DBF. First handle small and large x, then the general case.
 
@@ -124,7 +134,7 @@ def _detailed_balance_factor(
         DBF = sc.to_unit(DBF, unit=energy.unit)
 
     if DBF.sizes == {}:
-        DBF_values = np.array(DBF.value)
+        DBF_values = np.array([DBF.value])
     else:
         DBF_values = DBF.values
     return DBF_values
