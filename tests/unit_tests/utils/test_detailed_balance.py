@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience import Parameter
+from scipp import UnitError
 from scipp.constants import Boltzmann as kB
 
 from easydynamics.utils import _detailed_balance_factor as detailed_balance_factor
@@ -312,3 +313,22 @@ class TestDetailedBalanceFactor:
         # Expect
         expected = energy / (1 - np.exp(-energy / (kB_meV_per_K * 0.1)))
         np.testing.assert_allclose(result, expected, rtol=1e-5)
+
+    def test_incompatible_energy_and_temperature_units_raises(self):
+        # When
+        energy = 2.0
+        T = 100
+        energy_unit = "meV"
+        temperature_unit = "m"
+
+        # Then Expect
+        with pytest.raises(
+            UnitError,
+            match="Error converting energy",
+        ):
+            detailed_balance_factor(
+                energy,
+                T,
+                energy_unit=energy_unit,
+                temperature_unit=temperature_unit,
+            )
