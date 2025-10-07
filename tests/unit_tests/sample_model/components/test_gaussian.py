@@ -153,7 +153,7 @@ class TestGaussian:
         ):
             gaussian.evaluate(x)
 
-    def test_evaluate_with_incompatible_unit(self, gaussian: Gaussian):
+    def test_evaluate_with_incompatible_unit_raises(self, gaussian: Gaussian):
         # WHEN THEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
 
@@ -164,7 +164,7 @@ class TestGaussian:
         ):
             gaussian.evaluate(x)
 
-    def test_evaluate_with_nan_input(self, gaussian: Gaussian):
+    def test_evaluate_with_nan_input_raises(self, gaussian: Gaussian):
         # WHEN THEN
         x = np.array([0.0, np.nan, 1.0])
 
@@ -172,7 +172,7 @@ class TestGaussian:
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             gaussian.evaluate(x)
 
-    def test_evaluate_with_infinite_input(self, gaussian: Gaussian):
+    def test_evaluate_with_infinite_input_raises(self, gaussian: Gaussian):
         # WHEN THEN
         x = np.array([0.0, np.inf, 1.0])
 

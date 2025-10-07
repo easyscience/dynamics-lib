@@ -95,7 +95,7 @@ class TestPolynomial:
         ):
             polynomial.evaluate(x)
 
-    def test_evaluate_with_nan_input(self, polynomial: Polynomial):
+    def test_evaluate_with_nan_input_raises(self, polynomial: Polynomial):
         # WHEN
         x = np.array([0.0, np.nan, 1.0])
 
@@ -103,7 +103,7 @@ class TestPolynomial:
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             polynomial.evaluate(x)
 
-    def test_evaluate_with_infinite_input(self, polynomial: Polynomial):
+    def test_evaluate_with_infinite_input_raises(self, polynomial: Polynomial):
         # WHEN
         x = np.array([0.0, np.inf, 1.0])
 

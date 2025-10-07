@@ -122,7 +122,9 @@ class TestDeltaFunction:
         ):
             delta_function.evaluate(x)
 
-    def test_evaluate_with_incompatible_unit(self, delta_function: DeltaFunction):
+    def test_evaluate_with_incompatible_unit_raises(
+        self, delta_function: DeltaFunction
+    ):
         # WHEN
         x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="nm")
         # THEN EXPECT
@@ -132,7 +134,7 @@ class TestDeltaFunction:
         ):
             delta_function.evaluate(x)
 
-    def test_evaluate_with_nan_input(self, delta_function: DeltaFunction):
+    def test_evaluate_with_nan_input_raises(self, delta_function: DeltaFunction):
         # WHEN
         x = np.array([0.0, np.nan, 1.0])
 
@@ -140,7 +142,7 @@ class TestDeltaFunction:
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             delta_function.evaluate(x)
 
-    def test_evaluate_with_infinite_input(self, delta_function: DeltaFunction):
+    def test_evaluate_with_infinite_input_raises(self, delta_function: DeltaFunction):
         # WHEN
         x = np.array([0.0, np.inf, 1.0])
 

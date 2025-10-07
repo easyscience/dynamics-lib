@@ -199,7 +199,9 @@ class TestDampedHarmonicOscillator:
         ):
             dho.evaluate(x)
 
-    def test_evaluate_with_incompatible_unit(self, dho: DampedHarmonicOscillator):
+    def test_evaluate_with_incompatible_unit_raises(
+        self, dho: DampedHarmonicOscillator
+    ):
         # WHEN THEN
         x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
 
@@ -210,7 +212,7 @@ class TestDampedHarmonicOscillator:
         ):
             dho.evaluate(x)
 
-    def test_evaluate_with_nan_input(self, dho: DampedHarmonicOscillator):
+    def test_evaluate_with_nan_input_raises(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, np.nan, 1.0])
 
@@ -218,7 +220,7 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(ValueError, match="Input x contains NaN values."):
             dho.evaluate(x)
 
-    def test_evaluate_with_infinite_input(self, dho: DampedHarmonicOscillator):
+    def test_evaluate_with_infinite_input_raises(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, np.inf, 1.0])
 
