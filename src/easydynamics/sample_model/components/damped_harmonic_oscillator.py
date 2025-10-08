@@ -6,7 +6,6 @@ from typing import Optional, Union
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 
 from .model_component import ModelComponent
 
@@ -113,37 +112,29 @@ class DampedHarmonicOscillator(ModelComponent):
             raise TypeError("width must be a number.")
         self._width.value = float(value)
 
+    @property
+    def unit(self) -> Union[str, sc.Unit]:
+        """Return the unit of the component."""
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: Union[str, sc.Unit]):
+        if not isinstance(value, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+        self.convert_unit(value)
+
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
         """Evaluate the Damped Harmonic Oscillator at the given x values.
         If x is a scipp Variable, the unit of the DHO will be converted to
         match x. The DHO evaluates to 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )"""
 
-        # Handle units
-        if isinstance(x, sc.Variable):
-            x_in = x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
-                try:
-                    self.convert_unit(x.unit.name)
-                except Exception as e:
-                    raise UnitError(
-                        f"Input x has unit {x.unit}, but DampedHarmonicOscillator component has unit {self._unit}. Failed to convert DampedHarmonicOscillator to {x.unit}."
-                    ) from e
-                warnings.warn(
-                    f"Input x has unit {x.unit}, but DampedHarmonicOscillator component has unit {self_unit_for_warning}. Converting DampedHarmonicOscillator to {x.unit}."
-                )
-        else:
-            x_in = x
-
-        if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
-
-        if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
+        x = self._prepare_x_for_evaluate(x)
 
         normalization = 2 * self._center.value**2 * self._width.value / np.pi
-        denominator = (x_in**2 - self._center.value**2) ** 2 + (
-            2 * self._width.value * x_in
+        denominator = (x**2 - self._center.value**2) ** 2 + (
+            2
+            * self._width.value
+            * x  # No division by zero here, width>0 enforced in setter
         ) ** 2
 
         return self._area.value * normalization / (denominator)

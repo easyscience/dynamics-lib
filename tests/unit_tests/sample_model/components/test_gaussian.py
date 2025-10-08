@@ -126,6 +126,21 @@ class TestGaussian:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    def test_evaluate_scipp_DataArray(self, gaussian: Gaussian):
+        # WHEN
+        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
+        var = sc.array(dims=["x"], values=[10.0, 20.0, 30.0])
+        array = sc.DataArray(data=var, coords={"x": x})
+
+        # THEN
+        result = gaussian.evaluate(array)
+
+        # EXPECT
+        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * ((x.values - 0.5) / 0.6) ** 2
+        )
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
     @pytest.mark.filterwarnings(
         "ignore:Input x has unit µeV, but Gaussian component has unit meV.*:UserWarning"
     )

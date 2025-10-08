@@ -26,9 +26,9 @@ class DeltaFunction(ModelComponent):
     def __init__(
         self,
         name: str = "DeltaFunction",
-        center: Union[None, Numeric, Parameter] = None,
+        center: Union[None, Numeric] = None,
         area: Numeric = 1.0,
-        unit="meV",
+        unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs
         if not isinstance(area, Numeric):
@@ -89,6 +89,18 @@ class DeltaFunction(ModelComponent):
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
+
+    @property
+    def unit(self) -> Union[str, sc.Unit]:
+        """Return the unit of the component."""
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: Union[str, sc.Unit]):
+        """Set the unit of the component."""
+        if not isinstance(value, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+        self._unit = value
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
