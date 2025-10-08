@@ -49,8 +49,7 @@ class DampedHarmonicOscillator(ModelComponent):
         if not isinstance(center, Numeric):
             raise TypeError("center must be a number.")
 
-        if isinstance(center, Numeric):
-            center = float(center)
+        center = float(center)
 
         if not isinstance(width, Numeric):
             raise TypeError("width must be a number.")

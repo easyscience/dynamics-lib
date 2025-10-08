@@ -62,36 +62,16 @@ class Polynomial(ModelComponent):
 
         self._unit = unit
 
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
+    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
         The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
         """
-        if isinstance(x, sc.Variable):
-            x_in = x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
-                try:
-                    self.convert_unit(x.unit)
-                except Exception as e:
-                    raise UnitError(
-                        f"Input x has unit {x.unit}, but Polynomial component has unit {self._unit}. Failed to convert Polynomial to {x.unit}."
-                    ) from e
 
-                warnings.warn(
-                    f"Input x has unit {x.unit}, but Polynomial component has unit {self_unit_for_warning}. Converting Polynomial to {x.unit}."
-                )
-        else:
-            x_in = x
+        x = self._prepare_x_for_evaluate(x)
 
-        if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
-
-        if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
-
-        result = np.zeros_like(x_in, dtype=float)
+        result = np.zeros_like(x, dtype=float)
         for i, param in enumerate(self.coefficients):
-            result += param.value * np.power(x_in, i)
+            result += param.value * np.power(x, i)
 
         if any(result < 0):
             warnings.warn(

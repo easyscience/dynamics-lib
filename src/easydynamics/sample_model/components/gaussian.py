@@ -6,7 +6,6 @@ from typing import List, Optional, Union
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 
 from .model_component import ModelComponent
 
@@ -118,37 +117,15 @@ class Gaussian(ModelComponent):
             raise TypeError("width must be a number.")
         self._width.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
         """Evaluate the Gaussian at the given x values.
         If x is a scipp Variable, the unit of the Gaussian will be converted to match x.
         The Gaussian evaluates to area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)"""
 
-        # Handle units
-        if isinstance(x, sc.Variable):
-            x_in = x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
-                try:
-                    self.convert_unit(x.unit.name)
-                except Exception as e:
-                    raise UnitError(
-                        f"Input x has unit {x.unit}, but Gaussian component has unit {self._unit}. Failed to convert Gaussian to {x.unit}."
-                    ) from e
-
-                warnings.warn(
-                    f"Input x has unit {x.unit}, but Gaussian component has unit {self_unit_for_warning}. Converting Gaussian to {x.unit}."
-                )
-        else:
-            x_in = x
-
-        if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
-
-        if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
+        x = self._prepare_x_for_evaluate(x)
 
         normalization = 1 / (np.sqrt(2 * np.pi) * self._width.value)
-        exponent = -0.5 * ((x_in - self._center.value) / self._width.value) ** 2
+        exponent = -0.5 * ((x - self._center.value) / self._width.value) ** 2
 
         return self._area.value * normalization * np.exp(exponent)
 

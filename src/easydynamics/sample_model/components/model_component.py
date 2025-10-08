@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from abc import abstractmethod
 from typing import List, Optional, Union
 
@@ -7,6 +8,7 @@ import numpy as np
 import scipp as sc
 from easyscience.base_classes import ObjBase
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 Numeric = Union[float, int]
 
@@ -49,6 +51,50 @@ class ModelComponent(ObjBase):
         """Free all parameters in the model component."""
         for p in self.get_parameters():
             p.fixed = False
+
+    def _prepare_x_for_evaluate(
+        self, x: Union[Numeric, List[Numeric], np.ndarray, sc.Variable]
+    ) -> np.ndarray:
+        # Handle units
+        if isinstance(x, sc.Variable):
+            x_in = x.values
+            if self._unit is not None and x.unit != self._unit:
+                self_unit_for_warning = self._unit
+                try:
+                    self.convert_unit(x.unit.name)
+                except Exception as e:
+                    raise UnitError(
+                        f"Input x has unit {x.unit}, but {self.__class__.__name__} component has unit {self._unit}. Failed to convert {self.__class__.__name__} to {x.unit}."
+                    ) from e
+
+                warnings.warn(
+                    f"Input x has unit {x.unit}, but {self.__class__.__name__} component has unit {self_unit_for_warning}. Converting {self.__class__.__name__} to {x.unit}."
+                )
+        else:
+            x_in = x
+
+        if isinstance(x_in, Numeric):
+            x_in = np.array([x_in])
+        elif isinstance(x_in, list):
+            x_in = np.array(x_in)
+
+        if any(np.isnan(x_in)):
+            raise ValueError("Input x contains NaN values.")
+
+        if any(np.isinf(x_in)):
+            raise ValueError("Input x contains infinite values.")
+
+        return x_in
+
+    @abstractmethod
+    def convert_unit(self, unit: Union[str, sc.Unit]):
+        """
+        Convert the unit of the Parameters in the component.
+
+        Args:
+            unit (str or sc.Unit): The new unit to convert to.
+        """
+        pass
 
     @abstractmethod
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:

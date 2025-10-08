@@ -6,7 +6,6 @@ from typing import Optional, Union
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 
 from .model_component import ModelComponent
 
@@ -91,36 +90,14 @@ class DeltaFunction(ModelComponent):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
 
-    def evaluate(self, x: Union[np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
         """ "Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
         # TODO: Consider adding support for evaluation without resolution convolution
 
-        # Handle units
-        if isinstance(x, sc.Variable):
-            x_in = x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
-                try:
-                    self.convert_unit(x.unit.name)
-                except Exception as e:
-                    raise UnitError(
-                        f"Input x has unit {x.unit}, but DeltaFunction component has unit {self._unit}. Failed to convert DeltaFunction to {x.unit}."
-                    ) from e
+        x = self._prepare_x_for_evaluate(x)
 
-                warnings.warn(
-                    f"Input x has unit {x.unit}, but DeltaFunction component has unit {self_unit_for_warning}. Converting DeltaFunction to {x.unit}."
-                )
-        else:
-            x_in = x
-
-        if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
-
-        if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
-
-        return 0 * x_in
+        return 0 * x
 
     def get_parameters(self):
         """

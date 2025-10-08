@@ -6,7 +6,6 @@ from typing import Optional, Union
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.special import voigt_profile
 
 from .model_component import ModelComponent
@@ -153,36 +152,15 @@ class Voigt(ModelComponent):
             raise TypeError("width must be a number.")
         self._lorentzian_width.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
         """Evaluate the Voigt at the given x values.
         If x is a scipp Variable, the unit of the Voigt will be converted to match x.
         The Voigt evaluates to the convolution of a Gaussian with sigma gaussian_width and a Lorentzian with half width at half max lorentzian_width, centered at center, with area equal to area."""
 
-        # Handle units
-        if isinstance(x, sc.Variable):
-            x_in = x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
-                try:
-                    self.convert_unit(x.unit.name)
-                except Exception as e:
-                    raise UnitError(
-                        f"Input x has unit {x.unit}, but Voigt component has unit {self._unit}. Failed to convert Voigt to {x.unit}."
-                    ) from e
-                warnings.warn(
-                    f"Input x has unit {x.unit}, but Voigt component has unit {self_unit_for_warning}. Converting Voigt to {x.unit}."
-                )
-        else:
-            x_in = x
-
-        if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
-
-        if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
+        x = self._prepare_x_for_evaluate(x)
 
         return self._area.value * voigt_profile(
-            x_in - self._center.value,
+            x - self._center.value,
             self._gaussian_width.value,
             self._lorentzian_width.value,
         )
