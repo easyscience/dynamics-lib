@@ -62,7 +62,9 @@ class Polynomial(ModelComponent):
 
         self._unit = unit
 
-    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
         The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
         """

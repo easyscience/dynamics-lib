@@ -152,7 +152,9 @@ class Voigt(ModelComponent):
             raise TypeError("width must be a number.")
         self._lorentzian_width.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """Evaluate the Voigt at the given x values.
         If x is a scipp Variable, the unit of the Voigt will be converted to match x.
         The Voigt evaluates to the convolution of a Gaussian with sigma gaussian_width and a Lorentzian with half width at half max lorentzian_width, centered at center, with area equal to area."""

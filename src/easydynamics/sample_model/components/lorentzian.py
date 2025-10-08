@@ -117,7 +117,9 @@ class Lorentzian(ModelComponent):
             raise TypeError("width must be a number.")
         self._width.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """Evaluate the Lorentzian at the given x values.
         If x is a scipp Variable, the unit of the Lorentzian will be converted to match x.
         The Lorentzian evaluates to area*width / (pi * ( (x - center)^2 + width^2 ) )"""

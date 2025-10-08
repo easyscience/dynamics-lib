@@ -90,7 +90,9 @@ class DeltaFunction(ModelComponent):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """ "Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
         # TODO: Consider adding support for evaluation without resolution convolution

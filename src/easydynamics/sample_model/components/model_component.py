@@ -53,10 +53,26 @@ class ModelComponent(ObjBase):
             p.fixed = False
 
     def _prepare_x_for_evaluate(
-        self, x: Union[Numeric, List[Numeric], np.ndarray, sc.Variable]
+        self, x: Union[Numeric, List[Numeric], np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:
+        """ "Prepare the input x for evaluation by handling units and converting to a numpy array."""
+
         # Handle units
+        if isinstance(x, sc.DataArray):
+            # Check that there's exactly one coordinate
+            coords = dict(x.coords)
+            ncoords = len(coords)
+            if ncoords != 1:
+                coord_names = ", ".join(coords.keys())
+                raise ValueError(
+                    f"scipp.DataArray must have exactly one coordinate to be used as input `x`. "
+                    f"Found {ncoords} coordinates: {coord_names}."
+                )
+            # get the coordinate, it's a sc.Variable
+            coord_name, coord_obj = next(iter(coords.items()))
+            x = coord_obj
         if isinstance(x, sc.Variable):
+            # Need to check if the units are consistent, and convert if not
             x_in = x.values
             if self._unit is not None and x.unit != self._unit:
                 self_unit_for_warning = self._unit

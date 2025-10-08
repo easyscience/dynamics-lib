@@ -117,7 +117,9 @@ class Gaussian(ModelComponent):
             raise TypeError("width must be a number.")
         self._width.value = float(value)
 
-    def evaluate(self, x: Union[Numeric, list, np.ndarray, sc.Variable]) -> np.ndarray:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """Evaluate the Gaussian at the given x values.
         If x is a scipp Variable, the unit of the Gaussian will be converted to match x.
         The Gaussian evaluates to area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)"""
