@@ -91,7 +91,14 @@ class Lorentzian(ModelComponent):
         """Set the area parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("area must be a number.")
-        self._area.value = float(value)
+        value = float(value)
+        if value < 0:
+            warnings.warn(
+                "The area of the Lorentzian with name {} is negative, which may not be physically meaningful.".format(
+                    self.name
+                )
+            )
+        self._area.value = value
 
     @property
     def center(self) -> Parameter:
@@ -115,7 +122,10 @@ class Lorentzian(ModelComponent):
         """Set the width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
-        self._width.value = float(value)
+        value = float(value)
+        if value <= 0:
+            raise ValueError("The width of a Lorentzian must be greater than zero.")
+        self._width.value = value
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]

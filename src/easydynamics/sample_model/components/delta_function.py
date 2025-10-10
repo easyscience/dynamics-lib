@@ -76,7 +76,14 @@ class DeltaFunction(ModelComponent):
         """Set the area parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("area must be a number.")
-        self._area.value = float(value)
+        value = float(value)
+        if value < 0:
+            warnings.warn(
+                "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
+                    self.name
+                )
+            )
+        self._area.value = value
 
     @property
     def center(self) -> Parameter:

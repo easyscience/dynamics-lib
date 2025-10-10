@@ -86,6 +86,13 @@ class DampedHarmonicOscillator(ModelComponent):
         """Set the area parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("area must be a number.")
+        value = float(value)
+        if value < 0:
+            warnings.warn(
+                "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
+                    self.name
+                )
+            )
         self._area.value = float(value)
 
     @property
@@ -110,7 +117,12 @@ class DampedHarmonicOscillator(ModelComponent):
         """Set the width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
-        self._width.value = float(value)
+        value = float(value)
+        if value <= 0:
+            raise ValueError(
+                "The width of a DampedHarmonicOscillator must be greater than zero."
+            )
+        self._width.value = value
 
     @property
     def unit(self) -> Union[str, sc.Unit]:

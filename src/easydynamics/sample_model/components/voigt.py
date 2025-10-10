@@ -114,7 +114,14 @@ class Voigt(ModelComponent):
         """Set the area parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("area must be a number.")
-        self._area.value = float(value)
+        value = float(value)
+        if value < 0:
+            warnings.warn(
+                "The area of the Voigt profile with name {} is negative, which may not be physically meaningful.".format(
+                    self.name
+                )
+            )
+        self._area.value = value
 
     @property
     def center(self) -> Parameter:
@@ -138,7 +145,10 @@ class Voigt(ModelComponent):
         """Set the gaussian_width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
-        self._gaussian_width.value = float(value)
+        value = float(value)
+        if value <= 0:
+            raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
+        self._gaussian_width.value = value
 
     @property
     def lorentzian_width(self) -> Parameter:
@@ -150,7 +160,12 @@ class Voigt(ModelComponent):
         """Set the lorentzian_width parameter."""
         if not isinstance(value, Numeric):
             raise TypeError("width must be a number.")
-        self._lorentzian_width.value = float(value)
+        value = float(value)
+        if value <= 0:
+            raise ValueError(
+                "The lorentzian_width of a Voigt must be greater than zero."
+            )
+        self._lorentzian_width.value = value
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
