@@ -77,24 +77,33 @@ class TestDeltaFunction:
 
     def test_evaluate(self, delta_function: DeltaFunction):
         # WHEN
-        x = np.array([0.0, 0.5, 1.0])
+        x = np.linspace(-1, 2, 100)
 
         # THEN
         result = delta_function.evaluate(x)
 
         # EXPECT
         expected_result = np.zeros_like(x)
+
+        idx = np.argmin(np.abs(x - delta_function.center.value))
+        dx = (max(x) - min(x)) / (len(x) - 1)  # domain spacing
+        expected_result[idx] = 2.0 / dx
+
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_scipp_array(self, delta_function: DeltaFunction):
         # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
+        x = sc.array(dims=["x"], values=np.linspace(-1, 2, 10), unit="meV")
 
         # THEN
         result = delta_function.evaluate(x)
 
         # EXPECT
         expected_result = np.zeros_like(x.values)
+
+        idx = np.argmin(np.abs(x.values - delta_function.center.value))
+        dx = (max(x.values) - min(x.values)) / (len(x.values) - 1)  # domain spacing
+        expected_result[idx] = 2.0 / dx
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     @pytest.mark.filterwarnings(
@@ -102,13 +111,18 @@ class TestDeltaFunction:
     )
     def test_evaluate_with_different_unit(self, delta_function: DeltaFunction):
         # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="microeV")
+        x = sc.array(dims=["x"], values=np.linspace(-1, 2, 11), unit="microeV")
+        delta_function.center = 0.0  # set center to 0 so that it is in the range of x
 
         # THEN
         result = delta_function.evaluate(x)
 
         # EXPECT
         expected_result = np.zeros_like(x.values)
+
+        idx = np.argmin(np.abs(x.values - delta_function.center.value))
+        dx = (max(x.values) - min(x.values)) / (len(x.values) - 1)  # domain spacing
+        expected_result[idx] = 2.0 * 1e3 / dx
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_with_different_unit_warns(self, delta_function: DeltaFunction):
@@ -121,6 +135,18 @@ class TestDeltaFunction:
             match="Input x has unit µeV, but DeltaFunction component has unit meV. Converting DeltaFunction to µeV.",
         ):
             delta_function.evaluate(x)
+
+    def test_area_matches_parameter_value(self, delta_function: DeltaFunction):
+        # WHEN
+        x = np.linspace(-1, 2, 100)
+
+        # THEN
+        result = delta_function.evaluate(x)
+
+        # EXPECT
+        numerical_area = np.trapezoid(result, x)
+
+        assert np.isclose(numerical_area, delta_function.area.value, rtol=1e-5)
 
     def test_evaluate_with_incompatible_unit_raises(
         self, delta_function: DeltaFunction

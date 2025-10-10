@@ -105,13 +105,25 @@ class DeltaFunction(ModelComponent):
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:
-        """ "Evaluate the Delta function at the given x values.
-        The Delta function evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler."""
+        """Evaluate the Delta function at the given x values.
+        The Delta function evaluates to zero everywhere, except at the center. Its numerical integral is equal to the area.
+        It acts as an identity in convolutions."""
         # TODO: Consider adding support for evaluation without resolution convolution
 
         x = self._prepare_x_for_evaluate(x)
+        model = np.zeros_like(x, dtype=float)
 
-        return 0 * x
+        if min(x) <= self._center.value <= max(x):
+            # if center within x-range, delta is non-zero in this interval
+            # otherwise do nothing
+            idx = np.argmin(np.abs(x - self._center.value))
+            if len(x) > 1:
+                dx = (max(x) - min(x)) / (len(x) - 1)  # domain spacing
+            else:
+                dx = 1.0
+            model[idx] = self._area.value / dx
+
+        return model
 
     def get_parameters(self):
         """
