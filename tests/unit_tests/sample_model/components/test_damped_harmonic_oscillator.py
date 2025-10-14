@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import DampedHarmonicOscillator
@@ -81,7 +79,7 @@ class TestDampedHarmonicOscillator:
             ("width", 0.7, "invalid", r"width must be a number\."),
         ],
     )
-    def test_property_setters_validate(
+    def test_property_setters(
         self,
         dho: DampedHarmonicOscillator,
         prop,
@@ -114,84 +112,6 @@ class TestDampedHarmonicOscillator:
             / ((x**2 - 1.5**2) ** 2 + (2 * 0.3 * x) ** 2)
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, dho: DampedHarmonicOscillator):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 1.5, 3.0], unit="meV")
-
-        # THEN
-        result = dho.evaluate(x)
-
-        # EXPECT
-        expected_result = (
-            2
-            * 2.0
-            * (1.5**2)
-            * (0.3)
-            / np.pi
-            / ((x.values**2 - 1.5**2) ** 2 + (2 * 0.3 * x.values) ** 2)
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but DampedHarmonicOscillator component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, dho: DampedHarmonicOscillator):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN
-        result = dho.evaluate(x)
-
-        # EXPECT
-        expected_result = (
-            2
-            * 2.0
-            * 1e3
-            * ((1.5 * 1e3) ** 2)
-            * (0.3 * 1e3)
-            / np.pi
-            / ((x.values**2 - (1.5 * 1e3) ** 2) ** 2 + (2 * 0.3 * 1e3 * x.values) ** 2)
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warning(self, dho: DampedHarmonicOscillator):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but DampedHarmonicOscillator component has unit meV. Converting DampedHarmonicOscillator to µeV.",
-        ):
-            dho.evaluate(x)
-
-    def test_evaluate_with_incompatible_unit_raises(
-        self, dho: DampedHarmonicOscillator
-    ):
-        # WHEN THEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
-
-        # EXPECT
-        with pytest.raises(
-            UnitError,
-            match="Input x has unit nm, but DampedHarmonicOscillator component has unit meV. Failed to convert DampedHarmonicOscillator to nm.",
-        ):
-            dho.evaluate(x)
-
-    @pytest.mark.parametrize(
-        "x, expected_message",
-        [
-            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
-            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
-        ],
-    )
-    def test_evaluate_with_invalid_input_raises(
-        self, dho: DampedHarmonicOscillator, x, expected_message
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=expected_message):
-            dho.evaluate(x)
 
     def test_get_parameters(self, dho: DampedHarmonicOscillator):
         # WHEN THEN

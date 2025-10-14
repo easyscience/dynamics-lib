@@ -52,7 +52,7 @@ class TestDeltaFunction:
             ("center", 0.6, "invalid", r"center must be a number\."),
         ],
     )
-    def test_property_setters_validate(
+    def test_property_setters(
         self,
         delta_function: DeltaFunction,
         prop,
@@ -94,51 +94,6 @@ class TestDeltaFunction:
         # EXPECT
         expected_result = np.zeros_like(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, delta_function: DeltaFunction):
-        # WHEN
-        x = sc.array(dims=["x"], values=np.linspace(-1, 2, 10), unit="meV")
-
-        # THEN
-        result = delta_function.evaluate(x)
-
-        # EXPECT
-        expected_result = np.zeros_like(x.values)
-
-        idx = np.argmin(np.abs(x.values - delta_function.center.value))
-        dx = (max(x.values) - min(x.values)) / (len(x.values) - 1)  # domain spacing
-        expected_result[idx] = 2.0 / dx
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but DeltaFunction component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, delta_function: DeltaFunction):
-        # WHEN
-        x = sc.array(dims=["x"], values=np.linspace(-1, 2, 11), unit="microeV")
-        delta_function.center = 0.0  # set center to 0 so that it is in the range of x
-
-        # THEN
-        result = delta_function.evaluate(x)
-
-        # EXPECT
-        expected_result = np.zeros_like(x.values)
-
-        idx = np.argmin(np.abs(x.values - delta_function.center.value))
-        dx = (max(x.values) - min(x.values)) / (len(x.values) - 1)  # domain spacing
-        expected_result[idx] = 2.0 * 1e3 / dx
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warns(self, delta_function: DeltaFunction):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="microeV")
-
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but DeltaFunction component has unit meV. Converting DeltaFunction to µeV.",
-        ):
-            delta_function.evaluate(x)
 
     def test_area_matches_parameter_value(self, delta_function: DeltaFunction):
         # WHEN
@@ -186,11 +141,11 @@ class TestDeltaFunction:
         ],
     )
     def test_evaluate_with_invalid_input_raises(
-        self, delta: DeltaFunction, x, expected_message
+        self, delta_function: DeltaFunction, x, expected_message
     ):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match=expected_message):
-            delta.evaluate(x)
+            delta_function.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN

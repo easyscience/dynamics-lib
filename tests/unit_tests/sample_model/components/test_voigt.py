@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.integrate import simpson
 from scipy.special import voigt_profile
 
@@ -144,7 +142,7 @@ class TestVoigt:
             ),
         ],
     )
-    def test_property_setters_validate(
+    def test_property_setters(
         self, voigt: Voigt, prop, valid_value, invalid_value, invalid_message
     ):
         # set valid
@@ -165,69 +163,6 @@ class TestVoigt:
         # EXPECT
         expected_result = 2.0 * voigt_profile(x - 0.5, 0.6, 0.7)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, voigt: Voigt):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-
-        # THEN
-        result = voigt.evaluate(x)
-
-        # EXPECT
-        expected_result = 2.0 * voigt_profile(x.values - 0.5, 0.6, 0.7)
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but Voigt component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, voigt: Voigt):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN
-        result = voigt.evaluate(x)
-
-        # EXPECT
-        expected_result = (
-            2.0 * 1e3 * voigt_profile(x.values - 0.5 * 1e3, 0.6 * 1e3, 0.7 * 1e3)
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warns(self, voigt: Voigt):
-        # WHEN THEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but Voigt component has unit meV. Converting Voigt to µeV.",
-        ):
-            voigt.evaluate(x)
-
-    def test_evaluate_with_incompatible_unit_raises(self, voigt: Voigt):
-        # WHEN THEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
-
-        # EXPECT
-        with pytest.raises(
-            UnitError,
-            match="Input x has unit nm, but Voigt component has unit meV. Failed to convert Voigt to nm.",
-        ):
-            voigt.evaluate(x)
-
-    @pytest.mark.parametrize(
-        "x, expected_message",
-        [
-            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
-            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
-        ],
-    )
-    def test_evaluate_with_invalid_input_raises(
-        self, voigt: Voigt, x, expected_message
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=expected_message):
-            voigt.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN

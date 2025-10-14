@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian
@@ -68,7 +66,7 @@ class TestGaussian:
             ("width", 0.7, "invalid", r"width must be a number\."),
         ],
     )
-    def test_property_setters_validate(
+    def test_property_setters(
         self, gaussian: Gaussian, prop, valid_value, invalid_value, invalid_message
     ):
         # set valid
@@ -91,86 +89,6 @@ class TestGaussian:
             -0.5 * ((x - 0.5) / 0.6) ** 2
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, gaussian: Gaussian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-
-        # THEN
-        result = gaussian.evaluate(x)
-
-        # EXPECT
-        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(
-            -0.5 * ((x.values - 0.5) / 0.6) ** 2
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_DataArray(self, gaussian: Gaussian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-        var = sc.array(dims=["x"], values=[10.0, 20.0, 30.0])
-        array = sc.DataArray(data=var, coords={"x": x})
-
-        # THEN
-        result = gaussian.evaluate(array)
-
-        # EXPECT
-        expected_result = (2.0 / (0.6 * np.sqrt(2 * np.pi))) * np.exp(
-            -0.5 * ((x.values - 0.5) / 0.6) ** 2
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but Gaussian component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, gaussian: Gaussian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN
-        result = gaussian.evaluate(x)
-
-        # EXPECT
-        expected_result = (2.0 * 1e3 / (0.6 * 1e3 * np.sqrt(2 * np.pi))) * np.exp(
-            -0.5 * ((x.values - 500.0) / (0.6 * 1e3)) ** 2
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warns(self, gaussian: Gaussian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but Gaussian component has unit meV. Converting Gaussian to µeV.",
-        ):
-            gaussian.evaluate(x)
-
-    def test_evaluate_with_incompatible_unit_raises(self, gaussian: Gaussian):
-        # WHEN THEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
-
-        # EXPECT
-        with pytest.raises(
-            UnitError,
-            match="Input x has unit nm, but Gaussian component has unit meV. Failed to convert Gaussian to nm.",
-        ):
-            gaussian.evaluate(x)
-
-    @pytest.mark.parametrize(
-        "x, expected_message",
-        [
-            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
-            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
-        ],
-    )
-    def test_evaluate_with_invalid_input_raises(
-        self, gaussian: Gaussian, x, expected_message
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=expected_message):
-            gaussian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN

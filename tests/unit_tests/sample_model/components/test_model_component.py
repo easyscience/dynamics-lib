@@ -55,75 +55,41 @@ class TestModelComponent:
         repr_str = repr(dummy)
         assert "DummyComponent" in repr_str
 
-    def test_prepare_x_for_evaluate_with_numeric(self, dummy):
-        # WHEN THEN
-        x_prepared = dummy._prepare_x_for_evaluate(5.0)
+    @pytest.mark.parametrize(
+        "case, x_input, expected_array",
+        [
+            ("python_scalar", 5.0, np.array([5.0])),
+            ("python_list", [1.0, 2.0, 3.0], np.array([1.0, 2.0, 3.0])),
+            ("numpy_array", np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 3.0])),
+            ("scipp_scalar", sc.scalar(5.0, unit="meV"), np.array([5.0])),
+            (
+                "scipp_array",
+                sc.array(dims=["x"], values=[1.0, 2.0, 3.0], unit="meV"),
+                np.array([1.0, 2.0, 3.0]),
+            ),
+            (
+                "scipp_dataarray",
+                sc.DataArray(
+                    data=sc.array(dims=["x"], values=[10.0, 20.0, 30.0]),
+                    coords={
+                        "x": sc.array(dims=["x"], values=[1.0, 2.0, 3.0], unit="meV")
+                    },
+                ),
+                np.array([1.0, 2.0, 3.0]),
+            ),
+        ],
+        ids="python_scalar,python_list,numpy_array,scipp_scalar,scipp_array,scipp_dataarray".split(
+            ","
+        ),
+    )
+    def test_prepare_x_for_evaluate_various_inputs(
+        self, dummy, case, x_input, expected_array
+    ):
+        x_prepared = dummy._prepare_x_for_evaluate(x_input)
 
-        # EXPECT
         assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (1,)
-        assert x_prepared == 5.0
-
-    def test_prepare_x_for_evaluate_with_list(self, dummy):
-        # WHEN
-        x = [1.0, 2.0, 3.0]
-
-        # THEN
-        x_prepared = dummy._prepare_x_for_evaluate(x)
-
-        # EXPECT
-        assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (3,)
-        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-
-    def test_prepare_x_for_evaluate_with_numpy_array(self, dummy):
-        # WHEN
-        x = np.array([1.0, 2.0, 3.0])
-
-        # THEN
-        x_prepared = dummy._prepare_x_for_evaluate(x)
-
-        # THEN EXPECT
-        assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (3,)
-        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-
-    def test_prepare_x_for_evaluate_with_scipp_scalar(self, dummy):
-        # WHEN
-        x_scipp = sc.scalar(5.0, unit="meV")
-
-        # THEN
-        x_prepared = dummy._prepare_x_for_evaluate(x_scipp)
-
-        # EXPECT
-        assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (1,)
-        assert x_prepared == 5.0
-
-    def test_prepare_x_for_evaluate_with_scipp_variable(self, dummy):
-        # WHEN
-        x_scipp = sc.array(dims=["x"], values=[1.0, 2.0, 3.0], unit="meV")
-
-        # THEN
-        x_prepared = dummy._prepare_x_for_evaluate(x_scipp)
-
-        # EXPECT
-        assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (3,)
-        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-
-    def test_prepare_x_for_evaluate_with_scipp_data_array(self, dummy):
-        # WHEN
-        x_scipp = sc.array(dims=["x"], values=[1.0, 2.0, 3.0], unit="meV")
-        data_array = sc.DataArray(data=x_scipp, coords={"x": x_scipp})
-
-        # THEN
-        x_prepared = dummy._prepare_x_for_evaluate(data_array)
-
-        # EXPECT
-        assert isinstance(x_prepared, np.ndarray)
-        assert x_prepared.shape == (3,)
-        np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
+        assert x_prepared.shape == expected_array.shape
+        np.testing.assert_array_equal(x_prepared, expected_array)
 
     def test_prepare_x_for_evaluate_with_scipp_data_array_multiple_coords_raises(
         self, dummy
@@ -144,20 +110,19 @@ class TestModelComponent:
         ):
             dummy._prepare_x_for_evaluate(array)
 
-    def test_prepare_x_for_evaluate_with_nan_raises(self, dummy):
-        # WHEN
-        x = np.array([1.0, np.nan, 3.0])
-
+    @pytest.mark.parametrize(
+        "x, expected_message",
+        [
+            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
+            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
+        ],
+        ids=["nan", "infinite"],
+    )
+    def test_prepare_x_for_evaluate_with_invalid_input_raises(
+        self, dummy: DummyComponent, x, expected_message
+    ):
         # THEN EXPECT
-        with pytest.raises(ValueError, match="contains NaN values"):
-            dummy._prepare_x_for_evaluate(x)
-
-    def test_prepare_x_for_evaluate_with_infinite_raises(self, dummy):
-        # WHEN
-        x = np.array([1.0, np.inf, 3.0])
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="contains infinite values"):
+        with pytest.raises(ValueError, match=expected_message):
             dummy._prepare_x_for_evaluate(x)
 
     def test_prepare_x_for_evaluate_with_incompatible_unit_raises(self, dummy):

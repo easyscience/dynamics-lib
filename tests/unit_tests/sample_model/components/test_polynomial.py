@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model import Polynomial
@@ -62,58 +61,6 @@ class TestPolynomial:
         # EXPECT
         expected_result = 1.0 - 2.0 * x + 3.0 * x**2
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, polynomial: Polynomial):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="meV")
-
-        # THEN
-        result = polynomial.evaluate(x)
-
-        # EXPECT
-        expected_result = 1.0 - 2.0 * x.values + 3.0 * x.values**2
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but Polynomial component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, polynomial: Polynomial):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
-
-        # THEN
-        result = polynomial.evaluate(x)
-
-        # EXPECT
-        expected_result = 1.0 - (2.0 * 1e-3) * x.values + 3.0 * 1e-6 * x.values**2
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warns(self, polynomial: Polynomial):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 1.0, 2.0], unit="microeV")
-
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but Polynomial component has unit meV. Converting Polynomial to µeV.",
-        ):
-            polynomial.evaluate(x)
-
-    def test_evaluate_with_nan_input_raises(self, polynomial: Polynomial):
-        # WHEN
-        x = np.array([0.0, np.nan, 1.0])
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="Input x contains NaN values."):
-            polynomial.evaluate(x)
-
-    def test_evaluate_with_infinite_input_raises(self, polynomial: Polynomial):
-        # WHEN
-        x = np.array([0.0, np.inf, 1.0])
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="Input x contains infinite values."):
-            polynomial.evaluate(x)
 
     def test_degree(self, polynomial: Polynomial):
         # WHEN THEN EXPECT

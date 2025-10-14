@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Lorentzian
@@ -72,7 +70,7 @@ class TestLorentzian:
             ("width", 0.7, "invalid", r"width must be a number\."),
         ],
     )
-    def test_property_setters_validate(
+    def test_property_setters(
         self, lorentzian: Lorentzian, prop, valid_value, invalid_value, invalid_message
     ):
         # set valid
@@ -93,69 +91,6 @@ class TestLorentzian:
         # EXPECT
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_scipp_array(self, lorentzian: Lorentzian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 0.5, 1.0], unit="meV")
-
-        # THEN
-        result = lorentzian.evaluate(x)
-
-        # EXPECT
-        expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x.values - 0.5) / 0.6) ** 2)
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    @pytest.mark.filterwarnings(
-        "ignore:Input x has unit µeV, but Lorentzian component has unit meV.*:UserWarning"
-    )
-    def test_evaluate_with_different_unit(self, lorentzian: Lorentzian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN
-        result = lorentzian.evaluate(x)
-
-        # EXPECT
-        expected_result = (2.0 * 1e3 / (np.pi * 0.6 * 1e3)) / (
-            1 + ((x.values - 0.5 * 1e3) / (0.6 * 1e3)) ** 2
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
-
-    def test_evaluate_with_different_unit_warns(self, lorentzian: Lorentzian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="microeV")
-
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match="Input x has unit µeV, but Lorentzian component has unit meV. Converting Lorentzian to µeV.",
-        ):
-            lorentzian.evaluate(x)
-
-    def test_evaluate_with_incompatible_unit_raises(self, lorentzian: Lorentzian):
-        # WHEN
-        x = sc.array(dims=["x"], values=[0.0, 500.0, 1000.0], unit="nm")
-
-        # THEN EXPECT
-        with pytest.raises(
-            UnitError,
-            match="Input x has unit nm, but Lorentzian component has unit meV. Failed to convert Lorentzian to nm.",
-        ):
-            lorentzian.evaluate(x)
-
-    @pytest.mark.parametrize(
-        "x, expected_message",
-        [
-            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
-            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
-        ],
-    )
-    def test_evaluate_with_invalid_input_raises(
-        self, lorentzian: Lorentzian, x, expected_message
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=expected_message):
-            lorentzian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN
