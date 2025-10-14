@@ -6,49 +6,45 @@ from easyscience.variable import Parameter
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 
+class DummyComponent(ModelComponent):
+    def __init__(self):
+        super().__init__(name="Dummy")
+        self._area = Parameter(name="area", value=1.0, unit="meV", fixed=False)
+        self._center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
+        self._width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
+        self._unit = "meV"
+
+    def get_parameters(self):
+        return [self._area, self._center, self._width]
+
+    def evaluate(self, x):
+        return np.zeros_like(x)
+
+    def convert_unit(self, unit):
+        self._area.convert_unit(unit)
+        self._center.convert_unit(unit)
+        self._width.convert_unit(unit)
+        self._unit = unit
+
+
 class TestModelComponent:
-    class DummyComponent(ModelComponent):
-        def __init__(self):
-            super().__init__(name="Dummy")
-            self._area = Parameter(name="area", value=1.0, unit="meV")
-            self._center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
-            self._width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
-            self._unit = "meV"
-
-        def get_parameters(self):
-            return [self._area, self._center, self._width]
-
-        def evaluate(self, x):
-            return np.zeros_like(x)
-
-        def convert_unit(self, unit):
-            self._area.convert_unit(unit)
-            self._center.convert_unit(unit)
-            self._width.convert_unit(unit)
-            self._unit = unit
-
     @pytest.fixture
     def dummy(self):
-        return self.DummyComponent()
+        return DummyComponent()
 
     def test_unit_cannot_be_set_directly(self, dummy: ModelComponent):
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError, match="Unit is read-only"):
             dummy.unit = "K"
 
-    def test_fix_all_parameters_sets_all_to_fixed(self, dummy):
-        # WHEN
-        dummy.fix_all_parameters()
-
-        # THEN EXPECT
-        assert all(p.fixed for p in dummy.get_parameters())
-
-    def test_free_all_parameters_sets_all_to_unfixed(self, dummy):
-        # WHEN
+    def test_free_and_fix_all_parameters(self, dummy):
+        # WHEN THEN EXPECT
         dummy.free_all_parameters()
+        assert all(not p.fixed for p in dummy.get_parameters())
 
         # THEN EXPECT
-        assert all(not p.fixed for p in dummy.get_parameters())
+        dummy.fix_all_parameters()
+        assert all(p.fixed for p in dummy.get_parameters())
 
     def test_repr(self, dummy):
         # WHEN THEN EXPECT
@@ -78,9 +74,14 @@ class TestModelComponent:
                 np.array([1.0, 2.0, 3.0]),
             ),
         ],
-        ids="python_scalar,python_list,numpy_array,scipp_scalar,scipp_array,scipp_dataarray".split(
-            ","
-        ),
+        ids=[
+            "python_scalar",
+            "python_list",
+            "numpy_array",
+            "scipp_scalar",
+            "scipp_array",
+            "scipp_dataarray",
+        ],
     )
     def test_prepare_x_for_evaluate_various_inputs(
         self, dummy, case, x_input, expected_array
