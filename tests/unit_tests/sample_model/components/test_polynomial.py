@@ -18,22 +18,26 @@ class TestPolynomial:
         assert polynomial.coefficients[1].value == -2.0
         assert polynomial.coefficients[2].value == 3.0
 
-    def test_input_type_validation_coefficients_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            TypeError, match="coefficients must be a list or ndarray of floats."
-        ):
-            Polynomial(name="TestPolynomial", coefficients="invalid")
-
-    def test_input_type_validation_coefficients_elements_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="All coefficients must be numbers."):
-            Polynomial(name="TestPolynomial", coefficients=[1.0, "invalid", 3.0])
-
-    def test_input_type_validation_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
-            Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0], unit=123)
+    @pytest.mark.parametrize(
+        "kwargs, expected_message",
+        [
+            (
+                {"coefficients": "invalid"},
+                "coefficients must be a list or ndarray of floats",
+            ),
+            (
+                {"coefficients": [1.0, "invalid", 3.0]},
+                "All coefficients must be numbers.",
+            ),
+            (
+                {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
+                "unit must be a string or a scipp unit",
+            ),
+        ],
+    )
+    def test_input_type_validation_raises(self, kwargs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            Polynomial(name="TestPolynomial", **kwargs)
 
     def test_no_coefficients_raises(self):
         # WHEN THEN EXPECT

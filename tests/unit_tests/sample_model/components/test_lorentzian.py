@@ -23,31 +23,30 @@ class TestLorentzian:
         assert lorentzian.width.value == 0.6
         assert lorentzian.unit == "meV"
 
-    def test_input_type_validation_area_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="area must be a number"):
-            Lorentzian(
-                name="TestLorentzian", area="invalid", center=0.5, width=0.6, unit="meV"
-            )
-
-    def test_input_type_validation_center_width_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="center must be None or a number"):
-            Lorentzian(
-                name="TestLorentzian", area=2.0, center="invalid", width=0.6, unit="meV"
-            )
-
-    def test_input_type_validation_width_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="width must be a number"):
-            Lorentzian(
-                name="TestLorentzian", area=2.0, center=0.5, width="invalid", unit="meV"
-            )
-
-    def test_input_type_validation_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
-            Lorentzian(name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit=123)
+    @pytest.mark.parametrize(
+        "kwargs, expected_message",
+        [
+            (
+                {"area": "invalid", "center": 0.5, "width": 0.6, "unit": "meV"},
+                "area must be a number",
+            ),
+            (
+                {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
+                "center must be None or a number",
+            ),
+            (
+                {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
+                "width must be a number",
+            ),
+            (
+                {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
+                "unit must be a string or a scipp unit",
+            ),
+        ],
+    )
+    def test_input_type_validation_raises(self, kwargs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            Lorentzian(name="TestLorentzian", **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
@@ -152,20 +151,18 @@ class TestLorentzian:
         ):
             lorentzian.evaluate(x)
 
-    def test_evaluate_with_nan_input_raises(self, lorentzian: Lorentzian):
-        # WHEN THEN
-        x = np.array([0.0, np.nan, 1.0])
-
-        # EXPECT
-        with pytest.raises(ValueError, match="Input x contains NaN values."):
-            lorentzian.evaluate(x)
-
-    def test_evaluate_with_infinite_input_raises(self, lorentzian: Lorentzian):
-        # WHEN THEN
-        x = np.array([0.0, np.inf, 1.0])
-
-        # EXPECT
-        with pytest.raises(ValueError, match="Input x contains infinite values."):
+    @pytest.mark.parametrize(
+        "x, expected_message",
+        [
+            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
+            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
+        ],
+    )
+    def test_evaluate_with_invalid_input_raises(
+        self, lorentzian: Lorentzian, x, expected_message
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=expected_message):
             lorentzian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):

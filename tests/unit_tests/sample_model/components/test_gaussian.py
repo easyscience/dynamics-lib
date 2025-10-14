@@ -44,35 +44,9 @@ class TestGaussian:
             ),
         ],
     )
-    def test_input_type_validation_raises(kwargs, expected_message):
+    def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
             Gaussian(name="TestGaussian", **kwargs)
-
-    def test_input_type_validation_area_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="area must be a number"):
-            Gaussian(
-                name="TestGaussian", area="invalid", center=0.5, width=0.6, unit="meV"
-            )
-
-    def test_input_type_validation_center_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="center must be None or a number"):
-            Gaussian(
-                name="TestGaussian", area=2.0, center="invalid", width=0.6, unit="meV"
-            )
-
-    def test_input_type_validation_width_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="width must be a number"):
-            Gaussian(
-                name="TestGaussian", area=2.0, center=0.5, width="invalid", unit="meV"
-            )
-
-    def test_input_type_validation_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
-            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=0.6, unit=123)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
@@ -192,20 +166,18 @@ class TestGaussian:
         ):
             gaussian.evaluate(x)
 
-    def test_evaluate_with_nan_input_raises(self, gaussian: Gaussian):
-        # WHEN THEN
-        x = np.array([0.0, np.nan, 1.0])
-
-        # EXPECT
-        with pytest.raises(ValueError, match="Input x contains NaN values."):
-            gaussian.evaluate(x)
-
-    def test_evaluate_with_infinite_input_raises(self, gaussian: Gaussian):
-        # WHEN THEN
-        x = np.array([0.0, np.inf, 1.0])
-
-        # EXPECT
-        with pytest.raises(ValueError, match="Input x contains infinite values."):
+    @pytest.mark.parametrize(
+        "x, expected_message",
+        [
+            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
+            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
+        ],
+    )
+    def test_evaluate_with_invalid_input_raises(
+        self, gaussian: Gaussian, x, expected_message
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=expected_message):
             gaussian.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):

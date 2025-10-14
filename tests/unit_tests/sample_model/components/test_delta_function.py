@@ -19,30 +19,26 @@ class TestDeltaFunction:
         assert delta_function.center.value == 0.5
         assert delta_function.unit == "meV"
 
-    def test_input_type_validation_area_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="area must be a number"):
-            DeltaFunction(
-                name="TestDeltaFunction",
-                area="invalid",
-                center=0.5,
-                unit="meV",
-            )
-
-    def test_input_type_validation_center_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="center must be None or a number"):
-            DeltaFunction(
-                name="TestDeltaFunction",
-                area=2.0,
-                center="invalid",
-                unit="meV",
-            )
-
-    def test_input_type_validation_unit_raises(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="unit must be a string or a scipp unit"):
-            DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit=123)
+    @pytest.mark.parametrize(
+        "kwargs, expected_message",
+        [
+            (
+                {"area": "invalid", "center": 0.5, "unit": "meV"},
+                "area must be a number",
+            ),
+            (
+                {"area": 2.0, "center": "invalid", "unit": "meV"},
+                "center must be None or a number",
+            ),
+            (
+                {"area": 2.0, "center": 0.5, "unit": 123},
+                "unit must be a string or a scipp unit",
+            ),
+        ],
+    )
+    def test_input_type_validation_raises(self, kwargs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            DeltaFunction(name="TestDeltaFunction", **kwargs)
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
@@ -177,21 +173,19 @@ class TestDeltaFunction:
         ):
             delta_function.evaluate(x)
 
-    def test_evaluate_with_nan_input_raises(self, delta_function: DeltaFunction):
-        # WHEN
-        x = np.array([0.0, np.nan, 1.0])
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="Input x contains NaN values."):
-            delta_function.evaluate(x)
-
-    def test_evaluate_with_infinite_input_raises(self, delta_function: DeltaFunction):
-        # WHEN
-        x = np.array([0.0, np.inf, 1.0])
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match="Input x contains infinite values."):
-            delta_function.evaluate(x)
+    @pytest.mark.parametrize(
+        "x, expected_message",
+        [
+            (np.array([0.0, np.nan, 1.0]), "Input x contains NaN values."),
+            (np.array([0.0, np.inf, 1.0]), "Input x contains infinite values."),
+        ],
+    )
+    def test_evaluate_with_invalid_input_raises(
+        self, delta: DeltaFunction, x, expected_message
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=expected_message):
+            delta.evaluate(x)
 
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN
