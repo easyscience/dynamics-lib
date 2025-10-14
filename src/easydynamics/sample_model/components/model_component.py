@@ -145,7 +145,7 @@ class ModelComponent(ObjBase):
         pass
 
     @abstractmethod
-    def copy(self) -> ModelComponent:
+    def __copy__(self) -> ModelComponent:
         """
         Return a deep copy of this component with independent parameters.
         """

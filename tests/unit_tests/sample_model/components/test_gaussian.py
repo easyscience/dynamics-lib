@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -142,7 +144,7 @@ class TestGaussian:
 
     def test_copy(self, gaussian: Gaussian):
         # WHEN THEN
-        gaussian_copy = gaussian.copy()
+        gaussian_copy = copy(gaussian)
         # EXPECT
         assert gaussian_copy is not gaussian
         assert gaussian_copy.name == "copy of " + gaussian.name

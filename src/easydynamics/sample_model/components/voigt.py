@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 import scipp as sc
@@ -199,12 +199,11 @@ class Voigt(ModelComponent):
         """
         return [self._area, self._center, self._gaussian_width, self._lorentzian_width]
 
-    def copy(self, name: Optional[str] = None) -> Voigt:
+    def __copy__(self) -> Voigt:
         """
         Return a deep copy of this component with independent parameters.
         """
-        if name is None:
-            name = "copy of " + self.name
+        name = "copy of " + self.name
 
         model_copy = Voigt(
             name=name,

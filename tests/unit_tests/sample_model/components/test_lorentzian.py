@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -142,7 +144,7 @@ class TestLorentzian:
 
     def test_copy(self, lorentzian: Lorentzian):
         # WHEN THEN
-        lorentzian_copy = lorentzian.copy()
+        lorentzian_copy = copy(lorentzian)
 
         # EXPECT
         assert lorentzian_copy is not lorentzian

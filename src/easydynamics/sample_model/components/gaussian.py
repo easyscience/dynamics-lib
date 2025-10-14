@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Optional, Union
+from typing import List, Union
 
 import numpy as np
 import scipp as sc
@@ -159,12 +159,11 @@ class Gaussian(ModelComponent):
         self._width.convert_unit(unit)
         self._unit = unit
 
-    def copy(self, name: Optional[str] = None) -> Gaussian:
+    def __copy__(self) -> Gaussian:
         """
         Return a deep copy of this component with independent parameters.
         """
-        if name is None:
-            name = "copy of " + self.name
+        name = "copy of " + self.name
 
         model_copy = Gaussian(
             name=name,

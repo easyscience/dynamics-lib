@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -13,9 +15,9 @@ class TestPolynomial:
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.name == "TestPolynomial"
-        assert polynomial.coefficients[0].value == 1.0
-        assert polynomial.coefficients[1].value == -2.0
-        assert polynomial.coefficients[2].value == 3.0
+        assert polynomial.coefficients[0] == 1.0
+        assert polynomial.coefficients[1] == -2.0
+        assert polynomial.coefficients[2] == 3.0
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
@@ -64,7 +66,7 @@ class TestPolynomial:
 
     def test_degree(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
-        assert polynomial.degree() == 2
+        assert polynomial.degree == 2
 
     def test_get_parameters(self, polynomial: Polynomial):
         # WHEN THEN
@@ -87,20 +89,20 @@ class TestPolynomial:
 
         # THEN EXPECT
         assert polynomial._unit == "microeV"
-        assert np.isclose(polynomial.coefficients[0].value, 1.0)
-        assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
-        assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
+        assert np.isclose(polynomial.coefficients[0], 1.0)
+        assert np.isclose(polynomial.coefficients[1], -2.0 * 1e-3)
+        assert np.isclose(polynomial.coefficients[2], 3.0 * 1e-6)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
-        polynomial_copy = polynomial.copy()
+        polynomial_copy = copy(polynomial)
 
         # EXPECT
         assert polynomial_copy is not polynomial
         assert polynomial_copy.name == polynomial.name
         assert len(polynomial_copy.coefficients) == len(polynomial.coefficients)
         for original_coeff, copied_coeff in zip(
-            polynomial.coefficients, polynomial_copy.coefficients
+            polynomial.get_parameters(), polynomial_copy.get_parameters()
         ):
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed

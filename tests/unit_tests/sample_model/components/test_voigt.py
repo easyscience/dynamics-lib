@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -225,7 +227,7 @@ class TestVoigt:
 
     def test_copy(self, voigt: Voigt):
         # WHEN THEN
-        voigt_copy = voigt.copy()
+        voigt_copy = copy(voigt)
 
         # EXPECT
         assert voigt_copy is not voigt

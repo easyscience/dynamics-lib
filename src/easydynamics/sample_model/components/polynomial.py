@@ -104,23 +104,6 @@ class Polynomial(ModelComponent):
         """
         return self._coefficients
 
-    def copy(self, name: Optional[str] = None) -> Polynomial:
-        """
-        Return a deep copy of this component with independent parameters.
-        """
-        if name is None:
-            name = "copy of " + self.name
-
-        model_copy = Polynomial(
-            name=self.name,
-            coefficients=[param.value for param in self._coefficients],
-            unit=self._unit,
-        )
-        for i, param in enumerate(model_copy.coefficients):
-            param.fixed = self._coefficients[i].fixed
-
-        return model_copy
-
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """Convert the unit of the polynomial.
         Args:
@@ -142,6 +125,25 @@ class Polynomial(ModelComponent):
             ) ** i  # set the values directly to the appropriate power
 
         self._unit = unit
+
+    def __copy__(self, name: Optional[str] = None) -> Polynomial:
+        """
+        Return a deep copy of this component with independent parameters.
+        """
+        if name is None:
+            name = "copy of " + self.name
+
+        model_copy = Polynomial(
+            name=self.name,
+            coefficients=self.coefficients,
+            unit=self._unit,
+        )
+        self_parameters = self.get_parameters()
+        model_copy_parameters = model_copy.get_parameters()
+        for i, param in enumerate(model_copy_parameters):
+            param.fixed = self_parameters[i].fixed
+
+        return model_copy
 
     def __repr__(self) -> str:
         coeffs_str = ", ".join(

@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -182,7 +184,7 @@ class TestDeltaFunction:
 
     def test_copy(self, delta_function: DeltaFunction):
         # WHEN THEN
-        delta_copy = delta_function.copy()
+        delta_copy = copy(delta_function)
 
         # EXPECT
         assert delta_copy is not delta_function

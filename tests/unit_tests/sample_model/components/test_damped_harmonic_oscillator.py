@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -153,7 +155,7 @@ class TestDampedHarmonicOscillator:
 
     def test_copy(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
-        dho_copy = dho.copy()
+        dho_copy = copy(dho)
 
         # EXPECT
         assert dho_copy is not dho

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 import scipp as sc
@@ -158,12 +158,11 @@ class Lorentzian(ModelComponent):
         self._width.convert_unit(unit)
         self._unit = unit
 
-    def copy(self, name: Optional[str] = None) -> Lorentzian:
-        """ "
+    def __copy__(self) -> Lorentzian:
+        """
         Return a deep copy of this component with independent parameters.
         """
-        if name is None:
-            name = "copy of " + self.name
+        name = "copy of " + self.name
 
         model_copy = Lorentzian(
             name=name,
