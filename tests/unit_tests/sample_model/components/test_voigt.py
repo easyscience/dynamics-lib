@@ -130,42 +130,30 @@ class TestVoigt:
                 unit="meV",
             )
 
-    def test_area_property_setter(self, voigt: Voigt):
-        # WHEN
-        voigt.area = 3.0
+    @pytest.mark.parametrize(
+        "prop, valid_value, invalid_value, invalid_message",
+        [
+            ("area", 3.0, "invalid", r"area must be a number\."),
+            ("center", 0.6, "invalid", r"center must be a number\."),
+            ("gaussian_width", 0.7, "invalid", r"gaussian_width must be a number\."),
+            (
+                "lorentzian_width",
+                0.7,
+                "invalid",
+                r"lorentzian_width must be a number\.",
+            ),
+        ],
+    )
+    def test_property_setters_validate(
+        self, voigt: Voigt, prop, valid_value, invalid_value, invalid_message
+    ):
+        # set valid
+        setattr(voigt, prop, valid_value)
+        assert getattr(voigt, prop).value == valid_value
 
-        # THEN EXPECT
-        assert voigt.area.value == 3.0
-        with pytest.raises(TypeError, match="area must be a number."):
-            voigt.area = "invalid"
-
-    def test_center_property_setter(self, voigt: Voigt):
-        # WHEN
-        voigt.center = 0.6
-
-        # THEN EXPECT
-        assert voigt.center.value == 0.6
-        with pytest.raises(TypeError, match="center must be a number."):
-            voigt.center = "invalid"
-
-    def test_gaussian_width_property_setter(self, voigt: Voigt):
-        # WHEN THEN
-        voigt.gaussian_width = 0.7
-
-        # EXPECT
-        assert voigt.gaussian_width.value == 0.7
-        with pytest.raises(TypeError, match="width must be a number."):
-            voigt.gaussian_width = "invalid"
-
-    def test_lorentzian_width_property_setter(self, voigt: Voigt):
-        # WHEN THEN
-        voigt.lorentzian_width = 0.8
-
-        # EXPECT
-        assert voigt.lorentzian_width.value == 0.8
-
-        with pytest.raises(TypeError, match="width must be a number."):
-            voigt.lorentzian_width = "invalid"
+        # invalid
+        with pytest.raises(TypeError, match=invalid_message):
+            setattr(voigt, prop, invalid_value)
 
     def test_evaluate(self, voigt: Voigt):
         # WHEN

@@ -140,7 +140,7 @@ class Voigt(ModelComponent):
     def gaussian_width(self, value: Numeric):
         """Set the gaussian_width parameter."""
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number.")
+            raise TypeError("gaussian_width must be a number.")
         value = float(value)
         if value <= 0:
             raise ValueError("The gaussian_width of a Voigt must be greater than zero.")
@@ -155,7 +155,7 @@ class Voigt(ModelComponent):
     def lorentzian_width(self, value: Numeric):
         """Set the lorentzian_width parameter."""
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number.")
+            raise TypeError("lorentzian_width must be a number.")
         value = float(value)
         if value <= 0:
             raise ValueError(

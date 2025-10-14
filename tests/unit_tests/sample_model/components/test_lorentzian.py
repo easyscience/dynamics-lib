@@ -64,32 +64,24 @@ class TestLorentzian:
                 name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
             )
 
-    def test_area_property_setter(self, lorentzian: Lorentzian):
-        # WHEN
-        lorentzian.area = 3.0
+    @pytest.mark.parametrize(
+        "prop, valid_value, invalid_value, invalid_message",
+        [
+            ("area", 3.0, "invalid", r"area must be a number\."),
+            ("center", 0.6, "invalid", r"center must be a number\."),
+            ("width", 0.7, "invalid", r"width must be a number\."),
+        ],
+    )
+    def test_property_setters_validate(
+        self, lorentzian: Lorentzian, prop, valid_value, invalid_value, invalid_message
+    ):
+        # set valid
+        setattr(lorentzian, prop, valid_value)
+        assert getattr(lorentzian, prop).value == valid_value
 
-        # THEN EXPECT
-        assert lorentzian.area.value == 3.0
-        with pytest.raises(TypeError, match="area must be a number."):
-            lorentzian.area = "invalid"
-
-    def test_center_property_setter(self, lorentzian: Lorentzian):
-        # WHEN THEN
-        lorentzian.center = 0.6
-
-        # EXPECT
-        assert lorentzian.center.value == 0.6
-        with pytest.raises(TypeError, match="center must be a number."):
-            lorentzian.center = "invalid"
-
-    def test_width_property_setter(self, lorentzian: Lorentzian):
-        # WHEN THEN
-        lorentzian.width = 0.7
-
-        # EXPECT
-        assert lorentzian.width.value == 0.7
-        with pytest.raises(TypeError, match="width must be a number."):
-            lorentzian.width = "invalid"
+        # invalid
+        with pytest.raises(TypeError, match=invalid_message):
+            setattr(lorentzian, prop, invalid_value)
 
     def test_evaluate(self, lorentzian: Lorentzian):
         # WHEN

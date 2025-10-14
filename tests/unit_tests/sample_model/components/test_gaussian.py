@@ -60,32 +60,24 @@ class TestGaussian:
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
 
-    def test_area_property_setter(self, gaussian: Gaussian):
-        # WHEN
-        gaussian.area = 3.0
+    @pytest.mark.parametrize(
+        "prop, valid_value, invalid_value, invalid_message",
+        [
+            ("area", 3.0, "invalid", r"area must be a number\."),
+            ("center", 0.6, "invalid", r"center must be a number\."),
+            ("width", 0.7, "invalid", r"width must be a number\."),
+        ],
+    )
+    def test_property_setters_validate(
+        self, gaussian: Gaussian, prop, valid_value, invalid_value, invalid_message
+    ):
+        # set valid
+        setattr(gaussian, prop, valid_value)
+        assert getattr(gaussian, prop).value == valid_value
 
-        # THEN EXPECT
-        assert gaussian.area.value == 3.0
-        with pytest.raises(TypeError, match="area must be a number."):
-            gaussian.area = "invalid"
-
-    def test_center_property_setter(self, gaussian: Gaussian):
-        # WHEN
-        gaussian.center = 0.6
-
-        # THEN EXPECT
-        assert gaussian.center.value == 0.6
-        with pytest.raises(TypeError, match="center must be a number."):
-            gaussian.center = "invalid"
-
-    def test_width_property_setter(self, gaussian: Gaussian):
-        # WHEN
-        gaussian.width = 0.7
-
-        # THEN EXPECT
-        assert gaussian.width.value == 0.7
-        with pytest.raises(TypeError, match="width must be a number."):
-            gaussian.width = "invalid"
+        # invalid
+        with pytest.raises(TypeError, match=invalid_message):
+            setattr(gaussian, prop, invalid_value)
 
     def test_evaluate(self, gaussian: Gaussian):
         # WHEN

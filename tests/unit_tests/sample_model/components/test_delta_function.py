@@ -45,23 +45,28 @@ class TestDeltaFunction:
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
 
-    def test_area_property_setter(self, delta_function: DeltaFunction):
-        # WHEN
-        delta_function.area = 3.0
+    @pytest.mark.parametrize(
+        "prop, valid_value, invalid_value, invalid_message",
+        [
+            ("area", 3.0, "invalid", r"area must be a number\."),
+            ("center", 0.6, "invalid", r"center must be a number\."),
+        ],
+    )
+    def test_property_setters_validate(
+        self,
+        delta_function: DeltaFunction,
+        prop,
+        valid_value,
+        invalid_value,
+        invalid_message,
+    ):
+        # set valid
+        setattr(delta_function, prop, valid_value)
+        assert getattr(delta_function, prop).value == valid_value
 
-        # THEN EXPECT
-        assert delta_function.area.value == 3.0
-        with pytest.raises(TypeError, match="area must be a number."):
-            delta_function.area = "invalid"
-
-    def test_center_property_setter(self, delta_function: DeltaFunction):
-        # WHEN
-        delta_function.center = 0.6
-
-        # THEN EXPECT
-        assert delta_function.center.value == 0.6
-        with pytest.raises(TypeError, match="center must be a number."):
-            delta_function.center = "invalid"
+        # invalid
+        with pytest.raises(TypeError, match=invalid_message):
+            setattr(delta_function, prop, invalid_value)
 
     def test_evaluate(self, delta_function: DeltaFunction):
         # WHEN
