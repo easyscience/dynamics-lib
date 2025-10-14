@@ -257,10 +257,10 @@ class TestDampedHarmonicOscillator:
         dho.convert_unit("microeV")
 
         # EXPECT
-        assert dho._unit == "microeV"
-        assert dho._area.value == 2 * 1e3
-        assert dho._center.value == 1.5 * 1e3
-        assert dho._width.value == 0.3 * 1e3
+        assert dho.unit == "microeV"
+        assert dho.area.value == 2 * 1e3
+        assert dho.center.value == 1.5 * 1e3
+        assert dho.width.value == 0.3 * 1e3
 
     def test_copy(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
@@ -268,18 +268,18 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert dho_copy is not dho
-        assert dho_copy.name == "copy of " + dho._name
+        assert dho_copy.name == "copy of " + dho.name
 
-        assert dho_copy._area.value == dho._area.value
-        assert dho_copy._area.fixed == dho._area.fixed
+        assert dho_copy.area.value == dho.area.value
+        assert dho_copy.area.fixed == dho.area.fixed
 
-        assert dho_copy._center.value == dho._center.value
-        assert dho_copy._center.fixed == dho._center.fixed
+        assert dho_copy.center.value == dho.center.value
+        assert dho_copy.center.fixed == dho.center.fixed
 
-        assert dho_copy._width.value == dho._width.value
-        assert dho_copy._width.fixed == dho._width.fixed
+        assert dho_copy.width.value == dho.width.value
+        assert dho_copy.width.fixed == dho.width.fixed
 
-        assert dho_copy._unit == dho._unit
+        assert dho_copy.unit == dho.unit
 
     def test_repr(self, dho: DampedHarmonicOscillator):
         # WHEN THEN

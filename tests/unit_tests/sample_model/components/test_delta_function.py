@@ -91,6 +91,17 @@ class TestDeltaFunction:
 
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    def test_evaluate_out_of_bounds(self, delta_function: DeltaFunction):
+        # WHEN
+        x = np.linspace(1, 2, 100)  # center is at 0.5, so out of bounds
+
+        # THEN
+        result = delta_function.evaluate(x)
+
+        # EXPECT
+        expected_result = np.zeros_like(x)
+        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
     def test_evaluate_scipp_array(self, delta_function: DeltaFunction):
         # WHEN
         x = sc.array(dims=["x"], values=np.linspace(-1, 2, 10), unit="meV")
@@ -139,6 +150,20 @@ class TestDeltaFunction:
     def test_area_matches_parameter_value(self, delta_function: DeltaFunction):
         # WHEN
         x = np.linspace(-1, 2, 100)
+
+        # THEN
+        result = delta_function.evaluate(x)
+
+        # EXPECT
+        numerical_area = np.trapezoid(result, x)
+
+        assert np.isclose(numerical_area, delta_function.area.value, rtol=1e-5)
+
+    def test_area_matches_parameter_value_non_uniform_spacing(
+        self, delta_function: DeltaFunction
+    ):
+        # WHEN
+        x = np.array([-1.0, 0.0, 0.4, 0.6, 1.0, 2.0])  # non-uniform spacing
 
         # THEN
         result = delta_function.evaluate(x)

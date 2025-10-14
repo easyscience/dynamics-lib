@@ -38,24 +38,30 @@ class Polynomial(ModelComponent):
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
 
-        dimless = sc.units.dimensionless
+        self._coefficients = []
+        # Coefficients are dimensionless, since powers of units are difficult to handle otherwise
+        for i, coef in enumerate(coefficients):
+            self._coefficients.append(Parameter(name=f"{name}_c{i}", value=coef))
+        self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
 
-        # Build Parameters with appropriate units
-        self.coefficients = []
-        for i, coef in enumerate(coefficients):
-            coef_unit = dimless if i == 0 else f"1 / ({unit}**{i})"
-            self.coefficients.append(
-                Parameter(name=f"{name}_c{i}", value=coef, unit=coef_unit)
+    @property
+    def coefficients(self) -> list[Parameter]:
+        """Get the coefficients of the polynomial as a list of Parameters."""
+        return self._coefficients
+
+    @coefficients.setter
+    def coefficients(self, coeffs: list[float]) -> None:
+        """Set the coefficients of the polynomial from a list of floats."""
+        if not isinstance(coeffs, list):
+            raise TypeError("coefficients must be a list of floats.")
+        if not all(isinstance(c, Numeric) for c in coeffs):
+            raise TypeError("All coefficients must be numbers.")
+        if len(coeffs) != len(self._coefficients):
+            raise ValueError(
+                "Number of coefficients must match the existing number of coefficients."
             )
-        # scipp converts units like "1 / (meV**2)" to SI units (3.89e+43 1/J**2)
-        # EasyScience then converts this to 1/J**2 when setting the Parameter, and the value is scaled accordingly.
-        # We therefore convert back to 1 / (meV**2), which becomes (3.89e+43 1/J**2), and set the value again
-        for i, coef in enumerate(coefficients):
-            coef_unit = f"1 / ({unit}**{i})"
-            if i == 0:
-                continue  # dimensionless, no scaling
-            self.coefficients[i].convert_unit(coef_unit)
-            self.coefficients[i].value = coef
+        for i, coef in enumerate(coeffs):
+            self._coefficients[i].value = coef
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
@@ -67,7 +73,7 @@ class Polynomial(ModelComponent):
         x = self._prepare_x_for_evaluate(x)
 
         result = np.zeros_like(x, dtype=float)
-        for i, param in enumerate(self.coefficients):
+        for i, param in enumerate(self._coefficients):
             result += param.value * np.power(x, i)
 
         if any(result < 0):
@@ -78,17 +84,17 @@ class Polynomial(ModelComponent):
             )
         return result
 
-    def degree(self):
+    def degree(self) -> int:
         """Return the degree of the polynomial."""
-        return len(self.coefficients) - 1
+        return len(self._coefficients) - 1
 
-    def get_parameters(self):
+    def get_parameters(self) -> list[Parameter]:
         """
         Get all parameters from the model component.
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return self.coefficients
+        return self._coefficients
 
     def copy(self) -> Polynomial:
         """
@@ -96,17 +102,11 @@ class Polynomial(ModelComponent):
         """
 
         model_copy = Polynomial(
-            name=self.name, coefficients=[param.value for param in self.coefficients]
+            name=self.name, coefficients=[param.value for param in self._coefficients]
         )
         for i, param in enumerate(model_copy.coefficients):
-            param.fixed = self.coefficients[i].fixed
+            param.fixed = self._coefficients[i].fixed
         return model_copy
-
-    def __repr__(self):
-        coeffs_str = ", ".join(
-            f"{param.name}={param.value}" for param in self.coefficients
-        )
-        return f"Polynomial(name = {self.name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """Convert the unit of the polynomial.
@@ -117,15 +117,24 @@ class Polynomial(ModelComponent):
         if not isinstance(unit, (str, sc.Unit)):
             raise UnitError("unit must be a string or a scipp unit.")
 
-        for i, param in enumerate(self.coefficients):
-            if i == 0:
-                continue  # dimensionless, no scaling
-            print(
-                f"Converting coefficient {param.name} from {param.unit} to 1 / ({unit}**{i})"
-            )
-            param.convert_unit(f"1 / ({unit}**{i})")
+        # Find out how much the unit changes by converting in a helper variable
+        conversion_value_before = self._unit_conversion_helper.value
+        self._unit_conversion_helper = sc.to_unit(
+            self._unit_conversion_helper, unit=unit
+        )
+        conversion_value_after = self._unit_conversion_helper.value
+        for i, param in enumerate(self._coefficients):
+            param.value *= (
+                conversion_value_before / conversion_value_after
+            ) ** i  # set the values directly to the appropriate power
 
         self._unit = unit
+
+    def __repr__(self) -> str:
+        coeffs_str = ", ".join(
+            f"{param.name}={param.value}" for param in self._coefficients
+        )
+        return f"Polynomial(name = {self.name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
 
 # from typing import Callable, Dict

@@ -17,6 +17,7 @@ MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 class Gaussian(ModelComponent):
     """
     Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
         name (str): Name of the component.

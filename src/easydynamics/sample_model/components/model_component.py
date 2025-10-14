@@ -20,6 +20,10 @@ class ModelComponent(ObjBase):
 
     def __init__(self, name="ModelComponent", unit: Optional[str] = "meV"):
         super().__init__(name=name)
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+
         self._unit = unit
 
     @property

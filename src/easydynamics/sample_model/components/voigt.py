@@ -18,6 +18,7 @@ MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 class Voigt(ModelComponent):
     """
     Voigt profile, a convolution of Gaussian and Lorentzian.
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
         name (str): Name of the component.

@@ -120,17 +120,6 @@ class DampedHarmonicOscillator(ModelComponent):
             )
         self._width.value = value
 
-    @property
-    def unit(self) -> Union[str, sc.Unit]:
-        """Return the unit of the component."""
-        return self._unit
-
-    @unit.setter
-    def unit(self, value: Union[str, sc.Unit]):
-        if not isinstance(value, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-        self.convert_unit(value)
-
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:

@@ -15,6 +15,7 @@ Numeric = Union[float, int]
 class DeltaFunction(ModelComponent):
     """
     Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
         name (str): Name of the component.
@@ -92,38 +93,39 @@ class DeltaFunction(ModelComponent):
             raise TypeError("center must be a number.")
         self._center.value = float(value)
 
-    @property
-    def unit(self) -> Union[str, sc.Unit]:
-        """Return the unit of the component."""
-        return self._unit
-
-    @unit.setter
-    def unit(self, value: Union[str, sc.Unit]):
-        """Set the unit of the component."""
-        if not isinstance(value, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-        self._unit = value
-
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:
         """Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except at the center. Its numerical integral is equal to the area.
         It acts as an identity in convolutions."""
-        # TODO: Consider adding support for evaluation without resolution convolution
 
+        # x assumed sorted, 1D numpy array
         x = self._prepare_x_for_evaluate(x)
         model = np.zeros_like(x, dtype=float)
+        center = self._center.value
+        area = self._area.value
 
-        if min(x) <= self._center.value <= max(x):
-            # if center within x-range, delta is non-zero in this interval
-            # otherwise do nothing
-            idx = np.argmin(np.abs(x - self._center.value))
-            if len(x) > 1:
-                dx = (max(x) - min(x)) / (len(x) - 1)  # domain spacing
+        if x.min() <= center <= x.max():
+            # nearest index
+            i = np.argmin(np.abs(x - center))
+
+            # left half-width
+            if i == 0:
+                left = x[1] - x[0] if x.size > 1 else 0.0
             else:
-                dx = 1.0
-            model[idx] = self._area.value / dx
+                left = x[i] - x[i - 1]
+
+            # right half-width
+            if i == x.size - 1:
+                right = x[-1] - x[-2] if x.size > 1 else 0.0
+            else:
+                right = x[i + 1] - x[i]
+
+            # effective bin width: half left + half right
+            bin_width = 0.5 * (left + right)
+
+            model[i] = area / bin_width
 
         return model
 

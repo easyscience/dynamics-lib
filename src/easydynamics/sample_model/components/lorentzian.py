@@ -17,6 +17,7 @@ MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 class Lorentzian(ModelComponent):
     """
     Lorentzian function: area*width / (pi * ( (x - center)^2 + width^2 ) )
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
         name (str): Name of the component.
