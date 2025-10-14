@@ -114,13 +114,13 @@ class DeltaFunction(ModelComponent):
 
             # left half-width
             if i == 0:
-                left = x[1] - x[0] if x.size > 1 else 0.0
+                left = x[1] - x[0] if x.size > 1 else 0.5
             else:
                 left = x[i] - x[i - 1]
 
             # right half-width
             if i == x.size - 1:
-                right = x[-1] - x[-2] if x.size > 1 else 0.0
+                right = x[-1] - x[-2] if x.size > 1 else 0.5
             else:
                 right = x[i + 1] - x[i]
 

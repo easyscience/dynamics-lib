@@ -107,7 +107,7 @@ class ModelComponent(ObjBase):
         if any(np.isinf(x_in)):
             raise ValueError("Input x contains infinite values.")
 
-        return x_in
+        return np.sort(x_in)
 
     @abstractmethod
     def convert_unit(self, unit: Union[str, sc.Unit]):
