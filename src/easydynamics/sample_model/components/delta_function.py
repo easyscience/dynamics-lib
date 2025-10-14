@@ -11,6 +11,8 @@ from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
+EPSILON = 1e-8  # small number to avoid floating point issues
+
 
 class DeltaFunction(ModelComponent):
     """
@@ -106,7 +108,7 @@ class DeltaFunction(ModelComponent):
         center = self._center.value
         area = self._area.value
 
-        if x.min() <= center <= x.max():
+        if x.min() - EPSILON <= center <= x.max() + EPSILON:
             # nearest index
             i = np.argmin(np.abs(x - center))
 

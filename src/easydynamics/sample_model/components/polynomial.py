@@ -119,7 +119,7 @@ class Polynomial(ModelComponent):
         if not isinstance(unit, (str, sc.Unit)):
             raise UnitError("unit must be a string or a scipp unit.")
 
-        # Find out how much the unit changes by converting in a helper variable
+        # Find out how much the unit changes by converting a helper variable
         conversion_value_before = self._unit_conversion_helper.value
         self._unit_conversion_helper = sc.to_unit(
             self._unit_conversion_helper, unit=unit
