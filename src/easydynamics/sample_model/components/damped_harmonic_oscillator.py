@@ -59,11 +59,7 @@ class DampedHarmonicOscillator(ModelComponent):
                 "The width of a DampedHarmonicOscillator must be greater than zero."
             )
 
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
-        super().__init__(name=name)
-        self._unit = unit  # Set the unit for the component
+        super().__init__(name=name, unit=unit)
 
         # Create Parameters from floats
         self._area = Parameter(name=name + " area", value=area, unit=unit)
@@ -135,7 +131,9 @@ class DampedHarmonicOscillator(ModelComponent):
             raise TypeError("unit must be a string or a scipp unit.")
         self.convert_unit(value)
 
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> Union[float, np.ndarray]:
+    def evaluate(
+        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+    ) -> np.ndarray:
         """Evaluate the Damped Harmonic Oscillator at the given x values.
         If x is a scipp Variable, the unit of the DHO will be converted to
         match x. The DHO evaluates to 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )"""

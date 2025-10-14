@@ -59,12 +59,7 @@ class Lorentzian(ModelComponent):
         if width <= 0:
             raise ValueError("The width of a Lorentzian must be greater than zero.")
 
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
-        super().__init__(name=name)
-        self._unit = unit  # Set the unit for the component
-
+        super().__init__(name=name, unit=unit)
         # Create Parameters from floats
         self._area = Parameter(name=name + " area", value=area, unit=unit)
         if area > 0:

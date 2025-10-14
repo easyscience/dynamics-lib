@@ -18,7 +18,7 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
-    def __init__(self, name="ModelComponent", unit: Optional[str] = None):
+    def __init__(self, name="ModelComponent", unit: Optional[str] = "meV"):
         super().__init__(name=name)
         self._unit = unit
 

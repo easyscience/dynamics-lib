@@ -34,10 +34,7 @@ class Polynomial(ModelComponent):
         if not all(isinstance(c, Numeric) for c in coefficients):
             raise TypeError("All coefficients must be numbers.")
 
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
-        super().__init__(name=name)
+        super().__init__(name=name, unit=unit)
         if not coefficients:
             raise ValueError("At least one coefficient must be provided.")
 
@@ -59,8 +56,6 @@ class Polynomial(ModelComponent):
                 continue  # dimensionless, no scaling
             self.coefficients[i].convert_unit(coef_unit)
             self.coefficients[i].value = coef
-
-        self._unit = unit
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]

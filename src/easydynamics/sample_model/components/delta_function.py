@@ -48,12 +48,7 @@ class DeltaFunction(ModelComponent):
         if isinstance(center, Numeric):
             center = float(center)
 
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
-        super().__init__(name=name)
-        self._unit = unit
-
+        super().__init__(name=name, unit=unit)
         # Create Parameters from floats, or set Parameters if already provided
         self._area = Parameter(name=name + " area", value=area, unit=unit)
         if area > 0:
