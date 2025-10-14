@@ -45,9 +45,10 @@ class Polynomial(ModelComponent):
         self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
 
     @property
-    def coefficients(self) -> list[Parameter]:
-        """Get the coefficients of the polynomial as a list of Parameters."""
-        return self._coefficients
+    def coefficients(self) -> list[float]:
+        """Get the coefficients of the polynomial as a list."""
+        coefficient_list = [param.value for param in self._coefficients]
+        return coefficient_list
 
     @coefficients.setter
     def coefficients(self, coeffs: list[float]) -> None:
@@ -84,9 +85,16 @@ class Polynomial(ModelComponent):
             )
         return result
 
+    @property
     def degree(self) -> int:
         """Return the degree of the polynomial."""
         return len(self._coefficients) - 1
+
+    @degree.setter
+    def degree(self, value: int) -> None:
+        raise AttributeError(
+            "The degree of the polynomial is determined by the number of coefficients and cannot be set directly."
+        )
 
     def get_parameters(self) -> list[Parameter]:
         """
@@ -104,10 +112,13 @@ class Polynomial(ModelComponent):
             name = "copy of " + self.name
 
         model_copy = Polynomial(
-            name=self.name, coefficients=[param.value for param in self._coefficients]
+            name=self.name,
+            coefficients=[param.value for param in self._coefficients],
+            unit=self._unit,
         )
         for i, param in enumerate(model_copy.coefficients):
             param.fixed = self._coefficients[i].fixed
+
         return model_copy
 
     def convert_unit(self, unit: Union[str, sc.Unit]):
