@@ -17,11 +17,11 @@ class TestDampedHarmonicOscillator:
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        assert dho._name == "TestDHO"
-        assert dho._area.value == 2.0
-        assert dho._center.value == 1.5
-        assert dho._width.value == 0.3
-        assert dho._unit == "meV"
+        assert dho.name == "TestDHO"
+        assert dho.area.value == 2.0
+        assert dho.center.value == 1.5
+        assert dho.width.value == 0.3
+        assert dho.unit == "meV"
 
     def test_input_type_validation_area_raises(self):
         # WHEN THEN EXPECT
@@ -92,10 +92,6 @@ class TestDampedHarmonicOscillator:
                 unit="meV",
             )
 
-    def test_area_property_getter(self, dho: DampedHarmonicOscillator):
-        # WHEN THEN EXPECT
-        assert dho.area.value == 2.0
-
     def test_area_property_setter(self, dho: DampedHarmonicOscillator):
         # WHEN
         dho.area = 3.0
@@ -105,10 +101,6 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(TypeError, match="area must be a number."):
             dho.area = "invalid"
 
-    def test_center_property_getter(self, dho: DampedHarmonicOscillator):
-        # WHEN THEN EXPECT
-        assert dho.center.value == 1.5
-
     def test_center_property_setter(self, dho: DampedHarmonicOscillator):
         # WHEN
         dho.center = 0.6
@@ -117,9 +109,6 @@ class TestDampedHarmonicOscillator:
         assert dho.center.value == 0.6
         with pytest.raises(TypeError, match="center must be a number."):
             dho.center = "invalid"
-
-    def test_width_property_getter(self, dho: DampedHarmonicOscillator):
-        assert dho.width.value == 0.3
 
     def test_width_property_setter(self, dho: DampedHarmonicOscillator):
         # WHEN

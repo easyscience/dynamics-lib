@@ -18,9 +18,9 @@ class TestLorentzian:
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
         assert lorentzian.name == "TestLorentzian"
-        assert lorentzian._area.value == 2.0
-        assert lorentzian._center.value == 0.5
-        assert lorentzian._width.value == 0.6
+        assert lorentzian.area.value == 2.0
+        assert lorentzian.center.value == 0.5
+        assert lorentzian.width.value == 0.6
         assert lorentzian.unit == "meV"
 
     def test_input_type_validation_area_raises(self):
@@ -65,10 +65,6 @@ class TestLorentzian:
                 name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
             )
 
-    def test_area_property_getter(self, lorentzian: Lorentzian):
-        # WHEN THEN EXPECT
-        assert lorentzian.area.value == 2.0
-
     def test_area_property_setter(self, lorentzian: Lorentzian):
         # WHEN
         lorentzian.area = 3.0
@@ -78,10 +74,6 @@ class TestLorentzian:
         with pytest.raises(TypeError, match="area must be a number."):
             lorentzian.area = "invalid"
 
-    def test_center_property_getter(self, lorentzian: Lorentzian):
-        # WHEN THEN EXPECT
-        assert lorentzian.center.value == 0.5
-
     def test_center_property_setter(self, lorentzian: Lorentzian):
         # WHEN THEN
         lorentzian.center = 0.6
@@ -90,10 +82,6 @@ class TestLorentzian:
         assert lorentzian.center.value == 0.6
         with pytest.raises(TypeError, match="center must be a number."):
             lorentzian.center = "invalid"
-
-    def test_width_property_getter(self, lorentzian: Lorentzian):
-        # WHEN THEN EXPECT
-        assert lorentzian.width.value == 0.6
 
     def test_width_property_setter(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -187,8 +175,8 @@ class TestLorentzian:
         )
 
         # EXPECT
-        assert test_lorentzian._center.value == 0.0
-        assert test_lorentzian._center.fixed is True
+        assert test_lorentzian.center.value == 0.0
+        assert test_lorentzian.center.fixed is True
 
     def test_get_parameters(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -204,8 +192,8 @@ class TestLorentzian:
     def test_area_matches_parameter(self, lorentzian: Lorentzian):
         # WHEN THEN
         x = np.linspace(
-            lorentzian._center.value - 500 * lorentzian._width.value,
-            lorentzian._center.value + 500 * lorentzian._width.value,
+            lorentzian.center.value - 500 * lorentzian.width.value,
+            lorentzian.center.value + 500 * lorentzian.width.value,
             20000,
         )  # Lorentzians have very long tails
         y = lorentzian.evaluate(x)
@@ -220,9 +208,9 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian.unit == "microeV"
-        assert lorentzian._area.value == 2 * 1e3
-        assert lorentzian._center.value == 0.5 * 1e3
-        assert lorentzian._width.value == 0.6 * 1e3
+        assert lorentzian.area.value == 2 * 1e3
+        assert lorentzian.center.value == 0.5 * 1e3
+        assert lorentzian.width.value == 0.6 * 1e3
 
     def test_copy(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -232,14 +220,14 @@ class TestLorentzian:
         assert lorentzian_copy is not lorentzian
         assert lorentzian_copy.name == "copy of " + lorentzian.name
 
-        assert lorentzian_copy._area.value == lorentzian._area.value
-        assert lorentzian_copy._area.fixed == lorentzian._area.fixed
+        assert lorentzian_copy.area.value == lorentzian.area.value
+        assert lorentzian_copy.area.fixed == lorentzian.area.fixed
 
-        assert lorentzian_copy._center.value == lorentzian._center.value
-        assert lorentzian_copy._center.fixed == lorentzian._center.fixed
+        assert lorentzian_copy.center.value == lorentzian.center.value
+        assert lorentzian_copy.center.fixed == lorentzian.center.fixed
 
-        assert lorentzian_copy._width.value == lorentzian._width.value
-        assert lorentzian_copy._width.fixed == lorentzian._width.fixed
+        assert lorentzian_copy.width.value == lorentzian.width.value
+        assert lorentzian_copy.width.fixed == lorentzian.width.fixed
 
         assert lorentzian_copy.unit == lorentzian.unit
 

@@ -15,8 +15,8 @@ class TestDeltaFunction:
     def test_initialization(self, delta_function: DeltaFunction):
         # WHEN THEN EXPECT
         assert delta_function.name == "TestDeltaFunction"
-        assert delta_function._area.value == 2.0
-        assert delta_function._center.value == 0.5
+        assert delta_function.area.value == 2.0
+        assert delta_function.center.value == 0.5
         assert delta_function.unit == "meV"
 
     def test_input_type_validation_area_raises(self):
@@ -49,10 +49,6 @@ class TestDeltaFunction:
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
 
-    def test_area_property_getter(self, delta_function: DeltaFunction):
-        # WHEN THEN EXPECT
-        assert delta_function.area.value == 2.0
-
     def test_area_property_setter(self, delta_function: DeltaFunction):
         # WHEN
         delta_function.area = 3.0
@@ -61,10 +57,6 @@ class TestDeltaFunction:
         assert delta_function.area.value == 3.0
         with pytest.raises(TypeError, match="area must be a number."):
             delta_function.area = "invalid"
-
-    def test_center_property_getter(self, delta_function: DeltaFunction):
-        # WHEN THEN EXPECT
-        assert delta_function.center.value == 0.5
 
     def test_center_property_setter(self, delta_function: DeltaFunction):
         # WHEN
@@ -208,8 +200,8 @@ class TestDeltaFunction:
         )
 
         # EXPECT
-        assert test_delta._center.value == 0.0
-        assert test_delta._center.fixed is True
+        assert test_delta.center.value == 0.0
+        assert test_delta.center.fixed is True
 
     def test_get_parameters(self, delta_function: DeltaFunction):
         # WHEN THEN
@@ -227,8 +219,8 @@ class TestDeltaFunction:
 
         # EXPECT
         assert delta_function.unit == "microeV"
-        assert delta_function._area.value == 2 * 1e3
-        assert delta_function._center.value == 0.5 * 1e3
+        assert delta_function.area.value == 2 * 1e3
+        assert delta_function.center.value == 0.5 * 1e3
 
     def test_copy(self, delta_function: DeltaFunction):
         # WHEN THEN
@@ -238,11 +230,11 @@ class TestDeltaFunction:
         assert delta_copy is not delta_function
         assert delta_copy.name == "copy of " + delta_function.name
 
-        assert delta_copy._area.value == delta_function._area.value
-        assert delta_copy._area.fixed == delta_function._area.fixed
+        assert delta_copy.area.value == delta_function.area.value
+        assert delta_copy.area.fixed == delta_function.area.fixed
 
-        assert delta_copy._center.value == delta_function._center.value
-        assert delta_copy._center.fixed == delta_function._center.fixed
+        assert delta_copy.center.value == delta_function.center.value
+        assert delta_copy.center.fixed == delta_function.center.fixed
 
         assert delta_copy.unit == delta_function.unit
 

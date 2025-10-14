@@ -24,10 +24,10 @@ class TestVoigt:
     def test_initialization(self, voigt: Voigt):
         # WHEN THEN EXPECT
         assert voigt.name == "TestVoigt"
-        assert voigt._area.value == 2.0
-        assert voigt._center.value == 0.5
-        assert voigt._gaussian_width.value == 0.6
-        assert voigt._lorentzian_width.value == 0.7
+        assert voigt.area.value == 2.0
+        assert voigt.center.value == 0.5
+        assert voigt.gaussian_width.value == 0.6
+        assert voigt.lorentzian_width.value == 0.7
         assert voigt.unit == "meV"
 
     def test_input_type_validation_area_raises(self):
@@ -131,10 +131,6 @@ class TestVoigt:
                 unit="meV",
             )
 
-    def test_area_property_getter(self, voigt: Voigt):
-        # WHEN THEN EXPECT
-        assert voigt.area.value == 2.0
-
     def test_area_property_setter(self, voigt: Voigt):
         # WHEN
         voigt.area = 3.0
@@ -143,10 +139,6 @@ class TestVoigt:
         assert voigt.area.value == 3.0
         with pytest.raises(TypeError, match="area must be a number."):
             voigt.area = "invalid"
-
-    def test_center_property_getter(self, voigt: Voigt):
-        # WHEN THEN EXPECT
-        assert voigt.center.value == 0.5
 
     def test_center_property_setter(self, voigt: Voigt):
         # WHEN
@@ -157,10 +149,6 @@ class TestVoigt:
         with pytest.raises(TypeError, match="center must be a number."):
             voigt.center = "invalid"
 
-    def test_gaussian_width_property_getter(self, voigt: Voigt):
-        # WHEN THEN EXPECT
-        assert voigt.gaussian_width.value == 0.6
-
     def test_gaussian_width_property_setter(self, voigt: Voigt):
         # WHEN THEN
         voigt.gaussian_width = 0.7
@@ -169,10 +157,6 @@ class TestVoigt:
         assert voigt.gaussian_width.value == 0.7
         with pytest.raises(TypeError, match="width must be a number."):
             voigt.gaussian_width = "invalid"
-
-    def test_lorentzian_width_property_getter(self, voigt: Voigt):
-        # WHEN THEN EXPECT
-        assert voigt.lorentzian_width.value == 0.7
 
     def test_lorentzian_width_property_setter(self, voigt: Voigt):
         # WHEN THEN
@@ -272,8 +256,8 @@ class TestVoigt:
         )
 
         # EXPECT
-        assert test_voigt._center.value == 0.0
-        assert test_voigt._center.fixed is True
+        assert test_voigt.center.value == 0.0
+        assert test_voigt.center.fixed is True
 
     def test_convert_unit(self, voigt: Voigt):
         # WHEN THEN
@@ -281,10 +265,10 @@ class TestVoigt:
 
         # EXPECT
         assert voigt.unit == "microeV"
-        assert voigt._area.value == 2 * 1e3
-        assert voigt._center.value == 0.5 * 1e3
-        assert voigt._gaussian_width.value == 0.6 * 1e3
-        assert voigt._lorentzian_width.value == 0.7 * 1e3
+        assert voigt.area.value == 2 * 1e3
+        assert voigt.center.value == 0.5 * 1e3
+        assert voigt.gaussian_width.value == 0.6 * 1e3
+        assert voigt.lorentzian_width.value == 0.7 * 1e3
 
     def test_get_parameters(self, voigt: Voigt):
         # WHEN THEN
@@ -301,19 +285,19 @@ class TestVoigt:
     def test_area_matches_parameter(self, voigt: Voigt):
         # WHEN THEN
         x = np.linspace(
-            voigt._center.value
-            - 100 * voigt._gaussian_width.value
-            - 300 * voigt._lorentzian_width.value,
-            voigt._center.value
-            + 100 * voigt._gaussian_width.value
-            + 300 * voigt._lorentzian_width.value,
+            voigt.center.value
+            - 100 * voigt.gaussian_width.value
+            - 300 * voigt.lorentzian_width.value,
+            voigt.center.value
+            + 100 * voigt.gaussian_width.value
+            + 300 * voigt.lorentzian_width.value,
             20000,
         )  # Voigts have very long tails
         y = voigt.evaluate(x)
         numerical_area = simpson(y, x)
 
         # EXPECT
-        assert numerical_area == pytest.approx(voigt._area.value, rel=2e-3)
+        assert numerical_area == pytest.approx(voigt.area.value, rel=2e-3)
 
     def test_copy(self, voigt: Voigt):
         # WHEN THEN

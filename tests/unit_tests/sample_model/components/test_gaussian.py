@@ -18,10 +18,35 @@ class TestGaussian:
     def test_initialization(self, gaussian: Gaussian):
         # WHEN THEN EXPECT
         assert gaussian.name == "TestGaussian"
-        assert gaussian._area.value == 2.0
-        assert gaussian._center.value == 0.5
-        assert gaussian._width.value == 0.6
+        assert gaussian.area.value == 2.0
+        assert gaussian.center.value == 0.5
+        assert gaussian.width.value == 0.6
         assert gaussian.unit == "meV"
+
+    @pytest.mark.parametrize(
+        "kwargs, expected_message",
+        [
+            (
+                {"area": "invalid", "center": 0.5, "width": 0.6, "unit": "meV"},
+                "area must be a number",
+            ),
+            (
+                {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
+                "center must be None or a number",
+            ),
+            (
+                {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
+                "width must be a number",
+            ),
+            (
+                {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
+                "unit must be a string or a scipp unit",
+            ),
+        ],
+    )
+    def test_input_type_validation_raises(kwargs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            Gaussian(name="TestGaussian", **kwargs)
 
     def test_input_type_validation_area_raises(self):
         # WHEN THEN EXPECT
@@ -61,10 +86,6 @@ class TestGaussian:
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
 
-    def test_area_property_getter(self, gaussian: Gaussian):
-        # WHEN THEN EXPECT
-        assert gaussian.area.value == 2.0
-
     def test_area_property_setter(self, gaussian: Gaussian):
         # WHEN
         gaussian.area = 3.0
@@ -74,10 +95,6 @@ class TestGaussian:
         with pytest.raises(TypeError, match="area must be a number."):
             gaussian.area = "invalid"
 
-    def test_center_property_getter(self, gaussian: Gaussian):
-        # WHEN THEN EXPECT
-        assert gaussian.center.value == 0.5
-
     def test_center_property_setter(self, gaussian: Gaussian):
         # WHEN
         gaussian.center = 0.6
@@ -86,10 +103,6 @@ class TestGaussian:
         assert gaussian.center.value == 0.6
         with pytest.raises(TypeError, match="center must be a number."):
             gaussian.center = "invalid"
-
-    def test_width_property_getter(self, gaussian: Gaussian):
-        # WHEN THEN EXPECT
-        assert gaussian.width.value == 0.6
 
     def test_width_property_setter(self, gaussian: Gaussian):
         # WHEN
@@ -201,8 +214,8 @@ class TestGaussian:
             name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"
         )
         # EXPECT
-        assert test_gaussian._center.value == 0.0
-        assert test_gaussian._center.fixed is True
+        assert test_gaussian.center.value == 0.0
+        assert test_gaussian.center.fixed is True
 
     def test_get_parameters(self, gaussian: Gaussian):
         # WHEN THEN
@@ -218,8 +231,8 @@ class TestGaussian:
     def test_area_matches_parameter(self, gaussian: Gaussian):
         # WHEN
         x = np.linspace(
-            gaussian._center.value - 10 * gaussian._width.value,
-            gaussian._center.value + 10 * gaussian._width.value,
+            gaussian.center.value - 10 * gaussian.width.value,
+            gaussian.center.value + 10 * gaussian.width.value,
             1000,
         )
 
@@ -228,7 +241,7 @@ class TestGaussian:
 
         # EXPECT
         numerical_area = simpson(y, x)
-        assert np.isclose(numerical_area, gaussian._area.value, rtol=1e-3)
+        assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
     def test_convert_unit(self, gaussian: Gaussian):
         # WHEN THEN
@@ -236,9 +249,9 @@ class TestGaussian:
 
         # EXPECT
         assert gaussian.unit == "microeV"
-        assert gaussian._area.value == 2 * 1e3
-        assert gaussian._center.value == 0.5 * 1e3
-        assert gaussian._width.value == 0.6 * 1e3
+        assert gaussian.area.value == 2 * 1e3
+        assert gaussian.center.value == 0.5 * 1e3
+        assert gaussian.width.value == 0.6 * 1e3
 
     def test_copy(self, gaussian: Gaussian):
         # WHEN THEN
@@ -247,14 +260,14 @@ class TestGaussian:
         assert gaussian_copy is not gaussian
         assert gaussian_copy.name == "copy of " + gaussian.name
 
-        assert gaussian_copy._area.value == gaussian._area.value
-        assert gaussian_copy._area.fixed == gaussian._area.fixed
+        assert gaussian_copy.area.value == gaussian.area.value
+        assert gaussian_copy.area.fixed == gaussian.area.fixed
 
-        assert gaussian_copy._center.value == gaussian._center.value
-        assert gaussian_copy._center.fixed == gaussian._center.fixed
+        assert gaussian_copy.center.value == gaussian.center.value
+        assert gaussian_copy.center.fixed == gaussian.center.fixed
 
-        assert gaussian_copy._width.value == gaussian._width.value
-        assert gaussian_copy._width.fixed == gaussian._width.fixed
+        assert gaussian_copy.width.value == gaussian.width.value
+        assert gaussian_copy.width.fixed == gaussian.width.fixed
 
         assert gaussian_copy.unit == gaussian.unit
 
