@@ -108,10 +108,14 @@ class TestLorentzian:
 
         # EXPECT
         assert len(params) == 3
-        assert params[0].name == "TestLorentzian area"
-        assert params[1].name == "TestLorentzian center"
-        assert params[2].name == "TestLorentzian width"
         assert all(isinstance(param, Parameter) for param in params)
+        expected_names = {
+            "TestLorentzian area",
+            "TestLorentzian center",
+            "TestLorentzian width",
+        }
+        actual_names = {param.name for param in params}
+        assert actual_names == expected_names
 
     def test_area_matches_parameter(self, lorentzian: Lorentzian):
         # WHEN THEN

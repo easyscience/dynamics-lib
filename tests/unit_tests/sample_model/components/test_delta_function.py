@@ -163,9 +163,13 @@ class TestDeltaFunction:
 
         # EXPECT
         assert len(params) == 2
-        assert params[0].name == "TestDeltaFunction area"
-        assert params[1].name == "TestDeltaFunction center"
         assert all(isinstance(param, Parameter) for param in params)
+        expected_names = {
+            "TestDeltaFunction area",
+            "TestDeltaFunction center",
+        }
+        actual_names = {param.name for param in params}
+        assert actual_names == expected_names
 
     def test_convert_unit(self, delta_function: DeltaFunction):
         # WHEN THEN

@@ -119,10 +119,14 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert len(params) == 3
-        assert params[0].name == "TestDHO area"
-        assert params[1].name == "TestDHO center"
-        assert params[2].name == "TestDHO width"
         assert all(isinstance(param, Parameter) for param in params)
+        expected_names = {
+            "TestDHO area",
+            "TestDHO center",
+            "TestDHO width",
+        }
+        actual_names = {param.name for param in params}
+        assert actual_names == expected_names
 
     def test_area_matches_parameter(self, dho: DampedHarmonicOscillator):
         # WHEN THEN

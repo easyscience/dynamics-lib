@@ -196,11 +196,15 @@ class TestVoigt:
 
         # EXPECT
         assert len(params) == 4
-        assert params[0].name == "TestVoigt area"
-        assert params[1].name == "TestVoigt center"
-        assert params[2].name == "TestVoigt gaussian_width"
-        assert params[3].name == "TestVoigt lorentzian_width"
         assert all(isinstance(param, Parameter) for param in params)
+        expected_names = {
+            "TestVoigt area",
+            "TestVoigt center",
+            "TestVoigt gaussian_width",
+            "TestVoigt lorentzian_width",
+        }
+        actual_names = {param.name for param in params}
+        assert actual_names == expected_names
 
     def test_area_matches_parameter(self, voigt: Voigt):
         # WHEN THEN

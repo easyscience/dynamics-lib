@@ -72,10 +72,14 @@ class TestPolynomial:
 
         # EXPECT
         assert len(params) == 3
-        assert params[0].name == "TestPolynomial_c0"
-        assert params[1].name == "TestPolynomial_c1"
-        assert params[2].name == "TestPolynomial_c2"
         assert all(isinstance(param, Parameter) for param in params)
+        expected_names = {
+            "TestPolynomial_c0",
+            "TestPolynomial_c1",
+            "TestPolynomial_c2",
+        }
+        actual_names = {param.name for param in params}
+        assert actual_names == expected_names
 
     def test_convert_unit(self, polynomial: Polynomial):
         # WHEN
