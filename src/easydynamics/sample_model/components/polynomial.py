@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -96,10 +96,12 @@ class Polynomial(ModelComponent):
         """
         return self._coefficients
 
-    def copy(self) -> Polynomial:
+    def copy(self, name: Optional[str] = None) -> Polynomial:
         """
         Return a deep copy of this component with independent parameters.
         """
+        if name is None:
+            name = "copy of " + self.name
 
         model_copy = Polynomial(
             name=self.name, coefficients=[param.value for param in self._coefficients]
