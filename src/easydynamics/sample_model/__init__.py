@@ -6,6 +6,7 @@ from .components import (
     Polynomial,
     Voigt,
 )
+from .sample_model import SampleModel
 
 __all__ = [
     "SampleModel",
