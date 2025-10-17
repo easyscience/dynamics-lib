@@ -13,11 +13,7 @@ from easydynamics.utils import _detailed_balance_factor as detailed_balance_fact
 class TestSampleModel:
     @pytest.fixture
     def sample_model(self):
-        return SampleModel(name="TestSampleModel")
-
-    @pytest.fixture
-    def sample_model_with_components(self):
-        model = SampleModel(name="TwoComponentModel")
+        model = SampleModel(name="TestSampleModel")
         component1 = Gaussian(
             name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
@@ -32,7 +28,7 @@ class TestSampleModel:
         # WHEN THEN EXPECT
         assert sample_model.name == "TestSampleModel"
         assert isinstance(sample_model.components, dict)
-        assert len(sample_model.components) == 0
+        assert len(sample_model.components) == 2
         assert not sample_model.use_detailed_balance
 
     def test_init_with_temperature(self):
@@ -59,27 +55,27 @@ class TestSampleModel:
         # EXPECT
         assert "TestComponent" in sample_model.components
 
-    def test_add_duplicate_component_raises(self, sample_model_with_components):
+    def test_add_duplicate_component_raises(self, sample_model):
         # WHEN THEN
         component = Gaussian(
             name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # EXPECT
         with pytest.raises(ValueError, match="already exists"):
-            sample_model_with_components.add_component(component)
+            sample_model.add_component(component)
 
-    def test_remove_component(self, sample_model_with_components):
+    def test_remove_component(self, sample_model):
         # WHEN THEN
-        sample_model_with_components.remove_component("TestGaussian1")
+        sample_model.remove_component("TestGaussian1")
         # EXPECT
-        assert "TestGaussian1" not in sample_model_with_components.components
+        assert "TestGaussian1" not in sample_model.components
 
-    def test_remove_nonexistent_component_raises(self, sample_model_with_components):
+    def test_remove_nonexistent_component_raises(self, sample_model):
         # WHEN THEN EXPECT
         with pytest.raises(
             KeyError, match="No component named 'NonExistentComponent' exists"
         ):
-            sample_model_with_components.remove_component("NonExistentComponent")
+            sample_model.remove_component("NonExistentComponent")
 
     def test_getitem(self, sample_model):
         # WHEN
@@ -99,25 +95,24 @@ class TestSampleModel:
         # EXPECT
         assert sample_model["TestComponent"] is component
 
-    def test_contains_component(self, sample_model_with_components):
+    def test_contains_component(self, sample_model):
         # WHEN THEN EXPECT
-        # EXPECT
-        assert "TestGaussian1" in sample_model_with_components
-        assert "NonExistentComponent" not in sample_model_with_components
+        assert "TestGaussian1" in sample_model
+        assert "NonExistentComponent" not in sample_model
 
-    def test_list_components(self, sample_model_with_components):
+    def test_list_components(self, sample_model):
         # WHEN THEN
-        components = sample_model_with_components.list_components()
+        components = sample_model.list_components()
         # EXPECT
         assert len(components) == 2
         assert components[0] == "TestGaussian1"
         assert components[1] == "TestLorentzian1"
 
-    def test_clear_components(self, sample_model_with_components):
+    def test_clear_components(self, sample_model):
         # WHEN THEN
-        sample_model_with_components.clear_components()
+        sample_model.clear_components()
         # EXPECT
-        assert len(sample_model_with_components.components) == 0
+        assert len(sample_model.components) == 0
 
     # ───── Temperature and Detailed Balance ─────
 
@@ -166,92 +161,84 @@ class TestSampleModel:
 
     # ───── Evaluation ─────
 
-    def test_evaluate(self, sample_model_with_components):
+    def test_evaluate(self, sample_model):
         # WHEN
         x = np.linspace(-5, 5, 100)
-        result = sample_model_with_components.evaluate(x)
+        result = sample_model.evaluate(x)
         # EXPECT
-        expected_result = sample_model_with_components["TestGaussian1"].evaluate(
-            x
-        ) + sample_model_with_components["TestLorentzian1"].evaluate(x)
+        expected_result = sample_model["TestGaussian1"].evaluate(x) + sample_model[
+            "TestLorentzian1"
+        ].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     @pytest.mark.parametrize(
         "normalise_db", [True, False], ids=["Normalise DB", "Don't normalise DB"]
     )
-    def test_evaluate_with_detailed_balance(
-        self, sample_model_with_components, normalise_db
-    ):
+    def test_evaluate_with_detailed_balance(self, sample_model, normalise_db):
         # WHEN
-        sample_model_with_components.temperature = 300
-        sample_model_with_components.use_detailed_balance = True
-        sample_model_with_components.normalise_detailed_balance = normalise_db
+        sample_model.temperature = 300
+        sample_model.use_detailed_balance = True
+        sample_model.normalise_detailed_balance = normalise_db
 
         x = np.linspace(-5, 5, 100)
 
         # THEN
-        result = sample_model_with_components.evaluate(x)
+        result = sample_model.evaluate(x)
 
         # EXPECT
-        expected_result = sample_model_with_components["TestGaussian1"].evaluate(
-            x
-        ) + sample_model_with_components["TestLorentzian1"].evaluate(x)
+        expected_result = sample_model["TestGaussian1"].evaluate(x) + sample_model[
+            "TestLorentzian1"
+        ].evaluate(x)
         expected_result *= detailed_balance_factor(
             energy=x,
-            temperature=sample_model_with_components.temperature,
+            temperature=sample_model.temperature,
             divide_by_temperature=normalise_db,
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_evaluate_component(self, sample_model_with_components):
+    def test_evaluate_component(self, sample_model):
         # WHEN  THEN
         x = np.linspace(-5, 5, 100)
-        result1 = sample_model_with_components.evaluate_component(x, "TestGaussian1")
-        result2 = sample_model_with_components.evaluate_component(x, "TestLorentzian1")
+        result1 = sample_model.evaluate_component(x, "TestGaussian1")
+        result2 = sample_model.evaluate_component(x, "TestLorentzian1")
 
         # EXPECT
-        expected_result1 = sample_model_with_components["TestGaussian1"].evaluate(x)
-        expected_result2 = sample_model_with_components["TestLorentzian1"].evaluate(x)
+        expected_result1 = sample_model["TestGaussian1"].evaluate(x)
+        expected_result2 = sample_model["TestLorentzian1"].evaluate(x)
         np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
     @pytest.mark.parametrize(
         "normalise_db", [True, False], ids=["Normalise DB", "Don't normalise DB"]
     )
-    def test_evaluate_component_with_detailed_balance(
-        self, sample_model_with_components, normalise_db
-    ):
+    def test_evaluate_component_with_detailed_balance(self, sample_model, normalise_db):
         # WHEN
-        sample_model_with_components.temperature = 300
-        sample_model_with_components.use_detailed_balance = True
-        sample_model_with_components.normalise_detailed_balance = normalise_db
+        sample_model.temperature = 300
+        sample_model.use_detailed_balance = True
+        sample_model.normalise_detailed_balance = normalise_db
 
         # THEN
         x = np.linspace(-5, 5, 100)
-        result1 = sample_model_with_components.evaluate_component(
-            x, name="TestGaussian1"
-        )
-        result2 = sample_model_with_components.evaluate_component(
-            x, name="TestLorentzian1"
-        )
+        result1 = sample_model.evaluate_component(x, name="TestGaussian1")
+        result2 = sample_model.evaluate_component(x, name="TestLorentzian1")
 
         # EXPECT
-        expected_result1 = sample_model_with_components["TestGaussian1"].evaluate(x)
-        expected_result2 = sample_model_with_components["TestLorentzian1"].evaluate(x)
+        expected_result1 = sample_model["TestGaussian1"].evaluate(x)
+        expected_result2 = sample_model["TestLorentzian1"].evaluate(x)
         expected_result1 *= detailed_balance_factor(
             energy=x,
-            temperature=sample_model_with_components.temperature,
+            temperature=sample_model.temperature,
             divide_by_temperature=normalise_db,
         )
         expected_result2 *= detailed_balance_factor(
             energy=x,
-            temperature=sample_model_with_components.temperature,
+            temperature=sample_model.temperature,
             divide_by_temperature=normalise_db,
         )
         np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
-    def test_evaluate_nonexistent_component_raises(self, sample_model_with_components):
+    def test_evaluate_nonexistent_component_raises(self, sample_model):
         # WHEN
         x = np.linspace(-5, 5, 100)
 
@@ -259,51 +246,51 @@ class TestSampleModel:
         with pytest.raises(
             KeyError, match="No component named 'NonExistentComponent' exists"
         ):
-            sample_model_with_components.evaluate_component(x, "NonExistentComponent")
+            sample_model.evaluate_component(x, "NonExistentComponent")
 
     # ───── Utilities ─────
 
-    def test_normalize_area(self, sample_model_with_components):
+    def test_normalize_area(self, sample_model):
         # WHEN THEN
-        sample_model_with_components.normalize_area()
+        sample_model.normalize_area()
         # EXPECT
         x = np.linspace(-10000, 10000, 1000000)  # Lorentzians have long tails
-        result = sample_model_with_components.evaluate(x)
+        result = sample_model.evaluate(x)
         numerical_area = simpson(result, x)
         assert np.isclose(numerical_area, 1.0, rtol=1e-4)
 
-    def test_normalize_area_no_components_raises(self, sample_model):
-        # WHEN THEN EXPECT
+    def test_normalize_area_no_components_raises(self):
+        # WHEN THEN
+        sample_model = SampleModel(name="EmptyModel")
+        # EXPECT
         with pytest.raises(
             ValueError, match="No components in the model to normalize."
         ):
             sample_model.normalize_area()
 
-    def test_normalize_area_zero_total_raises(self, sample_model_with_components):
+    def test_normalize_area_zero_total_raises(self, sample_model):
         # WHEN THEN
-        sample_model_with_components["TestGaussian1"].area = 0.0
-        sample_model_with_components["TestLorentzian1"].area = 0.0
+        sample_model["TestGaussian1"].area = 0.0
+        sample_model["TestLorentzian1"].area = 0.0
 
         # EXPECT
         with pytest.raises(ValueError, match="Total area is zero; cannot normalize."):
-            sample_model_with_components.normalize_area()
+            sample_model.normalize_area()
 
-    def test_normalize_area_non_area_component_warns(
-        self, sample_model_with_components
-    ):
+    def test_normalize_area_non_area_component_warns(self, sample_model):
         # WHEN
         component1 = Polynomial(
             name="TestPolynomial", coefficients=[1, 2, 3], unit="meV"
         )
-        sample_model_with_components.add_component(component1)
+        sample_model.add_component(component1)
 
         # THEN EXPECT
         with pytest.warns(UserWarning, match="does not have an 'area' "):
-            sample_model_with_components.normalize_area()
+            sample_model.normalize_area()
 
-    def test_get_parameters(self, sample_model_with_components):
+    def test_get_parameters(self, sample_model):
         # WHEN THEN
-        parameters = sample_model_with_components.get_parameters()
+        parameters = sample_model.get_parameters()
         # EXPECT
         assert len(parameters) == 6
 
@@ -320,16 +307,17 @@ class TestSampleModel:
         assert all(isinstance(param, Parameter) for param in parameters)
 
         # WHEN
-        sample_model_with_components.temperature = 300
+        sample_model.temperature = 300
         # THEN
-        parameters = sample_model_with_components.get_parameters()
+        parameters = sample_model.get_parameters()
         # EXPECT
         assert len(parameters) == 7
         expected_names.add("temperature")
         actual_names = {param.name for param in parameters}
         assert actual_names == expected_names
 
-    def test_get_parameters_no_components(self, sample_model):
+    def test_get_parameters_no_components(self):
+        sample_model = SampleModel(name="EmptyModel")
         # WHEN THEN
         parameters = sample_model.get_parameters()
         # EXPECT
@@ -342,18 +330,19 @@ class TestSampleModel:
         assert len(parameters) == 1
         assert parameters[0].name == "temperature"
 
-    def test_get_fit_parameters(self, sample_model_with_components):
+    def test_get_fit_parameters(self, sample_model):
         # WHEN
 
         # Fix one parameter and make another dependent
-        sample_model_with_components["TestGaussian1"].area.fixed = True
-        sample_model_with_components["TestLorentzian1"].width.make_dependent_on(
+        sample_model["TestGaussian1"].area.fixed = True
+        sample_model["TestLorentzian1"].width.make_dependent_on(
             "comp1_width",
-            {"comp1_width": sample_model_with_components["TestGaussian1"].width},
+            {"comp1_width": sample_model["TestGaussian1"].width},
         )
 
         # THEN
-        fit_parameters = sample_model_with_components.get_fit_parameters()
+        fit_parameters = sample_model.get_fit_parameters()
+
         # EXPECT
         assert len(fit_parameters) == 4
 
@@ -367,36 +356,36 @@ class TestSampleModel:
         assert actual_names == expected_names
         assert all(isinstance(param, Parameter) for param in fit_parameters)
 
-    def test_fix_and_free_all_parameters(self, sample_model_with_components):
+    def test_fix_and_free_all_parameters(self, sample_model):
         # WHEN THEN
-        sample_model_with_components.fix_all_parameters()
+        sample_model.fix_all_parameters()
+
         # EXPECT
-        for param in sample_model_with_components.get_parameters():
+        for param in sample_model.get_parameters():
             assert param.fixed is True
 
         # WHEN
-        sample_model_with_components.free_all_parameters()
+        sample_model.free_all_parameters()
+
         # THEN
-        for param in sample_model_with_components.get_parameters():
+        for param in sample_model.get_parameters():
             assert param.fixed is False
 
-    def test_repr_contains_name_and_components(self, sample_model_with_components):
+    def test_repr_contains_name_and_components(self, sample_model):
         # WHEN THEN
-        rep = repr(sample_model_with_components)
+        rep = repr(sample_model)
         # EXPECT
         assert "SampleModel" in rep
         assert "TestGaussian" in rep
 
-    def test_copy(self, sample_model_with_components):
+    def test_copy(self, sample_model):
         # WHEN THEN
-        model_copy = copy(sample_model_with_components)
+        model_copy = copy(sample_model)
         # EXPECT
-        assert model_copy is not sample_model_with_components
-        assert model_copy.name == "copy of " + sample_model_with_components.name
-        assert len(model_copy.components) == len(
-            sample_model_with_components.components
-        )
-        for name, comp in sample_model_with_components.components.items():
+        assert model_copy is not sample_model
+        assert model_copy.name == "copy of " + sample_model.name
+        assert len(model_copy.components) == len(sample_model.components)
+        for name, comp in sample_model.components.items():
             copied_comp = model_copy.components[name]
             assert copied_comp is not comp
             assert copied_comp.name == comp.name
