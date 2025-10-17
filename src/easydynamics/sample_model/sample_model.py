@@ -29,8 +29,8 @@ class SampleModel(ObjBase, MutableMapping):
         Temperature parameter for detailed balance.
     use_detailed_balance : bool
         Whether to apply detailed balance.
-    normalise_detailed_balance : bool
-        Whether to normalise the detailed balance by temperature.
+    normalize_detailed_balance : bool
+        Whether to normalize the detailed balance by temperature.
     name : str
         Name of the SampleModel.
     """
@@ -66,8 +66,8 @@ class SampleModel(ObjBase, MutableMapping):
             self._temperature = None
             self._use_detailed_balance = False
 
-        self._normalise_detailed_balance = (
-            True  # Whether to normalise by temperature when using detailed balance.
+        self._normalize_detailed_balance = (
+            True  # Whether to normalize by temperature when using detailed balance.
         )
 
     ##############################################
@@ -248,24 +248,24 @@ class SampleModel(ObjBase, MutableMapping):
         self._use_detailed_balance = value
 
     @property
-    def normalise_detailed_balance(self) -> bool:
+    def normalize_detailed_balance(self) -> bool:
         """
-        If True, detailed balance will be normalised by temperature. If False, it will not be normalised.
+        If True, detailed balance will be normalized by temperature. If False, it will not be normalized.
 
         """
-        return self._normalise_detailed_balance
+        return self._normalize_detailed_balance
 
-    @normalise_detailed_balance.setter
-    def normalise_detailed_balance(self, value: bool) -> None:
+    @normalize_detailed_balance.setter
+    def normalize_detailed_balance(self, value: bool) -> None:
         """
-        If True, normalises the detailed balance by temperature.
+        If True, normalizes the detailed balance by temperature.
 
         Parameters
         ----------
         value : bool
-            True to normalise, False otherwise.
+            True to normalize, False otherwise.
         """
-        self._normalise_detailed_balance = value
+        self._normalize_detailed_balance = value
 
     ##########################################################
     #       Evaluate        #
@@ -303,7 +303,7 @@ class SampleModel(ObjBase, MutableMapping):
             result *= detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
-                divide_by_temperature=self._normalise_detailed_balance,
+                divide_by_temperature=self._normalize_detailed_balance,
             )
 
         return result
@@ -340,7 +340,7 @@ class SampleModel(ObjBase, MutableMapping):
             result *= detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
-                divide_by_temperature=self._normalise_detailed_balance,
+                divide_by_temperature=self._normalize_detailed_balance,
             )
 
         return result

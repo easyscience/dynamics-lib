@@ -124,6 +124,12 @@ class TestSampleModel:
         assert sample_model.temperature.value == 300
         assert sample_model.temperature.unit == "K"
 
+        # WHEN THEN
+        sample_model.temperature = 150.0
+        # EXPECT
+        assert sample_model.temperature.value == 150.0
+        assert sample_model.temperature.unit == "K"
+
         # Set temperature to None
         # WHEN THEN
         sample_model.temperature = None
@@ -150,6 +156,11 @@ class TestSampleModel:
         assert np.isclose(sample_model.temperature.value, 300000.0)
         assert sample_model.temperature.unit == "mK"
 
+    def test_convert_temperature_unit_no_temperature_raises(self, sample_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match="cannot convert units"):
+            sample_model.convert_temperature_unit("mK")
+
     def test_use_detailed_balance(self, sample_model):
         sample_model.temperature = 300
         # WHEN THEN EXPECT
@@ -172,13 +183,13 @@ class TestSampleModel:
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     @pytest.mark.parametrize(
-        "normalise_db", [True, False], ids=["Normalise DB", "Don't normalise DB"]
+        "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
     )
-    def test_evaluate_with_detailed_balance(self, sample_model, normalise_db):
+    def test_evaluate_with_detailed_balance(self, sample_model, normalize_db):
         # WHEN
         sample_model.temperature = 300
         sample_model.use_detailed_balance = True
-        sample_model.normalise_detailed_balance = normalise_db
+        sample_model.normalize_detailed_balance = normalize_db
 
         x = np.linspace(-5, 5, 100)
 
@@ -192,9 +203,17 @@ class TestSampleModel:
         expected_result *= detailed_balance_factor(
             energy=x,
             temperature=sample_model.temperature,
-            divide_by_temperature=normalise_db,
+            divide_by_temperature=normalize_db,
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_no_components_raises(self):
+        # WHEN THEN
+        sample_model = SampleModel(name="EmptyModel")
+        x = np.linspace(-5, 5, 100)
+        # EXPECT
+        with pytest.raises(ValueError, match="No components in the model to evaluate."):
+            sample_model.evaluate(x)
 
     def test_evaluate_component(self, sample_model):
         # WHEN  THEN
@@ -209,13 +228,13 @@ class TestSampleModel:
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
     @pytest.mark.parametrize(
-        "normalise_db", [True, False], ids=["Normalise DB", "Don't normalise DB"]
+        "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
     )
-    def test_evaluate_component_with_detailed_balance(self, sample_model, normalise_db):
+    def test_evaluate_component_with_detailed_balance(self, sample_model, normalize_db):
         # WHEN
         sample_model.temperature = 300
         sample_model.use_detailed_balance = True
-        sample_model.normalise_detailed_balance = normalise_db
+        sample_model.normalize_detailed_balance = normalize_db
 
         # THEN
         x = np.linspace(-5, 5, 100)
@@ -228,12 +247,12 @@ class TestSampleModel:
         expected_result1 *= detailed_balance_factor(
             energy=x,
             temperature=sample_model.temperature,
-            divide_by_temperature=normalise_db,
+            divide_by_temperature=normalize_db,
         )
         expected_result2 *= detailed_balance_factor(
             energy=x,
             temperature=sample_model.temperature,
-            divide_by_temperature=normalise_db,
+            divide_by_temperature=normalize_db,
         )
         np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
@@ -268,13 +287,18 @@ class TestSampleModel:
         ):
             sample_model.normalize_area()
 
-    def test_normalize_area_zero_total_raises(self, sample_model):
+    @pytest.mark.parametrize(
+        "area_value",
+        [np.nan, 0.0, np.inf],
+        ids=["NaN area", "Zero area", "Infinite area"],
+    )
+    def test_normalize_area_not_finite_area_raises(self, sample_model, area_value):
         # WHEN THEN
-        sample_model["TestGaussian1"].area = 0.0
-        sample_model["TestLorentzian1"].area = 0.0
+        sample_model["TestGaussian1"].area = area_value
+        sample_model["TestLorentzian1"].area = area_value
 
         # EXPECT
-        with pytest.raises(ValueError, match="Total area is zero; cannot normalize."):
+        with pytest.raises(ValueError, match="cannot normalize."):
             sample_model.normalize_area()
 
     def test_normalize_area_non_area_component_warns(self, sample_model):
