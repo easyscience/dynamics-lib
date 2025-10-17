@@ -122,6 +122,13 @@ class TestSampleModel:
         # EXPECT
         assert len(sample_model.components) == 0
 
+    def test_convert_unit(self, sample_model):
+        # WHEN THEN
+        sample_model.convert_unit("eV")
+        # EXPECT
+        for component in sample_model.components.values():
+            assert component.unit == "eV"
+
     # ───── Temperature and Detailed Balance ─────
 
     def test_set_temperature(self, sample_model):

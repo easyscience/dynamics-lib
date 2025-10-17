@@ -1,11 +1,14 @@
 import warnings
 from collections.abc import MutableMapping
 from copy import copy
+from itertools import chain
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes import ObjBase
+
+# from easyscience.base_classes import ObjBase
+from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.variable import Parameter
 from scipp import UnitError
 
@@ -16,7 +19,7 @@ from .components.model_component import ModelComponent
 Numeric = Union[float, int]
 
 
-class SampleModel(ObjBase, MutableMapping):
+class SampleModel(TheoreticalModelBase, MutableMapping):
     """
     A model of the scattering from a sample, combining multiple model components.
     Optionally applies detailed balancing.
@@ -38,7 +41,8 @@ class SampleModel(ObjBase, MutableMapping):
     def __init__(
         self,
         name: str = "MySampleModel",
-        temperature: Optional[Union[Numeric, None]] = None,
+        unit: Optional[Union[str, sc.Unit]] = "meV",
+        temperature: Optional[Union[Numeric, sc.Variable]] = None,
         temperature_unit: Optional[str] = "K",
     ):
         """
@@ -48,7 +52,7 @@ class SampleModel(ObjBase, MutableMapping):
         ----------
         name : str
             Name of the sample model.
-        temperature : Number or None, optional
+        temperature : Number, sc.Variable or None, optional
             Temperature for detailed balance.
         temperature_unit : str, default 'K'
             Unit of the temperature.
@@ -57,18 +61,26 @@ class SampleModel(ObjBase, MutableMapping):
         self.components: Dict[str, ModelComponent] = {}
         super().__init__(name=name)
         # If temperature is given, create a Parameter and enable detailed balance.
-        if temperature is not None:
+        if temperature is None:
+            self._temperature = None
+            self._use_detailed_balance = False
+        elif isinstance(temperature, sc.Variable):
+            self._temperature = Parameter(
+                name="temperature",
+                value=temperature.value,
+                unit=temperature.unit,
+                fixed=True,
+            )
+        else:
             self._temperature = Parameter(
                 name="temperature", value=temperature, unit=temperature_unit, fixed=True
             )
             self._use_detailed_balance = True
-        else:
-            self._temperature = None
-            self._use_detailed_balance = False
 
         self._normalize_detailed_balance = (
             True  # Whether to normalize by temperature when using detailed balance.
         )
+        self._unit = unit
 
     ##############################################
     #       Methods for managing components     #
@@ -158,12 +170,40 @@ class SampleModel(ObjBase, MutableMapping):
         for param in area_params:
             param.value /= total_area
 
+    def convert_unit(self, unit: Union[str, sc.Unit]):
+        """
+        Convert the unit of the SampleModel and all its components.
+        """
+        self._unit = unit
+        for component in self.components.values():
+            component.convert_unit(unit)
+
+    @property
+    def unit(self) -> Optional[Union[str, sc.Unit]]:
+        """
+        Get the unit of the SampleModel.
+
+        Returns
+        -------
+        str or sc.Unit or None
+        """
+        return self._unit
+
+    @unit.setter
+    def unit(self, unit_str: str) -> None:
+        raise AttributeError(
+            (
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
+            )
+        )  # noqa: E501
+
     ##########################################################
     #       Methods for temperature and detailed balance     #
     ##########################################################
 
     @property
-    def temperature(self) -> Union[Parameter, None]:
+    def temperature(self) -> Optional[Parameter]:
         """
         Get the temperature.
 
@@ -174,7 +214,7 @@ class SampleModel(ObjBase, MutableMapping):
         return self._temperature
 
     @temperature.setter
-    def temperature(self, value: Union[Numeric, None]) -> None:
+    def temperature(self, value: Optional[Numeric]) -> None:
         """
         Set the temperature.
 
@@ -357,13 +397,18 @@ class SampleModel(ObjBase, MutableMapping):
         -------
         List[Parameter]
         """
-        if isinstance(self._temperature, Parameter):
-            params = [self._temperature]
-        else:
-            params = []
-        for comp in self.components.values():
-            params.extend(comp.get_parameters())
-        return params
+        # Create generator for temperature parameter
+        temp_params = (self._temperature,) if self._temperature is not None else ()
+
+        # Create generator for component parameters
+        comp_params = (
+            param
+            for comp in self.components.values()
+            for param in comp.get_parameters()
+        )
+
+        # Chain them together and return as list
+        return list(chain(temp_params, comp_params))
 
     def get_fit_parameters(self) -> List[Parameter]:
         """
@@ -373,17 +418,25 @@ class SampleModel(ObjBase, MutableMapping):
             List[Parameter]: A list of fit parameters.
         """
 
-        parameters = self.get_parameters()
-        fit_parameters = []
+        # parameters = self.get_parameters()
+        # fit_parameters = []
 
-        for parameter in parameters:
-            is_not_fixed = not getattr(parameter, "fixed", False)
-            is_independent = getattr(parameter, "_independent", True)
+        # for parameter in parameters:
+        #     is_not_fixed = not getattr(parameter, "fixed", False)
+        #     is_independent = getattr(parameter, "_independent", True)
 
-            if is_not_fixed and is_independent:
-                fit_parameters.append(parameter)
+        #     if is_not_fixed and is_independent:
+        #         fit_parameters.append(parameter)
 
-        return fit_parameters
+        def is_fit_parameter(param: Parameter) -> bool:
+            """Check if a parameter can be used for fitting."""
+            return not getattr(param, "fixed", False) and getattr(
+                param, "_independent", True
+            )
+
+        return [param for param in self.get_parameters() if is_fit_parameter(param)]
+
+        # return fit_parameters
 
     def fix_all_parameters(self) -> None:
         """
@@ -417,10 +470,12 @@ class SampleModel(ObjBase, MutableMapping):
         new_model = SampleModel(
             name=name,
             temperature=self._temperature.value if self._temperature else None,
+            unit=self.unit,
         )
 
         if self._temperature:
             new_model.use_detailed_balance = self.use_detailed_balance
+            new_model.normalize_detailed_balance = self.normalize_detailed_balance
 
         for comp in self.components.values():
             new_model.add_component(component=copy(comp), name=comp.name)
