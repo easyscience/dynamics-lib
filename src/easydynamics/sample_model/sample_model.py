@@ -86,13 +86,13 @@ class SampleModel(ObjBase, MutableMapping):
         name : str, optional
             Name to assign to the component. If None, uses the component's own name.
         """
+        if not isinstance(component, ModelComponent):
+            raise TypeError("component must be an instance of ModelComponent.")
+
         if name is None:
             name = component.name
         if name in self.components:
             raise ValueError(f"Component with name '{name}' already exists.")
-
-        if not isinstance(component, ModelComponent):
-            raise TypeError("component must be an instance of ModelComponent.")
 
         self.components[name] = component
 

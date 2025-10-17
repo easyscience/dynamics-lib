@@ -3,6 +3,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian, Lorentzian, Polynomial, SampleModel
@@ -167,7 +168,7 @@ class TestSampleModel:
         # WHEN
         sample_model.temperature = 300  # Kelvin
         # THEN EXPECT
-        with pytest.raises(ValueError, match="Failed to convert temperature"):
+        with pytest.raises(UnitError, match="Failed to convert temperature"):
             sample_model.convert_temperature_unit("m")
 
     def test_convert_temperature_unit_no_temperature_raises(self, sample_model):
