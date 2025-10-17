@@ -134,6 +134,9 @@ class SampleModel(ObjBase, MutableMapping):
         """
         Normalize the areas of all components so they sum to 1.
         """
+        if not self.components:
+            raise ValueError("No components in the model to normalize.")
+
         area_params = []
         total_area = 0.0
 
@@ -149,6 +152,9 @@ class SampleModel(ObjBase, MutableMapping):
         if total_area == 0:
             raise ValueError("Total area is zero; cannot normalize.")
 
+        if not np.isfinite(total_area):
+            raise ValueError("Total area is not finite; cannot normalize.")
+
         for param in area_params:
             param.value /= total_area
 
@@ -157,7 +163,7 @@ class SampleModel(ObjBase, MutableMapping):
     ##########################################################
 
     @property
-    def temperature(self) -> Parameter:
+    def temperature(self) -> Union[Parameter, None]:
         """
         Get the temperature.
 
@@ -168,7 +174,7 @@ class SampleModel(ObjBase, MutableMapping):
         return self._temperature
 
     @temperature.setter
-    def temperature(self, value: Union[Numeric, None]):
+    def temperature(self, value: Union[Numeric, None]) -> None:
         """
         Set the temperature.
 
@@ -197,7 +203,7 @@ class SampleModel(ObjBase, MutableMapping):
                 name="temperature", value=value, unit="K", fixed=True
             )
 
-    def convert_temperature_unit(self, new_unit: Union[str, sc.Unit]):
+    def convert_temperature_unit(self, new_unit: Union[str, sc.Unit]) -> None:
         """
         Convert the temperature parameter to a new unit.
 
@@ -211,8 +217,10 @@ class SampleModel(ObjBase, MutableMapping):
 
         try:
             self._temperature.convert_unit(new_unit)
-        except Exception as e:
+        except UnitError as e:
             raise UnitError(f"Failed to convert temperature to unit '{new_unit}': {e}")
+        except Exception as e:
+            raise RuntimeError(f"An error occurred during unit conversion: {e}")
 
     @property
     def use_detailed_balance(self) -> bool:
@@ -235,6 +243,8 @@ class SampleModel(ObjBase, MutableMapping):
         value : bool
             True to enable, False to disable.
         """
+        if self._temperature is None:
+            raise ValueError("Temperature must be set to use detailed balance.")
         self._use_detailed_balance = value
 
     @property
@@ -277,10 +287,19 @@ class SampleModel(ObjBase, MutableMapping):
         np.ndarray
             Evaluated model values.
         """
-        result = sum(
-            (component.evaluate(x) for component in self.components.values()), 0
-        )
-        if self.use_detailed_balance and self._temperature.value >= 0:
+
+        if not self.components:
+            raise ValueError("No components in the model to evaluate.")
+        result = None
+        for component in self.components.values():
+            value = component.evaluate(x)
+            result = value if result is None else result + value
+
+        if (
+            self.use_detailed_balance
+            and self._temperature is not None
+            and self._temperature.value >= 0
+        ):
             result *= detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
@@ -313,7 +332,11 @@ class SampleModel(ObjBase, MutableMapping):
             raise KeyError(f"No component named '{name}' exists.")
 
         result = self.components[name].evaluate(x)
-        if self.use_detailed_balance and self._temperature.value >= 0:
+        if (
+            self.use_detailed_balance
+            and self._temperature is not None
+            and self._temperature.value >= 0
+        ):
             result *= detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
@@ -389,16 +412,21 @@ class SampleModel(ObjBase, MutableMapping):
         SampleModel
             A new instance with copied components and parameters.
         """
+        name = "copy of " + self.name
 
         new_model = SampleModel(
-            name=self.name,
+            name=name,
             temperature=self._temperature.value if self._temperature else None,
         )
 
-        new_model.use_detailed_balance = self._use_detailed_balance
+        if self._temperature:
+            new_model.use_detailed_balance = self.use_detailed_balance
 
         for comp in self.components.values():
-            new_model.add_component(copy(comp))
+            new_model.add_component(component=copy(comp), name=comp.name)
+            new_model[comp.name].name = comp.name  # Remove 'copy of ' prefix
+            for par in new_model[comp.name].get_parameters():
+                par.name = par.name.removeprefix("copy of ")
 
         return new_model
 
