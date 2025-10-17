@@ -371,6 +371,12 @@ class TestSampleModel:
         for param in sample_model.get_parameters():
             assert param.fixed is False
 
+    def test_delitem(self, sample_model):
+        # WHEN THEN
+        del sample_model["TestGaussian1"]
+        # EXPECT
+        assert "TestGaussian1" not in sample_model.components
+
     def test_repr_contains_name_and_components(self, sample_model):
         # WHEN THEN
         rep = repr(sample_model)
