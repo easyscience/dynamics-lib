@@ -64,6 +64,13 @@ class TestSampleModel:
         with pytest.raises(ValueError, match="already exists"):
             sample_model.add_component(component)
 
+    def test_add_invalid_component_raises(self, sample_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError, match="component must be an instance of ModelComponent."
+        ):
+            sample_model.add_component("NotAComponent")
+
     def test_remove_component(self, sample_model):
         # WHEN THEN
         sample_model.remove_component("TestGaussian1")
@@ -156,6 +163,13 @@ class TestSampleModel:
         assert np.isclose(sample_model.temperature.value, 300000.0)
         assert sample_model.temperature.unit == "mK"
 
+    def test_convert_temperature_unit_incompatible_unit_raises(self, sample_model):
+        # WHEN
+        sample_model.temperature = 300  # Kelvin
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="Failed to convert temperature"):
+            sample_model.convert_temperature_unit("m")
+
     def test_convert_temperature_unit_no_temperature_raises(self, sample_model):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match="cannot convert units"):
@@ -169,6 +183,14 @@ class TestSampleModel:
         assert sample_model.use_detailed_balance is True
         sample_model.use_detailed_balance = False
         assert sample_model.use_detailed_balance is False
+
+    def test_use_detailed_balance_no_temperature_raises(self, sample_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match="Temperature must be set to use detailed balance.",
+        ):
+            sample_model.use_detailed_balance = True
 
     # ───── Evaluation ─────
 
@@ -410,11 +432,21 @@ class TestSampleModel:
 
     def test_copy(self, sample_model):
         # WHEN THEN
+        sample_model.temperature = 300
         model_copy = copy(sample_model)
         # EXPECT
         assert model_copy is not sample_model
         assert model_copy.name == "copy of " + sample_model.name
         assert len(model_copy.components) == len(sample_model.components)
+        assert model_copy.temperature is not sample_model.temperature
+        assert model_copy.temperature.name == sample_model.temperature.name
+        assert model_copy.temperature.value == sample_model.temperature.value
+        assert model_copy.temperature.unit == sample_model.temperature.unit
+        assert model_copy.use_detailed_balance == sample_model.use_detailed_balance
+        assert (
+            model_copy.normalize_detailed_balance
+            == sample_model.normalize_detailed_balance
+        )
         for name, comp in sample_model.components.items():
             copied_comp = model_copy.components[name]
             assert copied_comp is not comp
