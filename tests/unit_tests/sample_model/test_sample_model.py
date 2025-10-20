@@ -7,7 +7,6 @@ from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian, Lorentzian, Polynomial, SampleModel
-from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils import _detailed_balance_factor as detailed_balance_factor
 
 
@@ -28,7 +27,6 @@ class TestSampleModel:
     def test_init_no_temperature(self, sample_model):
         # WHEN THEN EXPECT
         assert sample_model.name == "TestSampleModel"
-        assert isinstance(sample_model.components, dict)
         assert len(sample_model.components) == 2
         assert not sample_model.use_detailed_balance
 
@@ -38,7 +36,6 @@ class TestSampleModel:
 
         # EXPECT
         assert sample_model.name == "TempModel"
-        assert isinstance(sample_model.components, dict)
         assert len(sample_model.components) == 0
         assert sample_model.use_detailed_balance
         assert isinstance(sample_model.temperature, Parameter)
@@ -54,7 +51,7 @@ class TestSampleModel:
         # THEN
         sample_model.add_component(component)
         # EXPECT
-        assert "TestComponent" in sample_model.components
+        assert sample_model["TestComponent"] is component
 
     def test_add_duplicate_component_raises(self, sample_model):
         # WHEN THEN
@@ -95,22 +92,9 @@ class TestSampleModel:
         # EXPECT
         assert sample_model["TestComponent"] is component
 
-    def test_setitem(self, sample_model):
-        # WHEN
-        component = ModelComponent(name="TestComponent")
-        # THEN
-        sample_model["TestComponent"] = component
-        # EXPECT
-        assert sample_model["TestComponent"] is component
-
-    def test_contains_component(self, sample_model):
-        # WHEN THEN EXPECT
-        assert "TestGaussian1" in sample_model
-        assert "NonExistentComponent" not in sample_model
-
-    def test_list_components(self, sample_model):
+    def test_list_component_names(self, sample_model):
         # WHEN THEN
-        components = sample_model.list_components()
+        components = sample_model.list_component_names()
         # EXPECT
         assert len(components) == 2
         assert components[0] == "TestGaussian1"
@@ -126,7 +110,7 @@ class TestSampleModel:
         # WHEN THEN
         sample_model.convert_unit("eV")
         # EXPECT
-        for component in sample_model.components.values():
+        for component in list(sample_model):
             assert component.unit == "eV"
 
     # ───── Temperature and Detailed Balance ─────
@@ -425,12 +409,6 @@ class TestSampleModel:
         for param in sample_model.get_parameters():
             assert param.fixed is False
 
-    def test_delitem(self, sample_model):
-        # WHEN THEN
-        del sample_model["TestGaussian1"]
-        # EXPECT
-        assert "TestGaussian1" not in sample_model.components
-
     def test_repr_contains_name_and_components(self, sample_model):
         # WHEN THEN
         rep = repr(sample_model)
@@ -445,7 +423,7 @@ class TestSampleModel:
         # EXPECT
         assert model_copy is not sample_model
         assert model_copy.name == "copy of " + sample_model.name
-        assert len(model_copy.components) == len(sample_model.components)
+        assert len(list(model_copy)) == len(list(sample_model))
         assert model_copy.temperature is not sample_model.temperature
         assert model_copy.temperature.name == sample_model.temperature.name
         assert model_copy.temperature.value == sample_model.temperature.value
@@ -455,8 +433,8 @@ class TestSampleModel:
             model_copy.normalize_detailed_balance
             == sample_model.normalize_detailed_balance
         )
-        for name, comp in sample_model.components.items():
-            copied_comp = model_copy.components[name]
+        for comp in list(sample_model):
+            copied_comp = model_copy[comp.name]
             assert copied_comp is not comp
             assert copied_comp.name == comp.name
             for param_orig, param_copy in zip(

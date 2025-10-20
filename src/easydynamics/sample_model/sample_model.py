@@ -1,13 +1,12 @@
 import warnings
-from collections.abc import MutableMapping
 from copy import copy
 from itertools import chain
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-
-# from easyscience.base_classes import ObjBase
+from easyscience.base_classes import CollectionBase
+from easyscience.global_object.undo_redo import NotarizedDict
 from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.variable import Parameter
 from scipp import UnitError
@@ -19,15 +18,13 @@ from .components.model_component import ModelComponent
 Numeric = Union[float, int]
 
 
-class SampleModel(TheoreticalModelBase, MutableMapping):
+class SampleModel(CollectionBase, TheoreticalModelBase):
     """
     A model of the scattering from a sample, combining multiple model components.
     Optionally applies detailed balancing.
 
     Attributes
     ----------
-    components : dict
-        Dictionary of model components keyed by name.
     temperature : Parameter
         Temperature parameter for detailed balance.
     use_detailed_balance : bool
@@ -36,6 +33,11 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         Whether to normalize the detailed balance by temperature.
     name : str
         Name of the SampleModel.
+    unit : str or sc.Unit
+        Unit of the SampleModel.
+    components : List[ModelComponent]
+        List of model components in the SampleModel.
+
     """
 
     def __init__(
@@ -58,8 +60,11 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
             Unit of the temperature.
         """
 
-        self.components: Dict[str, ModelComponent] = {}
-        super().__init__(name=name)
+        CollectionBase.__init__(self, name=name)
+        TheoreticalModelBase.__init__(self, name=name)
+        if not isinstance(self._kwargs, NotarizedDict):
+            self._kwargs = NotarizedDict()
+
         # If temperature is given, create a Parameter and enable detailed balance.
         if temperature is None:
             self._temperature = None
@@ -103,26 +108,24 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
 
         if name is None:
             name = component.name
-        if name in self.components:
+        if name in self.list_component_names():
             raise ValueError(f"Component with name '{name}' already exists.")
 
-        self.components[name] = component
+        component.name = name
+
+        self.insert(index=len(self), value=component)
 
     def remove_component(self, name: str):
         """
         Remove a model component by name.
-
-        Parameters
-        ----------
-        name : str
-            Name of the component to remove.
         """
-
-        if name not in self.components:
+        # Find index where item.name == name
+        indices = [i for i, item in enumerate(list(self)) if item.name == name]
+        if not indices:
             raise KeyError(f"No component named '{name}' exists in the model.")
-        del self.components[name]
+        del self[indices[0]]
 
-    def list_components(self) -> List[str]:
+    def list_component_names(self) -> List[str]:
         """
         List the names of all components in the model.
 
@@ -132,14 +135,15 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
             Component names.
         """
 
-        return list(self.components.keys())
+        return [item.name for item in list(self)]
 
     def clear_components(self):
         """
         Remove all components from the model.
         """
 
-        self.components.clear()
+        for _ in range(len(self)):
+            del self[0]
 
     def normalize_area(self) -> None:
         # Useful for convolutions.
@@ -152,7 +156,7 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         area_params = []
         total_area = 0.0
 
-        for component in self.components.values():
+        for component in list(self):
             if hasattr(component, "area"):
                 area_params.append(component.area)
                 total_area += component.area.value
@@ -175,8 +179,20 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         Convert the unit of the SampleModel and all its components.
         """
         self._unit = unit
-        for component in self.components.values():
+        # for component in self.components.values():
+        for component in list(self):
             component.convert_unit(unit)
+
+    @property
+    def components(self) -> List[ModelComponent]:
+        """
+        Get the list of components in the SampleModel.
+
+        Returns
+        -------
+        List[ModelComponent]
+        """
+        return list(self)
 
     @property
     def unit(self) -> Optional[Union[str, sc.Unit]]:
@@ -331,7 +347,7 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         if not self.components:
             raise ValueError("No components in the model to evaluate.")
         result = None
-        for component in self.components.values():
+        for component in list(self):
             value = component.evaluate(x)
             result = value if result is None else result + value
 
@@ -368,10 +384,21 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         np.ndarray
             Evaluated values for the specified component.
         """
-        if name not in self.components:
+        if not self.components:
+            raise ValueError("No components in the model to evaluate.")
+
+        if not isinstance(name, str):
+            raise TypeError(
+                (f"Component name must be a string, got {type(name)} instead.")
+            )
+
+        matches = [comp for comp in list(self) if comp.name == name]
+        if not matches:
             raise KeyError(f"No component named '{name}' exists.")
 
-        result = self.components[name].evaluate(x)
+        component = matches[0]
+
+        result = component.evaluate(x)
         if (
             self.use_detailed_balance
             and self._temperature is not None
@@ -401,11 +428,7 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         temp_params = (self._temperature,) if self._temperature is not None else ()
 
         # Create generator for component parameters
-        comp_params = (
-            param
-            for comp in self.components.values()
-            for param in comp.get_parameters()
-        )
+        comp_params = (param for comp in list(self) for param in comp.get_parameters())
 
         # Chain them together and return as list
         return list(chain(temp_params, comp_params))
@@ -417,16 +440,6 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         Returns:
             List[Parameter]: A list of fit parameters.
         """
-
-        # parameters = self.get_parameters()
-        # fit_parameters = []
-
-        # for parameter in parameters:
-        #     is_not_fixed = not getattr(parameter, "fixed", False)
-        #     is_independent = getattr(parameter, "_independent", True)
-
-        #     if is_not_fixed and is_independent:
-        #         fit_parameters.append(parameter)
 
         def is_fit_parameter(param: Parameter) -> bool:
             """Check if a parameter can be used for fitting."""
@@ -477,86 +490,13 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
             new_model.use_detailed_balance = self.use_detailed_balance
             new_model.normalize_detailed_balance = self.normalize_detailed_balance
 
-        for comp in self.components.values():
+        for comp in list(self):
             new_model.add_component(component=copy(comp), name=comp.name)
             new_model[comp.name].name = comp.name  # Remove 'copy of ' prefix
             for par in new_model[comp.name].get_parameters():
                 par.name = par.name.removeprefix("copy of ")
 
         return new_model
-
-    ##############################################
-    #       dict-like behaviour                  #
-    ##############################################
-
-    def __getitem__(self, key: str) -> ModelComponent:
-        """
-        Access a component by name.
-
-        Parameters
-        ----------
-        key : str
-            Name of the component.
-
-        Returns
-        -------
-        ModelComponent
-        """
-        return self.components[key]
-
-    def __setitem__(self, key: str, value: ModelComponent) -> None:
-        """
-        Set or replace a component.
-
-        Parameters
-        ----------
-        key : str
-            Name of the component.
-        value : ModelComponent
-            The component to assign.
-        """
-        if not isinstance(value, ModelComponent):
-            raise TypeError("Value must be an instance of ModelComponent.")
-        self.components[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        """
-        Remove a component by name.
-        Parameters
-        ----------
-        key : str
-            Name of the component to remove.
-        """
-        if not isinstance(key, str):
-            raise TypeError("Key must be a string.")
-
-        if key not in self.components:
-            raise KeyError(f"No component named '{key}' exists in the model.")
-
-        self.remove_component(key)
-
-    def __contains__(self, name: str) -> bool:
-        """
-        Check if a component exists in the model.
-
-        Parameters
-        ----------
-        name : str
-            Name of the component.
-
-        Returns
-        -------
-        bool
-        """
-        return name in self.components
-
-    def __iter__(self) -> iter:
-        """Iterate over component names."""
-        return iter(self.components)
-
-    def __len__(self) -> int:
-        """Return the number of components in the model."""
-        return len(self.components)
 
     def __repr__(self) -> str:
         """
@@ -566,10 +506,14 @@ class SampleModel(TheoreticalModelBase, MutableMapping):
         -------
         str
         """
-        comp_names = ", ".join(self.components.keys()) or "No components"
-        temp_str = (
-            f" | Temperature: {self._temperature.value} {self._temperature.unit}"
-            if self._use_detailed_balance
-            else ""
-        )
+        comp_names = ", ".join(c.name for c in self) or "No components"
+
+        temp_str = ""
+        if (
+            getattr(self, "_use_detailed_balance", False)
+            and getattr(self, "_temperature", None) is not None
+        ):
+            temp = self._temperature
+            temp_str = f" | Temperature: {temp.value} {temp.unit}"
+
         return f"<SampleModel name='{self.name}' | Components: {comp_names}{temp_str}>"
