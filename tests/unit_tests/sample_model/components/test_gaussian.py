@@ -32,7 +32,7 @@ class TestGaussian:
             ),
             (
                 {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
-                "center must be None or a number",
+                "center must be None, a number",
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
@@ -147,7 +147,7 @@ class TestGaussian:
         gaussian_copy = copy(gaussian)
         # EXPECT
         assert gaussian_copy is not gaussian
-        assert gaussian_copy.name == "copy of " + gaussian.name
+        assert gaussian_copy.name == gaussian.name
 
         assert gaussian_copy.area.value == gaussian.area.value
         assert gaussian_copy.area.fixed == gaussian.area.fixed

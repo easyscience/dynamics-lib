@@ -21,70 +21,66 @@ class Gaussian(ModelComponent):
 
     Args:
         name (str): Name of the component.
-        area (Int or float): Area of the Gaussian.
-        center (Int or float or None): Center of the Gaussian. If None, defaults to 0 and is fixed
-        width (Int or float): Standard deviation.
+        area (Int, float or Parameter): Area of the Gaussian.
+        center (Int, float, None or Parameter): Center of the Gaussian. If None, defaults to 0 and is fixed
+        width (Int, float or Parameter): Standard deviation.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
     """
 
     def __init__(
         self,
         name: str = "Gaussian",
-        area: Numeric = 1.0,
-        center: Union[Numeric, None] = None,
-        width: Numeric = 1.0,
+        area: Union[Numeric, Parameter] = 1.0,
+        center: Union[Numeric, Parameter, None] = None,
+        width: Union[Numeric, Parameter] = 1.0,
         unit: Union[str, sc.Unit] = "meV",
     ):
-        # Validate inputs - raise errors before any Parameters are created
-        if not isinstance(area, Numeric):
-            raise TypeError("area must be a number.")
+        # Validate inputs and create Parameters if not given
 
-        area = float(area)
-        if area < 0:
+        # this method lives in ModelComponent since it's the same for all components
+        self.validate_unit(unit)
+
+        # Area
+        if not isinstance(area, (Numeric, Parameter)):
+            raise TypeError("area must be a number or a Parameter.")
+        if isinstance(area, Numeric):
+            area = Parameter(name=name + " area", value=float(area), unit=unit)
+
+        if area.value < 0:
             warnings.warn(
                 "The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(
                     name
                 )
             )
+        else:
+            area.min = 0.0
 
-        if center is not None and not isinstance(center, Numeric):
-            raise TypeError("center must be None or a number.")
-
-        if isinstance(center, Numeric):
-            center = float(center)
-
-        if not isinstance(width, Numeric):
-            raise TypeError("width must be a number.")
-
-        width = float(width)
-        if width <= 0:
-            raise ValueError("The width of a Gaussian must be greater than zero.")
-
-        # this method lives in ModelComponent since it's the same for all components
-        self.validate_unit(unit)
-
-        # Create Parameters from floats
-        self._area = Parameter(name=name + " area", value=area, unit=unit)
-        if area > 0:
-            self._area.min = 0.0
+        # Center
+        if center is not None and not isinstance(center, (Numeric, Parameter)):
+            raise TypeError("center must be None, a number, or a Parameter.")
 
         if center is None:
-            self._center = Parameter(
-                name=name + " center", value=0.0, unit=unit, fixed=True
-            )
-        else:
-            self._center = Parameter(name=name + " center", value=center, unit=unit)
+            center = Parameter(name=name + " center", value=0.0, unit=unit, fixed=True)
+        elif isinstance(center, Numeric):
+            center = Parameter(name=name + " center", value=float(center), unit=unit)
 
-        self._width = Parameter(
-            name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
-        )
+        # Width
+        if not isinstance(width, (Numeric, Parameter)):
+            raise TypeError("width must be a number or a Parameter.")
+
+        if isinstance(width, Numeric):
+            width = Parameter(
+                name=name + " width", value=float(width), unit=unit, min=MINIMUM_WIDTH
+            )
+        if width.value <= 0:
+            raise ValueError("The width of a Gaussian must be greater than zero.")
 
         super().__init__(
             name=name,
             unit=unit,
-            area=self._area,
-            center=self._center,
-            width=self._width,
+            area=area,
+            center=center,
+            width=width,
         )
 
     def evaluate(
@@ -96,10 +92,10 @@ class Gaussian(ModelComponent):
 
         x = self._prepare_x_for_evaluate(x)
 
-        normalization = 1 / (np.sqrt(2 * np.pi) * self._width.value)
-        exponent = -0.5 * ((x - self._center.value) / self._width.value) ** 2
+        normalization = 1 / (np.sqrt(2 * np.pi) * self.width.value)
+        exponent = -0.5 * ((x - self.center.value) / self.width.value) ** 2
 
-        return self._area.value * normalization * np.exp(exponent)
+        return self.area.value * normalization * np.exp(exponent)
 
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """
@@ -109,29 +105,10 @@ class Gaussian(ModelComponent):
             unit (str or sc.Unit): The new unit to convert to.
         """
 
-        self._area.convert_unit(unit)
-        self._center.convert_unit(unit)
-        self._width.convert_unit(unit)
+        self.area.convert_unit(unit)
+        self.center.convert_unit(unit)
+        self.width.convert_unit(unit)
         self._unit = unit
 
-    def __copy__(self) -> Gaussian:
-        """
-        Return a deep copy of this component with independent parameters.
-        """
-        name = "copy of " + self.name
-
-        model_copy = Gaussian(
-            name=name,
-            area=self._area.value,
-            center=self._center.value,
-            width=self._width.value,
-            unit=self._unit,
-        )
-
-        model_copy._area.fixed = self._area.fixed
-        model_copy._center.fixed = self._center.fixed
-        model_copy._width.fixed = self._width.fixed
-        return model_copy
-
     def __repr__(self):
-        return f"Gaussian(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n width = {self._width})"
+        return f"Gaussian(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
