@@ -134,12 +134,5 @@ class ModelComponent(ObjBase):
         """
         pass
 
-    # @abstractmethod
-    # def __copy__(self) -> ModelComponent:
-    #     """
-    #     Return a deep copy of this component with independent parameters.
-    #     """
-    #     pass
-
     def __repr__(self):
         return f"{self.__class__.__name__}(name={self.name})"
