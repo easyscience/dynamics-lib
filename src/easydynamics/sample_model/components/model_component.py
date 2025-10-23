@@ -7,7 +7,6 @@ from typing import List, Optional, Union
 import numpy as np
 import scipp as sc
 from easyscience.base_classes import ObjBase
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 Numeric = Union[float, int]
@@ -18,12 +17,9 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
-    def __init__(self, name="ModelComponent", unit: Optional[str] = "meV"):
-        super().__init__(name=name)
-
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
+    def __init__(self, name="ModelComponent", unit: Optional[str] = "meV", **kwargs):
+        self.validate_unit(unit)
+        super().__init__(name=name, **kwargs)
         self._unit = unit
 
     @property
@@ -109,6 +105,12 @@ class ModelComponent(ObjBase):
 
         return np.sort(x_in)
 
+    @staticmethod
+    def validate_unit(unit) -> None:
+        """Raise TypeError if unit is not allowed (string or sc.Unit)."""
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError("unit must be a string or a scipp unit.")
+
     @abstractmethod
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """
@@ -129,18 +131,6 @@ class ModelComponent(ObjBase):
 
         Returns:
             np.ndarray: Evaluated function values.
-        """
-        pass
-
-    @abstractmethod
-    def get_parameters(self) -> List[Parameter]:
-        """
-        Get all parameters from the model component.
-
-        Returns
-        -------
-        List[Parameter]
-            List of parameters in the component.
         """
         pass
 

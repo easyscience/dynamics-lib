@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import scipp as sc
@@ -35,7 +35,7 @@ class Gaussian(ModelComponent):
         width: Numeric = 1.0,
         unit: Union[str, sc.Unit] = "meV",
     ):
-        # Validate inputs - throw errors before any Parameters are created
+        # Validate inputs - raise errors before any Parameters are created
         if not isinstance(area, Numeric):
             raise TypeError("area must be a number.")
 
@@ -60,7 +60,8 @@ class Gaussian(ModelComponent):
         if width <= 0:
             raise ValueError("The width of a Gaussian must be greater than zero.")
 
-        super().__init__(name=name, unit=unit)
+        # this method lives in ModelComponent since it's the same for all components
+        self.validate_unit(unit)
 
         # Create Parameters from floats
         self._area = Parameter(name=name + " area", value=area, unit=unit)
@@ -78,51 +79,13 @@ class Gaussian(ModelComponent):
             name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
         )
 
-    @property
-    def area(self) -> Parameter:
-        """Return the area parameter."""
-        return self._area
-
-    @area.setter
-    def area(self, value: Numeric):
-        """Set the area parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("area must be a number.")
-        value = float(value)
-        if value < 0:
-            warnings.warn(
-                "The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
-                )
-            )
-        self._area.value = value
-
-    @property
-    def center(self) -> Parameter:
-        """Return the center parameter."""
-        return self._center
-
-    @center.setter
-    def center(self, value: Numeric):
-        """Set the center parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("center must be a number.")
-        self._center.value = float(value)
-
-    @property
-    def width(self) -> Parameter:
-        """Return the width parameter."""
-        return self._width
-
-    @width.setter
-    def width(self, value: Numeric):
-        """Set the width parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("width must be a number.")
-        value = float(value)
-        if value <= 0:
-            raise ValueError("The width of a Gaussian must be greater than zero.")
-        self._width.value = value
+        super().__init__(
+            name=name,
+            unit=unit,
+            area=self._area,
+            center=self._center,
+            width=self._width,
+        )
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
@@ -137,14 +100,6 @@ class Gaussian(ModelComponent):
         exponent = -0.5 * ((x - self._center.value) / self._width.value) ** 2
 
         return self._area.value * normalization * np.exp(exponent)
-
-    def get_parameters(self) -> List[Parameter]:
-        """
-        Get all parameters from the model component.
-        Returns:
-        List[Parameter]: List of parameters in the component.
-        """
-        return [self._area, self._center, self._width]
 
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """

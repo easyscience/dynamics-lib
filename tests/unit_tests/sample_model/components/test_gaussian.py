@@ -63,9 +63,9 @@ class TestGaussian:
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
         [
-            ("area", 3.0, "invalid", r"area must be a number\."),
-            ("center", 0.6, "invalid", r"center must be a number\."),
-            ("width", 0.7, "invalid", r"width must be a number\."),
+            ("area", 3.0, "invalid", r"must be a number"),
+            ("center", 0.6, "invalid", r"must be a number"),
+            ("width", 0.7, "invalid", r"must be a number"),
         ],
     )
     def test_property_setters(
