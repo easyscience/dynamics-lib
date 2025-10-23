@@ -69,11 +69,15 @@ class Gaussian(ModelComponent):
             raise TypeError("width must be a number or a Parameter.")
 
         if isinstance(width, Numeric):
+            if float(width) < MINIMUM_WIDTH:
+                raise ValueError("The width of a Gaussian must be greater than zero.")
             width = Parameter(
                 name=name + " width", value=float(width), unit=unit, min=MINIMUM_WIDTH
             )
-        if width.value <= 0:
-            raise ValueError("The width of a Gaussian must be greater than zero.")
+        else:
+            if width.value <= 0:
+                raise ValueError("The width of a Gaussian must be greater than zero.")
+            width.min = MINIMUM_WIDTH
 
         super().__init__(
             name=name,
