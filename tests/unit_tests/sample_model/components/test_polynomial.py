@@ -40,12 +40,13 @@ class TestPolynomial:
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(name="TestPolynomial", **kwargs)
 
-    def test_no_coefficients_raises(self):
+    @pytest.mark.parametrize("invalid_coeffs", [[], None])
+    def test_no_coefficients_raises(self, invalid_coeffs):
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="At least one coefficient must be provided"
         ):
-            Polynomial(name="TestPolynomial", coefficients=[])
+            Polynomial(name="TestPolynomial", coefficients=invalid_coeffs)
 
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN EXPECT
@@ -108,6 +109,7 @@ class TestPolynomial:
         [
             ([None, 2.0, 3.0], "Each coefficient must be "),
             ([1.0, 2.0, "invalid"], "Each coefficient must be "),
+            ("not a list", "coefficients must be "),
         ],
     )
     def test_set_coefficient_values_raises(self, invalid_coeffs, expected_message):
