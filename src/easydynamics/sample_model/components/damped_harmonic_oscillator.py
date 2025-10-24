@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -11,7 +11,7 @@ from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
-MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+MINIMUMwidth = 1e-10  # To avoid division by zero
 
 
 class DampedHarmonicOscillator(ModelComponent):
@@ -28,97 +28,64 @@ class DampedHarmonicOscillator(ModelComponent):
 
     def __init__(
         self,
-        name: str = "DHO",
-        center: Numeric = 1.0,
-        width: Numeric = 1.0,
-        area: Numeric = 1.0,
-        unit: Union[str, sc.Unit] = "meV",
+        name: Optional[str] = "DampedHarmonicOscillator",
+        area: Optional[Union[Numeric, Parameter]] = 1.0,
+        center: Optional[Union[Numeric, Parameter]] = 1.0,
+        width: Optional[Union[Numeric, Parameter]] = 1.0,
+        unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
-        # Validate inputs
-        if not isinstance(area, Numeric):
-            raise TypeError("area must be a number.")
-        area = float(area)
-        if area < 0:
+        # Validate inputs and create Parameters if not given
+        # this method lives in ModelComponent since it's the same for all components
+        self.validate_unit(unit)
+
+        # Area
+        if not isinstance(area, (Numeric, Parameter)):
+            raise TypeError("area must be a number or a Parameter.")
+        if isinstance(area, Numeric):
+            area = Parameter(name=name + " area", value=float(area), unit=unit)
+
+        if area.value < 0:
             warnings.warn(
                 "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
                     name
                 )
             )
+        else:
+            area.min = 0.0
 
-        if not isinstance(center, Numeric):
-            raise TypeError("center must be a number.")
+        # Center
+        if not isinstance(center, (Numeric, Parameter)):
+            raise TypeError("center must be a number, or a Parameter.")
 
-        center = float(center)
+        if isinstance(center, Numeric):
+            center = Parameter(name=name + " center", value=float(center), unit=unit)
 
-        if not isinstance(width, Numeric):
-            raise TypeError("width must be a number.")
+        # Width
+        if not isinstance(width, (Numeric, Parameter)):
+            raise TypeError("width must be a number or a Parameter.")
 
-        width = float(width)
-        if width <= 0:
-            raise ValueError(
-                "The width of a DampedHarmonicOscillator must be greater than zero."
-            )
-
-        super().__init__(name=name, unit=unit)
-
-        # Create Parameters from floats
-        self._area = Parameter(name=name + " area", value=area, unit=unit)
-        if area > 0:
-            self._area.min = 0.0
-
-        self._center = Parameter(name=name + " center", value=center, unit=unit)
-
-        self._width = Parameter(
-            name=name + " width", value=width, unit=unit, min=MINIMUM_WIDTH
-        )
-
-    @property
-    def area(self) -> Parameter:
-        """Return the area parameter."""
-        return self._area
-
-    @area.setter
-    def area(self, value: Numeric):
-        """Set the area parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("area must be a number.")
-        value = float(value)
-        if value < 0:
-            warnings.warn(
-                "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
-                    self.name
+        if isinstance(width, Numeric):
+            if float(width) < MINIMUMwidth:
+                raise ValueError(
+                    "The width of a Damped Harmonic Oscillator must be greater than zero."
                 )
+            width = Parameter(
+                name=name + " width", value=float(width), unit=unit, min=MINIMUMwidth
             )
-        self._area.value = float(value)
+        else:
+            if width.value <= 0:
+                raise ValueError(
+                    "The width of a Damped Harmonic Oscillator must be greater than zero."
+                )
+            width.min = MINIMUMwidth
 
-    @property
-    def center(self) -> Parameter:
-        """Return the center parameter."""
-        return self._center
-
-    @center.setter
-    def center(self, value: Numeric):
-        """Set the center parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("center must be a number.")
-        self._center.value = float(value)
-
-    @property
-    def width(self) -> Parameter:
-        """Return the width parameter."""
-        return self._width
-
-    @width.setter
-    def width(self, value: Numeric):
-        """Set the width parameter."""
-        if not isinstance(value, Numeric):
-            raise TypeError("width must be a number.")
-        value = float(value)
-        if value <= 0:
-            raise ValueError(
-                "The width of a DampedHarmonicOscillator must be greater than zero."
-            )
-        self._width.value = value
+        super().__init__(
+            name=name,
+            unit=unit,
+            area=area,
+            center=center,
+            width=width,
+        )
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
@@ -129,22 +96,14 @@ class DampedHarmonicOscillator(ModelComponent):
 
         x = self._prepare_x_for_evaluate(x)
 
-        normalization = 2 * self._center.value**2 * self._width.value / np.pi
-        denominator = (x**2 - self._center.value**2) ** 2 + (
+        normalization = 2 * self.center.value**2 * self.width.value / np.pi
+        denominator = (x**2 - self.center.value**2) ** 2 + (
             2
-            * self._width.value
+            * self.width.value
             * x  # No division by zero here, width>0 enforced in setter
         ) ** 2
 
-        return self._area.value * normalization / (denominator)
-
-    def get_parameters(self):
-        """
-        Get all parameters from the model component.
-        Returns:
-        List[Parameter]: List of parameters in the component.
-        """
-        return [self._area, self._center, self._width]
+        return self.area.value * normalization / (denominator)
 
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """
@@ -153,29 +112,24 @@ class DampedHarmonicOscillator(ModelComponent):
         Args:
             unit (str or sc.Unit): The new unit to convert to.
         """
-
-        self._area.convert_unit(unit)
-        self._center.convert_unit(unit)
-        self._width.convert_unit(unit)
-        self._unit = unit
-
-    def __copy__(self) -> DampedHarmonicOscillator:
-        """
-        Return a deep copy of this component with independent parameters.
-        """
-        name = "copy of " + self.name
-
-        model_copy = DampedHarmonicOscillator(
-            name=name,
-            area=self._area.value,
-            center=self._center.value,
-            width=self._width.value,
-            unit=self._unit,
-        )
-        model_copy._area.fixed = self._area.fixed
-        model_copy._center.fixed = self._center.fixed
-        model_copy._width.fixed = self._width.fixed
-        return model_copy
+        old_unit = self._unit
+        try:
+            self.area.convert_unit(unit)
+            self.center.convert_unit(unit)
+            self.width.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                if hasattr(self.area, "convert_unit"):
+                    self.area.convert_unit(old_unit)
+                if hasattr(self.center, "convert_unit"):
+                    self.center.convert_unit(old_unit)
+                if hasattr(self.width, "convert_unit"):
+                    self.width.convert_unit(old_unit)
+            except Exception:
+                pass  # Best effort rollback
+            raise e
 
     def __repr__(self):
-        return f"DampedHarmonicOscillator(name = {self.name}, unit = {self._unit},\n area = {self._area},\n center = {self._center},\n width = {self._width})"
+        return f"DampedHarmonicOscillator(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
