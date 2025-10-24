@@ -35,12 +35,13 @@ class Gaussian(ValidationMixin, ModelComponent):
         unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)
+        self.validate_unit(unit)  # lives in ModelComponent
         self._unit = unit
 
-        area = self._validate_area(area, name)
-        center = self._validate_center(center, name, fix_if_none=True)
-        width = self._validate_width(width, name)
+        # These methods live in ValidationMixin
+        area = self._create_area_parameter(area, name)
+        center = self._create_center_parameter(center, name, fix_if_none=True)
+        width = self._create_width_parameter(width, name)
 
         super().__init__(
             name=name,

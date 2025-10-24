@@ -38,9 +38,9 @@ class Lorentzian(ValidationMixin, ModelComponent):
         self.validate_unit(unit)
         self._unit = unit
 
-        area = self._validate_area(area, name)
-        center = self._validate_center(center, name, fix_if_none=True)
-        width = self._validate_width(width, name)
+        area = self._create_area_parameter(area, name)
+        center = self._create_center_parameter(center, name, fix_if_none=True)
+        width = self._create_width_parameter(width, name)
 
         super().__init__(
             name=name,

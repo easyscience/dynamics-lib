@@ -11,8 +11,16 @@ MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 class ValidationMixin:
     """Provides `_validate_area` for components that define an 'area' parameter."""
 
-    def _validate_area(self, area: Union[Numeric, Parameter], name: str) -> Parameter:
-        """Validate and convert an area-like input to a Parameter object."""
+    def _create_area_parameter(
+        self, area: Union[Numeric, Parameter], name: str
+    ) -> Parameter:
+        """Validate and convert a number to a Parameter describing the area of a function.
+        args:
+            area (Numeric or Parameter): The area value or Parameter.
+            name (str): The name of the model component.
+        returns:
+            Parameter: The validated area Parameter.
+        """
         if not isinstance(area, (Parameter, Numeric)):
             raise TypeError("area must be a number or a Parameter.")
 
@@ -28,13 +36,20 @@ class ValidationMixin:
 
         return area
 
-    def _validate_center(
+    def _create_center_parameter(
         self,
         center: Union[Numeric, Parameter, None],
         name: str,
         fix_if_none: bool,
     ) -> Parameter:
-        """Validate and convert a center-like input to a Parameter object."""
+        """Validate and convert a number to a Parameter describing the center of a function.
+        args:
+            center (Numeric, Parameter, or None): The center value or Parameter.
+            name (str): The name of the model component.
+            fix_if_none (bool): Whether to fix the center Parameter if center is None.
+            returns:
+            Parameter: The validated center Parameter.
+        """
         if center is not None and not isinstance(center, (Numeric, Parameter)):
             raise TypeError("center must be None, a number, or a Parameter.")
 
@@ -52,13 +67,20 @@ class ValidationMixin:
 
         return center
 
-    def _validate_width(
+    def _create_width_parameter(
         self,
         width: Union[Numeric, Parameter],
         name: str,
         param_name: str = "width",
     ) -> Parameter:
-        """Validate and convert a width-like input to a Parameter object."""
+        """Validate and convert a numbert to a Parameter describing the width of a function.
+        args:
+            width (Numeric or Parameter): The width value or Parameter.
+            name (str): The name of the model component.
+            param_name (str): The name of the width parameter.
+            returns:
+            Parameter: The validated width Parameter.
+        """
         if not isinstance(width, (Numeric, Parameter)):
             raise TypeError(f"{param_name} must be a number or a Parameter.")
 

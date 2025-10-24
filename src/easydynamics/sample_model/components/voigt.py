@@ -41,12 +41,12 @@ class Voigt(ValidationMixin, ModelComponent):
         self.validate_unit(unit)
         self._unit = unit
 
-        area = self._validate_area(area, name)
-        center = self._validate_center(center, name, fix_if_none=True)
-        gaussian_width = self._validate_width(
+        area = self._create_area_parameter(area, name)
+        center = self._create_center_parameter(center, name, fix_if_none=True)
+        gaussian_width = self._create_width_parameter(
             gaussian_width, name, param_name="gaussian_width"
         )
-        lorentzian_width = self._validate_width(
+        lorentzian_width = self._create_width_parameter(
             lorentzian_width, name, param_name="lorentzian_width"
         )
 
