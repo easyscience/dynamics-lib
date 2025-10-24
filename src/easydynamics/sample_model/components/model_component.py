@@ -118,7 +118,6 @@ class ModelComponent(ObjBase):
                 f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
             )
 
-    @abstractmethod
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """
         Convert the unit of the Parameters in the component.
@@ -126,7 +125,22 @@ class ModelComponent(ObjBase):
         Args:
             unit (str or sc.Unit): The new unit to convert to.
         """
-        pass
+
+        old_unit = self._unit
+        pars = self.get_parameters()
+        try:
+            for p in pars:
+                p.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                for p in pars:
+                    if hasattr(p, "convert_unit"):
+                        p.convert_unit(old_unit)
+            except Exception:
+                pass  # Best effort rollback
+            raise e
 
     @abstractmethod
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
