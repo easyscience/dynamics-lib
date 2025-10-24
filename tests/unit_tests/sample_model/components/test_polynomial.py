@@ -15,24 +15,24 @@ class TestPolynomial:
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.name == "TestPolynomial"
-        assert polynomial.coefficients[0] == 1.0
-        assert polynomial.coefficients[1] == -2.0
-        assert polynomial.coefficients[2] == 3.0
+        assert polynomial.coefficients[0].value == 1.0
+        assert polynomial.coefficients[1].value == -2.0
+        assert polynomial.coefficients[2].value == 3.0
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
         [
             (
                 {"coefficients": "invalid"},
-                "coefficients must be a list or ndarray of floats",
+                "coefficients must be ",
             ),
             (
                 {"coefficients": [1.0, "invalid", 3.0]},
-                "All coefficients must be numbers.",
+                "Each coefficient must be ",
             ),
             (
                 {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
-                "unit must be None, a string or a scipp unit",
+                "unit must be ",
             ),
         ],
     )
@@ -89,9 +89,9 @@ class TestPolynomial:
 
         # THEN EXPECT
         assert polynomial._unit == "microeV"
-        assert np.isclose(polynomial.coefficients[0], 1.0)
-        assert np.isclose(polynomial.coefficients[1], -2.0 * 1e-3)
-        assert np.isclose(polynomial.coefficients[2], 3.0 * 1e-6)
+        assert np.isclose(polynomial.coefficients[0].value, 1.0)
+        assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
+        assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN

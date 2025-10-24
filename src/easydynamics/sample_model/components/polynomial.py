@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 import scipp as sc
@@ -22,47 +22,98 @@ class Polynomial(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
+    # def __init__(
+    #     self,
+    #     name: Optional[str] = "Polynomial",
+    #     coefficients: Optional[Union[list[float], Union[list[Parameter], np.ndarray]]] = [0.0],
+    #     unit: Union[str, sc.Unit] = "meV",
+    # ):
+    #     self.validate_unit(unit)
+
+    #     if not isinstance(coefficients, (list, np.ndarray)):
+    #         raise TypeError("coefficients must be a list or ndarray of floats.")
+
+    #     if not all(isinstance(c, Numeric) for c in coefficients):
+    #         raise TypeError("All coefficients must be numbers.")
+
+    #     if not coefficients:
+    #         raise ValueError("At least one coefficient must be provided.")
+
+    #     self._coefficients = []
+    #     # Coefficients are dimensionless, since powers of units are difficult to handle otherwise
+    #     for i, coef in enumerate(coefficients):
+    #         self._coefficients.append(Parameter(name=f"{name}_c{i}", value=coef))
+    #     self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
+
+    #     super().__init__(name=name, unit=unit, coefficients=coefficients)
+
     def __init__(
         self,
-        name: str = "Polynomial",
-        coefficients: Union[list[float], np.ndarray] = [0.0],
+        name: Optional[str] = "Polynomial",
+        coefficients: Optional[Sequence[Union[Numeric, Parameter]]] = (0.0,),
         unit: Union[str, sc.Unit] = "meV",
     ):
-        if not isinstance(coefficients, (list, np.ndarray)):
-            raise TypeError("coefficients must be a list or ndarray of floats.")
+        self.validate_unit(unit)
 
-        if not all(isinstance(c, Numeric) for c in coefficients):
-            raise TypeError("All coefficients must be numbers.")
-
-        super().__init__(name=name, unit=unit)
-        if not coefficients:
+        if coefficients is None:
             raise ValueError("At least one coefficient must be provided.")
 
-        self._coefficients = []
-        # Coefficients are dimensionless, since powers of units are difficult to handle otherwise
+        if not isinstance(coefficients, (list, tuple, np.ndarray)):
+            raise TypeError(
+                "coefficients must be a sequence (list/tuple/ndarray) of numbers or Parameter objects."
+            )
+
+        if len(coefficients) == 0:
+            raise ValueError("At least one coefficient must be provided.")
+
+        # Internal storage of Parameter objects
+        self._coefficients: list[Parameter] = []
+
+        # Coefficients are treated as dimensionless Parameters
         for i, coef in enumerate(coefficients):
-            self._coefficients.append(Parameter(name=f"{name}_c{i}", value=coef))
+            if isinstance(coef, Parameter):
+                param = coef
+            elif isinstance(coef, Numeric):
+                param = Parameter(name=f"{name}_c{i}", value=float(coef))
+            else:
+                raise TypeError(
+                    "Each coefficient must be either a numeric value or a Parameter."
+                )
+            self._coefficients.append(param)
+
+        # Helper scipp scalar to track unit conversions (value initialized to 1 with provided unit)
         self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
 
+        # call parent with the Parameters
+        super().__init__(name=name, unit=unit, coefficients=self._coefficients)
+
     @property
-    def coefficients(self) -> list[float]:
+    def coefficient_values(self) -> list[float]:
         """Get the coefficients of the polynomial as a list."""
         coefficient_list = [param.value for param in self._coefficients]
         return coefficient_list
 
-    @coefficients.setter
-    def coefficients(self, coeffs: list[float]) -> None:
-        """Set the coefficients of the polynomial from a list of floats."""
-        if not isinstance(coeffs, list):
-            raise TypeError("coefficients must be a list of floats.")
-        if not all(isinstance(c, Numeric) for c in coeffs):
-            raise TypeError("All coefficients must be numbers.")
+    @coefficient_values.setter
+    def coefficient_values(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
+        """Replace the coefficients. Length must match current number of coefficients."""
+        if not isinstance(coeffs, (list, tuple, np.ndarray)):
+            raise TypeError(
+                "coefficients must be a sequence (list/tuple/ndarray) of numbers or Parameter objects."
+            )
         if len(coeffs) != len(self._coefficients):
             raise ValueError(
                 "Number of coefficients must match the existing number of coefficients."
             )
         for i, coef in enumerate(coeffs):
-            self._coefficients[i].value = coef
+            if isinstance(coef, Parameter):
+                # replace parameter object
+                self._coefficients[i] = coef
+            elif isinstance(coef, (int, float, np.floating, np.integer)):
+                self._coefficients[i].value = float(coef)
+            else:
+                raise TypeError(
+                    "Each coefficient must be either a numeric value or a Parameter."
+                )
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
@@ -125,25 +176,6 @@ class Polynomial(ModelComponent):
             ) ** i  # set the values directly to the appropriate power
 
         self._unit = unit
-
-    def __copy__(self, name: Optional[str] = None) -> Polynomial:
-        """
-        Return a deep copy of this component with independent parameters.
-        """
-        if name is None:
-            name = "copy of " + self.name
-
-        model_copy = Polynomial(
-            name=self.name,
-            coefficients=self.coefficients,
-            unit=self._unit,
-        )
-        self_parameters = self.get_parameters()
-        model_copy_parameters = model_copy.get_parameters()
-        for i, param in enumerate(model_copy_parameters):
-            param.fixed = self_parameters[i].fixed
-
-        return model_copy
 
     def __repr__(self) -> str:
         coeffs_str = ", ".join(
