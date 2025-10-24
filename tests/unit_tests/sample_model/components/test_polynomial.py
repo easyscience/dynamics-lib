@@ -68,6 +68,55 @@ class TestPolynomial:
         # WHEN THEN EXPECT
         assert polynomial.degree == 2
 
+    @pytest.mark.parametrize(
+        "values",
+        [
+            [2.0, 0.0, -1.0],  # all floats
+            [
+                Parameter("p0", 2.0),
+                Parameter("p1", 0.0),
+                Parameter("p2", -1.0),
+            ],  # all Parameters
+            [2.0, Parameter("p1", 0.0), -1.0],  # mixed numbers and Parameters
+        ],
+    )
+    def test_set_coefficient_values(self, polynomial: Polynomial, values):
+        """Test that coefficients can be updated from numeric values or Parameters."""
+        # WHEN
+        polynomial.coefficient_values = values
+
+        # THEN EXPECT: Parameter values match the new inputs
+        for i, val in enumerate(values):
+            if isinstance(val, Parameter):
+                expected = val.value
+            else:
+                expected = val
+            assert np.isclose(polynomial.coefficients[i].value, expected)
+
+    def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):
+        """Ensure that setting coefficients with mismatched length raises an error."""
+        with pytest.raises(ValueError, match="Number of coefficients"):
+            polynomial.coefficient_values = [1.0, 2.0]  # shorter list
+
+    def test_set_coefficients_invalid_type_raises(self, polynomial: Polynomial):
+        """Ensure that invalid coefficient types raise a TypeError."""
+        with pytest.raises(TypeError):
+            polynomial.coefficient_values = [1.0, "invalid", 3.0]
+
+    @pytest.mark.parametrize(
+        "invalid_coeffs, expected_message",
+        [
+            ([None, 2.0, 3.0], "Each coefficient must be "),
+            ([1.0, 2.0, "invalid"], "Each coefficient must be "),
+        ],
+    )
+    def test_set_coefficient_values_raises(self, invalid_coeffs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            polynomial = Polynomial(
+                name="TestPolynomial", coefficients=[1.0, -2.0, 3.0]
+            )
+            polynomial.coefficient_values = invalid_coeffs
+
     def test_get_parameters(self, polynomial: Polynomial):
         # WHEN THEN
         params = polynomial.get_parameters()

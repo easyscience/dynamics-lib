@@ -106,9 +106,9 @@ class Polynomial(ModelComponent):
             )
         for i, coef in enumerate(coeffs):
             if isinstance(coef, Parameter):
-                # replace parameter object
+                # replace parameter
                 self._coefficients[i] = coef
-            elif isinstance(coef, (int, float, np.floating, np.integer)):
+            elif isinstance(coef, Numeric):
                 self._coefficients[i].value = float(coef)
             else:
                 raise TypeError(
