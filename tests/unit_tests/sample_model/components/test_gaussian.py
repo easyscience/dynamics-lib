@@ -23,6 +23,28 @@ class TestGaussian:
         assert gaussian.width.value == 0.6
         assert gaussian.unit == "meV"
 
+    def test_init_with_parameters(self):
+        # WHEN
+        area_param = Parameter(name="area_param", value=3.0, unit="meV")
+        center_param = Parameter(name="center_param", value=1.0, unit="meV")
+        width_param = Parameter(name="width_param", value=0.8, unit="meV")
+
+        # THEN
+        gaussian = Gaussian(
+            name="ParamGaussian",
+            area=area_param,
+            center=center_param,
+            width=width_param,
+            unit="meV",
+        )
+
+        # EXPECT
+        assert gaussian.name == "ParamGaussian"
+        assert gaussian.area is area_param
+        assert gaussian.center is center_param
+        assert gaussian.width is width_param
+        assert gaussian.unit == "meV"
+
     @pytest.mark.parametrize(
         "kwargs, expected_message",
         [
@@ -40,7 +62,7 @@ class TestGaussian:
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
-                "unit must be a string or a scipp unit",
+                "unit must be None",
             ),
         ],
     )

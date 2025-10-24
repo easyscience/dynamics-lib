@@ -32,7 +32,7 @@ class TestPolynomial:
             ),
             (
                 {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
-                "unit must be a string or a scipp unit",
+                "unit must be None, a string or a scipp unit",
             ),
         ],
     )

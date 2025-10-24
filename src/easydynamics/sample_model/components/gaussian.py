@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -29,11 +29,11 @@ class Gaussian(ModelComponent):
 
     def __init__(
         self,
-        name: str = "Gaussian",
-        area: Union[Numeric, Parameter] = 1.0,
-        center: Union[Numeric, Parameter, None] = None,
-        width: Union[Numeric, Parameter] = 1.0,
-        unit: Union[str, sc.Unit] = "meV",
+        name: Optional[str] = "Gaussian",
+        area: Optional[Union[Numeric, Parameter]] = 1.0,
+        center: Optional[Union[Numeric, Parameter, None]] = None,
+        width: Optional[Union[Numeric, Parameter]] = 1.0,
+        unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
         # Validate inputs and create Parameters if not given
         # this method lives in ModelComponent since it's the same for all components
@@ -108,10 +108,24 @@ class Gaussian(ModelComponent):
             unit (str or sc.Unit): The new unit to convert to.
         """
 
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
-        self.width.convert_unit(unit)
-        self._unit = unit
+        old_unit = self._unit
+        try:
+            self.area.convert_unit(unit)
+            self.center.convert_unit(unit)
+            self.width.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                if hasattr(self.area, "convert_unit"):
+                    self.area.convert_unit(old_unit)
+                if hasattr(self.center, "convert_unit"):
+                    self.center.convert_unit(old_unit)
+                if hasattr(self.width, "convert_unit"):
+                    self.width.convert_unit(old_unit)
+            except Exception:
+                pass  # Best effort rollback
+            raise e
 
     def __repr__(self):
         return f"Gaussian(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

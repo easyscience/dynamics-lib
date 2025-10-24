@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -17,7 +17,12 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
-    def __init__(self, name="ModelComponent", unit: Optional[str] = "meV", **kwargs):
+    def __init__(
+        self,
+        name="ModelComponent",
+        unit: Optional[Union[str, sc.Unit]] = "meV",
+        **kwargs: Any,
+    ):
         self.validate_unit(unit)
         super().__init__(name=name, **kwargs)
         self._unit = unit
@@ -108,8 +113,10 @@ class ModelComponent(ObjBase):
     @staticmethod
     def validate_unit(unit) -> None:
         """Raise TypeError if unit is not allowed (string or sc.Unit)."""
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
+        if unit is not None and not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(
+                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+            )
 
     @abstractmethod
     def convert_unit(self, unit: Union[str, sc.Unit]):

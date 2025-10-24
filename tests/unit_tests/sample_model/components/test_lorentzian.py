@@ -40,7 +40,7 @@ class TestLorentzian:
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
-                "unit must be a string or a scipp unit",
+                "unit must be None",
             ),
         ],
     )
