@@ -105,31 +105,5 @@ class DampedHarmonicOscillator(ModelComponent):
 
         return self.area.value * normalization / (denominator)
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
-        """
-        Convert the unit of the Parameters in the component.
-
-        Args:
-            unit (str or sc.Unit): The new unit to convert to.
-        """
-        old_unit = self._unit
-        try:
-            self.area.convert_unit(unit)
-            self.center.convert_unit(unit)
-            self.width.convert_unit(unit)
-            self._unit = unit
-        except Exception as e:
-            # Attempt to rollback on failure
-            try:
-                if hasattr(self.area, "convert_unit"):
-                    self.area.convert_unit(old_unit)
-                if hasattr(self.center, "convert_unit"):
-                    self.center.convert_unit(old_unit)
-                if hasattr(self.width, "convert_unit"):
-                    self.width.convert_unit(old_unit)
-            except Exception:
-                pass  # Best effort rollback
-            raise e
-
     def __repr__(self):
         return f"DampedHarmonicOscillator(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

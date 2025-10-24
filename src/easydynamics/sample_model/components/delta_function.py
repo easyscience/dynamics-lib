@@ -104,16 +104,5 @@ class DeltaFunction(ModelComponent):
 
         return model
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
-        """
-        Convert the unit of the Parameters in the component.
-
-        Args:
-            unit (str or sc.Unit): The new unit to convert to.
-        """
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
-        self._unit = unit
-
     def __repr__(self):
         return f"DeltaFunction(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"

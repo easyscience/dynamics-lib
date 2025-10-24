@@ -134,18 +134,5 @@ class Voigt(ModelComponent):
             self.lorentzian_width.value,
         )
 
-    def convert_unit(self, unit: str):
-        """
-        Convert the unit of the Parameters in the component.
-
-        Args:
-            unit (str): The new unit to convert to.
-        """
-        self.area.convert_unit(unit)
-        self.center.convert_unit(unit)
-        self.gaussian_width.convert_unit(unit)
-        self.lorentzian_width.convert_unit(unit)
-        self._unit = unit
-
     def __repr__(self):
         return f"Voigt(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
