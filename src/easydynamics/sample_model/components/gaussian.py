@@ -36,7 +36,6 @@ class Gaussian(ModelComponent):
         unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-
         # this method lives in ModelComponent since it's the same for all components
         self.validate_unit(unit)
 

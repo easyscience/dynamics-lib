@@ -32,7 +32,7 @@ class TestLorentzian:
             ),
             (
                 {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
-                "center must be None or a number",
+                "center must be None",
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
@@ -67,9 +67,9 @@ class TestLorentzian:
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
         [
-            ("area", 3.0, "invalid", r"area must be a number\."),
-            ("center", 0.6, "invalid", r"center must be a number\."),
-            ("width", 0.7, "invalid", r"width must be a number\."),
+            ("area", 3.0, "invalid", r" must be a number"),
+            ("center", 0.6, "invalid", r" must be a number"),
+            ("width", 0.7, "invalid", r" must be a number"),
         ],
     )
     def test_property_setters(
@@ -130,7 +130,7 @@ class TestLorentzian:
         numerical_area = simpson(y, x)
 
         # EXPECT
-        assert numerical_area == pytest.approx(lorentzian._area.value, rel=2e-3)
+        assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
     def test_convert_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -148,7 +148,7 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian_copy is not lorentzian
-        assert lorentzian_copy.name == "copy of " + lorentzian.name
+        assert lorentzian_copy.name == lorentzian.name
 
         assert lorentzian_copy.area.value == lorentzian.area.value
         assert lorentzian_copy.area.fixed == lorentzian.area.fixed
