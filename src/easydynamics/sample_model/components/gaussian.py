@@ -12,8 +12,6 @@ from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
-MINIMUM_WIDTH = 1e-10  # To avoid division by zero
-
 
 class Gaussian(ValidationMixin, ModelComponent):
     """
