@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import warnings
 from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
+
+from easydynamics.sample_model.components.mixins import ValidationMixin
 
 from .model_component import ModelComponent
 
@@ -14,7 +15,7 @@ Numeric = Union[float, int]
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
 
-class Gaussian(ModelComponent):
+class Gaussian(ValidationMixin, ModelComponent):
     """
     Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
@@ -36,47 +37,12 @@ class Gaussian(ModelComponent):
         unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        # this method lives in ModelComponent since it's the same for all components
         self.validate_unit(unit)
+        self._unit = unit
 
-        # Area
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
-        if isinstance(area, Numeric):
-            area = Parameter(name=name + " area", value=float(area), unit=unit)
-
-        if area.value < 0:
-            warnings.warn(
-                "The area of the Gaussian with name {} is negative, which may not be physically meaningful.".format(
-                    name
-                )
-            )
-        else:
-            area.min = 0.0
-
-        # Center
-        if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number, or a Parameter.")
-
-        if center is None:
-            center = Parameter(name=name + " center", value=0.0, unit=unit, fixed=True)
-        elif isinstance(center, Numeric):
-            center = Parameter(name=name + " center", value=float(center), unit=unit)
-
-        # Width
-        if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or a Parameter.")
-
-        if isinstance(width, Numeric):
-            if float(width) < MINIMUM_WIDTH:
-                raise ValueError("The width of a Gaussian must be greater than zero.")
-            width = Parameter(
-                name=name + " width", value=float(width), unit=unit, min=MINIMUM_WIDTH
-            )
-        else:
-            if width.value <= 0:
-                raise ValueError("The width of a Gaussian must be greater than zero.")
-            width.min = MINIMUM_WIDTH
+        area = self._validate_area(area, name)
+        center = self._validate_center(center, name, fix_if_none=True)
+        width = self._validate_width(width, name)
 
         super().__init__(
             name=name,

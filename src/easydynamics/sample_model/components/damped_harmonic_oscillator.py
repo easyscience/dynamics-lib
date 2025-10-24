@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-import warnings
 from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
+from easydynamics.sample_model.components.mixins import ValidationMixin
+
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
-MINIMUMwidth = 1e-10  # To avoid division by zero
 
-
-class DampedHarmonicOscillator(ModelComponent):
+class DampedHarmonicOscillator(ValidationMixin, ModelComponent):
     """
     Damped Harmonic Oscillator (DHO). 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )
 
@@ -35,49 +34,12 @@ class DampedHarmonicOscillator(ModelComponent):
         unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        # this method lives in ModelComponent since it's the same for all components
         self.validate_unit(unit)
+        self._unit = unit
 
-        # Area
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
-        if isinstance(area, Numeric):
-            area = Parameter(name=name + " area", value=float(area), unit=unit)
-
-        if area.value < 0:
-            warnings.warn(
-                "The area of the Damped Harmonic Oscillator with name {} is negative, which may not be physically meaningful.".format(
-                    name
-                )
-            )
-        else:
-            area.min = 0.0
-
-        # Center
-        if not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be a number, or a Parameter.")
-
-        if isinstance(center, Numeric):
-            center = Parameter(name=name + " center", value=float(center), unit=unit)
-
-        # Width
-        if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError("width must be a number or a Parameter.")
-
-        if isinstance(width, Numeric):
-            if float(width) < MINIMUMwidth:
-                raise ValueError(
-                    "The width of a Damped Harmonic Oscillator must be greater than zero."
-                )
-            width = Parameter(
-                name=name + " width", value=float(width), unit=unit, min=MINIMUMwidth
-            )
-        else:
-            if width.value <= 0:
-                raise ValueError(
-                    "The width of a Damped Harmonic Oscillator must be greater than zero."
-                )
-            width.min = MINIMUMwidth
+        area = self._validate_area(area, name)
+        center = self._validate_center(center, name, fix_if_none=False)
+        width = self._validate_width(width, name)
 
         super().__init__(
             name=name,

@@ -54,7 +54,7 @@ class TestDampedHarmonicOscillator:
             ),
             (
                 {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
-                "center must be a number",
+                "center must be ",
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
@@ -74,7 +74,7 @@ class TestDampedHarmonicOscillator:
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
-            match="The width of a Damped Harmonic Oscillator must be greater than zero.",
+            match="The width of a DampedHarmonicOscillator must be greater than zero.",
         ):
             DampedHarmonicOscillator(
                 name="TestDampedHarmonicOscillator",

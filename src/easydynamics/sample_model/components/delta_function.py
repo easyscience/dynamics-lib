@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import warnings
 from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
+
+from easydynamics.sample_model.components.mixins import ValidationMixin
 
 from .model_component import ModelComponent
 
@@ -14,7 +15,7 @@ Numeric = Union[float, int]
 EPSILON = 1e-8  # small number to avoid floating point issues
 
 
-class DeltaFunction(ModelComponent):
+class DeltaFunction(ValidationMixin, ModelComponent):
     """
     Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
@@ -34,32 +35,11 @@ class DeltaFunction(ModelComponent):
         unit: Union[str, sc.Unit] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        # this method lives in ModelComponent since it's the same for all components
         self.validate_unit(unit)
+        self._unit = unit
 
-        # Area
-        if not isinstance(area, (Numeric, Parameter)):
-            raise TypeError("area must be a number or a Parameter.")
-        if isinstance(area, Numeric):
-            area = Parameter(name=name + " area", value=float(area), unit=unit)
-
-        if area.value < 0:
-            warnings.warn(
-                "The area of the Delta function with name {} is negative, which may not be physically meaningful.".format(
-                    name
-                )
-            )
-        else:
-            area.min = 0.0
-
-        # Center
-        if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError("center must be None, a number, or a Parameter.")
-
-        if center is None:
-            center = Parameter(name=name + " center", value=0.0, unit=unit, fixed=True)
-        elif isinstance(center, Numeric):
-            center = Parameter(name=name + " center", value=float(center), unit=unit)
+        area = self._validate_area(area, name)
+        center = self._validate_center(center, name, fix_if_none=True)
 
         super().__init__(
             name=name,
