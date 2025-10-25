@@ -84,10 +84,6 @@ class CreateParametersMixin:
         if not isinstance(width, (Numeric, Parameter)):
             raise TypeError(f"{param_name} must be a number or a Parameter.")
 
-        # Width
-        if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError(f"{param_name} must be a number or a Parameter.")
-
         if isinstance(width, Numeric):
             if float(width) < MINIMUM_WIDTH:
                 raise ValueError(

@@ -21,6 +21,7 @@ class TestCreateParametersMixin:
         # WHEN THEN
         area_param = dummy_model._create_area_parameter(area_input, "TestModel")
 
+        # EXPECT
         assert isinstance(area_param, Parameter)
         assert area_param.name == "TestModel area"
         assert area_param.value == float(area_input)
@@ -57,6 +58,7 @@ class TestCreateParametersMixin:
         center_param = dummy_model._create_center_parameter(
             center_input, "TestModel", fix_if_none=False
         )
+        # EXPECT
         assert isinstance(center_param, Parameter)
         assert center_param.name == "TestModel center"
         assert center_param.value == float(center_input)
@@ -69,6 +71,7 @@ class TestCreateParametersMixin:
         center_param = dummy_model._create_center_parameter(
             None, "TestModel", fix_if_none=fix_if_none
         )
+        # EXPECT
         assert isinstance(center_param, Parameter)
         assert center_param.name == "TestModel center"
         assert center_param.value == 0.0
@@ -102,6 +105,7 @@ class TestCreateParametersMixin:
         width_param = dummy_model._create_width_parameter(
             width_input, "TestModel", param_name="width"
         )
+        # EXPECT
         assert isinstance(width_param, Parameter)
         assert width_param.name == "TestModel width"
         assert width_param.value == float(width_input)
@@ -119,6 +123,16 @@ class TestCreateParametersMixin:
 
         # EXPECT
         assert width_param is width_input  # Should be the same object
+
+    def test_create_width_parameter_from_parameter_negative_raises(self, dummy_model):
+        # WHEN
+        width_input = Parameter(name="input_width", value=-1.0, unit="meV", fixed=True)
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match=" must be greater than zero"):
+            dummy_model._create_width_parameter(
+                width_input, "TestModel", param_name="width"
+            )
 
     def test_create_width_parameter_invalid_type_raises(self, dummy_model):
         # WHEN THEN EXPECT
