@@ -8,7 +8,7 @@ Numeric = Union[int, float]
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
 
-class ValidationMixin:
+class CreateParametersMixin:
     """Provides `_validate_area` for components that define an 'area' parameter."""
 
     def _create_area_parameter(

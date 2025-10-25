@@ -6,14 +6,14 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.mixins import ValidationMixin
+from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
 
-class DampedHarmonicOscillator(ValidationMixin, ModelComponent):
+class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     """
     Damped Harmonic Oscillator (DHO). 2*area*center^2*width/pi / ( (x^2 - center^2)^2 + (2*width*x)^2 )
 

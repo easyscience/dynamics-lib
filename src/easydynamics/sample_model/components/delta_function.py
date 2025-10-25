@@ -6,7 +6,7 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.mixins import ValidationMixin
+from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
@@ -15,7 +15,7 @@ Numeric = Union[float, int]
 EPSILON = 1e-8  # small number to avoid floating point issues
 
 
-class DeltaFunction(ValidationMixin, ModelComponent):
+class DeltaFunction(CreateParametersMixin, ModelComponent):
     """
     Delta function. Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is handled in the ResolutionHandler.
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.

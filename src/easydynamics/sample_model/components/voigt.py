@@ -7,14 +7,14 @@ import scipp as sc
 from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
-from easydynamics.sample_model.components.mixins import ValidationMixin
+from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
 
-class Voigt(ValidationMixin, ModelComponent):
+class Voigt(CreateParametersMixin, ModelComponent):
     """
     Voigt profile, a convolution of Gaussian and Lorentzian.
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.

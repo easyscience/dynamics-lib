@@ -6,14 +6,14 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.mixins import ValidationMixin
+from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
 
-class Gaussian(ValidationMixin, ModelComponent):
+class Gaussian(CreateParametersMixin, ModelComponent):
     """
     Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.

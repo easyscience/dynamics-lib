@@ -6,14 +6,14 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-from easydynamics.sample_model.components.mixins import ValidationMixin
+from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
 
 
-class Lorentzian(ValidationMixin, ModelComponent):
+class Lorentzian(CreateParametersMixin, ModelComponent):
     """
     Lorentzian function: area*width / (pi * ( (x - center)^2 + width^2 ) )
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
