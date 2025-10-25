@@ -22,31 +22,6 @@ class Polynomial(ModelComponent):
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
     """
 
-    # def __init__(
-    #     self,
-    #     name: Optional[str] = "Polynomial",
-    #     coefficients: Optional[Union[list[float], Union[list[Parameter], np.ndarray]]] = [0.0],
-    #     unit: Union[str, sc.Unit] = "meV",
-    # ):
-    #     self.validate_unit(unit)
-
-    #     if not isinstance(coefficients, (list, np.ndarray)):
-    #         raise TypeError("coefficients must be a list or ndarray of floats.")
-
-    #     if not all(isinstance(c, Numeric) for c in coefficients):
-    #         raise TypeError("All coefficients must be numbers.")
-
-    #     if not coefficients:
-    #         raise ValueError("At least one coefficient must be provided.")
-
-    #     self._coefficients = []
-    #     # Coefficients are dimensionless, since powers of units are difficult to handle otherwise
-    #     for i, coef in enumerate(coefficients):
-    #         self._coefficients.append(Parameter(name=f"{name}_c{i}", value=coef))
-    #     self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
-
-    #     super().__init__(name=name, unit=unit, coefficients=coefficients)
-
     def __init__(
         self,
         name: Optional[str] = "Polynomial",
