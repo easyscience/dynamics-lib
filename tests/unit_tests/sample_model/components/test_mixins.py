@@ -1,31 +1,29 @@
+import numpy as np
 import pytest
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 
-class DummyModel(CreateParametersMixin):
-    """Minimal dummy class providing the _unit attribute for CreateParametersMixin."""
-
-    def __init__(self, unit: str = "meV"):
-        self._unit = unit
-
-
 class TestCreateParametersMixin:
     @pytest.fixture
     def dummy_model(self):
-        return DummyModel(unit="meV")
+        return CreateParametersMixin()
 
+    # ------------- Area----------------------
+    @pytest.mark.parametrize("unit", ["meV", "eV"])
     @pytest.mark.parametrize("area_input", [2, 2.0])
-    def test_create_area_parameter_from_numeric(self, dummy_model, area_input):
+    def test_create_area_parameter_from_numeric(self, dummy_model, area_input, unit):
         # WHEN THEN
-        area_param = dummy_model._create_area_parameter(area_input, "TestModel")
+        area_param = dummy_model._create_area_parameter(
+            area_input, "TestModel", unit=unit
+        )
 
         # EXPECT
         assert isinstance(area_param, Parameter)
         assert area_param.name == "TestModel area"
         assert area_param.value == float(area_input)
-        assert area_param.unit == "meV"
+        assert area_param.unit == unit
         assert not area_param.fixed
         assert area_param.min == 0.0
 
@@ -45,6 +43,23 @@ class TestCreateParametersMixin:
         with pytest.raises(TypeError, match="area must be a number or a Parameter"):
             dummy_model._create_area_parameter("invalid", "TestModel")
 
+    @pytest.mark.parametrize(
+        "non_finite_area",
+        [
+            np.nan,
+            np.inf,
+            -np.inf,
+        ],
+    )
+    def test_create_area_parameter_invalid_numeric_raises(
+        self, dummy_model, non_finite_area
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError, match="area must be a finite number or a Parameter"
+        ):
+            dummy_model._create_area_parameter(non_finite_area, "TestModel")
+
     def test_negative_area_warns(self, dummy_model):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
@@ -52,17 +67,21 @@ class TestCreateParametersMixin:
 
         assert area_param.min == -float("inf")  # No min constraint for negative area
 
+    # ------------- Center----------------------
+    @pytest.mark.parametrize("unit", ["meV", "eV"])
     @pytest.mark.parametrize("center_input", [0, 0.0])
-    def test_create_center_parameter_from_numeric(self, dummy_model, center_input):
+    def test_create_center_parameter_from_numeric(
+        self, dummy_model, center_input, unit
+    ):
         # WHEN THEN
         center_param = dummy_model._create_center_parameter(
-            center_input, "TestModel", fix_if_none=False
+            center_input, "TestModel", fix_if_none=False, unit=unit
         )
         # EXPECT
         assert isinstance(center_param, Parameter)
         assert center_param.name == "TestModel center"
         assert center_param.value == float(center_input)
-        assert center_param.unit == "meV"
+        assert center_param.unit == unit
         assert not center_param.fixed
 
     @pytest.mark.parametrize("fix_if_none", [True, False])
@@ -99,17 +118,37 @@ class TestCreateParametersMixin:
                 "invalid", "TestModel", fix_if_none=False
             )
 
+    @pytest.mark.parametrize(
+        "non_finite_center",
+        [
+            np.nan,
+            np.inf,
+            -np.inf,
+        ],
+    )
+    def test_create_center_parameter_invalid_numeric_raises(
+        self, dummy_model, non_finite_center
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError, match="center must be None, a finite number or a Parameter"
+        ):
+            dummy_model._create_center_parameter(
+                non_finite_center, "TestModel", fix_if_none=False
+            )
+
+    @pytest.mark.parametrize("unit", ["meV", "eV"])
     @pytest.mark.parametrize("width_input", [2, 2.0])
-    def test_create_width_parameter_from_numeric(self, dummy_model, width_input):
+    def test_create_width_parameter_from_numeric(self, dummy_model, width_input, unit):
         # WHEN THEN
         width_param = dummy_model._create_width_parameter(
-            width_input, "TestModel", param_name="width"
+            width_input, "TestModel", param_name="width", unit=unit
         )
         # EXPECT
         assert isinstance(width_param, Parameter)
         assert width_param.name == "TestModel width"
         assert width_param.value == float(width_input)
-        assert width_param.unit == "meV"
+        assert width_param.unit == unit
         assert not width_param.fixed
 
     def test_create_width_parameter_from_parameter(self, dummy_model):
@@ -145,3 +184,20 @@ class TestCreateParametersMixin:
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match=" must be greater than zero"):
             dummy_model._create_width_parameter(-1, "TestModel", param_name="width")
+
+    @pytest.mark.parametrize(
+        "non_finite_center",
+        [
+            np.nan,
+            np.inf,
+            -np.inf,
+        ],
+    )
+    def test_create_width_parameter_invalid_numeric_raises(
+        self, dummy_model, non_finite_center
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError, match="width must be a finite number or a Parameter"
+        ):
+            dummy_model._create_width_parameter(non_finite_center, "TestModel")

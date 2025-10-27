@@ -12,6 +12,15 @@ class TestPolynomial:
     def polynomial(self):
         return Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0])
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        polynomial = Polynomial()
+
+        # EXPECT
+        assert polynomial.name == "Polynomial"
+        assert polynomial.coefficients[0].value == 0.0
+        assert polynomial.unit == "meV"
+
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.name == "TestPolynomial"

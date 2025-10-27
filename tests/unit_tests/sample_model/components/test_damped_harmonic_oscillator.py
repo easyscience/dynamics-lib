@@ -15,6 +15,17 @@ class TestDampedHarmonicOscillator:
             name="TestDHO", area=2.0, center=1.5, width=0.3, unit="meV"
         )
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        dho = DampedHarmonicOscillator()
+
+        # EXPECT
+        assert dho.name == "DampedHarmonicOscillator"
+        assert dho.area.value == 1.0
+        assert dho.center.value == 1.0
+        assert dho.width.value == 1.0
+        assert dho.unit == "meV"
+
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
         assert dho.name == "TestDHO"

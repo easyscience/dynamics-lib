@@ -14,6 +14,17 @@ class TestDeltaFunction:
     def delta_function(self):
         return DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit="meV")
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        delta_function = DeltaFunction()
+
+        # EXPECT
+        assert delta_function.name == "DeltaFunction"
+        assert delta_function.area.value == 1.0
+        assert delta_function.center.value == 0.0
+        assert delta_function.unit == "meV"
+        assert delta_function.center.fixed is True
+
     def test_initialization(self, delta_function: DeltaFunction):
         # WHEN THEN EXPECT
         assert delta_function.name == "TestDeltaFunction"

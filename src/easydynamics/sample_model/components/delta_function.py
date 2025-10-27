@@ -13,6 +13,7 @@ from .model_component import ModelComponent
 Numeric = Union[float, int]
 
 EPSILON = 1e-8  # small number to avoid floating point issues
+MINIMUM_AREA = 0.0  # To avoid negative areas
 
 
 class DeltaFunction(CreateParametersMixin, ModelComponent):
@@ -38,8 +39,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self.validate_unit(unit)
         self._unit = unit
 
-        area = self._create_area_parameter(area, name)
-        center = self._create_center_parameter(center, name, fix_if_none=True)
+        # These methods live in ValidationMixin
+        area = self._create_area_parameter(
+            area=area, name=name, unit=self._unit, minimum_area=MINIMUM_AREA
+        )
+        center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, unit=self._unit
+        )
 
         super().__init__(
             name=name,

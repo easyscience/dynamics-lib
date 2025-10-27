@@ -11,6 +11,8 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+MINIMUM_AREA = 0.0  # To avoid negative areas
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
@@ -38,9 +40,16 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         self.validate_unit(unit)
         self._unit = unit
 
-        area = self._create_area_parameter(area, name)
-        center = self._create_center_parameter(center, name, fix_if_none=True)
-        width = self._create_width_parameter(width, name)
+        # These methods live in ValidationMixin
+        area = self._create_area_parameter(
+            area=area, name=name, unit=self._unit, minimum_area=MINIMUM_AREA
+        )
+        center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, unit=self._unit
+        )
+        width = self._create_width_parameter(
+            width=width, name=name, unit=self._unit, minimum_width=MINIMUM_WIDTH
+        )
 
         super().__init__(
             name=name,

@@ -15,6 +15,18 @@ class TestLorentzian:
             name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
         )
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        lorentzian = Lorentzian()
+
+        # EXPECT
+        assert lorentzian.name == "Lorentzian"
+        assert lorentzian.area.value == 1.0
+        assert lorentzian.center.value == 0.0
+        assert lorentzian.width.value == 1.0
+        assert lorentzian.unit == "meV"
+        assert lorentzian.center.fixed is True
+
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
         assert lorentzian.name == "TestLorentzian"

@@ -21,6 +21,19 @@ class TestVoigt:
             unit="meV",
         )
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        voigt = Voigt()
+
+        # EXPECT
+        assert voigt.name == "Voigt"
+        assert voigt.area.value == 1.0
+        assert voigt.center.value == 0.0
+        assert voigt.gaussian_width.value == 1.0
+        assert voigt.lorentzian_width.value == 1.0
+        assert voigt.unit == "meV"
+        assert voigt.center.fixed is True
+
     def test_initialization(self, voigt: Voigt):
         # WHEN THEN EXPECT
         assert voigt.name == "TestVoigt"
