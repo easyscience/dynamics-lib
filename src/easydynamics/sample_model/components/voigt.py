@@ -12,8 +12,6 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
-MINIMUM_WIDTH = 1e-10  # To avoid division by zero
-MINIMUM_AREA = 0.0  # To avoid negative areas
 
 
 class Voigt(CreateParametersMixin, ModelComponent):
@@ -44,9 +42,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         self._unit = unit
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=name, unit=self._unit, minimum_area=MINIMUM_AREA
-        )
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=name, fix_if_none=True, unit=self._unit
         )
@@ -55,14 +51,12 @@ class Voigt(CreateParametersMixin, ModelComponent):
             name=name,
             param_name="gaussian_width",
             unit=self._unit,
-            minimum_width=MINIMUM_WIDTH,
         )
         lorentzian_width = self._create_width_parameter(
             width=lorentzian_width,
             name=name,
             param_name="lorentzian_width",
             unit=self._unit,
-            minimum_width=MINIMUM_WIDTH,
         )
 
         super().__init__(

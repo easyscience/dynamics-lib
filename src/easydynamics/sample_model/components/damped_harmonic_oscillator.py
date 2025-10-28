@@ -11,8 +11,6 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from .model_component import ModelComponent
 
 Numeric = Union[float, int]
-MINIMUM_WIDTH = 1e-10  # To avoid division by zero
-MINIMUM_AREA = 0.0  # To avoid negative areas
 
 
 class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
@@ -40,15 +38,11 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         self._unit = unit
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=name, unit=self._unit, minimum_area=MINIMUM_AREA
-        )
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=name, fix_if_none=False, unit=self._unit
         )
-        width = self._create_width_parameter(
-            width=width, name=name, unit=self._unit, minimum_width=MINIMUM_WIDTH
-        )
+        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
 
         super().__init__(
             name=name,

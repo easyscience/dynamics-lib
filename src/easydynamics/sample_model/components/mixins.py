@@ -15,12 +15,15 @@ class CreateParametersMixin:
     (area, center, width) with appropriate bounds and type checking.
     """
 
+    MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+    MINIMUM_AREA = 0.0  # To avoid negative areas
+
     def _create_area_parameter(
         self,
         area: Union[Numeric, Parameter],
         name: str,
         unit: Union[str, sc.Unit] = "meV",
-        minimum_area: float = 0.0,
+        minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the area
         of a function. If the area is negative, a warning is raised.
@@ -97,7 +100,7 @@ class CreateParametersMixin:
         name: str,
         param_name: str = "width",
         unit: Union[str, sc.Unit] = "meV",
-        minimum_width: float = 0.0,
+        minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the width of a function.
         args:
