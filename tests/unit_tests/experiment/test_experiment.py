@@ -19,7 +19,8 @@ class TestExperiment:
         return experiment
 
     def test_init_array(self, experiment):
-        # THEN EXPECT
+        "Test initialization with a Scipp DataArray"
+        # WHEN THEN EXPECT
         assert experiment.name == "test_experiment"
         assert isinstance(experiment._data, sc.DataArray)
         assert "Q" in experiment._data.dims
@@ -32,6 +33,7 @@ class TestExperiment:
         )
 
     def test_init_string(self, tmp_path):
+        "Test initialization with a filename string - should load the file"
         # WHEN
         Q = sc.linspace("Q", 0.5, 1.5, num=10, unit="1/Angstrom")
         energy = sc.linspace("energy", -5, 5, num=11, unit="meV")
@@ -57,6 +59,7 @@ class TestExperiment:
         )
 
     def test_init_no_data(self):
+        "Test initialization with no data"
         # WHEN
         experiment = Experiment(name="empty_experiment")
 
@@ -65,11 +68,13 @@ class TestExperiment:
         assert experiment._data is None
 
     def test_init_invalid_data(self):
+        "Test initialization with invalid data type"
         # WHEN / THEN EXPECT
         with pytest.raises(TypeError):
             Experiment(name="invalid_experiment", data=123)
 
     def test_load_hdf5(self, tmp_path, experiment):
+        "Test loading data from an HDF5 file. First use scipp to save data to a file, then load it using the method."
         # WHEN
         # First create a file to load from
         filename = tmp_path / "test.h5"
@@ -86,21 +91,25 @@ class TestExperiment:
         assert new_experiment.name == "loaded_data"
 
     def test_load_hdf5_invalid_name_raises(self, experiment):
+        "Test loading data from an HDF5 file, giving the Experiment an invalid name"
         # WHEN / THEN EXPECT
         with pytest.raises(TypeError):
             experiment.load_hdf5("some_file.h5", name=123)
 
     def test_load_hdf5_invalid_filename_raises(self, experiment):
+        "Test loading data from an HDF5 file with an invalid filename"
         # WHEN / THEN EXPECT
         with pytest.raises(TypeError):
             experiment.load_hdf5(123)
 
     def test_load_hdf5_invalid_file_raises(self, experiment):
+        "Test loading data from a non-existent HDF5 file"
         # WHEN / THEN EXPECT
         with pytest.raises(OSError):
             experiment.load_hdf5("non_existent_file.h5")
 
     def test_save_hdf5(self, tmp_path, experiment):
+        "Test saving data to an HDF5 file. Load the saved file using scipp and compare to the original data."
         # WHEN THEN
         filename = tmp_path / "saved_data.h5"
         experiment.save_hdf5(str(filename))
@@ -111,6 +120,7 @@ class TestExperiment:
         assert sc.identical(original_data, loaded_data)
 
     def test_save_hdf5_default_name(self, tmp_path, experiment):
+        "Test saving data to an HDF5 file with default filename (based on experiment name). Load the saved file using scipp and compare to the original data."
         # WHEN THEN
         current_dir = tmp_path
         experiment.name = "default_name_experiment"
@@ -123,6 +133,7 @@ class TestExperiment:
         assert sc.identical(original_data, loaded_data)
 
     def test_save_hdf5_no_data_raises(self):
+        "Test saving data to an HDF5 file when no data is present in the experiment"
         # WHEN
         experiment = Experiment(name="no_data_experiment")
 
@@ -131,11 +142,13 @@ class TestExperiment:
             experiment.save_hdf5("should_fail.h5")
 
     def test_save_hdf5_invalid_filename_raises(self, experiment):
+        "Test saving data to an HDF5 file with an invalid filename"
         # WHEN / THEN EXPECT
         with pytest.raises(TypeError):
             experiment.save_hdf5(123)
 
     def test_remove_data(self, experiment):
+        "Test removing data from the experiment"
         # WHEN
         experiment.remove_data()
 
@@ -152,6 +165,7 @@ class TestExperiment:
         )
 
     def test_copy_experiment(self, experiment):
+        "Test copying an Experiment object. The copied object should have the same attributes but be a different object in memory."
         # WHEN
         copied_experiment = copy(experiment)
 
