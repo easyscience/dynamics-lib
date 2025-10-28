@@ -3,11 +3,9 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
-from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian, Lorentzian, Polynomial, SampleModel
-from easydynamics.utils import _detailed_balance_factor as detailed_balance_factor
 
 
 class TestSampleModel:
@@ -24,22 +22,30 @@ class TestSampleModel:
         model.add_component(component2)
         return model
 
-    def test_init_no_temperature(self, sample_model):
-        # WHEN THEN EXPECT
-        assert sample_model.name == "TestSampleModel"
-        assert len(sample_model.components) == 2
-        assert not sample_model.use_detailed_balance
-
-    def test_init_with_temperature(self):
+    def test_init(self):
         # WHEN THEN
-        sample_model = SampleModel(name="TempModel", temperature=100)
+        sample_model = SampleModel(name="InitModel")
 
         # EXPECT
-        assert sample_model.name == "TempModel"
+        assert sample_model.name == "InitModel"
         assert len(sample_model.components) == 0
-        assert sample_model.use_detailed_balance
-        assert isinstance(sample_model.temperature, Parameter)
-        assert sample_model.temperature.value == 100
+
+    # def test_init_no_temperature(self, sample_model):
+    #     # WHEN THEN EXPECT
+    #     assert sample_model.name == "TestSampleModel"
+    #     assert len(sample_model.components) == 2
+    #     assert not sample_model.use_detailed_balance
+
+    # def test_init_with_temperature(self):
+    #     # WHEN THEN
+    #     sample_model = SampleModel(name="TempModel", temperature=100)
+
+    #     # EXPECT
+    #     assert sample_model.name == "TempModel"
+    #     assert len(sample_model.components) == 0
+    #     assert sample_model.use_detailed_balance
+    #     assert isinstance(sample_model.temperature, Parameter)
+    #     assert sample_model.temperature.value == 100
 
     # ───── Component Management ─────
 
@@ -113,76 +119,76 @@ class TestSampleModel:
         for component in list(sample_model):
             assert component.unit == "eV"
 
-    # ───── Temperature and Detailed Balance ─────
+    # # ───── Temperature and Detailed Balance ─────
 
-    def test_set_temperature(self, sample_model):
-        # Set valid temperature
-        # WHEN THEN
-        sample_model.temperature = 300
-        # EXPECT
-        assert sample_model.temperature.value == 300
-        assert sample_model.temperature.unit == "K"
+    # def test_set_temperature(self, sample_model):
+    #     # Set valid temperature
+    #     # WHEN THEN
+    #     sample_model.temperature = 300
+    #     # EXPECT
+    #     assert sample_model.temperature.value == 300
+    #     assert sample_model.temperature.unit == "K"
 
-        # WHEN THEN
-        sample_model.temperature = 150.0
-        # EXPECT
-        assert sample_model.temperature.value == 150.0
-        assert sample_model.temperature.unit == "K"
+    #     # WHEN THEN
+    #     sample_model.temperature = 150.0
+    #     # EXPECT
+    #     assert sample_model.temperature.value == 150.0
+    #     assert sample_model.temperature.unit == "K"
 
-        # Set temperature to None
-        # WHEN THEN
-        sample_model.temperature = None
-        # EXPECT
-        assert sample_model.temperature is None
-        assert not sample_model.use_detailed_balance
+    #     # Set temperature to None
+    #     # WHEN THEN
+    #     sample_model.temperature = None
+    #     # EXPECT
+    #     assert sample_model.temperature is None
+    #     assert not sample_model.use_detailed_balance
 
-    def test_invalid_temperature_raises(self, sample_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="Temperature must be a number or None."):
-            sample_model.temperature = "invalid"
+    # def test_invalid_temperature_raises(self, sample_model):
+    #     # WHEN THEN EXPECT
+    #     with pytest.raises(TypeError, match="Temperature must be a number or None."):
+    #         sample_model.temperature = "invalid"
 
-    def test_negative_temperature_raises(self, sample_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="Temperature must be non-negative"):
-            sample_model.temperature = -50
+    # def test_negative_temperature_raises(self, sample_model):
+    #     # WHEN THEN EXPECT
+    #     with pytest.raises(ValueError, match="Temperature must be non-negative"):
+    #         sample_model.temperature = -50
 
-    def test_convert_temperature_unit(self, sample_model):
-        # WHEN
-        sample_model.temperature = 300  # Kelvin
-        # THEN
-        sample_model.convert_temperature_unit("mK")
-        # EXPECT
-        assert np.isclose(sample_model.temperature.value, 300000.0)
-        assert sample_model.temperature.unit == "mK"
+    # def test_convert_temperature_unit(self, sample_model):
+    #     # WHEN
+    #     sample_model.temperature = 300  # Kelvin
+    #     # THEN
+    #     sample_model.convert_temperature_unit("mK")
+    #     # EXPECT
+    #     assert np.isclose(sample_model.temperature.value, 300000.0)
+    #     assert sample_model.temperature.unit == "mK"
 
-    def test_convert_temperature_unit_incompatible_unit_raises(self, sample_model):
-        # WHEN
-        sample_model.temperature = 300  # Kelvin
-        # THEN EXPECT
-        with pytest.raises(UnitError, match="Failed to convert temperature"):
-            sample_model.convert_temperature_unit("m")
+    # def test_convert_temperature_unit_incompatible_unit_raises(self, sample_model):
+    #     # WHEN
+    #     sample_model.temperature = 300  # Kelvin
+    #     # THEN EXPECT
+    #     with pytest.raises(UnitError, match="Failed to convert temperature"):
+    #         sample_model.convert_temperature_unit("m")
 
-    def test_convert_temperature_unit_no_temperature_raises(self, sample_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="cannot convert units"):
-            sample_model.convert_temperature_unit("mK")
+    # def test_convert_temperature_unit_no_temperature_raises(self, sample_model):
+    #     # WHEN THEN EXPECT
+    #     with pytest.raises(ValueError, match="cannot convert units"):
+    #         sample_model.convert_temperature_unit("mK")
 
-    def test_use_detailed_balance(self, sample_model):
-        sample_model.temperature = 300
-        # WHEN THEN EXPECT
-        assert sample_model.use_detailed_balance is False
-        sample_model.use_detailed_balance = True
-        assert sample_model.use_detailed_balance is True
-        sample_model.use_detailed_balance = False
-        assert sample_model.use_detailed_balance is False
+    # def test_use_detailed_balance(self, sample_model):
+    #     sample_model.temperature = 300
+    #     # WHEN THEN EXPECT
+    #     assert sample_model.use_detailed_balance is False
+    #     sample_model.use_detailed_balance = True
+    #     assert sample_model.use_detailed_balance is True
+    #     sample_model.use_detailed_balance = False
+    #     assert sample_model.use_detailed_balance is False
 
-    def test_use_detailed_balance_no_temperature_raises(self, sample_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            ValueError,
-            match="Temperature must be set to use detailed balance.",
-        ):
-            sample_model.use_detailed_balance = True
+    # def test_use_detailed_balance_no_temperature_raises(self, sample_model):
+    #     # WHEN THEN EXPECT
+    #     with pytest.raises(
+    #         ValueError,
+    #         match="Temperature must be set to use detailed balance.",
+    #     ):
+    #         sample_model.use_detailed_balance = True
 
     # ───── Evaluation ─────
 
@@ -196,30 +202,30 @@ class TestSampleModel:
         ].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    @pytest.mark.parametrize(
-        "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
-    )
-    def test_evaluate_with_detailed_balance(self, sample_model, normalize_db):
-        # WHEN
-        sample_model.temperature = 300
-        sample_model.use_detailed_balance = True
-        sample_model.normalize_detailed_balance = normalize_db
+    # @pytest.mark.parametrize(
+    #     "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
+    # )
+    # def test_evaluate_with_detailed_balance(self, sample_model, normalize_db):
+    #     # WHEN
+    #     sample_model.temperature = 300
+    #     sample_model.use_detailed_balance = True
+    #     sample_model.normalize_detailed_balance = normalize_db
 
-        x = np.linspace(-5, 5, 100)
+    #     x = np.linspace(-5, 5, 100)
 
-        # THEN
-        result = sample_model.evaluate(x)
+    #     # THEN
+    #     result = sample_model.evaluate(x)
 
-        # EXPECT
-        expected_result = sample_model["TestGaussian1"].evaluate(x) + sample_model[
-            "TestLorentzian1"
-        ].evaluate(x)
-        expected_result *= detailed_balance_factor(
-            energy=x,
-            temperature=sample_model.temperature,
-            divide_by_temperature=normalize_db,
-        )
-        np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+    #     # EXPECT
+    #     expected_result = sample_model["TestGaussian1"].evaluate(x) + sample_model[
+    #         "TestLorentzian1"
+    #     ].evaluate(x)
+    #     expected_result *= detailed_balance_factor(
+    #         energy=x,
+    #         temperature=sample_model.temperature,
+    #         divide_by_temperature=normalize_db,
+    #     )
+    #     np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_no_components_raises(self):
         # WHEN THEN
@@ -241,35 +247,35 @@ class TestSampleModel:
         np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
-    @pytest.mark.parametrize(
-        "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
-    )
-    def test_evaluate_component_with_detailed_balance(self, sample_model, normalize_db):
-        # WHEN
-        sample_model.temperature = 300
-        sample_model.use_detailed_balance = True
-        sample_model.normalize_detailed_balance = normalize_db
+    # @pytest.mark.parametrize(
+    #     "normalize_db", [True, False], ids=["normalize DB", "Don't normalize DB"]
+    # )
+    # def test_evaluate_component_with_detailed_balance(self, sample_model, normalize_db):
+    #     # WHEN
+    #     sample_model.temperature = 300
+    #     sample_model.use_detailed_balance = True
+    #     sample_model.normalize_detailed_balance = normalize_db
 
-        # THEN
-        x = np.linspace(-5, 5, 100)
-        result1 = sample_model.evaluate_component(x, name="TestGaussian1")
-        result2 = sample_model.evaluate_component(x, name="TestLorentzian1")
+    #     # THEN
+    #     x = np.linspace(-5, 5, 100)
+    #     result1 = sample_model.evaluate_component(x, name="TestGaussian1")
+    #     result2 = sample_model.evaluate_component(x, name="TestLorentzian1")
 
-        # EXPECT
-        expected_result1 = sample_model["TestGaussian1"].evaluate(x)
-        expected_result2 = sample_model["TestLorentzian1"].evaluate(x)
-        expected_result1 *= detailed_balance_factor(
-            energy=x,
-            temperature=sample_model.temperature,
-            divide_by_temperature=normalize_db,
-        )
-        expected_result2 *= detailed_balance_factor(
-            energy=x,
-            temperature=sample_model.temperature,
-            divide_by_temperature=normalize_db,
-        )
-        np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
-        np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
+    #     # EXPECT
+    #     expected_result1 = sample_model["TestGaussian1"].evaluate(x)
+    #     expected_result2 = sample_model["TestLorentzian1"].evaluate(x)
+    #     expected_result1 *= detailed_balance_factor(
+    #         energy=x,
+    #         temperature=sample_model.temperature,
+    #         divide_by_temperature=normalize_db,
+    #     )
+    #     expected_result2 *= detailed_balance_factor(
+    #         energy=x,
+    #         temperature=sample_model.temperature,
+    #         divide_by_temperature=normalize_db,
+    #     )
+    #     np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
+    #     np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
     def test_evaluate_nonexistent_component_raises(self, sample_model):
         # WHEN
@@ -344,29 +350,12 @@ class TestSampleModel:
         assert actual_names == expected_names
         assert all(isinstance(param, Parameter) for param in parameters)
 
-        # WHEN
-        sample_model.temperature = 300
-        # THEN
-        parameters = sample_model.get_parameters()
-        # EXPECT
-        assert len(parameters) == 7
-        expected_names.add("temperature")
-        actual_names = {param.name for param in parameters}
-        assert actual_names == expected_names
-
     def test_get_parameters_no_components(self):
         sample_model = SampleModel(name="EmptyModel")
         # WHEN THEN
         parameters = sample_model.get_parameters()
         # EXPECT
         assert len(parameters) == 0
-
-        # WHEN THEN
-        sample_model.temperature = 300
-        parameters = sample_model.get_parameters()
-        # EXPECT
-        assert len(parameters) == 1
-        assert parameters[0].name == "temperature"
 
     def test_get_fit_parameters(self, sample_model):
         # WHEN
@@ -422,17 +411,8 @@ class TestSampleModel:
         model_copy = copy(sample_model)
         # EXPECT
         assert model_copy is not sample_model
-        assert model_copy.name == "copy of " + sample_model.name
+        assert model_copy.name == sample_model.name
         assert len(list(model_copy)) == len(list(sample_model))
-        assert model_copy.temperature is not sample_model.temperature
-        assert model_copy.temperature.name == sample_model.temperature.name
-        assert model_copy.temperature.value == sample_model.temperature.value
-        assert model_copy.temperature.unit == sample_model.temperature.unit
-        assert model_copy.use_detailed_balance == sample_model.use_detailed_balance
-        assert (
-            model_copy.normalize_detailed_balance
-            == sample_model.normalize_detailed_balance
-        )
         for comp in list(sample_model):
             copied_comp = model_copy[comp.name]
             assert copied_comp is not comp

@@ -1,6 +1,4 @@
 import warnings
-from copy import copy
-from itertools import chain
 from typing import List, Optional, Union
 
 import numpy as np
@@ -8,10 +6,6 @@ import scipp as sc
 from easyscience.base_classes import CollectionBase
 from easyscience.global_object.undo_redo import NotarizedDict
 from easyscience.job.theoreticalmodel import TheoreticalModelBase
-from easyscience.variable import Parameter
-from scipp import UnitError
-
-from easydynamics.utils import _detailed_balance_factor as detailed_balance_factor
 
 from .components.model_component import ModelComponent
 
@@ -21,16 +15,9 @@ Numeric = Union[float, int]
 class SampleModel(CollectionBase, TheoreticalModelBase):
     """
     A model of the scattering from a sample, combining multiple model components.
-    Optionally applies detailed balancing.
 
     Attributes
     ----------
-    temperature : Parameter
-        Temperature parameter for detailed balance.
-    use_detailed_balance : bool
-        Whether to apply detailed balance.
-    normalize_detailed_balance : bool
-        Whether to normalize the detailed balance by temperature.
     name : str
         Name of the SampleModel.
     unit : str or sc.Unit
@@ -44,8 +31,7 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         self,
         name: str = "MySampleModel",
         unit: Optional[Union[str, sc.Unit]] = "meV",
-        temperature: Optional[Union[Numeric, sc.Variable]] = None,
-        temperature_unit: Optional[str] = "K",
+        data: Optional[List] = None,
     ):
         """
         Initialize a new SampleModel.
@@ -54,10 +40,10 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         ----------
         name : str
             Name of the sample model.
-        temperature : Number, sc.Variable or None, optional
-            Temperature for detailed balance.
-        temperature_unit : str, default 'K'
-            Unit of the temperature.
+        unit : str or sc.Unit, optional
+            Unit of the sample model. Defaults to "meV".
+        data : List[ModelComponent], optional
+            Initial list of model components to include in the sample model.
         """
 
         CollectionBase.__init__(self, name=name)
@@ -65,27 +51,16 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         if not isinstance(self._kwargs, NotarizedDict):
             self._kwargs = NotarizedDict()
 
-        # If temperature is given, create a Parameter and enable detailed balance.
-        if temperature is None:
-            self._temperature = None
-            self._use_detailed_balance = False
-        elif isinstance(temperature, sc.Variable):
-            self._temperature = Parameter(
-                name="temperature",
-                value=temperature.value,
-                unit=temperature.unit,
-                fixed=True,
-            )
-        else:
-            self._temperature = Parameter(
-                name="temperature", value=temperature, unit=temperature_unit, fixed=True
-            )
-            self._use_detailed_balance = True
-
-        self._normalize_detailed_balance = (
-            True  # Whether to normalize by temperature when using detailed balance.
-        )
         self._unit = unit
+
+        if data:
+            # clear any accidental pre-populated items (defensive)
+            self.clear_components()
+            for item in data:
+                # ensure item is a ModelComponent
+                if not isinstance(item, ModelComponent):
+                    raise TypeError("Data items must be instances of ModelComponent.")
+                self.insert(index=len(self), value=item)
 
     ##############################################
     #       Methods for managing components     #
@@ -174,15 +149,6 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         for param in area_params:
             param.value /= total_area
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
-        """
-        Convert the unit of the SampleModel and all its components.
-        """
-        self._unit = unit
-        # for component in self.components.values():
-        for component in list(self):
-            component.convert_unit(unit)
-
     @property
     def components(self) -> List[ModelComponent]:
         """
@@ -214,118 +180,14 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
             )
         )  # noqa: E501
 
-    ##########################################################
-    #       Methods for temperature and detailed balance     #
-    ##########################################################
-
-    @property
-    def temperature(self) -> Optional[Parameter]:
+    def convert_unit(self, unit: Union[str, sc.Unit]) -> None:
         """
-        Get the temperature.
-
-        Returns
-        -------
-        Parameter
+        Convert the unit of the SampleModel and all its components.
         """
-        return self._temperature
-
-    @temperature.setter
-    def temperature(self, value: Optional[Numeric]) -> None:
-        """
-        Set the temperature.
-
-        Parameters
-        ----------
-        value : Number
-            Temperature value. If None, removes temperature and disables detailed balance.
-        """
-        # If None, disable detailed balance and remove temperature parameter.
-        if value is None:
-            self._use_detailed_balance = False
-            self._temperature = None
-            return
-
-        if not isinstance(value, Numeric):
-            raise TypeError("Temperature must be a number or None.")
-        value = float(value)
-
-        if value < 0:
-            raise ValueError("Temperature must be non-negative.")
-
-        if isinstance(self._temperature, Parameter):
-            self._temperature.value = value
-        else:
-            self._temperature = Parameter(
-                name="temperature", value=value, unit="K", fixed=True
-            )
-
-    def convert_temperature_unit(self, new_unit: Union[str, sc.Unit]) -> None:
-        """
-        Convert the temperature parameter to a new unit.
-
-        Parameters
-        ----------
-        new_unit : str or sc.Unit
-            The new unit for the temperature.
-        """
-        if self._temperature is None:
-            raise ValueError("Temperature is not set; cannot convert units.")
-
-        try:
-            self._temperature.convert_unit(new_unit)
-        except UnitError as e:
-            raise UnitError(f"Failed to convert temperature to unit '{new_unit}': {e}")
-        except Exception as e:
-            raise RuntimeError(f"An error occurred during unit conversion: {e}")
-
-    @property
-    def use_detailed_balance(self) -> bool:
-        """
-        True if detailed balance is enabled, otherwise False.
-
-        Returns
-        -------
-        bool
-        """
-        return self._use_detailed_balance
-
-    @use_detailed_balance.setter
-    def use_detailed_balance(self, value: bool) -> None:
-        """
-        If True, enables the use of detailed balance. Otherwise disables it.
-
-        Parameters
-        ----------
-        value : bool
-            True to enable, False to disable.
-        """
-        if self._temperature is None:
-            raise ValueError("Temperature must be set to use detailed balance.")
-        self._use_detailed_balance = value
-
-    @property
-    def normalize_detailed_balance(self) -> bool:
-        """
-        If True, detailed balance will be normalized by temperature. If False, it will not be normalized.
-
-        """
-        return self._normalize_detailed_balance
-
-    @normalize_detailed_balance.setter
-    def normalize_detailed_balance(self, value: bool) -> None:
-        """
-        If True, normalizes the detailed balance by temperature.
-
-        Parameters
-        ----------
-        value : bool
-            True to normalize, False otherwise.
-        """
-        self._normalize_detailed_balance = value
-
-    ##########################################################
-    #       Evaluate        #
-    ##########################################################
+        self._unit = unit
+        # for component in self.components.values():
+        for component in list(self):
+            component.convert_unit(unit)
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
@@ -350,17 +212,6 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         for component in list(self):
             value = component.evaluate(x)
             result = value if result is None else result + value
-
-        if (
-            self.use_detailed_balance
-            and self._temperature is not None
-            and self._temperature.value >= 0
-        ):
-            result *= detailed_balance_factor(
-                energy=x,
-                temperature=self._temperature,
-                divide_by_temperature=self._normalize_detailed_balance,
-            )
 
         return result
 
@@ -399,57 +250,8 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         component = matches[0]
 
         result = component.evaluate(x)
-        if (
-            self.use_detailed_balance
-            and self._temperature is not None
-            and self._temperature.value >= 0
-        ):
-            result *= detailed_balance_factor(
-                energy=x,
-                temperature=self._temperature,
-                divide_by_temperature=self._normalize_detailed_balance,
-            )
 
         return result
-
-    ##############################################
-    #       Methods for managing parameters     #
-    ##############################################
-
-    def get_parameters(self) -> List[Parameter]:
-        """
-        Return all parameters in the SampleModel.
-
-        Returns
-        -------
-        List[Parameter]
-        """
-        # Create generator for temperature parameter
-        temp_params = (self._temperature,) if self._temperature is not None else ()
-
-        # Create generator for component parameters
-        comp_params = (param for comp in list(self) for param in comp.get_parameters())
-
-        # Chain them together and return as list
-        return list(chain(temp_params, comp_params))
-
-    def get_fit_parameters(self) -> List[Parameter]:
-        """
-        Get all fit parameters, removing fixed and dependent parameters.
-
-        Returns:
-            List[Parameter]: A list of fit parameters.
-        """
-
-        def is_fit_parameter(param: Parameter) -> bool:
-            """Check if a parameter can be used for fitting."""
-            return not getattr(param, "fixed", False) and getattr(
-                param, "_independent", True
-            )
-
-        return [param for param in self.get_parameters() if is_fit_parameter(param)]
-
-        # return fit_parameters
 
     def fix_all_parameters(self) -> None:
         """
@@ -465,39 +267,6 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         for param in self.get_parameters():
             param.fixed = False
 
-    ##############################################
-    #       dunder methods                      #
-    ##############################################
-
-    def __copy__(self) -> "SampleModel":
-        """
-        Create a deep copy of the SampleModel with independent parameters.
-
-        Returns
-        -------
-        SampleModel
-            A new instance with copied components and parameters.
-        """
-        name = "copy of " + self.name
-
-        new_model = SampleModel(
-            name=name,
-            temperature=self._temperature.value if self._temperature else None,
-            unit=self.unit,
-        )
-
-        if self._temperature:
-            new_model.use_detailed_balance = self.use_detailed_balance
-            new_model.normalize_detailed_balance = self.normalize_detailed_balance
-
-        for comp in list(self):
-            new_model.add_component(component=copy(comp), name=comp.name)
-            new_model[comp.name].name = comp.name  # Remove 'copy of ' prefix
-            for par in new_model[comp.name].get_parameters():
-                par.name = par.name.removeprefix("copy of ")
-
-        return new_model
-
     def __repr__(self) -> str:
         """
         Return a string representation of the SampleModel.
@@ -508,12 +277,4 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         """
         comp_names = ", ".join(c.name for c in self) or "No components"
 
-        temp_str = ""
-        if (
-            getattr(self, "_use_detailed_balance", False)
-            and getattr(self, "_temperature", None) is not None
-        ):
-            temp = self._temperature
-            temp_str = f" | Temperature: {temp.value} {temp.unit}"
-
-        return f"<SampleModel name='{self.name}' | Components: {comp_names}{temp_str}>"
+        return f"<SampleModel name='{self.name}' | Components: {comp_names}>"
