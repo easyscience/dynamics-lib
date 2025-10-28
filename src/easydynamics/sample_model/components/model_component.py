@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.base_classes import ObjBase
-from easyscience.variable import Parameter
 from scipp import UnitError
 
 Numeric = Union[float, int]
@@ -18,12 +17,14 @@ class ModelComponent(ObjBase):
     Abstract base class for all model components.
     """
 
-    def __init__(self, name="ModelComponent", unit: Optional[str] = "meV"):
-        super().__init__(name=name)
-
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("unit must be a string or a scipp unit.")
-
+    def __init__(
+        self,
+        name="ModelComponent",
+        unit: Optional[Union[str, sc.Unit]] = "meV",
+        **kwargs: Any,
+    ):
+        self.validate_unit(unit)
+        super().__init__(name=name, **kwargs)
         self._unit = unit
 
     @property
@@ -109,7 +110,14 @@ class ModelComponent(ObjBase):
 
         return np.sort(x_in)
 
-    @abstractmethod
+    @staticmethod
+    def validate_unit(unit) -> None:
+        """Raise TypeError if unit is not allowed (string or sc.Unit)."""
+        if unit is not None and not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(
+                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+            )
+
     def convert_unit(self, unit: Union[str, sc.Unit]):
         """
         Convert the unit of the Parameters in the component.
@@ -117,7 +125,22 @@ class ModelComponent(ObjBase):
         Args:
             unit (str or sc.Unit): The new unit to convert to.
         """
-        pass
+
+        old_unit = self._unit
+        pars = self.get_parameters()
+        try:
+            for p in pars:
+                p.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                for p in pars:
+                    if hasattr(p, "convert_unit"):
+                        p.convert_unit(old_unit)
+            except Exception:
+                pass  # Best effort rollback
+            raise e
 
     @abstractmethod
     def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
@@ -129,25 +152,6 @@ class ModelComponent(ObjBase):
 
         Returns:
             np.ndarray: Evaluated function values.
-        """
-        pass
-
-    @abstractmethod
-    def get_parameters(self) -> List[Parameter]:
-        """
-        Get all parameters from the model component.
-
-        Returns
-        -------
-        List[Parameter]
-            List of parameters in the component.
-        """
-        pass
-
-    @abstractmethod
-    def __copy__(self) -> ModelComponent:
-        """
-        Return a deep copy of this component with independent parameters.
         """
         pass
 

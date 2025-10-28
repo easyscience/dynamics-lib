@@ -9,22 +9,16 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 class DummyComponent(ModelComponent):
     def __init__(self):
         super().__init__(name="Dummy")
-        self._area = Parameter(name="area", value=1.0, unit="meV", fixed=False)
-        self._center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
-        self._width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
+        self.area = Parameter(name="area", value=1.0, unit="meV", fixed=False)
+        self.center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
+        self.width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
         self._unit = "meV"
 
     def get_parameters(self):
-        return [self._area, self._center, self._width]
+        return [self.area, self.center, self.width]
 
     def evaluate(self, x):
         return np.zeros_like(x)
-
-    def convert_unit(self, unit):
-        self._area.convert_unit(unit)
-        self._center.convert_unit(unit)
-        self._width.convert_unit(unit)
-        self._unit = unit
 
 
 class TestModelComponent:
@@ -36,6 +30,16 @@ class TestModelComponent:
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError, match="Unit is read-only"):
             dummy.unit = "K"
+
+    def test_convert_unit(self, dummy: DummyComponent):
+        # WHEN THEN
+        dummy.convert_unit("microeV")
+
+        # EXPECT
+        assert dummy.unit == "microeV"
+        assert dummy.area.value == 1 * 1e3
+        assert dummy.center.value == 2 * 1e3
+        assert dummy.width.value == 3 * 1e3
 
     def test_free_and_fix_all_parameters(self, dummy):
         # WHEN THEN EXPECT
@@ -153,6 +157,6 @@ class TestModelComponent:
         assert x_prepared.shape == (3,)
         np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
         assert dummy.unit == "µeV"
-        assert dummy._area.value == 1.0 * 1e3
-        assert dummy._center.value == 2.0 * 1e3
-        assert dummy._width.value == 3.0 * 1e3
+        assert dummy.area.value == 1.0 * 1e3
+        assert dummy.center.value == 2.0 * 1e3
+        assert dummy.width.value == 3.0 * 1e3

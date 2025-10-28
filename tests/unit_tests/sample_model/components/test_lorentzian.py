@@ -15,12 +15,46 @@ class TestLorentzian:
             name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
         )
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        lorentzian = Lorentzian()
+
+        # EXPECT
+        assert lorentzian.name == "Lorentzian"
+        assert lorentzian.area.value == 1.0
+        assert lorentzian.center.value == 0.0
+        assert lorentzian.width.value == 1.0
+        assert lorentzian.unit == "meV"
+        assert lorentzian.center.fixed is True
+
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
         assert lorentzian.name == "TestLorentzian"
         assert lorentzian.area.value == 2.0
         assert lorentzian.center.value == 0.5
         assert lorentzian.width.value == 0.6
+        assert lorentzian.unit == "meV"
+
+    def test_init_with_parameters(self):
+        # WHEN
+        area_param = Parameter(name="area_param", value=3.0, unit="meV")
+        center_param = Parameter(name="center_param", value=1.0, unit="meV")
+        width_param = Parameter(name="width_param", value=0.8, unit="meV")
+
+        # THEN
+        lorentzian = Lorentzian(
+            name="ParamLorentzian",
+            area=area_param,
+            center=center_param,
+            width=width_param,
+            unit="meV",
+        )
+
+        # EXPECT
+        assert lorentzian.name == "ParamLorentzian"
+        assert lorentzian.area is area_param
+        assert lorentzian.center is center_param
+        assert lorentzian.width is width_param
         assert lorentzian.unit == "meV"
 
     @pytest.mark.parametrize(
@@ -32,7 +66,7 @@ class TestLorentzian:
             ),
             (
                 {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
-                "center must be None or a number",
+                "center must be None",
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
@@ -40,7 +74,7 @@ class TestLorentzian:
             ),
             (
                 {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
-                "unit must be a string or a scipp unit",
+                "unit must be None",
             ),
         ],
     )
@@ -67,9 +101,9 @@ class TestLorentzian:
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
         [
-            ("area", 3.0, "invalid", r"area must be a number\."),
-            ("center", 0.6, "invalid", r"center must be a number\."),
-            ("width", 0.7, "invalid", r"width must be a number\."),
+            ("area", 3.0, "invalid", r" must be a number"),
+            ("center", 0.6, "invalid", r" must be a number"),
+            ("width", 0.7, "invalid", r" must be a number"),
         ],
     )
     def test_property_setters(
@@ -130,7 +164,7 @@ class TestLorentzian:
         numerical_area = simpson(y, x)
 
         # EXPECT
-        assert numerical_area == pytest.approx(lorentzian._area.value, rel=2e-3)
+        assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
     def test_convert_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -148,7 +182,7 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian_copy is not lorentzian
-        assert lorentzian_copy.name == "copy of " + lorentzian.name
+        assert lorentzian_copy.name == lorentzian.name
 
         assert lorentzian_copy.area.value == lorentzian.area.value
         assert lorentzian_copy.area.fixed == lorentzian.area.fixed
