@@ -21,6 +21,19 @@ class TestVoigt:
             unit="meV",
         )
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        voigt = Voigt()
+
+        # EXPECT
+        assert voigt.name == "Voigt"
+        assert voigt.area.value == 1.0
+        assert voigt.center.value == 0.0
+        assert voigt.gaussian_width.value == 1.0
+        assert voigt.lorentzian_width.value == 1.0
+        assert voigt.unit == "meV"
+        assert voigt.center.fixed is True
+
     def test_initialization(self, voigt: Voigt):
         # WHEN THEN EXPECT
         assert voigt.name == "TestVoigt"
@@ -28,6 +41,35 @@ class TestVoigt:
         assert voigt.center.value == 0.5
         assert voigt.gaussian_width.value == 0.6
         assert voigt.lorentzian_width.value == 0.7
+        assert voigt.unit == "meV"
+
+    def test_init_with_parameters(self):
+        # WHEN
+        area_param = Parameter(name="area_param", value=3.0, unit="meV")
+        center_param = Parameter(name="center_param", value=1.0, unit="meV")
+        gaussian_width_param = Parameter(
+            name="gaussian_width_param", value=0.8, unit="meV"
+        )
+        lorentzian_width_param = Parameter(
+            name="lorentzian_width_param", value=0.9, unit="meV"
+        )
+
+        # THEN
+        voigt = Voigt(
+            name="ParamVoigt",
+            area=area_param,
+            center=center_param,
+            gaussian_width=gaussian_width_param,
+            lorentzian_width=lorentzian_width_param,
+            unit="meV",
+        )
+
+        # EXPECT
+        assert voigt.name == "ParamVoigt"
+        assert voigt.area is area_param
+        assert voigt.center is center_param
+        assert voigt.gaussian_width is gaussian_width_param
+        assert voigt.lorentzian_width is lorentzian_width_param
         assert voigt.unit == "meV"
 
     @pytest.mark.parametrize(
@@ -51,7 +93,7 @@ class TestVoigt:
                     "lorentzian_width": 0.7,
                     "unit": "meV",
                 },
-                "center must be None or a number",
+                "center must be None",
             ),
             (
                 {
@@ -81,7 +123,7 @@ class TestVoigt:
                     "lorentzian_width": 0.7,
                     "unit": 123,
                 },
-                "unit must be a string or a scipp unit",
+                "unit must be None,",
             ),
         ],
     )
@@ -133,14 +175,14 @@ class TestVoigt:
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
         [
-            ("area", 3.0, "invalid", r"area must be a number\."),
-            ("center", 0.6, "invalid", r"center must be a number\."),
-            ("gaussian_width", 0.7, "invalid", r"gaussian_width must be a number\."),
+            ("area", 3.0, "invalid", r"must be a number"),
+            ("center", 0.6, "invalid", r"must be a number"),
+            ("gaussian_width", 0.7, "invalid", r"must be a number"),
             (
                 "lorentzian_width",
                 0.7,
                 "invalid",
-                r"lorentzian_width must be a number\.",
+                r"must be a number",
             ),
         ],
     )
@@ -231,19 +273,19 @@ class TestVoigt:
 
         # EXPECT
         assert voigt_copy is not voigt
-        assert voigt_copy.name == "copy of " + voigt.name
+        assert voigt_copy.name == voigt.name
 
-        assert voigt_copy._area.value == voigt._area.value
-        assert voigt_copy._area.fixed == voigt._area.fixed
+        assert voigt_copy.area.value == voigt.area.value
+        assert voigt_copy.area.fixed == voigt.area.fixed
 
-        assert voigt_copy._center.value == voigt._center.value
-        assert voigt_copy._center.fixed == voigt._center.fixed
+        assert voigt_copy.center.value == voigt.center.value
+        assert voigt_copy.center.fixed == voigt.center.fixed
 
-        assert voigt_copy._gaussian_width.value == voigt._gaussian_width.value
-        assert voigt_copy._gaussian_width.fixed == voigt._gaussian_width.fixed
+        assert voigt_copy.gaussian_width.value == voigt.gaussian_width.value
+        assert voigt_copy.gaussian_width.fixed == voigt.gaussian_width.fixed
 
-        assert voigt_copy._lorentzian_width.value == voigt._lorentzian_width.value
-        assert voigt_copy._lorentzian_width.fixed == voigt._lorentzian_width.fixed
+        assert voigt_copy.lorentzian_width.value == voigt.lorentzian_width.value
+        assert voigt_copy.lorentzian_width.fixed == voigt.lorentzian_width.fixed
 
         assert voigt_copy.unit == voigt.unit
 

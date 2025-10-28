@@ -12,27 +12,36 @@ class TestPolynomial:
     def polynomial(self):
         return Polynomial(name="TestPolynomial", coefficients=[1.0, -2.0, 3.0])
 
+    def test_init_no_inputs(self):
+        # WHEN THEN
+        polynomial = Polynomial()
+
+        # EXPECT
+        assert polynomial.name == "Polynomial"
+        assert polynomial.coefficients[0].value == 0.0
+        assert polynomial.unit == "meV"
+
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.name == "TestPolynomial"
-        assert polynomial.coefficients[0] == 1.0
-        assert polynomial.coefficients[1] == -2.0
-        assert polynomial.coefficients[2] == 3.0
+        assert polynomial.coefficients[0].value == 1.0
+        assert polynomial.coefficients[1].value == -2.0
+        assert polynomial.coefficients[2].value == 3.0
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
         [
             (
                 {"coefficients": "invalid"},
-                "coefficients must be a list or ndarray of floats",
+                "coefficients must be ",
             ),
             (
                 {"coefficients": [1.0, "invalid", 3.0]},
-                "All coefficients must be numbers.",
+                "Each coefficient must be ",
             ),
             (
                 {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
-                "unit must be a string or a scipp unit",
+                "unit must be ",
             ),
         ],
     )
@@ -40,12 +49,13 @@ class TestPolynomial:
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(name="TestPolynomial", **kwargs)
 
-    def test_no_coefficients_raises(self):
+    @pytest.mark.parametrize("invalid_coeffs", [[], None])
+    def test_no_coefficients_raises(self, invalid_coeffs):
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="At least one coefficient must be provided"
         ):
-            Polynomial(name="TestPolynomial", coefficients=[])
+            Polynomial(name="TestPolynomial", coefficients=invalid_coeffs)
 
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN EXPECT
@@ -68,6 +78,56 @@ class TestPolynomial:
         # WHEN THEN EXPECT
         assert polynomial.degree == 2
 
+    @pytest.mark.parametrize(
+        "values",
+        [
+            [2.0, 0.0, -1.0],  # all floats
+            [
+                Parameter("p0", 2.0),
+                Parameter("p1", 0.0),
+                Parameter("p2", -1.0),
+            ],  # all Parameters
+            [2.0, Parameter("p1", 0.0), -1.0],  # mixed numbers and Parameters
+        ],
+    )
+    def test_set_coefficient_values(self, polynomial: Polynomial, values):
+        """Test that coefficients can be updated from numeric values or Parameters."""
+        # WHEN
+        polynomial.coefficient_values = values
+
+        # THEN EXPECT: Parameter values match the new inputs
+        for i, val in enumerate(values):
+            if isinstance(val, Parameter):
+                expected = val.value
+            else:
+                expected = val
+            assert np.isclose(polynomial.coefficients[i].value, expected)
+
+    def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):
+        """Ensure that setting coefficients with mismatched length raises an error."""
+        with pytest.raises(ValueError, match="Number of coefficients"):
+            polynomial.coefficient_values = [1.0, 2.0]  # shorter list
+
+    def test_set_coefficients_invalid_type_raises(self, polynomial: Polynomial):
+        """Ensure that invalid coefficient types raise a TypeError."""
+        with pytest.raises(TypeError):
+            polynomial.coefficient_values = [1.0, "invalid", 3.0]
+
+    @pytest.mark.parametrize(
+        "invalid_coeffs, expected_message",
+        [
+            ([None, 2.0, 3.0], "Each coefficient must be "),
+            ([1.0, 2.0, "invalid"], "Each coefficient must be "),
+            ("not a list", "coefficients must be "),
+        ],
+    )
+    def test_set_coefficient_values_raises(self, invalid_coeffs, expected_message):
+        with pytest.raises(TypeError, match=expected_message):
+            polynomial = Polynomial(
+                name="TestPolynomial", coefficients=[1.0, -2.0, 3.0]
+            )
+            polynomial.coefficient_values = invalid_coeffs
+
     def test_get_parameters(self, polynomial: Polynomial):
         # WHEN THEN
         params = polynomial.get_parameters()
@@ -89,9 +149,9 @@ class TestPolynomial:
 
         # THEN EXPECT
         assert polynomial._unit == "microeV"
-        assert np.isclose(polynomial.coefficients[0], 1.0)
-        assert np.isclose(polynomial.coefficients[1], -2.0 * 1e-3)
-        assert np.isclose(polynomial.coefficients[2], 3.0 * 1e-6)
+        assert np.isclose(polynomial.coefficients[0].value, 1.0)
+        assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
+        assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
