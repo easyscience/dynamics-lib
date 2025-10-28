@@ -53,18 +53,15 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
 
         self._unit = unit
 
+        # Add initial components if provided. Mostly used for serialization.
         if data:
-            # clear any accidental pre-populated items (defensive)
+            # Just to be safe
             self.clear_components()
             for item in data:
                 # ensure item is a ModelComponent
                 if not isinstance(item, ModelComponent):
                     raise TypeError("Data items must be instances of ModelComponent.")
                 self.insert(index=len(self), value=item)
-
-    ##############################################
-    #       Methods for managing components     #
-    ##############################################
 
     def add_component(
         self, component: ModelComponent, name: Optional[str] = None
@@ -221,7 +218,7 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         name: str,
     ) -> np.ndarray:
         """
-        Evaluate a single component by name, optionally applying detailed balance.
+        Evaluate a single component by name.
 
         Parameters
         ----------
