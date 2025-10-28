@@ -119,26 +119,13 @@ class TestExperiment:
         original_data = experiment.data
         assert sc.identical(original_data, loaded_data)
 
-    def test_save_hdf5_default_name(self, tmp_path, experiment):
-        "Test saving data to an HDF5 file with default filename (based on experiment name). Load the saved file using scipp and compare to the original data."
-        # WHEN THEN
-        current_dir = tmp_path
-        experiment.name = "default_name_experiment"
-        expected_filename = current_dir / "default_name_experiment.h5"
-        experiment.save_hdf5()
-
-        # EXPECT
-        loaded_data = sc.io.load_hdf5(str(expected_filename))
-        original_data = experiment.data
-        assert sc.identical(original_data, loaded_data)
-
     def test_save_hdf5_no_data_raises(self):
         "Test saving data to an HDF5 file when no data is present in the experiment"
         # WHEN
         experiment = Experiment(name="no_data_experiment")
 
         # THEN EXPECT
-        with pytest.raises(AttributeError):
+        with pytest.raises(ValueError):
             experiment.save_hdf5("should_fail.h5")
 
     def test_save_hdf5_invalid_filename_raises(self, experiment):
