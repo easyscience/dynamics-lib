@@ -57,6 +57,8 @@ def convolution(
         normalize_detailed_balance : bool, optional
             Whether to normalize the detailed balance factor. Default is True.
     """
+
+    # Input validation
     if not isinstance(x, np.ndarray):
         raise TypeError(
             f"`x` is an instance of {type(x).__name__}, but must be a numpy array."

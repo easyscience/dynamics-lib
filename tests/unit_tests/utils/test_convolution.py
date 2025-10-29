@@ -35,6 +35,22 @@ class TestConvolution:
         return test_resolution_model
 
     @pytest.fixture
+    def gaussian_component(self):
+        return Gaussian(center=0.1, width=0.3, area=2.0)
+
+    @pytest.fixture
+    def other_gaussian_component(self):
+        return Gaussian(center=0.2, width=0.4, area=3.0)
+
+    @pytest.fixture
+    def lorentzian_component(self):
+        return Lorentzian(center=0.1, width=0.3, area=2.0)
+
+    @pytest.fixture
+    def other_lorentzian_component(self):
+        return Lorentzian(center=0.2, width=0.4, area=3.0)
+
+    @pytest.fixture
     def x(self):
         return np.linspace(-50, 50, 50001)
 
@@ -51,12 +67,20 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
-    def test_components_gauss_gauss(self, x, offset_obj, expected_shift, method):
+    def test_components_gauss_gauss(
+        self,
+        x,
+        gaussian_component,
+        other_gaussian_component,
+        offset_obj,
+        expected_shift,
+        method,
+    ):
         "Test convolution of Gaussian sample and Gaussian resolution components without SampleModel."
         "Test with different offset types and methods."
         # WHEN
-        sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
-        resolution_gauss = Gaussian(center=0.2, width=0.4, area=3)
+        sample_gauss = gaussian_component
+        resolution_gauss = other_gaussian_component
 
         # THEN
         calculated_convolution = convolution(
@@ -68,6 +92,7 @@ class TestConvolution:
         )
 
         # EXPECT
+        # Convolution of two Gaussians is another Gaussian with width = sqrt(w1^2 + w2^2)
         expected_width = np.sqrt(
             sample_gauss.width.value**2 + resolution_gauss.width.value**2
         )
@@ -95,12 +120,14 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
-    def test_components_DHO_gauss(self, x, offset_obj, expected_shift, method):
+    def test_components_DHO_gauss(
+        self, x, gaussian_component, offset_obj, expected_shift, method
+    ):
         "Test convolution of DHO sample and Gaussian resolution components without SampleModel."
         "Test with different offset types and methods."
         # WHEN
         sample_dho = DampedHarmonicOscillator(center=1.5, width=0.3, area=2)
-        resolution_gauss = Gaussian(center=0.2, width=0.4, area=3)
+        resolution_gauss = gaussian_component
 
         # THEN
         calculated_convolution = convolution(
@@ -112,6 +139,7 @@ class TestConvolution:
         )
 
         # EXPECT
+        # no simple analytical form, so compute expected result via direct convolution
         sample_values = sample_dho.evaluate(x - expected_shift)
         resolution_values = resolution_gauss.evaluate(x)
         expected_result = fftconvolve(sample_values, resolution_values, mode="same")
@@ -132,13 +160,19 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_lorentzian_lorentzian(
-        self, x, offset_obj, expected_shift, method
+        self,
+        x,
+        lorentzian_component,
+        other_lorentzian_component,
+        offset_obj,
+        expected_shift,
+        method,
     ):
         "Test convolution of Lorentzian sample and Lorentzian resolution components without SampleModel."
         "Test with different offset types and methods."
         # WHEN
-        sample_lorentzian = Lorentzian(center=0.1, width=0.3, area=2)
-        resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
+        sample_lorentzian = lorentzian_component
+        resolution_lorentzian = other_lorentzian_component
 
         # THEN
         calculated_convolution = convolution(
@@ -151,6 +185,7 @@ class TestConvolution:
         )
 
         # EXPECT
+        # Convolution of two Lorentzians is another Lorentzian with width = w1 + w2
         expected_width = (
             sample_lorentzian.width.value + resolution_lorentzian.width.value
         )
@@ -186,34 +221,56 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
-    def test_components_gauss_lorentzian(self, x, offset_obj, expected_shift, method):
-        "Test convolution of Gaussian sample and Lorentzian resolution components without SampleModel."
+    @pytest.mark.parametrize(
+        "sample_is_gauss",
+        [True, False],
+        ids=["gauss_sample__lorentz_resolution", "lorentz_sample__gauss_resolution"],
+    )
+    def test_components_gauss_lorentzian(
+        self,
+        x,
+        gaussian_component,
+        lorentzian_component,
+        offset_obj,
+        expected_shift,
+        method,
+        sample_is_gauss,
+    ):
+        "Test convolution of Gaussian and Lorentzian components without SampleModel."
         "Test with different offset types and methods."
         # WHEN
-        sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
-        resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
+        if sample_is_gauss:
+            sample = gaussian_component
+            resolution = lorentzian_component
+        else:
+            sample = lorentzian_component
+            resolution = gaussian_component
 
         # THEN
         calculated_convolution = convolution(
             x=x,
-            sample_model=sample_gauss,
-            resolution_model=resolution_lorentzian,
+            sample_model=sample,
+            resolution_model=resolution,
             offset=offset_obj,
             method=method,
             upsample_factor=5,
         )
 
         # EXPECT
-        expected_center = (
-            sample_gauss.center.value
-            + resolution_lorentzian.center.value
-            + expected_shift
+        expected_center = sample.center.value + resolution.center.value + expected_shift
+        expected_area = sample.area.value * resolution.area.value
+
+        gaussian_width = (
+            sample.width.value if sample_is_gauss else resolution.width.value
         )
-        expected_area = sample_gauss.area.value * resolution_lorentzian.area.value
+        lorentzian_width = (
+            resolution.width.value if sample_is_gauss else sample.width.value
+        )
+
         expected_result = expected_area * voigt_profile(
             x - expected_center,
-            sample_gauss.width.value,
-            resolution_lorentzian.width.value,
+            gaussian_width,
+            lorentzian_width,
         )
 
         np.testing.assert_allclose(
@@ -235,61 +292,23 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
-    def test_components_lorentzian_gauss(self, x, offset_obj, expected_shift, method):
-        "Test convolution of Lorentzian sample and Gaussian resolution components without SampleModel."
-        "Test with different offset types and methods."
-        # WHEN
-        resolution_gauss = Gaussian(center=0.1, width=0.3, area=2)
-        sample_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
-
-        # THEN
-        calculated_convolution = convolution(
-            x=x,
-            sample_model=sample_lorentzian,
-            resolution_model=resolution_gauss,
-            offset=offset_obj,
-            method=method,
-            upsample_factor=5,
-        )
-
-        # EXPECT
-        expected_center = (
-            sample_lorentzian.center.value
-            + resolution_gauss.center.value
-            + expected_shift
-        )
-        expected_area = sample_lorentzian.area.value * resolution_gauss.area.value
-        expected_result = expected_area * voigt_profile(
-            x - expected_center,
-            resolution_gauss.width.value,
-            sample_lorentzian.width.value,
-        )
-
-        np.testing.assert_allclose(
-            calculated_convolution,
-            expected_result,
-            atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
-            rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
-        )
-
     @pytest.mark.parametrize(
-        "offset_obj, expected_shift",
-        [
-            (None, 0.0),
-            (0.4, 0.4),
-            (Parameter("off", 0.4), 0.4),
-        ],
-        ids=["none", "float", "parameter"],
+        "sample_is_gauss",
+        [True, False],
+        ids=["gauss_sample__delta_resolution", "delta_sample__gauss_resolution"],
     )
-    @pytest.mark.parametrize(
-        "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
-    )
-    def test_components_delta_gauss(self, x, offset_obj, expected_shift, method):
+    def test_components_delta_gauss(
+        self, x, gaussian_component, offset_obj, expected_shift, method, sample_is_gauss
+    ):
         "Test convolution of Delta function sample and Gaussian resolution components without SampleModel."
         "Test with different offset types and methods."
         # WHEN
-        sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
-        resolution_gauss = Gaussian(center=0.2, width=0.3, area=3)
+        if sample_is_gauss:
+            sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
+            resolution_gauss = gaussian_component
+        else:
+            sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
+            resolution_gauss = gaussian_component
 
         # THEN
         calculated_convolution = convolution(
@@ -309,47 +328,6 @@ class TestConvolution:
             expected_area
             * np.exp(-0.5 * ((x - expected_center) / resolution_gauss.width.value) ** 2)
             / (np.sqrt(2 * np.pi) * resolution_gauss.width.value)
-        )
-
-        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
-
-    @pytest.mark.parametrize(
-        "offset_obj, expected_shift",
-        [
-            (None, 0.0),
-            (0.4, 0.4),
-            (Parameter("off", 0.4), 0.4),
-        ],
-        ids=["none", "float", "parameter"],
-    )
-    @pytest.mark.parametrize(
-        "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
-    )
-    def test_components_gauss_delta(self, x, offset_obj, expected_shift, method):
-        "Test convolution of Gaussian sample and Delta function resolution components without SampleModel."
-        "Test with different offset types and methods."
-        # WHEN
-        sample_gauss = Gaussian(center=0.1, width=0.2, area=2)
-        resolution_delta = DeltaFunction(name="Delta", center=0.2, area=3)
-
-        # THEN
-        calculated_convolution = convolution(
-            x=x,
-            sample_model=sample_gauss,
-            resolution_model=resolution_delta,
-            offset=offset_obj,
-            method=method,
-        )
-
-        # EXPECT
-        expected_center = (
-            sample_gauss.center.value + resolution_delta.center.value + expected_shift
-        )
-        expected_area = sample_gauss.area.value * resolution_delta.area.value
-        expected_result = (
-            expected_area
-            * np.exp(-0.5 * ((x - expected_center) / sample_gauss.width.value) ** 2)
-            / (np.sqrt(2 * np.pi) * sample_gauss.width.value)
         )
 
         np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
