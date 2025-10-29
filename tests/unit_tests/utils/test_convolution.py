@@ -304,30 +304,28 @@ class TestConvolution:
         "Test with different offset types and methods."
         # WHEN
         if sample_is_gauss:
-            sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
-            resolution_gauss = gaussian_component
+            sample = DeltaFunction(name="Delta", center=0.1, area=2)
+            resolution = gaussian_component
         else:
-            sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
-            resolution_gauss = gaussian_component
+            resolution = DeltaFunction(name="Delta", center=0.1, area=2)
+            sample = gaussian_component
 
         # THEN
         calculated_convolution = convolution(
             x=x,
-            sample_model=sample_delta,
-            resolution_model=resolution_gauss,
+            sample_model=sample,
+            resolution_model=resolution,
             offset=offset_obj,
             method=method,
         )
 
         # EXPECT
-        expected_center = (
-            sample_delta.center.value + resolution_gauss.center.value + expected_shift
-        )
-        expected_area = sample_delta.area.value * resolution_gauss.area.value
+        expected_center = sample.center.value + resolution.center.value + expected_shift
+        expected_area = sample.area.value * resolution.area.value
         expected_result = (
             expected_area
-            * np.exp(-0.5 * ((x - expected_center) / resolution_gauss.width.value) ** 2)
-            / (np.sqrt(2 * np.pi) * resolution_gauss.width.value)
+            * np.exp(-0.5 * ((x - expected_center) / resolution.width.value) ** 2)
+            / (np.sqrt(2 * np.pi) * resolution.width.value)
         )
 
         np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
