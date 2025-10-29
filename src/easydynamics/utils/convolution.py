@@ -32,6 +32,30 @@ def convolution(
     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
     Accepts SampleModel or ModelComponent for both sample and resolution.
     The analytical method silently falls back to numerical convolution if no analytical expression is found.
+
+    Args:
+        x : np.ndarray
+            1D array of x values where the convolution is evaluated.
+        sample_model : SampleModel or ModelComponent
+            The sample model to be convolved.
+        resolution_model : SampleModel or ModelComponent
+            The resolution model to convolve with.
+        offset : Parameter, float, or None, optional
+            The offset to apply to the x values before convolution.
+        method : str, optional
+            The convolution method to use: 'analytical' or 'numerical'. Default is 'analytical'.
+        upsample_factor : int, optional
+            The factor by which to upsample the input data before numerical convolution. Default is 0 (no upsampling).
+        extension_factor : float, optional
+            The factor by which to extend the input data range before numerical convolution. Default is 0.2.
+        temperature : Parameter, float, or None, optional
+            The temperature to use for detailed balance calculations. Default is None.
+        temperature_unit : str or sc.Unit, optional
+            The unit of the temperature parameter. Default is 'K'.
+        x_unit : str or sc.Unit, optional
+            The unit of the x parameter. Default is 'meV'.
+        normalize_detailed_balance : bool, optional
+            Whether to normalize the detailed balance factor. Default is True.
     """
     if not isinstance(x, np.ndarray):
         raise TypeError(
@@ -60,6 +84,17 @@ def convolution(
         if not resolution_model.components:
             raise ValueError("ResolutionModel must have at least one component.")
 
+    if offset is None:
+        off = 0.0
+    elif isinstance(offset, Parameter):
+        off = offset.value
+    elif isinstance(offset, float):
+        off = offset
+    else:
+        raise TypeError(
+            f"Expected offset to be Parameter, float, or None, got {type(offset)}"
+        )
+
     if method == "analytical":
         if isinstance(sample_model, SampleModel) and temperature is not None:
             raise ValueError(
@@ -69,7 +104,7 @@ def convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
-            offset=offset,
+            offset=off,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
         )
@@ -79,7 +114,7 @@ def convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
-            offset=offset,
+            offset=off,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -96,8 +131,8 @@ def convolution(
 
 def _numerical_convolution(
     x: np.ndarray,
-    sample_model: Union[SampleModel, ModelComponent, np.ndarray],
-    resolution_model: Union[SampleModel, ModelComponent, np.ndarray],
+    sample_model: Union[SampleModel, ModelComponent],
+    resolution_model: Union[SampleModel, ModelComponent],
     offset: Union[Parameter, np.ndarray, None] = None,
     upsample_factor: int = 5,
     extension_factor: float = 0.2,
@@ -108,25 +143,40 @@ def _numerical_convolution(
 ) -> np.ndarray:
     """
     Numerical convolution using FFT with optional upsampling + extended range.
+    Includes detailed balance correction if temperature is provided.
 
-    sample_model / resolution_model may be:
-        - SampleModel
-        - ModelComponent
-        - Callable: f(x: np.ndarray) -> np.ndarray
-    offset: Union[Parameter, np.ndarray, None]: The offset on the x axis
-    upsample_factor: int: The factor by which to upsample the input array to improve resolution
-    extension_factor: float: The factor by which to extend the range of the input array to improve accuracy at the edges
-    selected_component_name: Union[str, None]: If provided, the name of the component to be selected for evaluation
+    Args:
+        x : np.ndarray
+            1D array of x values where the convolution is evaluated.
+        sample_model : SampleModel or ModelComponent
+            The sample model to be convolved.
+        resolution_model : SampleModel or ModelComponent
+            The resolution model to convolve with.
+        offset : Parameter, float, or None, optional
+            The offset to apply to the input array.
+        upsample_factor : int, optional
+            The factor by which to upsample the input data before convolution. Default is 5.
+        extension_factor : float, optional
+            The factor by which to extend the input data range before convolution. Default is 0.2.
+        temperature : Parameter, float, or None, optional
+            The temperature to use for detailed balance correction. Default is None.
+        temperature_unit : str or sc.Unit, optional
+            The unit of the temperature parameter. Default is 'K'.
+        x_unit : str or sc.Unit, optional
+            The unit of the x parameter. Default is 'meV'.
+        normalize_detailed_balance : bool, optional
+            Whether to normalize the detailed balance factor. Default is True.
+    Returns:
+        np.ndarray
+            The convolved values evaluated at x.
     """
-
-    def is_uniform(xarr, rtol=1e-5) -> bool:
-        """Check if the array is uniformly spaced."""
-        dx = np.diff(xarr)
-        return np.allclose(dx, dx[0], rtol=rtol)
 
     # Build dense grid
     if upsample_factor == 0:
-        if not is_uniform(x):
+        # Check if the array is uniformly spaced.
+        dx = np.diff(x)
+        is_uniform = np.allclose(dx, dx[0])
+        if not is_uniform:
             raise ValueError(
                 "Input array `x` must be uniformly spaced if upsample_factor = 0."
             )
@@ -140,22 +190,11 @@ def _numerical_convolution(
         extended_max = x_max + extra
         num_points = len(x) * upsample_factor
         x_dense = np.linspace(extended_min, extended_max, num_points)
-    if offset is None:
-        off = 0.0
-    elif isinstance(offset, Parameter):
-        off = offset.value
-    elif isinstance(offset, float):
-        off = offset
-    else:
-        raise TypeError(
-            f"Expected offset to be Parameter, float, or None, got {type(offset)}"
-        )
 
-    dx = x_dense[1] - x_dense[0]
     span = x_dense.max() - x_dense.min()
     # Handle offset for even length of x in convolution
     if len(x_dense) % 2 == 0:
-        off2 = -0.5 * dx
+        off2 = -0.5 * (x_dense[1] - x_dense[0])
     else:
         off2 = 0.0
 
@@ -171,11 +210,11 @@ def _numerical_convolution(
 
     # Evaluate on dense grid
     if isinstance(sample_model, SampleModel):
-        sample_vals = sample_model.evaluate_without_delta(x_dense - off - off2)
+        sample_vals = sample_model.evaluate_without_delta(x_dense - offset - off2)
     elif isinstance(sample_model, DeltaFunction):
         sample_vals = np.zeros_like(x_dense)
     else:
-        sample_vals = sample_model.evaluate(x_dense - off - off2)
+        sample_vals = sample_model.evaluate(x_dense - offset - off2)
 
     # Detailed balance correction
     if temperature is not None:
@@ -219,22 +258,22 @@ def _numerical_convolution(
         for comp in sample_model.components:
             if isinstance(comp, DeltaFunction):
                 convolved += comp.area.value * resolution_model.evaluate(
-                    x_dense - off - comp.center.value
+                    x_dense - offset - comp.center.value
                 )
     elif isinstance(sample_model, DeltaFunction):
         convolved += sample_model.area.value * resolution_model.evaluate(
-            x_dense - off - sample_model.center.value
+            x_dense - offset - sample_model.center.value
         )
 
     if isinstance(resolution_model, SampleModel):
         for comp in resolution_model.components:
             if isinstance(comp, DeltaFunction):
                 convolved += comp.area.value * sample_model.evaluate(
-                    x_dense - off - comp.center.value
+                    x_dense - offset - comp.center.value
                 )
     elif isinstance(resolution_model, DeltaFunction):
         convolved += resolution_model.area.value * sample_model.evaluate(
-            x_dense - off - resolution_model.center.value
+            x_dense - offset - resolution_model.center.value
         )
 
     # TODO: if both resolution and sample are delta functions, we should let the user know that they are wrong.
@@ -265,17 +304,6 @@ def _analytical_convolution(
     - Handles delta functions analytically.
     """
 
-    if offset is None:
-        off = 0.0
-    elif isinstance(offset, Parameter):
-        off = offset.value
-    elif isinstance(offset, float):
-        off = offset
-    else:
-        raise TypeError(
-            f"Expected offset to be Parameter, float, or None, got {type(offset)}"
-        )
-
     # prepare list of components
     if isinstance(sample_model, SampleModel):
         sample_components = sample_model.components
@@ -295,7 +323,7 @@ def _analytical_convolution(
 
         # Go through resolution components, adding analytical contributions where possible, making a list of those that cannot be handled analytically
         for r in resolution_components:
-            handled, contrib = _try_analytic_pair(x, s, r, off)
+            handled, contrib = _try_analytic_pair(x, s, r, offset)
             if handled:
                 total += contrib
             else:

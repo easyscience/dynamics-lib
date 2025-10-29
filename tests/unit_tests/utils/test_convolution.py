@@ -4,7 +4,13 @@ from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
-from easydynamics.sample_model import DeltaFunction, Gaussian, Lorentzian, SampleModel
+from easydynamics.sample_model import (
+    DampedHarmonicOscillator,
+    DeltaFunction,
+    Gaussian,
+    Lorentzian,
+    SampleModel,
+)
 from easydynamics.utils import convolution
 from easydynamics.utils.detailed_balance import (
     _detailed_balance_factor as detailed_balance_factor,
@@ -74,6 +80,42 @@ class TestConvolution:
             * np.exp(-0.5 * ((x - expected_center) / expected_width) ** 2)
             / (np.sqrt(2 * np.pi) * expected_width)
         )
+
+        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
+
+    @pytest.mark.parametrize(
+        "offset_obj, expected_shift",
+        [
+            (None, 0.0),
+            (0.4, 0.4),
+            (Parameter("off", 0.4), 0.4),
+        ],
+        ids=["none", "float", "parameter"],
+    )
+    @pytest.mark.parametrize(
+        "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
+    )
+    def test_components_DHO_gauss(self, x, offset_obj, expected_shift, method):
+        "Test convolution of DHO sample and Gaussian resolution components without SampleModel."
+        "Test with different offset types and methods."
+        # WHEN
+        sample_dho = DampedHarmonicOscillator(center=1.5, width=0.3, area=2)
+        resolution_gauss = Gaussian(center=0.2, width=0.4, area=3)
+
+        # THEN
+        calculated_convolution = convolution(
+            x=x,
+            sample_model=sample_dho,
+            resolution_model=resolution_gauss,
+            offset=offset_obj,
+            method=method,
+        )
+
+        # EXPECT
+        sample_values = sample_dho.evaluate(x - expected_shift)
+        resolution_values = resolution_gauss.evaluate(x)
+        expected_result = fftconvolve(sample_values, resolution_values, mode="same")
+        expected_result *= x[1] - x[0]  # normalize
 
         np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
