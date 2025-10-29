@@ -1,26 +1,32 @@
 import warnings
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
+import scipp as sc
 from easyscience.variable import Parameter
 from scipy.interpolate import interp1d
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model import DeltaFunction, Gaussian, Lorentzian, SampleModel
-from easydynamics.sample_model.components import ModelComponent
+from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.detailed_balance import (
+    _detailed_balance_factor as detailed_balance_factor,
+)
 
 
 def convolution(
     x: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
-    offset: Union[Parameter, float, None] = None,
-    method: str = "analytical",
-    upsample_factor: int = 0,
-    extension_factor: float = 0.2,
-    temperature: Union[Parameter, float, None] = None,
-    normalize_detailed_balance: bool = True,
+    offset: Optional[Union[Parameter, float, None]] = None,
+    method: Optional[str] = "analytical",
+    upsample_factor: Optional[int] = 0,
+    extension_factor: Optional[float] = 0.2,
+    temperature: Optional[Union[Parameter, float, None]] = None,
+    temperature_unit: Union[str, sc.Unit] = "K",
+    x_unit: Optional[Union[str, sc.Unit]] = "meV",
+    normalize_detailed_balance: Optional[bool] = True,
 ) -> np.ndarray:
     """
     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
@@ -77,6 +83,8 @@ def convolution(
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
+            temperature_unit=temperature_unit,
+            x_unit=x_unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
 
@@ -94,6 +102,8 @@ def _numerical_convolution(
     upsample_factor: int = 5,
     extension_factor: float = 0.2,
     temperature: Union[Parameter, float, None] = None,
+    temperature_unit: Union[str, sc.Unit] = "K",
+    x_unit: Optional[Union[str, sc.Unit]] = "meV",
     normalize_detailed_balance: bool = True,
 ) -> np.ndarray:
     """
@@ -160,10 +170,45 @@ def _numerical_convolution(
     _check_width_thresholds(resolution_model, span, dx, "resolution model")
 
     # Evaluate on dense grid
-    # sample_vals = _evaluate_any(sample_model, x_dense - off - off2)
-    # resolution_vals = _evaluate_any(resolution_model, x_dense_resolution)
-    sample_vals = sample_model.evaluate(x_dense - off - off2)
-    resolution_vals = resolution_model.evaluate(x_dense_resolution)
+    if isinstance(sample_model, SampleModel):
+        sample_vals = sample_model.evaluate_without_delta(x_dense - off - off2)
+    elif isinstance(sample_model, DeltaFunction):
+        sample_vals = np.zeros_like(x_dense)
+    else:
+        sample_vals = sample_model.evaluate(x_dense - off - off2)
+
+    # Detailed balance correction
+    if temperature is not None:
+        if isinstance(temperature, Parameter):
+            T = temperature.value
+            temperature_unit = temperature.unit
+        elif isinstance(temperature, float):
+            T = temperature
+        else:
+            raise TypeError(
+                f"Expected temperature to be Parameter, float, or None, got {type(temperature)}"
+            )
+
+        if x_unit is None:
+            raise ValueError("x_unit must be provided when temperature is specified.")
+        if not isinstance(x_unit, (str, sc.Unit)):
+            raise TypeError(f"Expected x_unit to be str or sc.Unit, got {type(x_unit)}")
+
+        detailed_balance_factor_correction = detailed_balance_factor(
+            energy=x_dense,
+            temperature=T,
+            energy_unit=x_unit,
+            temperature_unit=temperature_unit,
+            divide_by_temperature=normalize_detailed_balance,
+        )
+        sample_vals *= detailed_balance_factor_correction
+
+    if isinstance(resolution_model, SampleModel):
+        resolution_vals = resolution_model.evaluate_without_delta(x_dense_resolution)
+    elif isinstance(resolution_model, DeltaFunction):
+        resolution_vals = np.zeros_like(x_dense_resolution)
+    else:
+        resolution_vals = resolution_model.evaluate(x_dense_resolution)
 
     # Convolution
     convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
@@ -171,7 +216,7 @@ def _numerical_convolution(
 
     # Add delta contributions
     if isinstance(sample_model, SampleModel):
-        for comp in sample_model.components.values():
+        for comp in sample_model.components:
             if isinstance(comp, DeltaFunction):
                 convolved += comp.area.value * resolution_model.evaluate(
                     x_dense - off - comp.center.value
@@ -182,7 +227,7 @@ def _numerical_convolution(
         )
 
     if isinstance(resolution_model, SampleModel):
-        for comp in resolution_model.components.values():
+        for comp in resolution_model.components:
             if isinstance(comp, DeltaFunction):
                 convolved += comp.area.value * sample_model.evaluate(
                     x_dense - off - comp.center.value
@@ -204,7 +249,6 @@ def _numerical_convolution(
 
 
 def _analytical_convolution(
-    self,
     x: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
@@ -271,7 +315,7 @@ def _analytical_convolution(
 
 
 def _try_analytic_pair(
-    self, x: np.ndarray, s: ModelComponent, r: ModelComponent, off: float
+    x: np.ndarray, s: ModelComponent, r: ModelComponent, off: float
 ) -> Tuple[bool, np.ndarray]:
     """
     Attempt an analytic convolution for component pair (s, r).
@@ -289,14 +333,14 @@ def _try_analytic_pair(
         width = np.sqrt(s.width.value**2 + r.width.value**2)
         area = s.area.value * r.area.value
         center = (s.center.value + r.center.value) + off
-        return True, self.gaussian_eval(x, center, width, area)
+        return True, gaussian_eval(x, center, width, area)
 
     # Lorentzian + Lorentzian --> Lorentzian
     if isinstance(s, Lorentzian) and isinstance(r, Lorentzian):
         width = s.width.value + r.width.value
         area = s.area.value * r.area.value
         center = (s.center.value + r.center.value) + off
-        return True, self.lorentzian_eval(x, center, width, area)
+        return True, lorentzian_eval(x, center, width, area)
 
     # Gaussian + Lorentzian --> Voigt
     if (isinstance(s, Gaussian) and isinstance(r, Lorentzian)) or (
@@ -308,7 +352,7 @@ def _try_analytic_pair(
             G, L = r, s
         center = (G.center.value + L.center.value) + off
         area = G.area.value * L.area.value
-        return True, self.voigt_eval(x, center, G.width.value, L.width.value, area)
+        return True, voigt_eval(x, center, G.width.value, L.width.value, area)
 
     return False, np.zeros_like(x, dtype=float)
 
@@ -351,7 +395,7 @@ def _check_width_thresholds(model, span, dx, model_type):
 
     # Handle SampleModel or ModelComponent
     if isinstance(model, SampleModel):
-        components = model.components.values()
+        components = model.components
     else:
         components = [model]  # Treat single ModelComponent as a list of one
 

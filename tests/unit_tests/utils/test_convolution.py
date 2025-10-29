@@ -1,10 +1,14 @@
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model import DeltaFunction, Gaussian, Lorentzian, SampleModel
-from easydynamics.utils import convolution as MyConvolutionFunction
+from easydynamics.utils import convolution
+from easydynamics.utils.detailed_balance import (
+    _detailed_balance_factor as detailed_balance_factor,
+)
 
 # Numerical convolutions are not very accurate
 NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE = 1e-6
@@ -42,12 +46,14 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_gauss_gauss(self, x, offset_obj, expected_shift, method):
+        "Test convolution of Gaussian sample and Gaussian resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
         resolution_gauss = Gaussian(center=0.2, width=0.4, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_gauss,
             resolution_model=resolution_gauss,
@@ -69,7 +75,7 @@ class TestConvolution:
             / (np.sqrt(2 * np.pi) * expected_width)
         )
 
-        np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
+        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
     @pytest.mark.parametrize(
         "offset_obj, expected_shift",
@@ -86,12 +92,14 @@ class TestConvolution:
     def test_components_lorentzian_lorentzian(
         self, x, offset_obj, expected_shift, method
     ):
+        "Test convolution of Lorentzian sample and Lorentzian resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         sample_lorentzian = Lorentzian(center=0.1, width=0.3, area=2)
         resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_lorentzian,
             resolution_model=resolution_lorentzian,
@@ -118,7 +126,7 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_result,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
@@ -137,12 +145,14 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_gauss_lorentzian(self, x, offset_obj, expected_shift, method):
+        "Test convolution of Gaussian sample and Lorentzian resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         sample_gauss = Gaussian(center=0.1, width=0.3, area=2)
         resolution_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_gauss,
             resolution_model=resolution_lorentzian,
@@ -165,7 +175,7 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_result,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
@@ -184,12 +194,14 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_lorentzian_gauss(self, x, offset_obj, expected_shift, method):
+        "Test convolution of Lorentzian sample and Gaussian resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         resolution_gauss = Gaussian(center=0.1, width=0.3, area=2)
         sample_lorentzian = Lorentzian(center=0.2, width=0.4, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_lorentzian,
             resolution_model=resolution_gauss,
@@ -212,7 +224,7 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_result,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
@@ -231,12 +243,14 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_delta_gauss(self, x, offset_obj, expected_shift, method):
+        "Test convolution of Delta function sample and Gaussian resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         sample_delta = DeltaFunction(name="Delta", center=0.1, area=2)
         resolution_gauss = Gaussian(center=0.2, width=0.3, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_delta,
             resolution_model=resolution_gauss,
@@ -255,7 +269,7 @@ class TestConvolution:
             / (np.sqrt(2 * np.pi) * resolution_gauss.width.value)
         )
 
-        np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
+        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
     @pytest.mark.parametrize(
         "offset_obj, expected_shift",
@@ -270,12 +284,14 @@ class TestConvolution:
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_components_gauss_delta(self, x, offset_obj, expected_shift, method):
+        "Test convolution of Gaussian sample and Delta function resolution components without SampleModel."
+        "Test with different offset types and methods."
         # WHEN
         sample_gauss = Gaussian(center=0.1, width=0.2, area=2)
         resolution_delta = DeltaFunction(name="Delta", center=0.2, area=3)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_gauss,
             resolution_model=resolution_delta,
@@ -294,7 +310,7 @@ class TestConvolution:
             / (np.sqrt(2 * np.pi) * sample_gauss.width.value)
         )
 
-        np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
+        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
     # Test convolution of SampleModel
     @pytest.mark.parametrize(
@@ -312,6 +328,9 @@ class TestConvolution:
     def test_model_gauss_gauss_resolution_gauss(
         self, x, offset_obj, expected_shift, method
     ):
+        "Test convolution of Gaussian sample components in SampleModel and Gaussian resolution components in SampleModel."
+        "Test with different offset types and methods."
+
         # WHEN
         sample_gauss1 = Gaussian(center=0.1, width=0.3, area=2, name="SampleGauss1")
         sample_gauss2 = Gaussian(center=0.2, width=0.4, area=3, name="SampleGauss2")
@@ -325,7 +344,7 @@ class TestConvolution:
         resolution.add_component(resolution_gauss)
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample,
             resolution_model=resolution,
@@ -354,12 +373,13 @@ class TestConvolution:
         ) / (np.sqrt(2 * np.pi) * expected_width1) + expected_area2 * np.exp(
             -0.5 * ((x - expected_center2) / expected_width2) ** 2
         ) / (np.sqrt(2 * np.pi) * expected_width2)
-        np.testing.assert_allclose(convolution, expected_result, atol=1e-10)
+        np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
     @pytest.mark.parametrize(
         "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
     )
     def test_model_lorentzian_delta_resolution_gauss(self, x, method):
+        "Test convolution of Lorentzian and Delta function sample components in SampleModel and Gaussian resolution components in SampleModel."
         # WHEN
         sample_lorentzian = Lorentzian(
             center=0.1, width=0.3, area=2, name="SampleLorentzian"
@@ -376,7 +396,7 @@ class TestConvolution:
 
         # THEN
         x = np.linspace(-10, 10, 20001)
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample,
             resolution_model=resolution,
@@ -395,13 +415,50 @@ class TestConvolution:
         )
         expected_result = expected_voigt + expected_gauss
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_result,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
         )
 
     # Test numerical convolution
+
+    def test_numerical_convolve_with_temperature(self, x):
+        "Test numerical convolution with detailed balance correction."
+        # WHEN
+        sample_model = SampleModel(name="SampleModel")
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
+
+        resolution_model = SampleModel(name="ResolutionModel")
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
+
+        temperature = 300.0  # Kelvin
+
+        # THEN
+        calculated_convolution = convolution(
+            x=x,
+            sample_model=sample_model,
+            resolution_model=resolution_model,
+            method="numerical",
+            upsample_factor=5,
+            temperature=temperature,
+        )
+
+        sample_with_db = sample_model.evaluate(x) * detailed_balance_factor(
+            energy=x, temperature=temperature
+        )
+        resolution = resolution_model.evaluate(x)
+
+        expected_convolution = fftconvolve(sample_with_db, resolution, mode="same")
+        expected_convolution *= [x[1] - x[0]]  # normalize
+
+        np.testing.assert_allclose(
+            calculated_convolution,
+            expected_convolution,
+            atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
+            rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
+        )
+
     @pytest.mark.parametrize(
         "x",
         [
@@ -411,6 +468,7 @@ class TestConvolution:
         ids=["odd_length", "even_length"],
     )
     def test_numerical_convolve_x_length_even_and_odd(self, x):
+        "Test numerical convolution with both even and odd length x arrays. With even length the FFT shifts the signal by half a bin."
         # WHEN
         sample_model = SampleModel(name="SampleModel")
         sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
@@ -419,7 +477,7 @@ class TestConvolution:
         resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -428,40 +486,7 @@ class TestConvolution:
         )
 
         # EXPECT
-        expected_convolution = MyConvolutionFunction(
-            x=x,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
-            method="analytical",
-            upsample_factor=0,
-        )
-
-        np.testing.assert_allclose(convolution, expected_convolution, atol=1e-10)
-
-    @pytest.mark.parametrize(
-        "upsample_factor",
-        [0, 2, 5, 10],
-        ids=["no_upsample", "upsample_2", "upsample_5", "upsample_10"],
-    )
-    def test_numerical_convolve_upsample_factor(self, x, upsample_factor):
-        # WHEN
-        sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
-
-        resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
-
-        # THEN
-        convolution = MyConvolutionFunction(
-            x=x,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
-            method="numerical",
-            upsample_factor=upsample_factor,
-        )
-
-        # EXPECT
-        expected_convolution = MyConvolutionFunction(
+        expected_convolution = convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -470,7 +495,43 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution, expected_convolution, atol=1e-10
+        )
+
+    @pytest.mark.parametrize(
+        "upsample_factor",
+        [0, 2, 5, 10],
+        ids=["no_upsample", "upsample_2", "upsample_5", "upsample_10"],
+    )
+    def test_numerical_convolve_upsample_factor(self, x, upsample_factor):
+        "Test numerical convolution with different upsample factors."
+        # WHEN
+        sample_model = SampleModel(name="SampleModel")
+        sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
+
+        resolution_model = SampleModel(name="ResolutionModel")
+        resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
+
+        # THEN
+        calculated_convolution = convolution(
+            x=x,
+            sample_model=sample_model,
+            resolution_model=resolution_model,
+            method="numerical",
+            upsample_factor=upsample_factor,
+        )
+
+        # EXPECT
+        expected_convolution = convolution(
+            x=x,
+            sample_model=sample_model,
+            resolution_model=resolution_model,
+            method="analytical",
+            upsample_factor=0,
+        )
+
+        np.testing.assert_allclose(
+            calculated_convolution,
             expected_convolution,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
@@ -485,6 +546,7 @@ class TestConvolution:
         "upsample_factor", [0, 2, 5], ids=["no_upsample", "upsample_2", "upsample_5"]
     )
     def test_numerical_convolve_x_not_symmetric(self, x, upsample_factor):
+        "Test numerical convolution with asymmetric and only positive x arrays."
         # WHEN
         sample_model = SampleModel(name="SampleModel")
         sample_model.add_component(Gaussian(center=9, width=0.3, area=2))
@@ -493,7 +555,7 @@ class TestConvolution:
         resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
 
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -502,7 +564,7 @@ class TestConvolution:
         )
 
         # EXPECT
-        expected_convolution = MyConvolutionFunction(
+        expected_convolution = convolution(
             x=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -511,13 +573,14 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_convolution,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
         )
 
     def test_numerical_convolve_x_not_uniform(self):
+        "Test numerical convolution with non-uniform x arrays."
         # WHEN
         sample_model = SampleModel(name="SampleModel")
         sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
@@ -528,7 +591,7 @@ class TestConvolution:
         x_2 = np.linspace(0.001, 2, 2000)
         x_non_uniform = np.concatenate([x_1, x_2])
         # THEN
-        convolution = MyConvolutionFunction(
+        calculated_convolution = convolution(
             x=x_non_uniform,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -537,7 +600,7 @@ class TestConvolution:
         )
 
         # EXPECT
-        expected_convolution = MyConvolutionFunction(
+        expected_convolution = convolution(
             x=x_non_uniform,
             sample_model=sample_model,
             resolution_model=resolution_model,
@@ -545,7 +608,7 @@ class TestConvolution:
         )
 
         np.testing.assert_allclose(
-            convolution,
+            calculated_convolution,
             expected_convolution,
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
             rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
@@ -557,7 +620,6 @@ class TestConvolution:
         # WHEN
         sample_model = SampleModel(name="SampleModel")
         sample_model.add_component(Gaussian(center=0.1, width=0.3, area=2))
-        sample_model.temperature = 300
 
         resolution_model = SampleModel(name="ResolutionModel")
         resolution_model.add_component(Gaussian(center=0.2, width=0.4, area=3))
@@ -567,11 +629,12 @@ class TestConvolution:
             ValueError,
             match="Analytical convolution is not supported with detailed balance.",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="analytical",
+                temperature=300,
             )
 
     def test_convolution_only_accepts_analytical_and_numerical_methods(self, x):
@@ -587,7 +650,7 @@ class TestConvolution:
             ValueError,
             match="Unknown convolution method: unknown_method. Choose from 'analytical', or 'numerical'.",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
@@ -604,21 +667,21 @@ class TestConvolution:
 
         # THEN
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
-            MyConvolutionFunction(
+            convolution(
                 x=np.array([[1, 2], [3, 4]]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
-            MyConvolutionFunction(
+            convolution(
                 x=np.array([1, 2, np.nan]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
-            MyConvolutionFunction(
+            convolution(
                 x=np.array([1, 2, np.inf]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
@@ -637,7 +700,7 @@ class TestConvolution:
             ValueError,
             match="Input array `x` must be uniformly spaced if upsample_factor = 0.",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
@@ -655,7 +718,7 @@ class TestConvolution:
         with pytest.raises(
             ValueError, match="SampleModel must have at least one component."
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=np.array([0, 1, 2]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
@@ -671,7 +734,7 @@ class TestConvolution:
         with pytest.raises(
             ValueError, match="ResolutionModel must have at least one component."
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=np.array([0, 1, 2]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
@@ -695,7 +758,7 @@ class TestConvolution:
             UserWarning,
             match=r"The width of the sample model component 'SampleGauss' \(1.9\) is large",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample,
                 resolution_model=resolution,
@@ -723,7 +786,7 @@ class TestConvolution:
             UserWarning,
             match=r"The width of the resolution model component 'ResolutionGauss' \(1.9\) is large",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample,
                 resolution_model=resolution,
@@ -749,7 +812,7 @@ class TestConvolution:
             UserWarning,
             match=r"The width of the sample model component 'SampleGauss' \(0.001\) is small",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample,
                 resolution_model=resolution,
@@ -777,7 +840,7 @@ class TestConvolution:
             UserWarning,
             match=r"The width of the resolution model component 'ResolutionGauss' \(0.001\) is small",
         ):
-            MyConvolutionFunction(
+            convolution(
                 x=x,
                 sample_model=sample,
                 resolution_model=resolution,
