@@ -96,7 +96,7 @@ def convolution(
         )
 
     if method == "analytical":
-        if isinstance(sample_model, SampleModel) and temperature is not None:
+        if temperature is not None:
             raise ValueError(
                 "Analytical convolution is not supported with detailed balance. Set method to 'numerical' instead or set the temperature to None."
             )
@@ -133,13 +133,13 @@ def _numerical_convolution(
     x: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
-    offset: Union[Parameter, np.ndarray, None] = None,
-    upsample_factor: int = 5,
-    extension_factor: float = 0.2,
-    temperature: Union[Parameter, float, None] = None,
-    temperature_unit: Union[str, sc.Unit] = "K",
+    offset: Optional[Union[Parameter, np.ndarray]] = None,
+    upsample_factor: Optional[int] = 5,
+    extension_factor: Optional[float] = 0.2,
+    temperature: Optional[Union[Parameter, float]] = None,
+    temperature_unit: Optional[Union[str, sc.Unit]] = "K",
     x_unit: Optional[Union[str, sc.Unit]] = "meV",
-    normalize_detailed_balance: bool = True,
+    normalize_detailed_balance: Optional[bool] = True,
 ) -> np.ndarray:
     """
     Numerical convolution using FFT with optional upsampling + extended range.
@@ -174,8 +174,8 @@ def _numerical_convolution(
     # Build dense grid
     if upsample_factor == 0:
         # Check if the array is uniformly spaced.
-        dx = np.diff(x)
-        is_uniform = np.allclose(dx, dx[0])
+        x_diff = np.diff(x)
+        is_uniform = np.allclose(x_diff, x_diff[0])
         if not is_uniform:
             raise ValueError(
                 "Input array `x` must be uniformly spaced if upsample_factor = 0."
@@ -191,10 +191,11 @@ def _numerical_convolution(
         num_points = len(x) * upsample_factor
         x_dense = np.linspace(extended_min, extended_max, num_points)
 
+    dx = x_dense[1] - x_dense[0]
     span = x_dense.max() - x_dense.min()
     # Handle offset for even length of x in convolution
     if len(x_dense) % 2 == 0:
-        off2 = -0.5 * (x_dense[1] - x_dense[0])
+        off2 = -0.5 * dx
     else:
         off2 = 0.0
 
