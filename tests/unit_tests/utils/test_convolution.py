@@ -588,7 +588,6 @@ class TestConvolution:
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
-            upsample_factor=0,
         )
 
         np.testing.assert_allclose(

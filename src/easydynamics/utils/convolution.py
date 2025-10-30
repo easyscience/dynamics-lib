@@ -1,10 +1,9 @@
 import warnings
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
-from scipy.interpolate import interp1d
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
@@ -13,6 +12,8 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.detailed_balance import (
     _detailed_balance_factor as detailed_balance_factor,
 )
+
+Numerical = Union[float, int]
 
 
 def convolution(
@@ -32,6 +33,7 @@ def convolution(
     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
     Accepts SampleModel or ModelComponent for both sample and resolution.
     The analytical method silently falls back to numerical convolution if no analytical expression is found.
+    Detailed balancing is included if temperature is provided. This requires numerical convolution.
 
     Args:
         x : np.ndarray
@@ -90,11 +92,11 @@ def convolution(
         off = 0.0
     elif isinstance(offset, Parameter):
         off = offset.value
-    elif isinstance(offset, float):
-        off = offset
+    elif isinstance(offset, Numerical):
+        off = float(offset)
     else:
         raise TypeError(
-            f"Expected offset to be Parameter, float, or None, got {type(offset)}"
+            f"Expected offset to be Parameter, number, or None, got {type(offset)}"
         )
 
     if method == "analytical":
@@ -110,8 +112,7 @@ def convolution(
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
         )
-
-    if method == "numerical":
+    elif method == "numerical":
         return _numerical_convolution(
             x=x,
             sample_model=sample_model,
@@ -124,8 +125,7 @@ def convolution(
             x_unit=x_unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
-
-    if method not in ["analytical", "numerical"]:
+    else:
         raise ValueError(
             f"Unknown convolution method: {method}. Choose from 'analytical', or 'numerical'."
         )
@@ -197,9 +197,9 @@ def _numerical_convolution(
     span = x_dense.max() - x_dense.min()
     # Handle offset for even length of x in convolution
     if len(x_dense) % 2 == 0:
-        off2 = -0.5 * dx
+        x_even_length_offset = -0.5 * dx
     else:
-        off2 = 0.0
+        x_even_length_offset = 0.0
 
     # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
     if not np.isclose(x_dense.mean(), 0.0):
@@ -211,13 +211,15 @@ def _numerical_convolution(
     _check_width_thresholds(sample_model, span, dx, "sample model")
     _check_width_thresholds(resolution_model, span, dx, "resolution model")
 
-    # Evaluate on dense grid
+    # Evaluate on dense grid and interpolate at the end
     if isinstance(sample_model, SampleModel):
-        sample_vals = sample_model.evaluate_without_delta(x_dense - offset - off2)
+        sample_vals = sample_model.evaluate_without_delta(
+            x_dense - offset - x_even_length_offset
+        )
     elif isinstance(sample_model, DeltaFunction):
         sample_vals = np.zeros_like(x_dense)
     else:
-        sample_vals = sample_model.evaluate(x_dense - offset - off2)
+        sample_vals = sample_model.evaluate(x_dense - offset - x_even_length_offset)
 
     # Detailed balance correction
     if temperature is not None:
@@ -245,6 +247,7 @@ def _numerical_convolution(
         )
         sample_vals *= detailed_balance_factor_correction
 
+    # Delta functions are handled separately for accuracy
     if isinstance(resolution_model, SampleModel):
         resolution_vals = resolution_model.evaluate_without_delta(x_dense_resolution)
     elif isinstance(resolution_model, DeltaFunction):
@@ -256,38 +259,35 @@ def _numerical_convolution(
     convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
     convolved *= dx  # normalize
 
-    # Add delta contributions
-    if isinstance(sample_model, SampleModel):
-        for comp in sample_model.components:
-            if isinstance(comp, DeltaFunction):
-                convolved += comp.area.value * resolution_model.evaluate(
-                    x_dense - offset - comp.center.value
-                )
-    elif isinstance(sample_model, DeltaFunction):
-        convolved += sample_model.area.value * resolution_model.evaluate(
-            x_dense - offset - sample_model.center.value
-        )
-
-    if isinstance(resolution_model, SampleModel):
-        for comp in resolution_model.components:
-            if isinstance(comp, DeltaFunction):
-                convolved += comp.area.value * sample_model.evaluate(
-                    x_dense - offset - comp.center.value
-                )
-    elif isinstance(resolution_model, DeltaFunction):
-        convolved += resolution_model.area.value * sample_model.evaluate(
-            x_dense - offset - resolution_model.center.value
-        )
-
-    # TODO: if both resolution and sample are delta functions, we should let the user know that they are wrong.
-
     if upsample_factor > 0:
         # interpolate back to original x grid
-        return interp1d(
-            x_dense, convolved, kind="linear", bounds_error=False, fill_value=0.0
-        )(x)
-    else:
-        return convolved
+        convolved = np.interp(x, x_dense, convolved, left=0.0, right=0.0)
+
+    # Add delta contributions on original grid
+    # collect deltas
+    sample_deltas = _delta_components(sample_model)
+    resolution_deltas = _delta_components(resolution_model)
+
+    # error if both contain delta(s)
+    if sample_deltas and resolution_deltas:
+        raise ValueError(
+            "Both sample_model and resolution_model contain delta functions. "
+            "Their convolution is not defined."
+        )
+
+    # if sample has deltas, convolve each delta with the resolution_model
+    for delta in sample_deltas:
+        convolved += delta.area.value * resolution_model.evaluate(
+            x - offset - delta.center.value
+        )
+
+    # if resolution has deltas, convolve each delta with the sample_model
+    for delta in resolution_deltas:
+        convolved += delta.area.value * sample_model.evaluate(
+            x - offset - delta.center.value
+        )
+
+    return convolved
 
 
 def _analytical_convolution(
@@ -346,41 +346,67 @@ def _analytical_convolution(
 
 
 def _try_analytic_pair(
-    x: np.ndarray, s: ModelComponent, r: ModelComponent, off: float
+    x: np.ndarray,
+    sample_component: ModelComponent,
+    resolution_component: ModelComponent,
+    off: float,
 ) -> Tuple[bool, np.ndarray]:
     """
-    Attempt an analytic convolution for component pair (s, r).
+    Attempt an analytic convolution for component pair (sample_component, resolution_component).
     Returns (True, contribution) if handled, else (False, zeros).
     """
     # Delta functions
-    if isinstance(s, DeltaFunction):
-        return True, s.area.value * r.evaluate(x - s.center.value - off)
+    if isinstance(sample_component, DeltaFunction) and isinstance(
+        resolution_component, DeltaFunction
+    ):
+        raise ValueError("Convolution of two delta functions is not defined.")
 
-    if isinstance(r, DeltaFunction):
-        return True, r.area.value * s.evaluate(x - r.center.value - off)
+    if isinstance(sample_component, DeltaFunction):
+        return True, sample_component.area.value * resolution_component.evaluate(
+            x - sample_component.center.value - off
+        )
+
+    if isinstance(resolution_component, DeltaFunction):
+        return True, resolution_component.area.value * sample_component.evaluate(
+            x - resolution_component.center.value - off
+        )
 
     # Gaussian + Gaussian --> Gaussian
-    if isinstance(s, Gaussian) and isinstance(r, Gaussian):
-        width = np.sqrt(s.width.value**2 + r.width.value**2)
-        area = s.area.value * r.area.value
-        center = (s.center.value + r.center.value) + off
+    if isinstance(sample_component, Gaussian) and isinstance(
+        resolution_component, Gaussian
+    ):
+        width = np.sqrt(
+            sample_component.width.value**2 + resolution_component.width.value**2
+        )
+        area = sample_component.area.value * resolution_component.area.value
+        center = (
+            sample_component.center.value + resolution_component.center.value
+        ) + off
         return True, gaussian_eval(x, center, width, area)
 
     # Lorentzian + Lorentzian --> Lorentzian
-    if isinstance(s, Lorentzian) and isinstance(r, Lorentzian):
-        width = s.width.value + r.width.value
-        area = s.area.value * r.area.value
-        center = (s.center.value + r.center.value) + off
+    if isinstance(sample_component, Lorentzian) and isinstance(
+        resolution_component, Lorentzian
+    ):
+        width = sample_component.width.value + resolution_component.width.value
+        area = sample_component.area.value * resolution_component.area.value
+        center = (
+            sample_component.center.value + resolution_component.center.value
+        ) + off
         return True, lorentzian_eval(x, center, width, area)
 
     # Gaussian + Lorentzian --> Voigt
-    if (isinstance(s, Gaussian) and isinstance(r, Lorentzian)) or (
-        isinstance(s, Lorentzian) and isinstance(r, Gaussian)
+    if (
+        isinstance(sample_component, Gaussian)
+        and isinstance(resolution_component, Lorentzian)
+    ) or (
+        isinstance(sample_component, Lorentzian)
+        and isinstance(resolution_component, Gaussian)
     ):
-        if isinstance(s, Gaussian):
-            G, L = s, r
+        if isinstance(sample_component, Gaussian):
+            G, L = sample_component, resolution_component
         else:
-            G, L = r, s
+            G, L = resolution_component, sample_component
         center = (G.center.value + L.center.value) + off
         area = G.area.value * L.area.value
         return True, voigt_eval(x, center, G.width.value, L.width.value, area)
@@ -444,3 +470,12 @@ def _check_width_thresholds(model, span, dx, model_type):
                     f"array ({dx}). This may lead to inaccuracies in the convolution.",
                     UserWarning,
                 )
+
+
+def _delta_components(model: Union[SampleModel, ModelComponent]) -> List[DeltaFunction]:
+    """Return a list of DeltaFunction instances contained in `model`."""
+    if isinstance(model, DeltaFunction):
+        return [model]
+    if isinstance(model, SampleModel):
+        return [c for c in model.components if isinstance(c, DeltaFunction)]
+    return []
