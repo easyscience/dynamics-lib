@@ -652,7 +652,7 @@ class TestConvolution:
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="analytical",
-                temperature=300,
+                temperature=300.0,
             )
 
     def test_convolution_only_accepts_analytical_and_numerical_methods(self, x):

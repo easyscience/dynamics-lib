@@ -101,6 +101,7 @@ def convolution(
         )
 
     # Handle temperature
+    T = None
     if temperature is not None:
         if isinstance(temperature, Parameter):
             T = temperature.value
@@ -550,8 +551,12 @@ def _check_width_thresholds(
             If the component widths are not appropriate for the data span or bin spacing.
 
     """
-    LARGE_WIDTH_THRESHOLD = 0.1  # Threshold for large widths compared to span
-    SMALL_WIDTH_THRESHOLD = 0.5  # Threshold for small widths compared to bin spacing
+    LARGE_WIDTH_THRESHOLD = (
+        0.1  # Threshold for large widths compared to span - warn if width > 10% of span
+    )
+    SMALL_WIDTH_THRESHOLD = (
+        1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
+    )
 
     # Handle SampleModel or ModelComponent
     if isinstance(model, SampleModel):
