@@ -547,6 +547,8 @@ def _check_width_thresholds(
             If the component widths are not appropriate for the data span or bin spacing.
 
     """
+
+    # The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
     LARGE_WIDTH_THRESHOLD = (
         0.1  # Threshold for large widths compared to span - warn if width > 10% of span
     )
