@@ -154,7 +154,7 @@ def _numerical_convolution(
     x: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
-    offset: Optional[Union[Parameter, np.ndarray]] = None,
+    offset: Optional[float] = 0.0,
     upsample_factor: Optional[int] = 5,
     extension_factor: Optional[float] = 0.2,
     temperature: Optional[Union[Parameter, float]] = None,
@@ -298,7 +298,7 @@ def _analytical_convolution(
     x: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
-    offset: Union[Parameter, float, None] = None,
+    offset: float = 0.0,
     upsample_factor: int = 5,
     extension_factor: float = 0.2,
 ) -> np.ndarray:
@@ -316,7 +316,7 @@ def _analytical_convolution(
             The sample model to be convolved.
         resolution_model : SampleModel or ModelComponent
             The resolution model to convolve with.
-        offset : Parameter, float, or None, optional
+        offset : float
             The offset to apply to the convolution.
         upsample_factor : int, optional
             The factor by which to upsample the input data before numerical convolution. Improves accuracy at the cost of speed. Default is 5
@@ -450,7 +450,6 @@ def _try_analytic_pair(
     return False, np.zeros_like(x, dtype=float)
 
 
-@staticmethod
 def _gaussian_eval(
     x: np.ndarray, center: float, width: float, area: float
 ) -> np.ndarray:
@@ -479,7 +478,6 @@ def _gaussian_eval(
     )
 
 
-@staticmethod
 def _lorentzian_eval(
     x: np.ndarray, center: float, width: float, area: float
 ) -> np.ndarray:
@@ -503,7 +501,6 @@ def _lorentzian_eval(
     return area * width / np.pi / ((x - center) ** 2 + width**2)
 
 
-@staticmethod
 def _voigt_eval(
     x: np.ndarray, center: float, g_width: float, l_width: float, area: float
 ) -> np.ndarray:
@@ -528,7 +525,6 @@ def _voigt_eval(
     return area * voigt_profile(x - center, g_width, l_width)
 
 
-@staticmethod
 def _check_width_thresholds(
     model: Union[SampleModel, ModelComponent], span: float, dx: float, model_type: str
 ) -> None:
