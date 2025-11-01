@@ -28,7 +28,7 @@ class TestSampleModel:
 
         # EXPECT
         assert sample_model.name == "InitModel"
-        assert len(sample_model.components) == 0
+        assert list(sample_model) == []
 
     def test_initialization_with_components(self):
         # WHEN THEN
@@ -44,7 +44,7 @@ class TestSampleModel:
 
         # EXPECT
         assert sample_model.name == "InitModelWithComponents"
-        assert len(sample_model.components) == 2
+        assert len(list(sample_model)) == 2
         assert sample_model["InitGaussian"] is component1
         assert sample_model["InitLorentzian"] is component2
 
@@ -72,7 +72,7 @@ class TestSampleModel:
     def test_add_invalid_component_raises(self, sample_model):
         # WHEN THEN EXPECT
         with pytest.raises(
-            TypeError, match="component must be an instance of ModelComponent."
+            TypeError, match="Component must be an instance of ModelComponent."
         ):
             sample_model.add_component("NotAComponent")
 
@@ -80,7 +80,7 @@ class TestSampleModel:
         # WHEN THEN
         sample_model.remove_component("TestGaussian1")
         # EXPECT
-        assert "TestGaussian1" not in sample_model.components
+        assert "TestGaussian1" not in list(sample_model)
 
     def test_remove_nonexistent_component_raises(self, sample_model):
         # WHEN THEN EXPECT
@@ -111,7 +111,7 @@ class TestSampleModel:
         # WHEN THEN
         sample_model.clear_components()
         # EXPECT
-        assert len(sample_model.components) == 0
+        assert len(list(sample_model)) == 0
 
     def test_convert_unit(self, sample_model):
         # WHEN THEN
