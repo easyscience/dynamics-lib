@@ -120,6 +120,38 @@ class TestSampleModel:
         for component in list(sample_model):
             assert component.unit == "eV"
 
+    def test_convert_unit_failure_rolls_back(self, sample_model):
+        # WHEN THEN
+        # Introduce a faulty component that will fail conversion
+        class FaultyComponent(Gaussian):
+            def convert_unit(self, unit: str) -> None:
+                raise RuntimeError("Conversion failed.")
+
+        faulty_component = FaultyComponent(
+            name="FaultyComponent", area=1.0, center=0.0, width=1.0, unit="meV"
+        )
+        sample_model.add_component(faulty_component)
+
+        original_units = {
+            component.name: component.unit for component in list(sample_model)
+        }
+
+        # EXPECT
+        with pytest.raises(RuntimeError, match="Conversion failed."):
+            sample_model.convert_unit("eV")
+
+        # Check that all components have their original units
+        for component in list(sample_model):
+            assert component.unit == original_units[component.name]
+
+    def test_set_unit(self, sample_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            AttributeError,
+            match="Unit is read-only. Use convert_unit to change the unit",
+        ):
+            sample_model.unit = "eV"
+
     def test_evaluate(self, sample_model):
         # WHEN
         x = np.linspace(-5, 5, 100)
@@ -289,6 +321,16 @@ class TestSampleModel:
         # THEN
         for param in sample_model.get_parameters():
             assert param.fixed is False
+
+    def test_contains(self, sample_model):
+        # WHEN THEN
+        assert "TestGaussian1" in sample_model
+        assert "NonExistentComponent" not in sample_model
+        assert sample_model["TestLorentzian1"] in sample_model
+        fake_component = Gaussian(
+            name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
+        )
+        assert fake_component not in sample_model
 
     def test_repr_contains_name_and_components(self, sample_model):
         # WHEN THEN

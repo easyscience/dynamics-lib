@@ -168,18 +168,18 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
 
         old_unit = self._unit
 
-        for component in list(self):
-            try:
+        try:
+            for component in list(self):
                 component.convert_unit(unit)
-            except Exception as e:
-                # Attempt to rollback on failure
-                try:
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                for component in list(self):
                     component.convert_unit(old_unit)
-                except Exception:
-                    pass  # Best effort rollback
-                raise e
-
-        self._unit = unit
+            except Exception:
+                pass  # Best effort rollback
+            raise e
 
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
