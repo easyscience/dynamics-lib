@@ -51,7 +51,7 @@ class TestConvolution:
         return Lorentzian(center=0.2, width=0.4, area=3.0)
 
     @pytest.fixture
-    def x(self):
+    def energy(self):
         return np.linspace(-50, 50, 50001)
 
     # Test convolution of components
@@ -69,7 +69,7 @@ class TestConvolution:
     )
     def test_components_gauss_gauss(
         self,
-        x,
+        energy,
         gaussian_component,
         other_gaussian_component,
         offset_obj,
@@ -84,7 +84,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_gauss,
             resolution_model=resolution_gauss,
             offset=offset_obj,
@@ -102,7 +102,7 @@ class TestConvolution:
         )
         expected_result = (
             expected_area
-            * np.exp(-0.5 * ((x - expected_center) / expected_width) ** 2)
+            * np.exp(-0.5 * ((energy - expected_center) / expected_width) ** 2)
             / (np.sqrt(2 * np.pi) * expected_width)
         )
 
@@ -117,11 +117,9 @@ class TestConvolution:
         ],
         ids=["none", "float", "parameter"],
     )
-    @pytest.mark.parametrize(
-        "method", ["analytical", "numerical"], ids=["analytical", "numerical"]
-    )
+    @pytest.mark.parametrize("method", ["auto", "numerical"], ids=["auto", "numerical"])
     def test_components_DHO_gauss(
-        self, x, gaussian_component, offset_obj, expected_shift, method
+        self, energy, gaussian_component, offset_obj, expected_shift, method
     ):
         "Test convolution of DHO sample and Gaussian resolution components without SampleModel."
         "Test with different offset types and methods."
@@ -131,7 +129,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_dho,
             resolution_model=resolution_gauss,
             offset=offset_obj,
@@ -140,10 +138,10 @@ class TestConvolution:
 
         # EXPECT
         # no simple analytical form, so compute expected result via direct convolution
-        sample_values = sample_dho.evaluate(x - expected_shift)
-        resolution_values = resolution_gauss.evaluate(x)
+        sample_values = sample_dho.evaluate(energy - expected_shift)
+        resolution_values = resolution_gauss.evaluate(energy)
         expected_result = fftconvolve(sample_values, resolution_values, mode="same")
-        expected_result *= x[1] - x[0]  # normalize
+        expected_result *= energy[1] - energy[0]  # normalize
 
         np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
@@ -161,7 +159,7 @@ class TestConvolution:
     )
     def test_components_lorentzian_lorentzian(
         self,
-        x,
+        energy,
         lorentzian_component,
         other_lorentzian_component,
         offset_obj,
@@ -176,7 +174,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_lorentzian,
             resolution_model=resolution_lorentzian,
             offset=offset_obj,
@@ -199,7 +197,7 @@ class TestConvolution:
             expected_area
             * expected_width
             / np.pi
-            / ((x - expected_center) ** 2 + expected_width**2)
+            / ((energy - expected_center) ** 2 + expected_width**2)
         )
 
         np.testing.assert_allclose(
@@ -228,7 +226,7 @@ class TestConvolution:
     )
     def test_components_gauss_lorentzian(
         self,
-        x,
+        energy,
         gaussian_component,
         lorentzian_component,
         offset_obj,
@@ -248,7 +246,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample,
             resolution_model=resolution,
             offset=offset_obj,
@@ -268,7 +266,7 @@ class TestConvolution:
         )
 
         expected_result = expected_area * voigt_profile(
-            x - expected_center,
+            energy - expected_center,
             gaussian_width,
             lorentzian_width,
         )
@@ -298,7 +296,13 @@ class TestConvolution:
         ids=["gauss_sample__delta_resolution", "delta_sample__gauss_resolution"],
     )
     def test_components_delta_gauss(
-        self, x, gaussian_component, offset_obj, expected_shift, method, sample_is_gauss
+        self,
+        energy,
+        gaussian_component,
+        offset_obj,
+        expected_shift,
+        method,
+        sample_is_gauss,
     ):
         "Test convolution of Delta function sample and Gaussian resolution components without SampleModel."
         "Test with different offset types and methods."
@@ -312,7 +316,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample,
             resolution_model=resolution,
             offset=offset_obj,
@@ -325,7 +329,7 @@ class TestConvolution:
         width = sample.width.value if sample_is_gauss else resolution.width.value
         expected_result = (
             expected_area
-            * np.exp(-0.5 * ((x - expected_center) / width) ** 2)
+            * np.exp(-0.5 * ((energy - expected_center) / width) ** 2)
             / (np.sqrt(2 * np.pi) * width)
         )
 
@@ -346,7 +350,7 @@ class TestConvolution:
     )
     def test_model_gauss_gauss_resolution_gauss(
         self,
-        x,
+        energy,
         sample_model,
         resolution_model,
         offset_obj,
@@ -362,7 +366,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             offset=offset_obj,
@@ -388,9 +392,9 @@ class TestConvolution:
         )
 
         expected_result = expected_area1 * np.exp(
-            -0.5 * ((x - expected_center1) / expected_width1) ** 2
+            -0.5 * ((energy - expected_center1) / expected_width1) ** 2
         ) / (np.sqrt(2 * np.pi) * expected_width1) + expected_area2 * np.exp(
-            -0.5 * ((x - expected_center2) / expected_width2) ** 2
+            -0.5 * ((energy - expected_center2) / expected_width2) ** 2
         ) / (np.sqrt(2 * np.pi) * expected_width2)
         np.testing.assert_allclose(calculated_convolution, expected_result, atol=1e-10)
 
@@ -408,7 +412,7 @@ class TestConvolution:
     )
     def test_model_lorentzian_delta_resolution_gauss(
         self,
-        x,
+        energy,
         method,
         lorentzian_component,
         resolution_model,
@@ -425,9 +429,9 @@ class TestConvolution:
         sample.add_component(sample_delta)
 
         # THEN
-        x = np.linspace(-10, 10, 20001)
+        energy = np.linspace(-10, 10, 20001)
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample,
             resolution_model=resolution_model,
             offset=offset_obj,
@@ -448,7 +452,7 @@ class TestConvolution:
             + expected_shift
         )
         expected_voigt = expected_voigt_area * voigt_profile(
-            x - expected_voigt_center,
+            energy - expected_voigt_center,
             gaussian_component.width.value,
             lorentzian_component.width.value,
         )
@@ -459,7 +463,9 @@ class TestConvolution:
         expected_gauss_width = gaussian_component.width.value
         expected_gauss = (
             expected_gauss_area
-            * np.exp(-0.5 * ((x - (expected_gauss_center)) / expected_gauss_width) ** 2)
+            * np.exp(
+                -0.5 * ((energy - (expected_gauss_center)) / expected_gauss_width) ** 2
+            )
             / (np.sqrt(2 * np.pi) * expected_gauss_width)
         )
         expected_result = expected_voigt + expected_gauss
@@ -471,7 +477,7 @@ class TestConvolution:
         )
 
     def test_numerical_convolve_with_temperature(
-        self, x, sample_model, resolution_model
+        self, energy, sample_model, resolution_model
     ):
         "Test numerical convolution with detailed balance correction."
         # WHEN
@@ -479,7 +485,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -487,13 +493,13 @@ class TestConvolution:
             temperature=temperature,
         )
 
-        sample_with_db = sample_model.evaluate(x) * detailed_balance_factor(
-            energy=x, temperature=temperature
+        sample_with_db = sample_model.evaluate(energy) * detailed_balance_factor(
+            energy=energy, temperature=temperature
         )
-        resolution = resolution_model.evaluate(x)
+        resolution = resolution_model.evaluate(energy)
 
         expected_convolution = fftconvolve(sample_with_db, resolution, mode="same")
-        expected_convolution *= [x[1] - x[0]]  # normalize
+        expected_convolution *= [energy[1] - energy[0]]  # normalize
 
         np.testing.assert_allclose(
             calculated_convolution,
@@ -543,12 +549,12 @@ class TestConvolution:
         ids=["no_upsample", "upsample_2", "upsample_5", "upsample_10"],
     )
     def test_numerical_convolve_upsample_factor(
-        self, x, upsample_factor, sample_model, resolution_model
+        self, energy, upsample_factor, sample_model, resolution_model
     ):
         "Test numerical convolution with different upsample factors."
         # WHEN THEN
         calculated_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -557,7 +563,7 @@ class TestConvolution:
 
         # EXPECT
         expected_convolution = convolution(
-            energy=x,
+            energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
@@ -644,7 +650,7 @@ class TestConvolution:
 
     # Test error handling
     def test_analytical_convolution_fails_with_detailed_balance(
-        self, x, sample_model, resolution_model
+        self, energy, sample_model, resolution_model
     ):
         # WHEN
         temperature = 300.0
@@ -654,7 +660,7 @@ class TestConvolution:
             match="Analytical convolution is not supported with detailed balance.",
         ):
             convolution(
-                energy=x,
+                energy=energy,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="analytical",
@@ -662,7 +668,7 @@ class TestConvolution:
             )
 
     def test_convolution_only_accepts_analytical_and_numerical_methods(
-        self, x, sample_model, resolution_model
+        self, energy, sample_model, resolution_model
     ):
         # WHEN THEN EXPECT
         with pytest.raises(
@@ -670,7 +676,7 @@ class TestConvolution:
             match="Unknown convolution method: unknown_method. Choose from 'analytical', or 'numerical'.",
         ):
             convolution(
-                energy=x,
+                energy=energy,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="unknown_method",
