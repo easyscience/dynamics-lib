@@ -84,7 +84,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_gauss,
             resolution_model=resolution_gauss,
             offset=offset_obj,
@@ -131,7 +131,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_dho,
             resolution_model=resolution_gauss,
             offset=offset_obj,
@@ -176,7 +176,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_lorentzian,
             resolution_model=resolution_lorentzian,
             offset=offset_obj,
@@ -248,7 +248,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample,
             resolution_model=resolution,
             offset=offset_obj,
@@ -312,7 +312,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample,
             resolution_model=resolution,
             offset=offset_obj,
@@ -362,7 +362,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             offset=offset_obj,
@@ -427,7 +427,7 @@ class TestConvolution:
         # THEN
         x = np.linspace(-10, 10, 20001)
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample,
             resolution_model=resolution_model,
             offset=offset_obj,
@@ -479,7 +479,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -517,7 +517,7 @@ class TestConvolution:
 
         # WHEN THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -526,7 +526,7 @@ class TestConvolution:
 
         # EXPECT
         expected_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
@@ -548,7 +548,7 @@ class TestConvolution:
         "Test numerical convolution with different upsample factors."
         # WHEN THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -557,7 +557,7 @@ class TestConvolution:
 
         # EXPECT
         expected_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
@@ -589,7 +589,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -598,7 +598,7 @@ class TestConvolution:
 
         # EXPECT
         expected_convolution = convolution(
-            x=x,
+            energy=x,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
@@ -620,7 +620,7 @@ class TestConvolution:
 
         # THEN
         calculated_convolution = convolution(
-            x=x_non_uniform,
+            energy=x_non_uniform,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="numerical",
@@ -629,7 +629,7 @@ class TestConvolution:
 
         # EXPECT
         expected_convolution = convolution(
-            x=x_non_uniform,
+            energy=x_non_uniform,
             sample_model=sample_model,
             resolution_model=resolution_model,
             method="analytical",
@@ -654,7 +654,7 @@ class TestConvolution:
             match="Analytical convolution is not supported with detailed balance.",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="analytical",
@@ -670,7 +670,7 @@ class TestConvolution:
             match="Unknown convolution method: unknown_method. Choose from 'analytical', or 'numerical'.",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="unknown_method",
@@ -680,21 +680,21 @@ class TestConvolution:
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
             convolution(
-                x=np.array([[1, 2], [3, 4]]),
+                energy=np.array([[1, 2], [3, 4]]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
             convolution(
-                x=np.array([1, 2, np.nan]),
+                energy=np.array([1, 2, np.nan]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
         with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
             convolution(
-                x=np.array([1, 2, np.inf]),
+                energy=np.array([1, 2, np.inf]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
@@ -711,7 +711,7 @@ class TestConvolution:
             match="Input array `x` must be uniformly spaced if upsample_factor = 0.",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample_model,
                 resolution_model=resolution_model,
                 method="numerical",
@@ -727,7 +727,7 @@ class TestConvolution:
             ValueError, match="SampleModel must have at least one component."
         ):
             convolution(
-                x=np.array([0, 1, 2]),
+                energy=np.array([0, 1, 2]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
@@ -741,7 +741,7 @@ class TestConvolution:
             ValueError, match="ResolutionModel must have at least one component."
         ):
             convolution(
-                x=np.array([0, 1, 2]),
+                energy=np.array([0, 1, 2]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
@@ -762,7 +762,7 @@ class TestConvolution:
             match=r"The width of the sample model component ",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample,
                 resolution_model=resolution_model,
                 method="numerical",
@@ -788,7 +788,7 @@ class TestConvolution:
             match=r"The width of the resolution model component 'ResolutionGauss' \(1.9\) is large",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample_model,
                 resolution_model=resolution,
                 method="numerical",
@@ -812,7 +812,7 @@ class TestConvolution:
             match=r"The width of the sample model component 'SampleGauss' \(0.001\) is small",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample,
                 resolution_model=resolution_model,
                 method="numerical",
@@ -838,7 +838,7 @@ class TestConvolution:
             match=r"The width of the resolution model component 'ResolutionGauss' \(0.001\) is small",
         ):
             convolution(
-                x=x,
+                energy=x,
                 sample_model=sample_model,
                 resolution_model=resolution,
                 method="numerical",

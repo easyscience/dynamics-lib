@@ -17,27 +17,28 @@ Numerical = Union[float, int]
 
 
 def convolution(
-    x: np.ndarray,
+    energy: np.ndarray,
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
     offset: Optional[Union[Parameter, float, None]] = None,
-    method: Optional[str] = "analytical",
+    method: Optional[str] = "auto",
     upsample_factor: Optional[int] = 0,
     extension_factor: Optional[float] = 0.2,
     temperature: Optional[Union[Parameter, float, None]] = None,
     temperature_unit: Union[str, sc.Unit] = "K",
-    x_unit: Optional[Union[str, sc.Unit]] = "meV",
+    energy_unit: Optional[Union[str, sc.Unit]] = "meV",
     normalize_detailed_balance: Optional[bool] = True,
 ) -> np.ndarray:
     """
     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
     Accepts SampleModel or ModelComponent for both sample and resolution.
-    The analytical method silently falls back to numerical convolution if no analytical expression is found.
+    Analytical convolution is preferred when possible, otherwise numerical convolution is used.
     Detailed balancing is included if temperature is provided. This requires numerical convolution.
 
+
     Args:
-        x : np.ndarray
-            1D array of x values where the convolution is evaluated.
+        energy : np.ndarray
+            1D array of energy transfer where the convolution is evaluated.
         sample_model : SampleModel or ModelComponent
             The sample model to be convolved.
         resolution_model : SampleModel or ModelComponent
@@ -45,7 +46,7 @@ def convolution(
         offset : Parameter, float, or None, optional
             The offset to apply to the x values before convolution.
         method : str, optional
-            The convolution method to use: 'analytical' or 'numerical'. Default is 'analytical'.
+            The convolution method to use: 'auto', 'analytical' or 'numerical'. Default is 'auto'.
         upsample_factor : int, optional
             The factor by which to upsample the input data before numerical convolution. Default is 0 (no upsampling).
         extension_factor : float, optional
@@ -54,20 +55,20 @@ def convolution(
             The temperature to use for detailed balance calculations. Default is None.
         temperature_unit : str or sc.Unit, optional
             The unit of the temperature parameter. Default is 'K'.
-        x_unit : str or sc.Unit, optional
-            The unit of the x parameter. Default is 'meV'.
+        energy_unit : str or sc.Unit, optional
+            The unit of the energy. Default is 'meV'.
         normalize_detailed_balance : bool, optional
             Whether to normalize the detailed balance factor. Default is True.
     """
 
     # Input validation
-    if not isinstance(x, np.ndarray):
+    if not isinstance(energy, np.ndarray):
         raise TypeError(
-            f"`x` is an instance of {type(x).__name__}, but must be a numpy array."
+            f"`x` is an instance of {type(energy).__name__}, but must be a numpy array."
         )
 
-    x = np.asarray(x, dtype=float)
-    if x.ndim != 1 or not np.all(np.isfinite(x)):
+    energy = np.asarray(energy, dtype=float)
+    if energy.ndim != 1 or not np.all(np.isfinite(energy)):
         raise ValueError("`x` must be a 1D finite array.")
 
     if not isinstance(sample_model, (SampleModel, ModelComponent)):
@@ -107,10 +108,22 @@ def convolution(
         raise ValueError("extension_factor must be a non-negative float.")
 
     if temperature is not None:
-        if x_unit is None:
-            raise ValueError("x_unit must be provided when temperature is specified.")
-        if not isinstance(x_unit, (str, sc.Unit)):
-            raise TypeError(f"Expected x_unit to be str or sc.Unit, got {type(x_unit)}")
+        if energy_unit is None:
+            raise ValueError(
+                "energy_unit must be provided when temperature is specified."
+            )
+        if not isinstance(energy_unit, (str, sc.Unit)):
+            raise TypeError(
+                f"Expected energy_unit to be str or sc.Unit, got {type(energy_unit)}"
+            )
+
+    use_numerical_convolution_as_fallback = False
+    if method == "auto":
+        if temperature is not None:
+            method = "numerical"
+        else:
+            method = "analytical"
+            use_numerical_convolution_as_fallback = True
 
     if method == "analytical":
         if temperature is not None:
@@ -118,16 +131,17 @@ def convolution(
                 "Analytical convolution is not supported with detailed balance. Set method to 'numerical' instead or set the temperature to None."
             )
         return _analytical_convolution(
-            x=x,
+            x=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             offset_float=offset_float,
+            use_numerical_convolution_as_fallback=use_numerical_convolution_as_fallback,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
         )
     elif method == "numerical":
         return _numerical_convolution(
-            x=x,
+            x=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             offset_float=offset_float,
@@ -135,7 +149,7 @@ def convolution(
             extension_factor=extension_factor,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            x_unit=x_unit,
+            x_unit=energy_unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
     else:
@@ -285,6 +299,7 @@ def _analytical_convolution(
     sample_model: Union[SampleModel, ModelComponent],
     resolution_model: Union[SampleModel, ModelComponent],
     offset_float: float = 0.0,
+    use_numerical_convolution_as_fallback: bool = False,
     upsample_factor: int = 5,
     extension_factor: float = 0.2,
 ) -> np.ndarray:
@@ -344,14 +359,20 @@ def _analytical_convolution(
                 not_analytical_components.add_component(r)
 
         if not_analytical_components:
-            total += _numerical_convolution(
-                x=x,
-                sample_model=s,  # single component
-                resolution_model=not_analytical_components,
-                offset_float=offset_float,
-                upsample_factor=upsample_factor,
-                extension_factor=extension_factor,
-            )
+            if use_numerical_convolution_as_fallback:
+                total += _numerical_convolution(
+                    x=x,
+                    sample_model=s,  # single component
+                    resolution_model=not_analytical_components,
+                    offset_float=offset_float,
+                    upsample_factor=upsample_factor,
+                    extension_factor=extension_factor,
+                )
+            else:
+                raise ValueError(
+                    f"Could not find analytical convolution for sample component '{s.name}' with resolution model '{not_analytical_components.name}'. "
+                    "Set method to 'auto' or 'numerical'."
+                )
 
     return total
 
