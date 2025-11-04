@@ -32,8 +32,30 @@ def convolution(
     """
     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
     Accepts SampleModel or ModelComponent for both sample and resolution.
-    Analytical convolution is preferred when possible, otherwise numerical convolution is used.
-    Detailed balancing is included if temperature is provided. This requires numerical convolution.
+    If method is 'auto', analytical convolution is preferred when possible, otherwise numerical convolution is used.
+    Detailed balancing is included if temperature is provided. This requires numerical convolution and that the units
+    of energy and temperature are provided. An error will be raised if the units are not compatible.
+    The calculated model is shifted by the specified offset.
+
+    Examples:
+    energy = np.linspace(-10, 10, 100)
+    sample = SampleModel()
+    sample.add_component(Gaussian(name="SampleGaussian", area=1.0, center=0.1, width=1.0))
+    resolution = Gaussian(name="ResolutionGaussian", area=1.0, center=0.0, width=0.5)
+    result = convolution(energy, sample, resolution, offset=0.2)
+
+    energy = np.linspace(-10, 10, 100)
+    sample = SampleModel()
+    sample.add_component(Gaussian(name="Gaussian", area=1.0, center=0.1, width=1.0))
+    sample.add_component(DampedHarmonicOscillator(name="DHO", area=2.0, center=1.5, width=0.2))
+    sample.add_component(DeltaFunction(name="Delta", area=0.5, center=0.0))
+
+    resolution = SampleModel()
+    resolution.add_component(Gaussian(name="ResolutionGaussian", area=0.8, center=0.0, width=0.5))
+    resolution.add_component(Lorentzian(name="ResolutionLorentzian", area=0.2, center=0.1, width=0.3))
+
+    result_auto = convolution(energy, sample, resolution, offset=0.2, method='auto', upsample_factor=5, extension_factor=0.2)
+    result_numerical = convolution(energy, sample, resolution, offset=0.2, method='numerical', upsample_factor=5, extension_factor=0.2)
 
 
     Args:
@@ -402,6 +424,11 @@ def _try_analytic_pair(
             The resolution component to convolve with.
         off : float
             The offset to apply to the convolution.
+
+    Returns:
+        Tuple[bool, np.ndarray]:
+            - bool: True if analytical convolution was computed, False otherwise
+            - np.ndarray: The convolution result if computed, or zeros if not handled
     """
     # Delta functions
     if isinstance(sample_component, DeltaFunction) and isinstance(
