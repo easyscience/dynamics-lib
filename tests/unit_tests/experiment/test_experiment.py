@@ -1,4 +1,5 @@
 from copy import copy
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -161,3 +162,44 @@ class TestExperiment:
         assert sc.identical(copied_experiment.data, experiment.data)
         assert copied_experiment is not experiment
         assert copied_experiment.data is not experiment.data
+
+    def test_plot_data_success(self, experiment):
+        "Test plotting data successfully when in notebook environment"
+        # WHEN
+        with (
+            patch.object(Experiment, "_in_notebook", return_value=True),
+            patch("plopp.plot") as mock_plot,
+            patch("IPython.display.display") as mock_display,
+        ):
+            mock_fig = MagicMock()
+            mock_plot.return_value = mock_fig
+
+            # THEN
+            experiment.plot_data()
+
+            # EXPECT
+            mock_plot.assert_called_once()
+            args, kwargs = mock_plot.call_args
+            assert sc.identical(args[0], experiment._data.transpose())
+            assert kwargs["title"] == f"{experiment.name}"
+            mock_display.assert_called_once_with(mock_fig)
+
+    def test_plot_data_no_data_raises(self):
+        "Test plotting data raises ValueError when no data is present"
+        # WHEN
+        experiment = Experiment(name="empty_experiment")
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="No data to plot"):
+            experiment.plot_data()
+
+    def test_plot_data_not_in_notebook_raises(self, experiment):
+        "Test plotting data raises RuntimeError when not in notebook environment"
+        # WHEN
+        with patch.object(Experiment, "_in_notebook", return_value=False):
+            # THEN EXPECT
+            with pytest.raises(
+                RuntimeError,
+                match="plot_data\\(\\) can only be used in a Jupyter notebook environment",
+            ):
+                experiment.plot_data()

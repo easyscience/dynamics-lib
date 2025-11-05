@@ -48,7 +48,12 @@ class Experiment(ExperimentBase):
             self.name = name
 
         # TODO: Add checks of dimensions etc. I'm not yet sure what dimensions I want to allow, so for now I trust myself.
-        self._data = sc_load_hdf5(filename)
+        loaded_data = sc_load_hdf5(filename)
+        if not isinstance(loaded_data, sc.DataArray):
+            raise TypeError(
+                f"Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}"
+            )
+        self._data = loaded_data
 
     def save_hdf5(self, filename: Optional[str] = None):
         """Save the dataset to HDF5.
@@ -68,7 +73,10 @@ class Experiment(ExperimentBase):
 
         import os
 
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        dir_name = os.path.dirname(filename)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+
         sc_save_hdf5(self._data, filename)
 
     def remove_data(self):
