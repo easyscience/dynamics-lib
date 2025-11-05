@@ -47,7 +47,7 @@ class Experiment(ExperimentBase):
                 raise TypeError(f"Name must be a string, not {type(name).__name__}")
             self.name = name
 
-        # TODO: Add checks of dimensions etc. I'm not yet sure what dimensions I want to allow, so for now I trust myself.
+        # TODO: Add checks of dimensions etc. I'm not yet sure what dimensions I want to allow, so for now I trust that the data is valid.
         loaded_data = sc_load_hdf5(filename)
         if not isinstance(loaded_data, sc.DataArray):
             raise TypeError(

@@ -120,6 +120,20 @@ class TestExperiment:
         original_data = experiment.data
         assert sc.identical(original_data, loaded_data)
 
+    def test_save_hdf5_default_filename(self, tmp_path, experiment, monkeypatch):
+        "Test saving data to an HDF5 file with default filename"
+        # WHEN
+        monkeypatch.chdir(tmp_path)
+
+        # THEN
+        experiment.save_hdf5()
+
+        # EXPECT
+        expected_filename = tmp_path / f"{experiment.name}.h5"
+        loaded_data = sc.io.load_hdf5(str(expected_filename))
+        original_data = experiment.data
+        assert sc.identical(original_data, loaded_data)
+
     def test_save_hdf5_no_data_raises(self):
         "Test saving data to an HDF5 file when no data is present in the experiment"
         # WHEN
@@ -142,6 +156,12 @@ class TestExperiment:
 
         # THEN EXPECT
         assert experiment._data is None
+
+    def test_data_setter_raises_type_error(self, experiment):
+        "Test setting data to an invalid type raises TypeError"
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            experiment.data = 123
 
     def test_repr(self, experiment):
         # WHEN
