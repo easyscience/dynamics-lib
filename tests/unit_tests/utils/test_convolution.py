@@ -667,13 +667,13 @@ class TestConvolution:
                 temperature=temperature,
             )
 
-    def test_convolution_only_accepts_analytical_and_numerical_methods(
+    def test_convolution_only_accepts_auto_analytical_and_numerical_methods(
         self, energy, sample_model, resolution_model
     ):
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
-            match="Unknown convolution method: unknown_method. Choose from 'analytical', or 'numerical'.",
+            match="Unknown convolution method: unknown_method. Choose from 'auto', 'analytical', or 'numerical'.",
         ):
             convolution(
                 energy=energy,
@@ -682,23 +682,23 @@ class TestConvolution:
                 method="unknown_method",
             )
 
-    def test_x_must_be_1d_finite_array(self, sample_model, resolution_model):
+    def test_energy_must_be_1d_finite_array(self, sample_model, resolution_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
+        with pytest.raises(ValueError, match="`energy` must be a 1D finite array."):
             convolution(
                 energy=np.array([[1, 2], [3, 4]]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
-        with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
+        with pytest.raises(ValueError, match="`energy` must be a 1D finite array."):
             convolution(
                 energy=np.array([1, 2, np.nan]),
                 sample_model=sample_model,
                 resolution_model=resolution_model,
             )
 
-        with pytest.raises(ValueError, match="`x` must be a 1D finite array."):
+        with pytest.raises(ValueError, match="`energy` must be a 1D finite array."):
             convolution(
                 energy=np.array([1, 2, np.inf]),
                 sample_model=sample_model,
@@ -714,7 +714,7 @@ class TestConvolution:
         # THEN EXPECT
         with pytest.raises(
             ValueError,
-            match="Input array `x` must be uniformly spaced if upsample_factor = 0.",
+            match="Input array `energy` must be uniformly spaced if upsample_factor = 0.",
         ):
             convolution(
                 energy=x,
