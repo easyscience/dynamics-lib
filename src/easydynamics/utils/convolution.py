@@ -302,10 +302,19 @@ def _numerical_convolution(
         )
 
     # if sample has deltas, convolve each delta with the resolution_model
-    for delta in sample_deltas:
-        convolved += delta.area.value * resolution_model.evaluate(
-            x - offset_float - delta.center.value
-        )
+    # for delta in sample_deltas:
+    #     convolved += delta.area.value * resolution_model.evaluate(
+    #         x - offset_float - delta.center.value
+    #     )
+
+    # for delta in sample_deltas:
+
+    #         _try_analytic_pair(
+    #     x: np.ndarray,
+    #     sample_component: ModelComponent,
+    #     resolution_component: ModelComponent,
+    #     off: float,
+    # ) -> Tuple[bool, np.ndarray]:
 
     # if resolution has deltas, convolve each delta with the sample_model
     for delta in resolution_deltas:
