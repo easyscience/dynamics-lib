@@ -30,24 +30,6 @@ class TestSampleModel:
         assert sample_model.name == "InitModel"
         assert sample_model.components == []
 
-    # def test_initialization_with_components(self):
-    #     # WHEN THEN
-    #     component1 = Gaussian(
-    #         name="InitGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
-    #     )
-    #     component2 = Lorentzian(
-    #         name="InitLorentzian", area=2.0, center=1.0, width=0.5, unit="meV"
-    #     )
-    #     sample_model = SampleModel(
-    #         name="InitModelWithComponents", components=[component1, component2]
-    #     )
-
-    #     # EXPECT
-    #     assert sample_model.name == "InitModelWithComponents"
-    #     assert len(sample_model.components) == 2
-    #     assert sample_model.components[0] is component1
-    #     assert sample_model.components[1] is component2
-
     # ───── Component Management ─────
 
     def test_add_component(self, sample_model):

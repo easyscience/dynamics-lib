@@ -28,7 +28,6 @@ class SampleModel(TheoreticalModelBase):
         self,
         name: str = "MySampleModel",
         unit: Optional[Union[str, sc.Unit]] = "meV",
-        # components: Optional[List] = None,
         **kwargs,
     ):
         """
@@ -40,8 +39,8 @@ class SampleModel(TheoreticalModelBase):
             Name of the sample model.
         unit : str or sc.Unit, optional
             Unit of the sample model. Defaults to "meV".
-        components : List[ModelComponent], optional
-            Initial list of model components to include in the sample model.
+        **kwargs : ModelComponent
+            Initial model components to add to the SampleModel. Keys are component names, values are ModelComponent instances.
         """
 
         super().__init__(name=name)
@@ -51,7 +50,7 @@ class SampleModel(TheoreticalModelBase):
         self._unit = unit
         self._components = []
 
-        # Add initial components if provided. Needed for serialization.
+        # Add initial components if provided. Used for serialization.
         for key, comp in list(kwargs.items()):
             self._add_component(key, comp)
 
