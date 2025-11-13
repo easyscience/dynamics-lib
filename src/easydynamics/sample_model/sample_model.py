@@ -201,7 +201,7 @@ class SampleModel(TheoreticalModelBase):
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:
         """
-        Evaluate the sum of all components, optionally applying detailed balance.
+        Evaluate the sum of all components.
 
         Parameters
         ----------
