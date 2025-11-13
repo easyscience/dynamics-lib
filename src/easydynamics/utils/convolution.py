@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -7,7 +7,13 @@ from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
-from easydynamics.sample_model import DeltaFunction, Gaussian, Lorentzian, SampleModel
+from easydynamics.sample_model import (
+    DeltaFunction,
+    Gaussian,
+    Lorentzian,
+    SampleModel,
+    Voigt,
+)
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.detailed_balance import (
     _detailed_balance_factor as detailed_balance_factor,
@@ -16,734 +22,750 @@ from easydynamics.utils.detailed_balance import (
 Numerical = Union[float, int]
 
 
-def convolution(
-    energy: np.ndarray,
-    sample_model: Union[SampleModel, ModelComponent],
-    resolution_model: Union[SampleModel, ModelComponent],
-    offset: Optional[Union[Parameter, float, None]] = None,
-    method: Optional[str] = "auto",
-    upsample_factor: Optional[int] = 0,
-    extension_factor: Optional[float] = 0.2,
-    temperature: Optional[Union[Parameter, float, None]] = None,
-    temperature_unit: Union[str, sc.Unit] = "K",
-    energy_unit: Optional[Union[str, sc.Unit]] = "meV",
-    normalize_detailed_balance: Optional[bool] = True,
-) -> np.ndarray:
-    """
-    Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
-    Accepts SampleModel or ModelComponent for both sample and resolution.
-    If method is 'auto', analytical convolution is preferred when possible, otherwise numerical convolution is used.
-    Detailed balancing is included if temperature is provided. This requires numerical convolution and that the units
-    of energy and temperature are provided. An error will be raised if the units are not compatible.
-    The calculated model is shifted by the specified offset.
+class Convolution:
+    def __init__(self):
+        pass
 
-    Examples:
-    energy = np.linspace(-10, 10, 100)
-    sample = SampleModel()
-    sample.add_component(Gaussian(name="SampleGaussian", area=1.0, center=0.1, width=1.0))
-    resolution = Gaussian(name="ResolutionGaussian", area=1.0, center=0.0, width=0.5)
-    result = convolution(energy, sample, resolution, offset=0.2)
+    # def _find_delta_components(self,
+    #     model: Union[SampleModel, ModelComponent],
+    # ) -> List[DeltaFunction]:
+    #     """Return a list of DeltaFunction instances contained in `model`.
 
-    energy = np.linspace(-10, 10, 100)
-    sample = SampleModel()
-    sample.add_component(Gaussian(name="Gaussian", area=1.0, center=0.1, width=1.0))
-    sample.add_component(DampedHarmonicOscillator(name="DHO", area=2.0, center=1.5, width=0.2))
-    sample.add_component(DeltaFunction(name="Delta", area=0.5, center=0.0))
+    #     Args:
+    #         model : SampleModel or ModelComponent
+    #             The model to search for DeltaFunction components.
+    #     Returns:
+    #         List[DeltaFunction]
+    #             A list of DeltaFunction components found in the model.
+    #     """
+    #     if isinstance(model, DeltaFunction):
+    #         return [model]
+    #     if isinstance(model, SampleModel):
+    #         return [c for c in model.components if isinstance(c, DeltaFunction)]
+    #     return []
 
-    resolution = SampleModel()
-    resolution.add_component(Gaussian(name="ResolutionGaussian", area=0.8, center=0.0, width=0.5))
-    resolution.add_component(Lorentzian(name="ResolutionLorentzian", area=0.2, center=0.1, width=0.3))
+    # def _calculate_delta_contributions(self,
+    #     energy: np.ndarray,
+    #     sample_model: Union[SampleModel, ModelComponent],
+    #     resolution_model: Union[SampleModel, ModelComponent],
+    #     offset_float: float,
+    # ) -> np.ndarray:
+    #     """
+    #     Calculate the contributions of delta functions in the convolution.
+    #     Args:
+    #         energy : np.ndarray
+    #             1D array of energy values where the convolution is evaluated.
+    #         sample_model : SampleModel or ModelComponent
+    #             The sample model to be convolved.
+    #         resolution_model : SampleModel or ModelComponent
+    #             The resolution model to convolve with.
+    #         offset_float : float
+    #             The offset to apply to the convolution.
+    #     Returns:
+    #         np.ndarray
+    #             The delta function contributions evaluated at energy.
 
-    result_auto = convolution(energy, sample, resolution, offset=0.2, method='auto', upsample_factor=5, extension_factor=0.2)
-    result_numerical = convolution(energy, sample, resolution, offset=0.2, method='numerical', upsample_factor=5, extension_factor=0.2)
+    #             Raises:
+    #         ValueError
+    #             If both sample_model and resolution_model contain delta functions.
+    #     """
+    #     delta_contributions = np.zeros_like(energy)
+
+    #     # Add delta contributions on original grid
+    #     # collect deltas
+    #     sample_deltas = self._find_delta_components(sample_model)
+    #     resolution_deltas = self._find_delta_components(resolution_model)
+
+    #     # error if both contain delta(s)
+    #     if sample_deltas and resolution_deltas:
+    #         raise ValueError(
+    #             "Both sample_model and resolution_model contain delta functions. "
+    #             "Their convolution is not defined."
+    #         )
+
+    #     # if sample has deltas, convolve each delta with the resolution_model
+    #     for delta in sample_deltas:
+    #         (_, delta_contribution) = self.try_analytic_pair(
+    #             energy=energy,
+    #             sample_component=delta,
+    #             resolution_component=resolution_model,
+    #             offset_float=offset_float,
+    #         )
+    #         delta_contributions += delta_contribution
+
+    #     # if resolution has deltas, convolve each delta with the sample_model
+    #     for delta in resolution_deltas:
+    #         (_, delta_contribution) = self.try_analytic_pair(
+    #             energy=energy,
+    #             sample_component=sample_model,
+    #             resolution_component=delta,
+    #             offset_float=offset_float,
+    #         )
+    #         delta_contributions += delta_contribution
+
+    #     return delta_contributions
 
 
-    Args:
-        energy : np.ndarray
-            1D array of energy transfer where the convolution is evaluated.
-        sample_model : SampleModel or ModelComponent
-            The sample model to be convolved.
-        resolution_model : SampleModel or ModelComponent
-            The resolution model to convolve with.
-        offset : Parameter, float, or None, optional
-            The offset to apply to the x values before convolution.
-        method : str, optional
-            The convolution method to use: 'auto', 'analytical' or 'numerical'. Default is 'auto'.
-        upsample_factor : int, optional
-            The factor by which to upsample the input data before numerical convolution. Default is 0 (no upsampling).
-        extension_factor : float, optional
-            The factor by which to extend the input data range before numerical convolution. Default is 0.2.
-        temperature : Parameter, float, or None, optional
-            The temperature to use for detailed balance calculations. Default is None.
-        temperature_unit : str or sc.Unit, optional
-            The unit of the temperature parameter. Default is 'K'.
-        energy_unit : str or sc.Unit, optional
-            The unit of the energy. Default is 'meV'.
-        normalize_detailed_balance : bool, optional
-            Whether to normalize the detailed balance factor. Default is True.
-    """
+class AnalyticalConvolution:
+    def __init__(self):
+        pass
 
-    # Input validation
-    if not isinstance(energy, np.ndarray):
-        raise TypeError(
-            f"`energy` is an instance of {type(energy).__name__}, but must be a numpy array."
-        )
+    def convolution(
+        self,
+        energy: np.ndarray,
+        sample_model: Union[SampleModel, ModelComponent],
+        resolution_model: Union[SampleModel, ModelComponent],
+        offset_float: float = 0.0,
+    ) -> np.ndarray:
+        """
+        Convolve sample with resolution analytically if possible. Accepts SampleModel or single ModelComponent for each.
+        Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt profiles.
 
-    energy = np.asarray(energy, dtype=float)
-    if energy.ndim != 1 or not np.all(np.isfinite(energy)):
-        raise ValueError("`energy` must be a 1D finite array.")
+        Most validation happens in the main `convolution` function.
 
-    if not isinstance(sample_model, (SampleModel, ModelComponent)):
-        raise TypeError(
-            f"`sample_model` is an instance of {type(sample_model).__name__}, but must be SampleModel or ModelComponent."
-        )
+        Args:
+            x : np.ndarray
+                1D array of x values where the convolution is evaluated.
+            sample_model : SampleModel or ModelComponent
+                The sample model to be convolved.
+            resolution_model : SampleModel or ModelComponent
+                The resolution model to convolve with.
+            offset_float : float
+                The offset to apply to the convolution.
+        Returns:
+            np.ndarray
+                The convolved values evaluated at x.
 
-    if not isinstance(resolution_model, (SampleModel, ModelComponent)):
-        raise TypeError(
-            f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be SampleModel or ModelComponent."
-        )
+        Raises:
+            ValueError
+                If resolution_model contains delta functions.
+            ValueError
+                If component pair cannot be handled analytically.
 
-    if isinstance(sample_model, SampleModel):
-        if not sample_model.components:
-            raise ValueError("SampleModel must have at least one component.")
+        """
 
-    if isinstance(resolution_model, SampleModel):
-        if not resolution_model.components:
-            raise ValueError("ResolutionModel must have at least one component.")
-
-    # Handle offset
-    if offset is None:
-        offset_float = 0.0
-    elif isinstance(offset, Parameter):
-        offset_float = offset.value
-    elif isinstance(offset, Numerical):
-        offset_float = float(offset)
-    else:
-        raise TypeError(
-            f"Expected offset to be Parameter, number, or None, got {type(offset)}"
-        )
-
-    if not isinstance(upsample_factor, int) or upsample_factor < 0:
-        raise ValueError("upsample_factor must be a non-negative integer.")
-
-    if not isinstance(extension_factor, float) or extension_factor < 0.0:
-        raise ValueError("extension_factor must be a non-negative float.")
-
-    if temperature is not None:
-        if energy_unit is None:
-            raise ValueError(
-                "energy_unit must be provided when temperature is specified."
-            )
-        if not isinstance(energy_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"Expected energy_unit to be str or sc.Unit, got {type(energy_unit)}"
-            )
-
-    use_numerical_convolution_as_fallback = False
-    if method == "auto":
-        if temperature is not None:
-            method = "numerical"
+        # prepare list of components
+        if isinstance(sample_model, SampleModel):
+            sample_components = sample_model.components
         else:
-            method = "analytical"
-            use_numerical_convolution_as_fallback = True
+            sample_components = [sample_model]
 
-    if method == "analytical":
-        if temperature is not None:
-            raise ValueError(
-                "Analytical convolution is not supported with detailed balance. Set method to 'numerical' instead or set the temperature to None."
-            )
-        return _analytical_convolution(
-            energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
-            offset_float=offset_float,
-            use_numerical_convolution_as_fallback=use_numerical_convolution_as_fallback,
-            upsample_factor=upsample_factor,
-            extension_factor=extension_factor,
-        )
-    elif method == "numerical":
-        return _numerical_convolution(
-            energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
-            offset_float=offset_float,
-            upsample_factor=upsample_factor,
-            extension_factor=extension_factor,
-            temperature=temperature,
-            temperature_unit=temperature_unit,
-            energy_unit=energy_unit,
-            normalize_detailed_balance=normalize_detailed_balance,
-        )
-    else:
-        raise ValueError(
-            f"Unknown convolution method: {method}. Choose from 'auto', 'analytical', or 'numerical'."
-        )
+        if isinstance(resolution_model, SampleModel):
+            resolution_components = resolution_model.components
+        else:
+            resolution_components = [resolution_model]
 
+        total = np.zeros_like(energy, dtype=float)
 
-def _numerical_convolution(
-    energy: np.ndarray,
-    sample_model: Union[SampleModel, ModelComponent],
-    resolution_model: Union[SampleModel, ModelComponent],
-    offset_float: Optional[float] = 0.0,
-    upsample_factor: Optional[int] = 5,
-    extension_factor: Optional[float] = 0.2,
-    temperature: Optional[Union[Parameter, float]] = None,
-    temperature_unit: Optional[Union[str, sc.Unit]] = "K",
-    energy_unit: Optional[Union[str, sc.Unit]] = "meV",
-    normalize_detailed_balance: Optional[bool] = True,
-) -> np.ndarray:
-    """
-    Numerical convolution using FFT with optional upsampling + extended range.
-    Includes detailed balance correction if temperature is provided.
-
-
-    Args:
-        energy : np.ndarray
-            1D array of energy values where the convolution is evaluated.
-        sample_model : SampleModel or ModelComponent
-            The sample model to be convolved.
-        resolution_model : SampleModel or ModelComponent
-            The resolution model to convolve with.
-        offset_float : float, or None, optional
-            The offset to apply to the input array.
-        upsample_factor : int, optional
-            The factor by which to upsample the input data before convolution. Default is 5.
-        extension_factor : float, optional
-            The factor by which to extend the input data range before convolution. Default is 0.2.
-        temperature : Parameter, float, or None, optional
-            The temperature to use for detailed balance correction. Default is None.
-        temperature_unit : str or sc.Unit, optional
-            The unit of the temperature parameter. Default is 'K'.
-        energy_unit : str or sc.Unit, optional
-            The unit of the energy. Default is 'meV'.
-        normalize_detailed_balance : bool, optional
-            Whether to normalize the detailed balance factor. Default is True.
-    Returns:
-        np.ndarray
-            The convolved values evaluated at energy.
-    """
-
-    # Create a dense grid to improve accuracy. We evaluate on this grid and interpolate back to the original values at the end
-    energy_dense = _create_dense_grid(
-        energy, upsample_factor=upsample_factor, extension_factor=extension_factor
-    )
-
-    energy_step = energy_dense[1] - energy_dense[0]
-    span = energy_dense.max() - energy_dense.min()
-    # Handle offset for even length of x in convolution.
-    # The convolution of two arrays of length N is of length 2N-1. When using 'same' mode, only the central N points are kept,
-    # so the output has the same length as the input.
-    # However, if N is even, the center falls between two points, leading to a half-bin offset.
-    # For example, if N=4, the convolution has length 7, and when we select the 4 central points we either get
-    # indices [2,3,4,5] or [1,2,3,4], both of which are offset by 0.5*dx from the true center at index 3.5.
-    if len(energy_dense) % 2 == 0:
-        x_even_length_offset = -0.5 * energy_step
-    else:
-        x_even_length_offset = 0.0
-
-    # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
-    if not np.isclose(energy_dense.mean(), 0.0):
-        energy_dense_centered = np.linspace(-0.5 * span, 0.5 * span, len(energy_dense))
-    else:
-        energy_dense_centered = energy_dense
-
-    # Give warnings if peaks are very wide or very narrow
-    _check_width_thresholds(
-        model=sample_model,
-        span=span,
-        energy_step=energy_step,
-        model_name="sample model",
-    )
-    _check_width_thresholds(
-        model=resolution_model,
-        span=span,
-        energy_step=energy_step,
-        model_name="resolution model",
-    )
-
-    # Evaluate sample model. Delta functions are handled separately for accuracy.
-    if isinstance(sample_model, SampleModel):
-        sample_vals = sample_model.evaluate_without_delta(
-            energy_dense - offset_float - x_even_length_offset
-        )
-    elif isinstance(sample_model, DeltaFunction):
-        sample_vals = np.zeros_like(energy_dense)
-    else:
-        sample_vals = sample_model.evaluate(
-            energy_dense - offset_float - x_even_length_offset
-        )
-
-    # Detailed balance correction
-    if temperature is not None:
-        detailed_balance_factor_correction = detailed_balance_factor(
-            energy=energy_dense,
-            temperature=temperature,
-            energy_unit=energy_unit,
-            temperature_unit=temperature_unit,
-            divide_by_temperature=normalize_detailed_balance,
-        )
-        sample_vals *= detailed_balance_factor_correction
-
-    # Evaluate resolution model
-    if isinstance(resolution_model, SampleModel):
-        resolution_vals = resolution_model.evaluate_without_delta(energy_dense_centered)
-    elif isinstance(resolution_model, DeltaFunction):
-        resolution_vals = np.zeros_like(energy_dense_centered)
-    else:
-        resolution_vals = resolution_model.evaluate(energy_dense_centered)
-
-    # Convolution
-    convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
-    convolved *= energy_step  # normalize
-
-    if upsample_factor > 0:
-        # interpolate back to original energy grid
-        convolved = np.interp(energy, energy_dense, convolved, left=0.0, right=0.0)
-
-    # Add delta function contributions
-    delta_contributions = _calculate_delta_contributions(
-        energy=energy,
-        sample_model=sample_model,
-        resolution_model=resolution_model,
-        offset_float=offset_float,
-    )
-    convolved += delta_contributions
-
-    return convolved
-
-
-def _analytical_convolution(
-    energy: np.ndarray,
-    sample_model: Union[SampleModel, ModelComponent],
-    resolution_model: Union[SampleModel, ModelComponent],
-    offset_float: float = 0.0,
-    use_numerical_convolution_as_fallback: bool = False,
-    upsample_factor: int = 5,
-    extension_factor: float = 0.2,
-) -> np.ndarray:
-    """
-    Convolve sample with resolution analytically if possible. Accepts SampleModel or single ModelComponent for each.
-    Possible analytical convolutions are any combination of delta functions, Gaussians, and Lorentzians.
-    Falls back to numerical convolution for other pairs of functions
-
-    Most validation happens in the main `convolution` function.
-
-    Args:
-        x : np.ndarray
-            1D array of x values where the convolution is evaluated.
-        sample_model : SampleModel or ModelComponent
-            The sample model to be convolved.
-        resolution_model : SampleModel or ModelComponent
-            The resolution model to convolve with.
-        offset_float : float
-            The offset to apply to the convolution.
-        use_numerical_convolution_as_fallback : bool
-            Whether to use numerical convolution as a fallback if analytical convolution is not possible. Default is False. Is True when method='auto'.
-        upsample_factor : int, optional
-            The factor by which to upsample the input data before numerical convolution. Improves accuracy at the cost of speed. Default is 5
-        extension_factor : float, optional
-            The factor by which to extend the input data range before numerical convolution. Improves accuracy at the edges of the data. Default is 0.2
-    Returns:
-        np.ndarray
-            The convolved values evaluated at x.
-
-    Raises:
-        ValueError
-            If both sample_model and resolution_model contain delta functions.
-
-    """
-
-    # prepare list of components
-    if isinstance(sample_model, SampleModel):
-        sample_components = sample_model.components
-    else:
-        sample_components = [sample_model]
-
-    if isinstance(resolution_model, SampleModel):
-        resolution_components = resolution_model.components
-    else:
-        resolution_components = [resolution_model]
-
-    total = np.zeros_like(energy, dtype=float)
-
-    # loop over sample components. Try to convolve each with all resolution components analytically
-    for sample_component in sample_components:
-        not_analytical_components = SampleModel(name="not_analytical")
-
-        # Go through resolution components, adding analytical contributions where possible, making a list of those that cannot be handled analytically
-        for resolution_component in resolution_components:
-            handled, contrib = _try_analytic_pair(
-                energy=energy,
-                sample_component=sample_component,
-                resolution_component=resolution_component,
-                offset_float=offset_float,
-            )
-            if handled:
-                total += contrib
-            else:
-                not_analytical_components.add_component(resolution_component)
-
-        if not_analytical_components:
-            if use_numerical_convolution_as_fallback:
-                total += _numerical_convolution(
+        for sample_component in sample_components:
+            # Go through resolution components, adding analytical contributions
+            for resolution_component in resolution_components:
+                contrib = self._try_analytic_pair(
                     energy=energy,
-                    sample_model=sample_component,
-                    resolution_model=not_analytical_components,
+                    sample_component=sample_component,
+                    resolution_component=resolution_component,
                     offset_float=offset_float,
-                    upsample_factor=upsample_factor,
-                    extension_factor=extension_factor,
                 )
-            else:
-                raise ValueError(
-                    f"Could not find analytical convolution for sample component '{sample_component.name}' with resolution model '{not_analytical_components.name}'. "
-                    "Set method to 'auto' or 'numerical'."
-                )
+                total += contrib
 
-    return total
+        return total
+
+    def _try_analytic_pair(
+        self,
+        energy: np.ndarray,
+        sample_component: Union[ModelComponent, SampleModel],
+        resolution_component: ModelComponent,
+        offset_float: float,
+    ) -> np.ndarray:
+        """
+        Attempt an analytic convolution for component pair (sample_component, resolution_component).
+        Returns (True, contribution) if handled, else (False, zeros).
+        The convolution of two gaussian components results in another gaussian component with width sqrt(w1^2 + w2^2).
+        The convolution of two lorentzian components results in another lorentzian component with width w1 + w2.
+        The convolution of a gaussian and a lorentzian results in a voigt profile.
+        The convolution of a delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.
+        All areas are multiplied.
 
 
-# ---------------------- helpers & evals -----------------------
+        Args:
+            energy: np.ndarray
+                1D array of energy values where the convolution is evaluated.
+            sample_component : Union[ModelComponent, SampleModel]
+                The sample component to be convolved.
+            resolution_component : Union[ModelComponent, SampleModel]
+                The resolution component to convolve with.
+            offset_float : float
+                The offset in energyto apply to the convolution.
 
+        Returns:
+            np.ndarray: The convolution result
 
-def _create_dense_grid(
-    energy: np.ndarray, upsample_factor: int = 5, extension_factor: float = 0.2
-) -> np.ndarray:
-    """
-    Create a dense grid by upsampling and extending the input energy array.
+        Raises:
+            ValueError: If the component pair cannot be handled analytically.
+        """
 
-    Args:
-        energy : np.ndarray
-            1D array of energy values.
-        upsample_factor : int, optional
-            The factor by which to upsample the input data. Default is 5.
-        extension_factor : float, optional
-            The factor by which to extend the input data range. Default is 0.2.
-    Returns:
-        np.ndarray
-            The dense grid created by upsampling and extending x.
-    """
-    if upsample_factor == 0:
-        # Check if the array is uniformly spaced.
-        energy_diff = np.diff(energy)
-        is_uniform = np.allclose(energy_diff, energy_diff[0])
-        if not is_uniform:
-            raise ValueError(
-                "Input array `energy` must be uniformly spaced if upsample_factor = 0."
+        # Delta function + anything --> anything, shifted by delta center with area A1 * A2
+        if isinstance(sample_component, DeltaFunction):
+            return sample_component.area.value * resolution_component.evaluate(
+                energy - sample_component.center.value - offset_float
             )
-        energy_dense = energy
-    else:
-        # Create an extended and upsampled energy grid
-        energy_min, energy_max = energy.min(), energy.max()
-        span = energy_max - energy_min
-        extra = extension_factor * span
-        extended_min = energy_min - extra
-        extended_max = energy_max + extra
-        num_points = len(energy) * upsample_factor
-        energy_dense = np.linspace(extended_min, extended_max, num_points)
 
-    return energy_dense
+        # Gaussian + Gaussian --> Gaussian with width sqrt(w1^2 + w2^2) and area A1 * A2
+        if isinstance(sample_component, Gaussian) and isinstance(
+            resolution_component, Gaussian
+        ):
+            width = np.sqrt(
+                sample_component.width.value**2 + resolution_component.width.value**2
+            )
+            area = sample_component.area.value * resolution_component.area.value
+            center = (
+                sample_component.center.value + resolution_component.center.value
+            ) + offset_float
+            return self._gaussian_eval(energy, center, width, area)
 
+        # Lorentzian + Lorentzian --> Lorentzian with width w1 + w2 and area A1 * A2
+        if isinstance(sample_component, Lorentzian) and isinstance(
+            resolution_component, Lorentzian
+        ):
+            width = sample_component.width.value + resolution_component.width.value
+            area = sample_component.area.value * resolution_component.area.value
+            center = (
+                sample_component.center.value + resolution_component.center.value
+            ) + offset_float
+            return self._lorentzian_eval(energy, center, width, area)
 
-def _try_analytic_pair(
-    energy: np.ndarray,
-    sample_component: Union[ModelComponent, SampleModel],
-    resolution_component: Union[ModelComponent, SampleModel],
-    offset_float: float,
-) -> Tuple[bool, np.ndarray]:
-    """
-    Attempt an analytic convolution for component pair (sample_component, resolution_component).
-    Returns (True, contribution) if handled, else (False, zeros).
-    The convolution of two gaussian components results in another gaussian component with width sqrt(w1^2 + w2^2).
-    The convolution of two lorentzian components results in another lorentzian component with width w1 + w2.
-    The convolution of a gaussian and a lorentzian results in a voigt profile.
-    The convolution of a delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.
-    All areas are multiplied.
+        # Gaussian + Lorentzian --> Voigt with area A1 * A2
+        if (
+            isinstance(sample_component, Gaussian)
+            and isinstance(resolution_component, Lorentzian)
+        ) or (
+            isinstance(sample_component, Lorentzian)
+            and isinstance(resolution_component, Gaussian)
+        ):
+            if isinstance(sample_component, Gaussian):
+                gaussian, lorentzian = sample_component, resolution_component
+            else:
+                gaussian, lorentzian = resolution_component, sample_component
+            center = (gaussian.center.value + lorentzian.center.value) + offset_float
+            area = gaussian.area.value * lorentzian.area.value
+            return self._voigt_eval(
+                energy, center, gaussian.width.value, lorentzian.width.value, area
+            )
 
+        # Voigt + Lorentzian --> Voigt with area A1 * A2, Gaussian width unchanged, Lorentzian widths summed
+        if (
+            isinstance(sample_component, Voigt)
+            and isinstance(resolution_component, Lorentzian)
+        ) or (
+            isinstance(sample_component, Lorentzian)
+            and isinstance(resolution_component, Voigt)
+        ):
+            if isinstance(sample_component, Voigt):
+                voigt, lorentzian = sample_component, resolution_component
+            else:
+                voigt, lorentzian = resolution_component, sample_component
+            center = (voigt.center.value + lorentzian.center.value) + offset_float
+            area = voigt.area.value * lorentzian.area.value
+            g_width = voigt.g_width.value
+            l_width = voigt.l_width.value + lorentzian.width.value
+            return self._voigt_eval(energy, center, g_width, l_width, area)
 
-    Args:
-        energy: np.ndarray
-            1D array of energy values where the convolution is evaluated.
-        sample_component : Union[ModelComponent, SampleModel]
-            The sample component to be convolved.
-        resolution_component : Union[ModelComponent, SampleModel]
-            The resolution component to convolve with.
-        offset_float : float
-            The offset in energyto apply to the convolution.
+        # Voigt + Gaussian --> Voigt with area A1 * A2, Lorentzian width unchanged, Gaussian widths summed in quadrature
+        if (
+            isinstance(sample_component, Voigt)
+            and isinstance(resolution_component, Gaussian)
+        ) or (
+            isinstance(sample_component, Gaussian)
+            and isinstance(resolution_component, Voigt)
+        ):
+            if isinstance(sample_component, Voigt):
+                voigt, gaussian = sample_component, resolution_component
+            else:
+                voigt, gaussian = resolution_component, sample_component
+            center = (voigt.center.value + gaussian.center.value) + offset_float
+            area = voigt.area.value * gaussian.area.value
+            l_width = voigt.l_width.value
+            g_width = np.sqrt(voigt.g_width.value**2 + gaussian.width.value**2)
+            return self._voigt_eval(energy, center, g_width, l_width, area)
 
-    Returns:
-        Tuple[bool, np.ndarray]:
-            - bool: True if analytical convolution was computed, False otherwise
-            - np.ndarray: The convolution result if computed, or zeros if not handled
-    """
-    # Two delta functions is not meaningful
-    if isinstance(sample_component, DeltaFunction) and isinstance(
-        resolution_component, DeltaFunction
-    ):
-        raise ValueError("Convolution of two delta functions is not defined.")
-
-    # Delta function + anything --> anything, shifted by delta center with area A1 * A2
-    if isinstance(sample_component, DeltaFunction):
-        return True, sample_component.area.value * resolution_component.evaluate(
-            energy - sample_component.center.value - offset_float
+        return ValueError(
+            f"Analytical convolution not implemented for component pair: {type(sample_component).__name__}, {type(resolution_component).__name__}"
         )
 
-    if isinstance(resolution_component, DeltaFunction):
-        return True, resolution_component.area.value * sample_component.evaluate(
-            energy - resolution_component.center.value - offset_float
+    def _gaussian_eval(
+        self, energy: np.ndarray, center: float, width: float, area: float
+    ) -> np.ndarray:
+        """
+        Evaluate a Gaussian function. y = (area / (sqrt(2pi) * width)) * exp(-0.5 * ((x - center) / width)^2)
+        All checks are handled in the calling function.
+
+        Args:
+            energy : np.ndarray
+                1D array of energy values where the Gaussian is evaluated.
+            center : float
+                The center of the Gaussian.
+            width : float
+                The width (sigma) of the Gaussian.
+            area : float
+                The area under the Gaussian curve.
+        Returns:
+            np.ndarray
+                The evaluated Gaussian values at x.
+        """
+        return (
+            area
+            * 1
+            / (np.sqrt(2 * np.pi) * width)
+            * np.exp(-0.5 * ((energy - center) / width) ** 2)
         )
 
-    # Gaussian + Gaussian --> Gaussian with width sqrt(w1^2 + w2^2) and area A1 * A2
-    if isinstance(sample_component, Gaussian) and isinstance(
-        resolution_component, Gaussian
-    ):
-        width = np.sqrt(
-            sample_component.width.value**2 + resolution_component.width.value**2
+    def _lorentzian_eval(
+        self, energy: np.ndarray, center: float, width: float, area: float
+    ) -> np.ndarray:
+        """
+        Evaluate a Lorentzian function. y = (area * width / pi) / ((x - center)^2 + width^2).
+        All checks are handled in the calling function.
+
+        Args:
+            energy : np.ndarray
+                1D array of energy values where the Lorentzian is evaluated.
+            center : float
+                The center of the Lorentzian.
+            width : float
+                The width (HWHM) of the Lorentzian.
+            area : float
+                The area under the Lorentzian.
+        Returns:
+            np.ndarray
+                The evaluated Lorentzian values at x.
+        """
+        return area * width / np.pi / ((energy - center) ** 2 + width**2)
+
+    def _voigt_eval(
+        self,
+        energy: np.ndarray,
+        center: float,
+        g_width: float,
+        l_width: float,
+        area: float,
+    ) -> np.ndarray:
+        """
+        Evaluate a Voigt profile function using scipy's voigt_profile.
+        Args:
+            energy : np.ndarray
+                1D array of energy values where the Voigt profile is evaluated.
+            center : float
+                The center of the Voigt profile.
+            g_width : float
+                The Gaussian width (sigma) of the Voigt profile.
+            l_width : float
+                The Lorentzian width (HWHM) of the Voigt profile.
+            area : float
+                The area under the Voigt profile.
+        Returns:
+            np.ndarray
+                The evaluated Voigt profile values at x.
+        """
+
+        return area * voigt_profile(energy - center, g_width, l_width)
+
+
+class NumericalConvolution:
+    def __init__(self):
+        self._energy_dense = None
+        pass
+
+    def convolution(
+        self,
+        energy: np.ndarray,
+        sample_model: Union[SampleModel, ModelComponent],
+        resolution_model: Union[SampleModel, ModelComponent],
+        offset_float: Optional[float] = 0.0,
+        upsample_factor: Optional[int] = 5,
+        extension_factor: Optional[float] = 0.2,
+        temperature: Optional[Union[Parameter, float]] = None,
+        temperature_unit: Optional[Union[str, sc.Unit]] = "K",
+        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
+        normalize_detailed_balance: Optional[bool] = True,
+    ) -> np.ndarray:
+        """
+        Numerical convolution using FFT with optional upsampling + extended range.
+        Includes detailed balance correction if temperature is provided.
+
+
+        Args:
+            energy : np.ndarray
+                1D array of energy values where the convolution is evaluated.
+            sample_model : SampleModel or ModelComponent
+                The sample model to be convolved.
+            resolution_model : SampleModel or ModelComponent
+                The resolution model to convolve with.
+            offset_float : float, or None, optional
+                The offset to apply to the input array.
+            upsample_factor : int, optional
+                The factor by which to upsample the input data before convolution. Default is 5.
+            extension_factor : float, optional
+                The factor by which to extend the input data range before convolution. Default is 0.2.
+            temperature : Parameter, float, or None, optional
+                The temperature to use for detailed balance correction. Default is None.
+            temperature_unit : str or sc.Unit, optional
+                The unit of the temperature parameter. Default is 'K'.
+            energy_unit : str or sc.Unit, optional
+                The unit of the energy. Default is 'meV'.
+            normalize_detailed_balance : bool, optional
+                Whether to normalize the detailed balance factor. Default is True.
+        Returns:
+            np.ndarray
+                The convolved values evaluated at energy.
+        """
+
+        # Create a dense grid to improve accuracy. We evaluate on this grid and interpolate back to the original values at the end
+        energy_dense = self._create_dense_grid(
+            energy, upsample_factor=upsample_factor, extension_factor=extension_factor
         )
-        area = sample_component.area.value * resolution_component.area.value
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + offset_float
-        return True, _gaussian_eval(energy, center, width, area)
 
-    # Lorentzian + Lorentzian --> Lorentzian with width w1 + w2 and area A1 * A2
-    if isinstance(sample_component, Lorentzian) and isinstance(
-        resolution_component, Lorentzian
-    ):
-        width = sample_component.width.value + resolution_component.width.value
-        area = sample_component.area.value * resolution_component.area.value
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + offset_float
-        return True, _lorentzian_eval(energy, center, width, area)
-
-    # Gaussian + Lorentzian --> Voigt with area A1 * A2
-    if (
-        isinstance(sample_component, Gaussian)
-        and isinstance(resolution_component, Lorentzian)
-    ) or (
-        isinstance(sample_component, Lorentzian)
-        and isinstance(resolution_component, Gaussian)
-    ):
-        if isinstance(sample_component, Gaussian):
-            gaussian, lorentzian = sample_component, resolution_component
+        energy_step = energy_dense[1] - energy_dense[0]
+        span = energy_dense.max() - energy_dense.min()
+        # Handle offset for even length of x in convolution.
+        # The convolution of two arrays of length N is of length 2N-1. When using 'same' mode, only the central N points are kept,
+        # so the output has the same length as the input.
+        # However, if N is even, the center falls between two points, leading to a half-bin offset.
+        # For example, if N=4, the convolution has length 7, and when we select the 4 central points we either get
+        # indices [2,3,4,5] or [1,2,3,4], both of which are offset by 0.5*dx from the true center at index 3.5.
+        if len(energy_dense) % 2 == 0:
+            x_even_length_offset = -0.5 * energy_step
         else:
-            gaussian, lorentzian = resolution_component, sample_component
-        center = (gaussian.center.value + lorentzian.center.value) + offset_float
-        area = gaussian.area.value * lorentzian.area.value
-        return True, _voigt_eval(
-            energy, center, gaussian.width.value, lorentzian.width.value, area
+            x_even_length_offset = 0.0
+
+        # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
+        if not np.isclose(energy_dense.mean(), 0.0):
+            energy_dense_centered = np.linspace(
+                -0.5 * span, 0.5 * span, len(energy_dense)
+            )
+        else:
+            energy_dense_centered = energy_dense
+
+        # Give warnings if peaks are very wide or very narrow
+        self._check_width_thresholds(
+            model=sample_model,
+            span=span,
+            energy_step=energy_step,
+            model_name="sample model",
+        )
+        self._check_width_thresholds(
+            model=resolution_model,
+            span=span,
+            energy_step=energy_step,
+            model_name="resolution model",
         )
 
-    return False, np.zeros_like(energy, dtype=float)
+        # Evaluate sample model. Delta functions are handled separately for accuracy.
+        if isinstance(sample_model, SampleModel):
+            sample_vals = sample_model.evaluate_without_delta(
+                energy_dense - offset_float - x_even_length_offset
+            )
+        elif isinstance(sample_model, DeltaFunction):
+            sample_vals = np.zeros_like(energy_dense)
+        else:
+            sample_vals = sample_model.evaluate(
+                energy_dense - offset_float - x_even_length_offset
+            )
 
+        # Detailed balance correction
+        if temperature is not None:
+            detailed_balance_factor_correction = detailed_balance_factor(
+                energy=energy_dense,
+                temperature=temperature,
+                energy_unit=energy_unit,
+                temperature_unit=temperature_unit,
+                divide_by_temperature=normalize_detailed_balance,
+            )
+            sample_vals *= detailed_balance_factor_correction
 
-def _gaussian_eval(
-    energy: np.ndarray, center: float, width: float, area: float
-) -> np.ndarray:
-    """
-    Evaluate a Gaussian function. y = (area / (sqrt(2pi) * width)) * exp(-0.5 * ((x - center) / width)^2)
-    All checks are handled in the calling function.
+        # Evaluate resolution model
+        if isinstance(resolution_model, SampleModel):
+            resolution_vals = resolution_model.evaluate_without_delta(
+                energy_dense_centered
+            )
+        elif isinstance(resolution_model, DeltaFunction):
+            resolution_vals = np.zeros_like(energy_dense_centered)
+        else:
+            resolution_vals = resolution_model.evaluate(energy_dense_centered)
 
-    Args:
-        energy : np.ndarray
-            1D array of energy values where the Gaussian is evaluated.
-        center : float
-            The center of the Gaussian.
-        width : float
-            The width (sigma) of the Gaussian.
-        area : float
-            The area under the Gaussian curve.
-    Returns:
-        np.ndarray
-            The evaluated Gaussian values at x.
-    """
-    return (
-        area
-        * 1
-        / (np.sqrt(2 * np.pi) * width)
-        * np.exp(-0.5 * ((energy - center) / width) ** 2)
-    )
+        # Convolution
+        convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
+        convolved *= energy_step  # normalize
 
+        if upsample_factor > 0:
+            # interpolate back to original energy grid
+            convolved = np.interp(energy, energy_dense, convolved, left=0.0, right=0.0)
 
-def _lorentzian_eval(
-    energy: np.ndarray, center: float, width: float, area: float
-) -> np.ndarray:
-    """
-    Evaluate a Lorentzian function. y = (area * width / pi) / ((x - center)^2 + width^2).
-    All checks are handled in the calling function.
+        # # Add delta function contributions
+        # delta_contributions = _calculate_delta_contributions(
+        #     energy=energy,
+        #     sample_model=sample_model,
+        #     resolution_model=resolution_model,
+        #     offset_float=offset_float,
+        # )
+        # convolved += delta_contributions
 
-    Args:
-        energy : np.ndarray
-            1D array of energy values where the Lorentzian is evaluated.
-        center : float
-            The center of the Lorentzian.
-        width : float
-            The width (HWHM) of the Lorentzian.
-        area : float
-            The area under the Lorentzian.
-    Returns:
-        np.ndarray
-            The evaluated Lorentzian values at x.
-    """
-    return area * width / np.pi / ((energy - center) ** 2 + width**2)
+        return convolved
 
+    # ---------------------- helpers & evals -----------------------
 
-def _voigt_eval(
-    energy: np.ndarray, center: float, g_width: float, l_width: float, area: float
-) -> np.ndarray:
-    """
-    Evaluate a Voigt profile function using scipy's voigt_profile.
-    Args:
-        energy : np.ndarray
-            1D array of energy values where the Voigt profile is evaluated.
-        center : float
-            The center of the Voigt profile.
-        g_width : float
-            The Gaussian width (sigma) of the Voigt profile.
-        l_width : float
-            The Lorentzian width (HWHM) of the Voigt profile.
-        area : float
-            The area under the Voigt profile.
-    Returns:
-        np.ndarray
-            The evaluated Voigt profile values at x.
-    """
+    def _create_dense_grid(
+        self,
+        energy: np.ndarray,
+        upsample_factor: int = 5,
+        extension_factor: float = 0.2,
+    ) -> np.ndarray:
+        """
+        Create a dense grid by upsampling and extending the input energy array.
 
-    return area * voigt_profile(energy - center, g_width, l_width)
-
-
-def _check_width_thresholds(
-    model: Union[SampleModel, ModelComponent],
-    span: float,
-    energy_step: float,
-    model_name: str,
-) -> None:
-    """
-    Helper function to check and warn if components are wide compared to the span of the data, or narrow compared to the spacing.
-    In both cases, the convolution accuracy may be compromised.
-    Args:
-        model : SampleModel or ModelComponent
-            The model to check.
-        energy_step : float
-            The bin spacing of the energy array.
-        span : float
-            The total span of the energy array.
-        model_name : str
-            A string indicating whether the model is a 'sample model' or 'resolution model' for warning messages.
-    returns:
-        None
-    warns:
-        UserWarning
-            If the component widths are not appropriate for the data span or bin spacing.
-
-    """
-
-    # The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
-    LARGE_WIDTH_THRESHOLD = (
-        0.1  # Threshold for large widths compared to span - warn if width > 10% of span
-    )
-    SMALL_WIDTH_THRESHOLD = (
-        1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
-    )
-
-    # Handle SampleModel or ModelComponent
-    if isinstance(model, SampleModel):
-        components = model.components
-    else:
-        components = [model]  # Treat single ModelComponent as a list
-
-    for comp in components:
-        if hasattr(comp, "width"):
-            if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
-                warnings.warn(
-                    f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
-                    f"array ({span}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
-                    UserWarning,
+        Args:
+            energy : np.ndarray
+                1D array of energy values.
+            upsample_factor : int, optional
+                The factor by which to upsample the input data. Default is 5.
+            extension_factor : float, optional
+                The factor by which to extend the input data range. Default is 0.2.
+        Returns:
+            np.ndarray
+                The dense grid created by upsampling and extending x.
+        """
+        if upsample_factor == 0:
+            # Check if the array is uniformly spaced.
+            energy_diff = np.diff(energy)
+            is_uniform = np.allclose(energy_diff, energy_diff[0])
+            if not is_uniform:
+                raise ValueError(
+                    "Input array `energy` must be uniformly spaced if upsample_factor = 0."
                 )
-            if comp.width.value < SMALL_WIDTH_THRESHOLD * energy_step:
-                warnings.warn(
-                    f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
-                    f"array ({energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
-                    UserWarning,
-                )
+            energy_dense = energy
+        else:
+            # Create an extended and upsampled energy grid
+            energy_min, energy_max = energy.min(), energy.max()
+            span = energy_max - energy_min
+            extra = extension_factor * span
+            extended_min = energy_min - extra
+            extended_max = energy_max + extra
+            num_points = len(energy) * upsample_factor
+            energy_dense = np.linspace(extended_min, extended_max, num_points)
+
+        self._energy_dense = energy_dense
+
+    def _check_width_thresholds(
+        self,
+        model: Union[SampleModel, ModelComponent],
+        span: float,
+        energy_step: float,
+        model_name: str,
+    ) -> None:
+        """
+        Helper function to check and warn if components are wide compared to the span of the data, or narrow compared to the spacing.
+        In both cases, the convolution accuracy may be compromised.
+        Args:
+            model : SampleModel or ModelComponent
+                The model to check.
+            energy_step : float
+                The bin spacing of the energy array.
+            span : float
+                The total span of the energy array.
+            model_name : str
+                A string indicating whether the model is a 'sample model' or 'resolution model' for warning messages.
+        returns:
+            None
+        warns:
+            UserWarning
+                If the component widths are not appropriate for the data span or bin spacing.
+
+        """
+
+        # The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
+        LARGE_WIDTH_THRESHOLD = 0.1  # Threshold for large widths compared to span - warn if width > 10% of span
+        SMALL_WIDTH_THRESHOLD = 1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
+
+        # Handle SampleModel or ModelComponent
+        if isinstance(model, SampleModel):
+            components = model.components
+        else:
+            components = [model]  # Treat single ModelComponent as a list
+
+        for comp in components:
+            if hasattr(comp, "width"):
+                if comp.width.value > LARGE_WIDTH_THRESHOLD * span:
+                    warnings.warn(
+                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
+                        f"array ({span}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
+                        UserWarning,
+                    )
+                if comp.width.value < SMALL_WIDTH_THRESHOLD * energy_step:
+                    warnings.warn(
+                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
+                        f"array ({energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
+                        UserWarning,
+                    )
 
 
-def _find_delta_components(
-    model: Union[SampleModel, ModelComponent],
-) -> List[DeltaFunction]:
-    """Return a list of DeltaFunction instances contained in `model`.
+# def convolution(self,
+#     energy: np.ndarray,
+#     sample_model: Union[SampleModel, ModelComponent],
+#     resolution_model: Union[SampleModel, ModelComponent],
+#     offset: Optional[Union[Parameter, float, None]] = None,
+#     method: Optional[str] = "auto",
+#     upsample_factor: Optional[int] = 0,
+#     extension_factor: Optional[float] = 0.2,
+#     temperature: Optional[Union[Parameter, float, None]] = None,
+#     temperature_unit: Union[str, sc.Unit] = "K",
+#     energy_unit: Optional[Union[str, sc.Unit]] = "meV",
+#     normalize_detailed_balance: Optional[bool] = True,
+# ) -> np.ndarray:
+#     """
+#     Calculate the convolution of a sample model with a resolution model using analytical expressions or numerical FFT.
+#     Accepts SampleModel or ModelComponent for both sample and resolution.
+#     If method is 'auto', analytical convolution is preferred when possible, otherwise numerical convolution is used.
+#     Detailed balancing is included if temperature is provided. This requires numerical convolution and that the units
+#     of energy and temperature are provided. An error will be raised if the units are not compatible.
+#     The calculated model is shifted by the specified offset.
 
-    Args:
-        model : SampleModel or ModelComponent
-            The model to search for DeltaFunction components.
-    Returns:
-        List[DeltaFunction]
-            A list of DeltaFunction components found in the model.
-    """
-    if isinstance(model, DeltaFunction):
-        return [model]
-    if isinstance(model, SampleModel):
-        return [c for c in model.components if isinstance(c, DeltaFunction)]
-    return []
+#     Examples:
+#     energy = np.linspace(-10, 10, 100)
+#     sample = SampleModel()
+#     sample.add_component(Gaussian(name="SampleGaussian", area=1.0, center=0.1, width=1.0))
+#     resolution = Gaussian(name="ResolutionGaussian", area=1.0, center=0.0, width=0.5)
+#     result = convolution(energy, sample, resolution, offset=0.2)
+
+#     energy = np.linspace(-10, 10, 100)
+#     sample = SampleModel()
+#     sample.add_component(Gaussian(name="Gaussian", area=1.0, center=0.1, width=1.0))
+#     sample.add_component(DampedHarmonicOscillator(name="DHO", area=2.0, center=1.5, width=0.2))
+#     sample.add_component(DeltaFunction(name="Delta", area=0.5, center=0.0))
+
+#     resolution = SampleModel()
+#     resolution.add_component(Gaussian(name="ResolutionGaussian", area=0.8, center=0.0, width=0.5))
+#     resolution.add_component(Lorentzian(name="ResolutionLorentzian", area=0.2, center=0.1, width=0.3))
+
+#     result_auto = convolution(energy, sample, resolution, offset=0.2, method='auto', upsample_factor=5, extension_factor=0.2)
+#     result_numerical = convolution(energy, sample, resolution, offset=0.2, method='numerical', upsample_factor=5, extension_factor=0.2)
 
 
-def _calculate_delta_contributions(
-    energy: np.ndarray,
-    sample_model: Union[SampleModel, ModelComponent],
-    resolution_model: Union[SampleModel, ModelComponent],
-    offset_float: float,
-) -> np.ndarray:
-    """
-    Calculate the contributions of delta functions in the convolution.
-    Args:
-        energy : np.ndarray
-            1D array of energy values where the convolution is evaluated.
-        sample_model : SampleModel or ModelComponent
-            The sample model to be convolved.
-        resolution_model : SampleModel or ModelComponent
-            The resolution model to convolve with.
-        offset_float : float
-            The offset to apply to the convolution.
-    Returns:
-        np.ndarray
-            The delta function contributions evaluated at energy.
+#     Args:
+#         energy : np.ndarray
+#             1D array of energy transfer where the convolution is evaluated.
+#         sample_model : SampleModel or ModelComponent
+#             The sample model to be convolved.
+#         resolution_model : SampleModel or ModelComponent
+#             The resolution model to convolve with.
+#         offset : Parameter, float, or None, optional
+#             The offset to apply to the x values before convolution.
+#         method : str, optional
+#             The convolution method to use: 'auto', 'analytical' or 'numerical'. Default is 'auto'.
+#         upsample_factor : int, optional
+#             The factor by which to upsample the input data before numerical convolution. Default is 0 (no upsampling).
+#         extension_factor : float, optional
+#             The factor by which to extend the input data range before numerical convolution. Default is 0.2.
+#         temperature : Parameter, float, or None, optional
+#             The temperature to use for detailed balance calculations. Default is None.
+#         temperature_unit : str or sc.Unit, optional
+#             The unit of the temperature parameter. Default is 'K'.
+#         energy_unit : str or sc.Unit, optional
+#             The unit of the energy. Default is 'meV'.
+#         normalize_detailed_balance : bool, optional
+#             Whether to normalize the detailed balance factor. Default is True.
+#     """
 
-            Raises:
-        ValueError
-            If both sample_model and resolution_model contain delta functions.
-    """
-    delta_contributions = np.zeros_like(energy)
+#     # Input validation
+#     if not isinstance(energy, np.ndarray):
+#         raise TypeError(
+#             f"`energy` is an instance of {type(energy).__name__}, but must be a numpy array."
+#         )
 
-    # Add delta contributions on original grid
-    # collect deltas
-    sample_deltas = _find_delta_components(sample_model)
-    resolution_deltas = _find_delta_components(resolution_model)
+#     energy = np.asarray(energy, dtype=float)
+#     if energy.ndim != 1 or not np.all(np.isfinite(energy)):
+#         raise ValueError("`energy` must be a 1D finite array.")
 
-    # error if both contain delta(s)
-    if sample_deltas and resolution_deltas:
-        raise ValueError(
-            "Both sample_model and resolution_model contain delta functions. "
-            "Their convolution is not defined."
-        )
+#     if not isinstance(sample_model, (SampleModel, ModelComponent)):
+#         raise TypeError(
+#             f"`sample_model` is an instance of {type(sample_model).__name__}, but must be SampleModel or ModelComponent."
+#         )
 
-    # if sample has deltas, convolve each delta with the resolution_model
-    for delta in sample_deltas:
-        (_, delta_contribution) = _try_analytic_pair(
-            energy=energy,
-            sample_component=delta,
-            resolution_component=resolution_model,
-            offset_float=offset_float,
-        )
-        delta_contributions += delta_contribution
+#     if not isinstance(resolution_model, (SampleModel, ModelComponent)):
+#         raise TypeError(
+#             f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be SampleModel or ModelComponent."
+#         )
 
-    # if resolution has deltas, convolve each delta with the sample_model
-    for delta in resolution_deltas:
-        (_, delta_contribution) = _try_analytic_pair(
-            energy=energy,
-            sample_component=sample_model,
-            resolution_component=delta,
-            offset_float=offset_float,
-        )
-        delta_contributions += delta_contribution
+#     if isinstance(sample_model, SampleModel):
+#         if not sample_model.components:
+#             raise ValueError("SampleModel must have at least one component.")
 
-    return delta_contributions
+#     if isinstance(resolution_model, SampleModel):
+#         if not resolution_model.components:
+#             raise ValueError("ResolutionModel must have at least one component.")
+
+#     # Handle offset
+#     if offset is None:
+#         offset_float = 0.0
+#     elif isinstance(offset, Parameter):
+#         offset_float = offset.value
+#     elif isinstance(offset, Numerical):
+#         offset_float = float(offset)
+#     else:
+#         raise TypeError(
+#             f"Expected offset to be Parameter, number, or None, got {type(offset)}"
+#         )
+
+#     if not isinstance(upsample_factor, int) or upsample_factor < 0:
+#         raise ValueError("upsample_factor must be a non-negative integer.")
+
+#     if not isinstance(extension_factor, float) or extension_factor < 0.0:
+#         raise ValueError("extension_factor must be a non-negative float.")
+
+#     if temperature is not None:
+#         if energy_unit is None:
+#             raise ValueError(
+#                 "energy_unit must be provided when temperature is specified."
+#             )
+#         if not isinstance(energy_unit, (str, sc.Unit)):
+#             raise TypeError(
+#                 f"Expected energy_unit to be str or sc.Unit, got {type(energy_unit)}"
+#             )
+
+#     use_numerical_convolution_as_fallback = False
+#     if method == "auto":
+#         if temperature is not None:
+#             method = "numerical"
+#         else:
+#             method = "analytical"
+#             use_numerical_convolution_as_fallback = True
+
+#     if method == "analytical":
+#         if temperature is not None:
+#             raise ValueError(
+#                 "Analytical convolution is not supported with detailed balance. Set method to 'numerical' instead or set the temperature to None."
+#             )
+#         return _analytical_convolution(
+#             energy=energy,
+#             sample_model=sample_model,
+#             resolution_model=resolution_model,
+#             offset_float=offset_float,
+#             use_numerical_convolution_as_fallback=use_numerical_convolution_as_fallback,
+#             upsample_factor=upsample_factor,
+#             extension_factor=extension_factor,
+#         )
+#     elif method == "numerical":
+#         return _numerical_convolution(
+#             energy=energy,
+#             sample_model=sample_model,
+#             resolution_model=resolution_model,
+#             offset_float=offset_float,
+#             upsample_factor=upsample_factor,
+#             extension_factor=extension_factor,
+#             temperature=temperature,
+#             temperature_unit=temperature_unit,
+#             energy_unit=energy_unit,
+#             normalize_detailed_balance=normalize_detailed_balance,
+#         )
+#     else:
+#         raise ValueError(
+#             f"Unknown convolution method: {method}. Choose from 'auto', 'analytical', or 'numerical'."
+#         )
