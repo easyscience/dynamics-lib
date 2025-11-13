@@ -322,6 +322,22 @@ class TestSampleModel:
         for param in sample_model.get_parameters():
             assert param.fixed is False
 
+    def test_contains(self, sample_model):
+        # WHEN THEN
+        assert "TestGaussian1" in sample_model
+        assert "TestLorentzian1" in sample_model
+        assert "NonExistentComponent" not in sample_model
+
+        gaussian_component = sample_model.components[0]
+        lorentzian_component = sample_model.components[1]
+        assert gaussian_component in sample_model
+        assert lorentzian_component in sample_model
+
+        fake_component = Gaussian(
+            name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
+        )
+        assert fake_component not in sample_model
+
     def test_repr_contains_name_and_components(self, sample_model):
         # WHEN THEN
         rep = repr(sample_model)

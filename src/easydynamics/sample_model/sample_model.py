@@ -286,10 +286,10 @@ class SampleModel(TheoreticalModelBase):
 
         if isinstance(item, str):
             # Check by component name
-            return any(comp.name == item for comp in self)
+            return any(comp.name == item for comp in self.components)
         elif isinstance(item, ModelComponent):
             # Check by component instance
-            return any(comp is item for comp in self)
+            return any(comp is item for comp in self.components)
         else:
             return False
 
