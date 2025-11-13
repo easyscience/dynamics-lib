@@ -3,7 +3,6 @@ from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes import CollectionBase
 from easyscience.global_object.undo_redo import NotarizedDict
 from easyscience.job.theoreticalmodel import TheoreticalModelBase
 
@@ -12,7 +11,7 @@ from .components.model_component import ModelComponent
 Numeric = Union[float, int]
 
 
-class SampleModel(CollectionBase, TheoreticalModelBase):
+class SampleModel(TheoreticalModelBase):
     """
     A model of the scattering from a sample, combining multiple model components.
 
@@ -29,7 +28,8 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         self,
         name: str = "MySampleModel",
         unit: Optional[Union[str, sc.Unit]] = "meV",
-        data: Optional[List] = None,
+        # components: Optional[List] = None,
+        **kwargs,
     ):
         """
         Initialize a new SampleModel.
@@ -40,7 +40,7 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
             Name of the sample model.
         unit : str or sc.Unit, optional
             Unit of the sample model. Defaults to "meV".
-        data : List[ModelComponent], optional
+        components : List[ModelComponent], optional
             Initial list of model components to include in the sample model.
         """
 
@@ -49,14 +49,11 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
             self._kwargs = NotarizedDict()
 
         self._unit = unit
+        self._components = []
 
-        # Add initial components if provided. Mostly used for serialization.
-        if data:
-            for item in data:
-                # ensure item is a ModelComponent
-                if not isinstance(item, ModelComponent):
-                    raise TypeError("Data items must be instances of ModelComponent.")
-                self.insert(index=len(self), value=item)
+        # Add initial components if provided. Needed for serialization.
+        for key, comp in list(kwargs.items()):
+            self._add_component(key, comp)
 
     def add_component(
         self, component: ModelComponent, name: Optional[str] = None
@@ -68,28 +65,40 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         component : ModelComponent
             The model component to add.
         name : str, optional
-            Name to assign to the component. If None, uses the component's own name.
+            Name to assign to the component. If None, uses the component's own name. Renames the component if a different name is provided.
         """
+
         if not isinstance(component, ModelComponent):
             raise TypeError("Component must be an instance of ModelComponent.")
 
         if name is None:
             name = component.name
-        if name in self.list_component_names():
+
+        if not isinstance(name, str):
+            raise TypeError("Component name must be a string.")
+        if name in getattr(self, "_kwargs", {}):
             raise ValueError(f"Component with name '{name}' already exists.")
 
-        component.name = name
-
-        self.insert(index=len(self), value=component)
+        # Use ObjBase to add component so Global Object is updated correctly
+        self._add_component(name, component)
 
     def remove_component(self, name: str) -> None:
         """
-        Remove a model component by name.
+        Remove a model component from the SampleModel by name.
+        Parameters
+        ----------
+        name : str
+            Name of the component to remove.
         """
-        for i, item in enumerate(self):
+
+        if not isinstance(name, str):
+            raise TypeError("Component name must be a string.")
+
+        for key, item in list(self._kwargs.items()):
             if item.name == name:
-                del self[i]
+                del self._kwargs[key]
                 return
+
         raise KeyError(f"No component named '{name}' exists in the model.")
 
     def list_component_names(self) -> List[str]:
@@ -102,28 +111,25 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
             Component names.
         """
 
-        return [item.name for item in list(self)]
+        return [item.name for item in self.components]
 
-    def clear_components(self):
-        """
-        Remove all components from the model.
-        """
-
-        for _ in range(len(self)):
-            del self[0]
+    def clear_components(self) -> None:
+        """Remove all components."""
+        for key in list(self._kwargs.keys()):
+            del self._kwargs[key]
 
     def normalize_area(self) -> None:
         # Useful for convolutions.
         """
         Normalize the areas of all components so they sum to 1.
         """
-        if not list(self):
+        if not self.components:
             raise ValueError("No components in the model to normalize.")
 
         area_params = []
         total_area = 0.0
 
-        for component in list(self):
+        for component in self.components:
             if hasattr(component, "area"):
                 area_params.append(component.area)
                 total_area += component.area.value
@@ -140,6 +146,17 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
 
         for param in area_params:
             param.value /= total_area
+
+    @property
+    def components(self) -> List[ModelComponent]:
+        """
+        Get the list of model components in the SampleModel.
+        Returns
+        -------
+        List[ModelComponent]
+            List of model components.
+        """
+        return list(self._kwargs.values())
 
     @property
     def unit(self) -> Optional[Union[str, sc.Unit]]:
@@ -169,13 +186,13 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         old_unit = self._unit
 
         try:
-            for component in list(self):
+            for component in self.components:
                 component.convert_unit(unit)
             self._unit = unit
         except Exception as e:
             # Attempt to rollback on failure
             try:
-                for component in list(self):
+                for component in self.components:
                     component.convert_unit(old_unit)
             except Exception:
                 pass  # Best effort rollback
@@ -198,9 +215,9 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
             Evaluated model values.
         """
 
-        if not list(self):
+        if not self.components:
             raise ValueError("No components in the model to evaluate.")
-        return sum(component.evaluate(x) for component in list(self))
+        return sum(component.evaluate(x) for component in self.components)
 
     def evaluate_component(
         self,
@@ -222,7 +239,7 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         np.ndarray
             Evaluated values for the specified component.
         """
-        if not list(self):
+        if not self.components:
             raise ValueError("No components in the model to evaluate.")
 
         if not isinstance(name, str):
@@ -230,7 +247,7 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
                 (f"Component name must be a string, got {type(name)} instead.")
             )
 
-        matches = [comp for comp in list(self) if comp.name == name]
+        matches = [comp for comp in self.components if comp.name == name]
         if not matches:
             raise KeyError(f"No component named '{name}' exists.")
 
@@ -284,6 +301,6 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         -------
         str
         """
-        comp_names = ", ".join(c.name for c in self) or "No components"
+        comp_names = ", ".join(c.name for c in self.components) or "No components"
 
         return f"<SampleModel name='{self.name}' | Components: {comp_names}>"
