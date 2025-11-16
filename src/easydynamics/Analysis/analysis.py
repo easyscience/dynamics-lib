@@ -1,25 +1,15 @@
-from easyscience.job.analysis import AnalysisBase
-from easyscience.fitting import AvailableMinimizers
-from easyscience.fitting.fitter import Fitter as EasyScienceFitter
-
-from easyscience.variable import Parameter
-
-from easydynamics.resolution import ResolutionHandler
-
-
-from easydynamics.sample import SampleModel
-from easydynamics.sample import DiffusionModel
-
-from easydynamics.Experiment import Experiment
-
-from typing import Iterable, Dict, Tuple, Optional
-
-
-import numpy as np
-
-import scipp as sc
+from typing import Dict, Iterable, Optional, Tuple
 
 import matplotlib.pyplot as plt
+import numpy as np
+from easyscience.fitting import AvailableMinimizers
+from easyscience.fitting.fitter import Fitter as EasyScienceFitter
+from easyscience.job.analysis import AnalysisBase
+from easyscience.variable import Parameter
+
+from easydynamics.experiment import Experiment
+from easydynamics.resolution import ResolutionHandler
+from easydynamics.sample import DiffusionModel, SampleModel
 
 
 class Analysis(AnalysisBase):
@@ -308,11 +298,11 @@ class Analysis(AnalysisBase):
             rep = this_model.update_values_from(
                 other_model,
                 only_unfixed=only_unfixed,
-                strict_components=strict_components,
-                strict_params=strict_params,
-                include_temperature=include_temperature,
-                require_same_units=require_same_units,
-                convert_units=convert_units,
+                # strict_components=strict_components,
+                # strict_params=strict_params,
+                # include_temperature=include_temperature,
+                # require_same_units=require_same_units,
+                # convert_units=convert_units,
             )
             if rep:
                 report[domain_name] = rep

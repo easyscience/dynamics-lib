@@ -1,30 +1,19 @@
-from easyscience.job.job import JobBase
-
-from easydynamics.sample import SampleModel
-from easydynamics.Experiment import Experiment
-from easydynamics.Analysis import Analysis
-
-from easydynamics.sample import ModelComponent
-
-from easydynamics.sample import DiffusionModel
-
-from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
-import numpy as np
-from easyscience.base_classes import ObjBase
-from easyscience.fitting.fitter import Fitter as EasyScienceFitter
-
-
-import scipp as sc
-import plopp as pp
-
-from collections import defaultdict, Counter
-
-from easydynamics.Experiment.data import Data
-
-
+import math
+from collections import Counter, defaultdict
 from itertools import product
 
-import math
+import numpy as np
+import plopp as pp
+import scipp as sc
+from easyscience.base_classes import ObjBase
+from easyscience.fitting.fitter import Fitter as EasyScienceFitter
+from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitter
+from easyscience.job.job import JobBase
+
+from easydynamics.Analysis import Analysis
+from easydynamics.experiment import Experiment
+from easydynamics.experiment.data import Data
+from easydynamics.sample import DiffusionModel, ModelComponent, SampleModel
 
 
 class Job(JobBase):
@@ -494,6 +483,194 @@ class Job(JobBase):
 
         return plot
 
+    def return_data_and_model(
+        self,
+        intensity_min=0.0,
+        intensity_max=0.06,
+        energy_min=-0.02,
+        energy_max=0.02,
+        plot_individual_components=True,
+    ):
+        data = self._experiment._data.data
+        energy_dim = "energy"
+
+        # same shape/coords as data
+        fit_total = sc.zeros_like(data)
+        component_arrays = {} if plot_individual_components else None
+
+        # all non-energy dims (e.g. ['Temperature','Q'] or just ['Q'])
+        loop_dims = [d for d in data.dims if d != energy_dim]
+
+        if not loop_dims:
+            E = fit_total.coords[energy_dim].values
+            ana = (
+                self._analysis[0]
+                if isinstance(self._analysis, (list, tuple))
+                else self._analysis
+            )
+
+            if plot_individual_components:
+                comps = ana.calculate_individual_components(E)  # dict
+                for name, vals in comps.items():
+                    if name not in component_arrays:
+                        component_arrays[name] = sc.zeros_like(data)
+                    component_arrays[name].values = vals
+            fit_total.values = ana.calculate_theory(E)
+
+        else:
+            ranges = [range(data.sizes[d]) for d in loop_dims]
+            for combo in product(*ranges):
+                fsel = fit_total
+                for d, i in zip(loop_dims, combo):
+                    fsel = fsel[d, i]
+                E = fsel.coords[energy_dim].values
+
+                ana = self._analysis
+                for i in combo:
+                    ana = ana[i]
+
+                if plot_individual_components:
+                    comps = ana.calculate_individual_components(E)
+                    for name, vals in comps.items():
+                        if name not in component_arrays:
+                            component_arrays[name] = sc.zeros_like(data)
+                        csel = component_arrays[name]
+                        for d, i in zip(loop_dims, combo):
+                            csel = csel[d, i]
+                        csel.values = vals
+                fsel.values = ana.calculate_theory(E)
+
+        # Build plot group
+        data_and_model = {"Data": self._experiment._data.data, "Model": fit_total}
+        if plot_individual_components and component_arrays:
+            data_and_model.update(component_arrays)
+        data_and_model = sc.DataGroup(data_and_model)
+
+        # Apply energy window
+        energy_min = energy_min * sc.Unit("meV")
+        energy_max = energy_max * sc.Unit("meV")
+
+        # Styling
+        linestyle = {"Data": "none", "Model": "-"}
+        marker = {"Data": "o", "Model": "none"}
+        markerfacecolor = {"Data": "none", "Model": "none"}
+        color = {"Data": "black", "Model": "red"}
+
+        if plot_individual_components and component_arrays:
+            for name in component_arrays:
+                linestyle[name] = "--"
+                marker[name] = "none"
+                markerfacecolor[name] = "none"
+
+        # plot = pp.slicer(
+        #     data_and_model["energy", energy_min:energy_max],
+        #     vmin=intensity_min,
+        #     vmax=intensity_max,
+        #     keep=["energy"],
+        #     linestyle=linestyle,
+        #     marker=marker,
+        #     markerfacecolor=markerfacecolor,
+        #     color=color,
+        # )
+
+        return data_and_model
+
+    def plot_data_and_model_residual(
+        self,
+        intensity_min=0.0,
+        intensity_max=0.06,
+        energy_min=-0.02,
+        energy_max=0.02,
+        plot_individual_components=True,
+    ):
+        data = self._experiment._data.data
+        energy_dim = "energy"
+
+        # same shape/coords as data
+        fit_total = sc.zeros_like(data)
+        component_arrays = {} if plot_individual_components else None
+
+        # all non-energy dims (e.g. ['Temperature','Q'] or just ['Q'])
+        loop_dims = [d for d in data.dims if d != energy_dim]
+
+        if not loop_dims:
+            E = fit_total.coords[energy_dim].values
+            ana = (
+                self._analysis[0]
+                if isinstance(self._analysis, (list, tuple))
+                else self._analysis
+            )
+
+            if plot_individual_components:
+                comps = ana.calculate_individual_components(E)  # dict
+                for name, vals in comps.items():
+                    if name not in component_arrays:
+                        component_arrays[name] = sc.zeros_like(data)
+                    component_arrays[name].values = vals
+            fit_total.values = ana.calculate_theory(E)
+
+        else:
+            ranges = [range(data.sizes[d]) for d in loop_dims]
+            for combo in product(*ranges):
+                fsel = fit_total
+                for d, i in zip(loop_dims, combo):
+                    fsel = fsel[d, i]
+                E = fsel.coords[energy_dim].values
+
+                ana = self._analysis
+                for i in combo:
+                    ana = ana[i]
+
+                if plot_individual_components:
+                    comps = ana.calculate_individual_components(E)
+                    for name, vals in comps.items():
+                        if name not in component_arrays:
+                            component_arrays[name] = sc.zeros_like(data)
+                        csel = component_arrays[name]
+                        for d, i in zip(loop_dims, combo):
+                            csel = csel[d, i]
+                        csel.values = vals
+                fsel.values = ana.calculate_theory(E)
+
+        # Build plot group
+        data_and_model = {
+            "Data": self._experiment._data.data,
+            "Model": fit_total,
+            "Residual": self._experiment._data.data - fit_total,
+        }
+        if plot_individual_components and component_arrays:
+            data_and_model.update(component_arrays)
+        data_and_model = sc.DataGroup(data_and_model)
+
+        # Apply energy window
+        energy_min = energy_min * sc.Unit("meV")
+        energy_max = energy_max * sc.Unit("meV")
+
+        # Styling
+        linestyle = {"Data": "none", "Model": "-", "Residual": "-"}
+        marker = {"Data": "o", "Model": "none", "Residual": "none"}
+        markerfacecolor = {"Data": "none", "Model": "none", "Residual": "none"}
+        color = {"Data": "black", "Model": "red", "Residual": "blue"}
+
+        if plot_individual_components and component_arrays:
+            for name in component_arrays:
+                linestyle[name] = "--"
+                marker[name] = "none"
+                markerfacecolor[name] = "none"
+
+        plot = pp.slicer(
+            data_and_model["energy", energy_min:energy_max],
+            vmin=intensity_min,
+            vmax=intensity_max,
+            keep=["energy"],
+            linestyle=linestyle,
+            marker=marker,
+            markerfacecolor=markerfacecolor,
+            color=color,
+        )
+
+        return plot
+
     def plot_fit_parameters(self, parameter_name):
         """
         Plot the fit parameters of the analysis.
@@ -825,6 +1002,10 @@ class Job(JobBase):
 
         diffusion_width = pars[parameter_name]["value"].values
         diffusion_width_var = pars[parameter_name]["value"].variances
+        diffusion_width_var[diffusion_width_var == 0] = 1e-5  # avoid zero variance
+        print(
+            "warning: zero variances in diffusion width replaced with 1e-5 for fitting."
+        )
         Q = self._experiment._data.data.coords.get("Q").values
 
         def fit_func(Q_vals):
@@ -834,6 +1015,42 @@ class Job(JobBase):
         fit_obj = ObjBase(
             name="diffusion_width",
             diffusion_coefficient=self._diffusion_model.diffusion_coefficient,
+        )
+
+        fitter = EasyScienceFitter(
+            fit_object=fit_obj,
+            fit_function=fit_func,
+        )
+
+        fit_result = fitter.fit(
+            x=Q, y=diffusion_width, weights=1.0 / np.sqrt(diffusion_width_var)
+        )
+
+        return fit_result
+
+    def fit_jump_diffusion_width(self, parameter_name):
+        pars = self.get_parameters_as_data_group()
+        if parameter_name not in pars:
+            raise KeyError(
+                f"Parameter '{parameter_name}' not found in fit parameters. Available parameters: {list(pars.keys())}"
+            )
+
+        diffusion_width = pars[parameter_name]["value"].values
+        diffusion_width_var = pars[parameter_name]["value"].variances
+        diffusion_width_var[diffusion_width_var == 0] = 1e-5  # avoid zero variance
+        print(
+            "warning: zero variances in diffusion width replaced with 1e-5 for fitting."
+        )
+        Q = self._experiment._data.data.coords.get("Q").values
+
+        def fit_func(Q_vals):
+            return self._diffusion_model.calculate_width(Q_vals)
+
+        # TODO: generalize to multiple parameters
+        fit_obj = ObjBase(
+            name="diffusion_width",
+            diffusion_coefficient=self._diffusion_model.diffusion_coefficient,
+            tau=self._diffusion_model.tau,
         )
 
         fitter = EasyScienceFitter(
@@ -858,14 +1075,14 @@ class Job(JobBase):
 
         # Plotting code goes here
         plt.errorbar(
-            Q,
+            Q**2,
             diffusion_width,
             yerr=np.sqrt(diffusion_width_var),
             fmt="o",
             label="Fitted Width",
         )
-        plt.plot(Q, theory_width, "-", label="Diffusion Model")
-        plt.xlabel("Q")
+        plt.plot(Q**2, theory_width, "-", label="Diffusion Model")
+        plt.xlabel("Q^2")
         plt.ylabel("Width")
         plt.legend()
         plt.show()
