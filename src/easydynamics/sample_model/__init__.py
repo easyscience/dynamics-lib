@@ -6,6 +6,7 @@ from .components import (
     Polynomial,
     Voigt,
 )
+from .diffusion_model import BrownianTranslationalDiffusion, DiffusionModel
 from .sample_model import SampleModel
 
 __all__ = [
@@ -16,4 +17,6 @@ __all__ = [
     "DeltaFunction",
     "DampedHarmonicOscillator",
     "Polynomial",
+    "DiffusionModel",
+    "BrownianTranslationalDiffusion",
 ]
