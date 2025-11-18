@@ -1,8 +1,6 @@
 from typing import Optional, Union
 
 import scipp as sc
-
-# from .components import ModelComponent
 from easyscience.base_classes import ObjBase
 
 
@@ -28,7 +26,11 @@ class DiffusionModel(ObjBase):
             Unit of the diffusion model. Defaults to "meV".
         """
 
-        super().__init__(name=name, unit=unit, **kwargs)
+        if not (unit is None or isinstance(unit, (str, sc.Unit))):
+            raise TypeError("unit must be None, a string, or a scipp Unit")
+
+        super().__init__(name=name, **kwargs)
+        self._unit = unit
 
     @property
     def unit(self) -> Optional[Union[str, sc.Unit]]:

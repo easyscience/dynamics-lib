@@ -2,6 +2,7 @@ from numbers import Number
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+import scipp as sc
 from easyscience.variable import DescriptorNumber, Parameter
 from scipp.constants import hbar as scipp_hbar
 
@@ -10,14 +11,6 @@ from easydynamics.sample_model.diffusion_model.diffusion_model import DiffusionM
 from easydynamics.sample_model.sample_model import SampleModel
 
 Numeric = Union[float, int]
-
-# TODO: units
-# TODO: integrate into easyscience
-# TODO: add tests
-# TODO: add example
-# TODO: write ADR
-# TODO: add to documentation
-# TODO: add type hints
 
 
 class BrownianTranslationalDiffusion(DiffusionModel):
@@ -40,7 +33,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
     def __init__(
         self,
         name: Optional[str] = "BrownianTranslationalDiffusion",
-        unit: Optional[str] = "meV",
+        unit: Optional[Union[str, sc.Unit]] = "meV",
         scale: Optional[Union[Parameter, Numeric]] = 1.0,
         diffusion_coefficient: Optional[Union[Parameter, Numeric]] = 1.0,
         diffusion_unit: Optional[str] = "m**2/s",
@@ -68,6 +61,16 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         if not isinstance(diffusion_coefficient, (Parameter, Numeric)):
             raise TypeError("diffusion_coefficient must be a Parameter or a number.")
 
+        if not isinstance(diffusion_unit, str):
+            raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
+        if diffusion_unit == "meV*Å**2" or diffusion_unit == "meV*angstrom**2":
+            # In this case, hbar is absorbed in the unit of D
+            self._hbar = DescriptorNumber("hbar", 1.0)
+        elif diffusion_unit == "m**2/s" or diffusion_unit == "m^2/s":
+            self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+        else:
+            raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
+
         if not isinstance(scale, Parameter):
             scale = Parameter(name="scale", value=float(scale), fixed=False)
 
@@ -84,14 +87,6 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             scale=scale,
             diffusion_coefficient=diffusion_coefficient,
         )
-
-        if diffusion_unit == "meV*Å**2" or diffusion_unit == "meV*angstrom**2":
-            # In this case, hbar is absorbed in the unit of D
-            self._hbar = DescriptorNumber("hbar", 1.0)
-        elif diffusion_unit == "m**2/s" or diffusion_unit == "m^2/s":
-            self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
-        else:
-            raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
 
     def calculate_width(self, Q: np.ndarray) -> np.ndarray:
@@ -106,11 +101,24 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         Returns
         -------
         np.ndarray
-            HWHM values.
+            HWHM values in the unit of the model (e.g., meV).
         """
         if not isinstance(Q, np.ndarray):
             raise TypeError("Q must be a numpy array.")
-        width = self._hbar * self.diffusion_coefficient * Q**2 / (self._angstrom**2)
+
+        width_list = []
+        for Q_value in Q:
+            # Q is given as a float, so we need to divide by angstrom**2 to get the right units
+            width = (
+                self._hbar
+                * self.diffusion_coefficient
+                * Q_value**2
+                / (self._angstrom**2)
+            )
+            width.convert_unit(self.unit)
+            width_list.append(width.value)
+        width = np.array(width_list)
+
         return width
 
     def calculate_EISF(self, Q: np.ndarray) -> np.ndarray:
@@ -156,7 +164,6 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         self,
         Q: Union[Number, list, np.ndarray],
         component_name: str = "Lorentzian",
-        width_name: str = "Gamma",
     ) -> List[SampleModel]:
         """
         Create SampleModel components for the Brownian translational diffusion model at given Q values.
@@ -184,9 +191,6 @@ class BrownianTranslationalDiffusion(DiffusionModel):
 
         if not isinstance(component_name, str):
             raise TypeError("component_name must be a string.")
-
-        if not isinstance(width_name, str):
-            raise TypeError("width_name must be a string.")
 
         sample_model_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the Lorentzians and the delta function.
@@ -223,6 +227,8 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         """
         if not isinstance(Q, (float)):
             raise TypeError("Q must be a float.")
+
+        # Q is given as a float, so we need to add the units
         return f"hbar * D* {Q} **2*1/(angstrom**2)"
 
     def _write_width_dependency_map_expression(self) -> Dict[str, str]:
