@@ -121,7 +121,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
         convolved *= self._energy_grid.energy_step  # normalize
 
-        if self.upsample_factor > 0:
+        if self.upsample_factor is not None:
             # interpolate back to original energy grid
             convolved = np.interp(
                 self.energy.values,

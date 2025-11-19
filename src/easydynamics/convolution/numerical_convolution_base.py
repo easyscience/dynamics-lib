@@ -104,8 +104,13 @@ class NumericalConvolutionBase(ConvolutionBase):
     def upsample_factor(self, factor: Numerical) -> None:
         """
         Set the upsample factor and recreate the dense grid."""
+        if factor is None:
+            self._upsample_factor = factor
+            self._energy_grid = self._create_dense_grid()
+            return
+
         if not isinstance(factor, Numerical):
-            raise TypeError("Upsample factor must be a numerical value.")
+            raise TypeError("Upsample factor must be a numerical value or None.")
         factor = float(factor)
         if factor < 1.0:
             raise ValueError("Upsample factor must be greater than 1.")
@@ -239,7 +244,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             DenseGrid
                 The dense grid created by upsampling and extending x.
         """
-        if self.upsample_factor == 0:
+        if self.upsample_factor is None:
             # Check if the array is uniformly spaced.
             energy_diff = np.diff(self.energy.values)
             is_uniform = np.allclose(energy_diff, energy_diff[0])
