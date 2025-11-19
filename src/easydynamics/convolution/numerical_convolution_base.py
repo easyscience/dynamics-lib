@@ -248,6 +248,8 @@ class NumericalConvolutionBase(ConvolutionBase):
                     "Input array `energy` must be uniformly spaced if upsample_factor = 0."
                 )
             energy_dense = self.energy.values
+
+            span = self.energy.values.max() - self.energy.values.min()
         else:
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
