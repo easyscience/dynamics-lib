@@ -63,6 +63,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
 
         if not isinstance(diffusion_unit, str):
             raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
+
         if diffusion_unit == "meV*Å**2" or diffusion_unit == "meV*angstrom**2":
             # In this case, hbar is absorbed in the unit of D
             self._hbar = DescriptorNumber("hbar", 1.0)
