@@ -33,14 +33,17 @@ class ConvolutionBase:
         energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent] = None,
         resolution_model: Union[SampleModel, ModelComponent] = None,
-        energy_unit: str = "meV",
+        energy_unit: Union[str, sc.Unit] = "meV",
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
     ):
         if isinstance(energy, Numerical):
-            energy = np.array([energy])
+            energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
             raise TypeError("Energy must be a numpy ndarray or a scipp Variable.")
+
+        if not isinstance(energy_unit, (str, sc.Unit)):
+            raise TypeError("Energy_unit must be a string or sc.Unit.")
 
         if isinstance(energy, np.ndarray):
             energy = sc.array(dims=["energy"], values=energy, unit=energy_unit)
@@ -52,12 +55,12 @@ class ConvolutionBase:
 
         if not isinstance(sample_model, SampleModel):
             raise TypeError(
-                f"`sample_model` is an instance of {type(sample_model).__name__}, but must be SampleModel."
+                f"`sample_model` is an instance of {type(sample_model).__name__}, but must be a SampleModel or ModelComponent."
             )
 
         if not isinstance(resolution_model, SampleModel):
             raise TypeError(
-                f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be SampleModel."
+                f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
             )
 
         if offset is None:
@@ -89,7 +92,7 @@ class ConvolutionBase:
         """
 
         if isinstance(energy, Numerical):
-            energy = np.array([energy])
+            energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
             raise TypeError(
@@ -193,7 +196,7 @@ class ConvolutionBase:
         Raises:
             TypeError: If offset is not a Number or Parameter.
         """
-        if not isinstance(offset, Parameter):
+        if not isinstance(offset, (Numerical, Parameter)):
             raise TypeError("Offset must be a Number or Parameter.")
 
         if isinstance(offset, Numerical):
