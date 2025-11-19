@@ -16,9 +16,13 @@ Numerical = Union[float, int]
 
 
 class NumericalConvolutionBase(ConvolutionBase):
-    """ "
+    """
+    Base class for numerical convolutions of sample and resolution models.
+    Provides methods to handle upsampling, extension, and detailed balance correction.
+    This base class has no convolution functionality.
+
     Args:
-    energy : np.ndarray
+    energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
     sample_model : SampleModel or ModelComponent
         The sample model to be convolved.
@@ -37,7 +41,7 @@ class NumericalConvolutionBase(ConvolutionBase):
     energy_unit : str or sc.Unit, optional
         The unit of the energy. Default is 'meV'.
     normalize_detailed_balance : bool, optional
-        Whether to normalize the detailed balance factor. Default is True.
+        Whether to normalize the detailed balance correction. Default is True.
     """
 
     def __init__(
@@ -73,6 +77,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                 raise TypeError("Temperature must be a float or Parameter.")
         self._temperature = temperature
         self._temperature_unit = temperature_unit
+
         self._normalize_detailed_balance = normalize_detailed_balance
 
         self._upsample_factor = upsample_factor
@@ -80,8 +85,6 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         # Create a dense grid to improve accuracy. When upsample_factor>1, we evaluate on this grid and interpolate back to the original values at the end
         self._energy_grid = self._create_dense_grid()
-
-    # Properties for private attributes
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
@@ -108,6 +111,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             raise ValueError("Upsample factor must be greater than 1.")
 
         self._upsample_factor = factor
+
         # Recreate dense grid when upsample factor is updated
         self._energy_grid = self._create_dense_grid()
 
@@ -115,6 +119,8 @@ class NumericalConvolutionBase(ConvolutionBase):
     def extension_factor(self) -> float:
         """
         Get the extension factor.
+        The extension factor determines how much the energy range is extended on both sides before convolution.
+        0.2 means extending by 20% of the original energy span on each side
         """
 
         return self._extension_factor
@@ -122,7 +128,17 @@ class NumericalConvolutionBase(ConvolutionBase):
     @extension_factor.setter
     def extension_factor(self, factor: Numerical) -> None:
         """
-        Set the extension factor and recreate the dense grid."""
+        Set the extension factor and recreate the dense grid.
+        The extension factor determines how much the energy range is extended on both sides before convolution.
+        0.2 means extending by 20% of the original energy span on each side.
+
+        Args:
+            factor : float
+                The new extension factor.
+
+        Raises:
+            TypeError: If factor is not a number.
+        """
         if not isinstance(factor, Numerical):
             raise TypeError("Extension factor must be a number.")
         if factor < 0.0:
@@ -143,17 +159,30 @@ class NumericalConvolutionBase(ConvolutionBase):
     @temperature.setter
     def temperature(self, temp: Optional[Union[Parameter, float]]) -> None:
         """
-        Set the temperature.
+        Set the temperature. If None, disables detailed balance correction and removes the temperature parameter.
+        Args:
+            temp : Parameter, float, or None
+                The temperature to set. The unit will be the same as the existing temperature parameter if it exists, otherwise 'K'.
+        Raises:
+            TypeError: If temp is not a float, Parameter, or None.
         """
 
         if temp is None:
             self._temperature = None
         elif isinstance(temp, Numerical):
-            self._temperature.value = float(temp)
+            if self._temperature is not None:
+                self._temperature.value = float(temp)
+            else:
+                self._temperature = Parameter(
+                    name="temperature",
+                    value=float(temp),
+                    unit=self._temperature_unit,
+                    fixed=True,
+                )
         elif isinstance(temp, Parameter):
             self._temperature = temp
         else:
-            raise TypeError("Temperature must be a float or Parameter.")
+            raise TypeError("Temperature must be None, a float or a Parameter.")
 
     @property
     def normalize_detailed_balance(self) -> bool:
@@ -167,6 +196,12 @@ class NumericalConvolutionBase(ConvolutionBase):
     def normalize_detailed_balance(self, normalize: bool) -> None:
         """
         Set whether to normalize the detailed balance factor.
+        If True, the detailed balance factor is divided by temperature.
+        Args:
+            normalize : bool
+                Whether to normalize the detailed balance factor.
+        Raises:
+            TypeError: If normalize is not a bool.
         """
 
         if not isinstance(normalize, bool):
@@ -200,13 +235,6 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         Create a dense grid by upsampling and extending the input energy array.
 
-        Args:
-            energy : np.ndarray
-                1D array of energy values.
-            upsample_factor : int, optional
-                The factor by which to upsample the input data. Default is 5.
-            extension_factor : float, optional
-                The factor by which to extend the input data range. Default is 0.2.
         Returns:
             DenseGrid
                 The dense grid created by upsampling and extending x.

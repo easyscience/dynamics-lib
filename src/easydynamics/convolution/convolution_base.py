@@ -13,6 +13,8 @@ Numerical = Union[float, int]
 class ConvolutionBase:
     """
     Base class for convolutions of sample and resolution models.
+    This base class has no convolution functionality.
+
     Args:
     energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
@@ -44,6 +46,7 @@ class ConvolutionBase:
             energy = sc.array(dims=["energy"], values=energy, unit=energy_unit)
 
         self._energy = energy
+        self._energy_unit = energy_unit
         self._sample_model = sample_model
         self._resolution_model = resolution_model
 
@@ -100,6 +103,7 @@ class ConvolutionBase:
 
         if isinstance(energy, sc.Variable):
             self._energy = energy
+            self._energy_unit = energy.unit
 
     @property
     def sample_model(self) -> Union[SampleModel, ModelComponent]:
