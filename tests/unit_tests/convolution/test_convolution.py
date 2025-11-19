@@ -4,6 +4,7 @@ from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
+from easydynamics.convolution import convolution
 from easydynamics.sample_model import (
     DampedHarmonicOscillator,
     DeltaFunction,
@@ -11,7 +12,6 @@ from easydynamics.sample_model import (
     Lorentzian,
     SampleModel,
 )
-from easydynamics.utils import convolution
 from easydynamics.utils.detailed_balance import (
     _detailed_balance_factor as detailed_balance_factor,
 )

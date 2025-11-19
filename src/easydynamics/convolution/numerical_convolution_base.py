@@ -1,0 +1,332 @@
+import warnings
+from dataclasses import dataclass
+from typing import Optional, Union
+
+import numpy as np
+import scipp as sc
+from easyscience.variable import Parameter
+
+from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.sample_model import (
+    SampleModel,
+)
+from easydynamics.sample_model.components.model_component import ModelComponent
+
+Numerical = Union[float, int]
+
+
+class NumericalConvolutionBase(ConvolutionBase):
+    """ "
+    Args:
+    energy : np.ndarray
+        1D array of energy values where the convolution is evaluated.
+    sample_model : SampleModel or ModelComponent
+        The sample model to be convolved.
+    resolution_model : SampleModel or ModelComponent
+        The resolution model to convolve with.
+    offset_float : float, or None, optional
+        The offset to apply to the input array.
+    upsample_factor : int, optional
+        The factor by which to upsample the input data before convolution. Default is 5.
+    extension_factor : float, optional
+        The factor by which to extend the input data range before convolution. Default is 0.2.
+    temperature : Parameter, float, or None, optional
+        The temperature to use for detailed balance correction. Default is None.
+    temperature_unit : str or sc.Unit, optional
+        The unit of the temperature parameter. Default is 'K'.
+    energy_unit : str or sc.Unit, optional
+        The unit of the energy. Default is 'meV'.
+    normalize_detailed_balance : bool, optional
+        Whether to normalize the detailed balance factor. Default is True.
+    """
+
+    def __init__(
+        self,
+        energy: np.ndarray,
+        sample_model: Union[SampleModel, ModelComponent],
+        resolution_model: Union[SampleModel, ModelComponent],
+        offset: Optional[Union[Numerical, Parameter]] = 0.0,
+        upsample_factor: Optional[Numerical] = 5,
+        extension_factor: Optional[float] = 0.2,
+        temperature: Optional[Union[Parameter, float]] = None,
+        temperature_unit: Optional[Union[str, sc.Unit]] = "K",
+        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
+        normalize_detailed_balance: Optional[bool] = True,
+    ):
+        super().__init__(
+            energy=energy,
+            sample_model=sample_model,
+            resolution_model=resolution_model,
+            energy_unit=energy_unit,
+            offset=offset,
+        )
+
+        if temperature is not None:
+            if isinstance(temperature, Numerical):
+                temperature = Parameter(
+                    name="temperature",
+                    value=float(temperature),
+                    unit=temperature_unit,
+                    fixed=True,
+                )
+            elif not isinstance(temperature, Parameter):
+                raise TypeError("Temperature must be a float or Parameter.")
+        self._temperature = temperature
+        self._normalize_detailed_balance = normalize_detailed_balance
+
+        self._upsample_factor = upsample_factor
+        self._extension_factor = extension_factor
+
+        # Create a dense grid to improve accuracy. When upsample_factor>1, we evaluate on this grid and interpolate back to the original values at the end
+        self.energy_grid = self._create_dense_grid()
+
+    # Properties for private attributes
+
+    @ConvolutionBase.energy.setter
+    def energy(self, energy: np.ndarray) -> None:
+        super().energy = energy
+        # Recreate dense grid when energy is updated
+        self.energy_grid = self._create_dense_grid()
+
+    @property
+    def upsample_factor(self) -> Numerical:
+        """
+        Get the upsample factor.
+        """
+
+        return self._upsample_factor
+
+    @upsample_factor.setter
+    def upsample_factor(self, factor: Numerical) -> None:
+        """
+        Set the upsample factor and recreate the dense grid."""
+        if not isinstance(factor, Numerical):
+            raise TypeError("Upsample factor must be a numerical value.")
+        factor = float(factor)
+        if factor < 1.0:
+            raise ValueError("Upsample factor must be greater than 1.")
+
+        self._upsample_factor = factor
+        # Recreate dense grid when upsample factor is updated
+        self.energy_grid = self._create_dense_grid()
+
+    @property
+    def extension_factor(self) -> float:
+        """
+        Get the extension factor.
+        """
+
+        return self._extension_factor
+
+    @extension_factor.setter
+    def extension_factor(self, factor: Numerical) -> None:
+        """
+        Set the extension factor and recreate the dense grid."""
+        if not isinstance(factor, Numerical):
+            raise TypeError("Extension factor must be a number.")
+        if factor < 0.0:
+            raise ValueError("Extension factor must be non-negative.")
+
+        self._extension_factor = factor
+        # Recreate dense grid when extension factor is updated
+        self.energy_grid = self._create_dense_grid()
+
+    @property
+    def temperature(self) -> Optional[Parameter]:
+        """
+        Get the temperature.
+        """
+
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, temp: Optional[Union[Parameter, float]]) -> None:
+        """
+        Set the temperature.
+        """
+
+        if temp is None:
+            self._temperature = None
+        elif isinstance(temp, Numerical):
+            self._temperature.value = float(temp)
+        elif isinstance(temp, Parameter):
+            self._temperature = temp
+        else:
+            raise TypeError("Temperature must be a float or Parameter.")
+
+    @property
+    def normalize_detailed_balance(self) -> bool:
+        """
+        Get whether to normalize the detailed balance factor.
+        """
+
+        return self._normalize_detailed_balance
+
+    @normalize_detailed_balance.setter
+    def normalize_detailed_balance(self, normalize: bool) -> None:
+        """
+        Set whether to normalize the detailed balance factor.
+        """
+
+        if not isinstance(normalize, bool):
+            raise TypeError("normalize_detailed_balance must be True or False.")
+
+        self._normalize_detailed_balance = normalize
+
+    @dataclass(frozen=True)
+    class EnergyGrid:
+        """Container for the dense energy grid and related metadata.
+
+        Attributes:
+            energy_dense: the (possibly extended & upsampled) energy grid (1D).
+            span_original: span of the original energy array (max-min).
+            span_dense: span of the dense grid (max-min).
+            energy_even_length_offset: -0.5*dE if length is even, else 0.0 — used to correct half-bin shift.
+            energy_dense_centered: energy_dense recentered around zero (same length as energy_dense).
+            energy_step: grid spacing (dE) of energy_dense (positive float).
+        """
+
+        energy_dense: np.ndarray
+        span_original: float
+        span_dense: float
+        energy_even_length_offset: float
+        energy_dense_centered: np.ndarray
+        energy_step: float
+
+    def _create_dense_grid(
+        self,
+    ) -> EnergyGrid:
+        """
+        Create a dense grid by upsampling and extending the input energy array.
+
+        Args:
+            energy : np.ndarray
+                1D array of energy values.
+            upsample_factor : int, optional
+                The factor by which to upsample the input data. Default is 5.
+            extension_factor : float, optional
+                The factor by which to extend the input data range. Default is 0.2.
+        Returns:
+            DenseGrid
+                The dense grid created by upsampling and extending x.
+        """
+        if self.upsample_factor == 0:
+            # Check if the array is uniformly spaced.
+            energy_diff = np.diff(self.energy)
+            is_uniform = np.allclose(energy_diff, energy_diff[0])
+            if not is_uniform:
+                raise ValueError(
+                    "Input array `energy` must be uniformly spaced if upsample_factor = 0."
+                )
+            energy_dense = self.energy
+        else:
+            # Create an extended and upsampled energy grid
+            energy_min, energy_max = self.energy.min(), self.energy.max()
+            span = energy_max - energy_min
+            extra = self.extension_factor * span
+            extended_min = energy_min - extra
+            extended_max = energy_max + extra
+            num_points = round(len(self.energy) * self.upsample_factor)
+            energy_dense = np.linspace(extended_min, extended_max, num_points)
+
+        energy_step = energy_dense[1] - energy_dense[0]
+
+        # Handle offset for even length of x in convolution.
+        # The convolution of two arrays of length N is of length 2N-1. When using 'same' mode, only the central N points are kept,
+        # so the output has the same length as the input.
+        # However, if N is even, the center falls between two points, leading to a half-bin offset.
+        # For example, if N=4, the convolution has length 7, and when we select the 4 central points we either get
+        # indices [2,3,4,5] or [1,2,3,4], both of which are offset by 0.5*dx from the true center at index 3.5.
+        if len(energy_dense) % 2 == 0:
+            x_even_length_offset = -0.5 * energy_step
+        else:
+            x_even_length_offset = 0.0
+
+        # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
+        if not np.isclose(energy_dense.mean(), 0.0):
+            energy_dense_centered = np.linspace(
+                -0.5 * span, 0.5 * span, len(energy_dense)
+            )
+        else:
+            energy_dense_centered = energy_dense
+
+        energy_grid = self.EnergyGrid(
+            energy_dense=energy_dense,
+            span_original=span,
+            span_dense=span,
+            energy_even_length_offset=x_even_length_offset,
+            energy_dense_centered=energy_dense_centered,
+            energy_step=energy_step,
+        )
+
+        return energy_grid
+
+    def _check_width_thresholds(
+        self,
+        model: Union[SampleModel, ModelComponent],
+        model_name: str,
+    ) -> None:
+        """
+        Helper function to check and warn if components are wide compared to the span of the data, or narrow compared to the spacing.
+        In both cases, the convolution accuracy may be compromised.
+        Args:
+            model : SampleModel or ModelComponent
+                The model to check.
+            energy_step : float
+                The bin spacing of the energy array.
+            span : float
+                The total span of the energy array.
+            model_name : str
+                A string indicating whether the model is a 'sample model' or 'resolution model' for warning messages.
+        returns:
+            None
+        warns:
+            UserWarning
+                If the component widths are not appropriate for the data span or bin spacing.
+
+        """
+
+        # The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
+        LARGE_WIDTH_THRESHOLD = 0.1  # Threshold for large widths compared to span - warn if width > 10% of span
+        SMALL_WIDTH_THRESHOLD = 1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
+
+        # Handle SampleModel or ModelComponent
+        if isinstance(model, SampleModel):
+            components = model.components
+        else:
+            components = [model]  # Treat single ModelComponent as a list
+
+        for comp in components:
+            if hasattr(comp, "width"):
+                if (
+                    comp.width.value
+                    > LARGE_WIDTH_THRESHOLD * self.energy_grid.span_dense
+                ):
+                    warnings.warn(
+                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
+                        f"array ({self.energy_grid.span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
+                        UserWarning,
+                    )
+                if (
+                    comp.width.value
+                    < SMALL_WIDTH_THRESHOLD * self.energy_grid.energy_step
+                ):
+                    warnings.warn(
+                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
+                        f"array ({self.energy_grid.energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
+                        UserWarning,
+                    )
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"energy=array of shape {self.energy.shape}, "
+            f"sample_model={self.sample_model}, "
+            f"resolution_model={self.resolution_model}, "
+            f"energy_unit={self._energy_unit}, "
+            f"offset={self.offset}, "
+            f"upsample_factor={self.upsample_factor}, "
+            f"extension_factor={self.extension_factor}, "
+            f"temperature={self.temperature}, "
+            f"normalize_detailed_balance={self.normalize_detailed_balance})"
+        )
