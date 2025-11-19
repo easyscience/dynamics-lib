@@ -84,13 +84,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         self._extension_factor = extension_factor
 
         # Create a dense grid to improve accuracy. When upsample_factor>1, we evaluate on this grid and interpolate back to the original values at the end
-        self._energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_energy_grid()
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
         super().energy = energy
         # Recreate dense grid when energy is updated
-        self._energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_energy_grid()
 
     @property
     def upsample_factor(self) -> Numerical:
@@ -106,7 +106,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         Set the upsample factor and recreate the dense grid."""
         if factor is None:
             self._upsample_factor = factor
-            self._energy_grid = self._create_dense_grid()
+            self._energy_grid = self._create_energy_grid()
             return
 
         if not isinstance(factor, Numerical):
@@ -118,7 +118,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         self._upsample_factor = factor
 
         # Recreate dense grid when upsample factor is updated
-        self._energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_energy_grid()
 
     @property
     def extension_factor(self) -> float:
@@ -151,7 +151,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         self._extension_factor = factor
         # Recreate dense grid when extension factor is updated
-        self._energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_energy_grid()
 
     @property
     def temperature(self) -> Optional[Parameter]:
@@ -234,7 +234,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         energy_dense_centered: np.ndarray
         energy_step: float
 
-    def _create_dense_grid(
+    def _create_energy_grid(
         self,
     ) -> EnergyGrid:
         """
