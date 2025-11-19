@@ -42,7 +42,7 @@ class ConvolutionBase:
         if not isinstance(offset, Parameter):
             raise TypeError("Offset must be a Number or Parameter.")
 
-        self.offset = offset
+        self._offset = offset
 
     @property
     def energy(self) -> np.ndarray:
@@ -64,3 +64,25 @@ class ConvolutionBase:
                 f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )
+
+    @property
+    def offset(self) -> Parameter:
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset: Union[Numerical, Parameter]) -> None:
+        if not isinstance(offset, Parameter):
+            raise TypeError("Offset must be a Number or Parameter.")
+
+        if isinstance(offset, Numerical):
+            self._offset.value = offset
+        else:
+            self._offset = offset
+
+    @property
+    def sample_model(self) -> Union[SampleModel, ModelComponent]:
+        return self._sample_model
+
+    @property
+    def resolution_model(self) -> Union[SampleModel, ModelComponent]:
+        return self._resolution_model

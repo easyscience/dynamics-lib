@@ -162,14 +162,14 @@ class Convolution(NumericalConvolutionBase):
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
                 energy_unit=self._energy_unit,
-                sample_model=self.numerical_sample_model,
-                resolution_model=self.resolution_model,
-                offset=self.offset,
-                upsample_factor=self.upsample_factor,
-                extension_factor=self.extension_factor,
-                temperature=self.temperature,
-                temperature_unit=self.temperature_unit,
-                normalize_detailed_balance=self.normalize_detailed_balance,
+                sample_model=self._numerical_sample_model,
+                resolution_model=self._resolution_model,
+                offset=self._offset,
+                upsample_factor=self._upsample_factor,
+                extension_factor=self._extension_factor,
+                temperature=self._temperature,
+                temperature_unit=self._temperature_unit,
+                normalize_detailed_balance=self._normalize_detailed_balance,
             )
         else:
             self._numerical_convolver = None
@@ -185,7 +185,7 @@ class Convolution(NumericalConvolutionBase):
                 delta_sample_model.add_component(sample_component)
                 continue
             pair_is_analytic = []
-            for resolution_component in self.resolution_model.components:
+            for resolution_component in self._resolution_model.components:
                 pair_is_analytic.append(
                     self._check_if_pair_is_analytic(
                         sample_component, resolution_component

@@ -94,15 +94,15 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         # Evaluate sample model. Delta functions are already filtered out
         sample_vals = self.sample_model.evaluate(
-            self.energy_grid.energy_dense
+            self._energy_grid.energy_dense
             - self._offset.value
-            - self.energy_grid.energy_even_length_offset
+            - self._energy_grid.energy_even_length_offset
         )
 
         # Detailed balance correction
         if self.temperature is not None:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_dense,
+                energy=self._energy_grid.energy_dense - self._offset.value,
                 temperature=self.temperature,
                 energy_unit=self._energy_unit,
                 divide_by_temperature=self.normalize_detailed_balance,
@@ -111,18 +111,18 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         # Evaluate resolution model
         resolution_vals = self.resolution_model.evaluate(
-            self.energy_grid.energy_dense_centered
+            self._energy_grid.energy_dense_centered
         )
 
         # Convolution
         convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
-        convolved *= self._energy_step  # normalize
+        convolved *= self._energy_grid.energy_step  # normalize
 
         if self.upsample_factor > 0:
             # interpolate back to original energy grid
             convolved = np.interp(
                 self.energy,
-                self.energy_grid.energy_dense,
+                self._energy_grid.energy_dense,
                 convolved,
                 left=0.0,
                 right=0.0,

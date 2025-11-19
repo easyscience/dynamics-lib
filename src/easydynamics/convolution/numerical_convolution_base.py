@@ -72,13 +72,14 @@ class NumericalConvolutionBase(ConvolutionBase):
             elif not isinstance(temperature, Parameter):
                 raise TypeError("Temperature must be a float or Parameter.")
         self._temperature = temperature
+        self._temperature_unit = temperature_unit
         self._normalize_detailed_balance = normalize_detailed_balance
 
         self._upsample_factor = upsample_factor
         self._extension_factor = extension_factor
 
         # Create a dense grid to improve accuracy. When upsample_factor>1, we evaluate on this grid and interpolate back to the original values at the end
-        self.energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_dense_grid()
 
     # Properties for private attributes
 
@@ -86,7 +87,7 @@ class NumericalConvolutionBase(ConvolutionBase):
     def energy(self, energy: np.ndarray) -> None:
         super().energy = energy
         # Recreate dense grid when energy is updated
-        self.energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_dense_grid()
 
     @property
     def upsample_factor(self) -> Numerical:
@@ -108,7 +109,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         self._upsample_factor = factor
         # Recreate dense grid when upsample factor is updated
-        self.energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_dense_grid()
 
     @property
     def extension_factor(self) -> float:
@@ -129,7 +130,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         self._extension_factor = factor
         # Recreate dense grid when extension factor is updated
-        self.energy_grid = self._create_dense_grid()
+        self._energy_grid = self._create_dense_grid()
 
     @property
     def temperature(self) -> Optional[Parameter]:
@@ -300,20 +301,20 @@ class NumericalConvolutionBase(ConvolutionBase):
             if hasattr(comp, "width"):
                 if (
                     comp.width.value
-                    > LARGE_WIDTH_THRESHOLD * self.energy_grid.span_dense
+                    > LARGE_WIDTH_THRESHOLD * self._energy_grid.span_dense
                 ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
-                        f"array ({self.energy_grid.span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
+                        f"array ({self._energy_grid.span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
                         UserWarning,
                     )
                 if (
                     comp.width.value
-                    < SMALL_WIDTH_THRESHOLD * self.energy_grid.energy_step
+                    < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_step
                 ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
-                        f"array ({self.energy_grid.energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
+                        f"array ({self._energy_grid.energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
                         UserWarning,
                     )
 

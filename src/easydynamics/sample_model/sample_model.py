@@ -7,8 +7,6 @@ from easyscience.base_classes import CollectionBase
 from easyscience.global_object.undo_redo import NotarizedDict
 from easyscience.job.theoreticalmodel import TheoreticalModelBase
 
-from easydynamics.sample_model.components import DeltaFunction
-
 from .components.model_component import ModelComponent
 
 Numeric = Union[float, int]
@@ -211,33 +209,6 @@ class SampleModel(CollectionBase, TheoreticalModelBase):
         for component in list(self):
             value = component.evaluate(x)
             result = value if result is None else result + value
-
-        return result
-
-    def evaluate_without_delta(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
-    ) -> np.ndarray:
-        """
-        Evaluate the sum of all components except delta functions.
-
-        Parameters
-        ----------
-        x : Number, list, np.ndarray, sc.Variable, or sc.DataArray
-            Energy axis.
-
-        Returns
-        -------
-        np.ndarray
-            Evaluated model values.
-        """
-
-        if not self.components:
-            raise ValueError("No components in the model to evaluate.")
-        result = None
-        for component in list(self):
-            if not isinstance(component, DeltaFunction):
-                value = component.evaluate(x)
-                result = value if result is None else result + value
 
         return result
 
