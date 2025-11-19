@@ -106,6 +106,35 @@ class ConvolutionBase:
             self._energy_unit = energy.unit
 
     @property
+    def energy_unit(self) -> str:
+        """Get the energy unit"""
+        return self._energy_unit
+
+    @energy_unit.setter
+    def energy_unit(self, unit_str: str) -> None:
+        raise AttributeError(
+            (
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
+            )
+        )  # noqa: E501
+
+    def convert_energy_unit(self, energy_unit: Union[str, sc.Unit]) -> None:
+        """Convert the energy to the specified unit
+        Args:
+            energy_unit : str or sc.Unit
+                The unit of the energy.
+
+        Raises:
+            TypeError: If energy_unit is not a string or sc.Unit.
+        """
+        if not isinstance(energy_unit, (str, sc.Unit)):
+            raise TypeError("Energy unit must be a string or sc.Unit.")
+
+        self.energy = sc.to_unit(self.energy, energy_unit)
+        self._energy_unit = energy_unit
+
+    @property
     def sample_model(self) -> Union[SampleModel, ModelComponent]:
         """Get the sample model"""
         return self._sample_model

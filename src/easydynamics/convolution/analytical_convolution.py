@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import numpy as np
+import scipp as sc
 from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
@@ -16,16 +17,27 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 Numerical = Union[float, int]
 
-# TODO: update docstrings
-
 
 class AnalyticalConvolution(ConvolutionBase):
+    """Analytical convolution of a SampleModel with a ResolutionModel.
+    Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt profiles.
+    Args:
+        energy : np.ndarray or scipp.Variable
+            1D array of energy values where the convolution is evaluated.
+        sample_model : SampleModel or ModelComponent
+            The sample model to be convolved.
+        resolution_model : SampleModel or ModelComponent
+            The resolution model to convolve with.
+        offset : float, Parameter or None, optional
+            The offset in energy to apply to the convolution.
+    """
+
     def __init__(
         self,
-        energy: np.ndarray,
-        energy_unit: str = "meV",
-        sample_model: SampleModel = None,
-        resolution_model: SampleModel = None,
+        energy: Union[np.ndarray, sc.Variable],
+        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
+        sample_model: Optional[SampleModel] = None,
+        resolution_model: Optional[SampleModel] = None,
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
     ):
         super().__init__(
@@ -43,20 +55,9 @@ class AnalyticalConvolution(ConvolutionBase):
         Convolve sample with resolution analytically if possible. Accepts SampleModel or single ModelComponent for each.
         Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt profiles.
 
-        Most validation happens in the main `convolution` function.
-
-        Args:
-            x : np.ndarray
-                1D array of x values where the convolution is evaluated.
-            sample_model : SampleModel or ModelComponent
-                The sample model to be convolved.
-            resolution_model : SampleModel or ModelComponent
-                The resolution model to convolve with.
-            self.offset.value : float
-                The offset to apply to the convolution.
         Returns:
             np.ndarray
-                The convolved values evaluated at x.
+                The convolution of the sample_model and resolution_model values evaluated at energy.
 
         Raises:
             ValueError
@@ -120,6 +121,11 @@ class AnalyticalConvolution(ConvolutionBase):
         Raises:
             ValueError: If the component pair cannot be handled analytically.
         """
+
+        if isinstance(resolution_component, DeltaFunction):
+            raise ValueError(
+                "Analytical convolution with delta function in resolution model is not supported."
+            )
 
         # Delta function + anything --> anything, shifted by delta center with area A1 * A2
         if isinstance(sample_component, DeltaFunction):
@@ -193,12 +199,11 @@ class AnalyticalConvolution(ConvolutionBase):
                 lorentzian, voigt = sample_component, resolution_component
             else:
                 lorentzian, voigt = resolution_component, sample_component
-            center = (voigt.center.value + lorentzian.center.value) + self.offset.value
-            area = voigt.area.value * lorentzian.area.value
-            g_width = voigt.g_width.value
-            l_width = voigt.l_width.value + lorentzian.width.value
 
-            return self._voigt_eval(center, g_width, l_width, area)
+            return self._convolute_lorentz_voigt(
+                lorentzian,
+                voigt,
+            )
 
         # Voigt + Voigt --> Voigt with area A1 * A2, Gaussian widths summed in quadrature, Lorentzian widths summed
         if isinstance(sample_component, Voigt) and isinstance(
@@ -258,12 +263,14 @@ class AnalyticalConvolution(ConvolutionBase):
         width = np.sqrt(
             sample_component.width.value**2 + resolution_component.width.value**2
         )
+
         area = sample_component.area.value * resolution_component.area.value
+
         center = (
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
 
-        return self._gaussian_eval(center, width, area)
+        return self._gaussian_eval(area=area, center=center, width=width)
 
     def _convolute_gauss_lorentz(
         self,
@@ -290,10 +297,10 @@ class AnalyticalConvolution(ConvolutionBase):
         area = sample_component.area.value * resolution_component.area.value
 
         return self._voigt_eval(
-            center,
-            sample_component.width.value,
-            resolution_component.width.value,
-            area,
+            area=area,
+            center=center,
+            gauss_width=sample_component.width.value,
+            lorentzian_width=resolution_component.width.value,
         )
 
     def _convolute_gauss_voigt(
@@ -316,15 +323,24 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
+        area = sample_component.area.value * resolution_component.area.value
+
         center = (
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
-        area = sample_component.area.value * resolution_component.area.value
-        g_width = np.sqrt(
-            sample_component.width.value**2 + resolution_component.g_width.value**2
+
+        gauss_width = np.sqrt(
+            sample_component.width.value**2 + resolution_component.width.value**2
         )
-        l_width = resolution_component.l_width.value
-        return self._voigt_eval(center, g_width, l_width, area)
+
+        lorentzian_width = resolution_component.width.value
+
+        return self._voigt_eval(
+            area=area,
+            center=center,
+            gauss_width=gauss_width,
+            lorentzian_width=lorentzian_width,
+        )
 
     def _convolute_lorentz_lorentz(
         self,
@@ -344,12 +360,15 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
-        width = sample_component.width.value + resolution_component.width.value
         area = sample_component.area.value * resolution_component.area.value
+
         center = (
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
-        return self._lorentzian_eval(center, width, area)
+
+        width = sample_component.width.value + resolution_component.width.value
+
+        return self._lorentzian_eval(area=area, center=center, width=width)
 
     def _convolute_lorentz_voigt(
         self,
@@ -369,13 +388,24 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
+        area = sample_component.area.value * resolution_component.area.value
+
         center = (
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
-        area = sample_component.area.value * resolution_component.area.value
-        g_width = resolution_component.g_width.value
-        l_width = sample_component.width.value + resolution_component.l_width.value
-        return self._voigt_eval(center, g_width, l_width, area)
+
+        gauss_width = resolution_component.g_width.value
+
+        lorentzian_width = (
+            sample_component.width.value + resolution_component.l_width.value
+        )
+
+        return self._voigt_eval(
+            area=area,
+            center=center,
+            gauss_width=gauss_width,
+            lorentzian_width=lorentzian_width,
+        )
 
     def convolute_voigt_voigt(
         self,
@@ -395,84 +425,98 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
+        area = sample_component.area.value * resolution_component.area.value
+
         center = (
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
-        area = sample_component.area.value * resolution_component.area.value
-        g_width = np.sqrt(
+
+        gauss_width = np.sqrt(
             sample_component.g_width.value**2 + resolution_component.g_width.value**2
         )
-        l_width = sample_component.l_width.value + resolution_component.l_width.value
-        return self._voigt_eval(center, g_width, l_width, area)
 
-    def _gaussian_eval(self, center: float, width: float, area: float) -> np.ndarray:
+        lorentzian_width = (
+            sample_component.l_width.value + resolution_component.l_width.value
+        )
+        return self._voigt_eval(
+            area=area,
+            center=center,
+            gauss_width=gauss_width,
+            lorentzian_width=lorentzian_width,
+        )
+
+    def _gaussian_eval(
+        self,
+        area: float,
+        center: float,
+        width: float,
+    ) -> np.ndarray:
         """
         Evaluate a Gaussian function. y = (area / (sqrt(2pi) * width)) * exp(-0.5 * ((x - center) / width)^2)
         All checks are handled in the calling function.
 
         Args:
-            energy : np.ndarray
-                1D array of energy values where the Gaussian is evaluated.
+            area : float
+                The area under the Gaussian curve.
             center : float
                 The center of the Gaussian.
             width : float
                 The width (sigma) of the Gaussian.
-            area : float
-                The area under the Gaussian curve.
         Returns:
             np.ndarray
                 The evaluated Gaussian values at self.energy.
         """
-        return (
-            area
-            * 1
-            / (np.sqrt(2 * np.pi) * width)
-            * np.exp(-0.5 * ((self.energy.values - center) / width) ** 2)
-        )
 
-    def _lorentzian_eval(self, center: float, width: float, area: float) -> np.ndarray:
+        normalization = 1 / (np.sqrt(2 * np.pi) * width)
+        exponent = -0.5 * ((self.energy.values - center) / width) ** 2
+
+        return area * normalization * np.exp(exponent)
+
+    def _lorentzian_eval(self, area: float, center: float, width: float) -> np.ndarray:
         """
         Evaluate a Lorentzian function. y = (area * width / pi) / ((x - center)^2 + width^2).
         All checks are handled in the calling function.
 
         Args:
-            energy : np.ndarray
-                1D array of energy values where the Lorentzian is evaluated.
+            area : float
+                The area under the Lorentzian.
             center : float
                 The center of the Lorentzian.
             width : float
                 The width (HWHM) of the Lorentzian.
-            area : float
-                The area under the Lorentzian.
         Returns:
             np.ndarray
                 The evaluated Lorentzian values at self.energy.
         """
-        return area * width / np.pi / ((self.energy.values - center) ** 2 + width**2)
+
+        normalization = width / np.pi
+        denominator = (self.energy.values - center) ** 2 + width**2
+
+        return area * normalization / denominator
 
     def _voigt_eval(
         self,
-        center: float,
-        g_width: float,
-        l_width: float,
         area: float,
+        center: float,
+        gauss_width: float,
+        lorentzian_width: float,
     ) -> np.ndarray:
         """
         Evaluate a Voigt profile function using scipy's voigt_profile.
         Args:
-            energy : np.ndarray
-                1D array of energy values where the Voigt profile is evaluated.
-            center : float
-                The center of the Voigt profile.
-            g_width : float
-                The Gaussian width (sigma) of the Voigt profile.
-            l_width : float
-                The Lorentzian width (HWHM) of the Voigt profile.
             area : float
                 The area under the Voigt profile.
+            center : float
+                The center of the Voigt profile.
+            gauss_width : float
+                The Gaussian width (sigma) of the Voigt profile.
+            lorentzian_width : float
+                The Lorentzian width (HWHM) of the Voigt profile.
         Returns:
             np.ndarray
                 The evaluated Voigt profile values at self.energy.
         """
 
-        return area * voigt_profile(self.energy.values - center, g_width, l_width)
+        return area * voigt_profile(
+            self.energy.values - center, gauss_width, lorentzian_width
+        )

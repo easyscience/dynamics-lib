@@ -18,9 +18,13 @@ Numerical = Union[float, int]
 
 
 class NumericalConvolution(NumericalConvolutionBase):
-    """ "
+    """Numerical convolution of a SampleModel with a ResolutionModel using FFT.
+        Includes optional upsampling and extended range to improve accuracy.
+        Warns about very wide or very narrow peaks in the models.
+        If temperature is provided, detailed balance correction is applied to the sample model.
+
     Args:
-    energy : np.ndarray
+    energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
     sample_model : SampleModel or ModelComponent
         The sample model to be convolved.
@@ -39,7 +43,7 @@ class NumericalConvolution(NumericalConvolutionBase):
     energy_unit : str or sc.Unit, optional
         The unit of the energy. Default is 'meV'.
     normalize_detailed_balance : bool, optional
-        Whether to normalize the detailed balance factor. Default is True.
+        Whether to normalize the detailed balance correction. Default is True.
     """
 
     def __init__(
@@ -72,10 +76,9 @@ class NumericalConvolution(NumericalConvolutionBase):
         self,
     ) -> np.ndarray:
         """
-        Numerical convolution using FFT with optional upsampling + extended range.
+        Calculate the convolution of the sample and resolution models at the values
+        given in energy.
         Includes detailed balance correction if temperature is provided.
-
-
 
         Returns:
             np.ndarray
@@ -92,7 +95,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             model_name="resolution model",
         )
 
-        # Evaluate sample model. Delta functions are already filtered out
+        # Evaluate sample model. If called via the Convolution class, delta functions are already filtered out.
         sample_vals = self.sample_model.evaluate(
             self._energy_grid.energy_dense
             - self._offset.value
@@ -131,6 +134,8 @@ class NumericalConvolution(NumericalConvolutionBase):
         return convolved
 
     def __repr__(self) -> str:
+        """String representation of the NumericalConvolution instance."""
+
         return (
             f"NumericalConvolution(energy_unit={self._energy_unit}, "
             f"offset={self.offset}, upsample_factor={self.upsample_factor}, "
