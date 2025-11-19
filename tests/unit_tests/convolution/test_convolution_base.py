@@ -33,6 +33,26 @@ class TestConvolutionBase:
         assert isinstance(convolution_base._resolution_model, SampleModel)
         assert isinstance(convolution_base.offset, Parameter)
         assert convolution_base.offset.value == 0.0
+        assert convolution_base.offset.unit == "meV"
+
+    def test_init_energy_numerical_none_offset(self):
+        # WHEN
+        energy = 1
+
+        convolution_base = ConvolutionBase(
+            energy=energy,
+            offset=None,
+        )
+
+        # THEN EXPECT
+        assert isinstance(convolution_base, ConvolutionBase)
+        assert isinstance(convolution_base.energy, sc.Variable)
+        assert convolution_base.energy.values == np.array([1.0])
+        assert convolution_base.energy.unit == "meV"
+        assert convolution_base._sample_model is None
+        assert convolution_base._resolution_model is None
+        assert convolution_base.offset.value == 0.0
+        assert convolution_base.offset.unit == "meV"
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
@@ -154,6 +174,14 @@ class TestConvolutionBase:
             convolution_base.energy.values, np.linspace(-0.01, 0.01, 100)
         )
 
+    def test_convert_energy_unit_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match="Energy unit must be a string or scipp unit.",
+        ):
+            convolution_base.convert_energy_unit(123)
+
     def test_sample_model_property(self, convolution_base):
         # WHEN THEN EXPECT
         assert isinstance(convolution_base.sample_model, SampleModel)
@@ -225,3 +253,11 @@ class TestConvolutionBase:
         # EXPECT
         assert convolution_base.offset.value == 3.5
         assert convolution_base.offset.unique_name == old_offset_unique_name
+
+    def test_offset_setter_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match="Offset must be a Number or Parameter.",
+        ):
+            convolution_base.offset = "invalid"

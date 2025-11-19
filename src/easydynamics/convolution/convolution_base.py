@@ -24,7 +24,7 @@ class ConvolutionBase:
         The resolution model to convolve with.
     energy_unit : str or sc.Unit, optional
         The unit of the energy. Default is 'meV'.
-    offset_float : float, or None, optional
+    offset : float, or None, optional
         The offset to apply to the input array.
     """
 
@@ -34,7 +34,7 @@ class ConvolutionBase:
         sample_model: Union[SampleModel, ModelComponent] = None,
         resolution_model: Union[SampleModel, ModelComponent] = None,
         energy_unit: Union[str, sc.Unit] = "meV",
-        offset: Optional[Union[Numerical, Parameter]] = 0.0,
+        offset: Optional[Union[Numerical, Parameter]] = None,
     ):
         if isinstance(energy, Numerical):
             energy = np.array([float(energy)])
@@ -50,18 +50,20 @@ class ConvolutionBase:
 
         self._energy = energy
         self._energy_unit = energy_unit
-        self._sample_model = sample_model
-        self._resolution_model = resolution_model
 
-        if not isinstance(sample_model, SampleModel):
+        if sample_model is not None and not isinstance(sample_model, SampleModel):
             raise TypeError(
                 f"`sample_model` is an instance of {type(sample_model).__name__}, but must be a SampleModel or ModelComponent."
             )
+        self._sample_model = sample_model
 
-        if not isinstance(resolution_model, SampleModel):
+        if resolution_model is not None and not isinstance(
+            resolution_model, SampleModel
+        ):
             raise TypeError(
                 f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
             )
+        self._resolution_model = resolution_model
 
         if offset is None:
             offset = 0.0
@@ -129,10 +131,10 @@ class ConvolutionBase:
                 The unit of the energy.
 
         Raises:
-            TypeError: If energy_unit is not a string or sc.Unit.
+            TypeError: If energy_unit is not a string or scipp unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
-            raise TypeError("Energy unit must be a string or sc.Unit.")
+            raise TypeError("Energy unit must be a string or scipp unit.")
 
         self.energy = sc.to_unit(self.energy, energy_unit)
         self._energy_unit = energy_unit
