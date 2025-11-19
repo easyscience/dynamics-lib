@@ -42,7 +42,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     def __init__(
         self,
-        energy: np.ndarray,
+        energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
@@ -213,21 +213,21 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         if self.upsample_factor == 0:
             # Check if the array is uniformly spaced.
-            energy_diff = np.diff(self.energy)
+            energy_diff = np.diff(self.energy.values)
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
                     "Input array `energy` must be uniformly spaced if upsample_factor = 0."
                 )
-            energy_dense = self.energy
+            energy_dense = self.energy.values
         else:
             # Create an extended and upsampled energy grid
-            energy_min, energy_max = self.energy.min(), self.energy.max()
+            energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
             span = energy_max - energy_min
             extra = self.extension_factor * span
             extended_min = energy_min - extra
             extended_max = energy_max + extra
-            num_points = round(len(self.energy) * self.upsample_factor)
+            num_points = round(len(self.energy.values) * self.upsample_factor)
             energy_dense = np.linspace(extended_min, extended_max, num_points)
 
         energy_step = energy_dense[1] - energy_dense[0]
@@ -239,9 +239,9 @@ class NumericalConvolutionBase(ConvolutionBase):
         # For example, if N=4, the convolution has length 7, and when we select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by 0.5*dx from the true center at index 3.5.
         if len(energy_dense) % 2 == 0:
-            x_even_length_offset = -0.5 * energy_step
+            energy_even_length_offset = -0.5 * energy_step
         else:
-            x_even_length_offset = 0.0
+            energy_even_length_offset = 0.0
 
         # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
         if not np.isclose(energy_dense.mean(), 0.0):
@@ -255,7 +255,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_dense=energy_dense,
             span_original=span,
             span_dense=span,
-            energy_even_length_offset=x_even_length_offset,
+            energy_even_length_offset=energy_even_length_offset,
             energy_dense_centered=energy_dense_centered,
             energy_step=energy_step,
         )
@@ -321,7 +321,7 @@ class NumericalConvolutionBase(ConvolutionBase):
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}("
-            f"energy=array of shape {self.energy.shape}, "
+            f"energy=array of shape {self.energy.values.shape}, "
             f"sample_model={self.sample_model}, "
             f"resolution_model={self.resolution_model}, "
             f"energy_unit={self._energy_unit}, "

@@ -48,7 +48,7 @@ class Convolution(NumericalConvolutionBase):
 
     def __init__(
         self,
-        energy: np.ndarray,
+        energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
@@ -84,7 +84,7 @@ class Convolution(NumericalConvolutionBase):
         Perform convolution using analytical method where possible, and numerical method for remaining components.
         """
 
-        total = np.zeros_like(self.energy, dtype=float)
+        total = np.zeros_like(self.energy.values, dtype=float)
 
         # Analytical convolution
         if self._analytical_convolver is not None:
@@ -98,7 +98,9 @@ class Convolution(NumericalConvolutionBase):
         if self._delta_sample_model.components:
             for sample_component in self._delta_sample_model.components:
                 total += sample_component.area.value * self._resolution_model.evaluate(
-                    self.energy - sample_component.center.value - self.offset.value
+                    self.energy.values
+                    - sample_component.center.value
+                    - self.offset.value
                 )
 
         return total
@@ -150,7 +152,6 @@ class Convolution(NumericalConvolutionBase):
         if self._analytical_sample_model.components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
-                energy_unit=self._energy_unit,
                 sample_model=self._analytical_sample_model,
                 resolution_model=self._resolution_model,
                 offset=self.offset,
@@ -161,7 +162,6 @@ class Convolution(NumericalConvolutionBase):
         if self._numerical_sample_model.components:
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
-                energy_unit=self._energy_unit,
                 sample_model=self._numerical_sample_model,
                 resolution_model=self._resolution_model,
                 offset=self._offset,

@@ -44,7 +44,7 @@ class NumericalConvolution(NumericalConvolutionBase):
 
     def __init__(
         self,
-        energy: np.ndarray,
+        energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
@@ -104,7 +104,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             detailed_balance_factor_correction = detailed_balance_factor(
                 energy=self._energy_grid.energy_dense - self._offset.value,
                 temperature=self.temperature,
-                energy_unit=self._energy_unit,
+                energy_unit=self.energy.unit,
                 divide_by_temperature=self.normalize_detailed_balance,
             )
             sample_vals *= detailed_balance_factor_correction
@@ -121,7 +121,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         if self.upsample_factor > 0:
             # interpolate back to original energy grid
             convolved = np.interp(
-                self.energy,
+                self.energy.values,
                 self._energy_grid.energy_dense,
                 convolved,
                 left=0.0,

@@ -231,7 +231,7 @@ class AnalyticalConvolution(ConvolutionBase):
                 The evaluated convolution values at self.energy.
         """
         return sample_component.area.value * resolution_model.evaluate(
-            self.energy - sample_component.center.value - self.offset.value
+            self.energy.values - sample_component.center.value - self.offset.value
         )
 
     def _convolute_gauss_gauss(
@@ -427,7 +427,7 @@ class AnalyticalConvolution(ConvolutionBase):
             area
             * 1
             / (np.sqrt(2 * np.pi) * width)
-            * np.exp(-0.5 * ((self.energy - center) / width) ** 2)
+            * np.exp(-0.5 * ((self.energy.values - center) / width) ** 2)
         )
 
     def _lorentzian_eval(self, center: float, width: float, area: float) -> np.ndarray:
@@ -448,7 +448,7 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated Lorentzian values at self.energy.
         """
-        return area * width / np.pi / ((self.energy - center) ** 2 + width**2)
+        return area * width / np.pi / ((self.energy.values - center) ** 2 + width**2)
 
     def _voigt_eval(
         self,
@@ -475,4 +475,4 @@ class AnalyticalConvolution(ConvolutionBase):
                 The evaluated Voigt profile values at self.energy.
         """
 
-        return area * voigt_profile(self.energy - center, g_width, l_width)
+        return area * voigt_profile(self.energy.values - center, g_width, l_width)

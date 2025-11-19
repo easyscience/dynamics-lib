@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import numpy as np
+import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model import SampleModel
@@ -10,18 +11,40 @@ Numerical = Union[float, int]
 
 
 class ConvolutionBase:
+    """
+    Base class for convolutions of sample and resolution models.
+    Args:
+    energy : np.ndarray or scipp.Variable
+        1D array of energy values where the convolution is evaluated.
+    sample_model : SampleModel or ModelComponent
+        The sample model to be convolved.
+    resolution_model : SampleModel or ModelComponent
+        The resolution model to convolve with.
+    energy_unit : str or sc.Unit, optional
+        The unit of the energy. Default is 'meV'.
+    offset_float : float, or None, optional
+        The offset to apply to the input array.
+    """
+
     def __init__(
         self,
-        energy: np.ndarray,
+        energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent] = None,
         resolution_model: Union[SampleModel, ModelComponent] = None,
         energy_unit: str = "meV",
         offset: Optional[Union[Numerical, Parameter]] = 0.0,
     ):
+        if isinstance(energy, Numerical):
+            energy = np.array([energy])
+
+        if not isinstance(energy, (np.ndarray, sc.Variable)):
+            raise TypeError("Energy must be a numpy ndarray or a scipp Variable.")
+        if isinstance(energy, np.ndarray):
+            energy = sc.array(dims=["energy"], values=energy, unit=energy_unit)
+
         self._energy = energy
         self._sample_model = sample_model
         self._resolution_model = resolution_model
-        self._energy_unit = energy_unit
 
         if not isinstance(sample_model, SampleModel):
             raise TypeError(
@@ -51,19 +74,6 @@ class ConvolutionBase:
     @energy.setter
     def energy(self, energy: np.ndarray) -> None:
         self._energy = energy
-
-    @property
-    def energy_unit(self) -> str:
-        return self._energy_unit
-
-    @energy_unit.setter
-    def energy_unit(self, unit_str: str) -> None:
-        raise AttributeError(
-            (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
-            )
-        )
 
     @property
     def offset(self) -> Parameter:
