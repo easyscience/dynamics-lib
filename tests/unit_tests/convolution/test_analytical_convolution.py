@@ -36,6 +36,7 @@ def function2(request):
 class TestAnalyticalConvolution:
     @pytest.fixture
     def default_analytical_convolution(self):
+        # Energy needs to be odd to avoid issues with shifts in fftconvolve.
         energy = np.linspace(-100, 100, 2**15 + 1)
         sample_model = SampleModel(name="SampleModel")
         resolution_model = SampleModel(name="ResolutionModel")
