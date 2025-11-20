@@ -1,5 +1,8 @@
+from unittest.mock import patch
+
 import numpy as np
 import pytest
+import scipp as sc
 from scipy.signal import fftconvolve
 
 # from easyscience.variable import Parameter
@@ -71,74 +74,209 @@ class TestAnalyticalConvolution:
     def dho1(self):
         return DampedHarmonicOscillator(area=2.0, center=2.0, width=0.2)
 
-    # def test_init(self, default_analytical_convolution):
-    #     # WHEN THEN EXPECT
-    #     assert isinstance(default_analytical_convolution, AnalyticalConvolution)
-    #     assert isinstance(default_analytical_convolution.energy, sc.Variable)
-    #     assert np.allclose(
-    #         default_analytical_convolution.energy.values, np.linspace(-10, 10, 100)
-    #     )
-    #     assert isinstance(default_analytical_convolution._sample_model, SampleModel)
-    #     assert isinstance(
-    #         default_analytical_convolution._resolution_model, SampleModel
-    #     )
+    def test_init(self, default_analytical_convolution):
+        # WHEN THEN EXPECT
+        assert isinstance(default_analytical_convolution, AnalyticalConvolution)
+        assert isinstance(default_analytical_convolution.energy, sc.Variable)
+        assert np.allclose(
+            default_analytical_convolution.energy.values,
+            np.linspace(-100, 100, 2**15 + 1),
+        )
+        assert isinstance(default_analytical_convolution._sample_model, SampleModel)
+        assert isinstance(default_analytical_convolution._resolution_model, SampleModel)
+
+    def test_convolution(
+        self,
+        default_analytical_convolution,
+        gaussian1,
+        gaussian2,
+        lorentzian1,
+        lorentzian2,
+    ):
+        """Test that the convolute method calls _convolute_analytic_pair for all component pairs."""
+
+        # WHEN
+        sample_model = SampleModel(name="SampleModel")
+        sample_model.add_component(gaussian1)
+        sample_model.add_component(lorentzian1)
+
+        resolution_model = SampleModel(name="ResolutionModel")
+        resolution_model.add_component(gaussian2)
+        resolution_model.add_component(lorentzian2)
+        default_analytical_convolution.sample_model = sample_model
+        default_analytical_convolution.resolution_model = resolution_model
+
+        # THEN
+        # Mock _convolute_analytic_pair to return 1.0 for any input pair
+        def mock_convolute_analytic_pair(sample_component, resolution_component):
+            return np.full_like(
+                default_analytical_convolution.energy.values, fill_value=1.0
+            )
+
+        with patch.object(
+            default_analytical_convolution,
+            "_convolute_analytic_pair",
+            side_effect=mock_convolute_analytic_pair,
+        ) as mocked_pair:
+            result = default_analytical_convolution.convolution()
+
+            # EXPECT
+            # 2 sample components x 2 resolution components
+            assert np.all(result == 4.0)
+            assert mocked_pair.call_count == 4
+
+            # Gather the actual calls to verify correct pairs
+            calls = []
+            for c in mocked_pair.call_args_list:
+                kwargs = c.kwargs
+
+                # Ensure no accidental extra arguments
+                assert set(kwargs.keys()) == {
+                    "sample_component",
+                    "resolution_component",
+                }
+
+                calls.append(
+                    (kwargs["sample_component"], kwargs["resolution_component"])
+                )
+
+            expected_calls = [
+                (gaussian1, gaussian2),
+                (gaussian1, lorentzian2),
+                (lorentzian1, gaussian2),
+                (lorentzian1, lorentzian2),
+            ]
+            assert calls == expected_calls
+
+    def test_convolution_components(
+        self,
+        default_analytical_convolution,
+        gaussian1,
+        lorentzian1,
+    ):
+        """Test that the convolute method also works for components."""
+
+        # WHEN
+        default_analytical_convolution.sample_model = gaussian1
+        default_analytical_convolution.resolution_model = lorentzian1
+
+        # THEN
+        # Mock _convolute_analytic_pair to return 1.0 for any input pair
+        def mock_convolute_analytic_pair(sample_component, resolution_component):
+            return np.full_like(
+                default_analytical_convolution.energy.values, fill_value=1.0
+            )
+
+        with patch.object(
+            default_analytical_convolution,
+            "_convolute_analytic_pair",
+            side_effect=mock_convolute_analytic_pair,
+        ) as mocked_pair:
+            result = default_analytical_convolution.convolution()
+
+            # EXPECT
+            # 1 sample component x 1 resolution component
+            assert np.all(result == 1.0)
+            assert mocked_pair.call_count == 1
+
+            # Gather the actual calls to verify correct pairs
+            calls = []
+            for c in mocked_pair.call_args_list:
+                kwargs = c.kwargs
+
+                # Ensure no accidental extra arguments
+                assert set(kwargs.keys()) == {
+                    "sample_component",
+                    "resolution_component",
+                }
+
+                calls.append(
+                    (kwargs["sample_component"], kwargs["resolution_component"])
+                )
+
+            expected_calls = [
+                (gaussian1, lorentzian1),
+            ]
+            assert calls == expected_calls
 
     @pytest.mark.parametrize(
-        "function1, function2",
+        "function1, function2, expected_method, swapped",
         [
-            ("gaussian1", "gaussian2"),
-            ("gaussian1", "lorentzian1"),
-            ("gaussian1", "voigt1"),
-            ("lorentzian1", "gaussian1"),
-            ("lorentzian1", "lorentzian2"),
-            ("lorentzian1", "voigt1"),
-            ("voigt1", "gaussian1"),
-            ("voigt1", "lorentzian1"),
-            ("voigt1", "voigt2"),
+            # Normal cases
+            (
+                "gaussian1",
+                "gaussian2",
+                "_convolute_gaussian_gaussian",
+                False,
+            ),
+            (
+                "gaussian1",
+                "lorentzian1",
+                "_convolute_gaussian_lorentzian",
+                False,
+            ),
+            (
+                "gaussian1",
+                "voigt1",
+                "_convolute_gaussian_voigt",
+                False,
+            ),
+            (
+                "lorentzian1",
+                "lorentzian2",
+                "_convolute_lorentzian_lorentzian",
+                False,
+            ),
+            (
+                "lorentzian1",
+                "voigt1",
+                "_convolute_lorentzian_voigt",
+                False,
+            ),
+            ("voigt1", "voigt2", "_convolute_voigt_voigt", False),
+            # Swapped cases
+            ("lorentzian1", "gaussian1", "_convolute_gaussian_lorentzian", True),
+            ("voigt1", "gaussian1", "_convolute_gaussian_voigt", True),
+            ("voigt1", "lorentzian1", "_convolute_lorentzian_voigt", True),
         ],
         indirect=["function1", "function2"],
         ids=[
             "gauss-gauss",
             "gauss-lorentz",
             "gauss-voigt",
-            "lorentz-gauss",
             "lorentz-lorentz",
             "lorentz-voigt",
+            "voigt-voigt",
+            "lorentz-gauss",
             "voigt-gauss",
             "voigt-lorentz",
-            "voigt-voigt",
         ],
     )
-    def test_calculate_analytic_pair(
-        self, default_analytical_convolution, function1, function2
+    def test_convolute_analytic_pair_calls_correct_helper(
+        self,
+        default_analytical_convolution,
+        function1,
+        function2,
+        expected_method,
+        swapped,
     ):
-        """Test that the analytical convolution methods are correct by comparing to numerical convolution."""
-        # WHEN THEN
-        convoluted = default_analytical_convolution._calculate_analytic_pair(
-            function1, function2
-        )
+        """Test that _convolute_analytic_pair calls the correct internal helper with correct order."""
 
-        # EXPECT
-        expected = fftconvolve(
-            function1.evaluate(default_analytical_convolution.energy.values),
-            function2.evaluate(default_analytical_convolution.energy.values),
-            mode="same",
-        ) * (
-            default_analytical_convolution.energy.values[1]
-            - default_analytical_convolution.energy.values[0]
-        )
+        with patch.object(
+            default_analytical_convolution,
+            expected_method,
+            return_value="mocked_result",
+        ) as mocked_func:
+            result = default_analytical_convolution._convolute_analytic_pair(
+                function1, function2
+            )
+            if swapped:
+                expected_args = (function2, function1)
+            else:
+                expected_args = (function1, function2)
 
-        # Numerical convolution can be inaccurate at the edges, so only compare the central part
-        N = len(convoluted)
-        start = N // 4
-        end = 3 * N // 4
-
-        assert np.allclose(
-            convoluted[start:end],
-            expected[start:end],
-            rtol=NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE,
-            atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
-        )
+            mocked_func.assert_called_once_with(*expected_args)
+            assert result == "mocked_result"
 
     @pytest.mark.parametrize(
         "function1",
@@ -146,7 +284,7 @@ class TestAnalyticalConvolution:
         indirect=True,
         ids=["gaussian", "lorentzian", "voigt", "dho"],
     )
-    def test_calculate_analytic_pair_delta(
+    def test_convolute_analytic_pair_delta(
         self, default_analytical_convolution, function1
     ):
         """Test that convolution with delta function returns the other function."""
@@ -154,7 +292,7 @@ class TestAnalyticalConvolution:
         delta_function = DeltaFunction(area=2.0, center=0.5)
         function1 = Gaussian(area=3.0, center=-1.0, width=1.0)
 
-        convoluted = default_analytical_convolution._calculate_analytic_pair(
+        convoluted = default_analytical_convolution._convolute_analytic_pair(
             delta_function, function1
         )
 
@@ -170,7 +308,7 @@ class TestAnalyticalConvolution:
             atol=NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE,
         )
 
-    def test_calculate_analytic_pair_resolution_delta_raises(
+    def test_convolute_analytic_pair_resolution_delta_raises(
         self, default_analytical_convolution
     ):
         """Test that an error is raised if the resolution function is a delta function."""
@@ -183,11 +321,11 @@ class TestAnalyticalConvolution:
             ValueError,
             match="not supported",
         ):
-            default_analytical_convolution._calculate_analytic_pair(
+            default_analytical_convolution._convolute_analytic_pair(
                 sample_function, resolution_function
             )
 
-    def test_calculate_analytic_pair_non_analytical_pair_raises(
+    def test_convolute_analytic_pair_non_analytical_pair_raises(
         self, default_analytical_convolution, gaussian1, dho1
     ):
         """Test that an error is raised if the function pair is not supported for analytical convolution."""
@@ -200,18 +338,18 @@ class TestAnalyticalConvolution:
             ValueError,
             match="not supported",
         ):
-            default_analytical_convolution._calculate_analytic_pair(
+            default_analytical_convolution._convolute_analytic_pair(
                 sample_function, resolution_function
             )
 
     @pytest.mark.parametrize(
         "method_name, function1, function2",
         [
-            ("_convolute_gauss_gauss", "gaussian1", "gaussian2"),
-            ("_convolute_gauss_lorentz", "gaussian1", "lorentzian1"),
-            ("_convolute_gauss_voigt", "gaussian1", "voigt1"),
-            ("_convolute_lorentz_lorentz", "lorentzian1", "lorentzian2"),
-            ("_convolute_lorentz_voigt", "lorentzian1", "voigt1"),
+            ("_convolute_gaussian_gaussian", "gaussian1", "gaussian2"),
+            ("_convolute_gaussian_lorentzian", "gaussian1", "lorentzian1"),
+            ("_convolute_gaussian_voigt", "gaussian1", "voigt1"),
+            ("_convolute_lorentzian_lorentzian", "lorentzian1", "lorentzian2"),
+            ("_convolute_lorentzian_voigt", "lorentzian1", "voigt1"),
             ("_convolute_voigt_voigt", "voigt1", "voigt2"),
         ],
         indirect=["function1", "function2"],

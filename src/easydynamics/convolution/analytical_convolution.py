@@ -35,11 +35,11 @@ class AnalyticalConvolution(ConvolutionBase):
     # Mapping of supported component type pairs to convolution methods.
     # Delta functions are handled separately.
     _CONVOLUTIONS = {
-        ("Gaussian", "Gaussian"): "_convolute_gauss_gauss",
-        ("Gaussian", "Lorentzian"): "_convolute_gauss_lorentz",
-        ("Gaussian", "Voigt"): "_convolute_gauss_voigt",
-        ("Lorentzian", "Lorentzian"): "_convolute_lorentz_lorentz",
-        ("Lorentzian", "Voigt"): "_convolute_lorentz_voigt",
+        ("Gaussian", "Gaussian"): "_convolute_gaussian_gaussian",
+        ("Gaussian", "Lorentzian"): "_convolute_gaussian_lorentzian",
+        ("Gaussian", "Voigt"): "_convolute_gaussian_voigt",
+        ("Lorentzian", "Lorentzian"): "_convolute_lorentzian_lorentzian",
+        ("Lorentzian", "Voigt"): "_convolute_lorentzian_voigt",
         ("Voigt", "Voigt"): "_convolute_voigt_voigt",
     }
 
@@ -94,7 +94,7 @@ class AnalyticalConvolution(ConvolutionBase):
         for sample_component in sample_components:
             # Go through resolution components, adding analytical contributions
             for resolution_component in resolution_components:
-                contrib = self._calculate_analytic_pair(
+                contrib = self._convolute_analytic_pair(
                     sample_component=sample_component,
                     resolution_component=resolution_component,
                 )
@@ -102,9 +102,9 @@ class AnalyticalConvolution(ConvolutionBase):
 
         return total
 
-    def _calculate_analytic_pair(
+    def _convolute_analytic_pair(
         self,
-        sample_component: Union[ModelComponent, SampleModel],
+        sample_component: ModelComponent,
         resolution_component: ModelComponent,
     ) -> np.ndarray:
         """
@@ -121,9 +121,9 @@ class AnalyticalConvolution(ConvolutionBase):
 
 
         Args:
-            sample_component : Union[ModelComponent, SampleModel]
+            sample_component : ModelComponent
                 The sample component to be convolved.
-            resolution_component : Union[ModelComponent, SampleModel]
+            resolution_component : ModelComponent
                 The resolution component to convolve with.
 
         Returns:
@@ -192,7 +192,7 @@ class AnalyticalConvolution(ConvolutionBase):
             self.energy.values - sample_component.center.value - self.offset.value
         )
 
-    def _convolute_gauss_gauss(
+    def _convolute_gaussian_gaussian(
         self,
         sample_component: Gaussian,
         resolution_component: Gaussian,
@@ -225,7 +225,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
         return self._gaussian_eval(area=area, center=center, width=width)
 
-    def _convolute_gauss_lorentz(
+    def _convolute_gaussian_lorentzian(
         self,
         sample_component: Gaussian,
         resolution_component: Lorentzian,
@@ -256,7 +256,7 @@ class AnalyticalConvolution(ConvolutionBase):
             lorentzian_width=resolution_component.width.value,
         )
 
-    def _convolute_gauss_voigt(
+    def _convolute_gaussian_voigt(
         self,
         sample_component: Gaussian,
         resolution_component: Voigt,
@@ -296,7 +296,7 @@ class AnalyticalConvolution(ConvolutionBase):
             lorentzian_width=lorentzian_width,
         )
 
-    def _convolute_lorentz_lorentz(
+    def _convolute_lorentzian_lorentzian(
         self,
         sample_component: Lorentzian,
         resolution_component: Lorentzian,
@@ -324,7 +324,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
         return self._lorentzian_eval(area=area, center=center, width=width)
 
-    def _convolute_lorentz_voigt(
+    def _convolute_lorentzian_voigt(
         self,
         sample_component: Lorentzian,
         resolution_component: Voigt,
