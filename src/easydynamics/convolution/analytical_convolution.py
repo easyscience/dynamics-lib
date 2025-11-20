@@ -32,6 +32,17 @@ class AnalyticalConvolution(ConvolutionBase):
             The offset in energy to apply to the convolution.
     """
 
+    # Mapping of supported component type pairs to convolution methods.
+    # Delta functions are handled separately.
+    _CONVOLUTIONS = {
+        ("Gaussian", "Gaussian"): "_convolute_gauss_gauss",
+        ("Gaussian", "Lorentzian"): "_convolute_gauss_lorentz",
+        ("Gaussian", "Voigt"): "_convolute_gauss_voigt",
+        ("Lorentzian", "Lorentzian"): "_convolute_lorentz_lorentz",
+        ("Lorentzian", "Voigt"): "_convolute_lorentz_voigt",
+        ("Voigt", "Voigt"): "_convolute_voigt_voigt",
+    }
+
     def __init__(
         self,
         energy: Union[np.ndarray, sc.Variable],
@@ -124,7 +135,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
         if isinstance(resolution_component, DeltaFunction):
             raise ValueError(
-                "Analytical convolution with delta function in resolution model is not supported."
+                "Analytical convolution with a delta function in the resolution model is not supported."
             )
 
         # Delta function + anything --> anything, shifted by delta center with area A1 * A2
@@ -134,88 +145,30 @@ class AnalyticalConvolution(ConvolutionBase):
                 resolution_component,
             )
 
-        # Gaussian + Gaussian --> Gaussian with width sqrt(w1^2 + w2^2) and area A1 * A2
-        if isinstance(sample_component, Gaussian) and isinstance(
-            resolution_component, Gaussian
-        ):
-            return self._convolute_gauss_gauss(
-                sample_component,
-                resolution_component,
+        pair = (type(sample_component).__name__, type(resolution_component).__name__)
+        swapped = False
+
+        if pair not in self._CONVOLUTIONS:
+            # Try reversing the pair
+            pair = (
+                type(resolution_component).__name__,
+                type(sample_component).__name__,
+            )
+            swapped = True
+
+        func_name = self._CONVOLUTIONS.get(pair)
+
+        if func_name is None:
+            raise ValueError(
+                f"Analytical convolution not supported for component pair: "
+                f"{type(sample_component).__name__}, {type(resolution_component).__name__}"
             )
 
-        # Gaussian + Lorentzian --> Voigt with area A1 * A2
-        if (
-            isinstance(sample_component, Gaussian)
-            and isinstance(resolution_component, Lorentzian)
-        ) or (
-            isinstance(sample_component, Lorentzian)
-            and isinstance(resolution_component, Gaussian)
-        ):
-            if isinstance(sample_component, Gaussian):
-                gaussian, lorentzian = sample_component, resolution_component
-            else:
-                gaussian, lorentzian = resolution_component, sample_component
-
-            return self._convolute_gauss_lorentz(
-                gaussian,
-                lorentzian,
-            )
-
-        # Gaussian + Voigt --> Voigt with area A1 * A2, Lorentzian width unchanged, Gaussian widths summed in quadrature
-        if (
-            isinstance(sample_component, Gaussian)
-            and isinstance(resolution_component, Voigt)
-        ) or (
-            isinstance(sample_component, Voigt)
-            and isinstance(resolution_component, Gaussian)
-        ):
-            if isinstance(sample_component, Gaussian):
-                gaussian, voigt = sample_component, resolution_component
-            else:
-                gaussian, voigt = resolution_component, sample_component
-            return self._convolute_gauss_voigt(
-                gaussian,
-                voigt,
-            )
-
-        # Lorentzian + Lorentzian --> Lorentzian with width w1 + w2 and area A1 * A2
-        if isinstance(sample_component, Lorentzian) and isinstance(
-            resolution_component, Lorentzian
-        ):
-            return self._convolute_lorentz_lorentz(
-                sample_component,
-                resolution_component,
-            )
-
-        #  Lorentzian + Voigt --> Voigt with area A1 * A2, Gaussian width unchanged, Lorentzian widths summed
-        if (
-            isinstance(sample_component, Lorentzian)
-            and isinstance(resolution_component, Voigt)
-        ) or (
-            isinstance(sample_component, Voigt)
-            and isinstance(resolution_component, Lorentzian)
-        ):
-            if isinstance(sample_component, Lorentzian):
-                lorentzian, voigt = sample_component, resolution_component
-            else:
-                lorentzian, voigt = resolution_component, sample_component
-
-            return self._convolute_lorentz_voigt(
-                lorentzian,
-                voigt,
-            )
-
-        # Voigt + Voigt --> Voigt with area A1 * A2, Gaussian widths summed in quadrature, Lorentzian widths summed
-        if isinstance(sample_component, Voigt) and isinstance(
-            resolution_component, Voigt
-        ):
-            return self.convolute_voigt_voigt(
-                sample_component,
-                resolution_component,
-            )
-        return ValueError(
-            f"Analytical convolution not implemented for component pair: {type(sample_component).__name__}, {type(resolution_component).__name__}"
-        )
+        # Call the corresponding method
+        if swapped:
+            return getattr(self, func_name)(resolution_component, sample_component)
+        else:
+            return getattr(self, func_name)(sample_component, resolution_component)
 
     def _convolute_delta_any(
         self,
@@ -299,7 +252,7 @@ class AnalyticalConvolution(ConvolutionBase):
         return self._voigt_eval(
             area=area,
             center=center,
-            gauss_width=sample_component.width.value,
+            gaussian_width=sample_component.width.value,
             lorentzian_width=resolution_component.width.value,
         )
 
@@ -329,16 +282,17 @@ class AnalyticalConvolution(ConvolutionBase):
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
 
-        gauss_width = np.sqrt(
-            sample_component.width.value**2 + resolution_component.width.value**2
+        gaussian_width = np.sqrt(
+            sample_component.width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
-        lorentzian_width = resolution_component.width.value
+        lorentzian_width = resolution_component.lorentzian_width.value
 
         return self._voigt_eval(
             area=area,
             center=center,
-            gauss_width=gauss_width,
+            gaussian_width=gaussian_width,
             lorentzian_width=lorentzian_width,
         )
 
@@ -394,20 +348,20 @@ class AnalyticalConvolution(ConvolutionBase):
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
 
-        gauss_width = resolution_component.g_width.value
+        gaussian_width = resolution_component.gaussian_width.value
 
         lorentzian_width = (
-            sample_component.width.value + resolution_component.l_width.value
+            sample_component.width.value + resolution_component.lorentzian_width.value
         )
 
         return self._voigt_eval(
             area=area,
             center=center,
-            gauss_width=gauss_width,
+            gaussian_width=gaussian_width,
             lorentzian_width=lorentzian_width,
         )
 
-    def convolute_voigt_voigt(
+    def _convolute_voigt_voigt(
         self,
         sample_component: Voigt,
         resolution_component: Voigt,
@@ -431,17 +385,19 @@ class AnalyticalConvolution(ConvolutionBase):
             sample_component.center.value + resolution_component.center.value
         ) + self.offset.value
 
-        gauss_width = np.sqrt(
-            sample_component.g_width.value**2 + resolution_component.g_width.value**2
+        gaussian_width = np.sqrt(
+            sample_component.gaussian_width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
         lorentzian_width = (
-            sample_component.l_width.value + resolution_component.l_width.value
+            sample_component.lorentzian_width.value
+            + resolution_component.lorentzian_width.value
         )
         return self._voigt_eval(
             area=area,
             center=center,
-            gauss_width=gauss_width,
+            gaussian_width=gaussian_width,
             lorentzian_width=lorentzian_width,
         )
 
@@ -498,7 +454,7 @@ class AnalyticalConvolution(ConvolutionBase):
         self,
         area: float,
         center: float,
-        gauss_width: float,
+        gaussian_width: float,
         lorentzian_width: float,
     ) -> np.ndarray:
         """
@@ -508,7 +464,7 @@ class AnalyticalConvolution(ConvolutionBase):
                 The area under the Voigt profile.
             center : float
                 The center of the Voigt profile.
-            gauss_width : float
+            gaussian_width : float
                 The Gaussian width (sigma) of the Voigt profile.
             lorentzian_width : float
                 The Lorentzian width (HWHM) of the Voigt profile.
@@ -518,5 +474,5 @@ class AnalyticalConvolution(ConvolutionBase):
         """
 
         return area * voigt_profile(
-            self.energy.values - center, gauss_width, lorentzian_width
+            self.energy.values - center, gaussian_width, lorentzian_width
         )
