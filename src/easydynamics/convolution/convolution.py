@@ -37,8 +37,6 @@ class Convolution(NumericalConvolutionBase):
         The sample model to be convolved.
     resolution_model : SampleModel or ModelComponent
         The resolution model to convolve with.
-    offset_float : float, or None, optional
-        The offset to apply to the input array.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
     extension_factor : float, optional
@@ -58,7 +56,6 @@ class Convolution(NumericalConvolutionBase):
         energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
-        offset: Optional[Union[Numerical, Parameter]] = 0.0,
         upsample_factor: Optional[Numerical] = 5,
         extension_factor: Optional[float] = 0.2,
         temperature: Optional[Union[Parameter, float]] = None,
@@ -70,7 +67,6 @@ class Convolution(NumericalConvolutionBase):
             energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
-            offset=offset,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -107,9 +103,7 @@ class Convolution(NumericalConvolutionBase):
         if self._delta_sample_model.components:
             for sample_component in self._delta_sample_model.components:
                 total += sample_component.area.value * self._resolution_model.evaluate(
-                    self.energy.values
-                    - sample_component.center.value
-                    - self.offset.value
+                    self.energy.values - sample_component.center.value
                 )
 
         return total
@@ -163,7 +157,6 @@ class Convolution(NumericalConvolutionBase):
                 energy=self.energy,
                 sample_model=self._analytical_sample_model,
                 resolution_model=self._resolution_model,
-                offset=self.offset,
             )
         else:
             self._analytical_convolver = None
@@ -173,7 +166,6 @@ class Convolution(NumericalConvolutionBase):
                 energy=self.energy,
                 sample_model=self._numerical_sample_model,
                 resolution_model=self._resolution_model,
-                offset=self._offset,
                 upsample_factor=self._upsample_factor,
                 extension_factor=self._extension_factor,
                 temperature=self._temperature,

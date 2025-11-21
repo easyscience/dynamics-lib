@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import (
     ConvolutionBase,
@@ -15,13 +14,11 @@ class TestConvolutionBase:
         energy = np.linspace(-10, 10, 100)
         sample_model = SampleModel(name="SampleModel")
         resolution_model = SampleModel(name="ResolutionModel")
-        offset = 0.0
 
         return ConvolutionBase(
             energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
-            offset=offset,
         )
 
     def test_init(self, convolution_base):
@@ -31,9 +28,6 @@ class TestConvolutionBase:
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
         assert isinstance(convolution_base._sample_model, SampleModel)
         assert isinstance(convolution_base._resolution_model, SampleModel)
-        assert isinstance(convolution_base.offset, Parameter)
-        assert convolution_base.offset.value == 0.0
-        assert convolution_base.offset.unit == "meV"
 
     def test_init_energy_numerical_none_offset(self):
         # WHEN
@@ -41,7 +35,6 @@ class TestConvolutionBase:
 
         convolution_base = ConvolutionBase(
             energy=energy,
-            offset=None,
         )
 
         # THEN EXPECT
@@ -51,8 +44,6 @@ class TestConvolutionBase:
         assert convolution_base.energy.unit == "meV"
         assert convolution_base._sample_model is None
         assert convolution_base._resolution_model is None
-        assert convolution_base.offset.value == 0.0
-        assert convolution_base.offset.unit == "meV"
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
@@ -63,7 +54,6 @@ class TestConvolutionBase:
                     "sample_model": SampleModel(),
                     "resolution_model": SampleModel(),
                     "energy_unit": "meV",
-                    "offset": 0.0,
                 },
                 "Energy must be",
             ),
@@ -73,7 +63,6 @@ class TestConvolutionBase:
                     "sample_model": "invalid",
                     "resolution_model": SampleModel(),
                     "energy_unit": "meV",
-                    "offset": 0.0,
                 },
                 "`sample_model` is an instance of str, but must be a SampleModel or ModelComponent.",
             ),
@@ -83,7 +72,6 @@ class TestConvolutionBase:
                     "sample_model": SampleModel(),
                     "resolution_model": "invalid",
                     "energy_unit": "meV",
-                    "offset": 0.0,
                 },
                 "`resolution_model` is an instance of str, but must be a SampleModel or ModelComponent.",
             ),
@@ -93,19 +81,8 @@ class TestConvolutionBase:
                     "sample_model": SampleModel(),
                     "resolution_model": SampleModel(),
                     "energy_unit": 123,
-                    "offset": 0.0,
                 },
                 "Energy_unit must be ",
-            ),
-            (
-                {
-                    "energy": np.linspace(-10, 10, 100),
-                    "sample_model": SampleModel(),
-                    "resolution_model": SampleModel(),
-                    "energy_unit": "meV",
-                    "offset": "invalid",
-                },
-                "Offset must be a Number or Parameter.",
             ),
         ],
     )
@@ -225,39 +202,3 @@ class TestConvolutionBase:
             match="`resolution_model` is an instance of str, but must be a SampleModel or ModelComponent.",
         ):
             convolution_base.resolution_model = "invalid"
-
-    def test_offset_property(self, convolution_base):
-        # WHEN THEN EXPECT
-        assert isinstance(convolution_base.offset, Parameter)
-        assert convolution_base.offset.value == 0.0
-
-    def test_offset_setter_parameter(self, convolution_base):
-        # WHEN
-        new_offset = Parameter(value=2.5, name="offset", unit="meV")
-
-        # THEN
-        convolution_base.offset = new_offset
-
-        # EXPECT
-        assert convolution_base.offset == new_offset
-
-    def test_offset_setter_numerical(self, convolution_base):
-        "Make sure the offset unique name remains the same when setting the numerical value"
-        # WHEN
-        convolution_base.offset = 3.5
-        old_offset_unique_name = convolution_base.offset.unique_name
-
-        # THEN
-        convolution_base.offset = 3.5
-
-        # EXPECT
-        assert convolution_base.offset.value == 3.5
-        assert convolution_base.offset.unique_name == old_offset_unique_name
-
-    def test_offset_setter_invalid_type_raises(self, convolution_base):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            TypeError,
-            match="Offset must be a Number or Parameter.",
-        ):
-            convolution_base.offset = "invalid"

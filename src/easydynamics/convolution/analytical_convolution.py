@@ -2,7 +2,6 @@ from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
@@ -28,8 +27,6 @@ class AnalyticalConvolution(ConvolutionBase):
             The sample model to be convolved.
         resolution_model : SampleModel or ModelComponent
             The resolution model to convolve with.
-        offset : float, Parameter or None, optional
-            The offset in energy to apply to the convolution.
     """
 
     # Mapping of supported component type pairs to convolution methods.
@@ -49,14 +46,12 @@ class AnalyticalConvolution(ConvolutionBase):
         energy_unit: Optional[Union[str, sc.Unit]] = "meV",
         sample_model: Optional[SampleModel] = None,
         resolution_model: Optional[SampleModel] = None,
-        offset: Optional[Union[Numerical, Parameter]] = 0.0,
     ):
         super().__init__(
             energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
             energy_unit=energy_unit,
-            offset=offset,
         )
 
     def convolution(
@@ -117,7 +112,6 @@ class AnalyticalConvolution(ConvolutionBase):
         The convolution of two voigt profiles results in another voigt profile, with the gaussian widths summed in quadrature and the lorentzian widths summed.
         The convolution of a delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.
         All areas are multiplied.
-        The output is shifted by self.offset.value.
 
 
         Args:
@@ -189,7 +183,7 @@ class AnalyticalConvolution(ConvolutionBase):
                 The evaluated convolution values at self.energy.
         """
         return sample_component.area.value * resolution_model.evaluate(
-            self.energy.values - sample_component.center.value - self.offset.value
+            self.energy.values - sample_component.center.value
         )
 
     def _convolute_gaussian_gaussian(
@@ -219,9 +213,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
         area = sample_component.area.value * resolution_component.area.value
 
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
 
         return self._gaussian_eval(area=area, center=center, width=width)
 
@@ -244,9 +236,7 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
         area = sample_component.area.value * resolution_component.area.value
 
         return self._voigt_eval(
@@ -278,9 +268,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         area = sample_component.area.value * resolution_component.area.value
 
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
             sample_component.width.value**2
@@ -316,9 +304,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         area = sample_component.area.value * resolution_component.area.value
 
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
 
         width = sample_component.width.value + resolution_component.width.value
 
@@ -344,9 +330,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         area = sample_component.area.value * resolution_component.area.value
 
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = resolution_component.gaussian_width.value
 
@@ -381,9 +365,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         area = sample_component.area.value * resolution_component.area.value
 
-        center = (
-            sample_component.center.value + resolution_component.center.value
-        ) + self.offset.value
+        center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
             sample_component.gaussian_width.value**2

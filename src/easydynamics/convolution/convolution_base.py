@@ -1,8 +1,7 @@
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -24,8 +23,6 @@ class ConvolutionBase:
         The resolution model to convolve with.
     energy_unit : str or sc.Unit, optional
         The unit of the energy. Default is 'meV'.
-    offset : float, or None, optional
-        The offset to apply to the input array.
     """
 
     def __init__(
@@ -34,7 +31,6 @@ class ConvolutionBase:
         sample_model: Union[SampleModel, ModelComponent] = None,
         resolution_model: Union[SampleModel, ModelComponent] = None,
         energy_unit: Union[str, sc.Unit] = "meV",
-        offset: Optional[Union[Numerical, Parameter]] = None,
     ):
         if isinstance(energy, Numerical):
             energy = np.array([float(energy)])
@@ -64,17 +60,6 @@ class ConvolutionBase:
                 f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
             )
         self._resolution_model = resolution_model
-
-        if offset is None:
-            offset = 0.0
-
-        if isinstance(offset, Numerical):
-            offset = Parameter(value=offset, name="offset", unit=energy_unit)
-
-        if not isinstance(offset, Parameter):
-            raise TypeError("Offset must be a Number or Parameter.")
-
-        self._offset = offset
 
     @property
     def energy(self) -> sc.Variable:
@@ -182,26 +167,3 @@ class ConvolutionBase:
                 f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
             )
         self._resolution_model = resolution_model
-
-    @property
-    def offset(self) -> Parameter:
-        """Get the offset"""
-        return self._offset
-
-    @offset.setter
-    def offset(self, offset: Union[Numerical, Parameter]) -> None:
-        """Set the offset.
-        Args:
-            offset : Number or Parameter
-                The offset to apply to the input array.
-
-        Raises:
-            TypeError: If offset is not a Number or Parameter.
-        """
-        if not isinstance(offset, (Numerical, Parameter)):
-            raise TypeError("Offset must be a Number or Parameter.")
-
-        if isinstance(offset, Numerical):
-            self._offset.value = offset
-        else:
-            self._offset = offset

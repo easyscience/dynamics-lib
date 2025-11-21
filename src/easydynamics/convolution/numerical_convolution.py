@@ -30,8 +30,6 @@ class NumericalConvolution(NumericalConvolutionBase):
         The sample model to be convolved.
     resolution_model : SampleModel or ModelComponent
         The resolution model to convolve with.
-    offset_float : float, or None, optional
-        The offset to apply to the input array.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
     extension_factor : float, optional
@@ -51,7 +49,6 @@ class NumericalConvolution(NumericalConvolutionBase):
         energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
-        offset: Optional[Union[Numerical, Parameter]] = 0.0,
         upsample_factor: Optional[Numerical] = 5,
         extension_factor: Optional[float] = 0.2,
         temperature: Optional[Union[Parameter, float]] = None,
@@ -63,7 +60,6 @@ class NumericalConvolution(NumericalConvolutionBase):
             energy=energy,
             sample_model=sample_model,
             resolution_model=resolution_model,
-            offset=offset,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -97,15 +93,13 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         # Evaluate sample model. If called via the Convolution class, delta functions are already filtered out.
         sample_vals = self.sample_model.evaluate(
-            self._energy_grid.energy_dense
-            - self._offset.value
-            - self._energy_grid.energy_even_length_offset
+            self._energy_grid.energy_dense - self._energy_grid.energy_even_length_offset
         )
 
         # Detailed balance correction
         if self.temperature is not None:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense - self._offset.value,
+                energy=self._energy_grid.energy_dense,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.normalize_detailed_balance,
@@ -138,7 +132,6 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         return (
             f"NumericalConvolution(energy_unit={self._energy_unit}, "
-            f"offset={self.offset}, upsample_factor={self.upsample_factor}, "
             f"extension_factor={self.extension_factor}, "
             f"temperature={self.temperature}, "
             f"temperature_unit={self.temperature_unit}, "

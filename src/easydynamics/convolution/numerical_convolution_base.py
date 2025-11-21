@@ -30,8 +30,6 @@ class NumericalConvolutionBase(ConvolutionBase):
         The sample model to be convolved.
     resolution_model : SampleModel or ModelComponent
         The resolution model to convolve with.
-    offset_float : float, or None, optional
-        The offset to apply to the input array.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
     extension_factor : float, optional
@@ -51,7 +49,6 @@ class NumericalConvolutionBase(ConvolutionBase):
         energy: Union[np.ndarray, sc.Variable],
         sample_model: Union[SampleModel, ModelComponent],
         resolution_model: Union[SampleModel, ModelComponent],
-        offset: Optional[Union[Numerical, Parameter]] = 0.0,
         upsample_factor: Optional[Numerical] = 5,
         extension_factor: Optional[float] = 0.2,
         temperature: Optional[Union[Parameter, float]] = None,
@@ -64,7 +61,6 @@ class NumericalConvolutionBase(ConvolutionBase):
             sample_model=sample_model,
             resolution_model=resolution_model,
             energy_unit=energy_unit,
-            offset=offset,
         )
 
         if temperature is not None:
@@ -342,7 +338,6 @@ class NumericalConvolutionBase(ConvolutionBase):
             f"sample_model={self.sample_model}, "
             f"resolution_model={self.resolution_model}, "
             f"energy_unit={self._energy_unit}, "
-            f"offset={self.offset}, "
             f"upsample_factor={self.upsample_factor}, "
             f"extension_factor={self.extension_factor}, "
             f"temperature={self.temperature}, "
