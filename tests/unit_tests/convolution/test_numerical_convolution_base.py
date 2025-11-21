@@ -3,6 +3,7 @@ import pytest
 import scipp as sc
 from easyscience.variable import Parameter
 
+from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import (
     NumericalConvolutionBase,
 )
@@ -42,5 +43,4 @@ class TestNumericalConvolutionBase:
         # assert default_numerical_convolution_base.temperature_unit == "K"
         assert default_numerical_convolution_base.energy_unit == "meV"
         assert default_numerical_convolution_base.normalize_detailed_balance is True
-
-        # todo also check _energy_grid
+        assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
