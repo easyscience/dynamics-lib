@@ -216,11 +216,27 @@ class NumericalConvolutionBase(ConvolutionBase):
         self,
     ) -> EnergyGrid:
         """
-        Create a dense grid by upsampling and extending the input energy array.
-
+        Create a dense grid by upsampling and extending the energy array.
+            # energy_dense=energy_dense,
+            # energy_dense_centered=energy_dense_centered,
+            # energy_dense_step=energy_dense_step,
+            # span_dense=span,
+            # span_original=span_original,
+            # energy_even_length_offset=energy_even_length_offset,
         Returns:
-            DenseGrid
-                The dense grid created by upsampling and extending x.
+            EnergyGrid
+                The dense grid created by upsampling and extending energy.
+        The EnergyGrid has the following attributes:
+           energy_dense : np.ndarray
+               The upsampled and extended energy array.
+              energy_dense_centered : np.ndarray
+                The centered version of energy_dense (used for resolution evaluation).
+            energy_dense_step : float
+                The spacing of energy_dense (used for width checks and normalization).
+            energy_span_dense : float
+                The total span of energy_dense. (used for width checks).
+            energy_even_length_offset : float
+                The offset to apply if energy_dense has even length (used for convolution alignment).
         """
         if self.upsample_factor is None:
             # Check if the array is uniformly spaced.
@@ -232,22 +248,21 @@ class NumericalConvolutionBase(ConvolutionBase):
                 )
             energy_dense = self.energy.values
 
-            span = self.energy.values.max() - self.energy.values.min()
-            span_original = span
+            energy_span_dense = self.energy.values.max() - self.energy.values.min()
         else:
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
-            span_original = energy_max - energy_min
-            extra = self.extension_factor * span_original
+            energy_span_original = energy_max - energy_min
+            extra = self.extension_factor * energy_span_original
             extended_min = energy_min - extra
             extended_max = energy_max + extra
             num_points = round(len(self.energy.values) * self.upsample_factor)
             energy_dense = np.linspace(extended_min, extended_max, num_points)
-            span = extended_max - extended_min
+            energy_span_dense = extended_max - extended_min
 
         energy_dense_step = energy_dense[1] - energy_dense[0]
 
-        # Handle offset for even length of x in convolution.
+        # Handle offset for even length of energy_dense in convolution.
         # The convolution of two arrays of length N is of length 2N-1. When using 'same' mode, only the central N points are kept,
         # so the output has the same length as the input.
         # However, if N is even, the center falls between two points, leading to a half-bin offset.
@@ -258,21 +273,20 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_even_length_offset = 0.0
 
-        # Handle the case when x is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
+        # Handle the case when energy_dense is not symmetric around zero. The resolution is still centered around zero (or close to it), so it needs to be evaluated there.
         if not np.isclose(energy_dense.mean(), 0.0):
             energy_dense_centered = np.linspace(
-                -0.5 * span, 0.5 * span, len(energy_dense)
+                -0.5 * energy_span_dense, 0.5 * energy_span_dense, len(energy_dense)
             )
         else:
             energy_dense_centered = energy_dense
 
         energy_grid = EnergyGrid(
             energy_dense=energy_dense,
-            span_original=span_original,
-            span_dense=span,
-            energy_even_length_offset=energy_even_length_offset,
             energy_dense_centered=energy_dense_centered,
-            energy_step=energy_dense_step,
+            energy_dense_step=energy_dense_step,
+            energy_span_dense=energy_span_dense,
+            energy_even_length_offset=energy_even_length_offset,
         )
 
         return energy_grid
