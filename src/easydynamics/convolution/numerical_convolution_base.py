@@ -228,22 +228,24 @@ class NumericalConvolutionBase(ConvolutionBase):
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
-                    "Input array `energy` must be uniformly spaced if upsample_factor = 0."
+                    "Input array `energy` must be uniformly spaced if upsample_factor is not given."
                 )
             energy_dense = self.energy.values
 
             span = self.energy.values.max() - self.energy.values.min()
+            span_original = span
         else:
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
-            span = energy_max - energy_min
-            extra = self.extension_factor * span
+            span_original = energy_max - energy_min
+            extra = self.extension_factor * span_original
             extended_min = energy_min - extra
             extended_max = energy_max + extra
             num_points = round(len(self.energy.values) * self.upsample_factor)
             energy_dense = np.linspace(extended_min, extended_max, num_points)
+            span = extended_max - extended_min
 
-        energy_step = energy_dense[1] - energy_dense[0]
+        energy_dense_step = energy_dense[1] - energy_dense[0]
 
         # Handle offset for even length of x in convolution.
         # The convolution of two arrays of length N is of length 2N-1. When using 'same' mode, only the central N points are kept,
@@ -252,7 +254,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         # For example, if N=4, the convolution has length 7, and when we select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by 0.5*dx from the true center at index 3.5.
         if len(energy_dense) % 2 == 0:
-            energy_even_length_offset = -0.5 * energy_step
+            energy_even_length_offset = -0.5 * energy_dense_step
         else:
             energy_even_length_offset = 0.0
 
@@ -266,11 +268,11 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         energy_grid = EnergyGrid(
             energy_dense=energy_dense,
-            span_original=span,
+            span_original=span_original,
             span_dense=span,
             energy_even_length_offset=energy_even_length_offset,
             energy_dense_centered=energy_dense_centered,
-            energy_step=energy_step,
+            energy_step=energy_dense_step,
         )
 
         return energy_grid

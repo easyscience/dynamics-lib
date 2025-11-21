@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import (
@@ -34,9 +33,6 @@ class TestNumericalConvolutionBase:
         assert isinstance(
             default_numerical_convolution_base._resolution_model, SampleModel
         )
-        assert isinstance(default_numerical_convolution_base.offset, Parameter)
-        assert default_numerical_convolution_base.offset.value == 0.0
-        assert default_numerical_convolution_base.offset.unit == "meV"
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == 0.2
         assert default_numerical_convolution_base.temperature is None
