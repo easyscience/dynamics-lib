@@ -63,17 +63,12 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_unit=energy_unit,
         )
 
-        if temperature is not None:
-            if isinstance(temperature, Numerical):
-                temperature = Parameter(
-                    name="temperature",
-                    value=float(temperature),
-                    unit=temperature_unit,
-                    fixed=True,
-                )
-            elif not isinstance(temperature, Parameter):
-                raise TypeError("Temperature must be a float or Parameter.")
+        if temperature is not None and not isinstance(temperature, Numerical):
+            raise TypeError("Temperature must be None or a number.")
         self._temperature = temperature
+
+        if not isinstance(temperature_unit, (str, sc.Unit)):
+            raise TypeError("Temperature_unit must be a string or sc.Unit.")
         self._temperature_unit = temperature_unit
 
         self._normalize_detailed_balance = normalize_detailed_balance
