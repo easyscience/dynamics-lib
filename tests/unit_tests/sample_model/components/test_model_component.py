@@ -8,7 +8,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 class DummyComponent(ModelComponent):
     def __init__(self):
-        super().__init__(name="Dummy")
+        super().__init__(display_name="Dummy")
         self.area = Parameter(name="area", value=1.0, unit="meV", fixed=False)
         self.center = Parameter(name="center", value=2.0, unit="meV", fixed=True)
         self.width = Parameter(name="width", value=3.0, unit="meV", fixed=True)

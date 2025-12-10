@@ -2,29 +2,28 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes import ObjBase
+from easyscience.base_classes.new_base import NewBase
 from scipp import UnitError
 
 Numeric = Union[float, int]
 
 
-class ModelComponent(ObjBase):
+class ModelComponent(NewBase):
     """
     Abstract base class for all model components.
     """
 
     def __init__(
         self,
-        name="ModelComponent",
+        display_name="ModelComponent",
         unit: Optional[Union[str, sc.Unit]] = "meV",
-        **kwargs: Any,
     ):
         self.validate_unit(unit)
-        super().__init__(name=name, **kwargs)
+        super().__init__(display_name=display_name)
         self._unit = unit
 
     @property
@@ -156,4 +155,4 @@ class ModelComponent(ObjBase):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.name})"
+        return f"{self.__class__.__name__}(name={self.display_name})"

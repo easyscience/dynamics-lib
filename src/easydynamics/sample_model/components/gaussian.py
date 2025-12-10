@@ -28,29 +28,27 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        name: Optional[str] = "Gaussian",
+        display_name: Optional[str] = "Gaussian",
         area: Optional[Union[Numeric, Parameter]] = 1.0,
         center: Optional[Union[Numeric, Parameter, None]] = None,
         width: Optional[Union[Numeric, Parameter]] = 1.0,
         unit: Optional[Union[str, sc.Unit]] = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)  # lives in ModelComponent
-        self._unit = unit
+        super().__init__(
+            display_name=display_name,
+            unit=unit,
+        )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        area = self._create_area_parameter(
+            area=area, name=display_name, unit=self._unit
         )
-        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
-
-        super().__init__(
-            name=name,
-            unit=unit,
-            area=area,
-            center=center,
-            width=width,
+        center = self._create_center_parameter(
+            center=center, name=display_name, fix_if_none=True, unit=self._unit
+        )
+        width = self._create_width_parameter(
+            width=width, name=display_name, unit=self._unit
         )
 
     def evaluate(
