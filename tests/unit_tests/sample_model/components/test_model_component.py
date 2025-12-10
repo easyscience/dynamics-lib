@@ -1,9 +1,13 @@
+from typing import Union
+
 import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.model_component import ModelComponent
+
+Numeric = Union[float, int]
 
 
 class DummyComponent(ModelComponent):
@@ -14,7 +18,7 @@ class DummyComponent(ModelComponent):
         self.width = Parameter(name="width", value=3.0, unit="meV", fixed=True)
         self._unit = "meV"
 
-    def get_parameters(self):
+    def get_all_parameters(self):
         return [self.area, self.center, self.width]
 
     def evaluate(self, x):
@@ -44,11 +48,11 @@ class TestModelComponent:
     def test_free_and_fix_all_parameters(self, dummy):
         # WHEN THEN EXPECT
         dummy.free_all_parameters()
-        assert all(not p.fixed for p in dummy.get_parameters())
+        assert all(not p.fixed for p in dummy.get_all_parameters())
 
         # THEN EXPECT
         dummy.fix_all_parameters()
-        assert all(p.fixed for p in dummy.get_parameters())
+        assert all(p.fixed for p in dummy.get_all_parameters())
 
     def test_repr(self, dummy):
         # WHEN THEN EXPECT

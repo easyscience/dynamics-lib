@@ -6,13 +6,13 @@ from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.new_base import NewBase
+from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
 Numeric = Union[float, int]
 
 
-class ModelComponent(NewBase):
+class ModelComponent(ModelBase):
     """
     Abstract base class for all model components.
     """
@@ -47,13 +47,13 @@ class ModelComponent(NewBase):
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
 
-        pars = self.get_parameters()
+        pars = self.get_all_parameters()
         for p in pars:
             p.fixed = True
 
     def free_all_parameters(self):
         """Free all parameters in the model component."""
-        for p in self.get_parameters():
+        for p in self.get_all_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
@@ -126,7 +126,7 @@ class ModelComponent(NewBase):
         """
 
         old_unit = self._unit
-        pars = self.get_parameters()
+        pars = self.get_all_parameters()
         try:
             for p in pars:
                 p.convert_unit(unit)
