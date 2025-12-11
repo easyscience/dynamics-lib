@@ -3,22 +3,24 @@ from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
+
+# from easyscience.job.theoreticalmodel import TheoreticalModelBase
+from easyscience.base_classes.model_base import ModelBase
 from easyscience.global_object.undo_redo import NotarizedDict
-from easyscience.job.theoreticalmodel import TheoreticalModelBase
 
 from .components.model_component import ModelComponent
 
 Numeric = Union[float, int]
 
 
-class SampleModel(TheoreticalModelBase):
+class SampleModel(ModelBase):
     """
     A model of the scattering from a sample, combining multiple model components.
 
     Attributes
     ----------
-    name : str
-        Name of the SampleModel.
+    display_name : str
+        Display name of the SampleModel.
     unit : str or sc.Unit
         Unit of the SampleModel.
 
@@ -26,7 +28,7 @@ class SampleModel(TheoreticalModelBase):
 
     def __init__(
         self,
-        name: str = "MySampleModel",
+        display_name: str = "MySampleModel",
         unit: Optional[Union[str, sc.Unit]] = "meV",
         **kwargs,
     ):
@@ -43,7 +45,7 @@ class SampleModel(TheoreticalModelBase):
             Initial model components to add to the SampleModel. Keys are component names, values are ModelComponent instances.
         """
 
-        super().__init__(name=name)
+        super().__init__(name=display_name)
         if not isinstance(self._kwargs, NotarizedDict):
             self._kwargs = NotarizedDict()
 

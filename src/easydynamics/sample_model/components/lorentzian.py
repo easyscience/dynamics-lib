@@ -19,7 +19,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        name (str): Name of the component.
+        display_name (str): Display name of the component.
         area (Int, float or Parameter): Area of the Lorentzian.
         center (Int, float, None or Parameter): Peak center. If None, defaults to 0 and is fixed.
         width (Int, float or Parameter): Half Width at Half Maximum (HWHM)

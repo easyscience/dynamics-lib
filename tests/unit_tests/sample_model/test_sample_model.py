@@ -11,7 +11,7 @@ from easydynamics.sample_model import Gaussian, Lorentzian, Polynomial, SampleMo
 class TestSampleModel:
     @pytest.fixture
     def sample_model(self):
-        model = SampleModel(name="TestSampleModel")
+        model = SampleModel(display_name="TestSampleModel")
         component1 = Gaussian(
             name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
@@ -24,7 +24,7 @@ class TestSampleModel:
 
     def test_init(self):
         # WHEN THEN
-        sample_model = SampleModel(name="InitModel")
+        sample_model = SampleModel(display_name="InitModel")
 
         # EXPECT
         assert sample_model.name == "InitModel"
@@ -146,7 +146,7 @@ class TestSampleModel:
 
     def test_evaluate_no_components_raises(self):
         # WHEN THEN
-        sample_model = SampleModel(name="EmptyModel")
+        sample_model = SampleModel(display_name="EmptyModel")
         x = np.linspace(-5, 5, 100)
         # EXPECT
         with pytest.raises(ValueError, match="No components in the model to evaluate."):
@@ -176,7 +176,7 @@ class TestSampleModel:
 
     def test_evaluate_component_no_components_raises(self):
         # WHEN THEN
-        sample_model = SampleModel(name="EmptyModel")
+        sample_model = SampleModel(display_name="EmptyModel")
         x = np.linspace(-5, 5, 100)
         # EXPECT
         with pytest.raises(ValueError, match="No components in the model to evaluate."):
@@ -206,7 +206,7 @@ class TestSampleModel:
 
     def test_normalize_area_no_components_raises(self):
         # WHEN THEN
-        sample_model = SampleModel(name="EmptyModel")
+        sample_model = SampleModel(display_name="EmptyModel")
         # EXPECT
         with pytest.raises(
             ValueError, match="No components in the model to normalize."
@@ -257,7 +257,7 @@ class TestSampleModel:
         assert all(isinstance(param, Parameter) for param in parameters)
 
     def test_get_parameters_no_components(self):
-        sample_model = SampleModel(name="EmptyModel")
+        sample_model = SampleModel(display_name="EmptyModel")
         # WHEN THEN
         parameters = sample_model.get_parameters()
         # EXPECT

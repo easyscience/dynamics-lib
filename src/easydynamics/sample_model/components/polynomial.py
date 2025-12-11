@@ -18,8 +18,10 @@ class Polynomial(ModelComponent):
     Polynomial function component. c0 + c1*x + c2*x^2 + ... + cN*x^N
 
     Args:
+        display_name (str): Display name of the Polynomial component.
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
+        unit (str or sc.Unit): Unit of the Polynomial component.
     """
 
     def __init__(
