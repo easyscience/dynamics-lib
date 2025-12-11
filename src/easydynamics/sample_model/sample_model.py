@@ -6,7 +6,7 @@ import scipp as sc
 
 # from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.base_classes.model_base import ModelBase
-from easyscience.global_object.undo_redo import NotarizedDict
+from easyscience.variable import DescriptorBase
 
 from .components.model_component import ModelComponent
 
@@ -29,8 +29,8 @@ class SampleModel(ModelBase):
     def __init__(
         self,
         display_name: str = "MySampleModel",
-        unit: Optional[Union[str, sc.Unit]] = "meV",
-        **kwargs,
+        unit: str | sc.Unit = "meV",
+        components: List[ModelComponent] = [],
     ):
         """
         Initialize a new SampleModel.
@@ -45,62 +45,45 @@ class SampleModel(ModelBase):
             Initial model components to add to the SampleModel. Keys are component names, values are ModelComponent instances.
         """
 
-        super().__init__(name=display_name)
-        if not isinstance(self._kwargs, NotarizedDict):
-            self._kwargs = NotarizedDict()
+        super().__init__(display_name=display_name)
 
         self._unit = unit
         self._components = []
 
         # Add initial components if provided. Used for serialization.
-        for key, comp in list(kwargs.items()):
-            self._add_component(key, comp)
+        if components:
+            for comp in components:
+                self.add_component(comp)
 
-    def add_component(
-        self, component: ModelComponent, name: Optional[str] = None
-    ) -> None:
-        """
-        Add a model component to the SampleModel. Component names must be unique.
-        Parameters
-        ----------
-        component : ModelComponent
-            The model component to add.
-        name : str, optional
-            Name to assign to the component. If None, uses the component's own name. Renames the component if a different name is provided.
-        """
-
+    def add_component(self, component: ModelComponent) -> None:
         if not isinstance(component, ModelComponent):
             raise TypeError("Component must be an instance of ModelComponent.")
 
-        if name is None:
-            name = component.name
+        if component in self._components:
+            raise ValueError(f"Component '{component.display_name}' already added.")
 
-        if not isinstance(name, str):
-            raise TypeError("Component name must be a string.")
-        if name in getattr(self, "_kwargs", {}):
-            raise ValueError(f"Component with name '{name}' already exists.")
+        for comp in self._components:
+            if comp.display_name == component.display_name:
+                raise ValueError(
+                    f"A component with the name '{component.display_name}' already exists."
+                )
 
-        # Use ObjBase to add component so Global Object is updated correctly
-        self._add_component(name, component)
+        self._components.append(component)
 
     def remove_component(self, name: str) -> None:
-        """
-        Remove a model component from the SampleModel by name.
-        Parameters
-        ----------
-        name : str
-            Name of the component to remove.
-        """
-
         if not isinstance(name, str):
             raise TypeError("Component name must be a string.")
 
-        for key, item in list(self._kwargs.items()):
-            if item.name == name:
-                del self._kwargs[key]
+        for comp in self._components:
+            if comp.display_name == name:
+                self._components.remove(comp)
                 return
 
-        raise KeyError(f"No component named '{name}' exists in the model.")
+        raise KeyError(f"No component named '{name}' exists.")
+
+    @property
+    def components(self) -> list[ModelComponent]:
+        return list(self._components)
 
     def list_component_names(self) -> List[str]:
         """
@@ -112,12 +95,11 @@ class SampleModel(ModelBase):
             Component names.
         """
 
-        return [item.name for item in self.components]
+        return [component.display_name for component in self.components]
 
     def clear_components(self) -> None:
         """Remove all components."""
-        for key in list(self._kwargs.keys()):
-            del self._kwargs[key]
+        self._components.clear()
 
     def normalize_area(self) -> None:
         # Useful for convolutions.
@@ -136,7 +118,8 @@ class SampleModel(ModelBase):
                 total_area += component.area.value
             else:
                 warnings.warn(
-                    f"Component '{component.name}' does not have an 'area' attribute and will be skipped in normalization."
+                    f"Component '{component.display_name}' does not have an 'area' attribute and will be skipped in normalization.",
+                    UserWarning,
                 )
 
         if total_area == 0:
@@ -148,16 +131,18 @@ class SampleModel(ModelBase):
         for param in area_params:
             param.value /= total_area
 
-    @property
-    def components(self) -> List[ModelComponent]:
+    def get_all_variables(self) -> list[DescriptorBase]:
         """
-        Get the list of model components in the SampleModel.
-        Returns
-        -------
-        List[ModelComponent]
-            List of model components.
+        Get all parameters from the model component.
+        Returns:
+        List[Parameter]: List of parameters in the component.
         """
-        return list(self._kwargs.values())
+
+        return [
+            var
+            for component in self.components
+            for var in component.get_all_variables()
+        ]
 
     @property
     def unit(self) -> Optional[Union[str, sc.Unit]]:
@@ -222,7 +207,7 @@ class SampleModel(ModelBase):
 
     def evaluate_component(
         self,
-        x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray],
+        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
         name: str,
     ) -> np.ndarray:
         """
@@ -248,7 +233,7 @@ class SampleModel(ModelBase):
                 (f"Component name must be a string, got {type(name)} instead.")
             )
 
-        matches = [comp for comp in self.components if comp.name == name]
+        matches = [comp for comp in self.components if comp.display_name == name]
         if not matches:
             raise KeyError(f"No component named '{name}' exists.")
 
@@ -262,14 +247,14 @@ class SampleModel(ModelBase):
         """
         Fix all free parameters in the model.
         """
-        for param in self.get_parameters():
+        for param in self.get_all_parameters():
             param.fixed = True
 
     def free_all_parameters(self) -> None:
         """
         Free all fixed parameters in the model.
         """
-        for param in self.get_parameters():
+        for param in self.get_all_parameters():
             param.fixed = False
 
     def __contains__(self, item: Union[str, ModelComponent]) -> bool:
@@ -287,7 +272,7 @@ class SampleModel(ModelBase):
 
         if isinstance(item, str):
             # Check by component name
-            return any(comp.name == item for comp in self.components)
+            return any(comp.display_name == item for comp in self.components)
         elif isinstance(item, ModelComponent):
             # Check by component instance
             return any(comp is item for comp in self.components)
@@ -302,6 +287,8 @@ class SampleModel(ModelBase):
         -------
         str
         """
-        comp_names = ", ".join(c.name for c in self.components) or "No components"
+        comp_names = (
+            ", ".join(c.display_name for c in self.components) or "No components"
+        )
 
-        return f"<SampleModel name='{self.name}' | Components: {comp_names}>"
+        return f"<SampleModel display_name='{self.display_name}' | Components: {comp_names}>"

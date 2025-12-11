@@ -13,7 +13,7 @@ class TestSampleModel:
     def sample_model(self):
         model = SampleModel(display_name="TestSampleModel")
         component1 = Gaussian(
-            name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component2 = Lorentzian(
             display_name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
@@ -27,7 +27,7 @@ class TestSampleModel:
         sample_model = SampleModel(display_name="InitModel")
 
         # EXPECT
-        assert sample_model.name == "InitModel"
+        assert sample_model.display_name == "InitModel"
         assert sample_model.components == []
 
     # ───── Component Management ─────
@@ -35,7 +35,7 @@ class TestSampleModel:
     def test_add_component(self, sample_model):
         # WHEN
         component = Gaussian(
-            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
         sample_model.add_component(component)
@@ -45,7 +45,7 @@ class TestSampleModel:
     def test_add_duplicate_component_raises(self, sample_model):
         # WHEN THEN
         component = Gaussian(
-            name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # EXPECT
         with pytest.raises(ValueError, match="already exists"):
@@ -74,7 +74,7 @@ class TestSampleModel:
     def test_getitem(self, sample_model):
         # WHEN
         component = Gaussian(
-            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
         sample_model.add_component(component)
@@ -110,12 +110,13 @@ class TestSampleModel:
                 raise RuntimeError("Conversion failed.")
 
         faulty_component = FaultyComponent(
-            name="FaultyComponent", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="FaultyComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         sample_model.add_component(faulty_component)
 
         original_units = {
-            component.name: component.unit for component in sample_model.components
+            component.display_name: component.unit
+            for component in sample_model.components
         }
 
         # EXPECT
@@ -124,7 +125,7 @@ class TestSampleModel:
 
         # Check that all components have their original units
         for component in sample_model.components:
-            assert component.unit == original_units[component.name]
+            assert component.unit == original_units[component.display_name]
 
     def test_set_unit(self, sample_model):
         # WHEN THEN EXPECT
@@ -238,9 +239,9 @@ class TestSampleModel:
         with pytest.warns(UserWarning, match="does not have an 'area' "):
             sample_model.normalize_area()
 
-    def test_get_parameters(self, sample_model):
+    def test_get_all_parameters(self, sample_model):
         # WHEN THEN
-        parameters = sample_model.get_parameters()
+        parameters = sample_model.get_all_parameters()
         # EXPECT
         assert len(parameters) == 6
 
@@ -259,7 +260,7 @@ class TestSampleModel:
     def test_get_parameters_no_components(self):
         sample_model = SampleModel(display_name="EmptyModel")
         # WHEN THEN
-        parameters = sample_model.get_parameters()
+        parameters = sample_model.get_all_parameters()
         # EXPECT
         assert len(parameters) == 0
 
@@ -294,14 +295,14 @@ class TestSampleModel:
         sample_model.fix_all_parameters()
 
         # EXPECT
-        for param in sample_model.get_parameters():
+        for param in sample_model.get_all_parameters():
             assert param.fixed is True
 
         # WHEN
         sample_model.free_all_parameters()
 
         # THEN
-        for param in sample_model.get_parameters():
+        for param in sample_model.get_all_parameters():
             assert param.fixed is False
 
     def test_contains(self, sample_model):
@@ -316,7 +317,7 @@ class TestSampleModel:
         assert lorentzian_component in sample_model
 
         fake_component = Gaussian(
-            name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         assert fake_component not in sample_model
 
@@ -333,16 +334,16 @@ class TestSampleModel:
         model_copy = copy(sample_model)
         # EXPECT
         assert model_copy is not sample_model
-        assert model_copy.name == sample_model.name
+        assert model_copy.display_name == sample_model.display_name
         assert len(model_copy.components) == len(sample_model.components)
         for comp in sample_model.components:
             copied_comp = model_copy.components[
-                model_copy.list_component_names().index(comp.name)
+                model_copy.list_component_names().index(comp.display_name)
             ]
             assert copied_comp is not comp
-            assert copied_comp.name == comp.name
+            assert copied_comp.display_name == comp.display_name
             for param_orig, param_copy in zip(
-                comp.get_parameters(), copied_comp.get_parameters()
+                comp.get_all_parameters(), copied_comp.get_all_parameters()
             ):
                 assert param_copy is not param_orig
                 assert param_copy.name == param_orig.name
