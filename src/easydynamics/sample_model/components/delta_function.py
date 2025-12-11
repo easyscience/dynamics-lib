@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 import scipp as sc
@@ -21,7 +21,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        name (str): Name of the component.
+        display_name (str): Name of the component.
         center (Int or float or None): Center of the delta function. If None, defaults to 0 and is fixed.
         area (Int or float): Total area under the curve.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
@@ -29,30 +29,57 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        name: Optional[str] = "DeltaFunction",
-        center: Optional[Union[None, Numeric, Parameter]] = None,
-        area: Optional[Union[Numeric, Parameter]] = 1.0,
-        unit: Union[str, sc.Unit] = "meV",
+        display_name: str = "DeltaFunction",
+        center: None | Numeric | Parameter = None,
+        area: Numeric | Parameter = 1.0,
+        unit: str | sc.Unit = "meV",
     ):
         # Validate inputs and create Parameters if not given
         self.validate_unit(unit)
         self._unit = unit
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
+        area = self._create_area_parameter(
+            area=area, name=display_name, unit=self._unit
+        )
         center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+            center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
 
         super().__init__(
-            name=name,
+            display_name=display_name,
             unit=unit,
-            area=area,
-            center=center,
         )
 
+        self._area = area
+        self._center = center
+
+    @property
+    def area(self) -> Parameter:
+        """Get the area parameter."""
+        return self._area
+
+    @area.setter
+    def area(self, value: Numeric) -> None:
+        """Set the area parameter value."""
+        if not isinstance(value, Numeric):
+            raise TypeError("area must be a number")
+        self._area.value = value
+
+    @property
+    def center(self) -> Parameter:
+        """Get the center parameter."""
+        return self._center
+
+    @center.setter
+    def center(self, value: Numeric) -> None:
+        """Set the center parameter value."""
+        if not isinstance(value, Numeric):
+            raise TypeError("center must be a number")
+        self._center.value = value
+
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Delta function at the given x values.
         The Delta function evaluates to zero everywhere, except at the center. Its numerical integral is equal to the area.
@@ -88,4 +115,4 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         return model
 
     def __repr__(self):
-        return f"DeltaFunction(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"
+        return f"DeltaFunction(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"
