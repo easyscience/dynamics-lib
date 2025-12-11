@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional, Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -10,7 +8,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
@@ -28,11 +26,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        display_name: Optional[str] = "Gaussian",
-        area: Optional[Union[Numeric, Parameter]] = 1.0,
-        center: Optional[Union[Numeric, Parameter, None]] = None,
-        width: Optional[Union[Numeric, Parameter]] = 1.0,
-        unit: Optional[Union[str, sc.Unit]] = "meV",
+        display_name: str = "Gaussian",
+        area: Numeric | Parameter = 1.0,
+        center: Numeric | Parameter | None = None,
+        width: Numeric | Parameter = 1.0,
+        unit: str | sc.Unit = "meV",
     ):
         # Validate inputs and create Parameters if not given
         super().__init__(
@@ -92,7 +90,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Gaussian at the given x values.
         If x is a scipp Variable, the unit of the Gaussian will be converted to match x.

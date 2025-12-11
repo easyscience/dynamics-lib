@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import List, Union
+from typing import List
 
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class ModelComponent(ModelBase):
