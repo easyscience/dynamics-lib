@@ -230,7 +230,7 @@ class TestSampleModel:
     def test_normalize_area_non_area_component_warns(self, sample_model):
         # WHEN
         component1 = Polynomial(
-            name="TestPolynomial", coefficients=[1, 2, 3], unit="meV"
+            display_name="TestPolynomial", coefficients=[1, 2, 3], unit="meV"
         )
         sample_model.add_component(component1)
 
