@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import List, Optional, Union
+from typing import List, Union
 
 import numpy as np
 import scipp as sc
@@ -19,8 +19,8 @@ class ModelComponent(ModelBase):
 
     def __init__(
         self,
-        display_name="ModelComponent",
-        unit: Optional[Union[str, sc.Unit]] = "meV",
+        display_name: str = None,
+        unit: str | sc.Unit = "meV",
     ):
         self.validate_unit(unit)
         super().__init__(display_name=display_name)
@@ -47,17 +47,17 @@ class ModelComponent(ModelBase):
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
 
-        pars = self.get_all_parameters()
+        pars = self.get_fittable_parameters()
         for p in pars:
             p.fixed = True
 
     def free_all_parameters(self):
         """Free all parameters in the model component."""
-        for p in self.get_all_parameters():
+        for p in self.get_fittable_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
-        self, x: Union[Numeric, List[Numeric], np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """ "Prepare the input x for evaluation by handling units and converting to a numpy array."""
 
@@ -117,7 +117,7 @@ class ModelComponent(ModelBase):
                 f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
             )
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
+    def convert_unit(self, unit: str | sc.Unit):
         """
         Convert the unit of the Parameters in the component.
 
@@ -142,7 +142,7 @@ class ModelComponent(ModelBase):
             raise e
 
     @abstractmethod
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
+    def evaluate(self, x: Numeric | sc.Variable) -> np.ndarray:
         """
         Evaluate the model component at input x.
 
