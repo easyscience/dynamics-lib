@@ -16,7 +16,7 @@ class TestSampleModel:
             name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component2 = Lorentzian(
-            name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
+            display_name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
         )
         model.add_component(component1)
         model.add_component(component2)
