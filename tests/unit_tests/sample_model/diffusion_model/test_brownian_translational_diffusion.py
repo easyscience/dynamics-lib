@@ -174,42 +174,48 @@ class TestBrownianTranslationalDiffusion:
         with pytest.raises(TypeError, match="Q must be a numpy array."):
             brownian_diffusion_model.calculate_QISF(Q="invalid")  # Invalid type
 
-    def test_create_sample_models(self, brownian_diffusion_model):
+    def test_create_component_collections(self, brownian_diffusion_model):
         # WHEN
         Q = np.array([0.1, 0.2, 0.3])
 
         # THEN
-        sample_models = brownian_diffusion_model.create_sample_models(Q=Q)
+        component_collections = brownian_diffusion_model.create_component_collections(
+            Q=Q
+        )
 
         # EXPECT
         expected_widths = brownian_diffusion_model.calculate_width(Q)
-        for model_index in range(len(sample_models)):
-            model = sample_models[model_index]
+        for model_index in range(len(component_collections)):
+            model = component_collections[model_index]
             assert len(model.components) == 1
             component = model.components[0]
-            assert component.name == "Lorentzian"
+            assert component.display_name == "Lorentzian"
             assert component.width.unit == brownian_diffusion_model.unit
             assert component.width.value == expected_widths[model_index]
             assert component.width.independent is False
 
-    def test_create_sample_models_component_name_must_be_string(
+    def test_create_component_collections_component_name_must_be_string(
         self, brownian_diffusion_model
     ):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="component_name must be a string."):
-            brownian_diffusion_model.create_sample_models(
+            brownian_diffusion_model.create_component_collections(
                 Q=np.array([0.1, 0.2, 0.3]), component_name=123
             )
 
-    def test_create_sample_models_Q_type_error(self, brownian_diffusion_model):
+    def test_create_component_collections_Q_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="Q must be a "):
-            brownian_diffusion_model.create_sample_models(Q="invalid")  # Invalid type
+            brownian_diffusion_model.create_component_collections(
+                Q="invalid"
+            )  # Invalid type
 
-    def test_create_sample_models_Q_1dimensional_error(self, brownian_diffusion_model):
+    def test_create_component_collections_Q_1dimensional_error(
+        self, brownian_diffusion_model
+    ):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match="Q must be a 1-dimensional array."):
-            brownian_diffusion_model.create_sample_models(
+            brownian_diffusion_model.create_component_collections(
                 Q=np.array([[0.1, 0.2], [0.3, 0.4]])
             )  # Invalid shape
 

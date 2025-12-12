@@ -6,9 +6,11 @@ import scipp as sc
 from easyscience.variable import DescriptorNumber, Parameter
 from scipp.constants import hbar as scipp_hbar
 
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model import DiffusionModel
-from easydynamics.sample_model.sample_model import SampleModel
+from easydynamics.sample_model.diffusion_model.diffusion_model import (
+    DiffusionModel,
+)
 
 Numeric = Union[float, int]
 
@@ -18,15 +20,15 @@ class BrownianTranslationalDiffusion(DiffusionModel):
     Model of Brownian translational diffusion, consisting of a Lorentzian
     function for each Q-value, where the width is given by :math:`DQ^2`.
     Q is assumed to have units of 1/angstrom.
-    Creates SampleModels with Lorentzian components for given Q-values.
+    Creates ComponentCollections with Lorentzian components for given Q-values.
 
     Example usage:
     Q=np.linspace(0.5,2,7)
     energy=np.linspace(-2, 2, 501)
     scale=1.0
     diffusion_coefficient = 2.4e-9  # m^2/s
-    diffusion_model=BrownianTranslationalDiffusion(name="DiffusionModel", scale=scale, diffusion_coefficient= diffusion_coefficient)
-    sample_models=diffusion_model.create_sample_models(Q)
+    diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel", scale=scale, diffusion_coefficient= diffusion_coefficient)
+    component_collections=diffusion_model.create_component_collections(Q)
     See also the examples.
     """
 
@@ -161,13 +163,13 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         QISF = np.ones_like(Q)
         return QISF
 
-    def create_sample_models(
+    def create_component_collections(
         self,
         Q: Union[Number, list, np.ndarray],
         component_name: str = "Lorentzian",
-    ) -> List[SampleModel]:
+    ) -> List[ComponentCollection]:
         """
-        Create SampleModel components for the Brownian translational diffusion model at given Q values.
+        Create ComponentCollection components for the Brownian translational diffusion model at given Q values.
         Args:
         ----------
         Q : Number, list, or np.ndarray
@@ -178,8 +180,8 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             Name of the width parameter.
         Returns
         -------
-        List[SampleModel]
-            List of SampleModels with Lorentzian components.
+        List[ComponentCollection]
+            List of ComponentCollections with Lorentzian components.
         """
 
         if isinstance(Q, (Number, list)):
@@ -193,18 +195,18 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         if not isinstance(component_name, str):
             raise TypeError("component_name must be a string.")
 
-        sample_model_list = [None] * len(Q)
+        component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the Lorentzians and the delta function.
         QISF = self.calculate_QISF(Q)
 
         # Create a Lorentzian component for each Q-value, with width D*Q^2 and area equal to scale. No delta function, as the EISF is 0.
         for i in range(len(Q)):
-            sample_model_list[i] = SampleModel(
-                name=f"{self.name}_Q{Q[i]:.2f}", unit=self.unit
+            component_collection_list[i] = ComponentCollection(
+                display_name=f"{self.name}_Q{Q[i]:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
-                name=component_name, area=self.scale * QISF[i], unit=self.unit
+                display_name=component_name, area=self.scale * QISF[i], unit=self.unit
             )
 
             # Make the width dependent on Q
@@ -218,9 +220,9 @@ class BrownianTranslationalDiffusion(DiffusionModel):
 
             # Resolving the dependency can do weird things to the units, so we make sure it's correct.
             lorentzian_component.width.convert_unit(self.unit)
-            sample_model_list[i].add_component(lorentzian_component)
+            component_collection_list[i].add_component(lorentzian_component)
 
-        return sample_model_list
+        return component_collection_list
 
     def _write_width_dependency_expression(self, Q: float) -> str:
         """
