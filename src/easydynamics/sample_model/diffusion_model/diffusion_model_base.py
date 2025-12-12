@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
 
@@ -12,7 +10,7 @@ class DiffusionModel(ModelBase):
     def __init__(
         self,
         display_name="MyDiffusionModel",
-        unit: Optional[Union[str, sc.Unit]] = "meV",
+        unit: str | sc.Unit = "meV",
     ):
         """
         Initialize a new DiffusionModel.
@@ -32,7 +30,7 @@ class DiffusionModel(ModelBase):
         self._unit = unit
 
     @property
-    def unit(self) -> Optional[Union[str, sc.Unit]]:
+    def unit(self) -> str | sc.Unit:
         """
         Get the unit of the DiffusionModel.
 

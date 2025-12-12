@@ -34,7 +34,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
 
     def __init__(
         self,
-        name: Optional[str] = "BrownianTranslationalDiffusion",
+        display_name: Optional[str] = "BrownianTranslationalDiffusion",
         unit: Optional[Union[str, sc.Unit]] = "meV",
         scale: Optional[Union[Parameter, Numeric]] = 1.0,
         diffusion_coefficient: Optional[Union[Parameter, Numeric]] = 1.0,
@@ -45,8 +45,8 @@ class BrownianTranslationalDiffusion(DiffusionModel):
 
         Parameters
         ----------
-        name : str
-            Name of the diffusion model.
+        display_name : str
+            Display name of the diffusion model.
         unit : str or sc.Unit, optional
             Energy unit for the underlying Lorentzian components. Defaults to "meV".
         scale : float or Parameter, optional
@@ -75,7 +75,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
 
         if not isinstance(scale, Parameter):
-            scale = Parameter(name="scale", value=float(scale), fixed=False)
+            scale = Parameter(name="scale", value=float(scale), fixed=False, min=0.0)
 
         if not isinstance(diffusion_coefficient, Parameter):
             diffusion_coefficient = Parameter(
@@ -85,12 +85,48 @@ class BrownianTranslationalDiffusion(DiffusionModel):
                 unit=diffusion_unit,
             )
         super().__init__(
-            display_name=name,
+            display_name=display_name,
             unit=unit,
-            scale=scale,
-            diffusion_coefficient=diffusion_coefficient,
         )
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
+        self._scale = scale
+        self._diffusion_coefficient = diffusion_coefficient
+
+    @property
+    def scale(self) -> Parameter:
+        """
+        Get the scale parameter of the diffusion model.
+
+        Returns
+        -------
+        Parameter
+            Scale parameter.
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale: Numeric) -> None:
+        if not isinstance(scale, (Numeric)):
+            raise TypeError("scale must be a number.")
+        self._scale.value = scale
+
+    @property
+    def diffusion_coefficient(self) -> Parameter:
+        """
+        Get the diffusion coefficient parameter D.
+
+        Returns
+        -------
+        Parameter
+            Diffusion coefficient D.
+        """
+        return self._diffusion_coefficient
+
+    @diffusion_coefficient.setter
+    def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
+        if not isinstance(diffusion_coefficient, (Numeric)):
+            raise TypeError("diffusion_coefficient must be a number.")
+        self._diffusion_coefficient.value = diffusion_coefficient
 
     def calculate_width(self, Q: np.ndarray) -> np.ndarray:
         """
@@ -202,7 +238,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         # Create a Lorentzian component for each Q-value, with width D*Q^2 and area equal to scale. No delta function, as the EISF is 0.
         for i in range(len(Q)):
             component_collection_list[i] = ComponentCollection(
-                display_name=f"{self.name}_Q{Q[i]:.2f}", unit=self.unit
+                display_name=f"{self.display_name}_Q{Q[i]:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
@@ -248,4 +284,4 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         """
         String representation of the BrownianTranslationalDiffusion model.
         """
-        return f"BrownianTranslationalDiffusion(name={self.name}, diffusion_coefficient={self.diffusion_coefficient}, scale={self.scale})"
+        return f"BrownianTranslationalDiffusion(display_name={self.display_name}, diffusion_coefficient={self.diffusion_coefficient}, scale={self.scale})"

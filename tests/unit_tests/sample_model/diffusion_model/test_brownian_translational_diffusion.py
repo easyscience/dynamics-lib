@@ -20,7 +20,7 @@ class TestBrownianTranslationalDiffusion:
 
     def test_init_default(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        assert brownian_diffusion_model.name == "BrownianTranslationalDiffusion"
+        assert brownian_diffusion_model.display_name == "BrownianTranslationalDiffusion"
         assert brownian_diffusion_model.unit == "meV"
         assert brownian_diffusion_model.scale.value == 1.0
         assert brownian_diffusion_model.diffusion_coefficient.value == 1.0
@@ -69,14 +69,14 @@ class TestBrownianTranslationalDiffusion:
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
             BrownianTranslationalDiffusion(
-                name="BrownianTranslationalDiffusion", **kwargs
+                display_name="BrownianTranslationalDiffusion", **kwargs
             )
 
     def test_diffusion_unit_value_error(self):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match="diffusion_unit must be ."):
             BrownianTranslationalDiffusion(
-                name="BrownianTranslationalDiffusion",
+                display_name="BrownianTranslationalDiffusion",
                 unit="meV",
                 scale=1.0,
                 diffusion_coefficient=1.0,
@@ -93,14 +93,14 @@ class TestBrownianTranslationalDiffusion:
 
         # THEN
         brownian_diffusion_model = BrownianTranslationalDiffusion(
-            name="CustomBrownianDiffusion",
+            display_name="CustomBrownianDiffusion",
             unit="meV",
             scale=scale,
             diffusion_coefficient=diffusion_coefficient,
         )
 
         # EXPECT
-        assert brownian_diffusion_model.name == "CustomBrownianDiffusion"
+        assert brownian_diffusion_model.display_name == "CustomBrownianDiffusion"
         assert brownian_diffusion_model.unit == "meV"
         assert brownian_diffusion_model.scale is scale
         assert brownian_diffusion_model.diffusion_coefficient is diffusion_coefficient
