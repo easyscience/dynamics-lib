@@ -105,6 +105,30 @@ class TestBrownianTranslationalDiffusion:
         assert brownian_diffusion_model.scale is scale
         assert brownian_diffusion_model.diffusion_coefficient is diffusion_coefficient
 
+    def test_scale_setter(self, brownian_diffusion_model):
+        # WHEN
+        brownian_diffusion_model.scale = 2.0
+
+        # THEN EXPECT
+        assert brownian_diffusion_model.scale.value == 2.0
+
+    def test_scale_setter_raises(self, brownian_diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="scale must be a number."):
+            brownian_diffusion_model.scale = "invalid"  # Invalid type
+
+    def test_diffusion_coefficient_setter(self, brownian_diffusion_model):
+        # WHEN
+        brownian_diffusion_model.diffusion_coefficient = 3.0
+
+        # THEN EXPECT
+        assert brownian_diffusion_model.diffusion_coefficient.value == 3.0
+
+    def test_diffusion_coefficient_setter_raises(self, brownian_diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="diffusion_coefficient must be a number."):
+            brownian_diffusion_model.diffusion_coefficient = "invalid"  # Invalid type
+
     def test_calculate_width_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match="Q must be a numpy array."):
@@ -177,6 +201,26 @@ class TestBrownianTranslationalDiffusion:
     def test_create_component_collections(self, brownian_diffusion_model):
         # WHEN
         Q = np.array([0.1, 0.2, 0.3])
+
+        # THEN
+        component_collections = brownian_diffusion_model.create_component_collections(
+            Q=Q
+        )
+
+        # EXPECT
+        expected_widths = brownian_diffusion_model.calculate_width(Q)
+        for model_index in range(len(component_collections)):
+            model = component_collections[model_index]
+            assert len(model.components) == 1
+            component = model.components[0]
+            assert component.display_name == "Lorentzian"
+            assert component.width.unit == brownian_diffusion_model.unit
+            assert component.width.value == expected_widths[model_index]
+            assert component.width.independent is False
+
+    def test_create_component_collections_single_Q(self, brownian_diffusion_model):
+        # WHEN
+        Q = 0.5
 
         # THEN
         component_collections = brownian_diffusion_model.create_component_collections(

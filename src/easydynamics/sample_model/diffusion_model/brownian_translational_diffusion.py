@@ -142,6 +142,13 @@ class BrownianTranslationalDiffusion(DiffusionModel):
         np.ndarray
             HWHM values in the unit of the model (e.g., meV).
         """
+
+        if isinstance(Q, Numeric):
+            Q = np.array([Q])
+
+        if isinstance(Q, list):
+            Q = np.array(Q)
+
         if not isinstance(Q, np.ndarray):
             raise TypeError("Q must be a numpy array.")
 
@@ -220,12 +227,16 @@ class BrownianTranslationalDiffusion(DiffusionModel):
             List of ComponentCollections with Lorentzian components.
         """
 
-        if isinstance(Q, (Number, list)):
+        if isinstance(Q, Numeric):
+            Q = np.array([Q])
+
+        if isinstance(Q, list):
             Q = np.array(Q)
+
         if not isinstance(Q, np.ndarray):
             raise TypeError("Q must be a number, list, or numpy array.")
 
-        if Q.ndim != 1:
+        if Q.ndim > 1:
             raise ValueError("Q must be a 1-dimensional array.")
 
         if not isinstance(component_name, str):
