@@ -113,7 +113,7 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         # Convolution
         convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
-        convolved *= self._energy_grid.energy_step  # normalize
+        convolved *= self._energy_grid.energy_dense_step  # normalize
 
         if self.upsample_factor is not None:
             # interpolate back to original energy grid
@@ -126,14 +126,3 @@ class NumericalConvolution(NumericalConvolutionBase):
             )
 
         return convolved
-
-    def __repr__(self) -> str:
-        """String representation of the NumericalConvolution instance."""
-
-        return (
-            f"NumericalConvolution(energy_unit={self._energy_unit}, "
-            f"extension_factor={self.extension_factor}, "
-            f"temperature={self.temperature}, "
-            f"temperature_unit={self.temperature_unit}, "
-            f"normalize_detailed_balance={self.normalize_detailed_balance})"
-        )
