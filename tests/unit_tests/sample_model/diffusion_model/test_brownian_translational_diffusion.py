@@ -198,29 +198,21 @@ class TestBrownianTranslationalDiffusion:
         with pytest.raises(TypeError, match="Q must be a numpy array."):
             brownian_diffusion_model.calculate_QISF(Q="invalid")  # Invalid type
 
-    def test_create_component_collections(self, brownian_diffusion_model):
+    @pytest.mark.parametrize(
+        "Q",
+        [
+            (0.5),
+            ([1.0, 2.0, 3.0]),
+            (np.array([1.0, 2.0, 3.0])),
+        ],
+        ids=[
+            "python_scalar",
+            "python_list",
+            "numpy_array",
+        ],
+    )
+    def test_create_component_collections(self, brownian_diffusion_model, Q):
         # WHEN
-        Q = np.array([0.1, 0.2, 0.3])
-
-        # THEN
-        component_collections = brownian_diffusion_model.create_component_collections(
-            Q=Q
-        )
-
-        # EXPECT
-        expected_widths = brownian_diffusion_model.calculate_width(Q)
-        for model_index in range(len(component_collections)):
-            model = component_collections[model_index]
-            assert len(model.components) == 1
-            component = model.components[0]
-            assert component.display_name == "Lorentzian"
-            assert component.width.unit == brownian_diffusion_model.unit
-            assert component.width.value == expected_widths[model_index]
-            assert component.width.independent is False
-
-    def test_create_component_collections_single_Q(self, brownian_diffusion_model):
-        # WHEN
-        Q = 0.5
 
         # THEN
         component_collections = brownian_diffusion_model.create_component_collections(
