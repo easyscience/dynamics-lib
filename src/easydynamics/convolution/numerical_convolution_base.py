@@ -286,7 +286,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     def _check_width_thresholds(
         self,
-        model: Union[SampleModel, ModelComponent],
+        model: SampleModel | ModelComponent,
         model_name: str,
     ) -> None:
         """
@@ -295,10 +295,6 @@ class NumericalConvolutionBase(ConvolutionBase):
         Args:
             model : SampleModel or ModelComponent
                 The model to check.
-            energy_step : float
-                The bin spacing of the energy array.
-            span : float
-                The total span of the energy array.
             model_name : str
                 A string indicating whether the model is a 'sample model' or 'resolution model' for warning messages.
         returns:
@@ -323,32 +319,35 @@ class NumericalConvolutionBase(ConvolutionBase):
             if hasattr(comp, "width"):
                 if (
                     comp.width.value
-                    > LARGE_WIDTH_THRESHOLD * self._energy_grid.span_dense
+                    > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense
                 ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
-                        f"array ({self._energy_grid.span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
+                        f"array ({self._energy_grid.energy_span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
                         UserWarning,
                     )
                 if (
                     comp.width.value
-                    < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_step
+                    < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step
                 ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
-                        f"array ({self._energy_grid.energy_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
+                        f"array ({self._energy_grid.energy_dense_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
                         UserWarning,
                     )
 
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}("
-            f"energy=array of shape {self.energy.values.shape}, "
-            f"sample_model={self.sample_model}, "
-            f"resolution_model={self.resolution_model}, "
+            f"energy=array of shape {self.energy.values.shape},\n "
+            f"sample_model={repr(self.sample_model)}, \n"
+            f"resolution_model={repr(self.resolution_model)},\n "
             f"energy_unit={self._energy_unit}, "
             f"upsample_factor={self.upsample_factor}, "
             f"extension_factor={self.extension_factor}, "
             f"temperature={self.temperature}, "
             f"normalize_detailed_balance={self.normalize_detailed_balance})"
         )
+
+    def __str__(self) -> str:
+        return self.__repr__()

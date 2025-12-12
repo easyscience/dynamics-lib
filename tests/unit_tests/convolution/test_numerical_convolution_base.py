@@ -7,7 +7,7 @@ from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import (
     NumericalConvolutionBase,
 )
-from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model import Gaussian, SampleModel
 
 
 class TestNumericalConvolutionBase:
@@ -246,6 +246,21 @@ class TestNumericalConvolutionBase:
         # THEN EXPECT
         assert default_numerical_convolution_base.temperature is None
 
+    def test_temperature_setter_does_not_replace_parameter(
+        self, default_numerical_convolution_base
+    ):
+        "Test that if setting the temperature to a value when it already exists does not create a new Parameter"
+        # WHEN
+        temp_param = Parameter(name="TempParam", value=300.0, unit="K")
+        default_numerical_convolution_base.temperature = temp_param
+
+        # THEN
+        default_numerical_convolution_base.temperature = 350.0
+
+        # EXPECT
+        assert default_numerical_convolution_base.temperature is temp_param
+        assert default_numerical_convolution_base.temperature.value == 350.0
+
     def test_temperature_setter_raises(self, default_numerical_convolution_base):
         "Test that setting an invalid temperature raises TypeError."
         # WHEN THEN EXPECT
@@ -363,3 +378,69 @@ class TestNumericalConvolutionBase:
         assert np.isclose(energy_grid.energy_span_dense, expected_span)
 
         assert np.isclose(energy_grid.energy_even_length_offset, 0.0)
+
+    def test_check_width_large_threshold(self, default_numerical_convolution_base):
+        "Test that _check_width_thresholds warns when model widths are too large compared to energy grid span."
+        # WHEN
+        wide_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=15.0)
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Increase extension_factor to improve",
+        ):
+            default_numerical_convolution_base._check_width_thresholds(
+                model=wide_gaussian,
+                model_name="SampleModel",
+            )
+
+    def test_check_width_small_threshold(self, default_numerical_convolution_base):
+        "Test that _check_width_thresholds warns when model widths are too small compared to energy grid step."
+        # WHEN
+        narrow_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=0.01)
+
+        # THEN EXPECT
+        with pytest.warns(
+            UserWarning,
+            match="Increase upsample_factor to improve",
+        ):
+            default_numerical_convolution_base._check_width_thresholds(
+                model=narrow_gaussian,
+                model_name="SampleModel",
+            )
+
+    def test_check_width_no_warnings(self, default_numerical_convolution_base):
+        "Test that _check_width_thresholds does not warn when model widths are within acceptable range. Also tests that SampleModel components are checked correctly."
+        # WHEN
+        good_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=1.0)
+        sample_model = SampleModel(name="SampleModel")
+        sample_model.add_component(good_gaussian)
+
+        # THEN EXPECT
+        default_numerical_convolution_base._check_width_thresholds(
+            model=sample_model,
+            model_name="SampleModel",
+        )
+
+    def test_repr(self, default_numerical_convolution_base):
+        "Test the __repr__ method of NumericalConvolutionBase."
+        # WHEN
+        repr_str = repr(default_numerical_convolution_base)
+
+        # THEN EXPECT
+        assert "NumericalConvolutionBase(" in repr_str
+        assert "energy=array of shape" in repr_str
+        assert "(101," in repr_str  # correct shape
+
+        # Sample and resolution models
+        assert "SampleModel" in repr_str
+        assert "Components: No components" in repr_str
+        assert "sample_model=" in repr_str
+        assert "resolution_model=" in repr_str
+
+        # Important parameters
+        assert "energy_unit=meV" in repr_str
+        assert "upsample_factor=5" in repr_str
+        assert "extension_factor=0.2" in repr_str
+        assert "temperature=None" in repr_str
+        assert "normalize_detailed_balance=True" in repr_str
