@@ -1,5 +1,5 @@
 from .brownian_translational_diffusion import BrownianTranslationalDiffusion
-from .diffusion_model import DiffusionModel
+from .diffusion_model_base import DiffusionModel
 
 __all__ = [
     "DiffusionModel",

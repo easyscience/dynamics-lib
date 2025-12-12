@@ -8,7 +8,7 @@ from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model import (
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
     DiffusionModel,
 )
 
@@ -85,7 +85,7 @@ class BrownianTranslationalDiffusion(DiffusionModel):
                 unit=diffusion_unit,
             )
         super().__init__(
-            name=name,
+            display_name=name,
             unit=unit,
             scale=scale,
             diffusion_coefficient=diffusion_coefficient,

@@ -1,27 +1,26 @@
 from typing import Optional, Union
 
 import scipp as sc
-from easyscience.base_classes import ObjBase
+from easyscience.base_classes.model_base import ModelBase
 
 
-class DiffusionModel(ObjBase):
+class DiffusionModel(ModelBase):
     """
     Base class for constructing diffusion models.
     """
 
     def __init__(
         self,
-        name="MyDiffusionModel",
+        display_name="MyDiffusionModel",
         unit: Optional[Union[str, sc.Unit]] = "meV",
-        **kwargs,
     ):
         """
         Initialize a new DiffusionModel.
 
         Parameters
         ----------
-        name : str
-            Name of the diffusion model.
+        display_name : str
+            Display name of the diffusion model.
         unit : str or sc.Unit, optional
             Unit of the diffusion model. Defaults to "meV".
         """
@@ -29,7 +28,7 @@ class DiffusionModel(ObjBase):
         if not (unit is None or isinstance(unit, (str, sc.Unit))):
             raise TypeError("unit must be None, a string, or a scipp Unit")
 
-        super().__init__(name=name, **kwargs)
+        super().__init__(display_name=display_name)
         self._unit = unit
 
     @property
