@@ -1,3 +1,4 @@
+from .component_collection import ComponentCollection
 from .components import (
     DampedHarmonicOscillator,
     DeltaFunction,
@@ -6,10 +7,9 @@ from .components import (
     Polynomial,
     Voigt,
 )
-from .sample_model import SampleModel
 
 __all__ = [
-    "SampleModel",
+    "ComponentCollection",
     "Gaussian",
     "Lorentzian",
     "Voigt",

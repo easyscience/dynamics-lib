@@ -13,27 +13,27 @@ from .components.model_component import ModelComponent
 Numeric = Union[float, int]
 
 
-class SampleModel(ModelBase):
+class ComponentCollection(ModelBase):
     """
     A model of the scattering from a sample, combining multiple model components.
 
     Attributes
     ----------
     display_name : str
-        Display name of the SampleModel.
+        Display name of the ComponentCollection.
     unit : str or sc.Unit
-        Unit of the SampleModel.
+        Unit of the ComponentCollection.
 
     """
 
     def __init__(
         self,
-        display_name: str = "MySampleModel",
+        display_name: str = "MyComponentCollection",
         unit: str | sc.Unit = "meV",
         components: List[ModelComponent] = [],
     ):
         """
-        Initialize a new SampleModel.
+        Initialize a new ComponentCollection.
 
         Parameters
         ----------
@@ -42,7 +42,7 @@ class SampleModel(ModelBase):
         unit : str or sc.Unit, optional
             Unit of the sample model. Defaults to "meV".
         **kwargs : ModelComponent
-            Initial model components to add to the SampleModel. Keys are component names, values are ModelComponent instances.
+            Initial model components to add to the ComponentCollection. Keys are component names, values are ModelComponent instances.
         """
 
         super().__init__(display_name=display_name)
@@ -147,7 +147,7 @@ class SampleModel(ModelBase):
     @property
     def unit(self) -> Optional[Union[str, sc.Unit]]:
         """
-        Get the unit of the SampleModel.
+        Get the unit of the ComponentCollection.
 
         Returns
         -------
@@ -166,7 +166,7 @@ class SampleModel(ModelBase):
 
     def convert_unit(self, unit: Union[str, sc.Unit]) -> None:
         """
-        Convert the unit of the SampleModel and all its components.
+        Convert the unit of the ComponentCollection and all its components.
         """
 
         old_unit = self._unit
@@ -259,7 +259,7 @@ class SampleModel(ModelBase):
 
     def __contains__(self, item: Union[str, ModelComponent]) -> bool:
         """
-        Check if a component with the given name or instance exists in the SampleModel.
+        Check if a component with the given name or instance exists in the ComponentCollection.
         Args:
         ----------
         item : str or ModelComponent
@@ -281,7 +281,7 @@ class SampleModel(ModelBase):
 
     def __repr__(self) -> str:
         """
-        Return a string representation of the SampleModel.
+        Return a string representation of the ComponentCollection.
 
         Returns
         -------
@@ -291,4 +291,4 @@ class SampleModel(ModelBase):
             ", ".join(c.display_name for c in self.components) or "No components"
         )
 
-        return f"<SampleModel display_name='{self.display_name}' | Components: {comp_names}>"
+        return f"<ComponentCollection display_name='{self.display_name}' | Components: {comp_names}>"
