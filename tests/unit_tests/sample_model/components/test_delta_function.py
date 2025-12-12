@@ -12,14 +12,16 @@ from easydynamics.sample_model import DeltaFunction
 class TestDeltaFunction:
     @pytest.fixture
     def delta_function(self):
-        return DeltaFunction(name="TestDeltaFunction", area=2.0, center=0.5, unit="meV")
+        return DeltaFunction(
+            display_name="TestDeltaFunction", area=2.0, center=0.5, unit="meV"
+        )
 
     def test_init_no_inputs(self):
         # WHEN THEN
         delta_function = DeltaFunction()
 
         # EXPECT
-        assert delta_function.name == "DeltaFunction"
+        assert delta_function.display_name == "DeltaFunction"
         assert delta_function.area.value == 1.0
         assert delta_function.center.value == 0.0
         assert delta_function.unit == "meV"
@@ -27,7 +29,7 @@ class TestDeltaFunction:
 
     def test_initialization(self, delta_function: DeltaFunction):
         # WHEN THEN EXPECT
-        assert delta_function.name == "TestDeltaFunction"
+        assert delta_function.display_name == "TestDeltaFunction"
         assert delta_function.area.value == 2.0
         assert delta_function.center.value == 0.5
         assert delta_function.unit == "meV"
@@ -51,12 +53,14 @@ class TestDeltaFunction:
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            DeltaFunction(name="TestDeltaFunction", **kwargs)
+            DeltaFunction(display_name="TestDeltaFunction", **kwargs)
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
-            DeltaFunction(name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV")
+            DeltaFunction(
+                display_name="TestDeltaFunction", area=-2.0, center=0.5, unit="meV"
+            )
 
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
@@ -163,16 +167,16 @@ class TestDeltaFunction:
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN
         test_delta = DeltaFunction(
-            name="TestDeltaFunction", area=2.0, center=None, unit="meV"
+            display_name="TestDeltaFunction", area=2.0, center=None, unit="meV"
         )
 
         # EXPECT
         assert test_delta.center.value == 0.0
         assert test_delta.center.fixed is True
 
-    def test_get_parameters(self, delta_function: DeltaFunction):
+    def test_get_all_parameters(self, delta_function: DeltaFunction):
         # WHEN THEN
-        params = delta_function.get_parameters()
+        params = delta_function.get_all_parameters()
 
         # EXPECT
         assert len(params) == 2
@@ -199,7 +203,7 @@ class TestDeltaFunction:
 
         # EXPECT
         assert delta_copy is not delta_function
-        assert delta_copy.name == delta_function.name
+        assert delta_copy.display_name == delta_function.display_name
 
         assert delta_copy.area.value == delta_function.area.value
         assert delta_copy.area.fixed == delta_function.area.fixed

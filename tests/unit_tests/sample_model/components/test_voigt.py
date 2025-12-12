@@ -13,7 +13,7 @@ class TestVoigt:
     @pytest.fixture
     def voigt(self):
         return Voigt(
-            name="TestVoigt",
+            display_name="TestVoigt",
             area=2.0,
             center=0.5,
             gaussian_width=0.6,
@@ -26,7 +26,7 @@ class TestVoigt:
         voigt = Voigt()
 
         # EXPECT
-        assert voigt.name == "Voigt"
+        assert voigt.display_name == "Voigt"
         assert voigt.area.value == 1.0
         assert voigt.center.value == 0.0
         assert voigt.gaussian_width.value == 1.0
@@ -36,7 +36,7 @@ class TestVoigt:
 
     def test_initialization(self, voigt: Voigt):
         # WHEN THEN EXPECT
-        assert voigt.name == "TestVoigt"
+        assert voigt.display_name == "TestVoigt"
         assert voigt.area.value == 2.0
         assert voigt.center.value == 0.5
         assert voigt.gaussian_width.value == 0.6
@@ -56,7 +56,7 @@ class TestVoigt:
 
         # THEN
         voigt = Voigt(
-            name="ParamVoigt",
+            display_name="ParamVoigt",
             area=area_param,
             center=center_param,
             gaussian_width=gaussian_width_param,
@@ -65,7 +65,7 @@ class TestVoigt:
         )
 
         # EXPECT
-        assert voigt.name == "ParamVoigt"
+        assert voigt.display_name == "ParamVoigt"
         assert voigt.area is area_param
         assert voigt.center is center_param
         assert voigt.gaussian_width is gaussian_width_param
@@ -129,7 +129,7 @@ class TestVoigt:
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Voigt(name="TestVoigt", **kwargs)
+            Voigt(display_name="TestVoigt", **kwargs)
 
     def test_negative_gaussian_width_raises(self):
         # WHEN THEN EXPECT
@@ -137,7 +137,7 @@ class TestVoigt:
             ValueError, match="The gaussian_width of a Voigt must be greater than."
         ):
             Voigt(
-                name="TestVoigt",
+                display_name="TestVoigt",
                 area=2.0,
                 center=0.5,
                 gaussian_width=-0.6,
@@ -152,7 +152,7 @@ class TestVoigt:
             match="The lorentzian_width of a Voigt must be greater than zero.",
         ):
             Voigt(
-                name="TestVoigt",
+                display_name="TestVoigt",
                 area=2.0,
                 center=0.5,
                 gaussian_width=0.6,
@@ -164,7 +164,7 @@ class TestVoigt:
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Voigt(
-                name="TestVoigt",
+                display_name="TestVoigt",
                 area=-2.0,
                 center=0.5,
                 gaussian_width=0.6,
@@ -211,7 +211,7 @@ class TestVoigt:
     def test_center_is_fixed_if_set_to_None(self):
         # WHEN THEN
         test_voigt = Voigt(
-            name="TestVoigt",
+            display_name="TestVoigt",
             area=2.0,
             center=None,
             gaussian_width=0.6,
@@ -234,9 +234,9 @@ class TestVoigt:
         assert voigt.gaussian_width.value == 0.6 * 1e3
         assert voigt.lorentzian_width.value == 0.7 * 1e3
 
-    def test_get_parameters(self, voigt: Voigt):
+    def test_get_all_parameters(self, voigt: Voigt):
         # WHEN THEN
-        params = voigt.get_parameters()
+        params = voigt.get_all_parameters()
 
         # EXPECT
         assert len(params) == 4
@@ -273,7 +273,7 @@ class TestVoigt:
 
         # EXPECT
         assert voigt_copy is not voigt
-        assert voigt_copy.name == voigt.name
+        assert voigt_copy.display_name == voigt.display_name
 
         assert voigt_copy.area.value == voigt.area.value
         assert voigt_copy.area.fixed == voigt.area.fixed

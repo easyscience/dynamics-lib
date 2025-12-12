@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Sequence, Union
+from typing import Sequence, Union
 
 import numpy as np
 import scipp as sc
-from easyscience.variable import Parameter
+from easyscience.variable import DescriptorBase, Parameter
 from scipp import UnitError
 
 from .model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class Polynomial(ModelComponent):
@@ -18,15 +18,17 @@ class Polynomial(ModelComponent):
     Polynomial function component. c0 + c1*x + c2*x^2 + ... + cN*x^N
 
     Args:
+        display_name (str): Display name of the Polynomial component.
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
+        unit (str or sc.Unit): Unit of the Polynomial component.
     """
 
     def __init__(
         self,
-        name: Optional[str] = "Polynomial",
-        coefficients: Optional[Sequence[Union[Numeric, Parameter]]] = (0.0,),
-        unit: Union[str, sc.Unit] = "meV",
+        display_name: str = "Polynomial",
+        coefficients: Sequence[Union[Numeric, Parameter]] = (0.0,),
+        unit: str | sc.Unit = "meV",
     ):
         self.validate_unit(unit)
 
@@ -49,7 +51,7 @@ class Polynomial(ModelComponent):
             if isinstance(coef, Parameter):
                 param = coef
             elif isinstance(coef, Numeric):
-                param = Parameter(name=f"{name}_c{i}", value=float(coef))
+                param = Parameter(name=f"{display_name}_c{i}", value=float(coef))
             else:
                 raise TypeError(
                     "Each coefficient must be either a numeric value or a Parameter."
@@ -60,16 +62,15 @@ class Polynomial(ModelComponent):
         self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
 
         # call parent with the Parameters
-        super().__init__(name=name, unit=unit, coefficients=self._coefficients)
+        super().__init__(display_name=display_name, unit=unit)
 
     @property
-    def coefficient_values(self) -> list[float]:
-        """Get the coefficients of the polynomial as a list."""
-        coefficient_list = [param.value for param in self._coefficients]
-        return coefficient_list
+    def coefficients(self) -> list[Parameter]:
+        """Get the coefficients of the polynomial as a list of Parameters."""
+        return self._coefficients
 
-    @coefficient_values.setter
-    def coefficient_values(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
+    @coefficients.setter
+    def coefficients(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
         """Replace the coefficients. Length must match current number of coefficients."""
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -90,6 +91,12 @@ class Polynomial(ModelComponent):
                     "Each coefficient must be either a numeric value or a Parameter."
                 )
 
+    @property
+    def coefficient_values(self) -> list[float]:
+        """Get the coefficients of the polynomial as a list."""
+        coefficient_list = [param.value for param in self._coefficients]
+        return coefficient_list
+
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:
@@ -105,9 +112,9 @@ class Polynomial(ModelComponent):
 
         if any(result < 0):
             warnings.warn(
-                "The Polynomial with name {} has negative values, which may not be physically meaningful.".format(
-                    self.name
-                )
+                f"The Polynomial with name {self.display_name} has negative values, "
+                "which may not be physically meaningful.",
+                UserWarning,
             )
         return result
 
@@ -122,7 +129,7 @@ class Polynomial(ModelComponent):
             "The degree of the polynomial is determined by the number of coefficients and cannot be set directly."
         )
 
-    def get_parameters(self) -> list[Parameter]:
+    def get_all_variables(self) -> list[DescriptorBase]:
         """
         Get all parameters from the model component.
         Returns:
@@ -156,7 +163,7 @@ class Polynomial(ModelComponent):
         coeffs_str = ", ".join(
             f"{param.name}={param.value}" for param in self._coefficients
         )
-        return f"Polynomial(name = {self.name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
+        return f"Polynomial(display_name = {self.display_name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
 
 # from typing import Callable, Dict

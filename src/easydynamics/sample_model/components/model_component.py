@@ -2,29 +2,28 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import Any, List, Optional, Union
+from typing import List
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes import ObjBase
+from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
-class ModelComponent(ObjBase):
+class ModelComponent(ModelBase):
     """
     Abstract base class for all model components.
     """
 
     def __init__(
         self,
-        name="ModelComponent",
-        unit: Optional[Union[str, sc.Unit]] = "meV",
-        **kwargs: Any,
+        display_name: str = None,
+        unit: str | sc.Unit = "meV",
     ):
         self.validate_unit(unit)
-        super().__init__(name=name, **kwargs)
+        super().__init__(display_name=display_name)
         self._unit = unit
 
     @property
@@ -48,17 +47,17 @@ class ModelComponent(ObjBase):
     def fix_all_parameters(self):
         """Fix all parameters in the model component."""
 
-        pars = self.get_parameters()
+        pars = self.get_fittable_parameters()
         for p in pars:
             p.fixed = True
 
     def free_all_parameters(self):
         """Free all parameters in the model component."""
-        for p in self.get_parameters():
+        for p in self.get_fittable_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
-        self, x: Union[Numeric, List[Numeric], np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """ "Prepare the input x for evaluation by handling units and converting to a numpy array."""
 
@@ -118,7 +117,7 @@ class ModelComponent(ObjBase):
                 f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
             )
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
+    def convert_unit(self, unit: str | sc.Unit):
         """
         Convert the unit of the Parameters in the component.
 
@@ -127,7 +126,7 @@ class ModelComponent(ObjBase):
         """
 
         old_unit = self._unit
-        pars = self.get_parameters()
+        pars = self.get_all_parameters()
         try:
             for p in pars:
                 p.convert_unit(unit)
@@ -143,7 +142,7 @@ class ModelComponent(ObjBase):
             raise e
 
     @abstractmethod
-    def evaluate(self, x: Union[Numeric, sc.Variable]) -> np.ndarray:
+    def evaluate(self, x: Numeric | sc.Variable) -> np.ndarray:
         """
         Evaluate the model component at input x.
 
@@ -156,4 +155,4 @@ class ModelComponent(ObjBase):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.name})"
+        return f"{self.__class__.__name__}(name={self.display_name})"

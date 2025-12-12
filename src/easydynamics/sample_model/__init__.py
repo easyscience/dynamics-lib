@@ -1,3 +1,4 @@
+from .component_collection import ComponentCollection
 from .components import (
     DampedHarmonicOscillator,
     DeltaFunction,
@@ -7,10 +8,9 @@ from .components import (
     Voigt,
 )
 from .diffusion_model import BrownianTranslationalDiffusion, DiffusionModel
-from .sample_model import SampleModel
 
 __all__ = [
-    "SampleModel",
+    "ComponentCollection",
     "Gaussian",
     "Lorentzian",
     "Voigt",
