@@ -278,6 +278,10 @@ class TestBrownianTranslationalDiffusion:
 
         assert expression_map == expected_map
 
+    def test_write_width_dependency_expression_raises(self, brownian_diffusion_model):
+        with pytest.raises(TypeError, match="Q must be a float"):
+            brownian_diffusion_model._write_width_dependency_expression("invalid")
+
     def test_repr(self, brownian_diffusion_model):
         # WHEN THEN
         repr_str = repr(brownian_diffusion_model)
