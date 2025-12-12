@@ -188,7 +188,7 @@ class TestNumericalConvolutionBase:
         assert (
             default_numerical_convolution_base.extension_factor == new_extension_factor
         )
-        expected_span = 20 + 2 * (0.5 * 20)  # original span + 2 * (extension)
+        expected_span = 20 + (0.5 * 20)  # original span + extension
         assert np.isclose(
             default_numerical_convolution_base._energy_grid.energy_span_dense,
             expected_span,
