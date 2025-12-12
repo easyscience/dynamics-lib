@@ -348,6 +348,3 @@ class NumericalConvolutionBase(ConvolutionBase):
             f"temperature={self.temperature}, "
             f"normalize_detailed_balance={self.normalize_detailed_balance})"
         )
-
-    def __str__(self) -> str:
-        return self.__repr__()
