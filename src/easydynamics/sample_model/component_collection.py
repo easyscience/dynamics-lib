@@ -60,12 +60,14 @@ class ComponentCollection(ModelBase):
             raise TypeError("Component must be an instance of ModelComponent.")
 
         if component in self._components:
-            raise ValueError(f"Component '{component.display_name}' already added.")
+            raise ValueError(
+                f"Component '{component.display_name}' is already in the collection."
+            )
 
         for comp in self._components:
             if comp.display_name == component.display_name:
                 raise ValueError(
-                    f"A component with the name '{component.display_name}' already exists."
+                    f"A component with the name '{component.display_name}' is already in the collection."
                 )
 
         self._components.append(component)

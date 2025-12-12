@@ -97,28 +97,6 @@ class Polynomial(ModelComponent):
         coefficient_list = [param.value for param in self._coefficients]
         return coefficient_list
 
-    @coefficient_values.setter
-    def coefficient_values(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
-        """Replace the coefficients. Length must match current number of coefficients."""
-        if not isinstance(coeffs, (list, tuple, np.ndarray)):
-            raise TypeError(
-                "coefficients must be a sequence (list/tuple/ndarray) of numbers or Parameter objects."
-            )
-        if len(coeffs) != len(self._coefficients):
-            raise ValueError(
-                "Number of coefficients must match the existing number of coefficients."
-            )
-        for i, coef in enumerate(coeffs):
-            if isinstance(coef, Parameter):
-                # replace parameter
-                self._coefficients[i] = coef
-            elif isinstance(coef, Numeric):
-                self._coefficients[i].value = float(coef)
-            else:
-                raise TypeError(
-                    "Each coefficient must be either a numeric value or a Parameter."
-                )
-
     def evaluate(
         self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
     ) -> np.ndarray:

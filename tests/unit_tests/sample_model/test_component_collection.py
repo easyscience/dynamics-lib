@@ -47,13 +47,20 @@ class TestComponentCollection:
         # EXPECT
         assert component_collection.components[-1] is component
 
-    def test_add_duplicate_component_raises(self, component_collection):
+    def test_add_duplicate_component_name_raises(self, component_collection):
         # WHEN THEN
         component = Gaussian(
             display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # EXPECT
-        with pytest.raises(ValueError, match="already exists"):
+        with pytest.raises(ValueError, match="is already in the collection"):
+            component_collection.add_component(component)
+
+    def test_add_existing_component_raises(self, component_collection):
+        # WHEN THEN
+        component = component_collection.components[0]
+        # EXPECT
+        with pytest.raises(ValueError, match="is already in the collection"):
             component_collection.add_component(component)
 
     def test_add_invalid_component_raises(self, component_collection):
@@ -68,6 +75,11 @@ class TestComponentCollection:
         component_collection.remove_component("TestGaussian1")
         # EXPECT
         assert "TestGaussian1" not in component_collection.components
+
+    def test_remove_component_raises(self, component_collection):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="Component name must be a string"):
+            component_collection.remove_component(123)
 
     def test_remove_nonexistent_component_raises(self, component_collection):
         # WHEN THEN EXPECT
@@ -313,7 +325,6 @@ class TestComponentCollection:
             assert param.fixed is False
 
     def test_contains(self, component_collection):
-        # WHEN THEN
         assert "TestGaussian1" in component_collection
         assert "TestLorentzian1" in component_collection
         assert "NonExistentComponent" not in component_collection
@@ -323,10 +334,13 @@ class TestComponentCollection:
         assert gaussian_component in component_collection
         assert lorentzian_component in component_collection
 
+        # WHEN THEN
         fake_component = Gaussian(
             display_name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
         )
+        # EXPECT
         assert fake_component not in component_collection
+        assert 123 not in component_collection  # Invalid type
 
     def test_repr_contains_name_and_components(self, component_collection):
         # WHEN THEN
