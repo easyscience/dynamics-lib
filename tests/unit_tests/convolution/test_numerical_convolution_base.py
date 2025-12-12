@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import (
@@ -12,7 +13,7 @@ from easydynamics.sample_model import SampleModel
 class TestNumericalConvolutionBase:
     @pytest.fixture
     def default_numerical_convolution_base(self):
-        energy = np.linspace(-10, 10, 100)
+        energy = np.linspace(-10, 10, 101)
         sample_model = SampleModel(name="SampleModel")
         resolution_model = SampleModel(name="ResolutionModel")
 
@@ -23,11 +24,12 @@ class TestNumericalConvolutionBase:
         )
 
     def test_init(self, default_numerical_convolution_base):
+        "Test initialization of NumericalConvolutionBase with default parameters."
         # WHEN THEN EXPECT
         assert isinstance(default_numerical_convolution_base, NumericalConvolutionBase)
         assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
         assert np.allclose(
-            default_numerical_convolution_base.energy.values, np.linspace(-10, 10, 100)
+            default_numerical_convolution_base.energy.values, np.linspace(-10, 10, 101)
         )
         assert isinstance(default_numerical_convolution_base._sample_model, SampleModel)
         assert isinstance(
@@ -36,7 +38,328 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == 0.2
         assert default_numerical_convolution_base.temperature is None
-        # assert default_numerical_convolution_base.temperature_unit == "K"
         assert default_numerical_convolution_base.energy_unit == "meV"
         assert default_numerical_convolution_base.normalize_detailed_balance is True
         assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
+
+    def test_init_with_custom_parameters(self):
+        "Test initialization of NumericalConvolutionBase with custom parameters."
+        # WHEN
+        energy = np.linspace(-5, 5, 50)
+        sample_model = SampleModel(name="SampleModel")
+        resolution_model = SampleModel(name="ResolutionModel")
+        upsample_factor = 10
+        extension_factor = 0.5
+        temperature = 300.0
+        temperature_unit = "K"
+        energy_unit = "meV"
+        normalize_detailed_balance = False
+
+        # THEN
+        numerical_convolution_base = NumericalConvolutionBase(
+            energy=energy,
+            sample_model=sample_model,
+            resolution_model=resolution_model,
+            upsample_factor=upsample_factor,
+            extension_factor=extension_factor,
+            temperature=temperature,
+            temperature_unit=temperature_unit,
+            energy_unit=energy_unit,
+            normalize_detailed_balance=normalize_detailed_balance,
+        )
+
+        # EXPECT
+        assert numerical_convolution_base.upsample_factor == upsample_factor
+        assert numerical_convolution_base.extension_factor == extension_factor
+        assert numerical_convolution_base.temperature.value == temperature
+        assert numerical_convolution_base.temperature.unit == temperature_unit
+        assert numerical_convolution_base.energy_unit == energy_unit
+        assert (
+            numerical_convolution_base.normalize_detailed_balance
+            == normalize_detailed_balance
+        )
+        assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
+
+    def test_init_raises_type_error_for_invalid_temperature(self):
+        "Test that initialization raises TypeError for invalid temperature."
+        # WHEN
+        energy = np.linspace(-5, 5, 50)
+        sample_model = SampleModel(name="SampleModel")
+        resolution_model = SampleModel(name="ResolutionModel")
+        invalid_temperature = "invalid_temperature"
+
+        # THEN EXPECT
+        with pytest.raises(
+            TypeError, match="Temperature must be None, a number or a Parameter."
+        ):
+            NumericalConvolutionBase(
+                energy=energy,
+                sample_model=sample_model,
+                resolution_model=resolution_model,
+                temperature=invalid_temperature,
+            )
+
+    def test_init_raises_type_error_for_invalid_temperature_unit(self):
+        "Test that initialization raises TypeError for invalid temperature_unit."
+        # WHEN
+        energy = np.linspace(-5, 5, 50)
+        sample_model = SampleModel(name="SampleModel")
+        resolution_model = SampleModel(name="ResolutionModel")
+        invalid_temperature_unit = 123  # Not a string or sc.Unit
+
+        # THEN EXPECT
+        with pytest.raises(
+            TypeError, match="Temperature_unit must be a string or sc.Unit."
+        ):
+            NumericalConvolutionBase(
+                energy=energy,
+                sample_model=sample_model,
+                resolution_model=resolution_model,
+                temperature_unit=invalid_temperature_unit,
+            )
+
+    def test_energy_setter(self, default_numerical_convolution_base):
+        "Test setting a new energy array updates the energy grid accordingly."
+        # WHEN
+        new_energy = np.linspace(-20, 20, 201)
+        default_numerical_convolution_base.energy = new_energy
+
+        # THEN EXPECT
+        assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
+        assert np.allclose(default_numerical_convolution_base.energy.values, new_energy)
+        assert default_numerical_convolution_base._energy_grid.energy_dense.shape[
+            0
+        ] == round(201 * default_numerical_convolution_base.upsample_factor)
+
+    def test_upsample_factor_setter(self, default_numerical_convolution_base):
+        "Test setting a new upsample factor updates the energy grid accordingly."
+        # WHEN
+        new_upsample_factor = 10
+        default_numerical_convolution_base.upsample_factor = new_upsample_factor
+
+        # THEN EXPECT
+        assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
+        assert default_numerical_convolution_base._energy_grid.energy_dense.shape[
+            0
+        ] == round(101 * new_upsample_factor)
+
+    def test_upsample_factor_setter_none(self, default_numerical_convolution_base):
+        "Test setting upsample factor to None disables upsampling."
+        # WHEN
+        new_upsample_factor = None
+        default_numerical_convolution_base.upsample_factor = new_upsample_factor
+
+        # THEN EXPECT
+        assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
+        assert (
+            default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == 101
+        )
+
+    @pytest.mark.parametrize(
+        "invalid_upsample_factor, expected_exception",
+        [
+            (-1, ValueError),  # numeric < 1 → ValueError
+            (0, ValueError),  # numeric < 1 → ValueError
+            (1.0, ValueError),  # numeric = 1 → ValueError
+            ("invalid", TypeError),  # non-numeric → TypeError
+        ],
+        ids=["negative", "zero", "one", "string"],
+    )
+    def test_upsample_setter_raises(
+        self,
+        default_numerical_convolution_base,
+        invalid_upsample_factor,
+        expected_exception,
+    ):
+        "Test that setting invalid upsample factors raises appropriate exceptions."
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            expected_exception,
+        ):
+            default_numerical_convolution_base.upsample_factor = invalid_upsample_factor
+
+    def test_extension_factor_setter(self, default_numerical_convolution_base):
+        "Test setting a new extension factor updates the energy grid accordingly."
+        # WHEN
+        new_extension_factor = 0.5
+        default_numerical_convolution_base.extension_factor = new_extension_factor
+
+        # THEN EXPECT
+        assert (
+            default_numerical_convolution_base.extension_factor == new_extension_factor
+        )
+        expected_span = 20 + 2 * (0.5 * 20)  # original span + 2 * (extension)
+        assert np.isclose(
+            default_numerical_convolution_base._energy_grid.energy_span_dense,
+            expected_span,
+        )
+
+    @pytest.mark.parametrize(
+        "invalid_extension_factor, expected_exception",
+        [
+            (-0.1, ValueError),  # negative → ValueError
+            ("invalid", TypeError),  # non-numeric → TypeError
+        ],
+        ids=["negative", "string"],
+    )
+    def test_extension_factor_setter_raises(
+        self,
+        default_numerical_convolution_base,
+        invalid_extension_factor,
+        expected_exception,
+    ):
+        "Test that setting invalid extension factors raises appropriate exceptions."
+
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            expected_exception,
+        ):
+            default_numerical_convolution_base.extension_factor = (
+                invalid_extension_factor
+            )
+
+    @pytest.mark.parametrize(
+        "temperature_input, expected_value",
+        [
+            (1, 1.0),
+            (100.0, 100.0),
+            (Parameter(name="TempParam", value=250.0, unit="K"), 250.0),
+        ],
+        ids=["int", "float", "parameter"],
+    )
+    def test_temperature_setter(
+        self, default_numerical_convolution_base, temperature_input, expected_value
+    ):
+        "Test setting various valid temperature inputs."
+        # WHEN
+        default_numerical_convolution_base.temperature = temperature_input
+
+        # THEN EXPECT
+        assert default_numerical_convolution_base.temperature.value == expected_value
+        assert default_numerical_convolution_base.temperature.unit == "K"
+
+    def test_temperature_setter_none(self, default_numerical_convolution_base):
+        "Test setting temperature to None."
+        # WHEN
+        default_numerical_convolution_base.temperature = None
+
+        # THEN EXPECT
+        assert default_numerical_convolution_base.temperature is None
+
+    def test_temperature_setter_raises(self, default_numerical_convolution_base):
+        "Test that setting an invalid temperature raises TypeError."
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="Temperature must be"):
+            default_numerical_convolution_base.temperature = "invalid_temperature"
+
+    def test_normalize_detailed_balance_setter(
+        self, default_numerical_convolution_base
+    ):
+        "Test setting normalize_detailed_balance to False."
+        # WHEN
+        default_numerical_convolution_base.normalize_detailed_balance = False
+
+        # THEN EXPECT
+        assert default_numerical_convolution_base.normalize_detailed_balance is False
+
+    def test_normalize_detailed_balance_setter_raises(
+        self, default_numerical_convolution_base
+    ):
+        "Test that setting an invalid normalize_detailed_balance raises TypeError."
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="normalize_detailed_balance must be"):
+            default_numerical_convolution_base.normalize_detailed_balance = "invalid"
+
+    def test_create_energy_grid_upsample_none(self, default_numerical_convolution_base):
+        "Test creating energy grid with upsample_factor set to None (no upsampling). In this case, the energy grid is equal to the input energy"
+        # WHEN
+        default_numerical_convolution_base.upsample_factor = None
+        energy_grid = default_numerical_convolution_base._create_energy_grid()
+
+        # THEN EXPECT
+        assert isinstance(energy_grid, EnergyGrid)
+        assert np.allclose(
+            energy_grid.energy_dense,
+            np.linspace(-10, 10, 101),  # no extension
+        )
+        assert np.allclose(energy_grid.energy_dense_centered, np.linspace(-10, 10, 101))
+        assert np.isclose(energy_grid.energy_dense_step, 0.2)
+        assert np.isclose(energy_grid.energy_span_dense, 20.0)
+        assert np.isclose(energy_grid.energy_even_length_offset, 0.0)
+
+    def test_create_energy_grid_upsample_none_non_uniform_raises(
+        self, default_numerical_convolution_base
+    ):
+        "Test that creating energy grid with upsample_factor set to None and non-uniform energy raises ValueError (the energy grid must always be uniform)."
+        # WHEN
+        default_numerical_convolution_base.energy = np.array([0, 1, 3, 6, 10])
+        with pytest.raises(
+            ValueError,
+            match="Input array `energy` must be uniformly spaced if upsample_factor is not given",
+        ):
+            default_numerical_convolution_base.upsample_factor = None
+
+    @pytest.mark.parametrize("num_points", [100, 101], ids=["even", "odd"])
+    def test_create_energy_grid_upsample_and_extension(
+        self, default_numerical_convolution_base, num_points
+    ):
+        "Test creating energy grid with upsampling and extension. TThe even_length_offset is tested for both even and odd number of input energy points."
+        # WHEN
+        default_numerical_convolution_base.energy = np.linspace(-10, 10, num_points)
+
+        # THEN
+        energy_grid = default_numerical_convolution_base._create_energy_grid()
+
+        # EXPECT
+        assert isinstance(energy_grid, EnergyGrid)
+
+        expected_extended_energy = np.linspace(
+            -12,
+            12,
+            round(num_points * default_numerical_convolution_base.upsample_factor),
+        )
+        assert np.allclose(energy_grid.energy_dense, expected_extended_energy)
+
+        expected_centered_energy = expected_extended_energy
+        assert np.allclose(energy_grid.energy_dense_centered, expected_centered_energy)
+
+        expected_step = expected_extended_energy[1] - expected_extended_energy[0]
+        assert np.isclose(energy_grid.energy_dense_step, expected_step)
+
+        expected_span = 24.0  # original span + extension
+        assert np.isclose(energy_grid.energy_span_dense, expected_span)
+
+        if num_points % 2 == 0:
+            expected_offset = -expected_step / 2
+            assert np.isclose(energy_grid.energy_even_length_offset, expected_offset)
+        else:
+            assert np.isclose(energy_grid.energy_even_length_offset, 0.0)
+
+    def test_create_energy_grid_non_centered_energy(
+        self, default_numerical_convolution_base
+    ):
+        "Test creating energy grid when input energy is not centered around zero. The centered energy grid should be shifted accordingly."
+        # WHEN
+        default_numerical_convolution_base.energy = np.linspace(5, 25, 101)
+        energy_grid = default_numerical_convolution_base._create_energy_grid()
+
+        # THEN EXPECT
+        assert isinstance(energy_grid, EnergyGrid)
+
+        expected_extended_energy = np.linspace(
+            3,
+            27,
+            round(101 * default_numerical_convolution_base.upsample_factor),
+        )
+        assert np.allclose(energy_grid.energy_dense, expected_extended_energy)
+
+        expected_centered_energy = expected_extended_energy - 15.0
+        assert np.allclose(energy_grid.energy_dense_centered, expected_centered_energy)
+
+        expected_step = expected_extended_energy[1] - expected_extended_energy[0]
+        assert np.isclose(energy_grid.energy_dense_step, expected_step)
+
+        expected_span = 24.0  # original span + extension
+        assert np.isclose(energy_grid.energy_span_dense, expected_span)
+
+        assert np.isclose(energy_grid.energy_even_length_offset, 0.0)

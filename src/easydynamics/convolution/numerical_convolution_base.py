@@ -63,13 +63,16 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_unit=energy_unit,
         )
 
-        if temperature is not None and not isinstance(temperature, Numerical):
-            raise TypeError("Temperature must be None or a number.")
-        self._temperature = temperature
+        if temperature is not None and not isinstance(
+            temperature, (Numerical, Parameter)
+        ):
+            raise TypeError("Temperature must be None, a number or a Parameter.")
 
         if not isinstance(temperature_unit, (str, sc.Unit)):
             raise TypeError("Temperature_unit must be a string or sc.Unit.")
         self._temperature_unit = temperature_unit
+        self._temperature = None
+        self.temperature = temperature
 
         self._normalize_detailed_balance = normalize_detailed_balance
 
@@ -81,7 +84,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
-        super().energy = energy
+        ConvolutionBase.energy.fset(self, energy)
         # Recreate dense grid when energy is updated
         self._energy_grid = self._create_energy_grid()
 
@@ -105,7 +108,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         if not isinstance(factor, Numerical):
             raise TypeError("Upsample factor must be a numerical value or None.")
         factor = float(factor)
-        if factor < 1.0:
+        if factor <= 1.0:
             raise ValueError("Upsample factor must be greater than 1.")
 
         self._upsample_factor = factor
@@ -211,13 +214,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         self,
     ) -> EnergyGrid:
         """
-        Create a dense grid by upsampling and extending the energy array.
-            # energy_dense=energy_dense,
-            # energy_dense_centered=energy_dense_centered,
-            # energy_dense_step=energy_dense_step,
-            # span_dense=span,
-            # span_original=span_original,
-            # energy_even_length_offset=energy_even_length_offset,
+        Create a dense grid by upsampling and extending the energy array. If upsample_factor is None, no upsampling or extension is performed.
+        This dense grid is used for convolution to improve accuracy.
         Returns:
             EnergyGrid
                 The dense grid created by upsampling and extending energy.
@@ -248,7 +246,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
             energy_span_original = energy_max - energy_min
-            extra = self.extension_factor * energy_span_original
+            extra = self.extension_factor / 2 * energy_span_original
             extended_min = energy_min - extra
             extended_max = energy_max + extra
             num_points = round(len(self.energy.values) * self.upsample_factor)
