@@ -57,6 +57,6 @@ class TestConvolution:
 
         assert isinstance(default_convolution._analytical_sample_model, SampleModel)
         assert (
-            default_convolution._analytical_sample_model.components
-            is default_convolution.sample_model.components[2]
+            default_convolution._analytical_sample_model.components[0]
+            is default_convolution.sample_model.components[0]
         )
