@@ -1,11 +1,10 @@
 import warnings
-from typing import Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-Numeric = Union[int, float]
+Numeric = int | float
 
 
 class CreateParametersMixin:
@@ -20,9 +19,9 @@ class CreateParametersMixin:
 
     def _create_area_parameter(
         self,
-        area: Union[Numeric, Parameter],
+        area: Numeric | Parameter,
         name: str,
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the area
@@ -60,10 +59,10 @@ class CreateParametersMixin:
 
     def _create_center_parameter(
         self,
-        center: Union[Numeric, Parameter, None],
+        center: Numeric | Parameter | None,
         name: str,
         fix_if_none: bool,
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the center of a function.
         args:
@@ -96,10 +95,10 @@ class CreateParametersMixin:
 
     def _create_width_parameter(
         self,
-        width: Union[Numeric, Parameter],
+        width: Numeric | Parameter,
         name: str,
         param_name: str = "width",
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the width of a function.

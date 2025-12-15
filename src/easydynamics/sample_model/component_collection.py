@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Optional, Union
+from typing import List
 
 import numpy as np
 import scipp as sc
@@ -10,7 +10,7 @@ from easyscience.variable import DescriptorBase
 
 from .components.model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class ComponentCollection(ModelBase):
@@ -37,16 +37,20 @@ class ComponentCollection(ModelBase):
 
         Parameters
         ----------
-        name : str
-            Name of the sample model.
+        display_name : str
+            Display name of the sample model.
         unit : str or sc.Unit, optional
             Unit of the sample model. Defaults to "meV".
-        **kwargs : ModelComponent
-            Initial model components to add to the ComponentCollection. Keys are component names, values are ModelComponent instances.
+        components : List[ModelComponent], optional
+            Initial model components to add to the ComponentCollection.
         """
 
         super().__init__(display_name=display_name)
 
+        if unit is not None and not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(
+                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+            )
         self._unit = unit
         self._components = []
 
@@ -147,7 +151,7 @@ class ComponentCollection(ModelBase):
         ]
 
     @property
-    def unit(self) -> Optional[Union[str, sc.Unit]]:
+    def unit(self) -> str | sc.Unit:
         """
         Get the unit of the ComponentCollection.
 
@@ -166,7 +170,7 @@ class ComponentCollection(ModelBase):
             )
         )  # noqa: E501
 
-    def convert_unit(self, unit: Union[str, sc.Unit]) -> None:
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """
         Convert the unit of the ComponentCollection and all its components.
         """
@@ -187,7 +191,7 @@ class ComponentCollection(ModelBase):
             raise e
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """
         Evaluate the sum of all components.
@@ -259,7 +263,7 @@ class ComponentCollection(ModelBase):
         for param in self.get_all_parameters():
             param.fixed = False
 
-    def __contains__(self, item: Union[str, ModelComponent]) -> bool:
+    def __contains__(self, item: str | ModelComponent) -> bool:
         """
         Check if a component with the given name or instance exists in the ComponentCollection.
         Args:

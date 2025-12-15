@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -10,7 +8,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 EPSILON = 1e-8  # small number to avoid floating point issues
 

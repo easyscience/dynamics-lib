@@ -147,7 +147,7 @@ class ModelComponent(ModelBase):
         Evaluate the model component at input x.
 
         Args:
-            x (Union[Numeric, sc.Variable]): Input values.
+            x (Numeric | sc.Variable): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.

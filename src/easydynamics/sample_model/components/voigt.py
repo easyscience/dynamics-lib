@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -116,7 +114,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         self._lorentzian_width.value = value
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Voigt at the given x values.
         If x is a scipp Variable, the unit of the Voigt will be converted to match x.

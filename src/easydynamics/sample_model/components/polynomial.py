@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Sequence, Union
+from typing import Sequence
 
 import numpy as np
 import scipp as sc
@@ -27,7 +27,7 @@ class Polynomial(ModelComponent):
     def __init__(
         self,
         display_name: str = "Polynomial",
-        coefficients: Sequence[Union[Numeric, Parameter]] = (0.0,),
+        coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = "meV",
     ):
         super().__init__(display_name=display_name, unit=unit)
@@ -67,7 +67,7 @@ class Polynomial(ModelComponent):
         return self._coefficients
 
     @coefficients.setter
-    def coefficients(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
+    def coefficients(self, coeffs: Sequence[Numeric | Parameter]) -> None:
         """Replace the coefficients. Length must match current number of coefficients."""
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -95,7 +95,7 @@ class Polynomial(ModelComponent):
         return coefficient_list
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
         The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
@@ -134,7 +134,7 @@ class Polynomial(ModelComponent):
         """
         return self._coefficients
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
+    def convert_unit(self, unit: str | sc.Unit):
         """Convert the unit of the polynomial.
         Args:
             unit (str or sc.Unit): The target unit to convert to.

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -10,7 +8,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
@@ -92,7 +90,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Damped Harmonic Oscillator at the given x values.
         If x is a scipp Variable, the unit of the DHO will be converted to

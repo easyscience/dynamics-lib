@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 import pytest
 import scipp as sc
@@ -7,7 +5,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class DummyComponent(ModelComponent):
