@@ -19,12 +19,15 @@ class TestConvolution:
     def default_convolution(self):
         energy = np.linspace(-10, 10, 5001)
         sample_model = SampleModel(name="SampleModel")
+
         sample_model.add_component(
             Gaussian(name="Gaussian1", area=2.0, center=0.1, width=0.4)
         )
+
         sample_model.add_component(
             DampedHarmonicOscillator(name="DHO1", area=2.0, center=1.0, width=0.1)
         )
+
         sample_model.add_component(DeltaFunction(name="Delta1", area=2.0, center=0.3))
 
         resolution_model = SampleModel(name="ResolutionModel")
@@ -60,3 +63,26 @@ class TestConvolution:
             default_convolution._analytical_sample_model.components[0]
             is default_convolution.sample_model.components[0]
         )
+        assert isinstance(default_convolution._numerical_sample_model, SampleModel)
+        assert (
+            default_convolution._numerical_sample_model.components[0]
+            is default_convolution.sample_model.components[1]
+        )
+
+        assert isinstance(default_convolution._delta_sample_model, SampleModel)
+        assert (
+            default_convolution._delta_sample_model.components[0]
+            is default_convolution.sample_model.components[2]
+        )
+        assert default_convolution._convolution_plan_is_valid is True
+        assert default_convolution._reactions_enabled is True
+
+    def test_plan_is_built_when_invalid(mocker, default_convolution):
+        conv = default_convolution
+        conv._convolution_plan_is_valid = False
+
+        build_plan = mocker.spy(conv, "_build_convolution_plan")
+
+        conv.convolution()
+
+        build_plan.assert_called_once()
