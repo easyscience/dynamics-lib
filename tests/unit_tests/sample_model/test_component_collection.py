@@ -370,3 +370,35 @@ class TestComponentCollection:
                 assert param_copy.name == param_orig.name
                 assert param_copy.value == param_orig.value
                 assert param_copy.fixed == param_orig.fixed
+
+    def test_to_dict(self, component_collection):
+        # WHEN THEN
+        model_dict = component_collection.to_dict()
+        # EXPECT
+        assert model_dict["display_name"] == "TestComponentCollection"
+        assert len(model_dict["components"]) == 2
+        component_names = [
+            comp_dict["display_name"] for comp_dict in model_dict["components"]
+        ]
+        assert "TestGaussian1" in component_names
+        assert "TestLorentzian1" in component_names
+
+    def test_from_dict(self, component_collection):
+        # WHEN
+        model_dict = component_collection.to_dict()
+        # THEN
+        new_model = ComponentCollection.from_dict(model_dict)
+        # EXPECT
+        assert new_model.display_name == component_collection.display_name
+        assert len(new_model.components) == len(component_collection.components)
+        for comp in component_collection.components:
+            new_comp = new_model.components[
+                new_model.list_component_names().index(comp.display_name)
+            ]
+            assert new_comp.display_name == comp.display_name
+            for param_orig, param_new in zip(
+                comp.get_all_parameters(), new_comp.get_all_parameters()
+            ):
+                assert param_new.name == param_orig.name
+                assert param_new.value == param_orig.value
+                assert param_new.fixed == param_orig.fixed
