@@ -53,15 +53,15 @@ class Convolution(NumericalConvolutionBase):
 
     def __init__(
         self,
-        energy: Union[np.ndarray, sc.Variable],
-        sample_model: Union[SampleModel, ModelComponent],
-        resolution_model: Union[SampleModel, ModelComponent],
-        upsample_factor: Optional[Numerical] = 5,
-        extension_factor: Optional[float] = 0.2,
-        temperature: Optional[Union[Parameter, float]] = None,
-        temperature_unit: Optional[Union[str, sc.Unit]] = "K",
-        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
-        normalize_detailed_balance: Optional[bool] = True,
+        energy: np.ndarray | sc.Variable,
+        sample_model: SampleModel | ModelComponent,
+        resolution_model: SampleModel | ModelComponent,
+        upsample_factor: Numerical = 5,
+        extension_factor: Numerical = 0.2,
+        temperature: Parameter | Numerical | None = None,
+        temperature_unit: str | sc.Unit = "K",
+        energy_unit: str | sc.Unit = "meV",
+        normalize_detailed_balance: bool = True,
     ):
         super().__init__(
             energy=energy,
@@ -166,11 +166,11 @@ class Convolution(NumericalConvolutionBase):
                 energy=self.energy,
                 sample_model=self._numerical_sample_model,
                 resolution_model=self._resolution_model,
-                upsample_factor=self._upsample_factor,
-                extension_factor=self._extension_factor,
-                temperature=self._temperature,
-                temperature_unit=self._temperature_unit,
-                normalize_detailed_balance=self._normalize_detailed_balance,
+                upsample_factor=self.upsample_factor,
+                extension_factor=self.extension_factor,
+                temperature=self.temperature,
+                temperature_unit=self.temperature_unit,
+                normalize_detailed_balance=self.normalize_detailed_balance,
             )
         else:
             self._numerical_convolver = None
@@ -225,7 +225,7 @@ class Convolution(NumericalConvolutionBase):
         Raises:
             TypeError: If sample_model is not a SampleModel or ModelComponent.
         """
-        super(NumericalConvolutionBase).sample_model.sample_model = sample_model
+        NumericalConvolutionBase.sample_model.fset(self, sample_model)
 
         # Separate sample model components into pairs that can be handled analytically, delta functions, and the rest
         self._separate_analytical_components()
@@ -242,9 +242,7 @@ class Convolution(NumericalConvolutionBase):
         Raises:
             TypeError: If resolution_model is not a SampleModel or ModelComponent.
         """
-        super(
-            NumericalConvolutionBase
-        ).resolution_model.resolution_model = resolution_model
+        NumericalConvolutionBase.resolution_model.fset(self, resolution_model)
 
         # Separate sample model components into pairs that can be handled analytically, delta functions, and the rest
         self._separate_analytical_components()
@@ -257,7 +255,8 @@ class Convolution(NumericalConvolutionBase):
             temperature : Parameter, float, or None
                 The temperature to use for detailed balance correction.
         """
-        super(NumericalConvolutionBase).temperature = temperature
+        # super(NumericalConvolutionBase).temperature = temperature
+        NumericalConvolutionBase.temperature.fset(self, temperature)
 
         # Separate sample model components into pairs that can be handled analytically, delta functions, and the rest
         self._separate_analytical_components()
