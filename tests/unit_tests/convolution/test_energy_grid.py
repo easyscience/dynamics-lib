@@ -24,9 +24,3 @@ class TestEnergyGrid:
         assert energy_grid.energy_dense_step == energy_dense_step
         assert energy_grid.energy_span_dense == energy_span_dense
         assert energy_grid.energy_even_length_offset == energy_even_length_offset
-
-    # energy_dense: np.ndarray
-    # energy_dense_centered: np.ndarray
-    # energy_dense_step: float
-    # span_dense: float
-    # energy_even_length_offset: float
