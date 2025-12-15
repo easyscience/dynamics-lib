@@ -30,7 +30,7 @@ class Polynomial(ModelComponent):
         coefficients: Sequence[Union[Numeric, Parameter]] = (0.0,),
         unit: str | sc.Unit = "meV",
     ):
-        self.validate_unit(unit)
+        super().__init__(display_name=display_name, unit=unit)
 
         if coefficients is None:
             raise ValueError("At least one coefficient must be provided.")
@@ -60,9 +60,6 @@ class Polynomial(ModelComponent):
 
         # Helper scipp scalar to track unit conversions (value initialized to 1 with provided unit)
         self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
-
-        # call parent with the Parameters
-        super().__init__(display_name=display_name, unit=unit)
 
     @property
     def coefficients(self) -> list[Parameter]:

@@ -35,8 +35,10 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = "meV",
     ):
         # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)
-        self._unit = unit
+        super().__init__(
+            display_name=display_name,
+            unit=unit,
+        )
 
         # These methods live in ValidationMixin
         area = self._create_area_parameter(
@@ -44,11 +46,6 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         )
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
-        )
-
-        super().__init__(
-            display_name=display_name,
-            unit=unit,
         )
 
         self._area = area

@@ -30,7 +30,7 @@ class ComponentCollection(ModelBase):
         self,
         display_name: str = "MyComponentCollection",
         unit: str | sc.Unit = "meV",
-        components: List[ModelComponent] = [],
+        components: List[ModelComponent] | None = None,
     ):
         """
         Initialize a new ComponentCollection.
@@ -51,7 +51,7 @@ class ComponentCollection(ModelBase):
         self._components = []
 
         # Add initial components if provided. Used for serialization.
-        if components:
+        if components is not None:
             for comp in components:
                 self.add_component(comp)
 

@@ -34,9 +34,10 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
     ):
-        # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)
-        self._unit = unit
+        super().__init__(
+            display_name=display_name,
+            unit=unit,
+        )
 
         # These methods live in ValidationMixin
         area = self._create_area_parameter(
@@ -49,10 +50,6 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             width=width, name=display_name, unit=self._unit
         )
 
-        super().__init__(
-            display_name=display_name,
-            unit=unit,
-        )
         self._area = area
         self._center = center
         self._width = width
