@@ -117,14 +117,20 @@ class Convolution(NumericalConvolutionBase):
         if self._numerical_convolver is not None:
             total += self._numerical_convolver.convolution()
 
-        # Delta function components (no convolution needed, and no detailed balancing)
+        # Delta function components
         if self._delta_sample_model.components:
-            for sample_component in self._delta_sample_model.components:
-                total += sample_component.area.value * self._resolution_model.evaluate(
-                    self.energy.values - sample_component.center.value
-                )
+            total += self._convolve_delta_functions()
 
         return total
+
+    def _convolve_delta_functions(self) -> np.ndarray:
+        "Convolve delta function components of the sample model with the resolution model."
+        "No detailed balance correction is applied to delta functions."
+        return sum(
+            delta.area.value
+            * self._resolution_model.evaluate(self.energy.values - delta.center.value)
+            for delta in self._delta_sample_model.components
+        )
 
     def _check_if_pair_is_analytic(
         self,
@@ -146,16 +152,16 @@ class Convolution(NumericalConvolutionBase):
 
         if not isinstance(sample_component, ModelComponent):
             raise TypeError(
-                f"`sample_component` is an instance of {type(sample_component).__name__}, but must be ModelComponent."
+                f"`sample_component` is an instance of {type(sample_component).__name__}, but must be a ModelComponent."
             )
 
         if not isinstance(resolution_component, ModelComponent):
             raise TypeError(
-                f"`resolution_component` is an instance of {type(resolution_component).__name__}, but must be ModelComponent."
+                f"`resolution_component` is an instance of {type(resolution_component).__name__}, but must be a ModelComponent."
             )
 
         if isinstance(resolution_component, DeltaFunction):
-            raise ValueError(
+            raise TypeError(
                 "Resolution model contains delta functions. This is not supported."
             )
 
@@ -244,4 +250,5 @@ class Convolution(NumericalConvolutionBase):
             getattr(self, "_reactions_enabled", False)
             and name in self._invalidate_plan_on_change
         ):
-            super().__setattr__("_convolution_plan_is_valid", False)
+            # super().__setattr__("_convolution_plan_is_valid", False)
+            self._build_convolution_plan()
