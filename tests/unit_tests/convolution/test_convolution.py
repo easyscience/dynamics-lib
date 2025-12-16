@@ -5,10 +5,12 @@ import numpy as np
 import pytest
 import scipp as sc
 
+from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
 from easydynamics.convolution.convolution import (
     Convolution,
 )
 from easydynamics.convolution.energy_grid import EnergyGrid
+from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.sample_model import (
     DampedHarmonicOscillator,
     DeltaFunction,
@@ -341,6 +343,127 @@ class TestConvolution:
                 resolution_component=resolution_component,
             )
 
-    # def test_build_convolution_plan(self, default_convolution):
+    @pytest.mark.parametrize(
+        "analytical_component",
+        [True, False],
+        ids=["with_analytical", "without_analytical"],
+    )
+    @pytest.mark.parametrize(
+        "numerical_component",
+        [True, False],
+        ids=["with_numerical", "without_numerical"],
+    )
+    @pytest.mark.parametrize(
+        "delta_component", [True, False], ids=["with_delta", "without_delta"]
+    )
+    def test_build_convolution_plan(
+        self,
+        default_convolution,
+        analytical_component,
+        numerical_component,
+        delta_component,
+    ):
+        """
+        Tests that convolution calls the correct methods depending on which component types are present.
+        """
 
-    # def test_set_convolvers(self, default_convolution):
+        # WHEN
+        conv = default_convolution
+        sample_model = SampleModel()
+
+        if analytical_component:
+            sample_model.add_component(
+                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+            )
+
+        if numerical_component:
+            sample_model.add_component(
+                DampedHarmonicOscillator(
+                    name="DampedHarmonicOscillator", area=1.0, center=1.0, width=0.1
+                )
+            )
+
+        if delta_component:
+            sample_model.add_component(
+                DeltaFunction(name="DeltaFunction", area=1.0, center=0.0)
+            )
+
+        # THEN
+        conv.sample_model = sample_model  # This updates the internal sample models
+        conv._build_convolution_plan()  # It is already called by sample_model setter, but we now call it explicitly
+
+        # EXPECT
+        assert isinstance(conv._analytical_sample_model, SampleModel)
+        if analytical_component:
+            assert len(conv._analytical_sample_model.components) == 1
+            assert conv._analytical_sample_model.components[0].name == "Gaussian"
+        else:
+            assert len(conv._analytical_sample_model.components) == 0
+
+        assert isinstance(conv._numerical_sample_model, SampleModel)
+        if numerical_component:
+            assert len(conv._numerical_sample_model.components) == 1
+            assert (
+                conv._numerical_sample_model.components[0].name
+                == "DampedHarmonicOscillator"
+            )
+        else:
+            assert len(conv._numerical_sample_model.components) == 0
+
+        assert isinstance(conv._delta_sample_model, SampleModel)
+        if delta_component:
+            assert len(conv._delta_sample_model.components) == 1
+            assert conv._delta_sample_model.components[0].name == "DeltaFunction"
+
+        assert conv._convolution_plan_is_valid is True
+
+    @pytest.mark.parametrize(
+        "analytical_component",
+        [True, False],
+        ids=["with_analytical", "without_analytical"],
+    )
+    @pytest.mark.parametrize(
+        "numerical_component",
+        [True, False],
+        ids=["with_numerical", "without_numerical"],
+    )
+    def test_set_convolvers(
+        self,
+        default_convolution,
+        analytical_component,
+        numerical_component,
+    ):
+        """
+        Tests that convolution sets the correct methods depending on which component types are present.
+        """
+
+        # WHEN
+        conv = default_convolution
+        sample_model = SampleModel()
+
+        if analytical_component:
+            sample_model.add_component(
+                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+            )
+
+        if numerical_component:
+            sample_model.add_component(
+                DampedHarmonicOscillator(
+                    name="DampedHarmonicOscillator", area=1.0, center=1.0, width=0.1
+                )
+            )
+
+        # THEN
+        conv.sample_model = sample_model  # This updates the internal sample models
+        conv._set_convolvers()  # Should already have been called by sample_model setter, but we now call it explicitly
+
+        # EXPECT
+        if analytical_component:
+            assert isinstance(conv._analytical_convolver, AnalyticalConvolution)
+        else:
+            assert conv._analytical_convolver is None
+
+        if numerical_component:
+            assert isinstance(conv._numerical_convolver, NumericalConvolution)
+        else:
+            assert conv._numerical_convolver is None
