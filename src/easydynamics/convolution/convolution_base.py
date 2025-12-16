@@ -1,12 +1,10 @@
-from typing import Union
-
 import numpy as np
 import scipp as sc
 
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numerical = Union[float, int]
+Numerical = float | int
 
 
 class ConvolutionBase:
@@ -27,10 +25,10 @@ class ConvolutionBase:
 
     def __init__(
         self,
-        energy: Union[np.ndarray, sc.Variable],
-        sample_model: Union[SampleModel, ModelComponent] = None,
-        resolution_model: Union[SampleModel, ModelComponent] = None,
-        energy_unit: Union[str, sc.Unit] = "meV",
+        energy: np.ndarray | sc.Variable,
+        sample_model: SampleModel | ModelComponent = None,
+        resolution_model: SampleModel | ModelComponent = None,
+        energy_unit: str | sc.Unit = "meV",
     ):
         if isinstance(energy, Numerical):
             energy = np.array([float(energy)])
@@ -109,7 +107,7 @@ class ConvolutionBase:
             )
         )  # noqa: E501
 
-    def convert_energy_unit(self, energy_unit: Union[str, sc.Unit]) -> None:
+    def convert_energy_unit(self, energy_unit: str | sc.Unit) -> None:
         """Convert the energy to the specified unit
         Args:
             energy_unit : str or sc.Unit
@@ -125,12 +123,12 @@ class ConvolutionBase:
         self._energy_unit = energy_unit
 
     @property
-    def sample_model(self) -> Union[SampleModel, ModelComponent]:
+    def sample_model(self) -> SampleModel | ModelComponent:
         """Get the sample model"""
         return self._sample_model
 
     @sample_model.setter
-    def sample_model(self, sample_model: Union[SampleModel, ModelComponent]) -> None:
+    def sample_model(self, sample_model: SampleModel | ModelComponent) -> None:
         """Set the sample model.
         Args:
             sample_model : SampleModel or ModelComponent
@@ -146,14 +144,12 @@ class ConvolutionBase:
         self._sample_model = sample_model
 
     @property
-    def resolution_model(self) -> Union[SampleModel, ModelComponent]:
+    def resolution_model(self) -> SampleModel | ModelComponent:
         """Get the resolution model"""
         return self._resolution_model
 
     @resolution_model.setter
-    def resolution_model(
-        self, resolution_model: Union[SampleModel, ModelComponent]
-    ) -> None:
+    def resolution_model(self, resolution_model: SampleModel | ModelComponent) -> None:
         """Set the resolution model.
         Args:
             resolution_model : SampleModel or ModelComponent

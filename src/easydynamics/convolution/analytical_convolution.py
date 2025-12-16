@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import scipp as sc
@@ -14,7 +14,7 @@ from easydynamics.sample_model import (
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numerical = Union[float, int]
+Numerical = float | int
 
 
 class AnalyticalConvolution(ConvolutionBase):
@@ -42,8 +42,8 @@ class AnalyticalConvolution(ConvolutionBase):
 
     def __init__(
         self,
-        energy: Union[np.ndarray, sc.Variable],
-        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
+        energy: np.ndarray | sc.Variable,
+        energy_unit: str | sc.Unit = "meV",
         sample_model: Optional[SampleModel] = None,
         resolution_model: Optional[SampleModel] = None,
     ):
@@ -167,7 +167,7 @@ class AnalyticalConvolution(ConvolutionBase):
     def _convolute_delta_any(
         self,
         sample_component: ModelComponent,
-        resolution_model: Union[SampleModel, ModelComponent],
+        resolution_model: SampleModel | ModelComponent,
     ):
         """
         Convolution of delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.

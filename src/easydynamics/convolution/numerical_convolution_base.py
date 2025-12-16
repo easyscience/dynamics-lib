@@ -1,7 +1,7 @@
 import warnings
 
 # from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import scipp as sc
@@ -14,7 +14,7 @@ from easydynamics.sample_model import (
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numerical = Union[float, int]
+Numerical = float | int
 
 
 class NumericalConvolutionBase(ConvolutionBase):
@@ -158,7 +158,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         return self._temperature
 
     @temperature.setter
-    def temperature(self, temp: Optional[Union[Parameter, float]]) -> None:
+    def temperature(self, temp: Parameter | float | None) -> None:
         """
         Set the temperature. If None, disables detailed balance correction and removes the temperature parameter.
         Args:

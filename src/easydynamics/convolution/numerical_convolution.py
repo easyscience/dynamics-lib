@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -14,7 +12,7 @@ from easydynamics.utils.detailed_balance import (
     _detailed_balance_factor as detailed_balance_factor,
 )
 
-Numerical = Union[float, int]
+Numerical = float | int
 
 
 class NumericalConvolution(NumericalConvolutionBase):
@@ -46,15 +44,15 @@ class NumericalConvolution(NumericalConvolutionBase):
 
     def __init__(
         self,
-        energy: Union[np.ndarray, sc.Variable],
-        sample_model: Union[SampleModel, ModelComponent],
-        resolution_model: Union[SampleModel, ModelComponent],
-        upsample_factor: Optional[Numerical] = 5,
-        extension_factor: Optional[float] = 0.2,
-        temperature: Optional[Union[Parameter, float]] = None,
-        temperature_unit: Optional[Union[str, sc.Unit]] = "K",
-        energy_unit: Optional[Union[str, sc.Unit]] = "meV",
-        normalize_detailed_balance: Optional[bool] = True,
+        energy: np.ndarray | sc.Variable,
+        sample_model: SampleModel | ModelComponent,
+        resolution_model: SampleModel | ModelComponent,
+        upsample_factor: Numerical = 5,
+        extension_factor: float = 0.2,
+        temperature: Parameter | float | None = None,
+        temperature_unit: str | sc.Unit = "K",
+        energy_unit: str | sc.Unit = "meV",
+        normalize_detailed_balance: bool = True,
     ):
         super().__init__(
             energy=energy,

@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -16,7 +14,7 @@ from easydynamics.sample_model import (
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numerical = Union[float, int]
+Numerical = float | int
 
 
 class Convolution(NumericalConvolutionBase):
