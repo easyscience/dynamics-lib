@@ -356,12 +356,16 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "delta_component", [True, False], ids=["with_delta", "without_delta"]
     )
+    @pytest.mark.parametrize(
+        "temperature", [None, 100], ids=["with_temperature", "without_temperature"]
+    )
     def test_build_convolution_plan(
         self,
         default_convolution,
         analytical_component,
         numerical_component,
         delta_component,
+        temperature,
     ):
         """
         Tests that convolution calls the correct methods depending on which component types are present.
@@ -390,30 +394,46 @@ class TestConvolution:
 
         # THEN
         conv.sample_model = sample_model  # This updates the internal sample models
+        if temperature is not None:
+            conv.temperature = temperature
         conv._build_convolution_plan()  # It is already called by sample_model setter, but we now call it explicitly
 
         # EXPECT
         assert isinstance(conv._analytical_sample_model, SampleModel)
-        if analytical_component:
+        if analytical_component and not temperature:
             assert len(conv._analytical_sample_model.components) == 1
             assert conv._analytical_sample_model.components[0].name == "Gaussian"
         else:
             assert len(conv._analytical_sample_model.components) == 0
 
-        assert isinstance(conv._numerical_sample_model, SampleModel)
-        if numerical_component:
-            assert len(conv._numerical_sample_model.components) == 1
-            assert (
-                conv._numerical_sample_model.components[0].name
-                == "DampedHarmonicOscillator"
-            )
-        else:
-            assert len(conv._numerical_sample_model.components) == 0
-
         assert isinstance(conv._delta_sample_model, SampleModel)
         if delta_component:
             assert len(conv._delta_sample_model.components) == 1
             assert conv._delta_sample_model.components[0].name == "DeltaFunction"
+        else:
+            assert len(conv._delta_sample_model.components) == 0
+
+        assert isinstance(conv._numerical_sample_model, SampleModel)
+
+        if not temperature:
+            if numerical_component:
+                assert len(conv._numerical_sample_model.components) == 1
+                assert (
+                    conv._numerical_sample_model.components[0].name
+                    == "DampedHarmonicOscillator"
+                )
+            else:
+                assert len(conv._numerical_sample_model.components) == 0
+        else:
+            # analytical and numerical components go to numerical when temperature is set
+            expected_numerical_count = 0
+            if numerical_component:
+                expected_numerical_count += 1
+            if analytical_component:
+                expected_numerical_count += 1
+            assert (
+                len(conv._numerical_sample_model.components) == expected_numerical_count
+            )
 
         assert conv._convolution_plan_is_valid is True
 
