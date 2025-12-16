@@ -240,13 +240,15 @@ class Convolution(NumericalConvolutionBase):
 
     # Update some setters so the internal sample models are updated accordingly
     def __setattr__(self, name, value):
-        """Custom setattr to invalidate convolution plan on relevant attribute changes.
-        This only happens after initialization (when _reactions_enabled is True) to avoid issues during __init__."""
+        """Custom setattr to invalidate convolution plan on relevant attribute changes, and build a new plan.
+        The new plan is only built after initialization (when _reactions_enabled is True) to avoid issues during __init__."""
         super().__setattr__(name, value)
+
+        if name in self._invalidate_plan_on_change:
+            self._convolution_plan_is_valid = False
 
         if (
             getattr(self, "_reactions_enabled", False)
             and name in self._invalidate_plan_on_change
         ):
-            # super().__setattr__("_convolution_plan_is_valid", False)
             self._build_convolution_plan()

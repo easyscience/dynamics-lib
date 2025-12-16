@@ -45,7 +45,10 @@ class ConvolutionBase:
         self._energy = energy
         self._energy_unit = energy_unit
 
-        if sample_model is not None and not isinstance(sample_model, SampleModel):
+        if sample_model is not None and not (
+            isinstance(sample_model, SampleModel)
+            or isinstance(sample_model, ModelComponent)
+        ):
             raise TypeError(
                 f"`sample_model` is an instance of {type(sample_model).__name__}, but must be a SampleModel or ModelComponent."
             )

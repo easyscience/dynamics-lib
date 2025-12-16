@@ -84,7 +84,7 @@ class AnalyticalConvolution(ConvolutionBase):
         else:
             resolution_components = [self.resolution_model]
 
-        total = np.zeros_like(self.energy, dtype=float)
+        total = np.zeros_like(self.energy.values, dtype=float)
 
         for sample_component in sample_components:
             # Go through resolution components, adding analytical contributions
@@ -166,7 +166,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
     def _convolute_delta_any(
         self,
-        sample_component: ModelComponent,
+        sample_component: DeltaFunction,
         resolution_model: SampleModel | ModelComponent,
     ):
         """
@@ -174,10 +174,10 @@ class AnalyticalConvolution(ConvolutionBase):
         The areas are multiplied.
 
         Args:
-            sample_component : ModelComponent
+            sample_component : DeltaFunction
                 The sample component to be convolved.
-            resolution_component : ModelComponent
-                The resolution component to convolve with.
+            resolution_model : SampleModel | ModelComponent
+                The resolution model to convolve with.
         Returns:
             np.ndarray
                 The evaluated convolution values at self.energy.

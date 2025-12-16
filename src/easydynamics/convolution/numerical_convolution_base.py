@@ -16,6 +16,14 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 Numerical = float | int
 
+# The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
+LARGE_WIDTH_THRESHOLD = (
+    0.1  # Threshold for large widths compared to span - warn if width > 10% of span
+)
+SMALL_WIDTH_THRESHOLD = (
+    1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
+)
+
 
 class NumericalConvolutionBase(ConvolutionBase):
     """
@@ -253,6 +261,8 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_dense = np.linspace(extended_min, extended_max, num_points)
             energy_span_dense = extended_max - extended_min
 
+        if len(energy_dense) < 2:
+            raise ValueError("Energy array must have at least two points.")
         energy_dense_step = energy_dense[1] - energy_dense[0]
 
         # Handle offset for even length of energy_dense in convolution.
@@ -304,10 +314,6 @@ class NumericalConvolutionBase(ConvolutionBase):
                 If the component widths are not appropriate for the data span or bin spacing.
 
         """
-
-        # The thresholds are illustrated in performance_tests/convolution/convolution_width_thresholds.ipynb
-        LARGE_WIDTH_THRESHOLD = 0.1  # Threshold for large widths compared to span - warn if width > 10% of span
-        SMALL_WIDTH_THRESHOLD = 1.0  # Threshold for small widths compared to bin spacing - warn if width < dx
 
         # Handle SampleModel or ModelComponent
         if isinstance(model, SampleModel):
