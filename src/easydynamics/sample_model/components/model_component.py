@@ -19,11 +19,12 @@ class ModelComponent(ModelBase):
 
     def __init__(
         self,
-        display_name: str = None,
+        display_name: str | None = None,
+        unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
     ):
         self.validate_unit(unit)
-        super().__init__(display_name=display_name)
+        super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
 
     @property

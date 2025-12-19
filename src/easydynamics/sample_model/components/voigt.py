@@ -34,10 +34,12 @@ class Voigt(CreateParametersMixin, ModelComponent):
         gaussian_width: Numeric | Parameter = 1.0,
         lorentzian_width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        unique_name: str | None = None,
     ):
         super().__init__(
             display_name=display_name,
             unit=unit,
+            unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin

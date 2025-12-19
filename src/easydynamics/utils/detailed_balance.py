@@ -1,5 +1,4 @@
 import warnings
-from typing import Optional
 
 import numpy as np
 import scipp as sc
@@ -143,7 +142,7 @@ def _detailed_balance_factor(
 def _convert_to_scipp_variable(
     value: int | float | list | np.ndarray | Parameter | sc.Variable,
     name: str,
-    unit: Optional[str] = None,
+    unit: str | None = None,
 ) -> sc.Variable:
     """Convert various input types to a scipp Variable with proper units."""
     if isinstance(value, sc.Variable):

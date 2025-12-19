@@ -30,9 +30,11 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter = 1.0,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        unique_name: str | None = None,
     ):
         super().__init__(
             display_name=display_name,
+            unique_name=unique_name,
             unit=unit,
         )
 

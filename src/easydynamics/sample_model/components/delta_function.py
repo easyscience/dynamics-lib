@@ -31,11 +31,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         center: None | Numeric | Parameter = None,
         area: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        unique_name: str | None = None,
     ):
         # Validate inputs and create Parameters if not given
         super().__init__(
             display_name=display_name,
             unit=unit,
+            unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin

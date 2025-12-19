@@ -29,8 +29,9 @@ class Polynomial(ModelComponent):
         display_name: str = "Polynomial",
         coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = "meV",
+        unique_name: str | None = None,
     ):
-        super().__init__(display_name=display_name, unit=unit)
+        super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
 
         if coefficients is None:
             raise ValueError("At least one coefficient must be provided.")
