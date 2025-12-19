@@ -43,9 +43,12 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             area=area, name=display_name, unit=self._unit
         )
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=False, unit=self._unit
+            center=center,
+            name=display_name,
+            fix_if_none=False,
+            unit=self._unit,
+            enforce_minimum_center=True,
         )
-        center.min = 0.0  # Enforce center >= 0 for DHO
 
         width = self._create_width_parameter(
             width=width, name=display_name, unit=self._unit

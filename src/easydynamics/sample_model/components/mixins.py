@@ -7,15 +7,17 @@ from easyscience.variable import Parameter
 Numeric = int | float
 
 
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+MINIMUM_AREA = 0.0  # To avoid negative areas
+DHO_MINIMUM_CENTER = 1e-10  # To avoid zero center in DHO
+
+
 class CreateParametersMixin:
     """Provides parameter creation and validation methods for model components.
 
     This mixin provides methods to create and validate common physics parameters
     (area, center, width) with appropriate bounds and type checking.
     """
-
-    MINIMUM_WIDTH = 1e-10  # To avoid division by zero
-    MINIMUM_AREA = 0.0  # To avoid negative areas
 
     def _create_area_parameter(
         self,
@@ -63,6 +65,7 @@ class CreateParametersMixin:
         name: str,
         fix_if_none: bool,
         unit: str | sc.Unit = "meV",
+        enforce_minimum_center: bool = False,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the center of a function.
         args:
@@ -90,7 +93,8 @@ class CreateParametersMixin:
                 raise ValueError("center must be None, a finite number or a Parameter")
 
             center = Parameter(name=name + " center", value=float(center), unit=unit)
-
+        if enforce_minimum_center:
+            center.min = DHO_MINIMUM_CENTER
         return center
 
     def _create_width_parameter(
