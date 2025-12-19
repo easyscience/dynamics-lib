@@ -26,11 +26,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        display_name: str = "Gaussian",
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Gaussian",
         unique_name: str | None = None,
     ):
         # Validate inputs and create Parameters if not given

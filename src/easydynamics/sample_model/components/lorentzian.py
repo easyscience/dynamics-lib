@@ -26,11 +26,11 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        display_name: str = "Lorentzian",
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Lorentzian",
         unique_name: str | None = None,
     ):
         super().__init__(

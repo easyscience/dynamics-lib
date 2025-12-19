@@ -28,12 +28,12 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        display_name: str = "Voigt",
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         gaussian_width: Numeric | Parameter = 1.0,
         lorentzian_width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Voigt",
         unique_name: str | None = None,
     ):
         super().__init__(

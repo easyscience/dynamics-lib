@@ -26,9 +26,9 @@ class Polynomial(ModelComponent):
 
     def __init__(
         self,
-        display_name: str = "Polynomial",
         coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Polynomial",
         unique_name: str | None = None,
     ):
         super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
