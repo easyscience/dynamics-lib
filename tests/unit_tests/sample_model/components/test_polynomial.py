@@ -127,7 +127,7 @@ class TestPolynomial:
 
     def test_coefficient_values(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
-        coeff_values = polynomial.coefficient_values
+        coeff_values = polynomial.coefficient_values()
         assert coeff_values == [1.0, -2.0, 3.0]
 
     def test_get_all_parameters(self, polynomial: Polynomial):

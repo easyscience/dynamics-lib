@@ -62,7 +62,7 @@ class Polynomial(ModelComponent):
     @property
     def coefficients(self) -> list[Parameter]:
         """Get the coefficients of the polynomial as a list of Parameters."""
-        return self._coefficients
+        return list(self._coefficients)
 
     @coefficients.setter
     def coefficients(self, coeffs: Sequence[Numeric | Parameter]) -> None:
@@ -86,7 +86,6 @@ class Polynomial(ModelComponent):
                     "Each coefficient must be either a numeric value or a Parameter."
                 )
 
-    @property
     def coefficient_values(self) -> list[float]:
         """Get the coefficients of the polynomial as a list."""
         coefficient_list = [param.value for param in self._coefficients]
@@ -130,7 +129,7 @@ class Polynomial(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return self._coefficients
+        return list(self._coefficients)
 
     def convert_unit(self, unit: str | sc.Unit):
         """Convert the unit of the polynomial.

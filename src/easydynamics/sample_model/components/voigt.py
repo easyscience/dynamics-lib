@@ -85,7 +85,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         return self._center
 
     @center.setter
-    def center(self, value: Numeric) -> None:
+    def center(self, value: Numeric | None) -> None:
         """Set the center parameter value."""
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number")
