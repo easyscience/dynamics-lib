@@ -33,9 +33,6 @@ class Polynomial(ModelComponent):
     ):
         super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
 
-        if coefficients is None:
-            raise ValueError("At least one coefficient must be provided.")
-
         if not isinstance(coefficients, (list, tuple, np.ndarray)):
             raise TypeError(
                 "coefficients must be a sequence (list/tuple/ndarray) of numbers or Parameter objects."

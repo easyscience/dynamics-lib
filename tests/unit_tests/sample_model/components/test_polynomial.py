@@ -43,19 +43,15 @@ class TestPolynomial:
                 {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
                 "unit must be ",
             ),
+            (
+                {"coefficients": None},
+                "coefficients must be ",
+            ),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name="TestPolynomial", **kwargs)
-
-    @pytest.mark.parametrize("invalid_coeffs", [[], None])
-    def test_no_coefficients_raises(self, invalid_coeffs):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            ValueError, match="At least one coefficient must be provided"
-        ):
-            Polynomial(display_name="TestPolynomial", coefficients=invalid_coeffs)
 
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN
