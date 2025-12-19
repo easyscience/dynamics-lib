@@ -75,6 +75,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     @center.setter
     def center(self, value: Numeric) -> None:
         """Set the center parameter value."""
+        if value is None:
+            value = 0.0
+            self._center.fixed = True
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number")
         self._center.value = value
