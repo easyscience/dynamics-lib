@@ -35,6 +35,24 @@ class TestComponentCollection:
         assert component_collection.display_name == "InitModel"
         assert component_collection.components == []
 
+    def test_init_with_components(self):
+        # WHEN THEN
+        component1 = Gaussian(
+            display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
+        )
+        component2 = Lorentzian(
+            display_name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
+        )
+        component_collection = ComponentCollection(
+            display_name="InitModel", components=[component1, component2]
+        )
+
+        # EXPECT
+        assert component_collection.display_name == "InitModel"
+        assert len(component_collection.components) == 2
+        assert component_collection.components[0] is component1
+        assert component_collection.components[1] is component2
+
     # ───── Component Management ─────
 
     def test_add_component(self, component_collection):

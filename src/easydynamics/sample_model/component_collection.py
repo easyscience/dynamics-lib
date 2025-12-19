@@ -6,7 +6,7 @@ import scipp as sc
 
 # from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.base_classes.model_base import ModelBase
-from easyscience.variable import DescriptorBase
+from easyscience.variable import DescriptorBase, Parameter
 
 from .components.model_component import ModelComponent
 
@@ -28,8 +28,8 @@ class ComponentCollection(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyComponentCollection",
         unit: str | sc.Unit = "meV",
+        display_name: str = "MyComponentCollection",
         components: List[ModelComponent] | None = None,
     ):
         """
@@ -56,6 +56,10 @@ class ComponentCollection(ModelBase):
 
         # Add initial components if provided. Used for serialization.
         if components is not None:
+            if not isinstance(components, list):
+                raise TypeError(
+                    "components must be a list of ModelComponent instances."
+                )
             for comp in components:
                 self.add_component(comp)
 
@@ -101,7 +105,7 @@ class ComponentCollection(ModelBase):
             Component names.
         """
 
-        return [component.display_name for component in self.components]
+        return [component.display_name for component in self._components]
 
     def clear_components(self) -> None:
         """Remove all components."""
@@ -119,9 +123,10 @@ class ComponentCollection(ModelBase):
         total_area = 0.0
 
         for component in self.components:
+            total_area = Parameter(name="total_area", value=0.0, unit=self._unit)
             if hasattr(component, "area"):
                 area_params.append(component.area)
-                total_area += component.area.value
+                total_area += component.area
             else:
                 warnings.warn(
                     f"Component '{component.display_name}' does not have an 'area' attribute and will be skipped in normalization.",
@@ -253,14 +258,14 @@ class ComponentCollection(ModelBase):
         """
         Fix all free parameters in the model.
         """
-        for param in self.get_all_parameters():
+        for param in self.get_fittable_parameters():
             param.fixed = True
 
     def free_all_parameters(self) -> None:
         """
         Free all fixed parameters in the model.
         """
-        for param in self.get_all_parameters():
+        for param in self.get_fittable_parameters():
             param.fixed = False
 
     def __contains__(self, item: str | ModelComponent) -> bool:
