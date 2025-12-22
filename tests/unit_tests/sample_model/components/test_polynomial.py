@@ -175,5 +175,5 @@ class TestPolynomial:
 
         # EXPECT
         assert "Polynomial" in repr_str
-        assert "name = TestPolynomial" in repr_str
+        assert "unique_name = Polynomial" in repr_str
         assert "coefficients =" in repr_str

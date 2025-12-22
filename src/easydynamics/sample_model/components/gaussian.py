@@ -17,11 +17,12 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        display_name (str): Name of the component.
         area (Int, float or Parameter): Area of the Gaussian.
         center (Int, float, None or Parameter): Center of the Gaussian. If None, defaults to 0 and is fixed
         width (Int, float or Parameter): Standard deviation.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -109,4 +110,4 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization * np.exp(exponent)
 
     def __repr__(self):
-        return f"Gaussian(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

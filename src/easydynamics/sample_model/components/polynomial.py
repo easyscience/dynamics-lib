@@ -18,11 +18,11 @@ class Polynomial(ModelComponent):
     Polynomial function component. c0 + c1*x + c2*x^2 + ... + cN*x^N
 
     Args:
-        display_name (str): Display name of the Polynomial component.
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
         unit (str or sc.Unit): Unit of the Polynomial component.
-    """
+        display_name (str): Display name of the Polynomial component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated."""
 
     def __init__(
         self,
@@ -106,7 +106,7 @@ class Polynomial(ModelComponent):
 
         if any(result < 0):
             warnings.warn(
-                f"The Polynomial with name {self.display_name} has negative values, "
+                f"The Polynomial with unique_name {self.unique_name} has negative values, "
                 "which may not be physically meaningful.",
                 UserWarning,
             )
@@ -157,7 +157,7 @@ class Polynomial(ModelComponent):
         coeffs_str = ", ".join(
             f"{param.name}={param.value}" for param in self._coefficients
         )
-        return f"Polynomial(display_name = {self.display_name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
+        return f"Polynomial(unique_name = {self.unique_name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
 
 # from typing import Callable, Dict

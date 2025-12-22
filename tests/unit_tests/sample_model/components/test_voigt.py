@@ -295,7 +295,7 @@ class TestVoigt:
 
         # EXPECT
         assert "Voigt" in repr_str
-        assert "name = TestVoigt" in repr_str
+        assert "unique_name = Voigt" in repr_str
         assert "unit = meV" in repr_str
         assert "area =" in repr_str
         assert "center =" in repr_str

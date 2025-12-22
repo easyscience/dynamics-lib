@@ -18,10 +18,20 @@ class TestComponentCollection:
     def component_collection(self):
         model = ComponentCollection(display_name="TestComponentCollection")
         component1 = Gaussian(
-            display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
+            display_name="TestGaussian1",
+            area=1.0,
+            center=0.0,
+            width=1.0,
+            unit="meV",
+            unique_name="TestGaussian1",
         )
         component2 = Lorentzian(
-            display_name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
+            display_name="TestLorentzian1",
+            area=2.0,
+            center=1.0,
+            width=0.5,
+            unit="meV",
+            unique_name="TestLorentzian1",
         )
         model.add_component(component1)
         model.add_component(component2)
@@ -64,15 +74,6 @@ class TestComponentCollection:
         component_collection.add_component(component)
         # EXPECT
         assert component_collection.components[-1] is component
-
-    def test_add_duplicate_component_name_raises(self, component_collection):
-        # WHEN THEN
-        component = Gaussian(
-            display_name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
-        )
-        # EXPECT
-        with pytest.raises(ValueError, match="is already in the collection"):
-            component_collection.add_component(component)
 
     def test_add_existing_component_raises(self, component_collection):
         # WHEN THEN
@@ -225,7 +226,7 @@ class TestComponentCollection:
         # THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="Component name must be a string, got <class 'int'> instead.",
+            match="Component unique name must be a string, got <class 'int'> instead.",
         ):
             component_collection.evaluate_component(x, 123)
 
@@ -367,56 +368,113 @@ class TestComponentCollection:
         assert "ComponentCollection" in rep
         assert "TestGaussian" in rep
 
-    def test_copy(self, component_collection):
-        # WHEN THEN
-        component_collection.temperature = 300
-        model_copy = copy(component_collection)
-        # EXPECT
-        assert model_copy is not component_collection
-        assert model_copy.display_name == component_collection.display_name
-        assert len(model_copy.components) == len(component_collection.components)
-        for comp in component_collection.components:
-            copied_comp = model_copy.components[
-                model_copy.list_component_names().index(comp.display_name)
-            ]
-            assert copied_comp is not comp
-            assert copied_comp.display_name == comp.display_name
-            for param_orig, param_copy in zip(
-                comp.get_all_parameters(), copied_comp.get_all_parameters()
-            ):
-                assert param_copy is not param_orig
-                assert param_copy.name == param_orig.name
-                assert param_copy.value == param_orig.value
-                assert param_copy.fixed == param_orig.fixed
+    # def test_copy(self, component_collection):
+    #     # WHEN THEN
+    #     component_collection.temperature = 300
+    #     model_copy = copy(component_collection)
+    #     # EXPECT
+    #     assert model_copy is not component_collection
+    #     assert model_copy.display_name == component_collection.display_name
+    #     assert len(model_copy.components) == len(component_collection.components)
+    #     for comp in component_collection.components:
+    #         copied_comp = model_copy.components[
+    #             model_copy.list_component_names().index(comp.display_name)
+    #         ]
+    #         assert copied_comp is not comp
+    #         assert copied_comp.display_name == comp.display_name
+    #         for param_orig, param_copy in zip(
+    #             comp.get_all_parameters(), copied_comp.get_all_parameters()
+    #         ):
+    #             assert param_copy is not param_orig
+    #             assert param_copy.name == param_orig.name
+    #             assert param_copy.value == param_orig.value
+    #             assert param_copy.fixed == param_orig.fixed
 
+    # def test_to_dict(self, component_collection):
+    #     # WHEN THEN
+    #     model_dict = component_collection.to_dict()
+    #     # EXPECT
+    #     assert model_dict["display_name"] == "TestComponentCollection"
+    #     assert len(model_dict["components"]) == 2
+    #     component_names = [
+    #         comp_dict["display_name"] for comp_dict in model_dict["components"]
+    #     ]
+    #     assert "TestGaussian1" in component_names
+    #     assert "TestLorentzian1" in component_names
     def test_to_dict(self, component_collection):
         # WHEN THEN
         model_dict = component_collection.to_dict()
+
         # EXPECT
-        assert model_dict["display_name"] == "TestComponentCollection"
-        assert len(model_dict["components"]) == 2
-        component_names = [
-            comp_dict["display_name"] for comp_dict in model_dict["components"]
-        ]
-        assert "TestGaussian1" in component_names
-        assert "TestLorentzian1" in component_names
+        assert model_dict["display_name"] == component_collection.display_name
+        assert model_dict["unit"] == component_collection.unit
+        assert len(model_dict["components"]) == len(component_collection.components)
+
+        for comp, comp_dict in zip(
+            component_collection.components, model_dict["components"]
+        ):
+            assert comp_dict["@class"] == type(comp).__name__
+            assert comp_dict["display_name"] == comp.display_name
+            assert comp_dict["unit"] == comp.unit
 
     def test_from_dict(self, component_collection):
         # WHEN
         model_dict = component_collection.to_dict()
+
         # THEN
         new_model = ComponentCollection.from_dict(model_dict)
+
         # EXPECT
         assert new_model.display_name == component_collection.display_name
         assert len(new_model.components) == len(component_collection.components)
-        for comp in component_collection.components:
-            new_comp = new_model.components[
-                new_model.list_component_names().index(comp.display_name)
-            ]
-            assert new_comp.display_name == comp.display_name
-            for param_orig, param_new in zip(
-                comp.get_all_parameters(), new_comp.get_all_parameters()
-            ):
+
+        # Compare each component and its parameters
+        for orig_comp, new_comp in zip(
+            component_collection.components, new_model.components
+        ):
+            assert type(new_comp) is type(orig_comp)
+            assert new_comp.display_name == orig_comp.display_name
+            assert new_comp.unit == orig_comp.unit
+
+            orig_params = orig_comp.get_all_parameters()
+            new_params = new_comp.get_all_parameters()
+            assert len(orig_params) == len(new_params)
+            for param_orig, param_new in zip(orig_params, new_params):
                 assert param_new.name == param_orig.name
                 assert param_new.value == param_orig.value
                 assert param_new.fixed == param_orig.fixed
+
+    def test_copy(self, component_collection):
+        # WHEN
+        component_collection.temperature = 300
+        model_copy = copy(component_collection)
+
+        # THEN: collection-level checks
+        assert model_copy is not component_collection
+        assert model_copy.display_name == component_collection.display_name
+        assert len(model_copy.components) == len(component_collection.components)
+
+        # EXPECT: deep copy, same order
+        for orig_comp, copied_comp in zip(
+            component_collection.components, model_copy.components
+        ):
+            # New object
+            assert copied_comp is not orig_comp
+
+            # Same type and display name
+            assert type(copied_comp) is type(orig_comp)
+            assert copied_comp.display_name == orig_comp.display_name
+            assert copied_comp.unit == orig_comp.unit
+
+            # Parameters are deep-copied and equivalent
+            orig_params = orig_comp.get_all_parameters()
+            copied_params = copied_comp.get_all_parameters()
+
+            assert len(orig_params) == len(copied_params)
+
+            for param_orig, param_copy in zip(orig_params, copied_params):
+                assert param_copy is not param_orig
+                assert param_copy.value == param_orig.value
+                assert param_copy.min == param_orig.min
+                assert param_copy.max == param_orig.max
+                assert param_copy.fixed == param_orig.fixed

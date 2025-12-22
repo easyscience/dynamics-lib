@@ -19,10 +19,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        display_name (str): Name of the component.
         center (Int or float or None): Center of the delta function. If None, defaults to 0 and is fixed.
         area (Int or float): Total area under the curve.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -115,4 +116,4 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         return model
 
     def __repr__(self):
-        return f"DeltaFunction(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"
+        return f"DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center}"

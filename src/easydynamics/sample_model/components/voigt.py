@@ -18,12 +18,13 @@ class Voigt(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        display_name (str): Name of the component.
+        area (Int or float): Total area under the curve.
         center (Int or float or None): Center of the Voigt profile.
         gaussian_width (Int or float): Standard deviation of the Gaussian part.
         lorentzian_width (Int or float): Half width at half max (HWHM) of the Lorentzian part.
-        area (Int or float): Total area under the curve.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Display name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -134,4 +135,4 @@ class Voigt(CreateParametersMixin, ModelComponent):
         )
 
     def __repr__(self):
-        return f"Voigt(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"
+        return f"Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n gaussian_width = {self.gaussian_width},\n lorentzian_width = {self.lorentzian_width})"

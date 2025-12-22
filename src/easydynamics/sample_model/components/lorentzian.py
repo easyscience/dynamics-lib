@@ -17,11 +17,12 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        display_name (str): Display name of the component.
         area (Int, float or Parameter): Area of the Lorentzian.
         center (Int, float, None or Parameter): Peak center. If None, defaults to 0 and is fixed.
         width (Int, float or Parameter): Half Width at Half Maximum (HWHM)
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Display name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -108,4 +109,4 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization / denominator
 
     def __repr__(self):
-        return f"Lorentzian(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
