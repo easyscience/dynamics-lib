@@ -164,15 +164,16 @@ class TestDeltaFunction:
         with pytest.raises(ValueError, match=expected_message):
             delta_function.evaluate(x)
 
-    def test_center_is_fixed_if_set_to_None(self):
-        # WHEN THEN
-        test_delta = DeltaFunction(
-            display_name="TestDeltaFunction", area=2.0, center=None, unit="meV"
-        )
+    def test_center_is_fixed_if_set_to_None(self, delta_function: DeltaFunction):
+        # WHEN
+        assert delta_function.center.fixed is False
+
+        # THEN
+        delta_function.center = None
 
         # EXPECT
-        assert test_delta.center.value == 0.0
-        assert test_delta.center.fixed is True
+        assert delta_function.center.value == 0.0
+        assert delta_function.center.fixed is True
 
     def test_get_all_parameters(self, delta_function: DeltaFunction):
         # WHEN THEN

@@ -136,15 +136,16 @@ class TestLorentzian:
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_center_is_fixed_if_set_to_None(self):
-        # WHEN THEN
-        test_lorentzian = Lorentzian(
-            display_name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"
-        )
+    def test_center_is_fixed_if_set_to_None(self, lorentzian: Lorentzian):
+        # WHEN
+        assert lorentzian.center.fixed is False
+
+        # THEN
+        lorentzian.center = None
 
         # EXPECT
-        assert test_lorentzian.center.value == 0.0
-        assert test_lorentzian.center.fixed is True
+        assert lorentzian.center.value == 0.0
+        assert lorentzian.center.fixed is True
 
     def test_get_all_parameters(self, lorentzian: Lorentzian):
         # WHEN THEN

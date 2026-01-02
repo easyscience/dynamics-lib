@@ -138,14 +138,16 @@ class TestGaussian:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_center_is_fixed_if_set_to_None(self):
-        # WHEN THEN
-        test_gaussian = Gaussian(
-            display_name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"
-        )
+    def test_center_is_fixed_if_set_to_None(self, gaussian: Gaussian):
+        # WHEN
+        assert gaussian.center.fixed is False
+
+        # THEN
+        gaussian.center = None
+
         # EXPECT
-        assert test_gaussian.center.value == 0.0
-        assert test_gaussian.center.fixed is True
+        assert gaussian.center.value == 0.0
+        assert gaussian.center.fixed is True
 
     def test_get_all_parameters(self, gaussian: Gaussian):
         # WHEN THEN

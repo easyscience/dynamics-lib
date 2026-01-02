@@ -197,6 +197,17 @@ class TestVoigt:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(voigt, prop, invalid_value)
 
+    def test_center_is_fixed_if_set_to_None(self, voigt: Voigt):
+        # WHEN
+        assert voigt.center.fixed is False
+
+        # THEN
+        voigt.center = None
+
+        # EXPECT
+        assert voigt.center.value == 0.0
+        assert voigt.center.fixed is True
+
     def test_evaluate(self, voigt: Voigt):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])
