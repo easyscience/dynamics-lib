@@ -63,6 +63,18 @@ class TestComponentCollection:
         assert component_collection.components[0] is component1
         assert component_collection.components[1] is component2
 
+    def test_init_with_invalid_components_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError, match="Component must be an instance of ModelComponent."
+        ):
+            ComponentCollection(components=["NotAComponent"])
+
+    def test_init_with_invalid_unit_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match="unit must be"):
+            ComponentCollection(unit=123)
+
     # ───── Component Management ─────
 
     def test_add_component(self, component_collection):
@@ -368,39 +380,6 @@ class TestComponentCollection:
         assert "ComponentCollection" in rep
         assert "TestGaussian" in rep
 
-    # def test_copy(self, component_collection):
-    #     # WHEN THEN
-    #     component_collection.temperature = 300
-    #     model_copy = copy(component_collection)
-    #     # EXPECT
-    #     assert model_copy is not component_collection
-    #     assert model_copy.display_name == component_collection.display_name
-    #     assert len(model_copy.components) == len(component_collection.components)
-    #     for comp in component_collection.components:
-    #         copied_comp = model_copy.components[
-    #             model_copy.list_component_names().index(comp.display_name)
-    #         ]
-    #         assert copied_comp is not comp
-    #         assert copied_comp.display_name == comp.display_name
-    #         for param_orig, param_copy in zip(
-    #             comp.get_all_parameters(), copied_comp.get_all_parameters()
-    #         ):
-    #             assert param_copy is not param_orig
-    #             assert param_copy.name == param_orig.name
-    #             assert param_copy.value == param_orig.value
-    #             assert param_copy.fixed == param_orig.fixed
-
-    # def test_to_dict(self, component_collection):
-    #     # WHEN THEN
-    #     model_dict = component_collection.to_dict()
-    #     # EXPECT
-    #     assert model_dict["display_name"] == "TestComponentCollection"
-    #     assert len(model_dict["components"]) == 2
-    #     component_names = [
-    #         comp_dict["display_name"] for comp_dict in model_dict["components"]
-    #     ]
-    #     assert "TestGaussian1" in component_names
-    #     assert "TestLorentzian1" in component_names
     def test_to_dict(self, component_collection):
         # WHEN THEN
         model_dict = component_collection.to_dict()
