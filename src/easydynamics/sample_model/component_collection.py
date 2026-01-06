@@ -3,8 +3,6 @@ from typing import List
 
 import numpy as np
 import scipp as sc
-
-# from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase, Parameter
 
