@@ -10,6 +10,7 @@ class DiffusionModelBase(ModelBase):
     def __init__(
         self,
         display_name="MyDiffusionModel",
+        unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
     ):
         """
@@ -26,7 +27,7 @@ class DiffusionModelBase(ModelBase):
         if not (unit is None or isinstance(unit, (str, sc.Unit))):
             raise TypeError("unit must be None, a string, or a scipp Unit")
 
-        super().__init__(display_name=display_name)
+        super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
 
     @property

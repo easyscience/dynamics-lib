@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import scipp as sc
@@ -34,11 +34,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     def __init__(
         self,
-        display_name: Optional[str] = "BrownianTranslationalDiffusion",
-        unit: Optional[Union[str, sc.Unit]] = "meV",
-        scale: Optional[Union[Parameter, Numeric]] = 1.0,
-        diffusion_coefficient: Optional[Union[Parameter, Numeric]] = 1.0,
-        diffusion_unit: Optional[str] = "m**2/s",
+        display_name: str | None = "BrownianTranslationalDiffusion",
+        unique_name: str | None = None,
+        unit: str | sc.Unit = "meV",
+        scale: Parameter | Numeric = 1.0,
+        diffusion_coefficient: Parameter | Numeric = 1.0,
+        diffusion_unit: str = "m**2/s",
     ):
         """
         Initialize a new BrownianTranslationalDiffusion model.
@@ -86,6 +87,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             )
         super().__init__(
             display_name=display_name,
+            unique_name=unique_name,
             unit=unit,
         )
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
@@ -209,7 +211,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Union[Number, list, np.ndarray],
-        component_name: str = "Lorentzian",
+        component_display_name: str = "Lorentzian",
     ) -> List[ComponentCollection]:
         """
         Create ComponentCollection components for the Brownian translational diffusion model at given Q values.
@@ -239,7 +241,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         if Q.ndim > 1:
             raise ValueError("Q must be a 1-dimensional array.")
 
-        if not isinstance(component_name, str):
+        if not isinstance(component_display_name, str):
             raise TypeError("component_name must be a string.")
 
         component_collection_list = [None] * len(Q)
@@ -253,7 +255,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             )
 
             lorentzian_component = Lorentzian(
-                display_name=component_name, area=self.scale * QISF[i], unit=self.unit
+                display_name=component_display_name,
+                area=self.scale * QISF[i],
+                unit=self.unit,
             )
 
             # Make the width dependent on Q
