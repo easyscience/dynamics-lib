@@ -12,7 +12,7 @@ class TestGaussian:
     @pytest.fixture
     def gaussian(self):
         return Gaussian(
-            name="TestGaussian", area=2.0, center=0.5, width=0.6, unit="meV"
+            display_name="TestGaussian", area=2.0, center=0.5, width=0.6, unit="meV"
         )
 
     def test_init_no_inputs(self):
@@ -20,7 +20,7 @@ class TestGaussian:
         gaussian = Gaussian()
 
         # EXPECT
-        assert gaussian.name == "Gaussian"
+        assert gaussian.display_name == "Gaussian"
         assert gaussian.area.value == 1.0
         assert gaussian.center.value == 0.0
         assert gaussian.width.value == 1.0
@@ -29,7 +29,7 @@ class TestGaussian:
 
     def test_initialization(self, gaussian: Gaussian):
         # WHEN THEN EXPECT
-        assert gaussian.name == "TestGaussian"
+        assert gaussian.display_name == "TestGaussian"
         assert gaussian.area.value == 2.0
         assert gaussian.center.value == 0.5
         assert gaussian.width.value == 0.6
@@ -43,7 +43,7 @@ class TestGaussian:
 
         # THEN
         gaussian = Gaussian(
-            name="ParamGaussian",
+            display_name="ParamGaussian",
             area=area_param,
             center=center_param,
             width=width_param,
@@ -51,7 +51,7 @@ class TestGaussian:
         )
 
         # EXPECT
-        assert gaussian.name == "ParamGaussian"
+        assert gaussian.display_name == "ParamGaussian"
         assert gaussian.area is area_param
         assert gaussian.center is center_param
         assert gaussian.width is width_param
@@ -80,19 +80,31 @@ class TestGaussian:
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Gaussian(name="TestGaussian", **kwargs)
+            Gaussian(display_name="TestGaussian", **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError, match="The width of a Gaussian must be greater than zero."
         ):
-            Gaussian(name="TestGaussian", area=2.0, center=0.5, width=-0.6, unit="meV")
+            Gaussian(
+                display_name="TestGaussian",
+                area=2.0,
+                center=0.5,
+                width=-0.6,
+                unit="meV",
+            )
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
-            Gaussian(name="TestGaussian", area=-2.0, center=0.5, width=0.6, unit="meV")
+            Gaussian(
+                display_name="TestGaussian",
+                area=-2.0,
+                center=0.5,
+                width=0.6,
+                unit="meV",
+            )
 
     @pytest.mark.parametrize(
         "prop, valid_value, invalid_value, invalid_message",
@@ -126,18 +138,20 @@ class TestGaussian:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_center_is_fixed_if_set_to_None(self):
-        # WHEN THEN
-        test_gaussian = Gaussian(
-            name="TestGaussian", area=2.0, center=None, width=0.6, unit="meV"
-        )
-        # EXPECT
-        assert test_gaussian.center.value == 0.0
-        assert test_gaussian.center.fixed is True
+    def test_center_is_fixed_if_set_to_None(self, gaussian: Gaussian):
+        # WHEN
+        assert gaussian.center.fixed is False
 
-    def test_get_parameters(self, gaussian: Gaussian):
+        # THEN
+        gaussian.center = None
+
+        # EXPECT
+        assert gaussian.center.value == 0.0
+        assert gaussian.center.fixed is True
+
+    def test_get_all_parameters(self, gaussian: Gaussian):
         # WHEN THEN
-        params = gaussian.get_parameters()
+        params = gaussian.get_all_parameters()
 
         # EXPECT
         assert len(params) == 3
@@ -181,7 +195,7 @@ class TestGaussian:
         gaussian_copy = copy(gaussian)
         # EXPECT
         assert gaussian_copy is not gaussian
-        assert gaussian_copy.name == gaussian.name
+        assert gaussian_copy.display_name == gaussian.display_name
 
         assert gaussian_copy.area.value == gaussian.area.value
         assert gaussian_copy.area.fixed == gaussian.area.fixed
@@ -199,7 +213,7 @@ class TestGaussian:
         repr_str = repr(gaussian)
         # EXPECT
         assert "Gaussian" in repr_str
-        assert "name = TestGaussian" in repr_str
+        assert "unique_name = Gaussian" in repr_str
         assert "unit = meV" in repr_str
         assert "area =" in repr_str
         assert "center =" in repr_str

@@ -12,7 +12,7 @@ class TestLorentzian:
     @pytest.fixture
     def lorentzian(self):
         return Lorentzian(
-            name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
+            display_name="TestLorentzian", area=2.0, center=0.5, width=0.6, unit="meV"
         )
 
     def test_init_no_inputs(self):
@@ -20,7 +20,7 @@ class TestLorentzian:
         lorentzian = Lorentzian()
 
         # EXPECT
-        assert lorentzian.name == "Lorentzian"
+        assert lorentzian.display_name == "Lorentzian"
         assert lorentzian.area.value == 1.0
         assert lorentzian.center.value == 0.0
         assert lorentzian.width.value == 1.0
@@ -29,7 +29,7 @@ class TestLorentzian:
 
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
-        assert lorentzian.name == "TestLorentzian"
+        assert lorentzian.display_name == "TestLorentzian"
         assert lorentzian.area.value == 2.0
         assert lorentzian.center.value == 0.5
         assert lorentzian.width.value == 0.6
@@ -43,7 +43,7 @@ class TestLorentzian:
 
         # THEN
         lorentzian = Lorentzian(
-            name="ParamLorentzian",
+            display_name="ParamLorentzian",
             area=area_param,
             center=center_param,
             width=width_param,
@@ -51,7 +51,7 @@ class TestLorentzian:
         )
 
         # EXPECT
-        assert lorentzian.name == "ParamLorentzian"
+        assert lorentzian.display_name == "ParamLorentzian"
         assert lorentzian.area is area_param
         assert lorentzian.center is center_param
         assert lorentzian.width is width_param
@@ -80,7 +80,7 @@ class TestLorentzian:
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Lorentzian(name="TestLorentzian", **kwargs)
+            Lorentzian(display_name="TestLorentzian", **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
@@ -88,14 +88,22 @@ class TestLorentzian:
             ValueError, match="The width of a Lorentzian must be greater than zero."
         ):
             Lorentzian(
-                name="TestLorentzian", area=2.0, center=0.5, width=-0.6, unit="meV"
+                display_name="TestLorentzian",
+                area=2.0,
+                center=0.5,
+                width=-0.6,
+                unit="meV",
             )
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Lorentzian(
-                name="TestLorentzian", area=-2.0, center=0.5, width=0.6, unit="meV"
+                display_name="TestLorentzian",
+                area=-2.0,
+                center=0.5,
+                width=0.6,
+                unit="meV",
             )
 
     @pytest.mark.parametrize(
@@ -128,19 +136,20 @@ class TestLorentzian:
         expected_result = (2.0 / (np.pi * 0.6)) / (1 + ((x - 0.5) / 0.6) ** 2)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_center_is_fixed_if_set_to_None(self):
-        # WHEN THEN
-        test_lorentzian = Lorentzian(
-            name="TestLorentzian", area=2.0, center=None, width=0.6, unit="meV"
-        )
+    def test_center_is_fixed_if_set_to_None(self, lorentzian: Lorentzian):
+        # WHEN
+        assert lorentzian.center.fixed is False
+
+        # THEN
+        lorentzian.center = None
 
         # EXPECT
-        assert test_lorentzian.center.value == 0.0
-        assert test_lorentzian.center.fixed is True
+        assert lorentzian.center.value == 0.0
+        assert lorentzian.center.fixed is True
 
-    def test_get_parameters(self, lorentzian: Lorentzian):
+    def test_get_all_parameters(self, lorentzian: Lorentzian):
         # WHEN THEN
-        params = lorentzian.get_parameters()
+        params = lorentzian.get_all_parameters()
 
         # EXPECT
         assert len(params) == 3
@@ -182,7 +191,7 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian_copy is not lorentzian
-        assert lorentzian_copy.name == lorentzian.name
+        assert lorentzian_copy.display_name == lorentzian.display_name
 
         assert lorentzian_copy.area.value == lorentzian.area.value
         assert lorentzian_copy.area.fixed == lorentzian.area.fixed
@@ -201,7 +210,7 @@ class TestLorentzian:
 
         # EXPECT
         assert "Lorentzian" in repr_str
-        assert "name = TestLorentzian" in repr_str
+        assert "unique_name = Lorentzian" in repr_str
         assert "unit = meV" in repr_str
         assert "area =" in repr_str
         assert "center =" in repr_str

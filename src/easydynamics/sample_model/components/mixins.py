@@ -1,11 +1,15 @@
 import warnings
-from typing import Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-Numeric = Union[int, float]
+Numeric = int | float
+
+
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
+MINIMUM_AREA = 0.0  # To avoid negative areas
+DHO_MINIMUM_CENTER = 1e-10  # To avoid zero center in DHO
 
 
 class CreateParametersMixin:
@@ -15,14 +19,11 @@ class CreateParametersMixin:
     (area, center, width) with appropriate bounds and type checking.
     """
 
-    MINIMUM_WIDTH = 1e-10  # To avoid division by zero
-    MINIMUM_AREA = 0.0  # To avoid negative areas
-
     def _create_area_parameter(
         self,
-        area: Union[Numeric, Parameter],
+        area: Numeric | Parameter,
         name: str,
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the area
@@ -60,10 +61,11 @@ class CreateParametersMixin:
 
     def _create_center_parameter(
         self,
-        center: Union[Numeric, Parameter, None],
+        center: Numeric | Parameter | None,
         name: str,
         fix_if_none: bool,
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
+        enforce_minimum_center: bool = False,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the center of a function.
         args:
@@ -91,15 +93,16 @@ class CreateParametersMixin:
                 raise ValueError("center must be None, a finite number or a Parameter")
 
             center = Parameter(name=name + " center", value=float(center), unit=unit)
-
+        if enforce_minimum_center:
+            center.min = DHO_MINIMUM_CENTER
         return center
 
     def _create_width_parameter(
         self,
-        width: Union[Numeric, Parameter],
+        width: Numeric | Parameter,
         name: str,
         param_name: str = "width",
-        unit: Union[str, sc.Unit] = "meV",
+        unit: str | sc.Unit = "meV",
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """Validate and convert a number to a Parameter describing the width of a function.
