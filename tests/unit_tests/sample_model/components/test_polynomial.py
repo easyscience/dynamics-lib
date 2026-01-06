@@ -3,6 +3,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
 
@@ -43,19 +44,16 @@ class TestPolynomial:
                 {"coefficients": [1.0, -2.0, 3.0], "unit": 123},
                 "unit must be ",
             ),
+            (
+                {"coefficients": None},
+                "coefficients must be ",
+            ),
+            ({"coefficients": {}}, "coefficients must be "),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name="TestPolynomial", **kwargs)
-
-    @pytest.mark.parametrize("invalid_coeffs", [[], None])
-    def test_no_coefficients_raises(self, invalid_coeffs):
-        # WHEN THEN EXPECT
-        with pytest.raises(
-            ValueError, match="At least one coefficient must be provided"
-        ):
-            Polynomial(display_name="TestPolynomial", coefficients=invalid_coeffs)
 
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN
@@ -78,6 +76,11 @@ class TestPolynomial:
     def test_degree(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.degree == 2
+
+    def test_degree_setter_raises(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match="cannot be set directly"):
+            polynomial.degree = 3
 
     @pytest.mark.parametrize(
         "values",
@@ -131,7 +134,7 @@ class TestPolynomial:
 
     def test_coefficient_values(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
-        coeff_values = polynomial.coefficient_values
+        coeff_values = polynomial.coefficient_values()
         assert coeff_values == [1.0, -2.0, 3.0]
 
     def test_get_all_parameters(self, polynomial: Polynomial):
@@ -159,6 +162,11 @@ class TestPolynomial:
         assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
         assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
+    def test_convert_unit_raises_invalid_unit(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
+        with pytest.raises(UnitError, match="unit must be "):
+            polynomial.convert_unit(123)
+
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
         polynomial_copy = copy(polynomial)
@@ -179,5 +187,5 @@ class TestPolynomial:
 
         # EXPECT
         assert "Polynomial" in repr_str
-        assert "name = TestPolynomial" in repr_str
+        assert "unique_name = Polynomial" in repr_str
         assert "coefficients =" in repr_str

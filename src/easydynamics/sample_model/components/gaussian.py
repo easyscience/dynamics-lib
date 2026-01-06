@@ -17,25 +17,28 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        display_name (str): Name of the component.
         area (Int, float or Parameter): Area of the Gaussian.
         center (Int, float, None or Parameter): Center of the Gaussian. If None, defaults to 0 and is fixed
         width (Int, float or Parameter): Standard deviation.
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
         self,
-        display_name: str = "Gaussian",
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Gaussian",
+        unique_name: str | None = None,
     ):
         # Validate inputs and create Parameters if not given
         super().__init__(
             display_name=display_name,
             unit=unit,
+            unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin
@@ -73,6 +76,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     @center.setter
     def center(self, value: Numeric) -> None:
         """Set the center parameter value."""
+        if value is None:
+            value = 0.0
+            self._center.fixed = True
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number")
         self._center.value = value
@@ -104,4 +110,4 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization * np.exp(exponent)
 
     def __repr__(self):
-        return f"Gaussian(display_name = {self.display_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

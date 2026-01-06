@@ -19,11 +19,12 @@ class ModelComponent(ModelBase):
 
     def __init__(
         self,
-        display_name: str = None,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = None,
+        unique_name: str | None = None,
     ):
         self.validate_unit(unit)
-        super().__init__(display_name=display_name)
+        super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
 
     @property
@@ -147,7 +148,7 @@ class ModelComponent(ModelBase):
         Evaluate the model component at input x.
 
         Args:
-            x (Union[Numeric, sc.Variable]): Input values.
+            x (Numeric | sc.Variable): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.
@@ -155,4 +156,4 @@ class ModelComponent(ModelBase):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.display_name})"
+        return f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})"

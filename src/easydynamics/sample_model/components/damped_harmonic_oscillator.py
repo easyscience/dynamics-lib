@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -10,7 +8,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 
 from .model_component import ModelComponent
 
-Numeric = Union[float, int]
+Numeric = float | int
 
 
 class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
@@ -27,31 +25,33 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        display_name: str = "DampedHarmonicOscillator",
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter = 1.0,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "DampedHarmonicOscillator",
+        unique_name: str | None = None,
     ):
-        # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)
-        self._unit = unit
+        super().__init__(
+            display_name=display_name,
+            unique_name=unique_name,
+            unit=unit,
+        )
 
         # These methods live in ValidationMixin
         area = self._create_area_parameter(
             area=area, name=display_name, unit=self._unit
         )
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=False, unit=self._unit
+            center=center,
+            name=display_name,
+            fix_if_none=False,
+            unit=self._unit,
+            enforce_minimum_center=True,
         )
-        center.min = 0.0  # Enforce center >= 0 for DHO
 
         width = self._create_width_parameter(
             width=width, name=display_name, unit=self._unit
-        )
-        super().__init__(
-            display_name=display_name,
-            unit=unit,
         )
 
         self._area = area
@@ -80,6 +80,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         """Set the center parameter value."""
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number")
+
+        if value <= 0:
+            raise ValueError("center must be positive")
         self._center.value = value
 
     @property
@@ -95,7 +98,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Damped Harmonic Oscillator at the given x values.
         If x is a scipp Variable, the unit of the DHO will be converted to

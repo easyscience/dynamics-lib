@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Sequence, Union
+from typing import Sequence
 
 import numpy as np
 import scipp as sc
@@ -22,18 +22,17 @@ class Polynomial(ModelComponent):
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
         representing f(x) = c0 + c1*x + c2*x^2 + ... + cN*x^N
         unit (str or sc.Unit): Unit of the Polynomial component.
-    """
+        display_name (str): Display name of the Polynomial component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated."""
 
     def __init__(
         self,
-        display_name: str = "Polynomial",
-        coefficients: Sequence[Union[Numeric, Parameter]] = (0.0,),
+        coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = "meV",
+        display_name: str | None = "Polynomial",
+        unique_name: str | None = None,
     ):
-        self.validate_unit(unit)
-
-        if coefficients is None:
-            raise ValueError("At least one coefficient must be provided.")
+        super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
 
         if not isinstance(coefficients, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -61,16 +60,13 @@ class Polynomial(ModelComponent):
         # Helper scipp scalar to track unit conversions (value initialized to 1 with provided unit)
         self._unit_conversion_helper = sc.scalar(value=1.0, unit=unit)
 
-        # call parent with the Parameters
-        super().__init__(display_name=display_name, unit=unit)
-
     @property
     def coefficients(self) -> list[Parameter]:
         """Get the coefficients of the polynomial as a list of Parameters."""
-        return self._coefficients
+        return list(self._coefficients)
 
     @coefficients.setter
-    def coefficients(self, coeffs: Sequence[Union[Numeric, Parameter]]) -> None:
+    def coefficients(self, coeffs: Sequence[Numeric | Parameter]) -> None:
         """Replace the coefficients. Length must match current number of coefficients."""
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -91,14 +87,13 @@ class Polynomial(ModelComponent):
                     "Each coefficient must be either a numeric value or a Parameter."
                 )
 
-    @property
     def coefficient_values(self) -> list[float]:
         """Get the coefficients of the polynomial as a list."""
         coefficient_list = [param.value for param in self._coefficients]
         return coefficient_list
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
         The Polynomial evaluates to c0 + c1*x + c2*x^2 + ... + cN*x^N
@@ -112,7 +107,7 @@ class Polynomial(ModelComponent):
 
         if any(result < 0):
             warnings.warn(
-                f"The Polynomial with name {self.display_name} has negative values, "
+                f"The Polynomial with unique_name {self.unique_name} has negative values, "
                 "which may not be physically meaningful.",
                 UserWarning,
             )
@@ -135,9 +130,9 @@ class Polynomial(ModelComponent):
         Returns:
         List[Parameter]: List of parameters in the component.
         """
-        return self._coefficients
+        return list(self._coefficients)
 
-    def convert_unit(self, unit: Union[str, sc.Unit]):
+    def convert_unit(self, unit: str | sc.Unit):
         """Convert the unit of the polynomial.
         Args:
             unit (str or sc.Unit): The target unit to convert to.
@@ -163,7 +158,7 @@ class Polynomial(ModelComponent):
         coeffs_str = ", ".join(
             f"{param.name}={param.value}" for param in self._coefficients
         )
-        return f"Polynomial(display_name = {self.display_name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
+        return f"Polynomial(unique_name = {self.unique_name}, unit = {self._unit},\n coefficients = [{coeffs_str}])"
 
 
 # from typing import Callable, Dict

@@ -130,6 +130,11 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(dho, prop, invalid_value)
 
+    def test_center_setter_negative_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match="center must be positive"):
+            dho.center = -1.0
+
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, 1.5, 3.0])
