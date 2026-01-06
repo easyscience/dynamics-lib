@@ -48,7 +48,7 @@ class ComponentCollection(ModelBase):
             Initial model components to add to the ComponentCollection.
         """
 
-        super().__init__(display_name=display_name)
+        super().__init__(display_name=display_name, unique_name=unique_name)
 
         if unit is not None and not isinstance(unit, (str, sc.Unit)):
             raise TypeError(
@@ -73,6 +73,7 @@ class ComponentCollection(ModelBase):
         if component in self._components:
             raise ValueError(
                 f"Component '{component.unique_name}' is already in the collection."
+                f"Here is a list of the components in the collection: {self.list_component_names()} "
             )
 
         self._components.append(component)
@@ -86,11 +87,27 @@ class ComponentCollection(ModelBase):
                 self._components.remove(comp)
                 return
 
-        raise KeyError(f"No component named '{unique_name}' exists.")
+        raise KeyError(
+            f"No component named '{unique_name}' exists. "
+            f"Did you accidentally use the display_name? Here is a list of the components in the collection: {self.list_component_names()}"
+        )
 
     @property
     def components(self) -> list[ModelComponent]:
         return list(self._components)
+
+    @components.setter
+    def components(self, components: List[ModelComponent]) -> None:
+        if not isinstance(components, list):
+            raise TypeError("components must be a list of ModelComponent instances.")
+        for comp in components:
+            if not isinstance(comp, ModelComponent):
+                raise TypeError(
+                    "All items in components must be instances of ModelComponent. "
+                    f"Got {type(comp).__name__} instead."
+                )
+
+        self._components = components
 
     def list_component_names(self) -> List[str]:
         """

@@ -80,6 +80,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         """Set the center parameter value."""
         if not isinstance(value, Numeric):
             raise TypeError("center must be a number")
+
+        if value <= 0:
+            raise ValueError("center must be positive")
         self._center.value = value
 
     @property

@@ -129,6 +129,23 @@ class TestComponentCollection:
         # EXPECT
         assert component_collection.components[-1] is component
 
+    def test_component_setter(self, component_collection):
+        # WHEN
+        new_components = [Lorentzian()]
+        # THEN
+        component_collection.components = new_components
+        # EXPECT
+        assert len(component_collection.components) == 1
+        assert component_collection.components[0] is new_components[0]
+
+    def test_component_setter_invalid_raises(self, component_collection):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=" must be instances of ModelComponent."):
+            component_collection.components = ["NotAComponent"]
+
+        with pytest.raises(TypeError, match="components must be a list of"):
+            component_collection.components = "NotAList"
+
     def test_list_component_names(self, component_collection):
         # WHEN THEN
         components = component_collection.list_component_names()
