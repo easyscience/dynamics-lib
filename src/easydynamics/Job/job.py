@@ -11,8 +11,8 @@ from easyscience.fitting.multi_fitter import MultiFitter as EasyScienceMultiFitt
 from easyscience.job.job import JobBase
 
 from easydynamics.Analysis import Analysis
-from easydynamics.experiment import Experiment
-from easydynamics.experiment.data import Data
+from easydynamics.Experiment import Experiment
+from easydynamics.Experiment.data import Data
 from easydynamics.sample import DiffusionModel, ModelComponent, SampleModel
 
 

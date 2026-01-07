@@ -7,7 +7,7 @@ from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.job.analysis import AnalysisBase
 from easyscience.variable import Parameter
 
-from easydynamics.experiment import Experiment
+from easydynamics.Experiment import Experiment
 from easydynamics.resolution import ResolutionHandler
 from easydynamics.sample import DiffusionModel, SampleModel
 

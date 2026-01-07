@@ -2,7 +2,7 @@ import numpy as np
 import scipp as sc
 from easyscience.job.experiment import ExperimentBase
 
-from easydynamics.experiment.data import Data
+from easydynamics.Experiment.data import Data
 
 
 class Experiment(ExperimentBase):
