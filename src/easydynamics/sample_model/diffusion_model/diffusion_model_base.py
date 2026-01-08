@@ -1,5 +1,13 @@
+from typing import Union
+
+import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
+from numpy.typing import ArrayLike
+
+Numeric = Union[float, int]
+
+Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class DiffusionModelBase(ModelBase):
@@ -31,7 +39,7 @@ class DiffusionModelBase(ModelBase):
         self._unit = unit
 
     @property
-    def unit(self) -> str | sc.Unit:
+    def unit(self) -> str:
         """
         Get the unit of the DiffusionModel.
 
@@ -39,7 +47,7 @@ class DiffusionModelBase(ModelBase):
         -------
         str or sc.Unit or None
         """
-        return self._unit
+        return str(self._unit)
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
@@ -49,3 +57,27 @@ class DiffusionModelBase(ModelBase):
                 f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
+
+    def _validate_and_convert_Q(self, Q: Q_type) -> np.ndarray:
+        """
+        Validate and convert Q to a numpy array.
+        Parameters
+        ----------
+        Q : Number, list, or np.ndarray
+            Scattering vector values in 1/angstrom.
+        Returns
+        -------
+        np.ndarray
+            Q as a numpy array.
+        """
+        if isinstance(Q, Numeric):
+            Q = np.array([Q])
+        if isinstance(Q, list):
+            Q = np.array(Q)
+        if not isinstance(Q, np.ndarray):
+            raise TypeError("Q must be a number, list, or numpy array.")
+
+        if Q.ndim > 1:
+            raise ValueError("Q must be a 1-dimensional array.")
+
+        return Q

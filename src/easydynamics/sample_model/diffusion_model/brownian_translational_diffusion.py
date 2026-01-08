@@ -1,9 +1,9 @@
-from numbers import Number
 from typing import Dict, List, Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber, Parameter
+from numpy.typing import ArrayLike
 from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
@@ -13,6 +13,8 @@ from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
 )
 
 Numeric = Union[float, int]
+
+Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class BrownianTranslationalDiffusion(DiffusionModelBase):
@@ -55,7 +57,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         diffusion_coefficient : float or Parameter, optional
             Diffusion coefficient D. If a number is provided, it is assumed to be in the unit given by diffusion_unit. Defaults to 1.0.
         diffusion_unit : str, optional
-            Unit for the diffusion coefficient D. Default is "meV*Å**2". Options are 'meV*Å**2' or 'm**2/s'
+            Unit for the diffusion coefficient D. Default is m**2/s. Options are 'meV*Å**2' or 'm**2/s'
 
         """
         if not isinstance(scale, (Parameter, Numeric)):
@@ -130,7 +132,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             raise TypeError("diffusion_coefficient must be a number.")
         self._diffusion_coefficient.value = diffusion_coefficient
 
-    def calculate_width(self, Q: np.ndarray) -> np.ndarray:
+    def calculate_width(self, Q: Q_type) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the diffusion model.
 
@@ -145,31 +147,17 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             HWHM values in the unit of the model (e.g., meV).
         """
 
-        if isinstance(Q, Numeric):
-            Q = np.array([Q])
+        Q = self._validate_and_convert_Q(Q)
 
-        if isinstance(Q, list):
-            Q = np.array(Q)
-
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a numpy array.")
-
-        width_list = []
-        for Q_value in Q:
-            # Q is given as a float, so we need to divide by angstrom**2 to get the right units
-            width = (
-                self._hbar
-                * self.diffusion_coefficient
-                * Q_value**2
-                / (self._angstrom**2)
-            )
-            width.convert_unit(self.unit)
-            width_list.append(width.value)
-        width = np.array(width_list)
+        unit_conversion_factor = (
+            self._hbar * self.diffusion_coefficient / (self._angstrom**2)
+        )
+        unit_conversion_factor.convert_unit(self.unit)
+        width = Q**2 * unit_conversion_factor.value
 
         return width
 
-    def calculate_EISF(self, Q: np.ndarray) -> np.ndarray:
+    def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """
         Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational diffusion model.
 
@@ -183,12 +171,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a numpy array.")
+        Q = self._validate_and_convert_Q(Q)
         EISF = np.zeros_like(Q)
         return EISF
 
-    def calculate_QISF(self, Q: np.ndarray) -> np.ndarray:
+    def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """
         Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).
 
@@ -203,14 +190,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             QISF values (dimensionless).
         """
 
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a numpy array.")
+        Q = self._validate_and_convert_Q(Q)
         QISF = np.ones_like(Q)
         return QISF
 
     def create_component_collections(
         self,
-        Q: Union[Number, list, np.ndarray],
+        Q: Q_type,
         component_display_name: str = "Lorentzian",
     ) -> List[ComponentCollection]:
         """
@@ -228,18 +214,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         List[ComponentCollection]
             List of ComponentCollections with Lorentzian components.
         """
-
-        if isinstance(Q, Numeric):
-            Q = np.array([Q])
-
-        if isinstance(Q, list):
-            Q = np.array(Q)
-
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a number, list, or numpy array.")
-
-        if Q.ndim > 1:
-            raise ValueError("Q must be a 1-dimensional array.")
+        Q = self._validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
             raise TypeError("component_name must be a string.")
@@ -285,7 +260,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         # Q is given as a float, so we need to add the units
         return f"hbar * D* {Q} **2*1/(angstrom**2)"
 
-    def _write_width_dependency_map_expression(self) -> Dict[str, str]:
+    def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """
         Write the dependency map expression to make dependent Parameters.
         """

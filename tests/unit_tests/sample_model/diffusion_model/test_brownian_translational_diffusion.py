@@ -131,7 +131,7 @@ class TestBrownianTranslationalDiffusion:
 
     def test_calculate_width_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="Q must be a numpy array."):
+        with pytest.raises(TypeError, match="Q must be "):
             brownian_diffusion_model.calculate_width(Q="invalid")  # Invalid type
 
     def test_calculate_width(self, brownian_diffusion_model):
@@ -179,7 +179,7 @@ class TestBrownianTranslationalDiffusion:
 
     def test_calculate_EISF_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="Q must be a numpy array."):
+        with pytest.raises(TypeError, match="Q must be "):
             brownian_diffusion_model.calculate_EISF(Q="invalid")  # Invalid type
 
     def test_calculate_QISF(self, brownian_diffusion_model):
@@ -195,7 +195,7 @@ class TestBrownianTranslationalDiffusion:
 
     def test_calculate_QISF_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="Q must be a numpy array."):
+        with pytest.raises(TypeError, match="Q must be "):
             brownian_diffusion_model.calculate_QISF(Q="invalid")  # Invalid type
 
     @pytest.mark.parametrize(
@@ -227,7 +227,7 @@ class TestBrownianTranslationalDiffusion:
             component = model.components[0]
             assert component.display_name == "Lorentzian"
             assert component.width.unit == brownian_diffusion_model.unit
-            assert component.width.value == expected_widths[model_index]
+            assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
 
     def test_create_component_collections_component_name_must_be_string(
