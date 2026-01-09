@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import scipp as sc
-from easyscience.variable import DescriptorNumber, Parameter
+from easyscience.variable import DescriptorNumber
 from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
@@ -44,7 +44,7 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": 1.0,
                     "diffusion_unit": "m**2/s",
                 },
-                "scale must be a Parameter or a number.",
+                "scale must be a number",
             ),
             (
                 {
@@ -53,7 +53,7 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": "invalid",
                     "diffusion_unit": "m**2/s",
                 },
-                "diffusion_coefficient must be a Parameter or a number.",
+                "diffusion_coefficient must be a number",
             ),
             (
                 {
@@ -82,28 +82,6 @@ class TestBrownianTranslationalDiffusion:
                 diffusion_coefficient=1.0,
                 diffusion_unit="invalid_unit",
             )
-
-    def test_init_with_parameters(self):
-        # WHEN
-
-        scale = Parameter(name="scale_param", value=2.0)
-        diffusion_coefficient = Parameter(
-            name="diffusion_coefficient", value=3.0, unit="m**2/s"
-        )
-
-        # THEN
-        brownian_diffusion_model = BrownianTranslationalDiffusion(
-            display_name="CustomBrownianDiffusion",
-            unit="meV",
-            scale=scale,
-            diffusion_coefficient=diffusion_coefficient,
-        )
-
-        # EXPECT
-        assert brownian_diffusion_model.display_name == "CustomBrownianDiffusion"
-        assert brownian_diffusion_model.unit == "meV"
-        assert brownian_diffusion_model.scale is scale
-        assert brownian_diffusion_model.diffusion_coefficient is diffusion_coefficient
 
     def test_scale_setter(self, brownian_diffusion_model):
         # WHEN

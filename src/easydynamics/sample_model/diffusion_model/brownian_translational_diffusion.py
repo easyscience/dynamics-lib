@@ -39,8 +39,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         display_name: str | None = "BrownianTranslationalDiffusion",
         unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
-        scale: Parameter | Numeric = 1.0,
-        diffusion_coefficient: Parameter | Numeric = 1.0,
+        scale: Numeric = 1.0,
+        diffusion_coefficient: Numeric = 1.0,
         diffusion_unit: str = "m**2/s",
     ):
         """
@@ -61,10 +61,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         """
         if not isinstance(scale, (Parameter, Numeric)):
-            raise TypeError("scale must be a Parameter or a number.")
+            raise TypeError("scale must be a number.")
 
         if not isinstance(diffusion_coefficient, (Parameter, Numeric)):
-            raise TypeError("diffusion_coefficient must be a Parameter or a number.")
+            raise TypeError("diffusion_coefficient must be a number.")
 
         if not isinstance(diffusion_unit, str):
             raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
@@ -77,16 +77,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         else:
             raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
 
-        if not isinstance(scale, Parameter):
-            scale = Parameter(name="scale", value=float(scale), fixed=False, min=0.0)
+        scale = Parameter(name="scale", value=float(scale), fixed=False, min=0.0)
 
-        if not isinstance(diffusion_coefficient, Parameter):
-            diffusion_coefficient = Parameter(
-                name="diffusion_coefficient",
-                value=float(diffusion_coefficient),
-                fixed=False,
-                unit=diffusion_unit,
-            )
+        diffusion_coefficient = Parameter(
+            name="diffusion_coefficient",
+            value=float(diffusion_coefficient),
+            fixed=False,
+            unit=diffusion_unit,
+        )
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
