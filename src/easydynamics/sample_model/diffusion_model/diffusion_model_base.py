@@ -3,7 +3,9 @@ from typing import Union
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
+from easyscience.variable import DescriptorNumber
 from numpy.typing import ArrayLike
+from scipp import UnitError
 
 Numeric = Union[float, int]
 
@@ -32,8 +34,13 @@ class DiffusionModelBase(ModelBase):
             Unit of the diffusion model. Defaults to "meV".
         """
 
-        if not (unit is None or isinstance(unit, (str, sc.Unit))):
-            raise TypeError("unit must be None, a string, or a scipp Unit")
+        try:
+            test = DescriptorNumber(name="test", value=1, unit=unit)
+            test.convert_unit("meV")
+        except Exception as e:
+            raise UnitError(
+                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."
+            ) from e
 
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
@@ -81,3 +88,9 @@ class DiffusionModelBase(ModelBase):
             raise ValueError("Q must be a 1-dimensional array.")
 
         return Q
+
+    def __repr__(self):
+        """
+        String representation of the Diffusion model.
+        """
+        return f"{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})"

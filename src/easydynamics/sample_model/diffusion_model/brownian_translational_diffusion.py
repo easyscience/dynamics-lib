@@ -50,6 +50,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         ----------
         display_name : str
             Display name of the diffusion model.
+        unique_name : str or None
+            Unique name of the diffusion model. If None, a unique name is automatically generated.
         unit : str or sc.Unit, optional
             Energy unit for the underlying Lorentzian components. Defaults to "meV".
         scale : float or Parameter, optional
@@ -108,6 +110,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     @scale.setter
     def scale(self, scale: Numeric) -> None:
+        """
+        Set the scale parameter of the diffusion model.
+        """
         if not isinstance(scale, (Numeric)):
             raise TypeError("scale must be a number.")
         self._scale.value = scale
@@ -126,6 +131,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     @diffusion_coefficient.setter
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
+        """
+        Set the diffusion coefficient parameter D.
+        """
         if not isinstance(diffusion_coefficient, (Numeric)):
             raise TypeError("diffusion_coefficient must be a number.")
         self._diffusion_coefficient.value = diffusion_coefficient
@@ -136,7 +144,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Parameters
         ----------
-        Q : np.ndarray
+        Q : np.ndarray | Numeric | list | ArrayLike
             Scattering vector in 1/angstrom
 
         Returns
@@ -161,7 +169,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Parameters
         ----------
-        Q : np.ndarray
+        Q : np.ndarray | Numeric | list | ArrayLike
             Scattering vector in 1/angstrom
 
         Returns
@@ -179,7 +187,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Parameters
         ----------
-        Q : np.ndarray
+        Q : np.ndarray | Numeric | list | ArrayLike
             Scattering vector in 1/angstrom
 
         Returns
@@ -203,10 +211,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         ----------
         Q : Number, list, or np.ndarray
             Scattering vector values.
-        component_name : str
+        component_display_name : str
             Name of the Lorentzian component.
-        width_name : str
-            Name of the width parameter.
         Returns
         -------
         List[ComponentCollection]
@@ -222,9 +228,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         QISF = self.calculate_QISF(Q)
 
         # Create a Lorentzian component for each Q-value, with width D*Q^2 and area equal to scale. No delta function, as the EISF is 0.
-        for i in range(len(Q)):
+        for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f"{self.display_name}_Q{Q[i]:.2f}", unit=self.unit
+                display_name=f"{self.display_name}_Q{Q_value:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
@@ -251,6 +257,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def _write_width_dependency_expression(self, Q: float) -> str:
         """
         Write the dependency expression for the width as a function of Q to make dependent Parameters.
+        Parameters
+        ----------
+        Q : float
+            Scattering vector in 1/angstrom
+        Returns
+        -------
+        str
+            Dependency expression for the width.
         """
         if not isinstance(Q, (float)):
             raise TypeError("Q must be a float.")

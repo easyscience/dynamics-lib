@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import DescriptorNumber
+from scipp import UnitError
 from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
@@ -26,7 +27,7 @@ class TestBrownianTranslationalDiffusion:
         assert brownian_diffusion_model.diffusion_coefficient.value == 1.0
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message",
+        "kwargs,expected_exception, expected_message",
         [
             (
                 {
@@ -35,7 +36,8 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": 1.0,
                     "diffusion_unit": "m**2/s",
                 },
-                "unit must be None, a string, or a scipp Unit",
+                UnitError,
+                "Invalid unit",
             ),
             (
                 {
@@ -44,6 +46,7 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": 1.0,
                     "diffusion_unit": "m**2/s",
                 },
+                TypeError,
                 "scale must be a number",
             ),
             (
@@ -53,6 +56,7 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": "invalid",
                     "diffusion_unit": "m**2/s",
                 },
+                TypeError,
                 "diffusion_coefficient must be a number",
             ),
             (
@@ -62,12 +66,15 @@ class TestBrownianTranslationalDiffusion:
                     "diffusion_coefficient": 1.0,
                     "diffusion_unit": 123,
                 },
+                TypeError,
                 "diffusion_unit must be ",
             ),
         ],
     )
-    def test_input_type_validation_raises(self, kwargs, expected_message):
-        with pytest.raises(TypeError, match=expected_message):
+    def test_input_type_validation_raises(
+        self, kwargs, expected_exception, expected_message
+    ):
+        with pytest.raises(expected_exception, match=expected_message):
             BrownianTranslationalDiffusion(
                 display_name="BrownianTranslationalDiffusion", **kwargs
             )
