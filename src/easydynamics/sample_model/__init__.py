@@ -7,6 +7,9 @@ from .components import (
     Polynomial,
     Voigt,
 )
+from .diffusion_model.brownian_translational_diffusion import (
+    BrownianTranslationalDiffusion,
+)
 
 __all__ = [
     "ComponentCollection",
@@ -16,4 +19,5 @@ __all__ = [
     "DeltaFunction",
     "DampedHarmonicOscillator",
     "Polynomial",
+    "BrownianTranslationalDiffusion",
 ]
