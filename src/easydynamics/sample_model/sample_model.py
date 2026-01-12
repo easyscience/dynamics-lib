@@ -18,6 +18,12 @@
 
 # SampleModel will inherit from SampleModelBase or something similar.
 
+
+# Need to consider how to handle Q - it's stilly that sample_model, resolution_model and background_model all need to handle Q. At the same time, they do all
+# need to handle Q... Perhaps they will all have Q and Job will handle passing Q to them all?
+
+# Perhaps instrument_model will contain resolution_model and background_model as well as offset? That seems reasonable.
+
 from copy import copy
 
 import numpy as np
@@ -36,17 +42,18 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
-# Base class for sample models - contains a list of ComponentCollection as function of Q and probably not much else
-
-
 class SampleModel(SampleModelBase):
+    """SampleModel represents a model of a sample with components and diffusion models,
+    parameterized by Q and optionally temperature.
+    """
+
     def __init__(
         self,
         unit: str | sc.Unit = "meV",
         display_name: str = "MySampleModel",
         unique_name: str | None = None,
-        components: ComponentCollection | None = None,
-        diffusion_models: list[DiffusionModelBase] | None = None,
+        components: ComponentCollection | ModelComponent | None = None,
+        diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
         Q: np.ndarray | None = None,
         temperature: float | None = None,
         temperature_unit: str | sc.Unit = "K",
@@ -65,21 +72,26 @@ class SampleModel(SampleModelBase):
 
         if components is None:
             self._components = ComponentCollection()
+        elif isinstance(components, ModelComponent):
+            self._components = ComponentCollection()
+            self._components.add_component(components)
         else:
             if not isinstance(components, ComponentCollection):
                 raise TypeError(
-                    f"components must be a ComponentCollection or None, got {type(components).__name__}"
+                    f"components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
                 )
             self._components = components
 
         if diffusion_models is None:
             self._diffusion_models = []
+        elif isinstance(diffusion_models, DiffusionModelBase):
+            self._diffusion_models = [diffusion_models]
         else:
             if not isinstance(diffusion_models, list) or not all(
                 isinstance(dm, DiffusionModelBase) for dm in diffusion_models
             ):
                 raise TypeError(
-                    "diffusion_models must be a list of DiffusionModelBase or None"
+                    "diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase or None"
                 )
             self._diffusion_models = diffusion_models
 
@@ -107,7 +119,7 @@ class SampleModel(SampleModelBase):
     # Component management
     # --------------------------------------------------------------------
 
-    def add_diffusion_model(self, diffusion_model: DiffusionModelBase) -> None:
+    def append_diffusion_model(self, diffusion_model: DiffusionModelBase) -> None:
         """Append a DiffusionModel to the SampleModel.
 
         Args:
@@ -125,7 +137,7 @@ class SampleModel(SampleModelBase):
         """Clear all DiffusionModels from the SampleModel."""
         self._diffusion_models.clear()
 
-    def add_component(self, component: ModelComponent) -> None:
+    def append_component(self, component: ModelComponent) -> None:
         """Append a ModelComponent to the SampleModel.
 
         Args:
@@ -141,6 +153,21 @@ class SampleModel(SampleModelBase):
         """
         self._components.remove_component(unique_name)
 
+    def append_components_from_collection(
+        self,
+        component_collection: ComponentCollection,
+    ) -> None:
+        """Append a ComponentCollection to the SampleModel.
+        Args:
+        component_collection (ComponentCollection): The ComponentCollection to append.
+        """
+        if not isinstance(component_collection, ComponentCollection):
+            raise TypeError(
+                f"component_collection must be a ComponentCollection, got {type(component_collection).__name__}"
+            )
+        for component in component_collection.components:
+            self._components.add_component(component)
+
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
         self._components.clear_components()
@@ -148,6 +175,46 @@ class SampleModel(SampleModelBase):
     # --------------------------------------------------------------------
     # Properties
     # --------------------------------------------------------------------
+
+    @property
+    def components(self) -> ComponentCollection:
+        """Get the components of the SampleModel."""
+        return self._components
+
+    @components.setter
+    def components(self, value: ModelComponent | ComponentCollection) -> None:
+        """Set the components of the SampleModel."""
+        if isinstance(value, ModelComponent):
+            self._components = ComponentCollection()
+            self._components.add_component(value)
+            return
+        if not isinstance(value, ComponentCollection):
+            raise TypeError(
+                "components must be a ModelComponent or a ComponentCollection"
+            )
+        self._components = value
+
+    @property
+    def diffusion_models(self) -> list[DiffusionModelBase]:
+        """Get the diffusion models of the SampleModel."""
+        return self._diffusion_models
+
+    @diffusion_models.setter
+    def diffusion_models(
+        self, value: DiffusionModelBase | list[DiffusionModelBase]
+    ) -> None:
+        """Set the diffusion models of the SampleModel."""
+
+        if isinstance(value, DiffusionModelBase):
+            self._diffusion_models = [value]
+            return
+        if not isinstance(value, list) or not all(
+            isinstance(dm, DiffusionModelBase) for dm in value
+        ):
+            raise TypeError(
+                "diffusion_models must be a DiffusionModelBase or a list of DiffusionModelBase"
+            )
+        self._diffusion_models = value
 
     @property
     def temperature(self) -> Parameter | None:
@@ -243,9 +310,14 @@ class SampleModel(SampleModelBase):
         """Generate ComponentCollections from the DiffusionModels for each Q and add the components from self._components."""
 
         # TODO update temporary name
+        # TODO only regenerate if Q or diffusion models have changed
+
+        if self._Q is None:
+            raise ValueError("Q must be set before generating component collections.")
 
         self._component_collections = [ComponentCollection() for _ in self._Q]
 
+        # Generate components from diffusion models and add to component collections
         for diffusion_model in self._diffusion_models:
             diffusion_collections = diffusion_model.create_component_collections(
                 Q=self._Q, component_display_name="Temporary name"
@@ -256,8 +328,8 @@ class SampleModel(SampleModelBase):
                 for component in source.components:
                     target.add_component(component)
 
+        # Add copies of components from self._components to each component collection
         for collection in self._component_collections:
-            # Add copies of components from self._components to each collection
             for component in self._components.components:
                 collection.add_component(copy(component))
 
