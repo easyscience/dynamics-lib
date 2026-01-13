@@ -1,11 +1,7 @@
-# from easyscience.variable import DescriptorBase, Parameter
-# from .components.model_component import ModelComponent
 from copy import copy
 
 import numpy as np
 import scipp as sc
-
-# from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.base_classes.model_base import ModelBase
 from numpy.typing import ArrayLike
 
@@ -14,11 +10,12 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 Numeric = float | int
 
-# Base class for sample models - contains a list of ComponentCollection as function of Q and probably not much else
 Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class SampleModelBase(ModelBase):
+    """Base class for Sample Models. TODO: fill in"""
+
     def __init__(
         self,
         display_name: str = "MySampleModelBase",
