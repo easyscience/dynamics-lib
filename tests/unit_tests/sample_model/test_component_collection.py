@@ -77,13 +77,13 @@ class TestComponentCollection:
 
     # ───── Component Management ─────
 
-    def test_add_component(self, component_collection):
+    def test_append_component(self, component_collection):
         # WHEN
         component = Gaussian(
             display_name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
-        component_collection.add_component(component)
+        component_collection.append_component(component)
         # EXPECT
         assert component_collection.components[-1] is component
 
@@ -92,14 +92,14 @@ class TestComponentCollection:
         component = component_collection.components[0]
         # EXPECT
         with pytest.raises(ValueError, match="is already in the collection"):
-            component_collection.add_component(component)
+            component_collection.append_component(component)
 
     def test_add_invalid_component_raises(self, component_collection):
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError, match="Component must be an instance of ModelComponent."
         ):
-            component_collection.add_component("NotAComponent")
+            component_collection.append_component("NotAComponent")
 
     def test_remove_component(self, component_collection):
         # WHEN THEN
@@ -125,7 +125,7 @@ class TestComponentCollection:
             display_name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
-        component_collection.add_component(component)
+        component_collection.append_component(component)
         # EXPECT
         assert component_collection.components[-1] is component
 
@@ -177,7 +177,7 @@ class TestComponentCollection:
         faulty_component = FaultyComponent(
             display_name="FaultyComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
-        component_collection.add_component(faulty_component)
+        component_collection.append_component(faulty_component)
 
         original_units = {
             component.display_name: component.unit
@@ -300,7 +300,7 @@ class TestComponentCollection:
         component1 = Polynomial(
             display_name="TestPolynomial", coefficients=[1, 2, 3], unit="meV"
         )
-        component_collection.add_component(component1)
+        component_collection.append_component(component1)
 
         # THEN EXPECT
         with pytest.warns(UserWarning, match="does not have an 'area' "):
