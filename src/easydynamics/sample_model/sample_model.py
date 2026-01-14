@@ -27,7 +27,7 @@ class SampleModel(SampleModelBase):
         unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
         components: ComponentCollection | ModelComponent | None = None,
-        Q: np.ndarray | None = None,
+        Q: Q_type | None = None,
         diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
         temperature: float | None = None,
         temperature_unit: str | sc.Unit = "K",
@@ -209,12 +209,12 @@ class SampleModel(SampleModelBase):
                 self._component_collections, diffusion_collections
             ):
                 for component in source.components:
-                    target.add_component(component)
+                    target.append_component(component)
 
         # Add copies of components from self._components to each component collection
         for collection in self._component_collections:
             for component in self._components.components:
-                collection.add_component(copy(component))
+                collection.append_component(copy(component))
 
     # --------------------------------------------------------------------
     # Private methods

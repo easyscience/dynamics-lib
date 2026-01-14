@@ -250,7 +250,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
             # Resolving the dependency can do weird things to the units, so we make sure it's correct.
             lorentzian_component.width.convert_unit(self.unit)
-            component_collection_list[i].add_component(lorentzian_component)
+            component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list
 

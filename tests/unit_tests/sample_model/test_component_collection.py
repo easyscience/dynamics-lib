@@ -33,8 +33,8 @@ class TestComponentCollection:
             unit="meV",
             unique_name="TestLorentzian1",
         )
-        model.add_component(component1)
-        model.add_component(component2)
+        model.append_component(component1)
+        model.append_component(component2)
         return model
 
     def test_init(self):

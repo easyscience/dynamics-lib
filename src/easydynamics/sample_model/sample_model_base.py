@@ -39,18 +39,57 @@ class SampleModelBase(ModelBase):
             self._components = ComponentCollection()
         elif isinstance(components, ModelComponent):
             self._components = ComponentCollection()
-            self._components.append_component(components)
+            self.append_component(components)
         else:
             if not isinstance(components, ComponentCollection):
                 raise TypeError(
                     f"components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
                 )
-            self._components = components
+            self._components = ComponentCollection()
+            for component in components.components:
+                self.append_component(component)
 
         if Q is None:
             self._Q = None
         else:
             self._Q = self._validate_and_convert_Q(Q)
+
+    def evaluate(
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+    ) -> list[np.ndarray]:
+        """
+        Evaluate the sample model at all Q for the given x values
+
+        Parameters
+        ----------
+        x : Number, list, np.ndarray, sc.Variable, or sc.DataArray
+            Energy axis.
+
+        Returns
+        -------
+        np.ndarray
+            Evaluated model values.
+        """
+
+        if not self._component_collections:
+            raise ValueError("No components in the model to evaluate.")
+        y = [collection.evaluate(x) for collection in self._component_collections]
+
+        return y
+
+    def generate_component_collections(self) -> None:
+        """Generate ComponentCollections for each Q value."""
+        # TODO only regenerate if Q or diffusion models have changed
+
+        if self._Q is None:
+            raise ValueError("Q must be set before generating component collections.")
+
+        self._component_collections = [ComponentCollection() for _ in self._Q]
+
+        # Add copies of components from self._components to each component collection
+        for collection in self._component_collections:
+            for component in self._components.components:
+                collection.append_component(copy(component))
 
     # --------------------------------------------------------------------
     # Component management
@@ -61,7 +100,7 @@ class SampleModelBase(ModelBase):
         Args:
             component (ModelComponent): The ModelComponent to append.
         """
-        self._components.add_component(component)
+        self._components.append_component(component)
 
     def remove_component(self, unique_name: str) -> None:
         """Remove a ModelComponent from the SampleModel by its unique name.
@@ -83,7 +122,7 @@ class SampleModelBase(ModelBase):
                 f"component_collection must be a ComponentCollection, got {type(component_collection).__name__}"
             )
         for component in component_collection.components:
-            self._components.add_component(component)
+            self._components.append_component(component)
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
@@ -152,16 +191,9 @@ class SampleModelBase(ModelBase):
 
         return Q
 
-    def generate_component_collections(self) -> None:
-        """Generate ComponentCollections for each Q value."""
-        # TODO only regenerate if Q or diffusion models have changed
+    # --------------------------------------------------------------------
+    # dunder methods
+    # --------------------------------------------------------------------
 
-        if self._Q is None:
-            raise ValueError("Q must be set before generating component collections.")
-
-        self._component_collections = [ComponentCollection() for _ in self._Q]
-
-        # Add copies of components from self._components to each component collection
-        for collection in self._component_collections:
-            for component in self._components.components:
-                collection.add_component(copy(component))
+    def __repr__(self):
+        return f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), Q = {self.Q}, components = {self.components}"

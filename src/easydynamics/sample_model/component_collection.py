@@ -62,9 +62,9 @@ class ComponentCollection(ModelBase):
                     "components must be a list of ModelComponent instances."
                 )
             for comp in components:
-                self.add_component(comp)
+                self.append_component(comp)
 
-    def add_component(self, component: ModelComponent) -> None:
+    def append_component(self, component: ModelComponent) -> None:
         if not isinstance(component, ModelComponent):
             raise TypeError("Component must be an instance of ModelComponent.")
 
