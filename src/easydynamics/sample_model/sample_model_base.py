@@ -94,12 +94,16 @@ class SampleModelBase(ModelBase):
     # --------------------------------------------------------------------
     # Component management
     # ---
-    def append_component(self, component: ModelComponent) -> None:
+    def append_component(self, component: ModelComponent | ComponentCollection) -> None:
         """Append a ModelComponent to the SampleModel.
 
         Args:
             component (ModelComponent): The ModelComponent to append.
         """
+        if not isinstance(component, (ModelComponent, ComponentCollection)):
+            raise TypeError(
+                f"component must be a ModelComponent or ComponentCollection, got {type(component).__name__}"
+            )
         self._components.append_component(component)
 
     def remove_component(self, unique_name: str) -> None:
@@ -110,20 +114,6 @@ class SampleModelBase(ModelBase):
         """
         self._components.remove_component(unique_name)
 
-    def append_components_from_collection(
-        self, component_collection: ComponentCollection
-    ) -> None:
-        """Append a ComponentCollection to the SampleModel.
-        Args:
-        component_collection (ComponentCollection): The ComponentCollection to append.
-        """
-        if not isinstance(component_collection, ComponentCollection):
-            raise TypeError(
-                f"component_collection must be a ComponentCollection, got {type(component_collection).__name__}"
-            )
-        for component in component_collection.components:
-            self._components.append_component(component)
-
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
         self._components.clear_components()
@@ -133,22 +123,60 @@ class SampleModelBase(ModelBase):
     # --------------------------------------------------------------------
 
     @property
-    def components(self) -> ComponentCollection:
+    def unit(self) -> str | sc.Unit:
+        """
+        Get the unit of the ComponentCollection.
+
+        Returns
+        -------
+        str or sc.Unit or None
+        """
+        return self._unit
+
+    @unit.setter
+    def unit(self, unit_str: str) -> None:
+        raise AttributeError(
+            (
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
+            )
+        )  # noqa: E501
+
+    def convert_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the unit of the ComponentCollection and all its components.
+        """
+
+        old_unit = self._unit
+
+        try:
+            for component in self.components:
+                component.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                for component in self.components:
+                    component.convert_unit(old_unit)
+            except Exception:
+                pass  # Best effort rollback
+            raise e
+
+    @property
+    def components(self) -> list[ModelComponent]:
         """Get the components of the SampleModel."""
-        return self._components
+        return self._components.components
 
     @components.setter
     def components(self, value: ModelComponent | ComponentCollection) -> None:
         """Set the components of the SampleModel."""
-        if isinstance(value, ModelComponent):
-            self._components = ComponentCollection()
-            self._components.append_component(value)
-            return
-        if not isinstance(value, ComponentCollection):
+        if not isinstance(value, (ModelComponent, ComponentCollection)):
             raise TypeError(
                 "components must be a ModelComponent or a ComponentCollection"
             )
-        self._components = value
+
+        self.clear_components()
+        self.append_component(value)
 
     @property
     def Q(self) -> np.ndarray | None:

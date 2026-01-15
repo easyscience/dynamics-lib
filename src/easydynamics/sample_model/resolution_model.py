@@ -43,3 +43,4 @@ class ResolutionModel(SampleModelBase):
                 f"component in ResolutionModel cannot be a {component.__class__.__name__}"
             )
         super().append_component(component)
+

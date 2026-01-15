@@ -65,9 +65,7 @@ class TestComponentCollection:
 
     def test_init_with_invalid_components_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(
-            TypeError, match="Component must be an instance of ModelComponent."
-        ):
+        with pytest.raises(TypeError, match="Component must be."):
             ComponentCollection(components=["NotAComponent"])
 
     def test_init_with_invalid_unit_raises(self):
@@ -87,18 +85,28 @@ class TestComponentCollection:
         # EXPECT
         assert component_collection.components[-1] is component
 
-    def test_add_existing_component_raises(self, component_collection):
+    def test_append_component_collection(self, component_collection):
+        # WHEN
+        component = Gaussian(
+            display_name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
+        )
+        component_collection2 = ComponentCollection()
+        component_collection2.append_component(component)
+        # THEN
+        component_collection.append_component(component_collection2)
+        # EXPECT
+        assert component_collection.components[-1] is component
+
+    def test_append_existing_component_raises(self, component_collection):
         # WHEN THEN
         component = component_collection.components[0]
         # EXPECT
         with pytest.raises(ValueError, match="is already in the collection"):
             component_collection.append_component(component)
 
-    def test_add_invalid_component_raises(self, component_collection):
+    def test_append_invalid_component_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(
-            TypeError, match="Component must be an instance of ModelComponent."
-        ):
+        with pytest.raises(TypeError, match="Component must be "):
             component_collection.append_component("NotAComponent")
 
     def test_remove_component(self, component_collection):
