@@ -7,7 +7,7 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
-def _validate_and_convert_Q(Q: Q_type) -> np.ndarray:
+def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
     """
     Validate and convert Q to a numpy array.
     Parameters
@@ -19,7 +19,8 @@ def _validate_and_convert_Q(Q: Q_type) -> np.ndarray:
     np.ndarray
         Q as a np.ndarray. TODO: Update to sc.array, also propagate that to diffusionmodel
     """
-
+    if Q is None:
+        return None
     if not isinstance(Q, (Numeric, list, np.ndarray, sc.Variable)):
         raise TypeError("Q must be a number, list, numpy array, or scipp array.")
 
@@ -38,3 +39,25 @@ def _validate_and_convert_Q(Q: Q_type) -> np.ndarray:
             raise ValueError("Q must have a single dimension named 'Q'.")
         Q = Q.to(unit="1/angstrom")
     return Q.values
+
+
+def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
+    """
+    Validate that the unit is a string or scipp Unit.
+    Parameters
+    ----------
+    unit : str or sc.Unit or None
+        Unit to validate.
+    Returns
+    -------
+    sc.Unit | None
+        Validated unit or None.
+    """
+
+    if unit is not None and not isinstance(unit, (str, sc.Unit)):
+        raise TypeError(
+            f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+        )
+    if isinstance(unit, str):
+        unit = sc.Unit(unit)
+    return unit

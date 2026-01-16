@@ -216,6 +216,21 @@ class SampleModel(ModelBase):
             for component in self._components.components:
                 collection.append_component(copy(component))
 
+    def get_all_variables(self):
+        """Get all Parameters and Descriptors from all ComponentCollections in the SampleModel.
+        Also includes temperature if set and all variables from diffusion models.
+        Ignores the Parameters and Descriptors in self._components as these are just templates."""
+        all_vars = super().get_all_variables()
+        all_vars.extend(self._temperature or [])
+
+        diffusion_vars = [
+            var
+            for diffusion_model in self.diffusion_models
+            for var in diffusion_model.get_all_variables()
+        ]
+        all_vars.extend(diffusion_vars)
+        return all_vars
+
     # --------------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------------

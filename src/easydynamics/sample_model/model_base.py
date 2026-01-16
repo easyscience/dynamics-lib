@@ -7,7 +7,7 @@ from numpy.typing import ArrayLike
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_and_convert_Q, _validate_unit
 
 Numeric = float | int
 
@@ -15,13 +15,29 @@ Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
 class ModelBase(EasyScienceModelBase):
-    """Base class for Sample Models. TODO: fill in"""
+    """Base class for Sample Models.
+
+    Contains common functionality for models with components and Q dependence.
+
+    Parameters
+    ----------
+    display_name : str
+        Display name of the model.
+    unique_name : str | None
+        Unique name of the model. If None, a unique name will be generated.
+    unit : str | sc.Unit | None
+        Unit of the model. If None, unitless.
+    components : ModelComponent | ComponentCollection | None
+        Template components of the model. If None, no components are added. These components are copied into ComponentCollections for each Q value.
+    Q : Q_type | None
+        Q values for the model. If None, Q is not set.
+    """
 
     def __init__(
         self,
         display_name: str = "MyModelBase",
         unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit | None = "meV",
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ):
@@ -29,12 +45,7 @@ class ModelBase(EasyScienceModelBase):
             display_name=display_name,
             unique_name=unique_name,
         )
-
-        if unit is not None and not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
-            )
-        self._unit = unit
+        self._unit = _validate_unit(unit)
 
         if components is not None and not isinstance(
             components, (ModelComponent, ComponentCollection)
@@ -47,9 +58,6 @@ class ModelBase(EasyScienceModelBase):
         if isinstance(components, (ModelComponent, ComponentCollection)):
             self.append_component(components)
 
-        if Q is None:
-            self._Q = None
-        else:
             self._Q = _validate_and_convert_Q(Q)
 
     def evaluate(
@@ -65,7 +73,7 @@ class ModelBase(EasyScienceModelBase):
 
         Returns
         -------
-        np.ndarray
+        list[np.ndarray]
             Evaluated model values.
         """
 
@@ -82,12 +90,23 @@ class ModelBase(EasyScienceModelBase):
         if self._Q is None:
             raise ValueError("Q must be set before generating component collections.")
 
-        self._component_collections = [ComponentCollection() for _ in self._Q.values]
+        self._component_collections = [ComponentCollection() for _ in self._Q]
 
         # Add copies of components from self._components to each component collection
         for collection in self._component_collections:
             for component in self._components.components:
                 collection.append_component(copy(component))
+
+    def get_all_variables(self):
+        """Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
+        Ignores the Parameters and Descriptors in self._components as these are just templates."""
+
+        all_vars = [
+            var
+            for collection in self._component_collections
+            for var in collection.get_all_variables()
+        ]
+        return all_vars
 
     # --------------------------------------------------------------------
     # Component management
@@ -98,10 +117,6 @@ class ModelBase(EasyScienceModelBase):
         Args:
             component (ModelComponent | ComponentCollection): The ModelComponent or ComponentCollection to append.
         """
-        # if not isinstance(component, (ModelComponent, ComponentCollection)):
-        #     raise TypeError(
-        #         f"component must be a ModelComponent or ComponentCollection, got {type(component).__name__}"
-        #     )
         self._components.append_component(component)
 
     def remove_component(self, unique_name: str) -> None:
@@ -184,10 +199,7 @@ class ModelBase(EasyScienceModelBase):
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
         """Set the Q values of the SampleModel."""
-        if value is None:
-            self._Q = None
-        else:
-            self._Q = _validate_and_convert_Q(value)
+        self._Q = _validate_and_convert_Q(value)
 
     # --------------------------------------------------------------------
     # Private methods
