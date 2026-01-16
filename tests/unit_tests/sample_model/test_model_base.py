@@ -169,3 +169,79 @@ class TestModelBase:
             TypeError, match=" must be a ModelComponent or ComponentCollection"
         ):
             model_base.append_component("invalid_component")
+
+    def test_unit_property(self, model_base):
+        # WHEN
+        unit = model_base.unit
+
+        # THEN / EXPECT
+        assert unit == "meV"
+
+    def test_unit_setter_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError, match="Use convert_unit to change "):
+            model_base.unit = "K"
+
+    def test_convert_unit(self, model_base):
+        # WHEN
+        model_base.convert_unit("eV")
+
+        # THEN / EXPECT
+        assert model_base.unit == "eV"
+        for component in model_base.components:
+            assert component.unit == "eV"
+
+    def test_convert_unit_invalid_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(Exception):
+            model_base.convert_unit("invalid_unit")
+
+    def test_components_setter(self, model_base):
+        # WHEN
+        new_component = Lorentzian(unique_name="NewLorentzian")
+        model_base.components = new_component
+
+        # THEN / EXPECT
+        assert len(model_base.components) == 1
+        assert model_base.components[0] is new_component
+
+    def test_components_setter_collection(self, model_base):
+        # WHEN
+        new_collection = ComponentCollection()
+        new_component1 = Gaussian()
+        new_component2 = Lorentzian()
+        new_collection.append_component(new_component1)
+        new_collection.append_component(new_component2)
+
+        model_base.components = new_collection
+
+        # THEN / EXPECT
+        assert len(model_base.components) == 2
+        assert model_base.components[0] is new_component1
+        assert model_base.components[1] is new_component2
+
+    def test_components_setter_invalid_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match="components must be a ModelComponent or a ComponentCollection",
+        ):
+            model_base.components = "invalid_component"
+
+    def test_Q_setter(self, model_base):
+        # WHEN
+        new_Q = [0.5, 1.5, 2.5]
+        model_base.Q = new_Q
+
+        # THEN / EXPECT
+        np.testing.assert_array_equal(model_base.Q, np.array(new_Q))
+
+    def test_repr(self, model_base):
+        # WHEN
+        repr_str = repr(model_base)
+
+        # THEN / EXPECT
+        assert "unique_name" in repr_str
+        assert "unit" in repr_str
+        assert "Q = " in repr_str
+        assert "components = " in repr_str
