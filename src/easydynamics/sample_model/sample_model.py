@@ -6,7 +6,7 @@ from easyscience.variable import Parameter
 from numpy.typing import ArrayLike
 
 from easydynamics.sample_model.diffusion_model import DiffusionModelBase
-from easydynamics.sample_model.sample_model_base import SampleModelBase
+from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.utils import _detailed_balance_factor
 
 from .component_collection import ComponentCollection
@@ -16,7 +16,7 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
-class SampleModel(SampleModelBase):
+class SampleModel(ModelBase):
     """SampleModel represents a model of a sample with components and diffusion models,
     parameterized by Q and optionally temperature.
     """

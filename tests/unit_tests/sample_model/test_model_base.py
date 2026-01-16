@@ -6,10 +6,10 @@ from easydynamics.sample_model import (
     Gaussian,
     Lorentzian,
 )
-from easydynamics.sample_model.sample_model_base import SampleModelBase
+from easydynamics.sample_model.model_base import ModelBase
 
 
-class TestSampleModelBase:
+class TestModelBase:
     @pytest.fixture
     def sample_model_base(self):
         component1 = Gaussian(
@@ -21,7 +21,7 @@ class TestSampleModelBase:
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
-        sample_model_base = SampleModelBase(
+        sample_model_base = ModelBase(
             display_name="InitModel",
             components=component_collection,
             unit="meV",

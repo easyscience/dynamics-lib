@@ -65,30 +65,6 @@ class DiffusionModelBase(ModelBase):
             )
         )  # noqa: E501
 
-    def _validate_and_convert_Q(self, Q: Q_type) -> np.ndarray:
-        """
-        Validate and convert Q to a numpy array.
-        Parameters
-        ----------
-        Q : Number, list, or np.ndarray
-            Scattering vector values in 1/angstrom.
-        Returns
-        -------
-        np.ndarray
-            Q as a numpy array.
-        """
-        if isinstance(Q, Numeric):
-            Q = np.array([Q])
-        if isinstance(Q, list):
-            Q = np.array(Q)
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a number, list, or numpy array.")
-
-        if Q.ndim > 1:
-            raise ValueError("Q must be a 1-dimensional array.")
-
-        return Q
-
     def __repr__(self):
         """
         String representation of the Diffusion model.

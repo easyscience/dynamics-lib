@@ -2,7 +2,7 @@ import numpy as np
 import scipp as sc
 from numpy.typing import ArrayLike
 
-from easydynamics.sample_model.sample_model_base import SampleModelBase
+from easydynamics.sample_model.model_base import ModelBase
 
 from .component_collection import ComponentCollection
 from .components.model_component import ModelComponent
@@ -11,7 +11,7 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
-class BackgroundModel(SampleModelBase):
+class BackgroundModel(ModelBase):
     """BackgroundModel represents a model of the background in an experiment at various Q."""
 
     def __init__(

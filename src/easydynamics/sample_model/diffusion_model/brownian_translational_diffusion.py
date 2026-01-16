@@ -11,6 +11,7 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
     DiffusionModelBase,
 )
+from easydynamics.utils.utils import _validate_and_convert_Q
 
 Numeric = Union[float, int]
 
@@ -153,7 +154,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             HWHM values in the unit of the model (e.g., meV).
         """
 
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
 
         unit_conversion_factor = (
             self._hbar * self.diffusion_coefficient / (self._angstrom**2)
@@ -177,7 +178,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
         EISF = np.zeros_like(Q)
         return EISF
 
@@ -196,7 +197,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             QISF values (dimensionless).
         """
 
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
         QISF = np.ones_like(Q)
         return QISF
 
@@ -218,7 +219,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         List[ComponentCollection]
             List of ComponentCollections with Lorentzian components.
         """
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
             raise TypeError("component_name must be a string.")

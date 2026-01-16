@@ -88,28 +88,6 @@ class ComponentCollection(ModelBase):
 
             self._components.append(comp)
 
-        # if not isinstance(component, (ModelComponent, ComponentCollection)):
-        #     raise TypeError("Component must be a ModelComponent or ComponentCollection.")
-
-        # if isinstance(component,ModelComponent):
-        #     if component in self._components:
-        #         raise ValueError(
-        #             f"Component '{component.unique_name}' is already in the collection."
-        #             f"Here is a list of the components in the collection: {self.list_component_names()} "
-        #         )
-
-        #     self._components.append(component)
-
-        # if isinstance(component,ComponentCollection):
-        #     for comp in component.components:
-        #         if comp in self._components:
-        #             raise ValueError(
-        #                 f"Component '{comp.unique_name}' is already in the collection."
-        #                 f"Here is a list of the components in the collection: {self.list_component_names()} "
-        #             )
-
-        #         self._components.append(comp)
-
     def remove_component(self, unique_name: str) -> None:
         if not isinstance(unique_name, str):
             raise TypeError("Component name must be a string.")

@@ -2,23 +2,24 @@ from copy import copy
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
+from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from numpy.typing import ArrayLike
 
-from easydynamics.sample_model import ComponentCollection
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.utils import _validate_and_convert_Q
 
 Numeric = float | int
 
-Q_type = np.ndarray | Numeric | list | ArrayLike
+Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
-class SampleModelBase(ModelBase):
+class ModelBase(EasyScienceModelBase):
     """Base class for Sample Models. TODO: fill in"""
 
     def __init__(
         self,
-        display_name: str = "MySampleModelBase",
+        display_name: str = "MyModelBase",
         unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
         components: ModelComponent | ComponentCollection | None = None,
@@ -35,24 +36,21 @@ class SampleModelBase(ModelBase):
             )
         self._unit = unit
 
-        if components is None:
-            self._components = ComponentCollection()
-        elif isinstance(components, ModelComponent):
-            self._components = ComponentCollection()
+        if components is not None and not isinstance(
+            components, (ModelComponent, ComponentCollection)
+        ):
+            raise TypeError(
+                f"components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
+            )
+
+        self._components = ComponentCollection()
+        if isinstance(components, (ModelComponent, ComponentCollection)):
             self.append_component(components)
-        else:
-            if not isinstance(components, ComponentCollection):
-                raise TypeError(
-                    f"components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
-                )
-            self._components = ComponentCollection()
-            for component in components.components:
-                self.append_component(component)
 
         if Q is None:
             self._Q = None
         else:
-            self._Q = self._validate_and_convert_Q(Q)
+            self._Q = _validate_and_convert_Q(Q)
 
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
@@ -84,7 +82,7 @@ class SampleModelBase(ModelBase):
         if self._Q is None:
             raise ValueError("Q must be set before generating component collections.")
 
-        self._component_collections = [ComponentCollection() for _ in self._Q]
+        self._component_collections = [ComponentCollection() for _ in self._Q.values]
 
         # Add copies of components from self._components to each component collection
         for collection in self._component_collections:
@@ -93,17 +91,17 @@ class SampleModelBase(ModelBase):
 
     # --------------------------------------------------------------------
     # Component management
-    # ---
+    # --------------------------------------------------------------------
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
-        """Append a ModelComponent to the SampleModel.
+        """Append a ModelComponent or ComponentCollection to the SampleModel.
 
         Args:
-            component (ModelComponent): The ModelComponent to append.
+            component (ModelComponent | ComponentCollection): The ModelComponent or ComponentCollection to append.
         """
-        if not isinstance(component, (ModelComponent, ComponentCollection)):
-            raise TypeError(
-                f"component must be a ModelComponent or ComponentCollection, got {type(component).__name__}"
-            )
+        # if not isinstance(component, (ModelComponent, ComponentCollection)):
+        #     raise TypeError(
+        #         f"component must be a ModelComponent or ComponentCollection, got {type(component).__name__}"
+        #     )
         self._components.append_component(component)
 
     def remove_component(self, unique_name: str) -> None:
@@ -189,35 +187,11 @@ class SampleModelBase(ModelBase):
         if value is None:
             self._Q = None
         else:
-            self._Q = self._validate_and_convert_Q(value)
+            self._Q = _validate_and_convert_Q(value)
 
     # --------------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------------
-
-    def _validate_and_convert_Q(self, Q: Q_type) -> np.ndarray:
-        """
-        Validate and convert Q to a numpy array.
-        Parameters
-        ----------
-        Q : Number, list, or np.ndarray
-            Scattering vector values in 1/angstrom.
-        Returns
-        -------
-        np.ndarray
-            Q as a numpy array.
-        """
-        if isinstance(Q, Numeric):
-            Q = np.array([Q])
-        if isinstance(Q, list):
-            Q = np.array(Q)
-        if not isinstance(Q, np.ndarray):
-            raise TypeError("Q must be a number, list, or numpy array.")
-
-        if Q.ndim > 1:
-            raise ValueError("Q must be a 1-dimensional array.")
-
-        return Q
 
     # --------------------------------------------------------------------
     # dunder methods
