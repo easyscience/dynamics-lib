@@ -269,11 +269,11 @@ class TestSampleModel:
             "easydynamics.sample_model.sample_model._detailed_balance_factor"
         ) as mock_dbf:
             mock_dbf.return_value = np.array([10.0, 10.0, 10.0])  # simplified DBF
-
-            # WHEN
+            # THEN
             result = sample_model.evaluate(x)
 
-            # THEN: check that DBF was called correctly
+            # EXPECT
+            # Check that DBF was called with correct arguments
             mock_dbf.assert_called_once_with(
                 energy=x,
                 temperature=sample_model.temperature,
@@ -288,3 +288,7 @@ class TestSampleModel:
             # Check that DBF was applied elementwise
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]) * 10.0)
             np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]) * 10.0)
+
+
+# TODO: final tests
+# CLean up example
