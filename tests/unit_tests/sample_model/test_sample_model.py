@@ -289,6 +289,62 @@ class TestSampleModel:
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]) * 10.0)
             np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]) * 10.0)
 
+    def test_generate_component_collections(self, sample_model):
+        # WHEN THEN
+        sample_model.generate_component_collections()
 
-# TODO: final tests
-# CLean up example
+        # EXPECT
+        assert len(sample_model._component_collections) == 3  # 3 Q values
+        for collection in sample_model._component_collections:
+            assert isinstance(collection, ComponentCollection)
+            assert len(collection.components) == 3  # 3 components
+            assert collection.components[0].display_name == "TestGaussian1"
+            assert collection.components[0].area.value == 1.0
+            assert collection.components[1].display_name == "TestLorentzian1"
+            assert collection.components[1].area.value == 2.0
+            assert (
+                collection.components[2].display_name
+                == "Brownian translational diffusion"
+            )
+            assert isinstance(collection.components[2], Lorentzian)
+
+    def test_get_all_variables(self, sample_model):
+        # WHEN
+        sample_model.generate_component_collections()
+
+        # THEN
+        all_vars = sample_model.get_all_variables()
+
+        # EXPECT
+        # Should include temperature and variables from diffusion model
+        expected_num_vars = (
+            3 * 3 * 3
+        )  # 3 components, each with 3 parameters, across 3 Q values
+        expected_num_vars += 2  # diffusion model has 2 parameters
+        expected_num_vars += 1  # temperature variable
+
+        assert len(all_vars) == expected_num_vars
+        assert sample_model.temperature in all_vars
+        for var in sample_model.diffusion_models[0].get_all_variables():
+            assert var in all_vars
+
+        # Template component variables should NOT be included
+        template_vars = []
+        for component in sample_model.components:
+            template_vars.extend(component.get_all_variables())
+
+        for var in template_vars:
+            assert var not in all_vars
+
+    def test_repr(self, sample_model):
+        # WHEN
+        repr_str = repr(sample_model)
+
+        # THEN / EXPECT
+        assert "SampleModel" in repr_str
+        assert "unit = " in repr_str
+        assert "Q = " in repr_str
+        assert "components" in repr_str
+        assert "diffusion_models" in repr_str
+        assert "temperature" in repr_str
+        assert "divide_by_temperature" in repr_str
