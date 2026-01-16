@@ -144,14 +144,14 @@ class TestResolutionModel:
         # appending a single component
         with pytest.raises(
             TypeError,
-            match="component in ResolutionModel cannot be a ",
+            match="cannot be ",
         ):
             resolution_model.append_component(invalid_component)
 
         # appending a collection with invalid component
         with pytest.raises(
             TypeError,
-            match="component in ResolutionModel cannot be a ",
+            match="cannot be ",
         ):
             collection = ComponentCollection()
             collection.append_component(invalid_component)

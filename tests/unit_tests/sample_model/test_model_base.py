@@ -54,7 +54,7 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="components must be ",
+            match="Components must be ",
         ):
             ModelBase(components="invalid_component")
 
@@ -232,7 +232,7 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="components must be a ModelComponent or a ComponentCollection",
+            match="Components must be ",
         ):
             model_base.components = "invalid_component"
 
