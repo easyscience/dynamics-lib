@@ -64,6 +64,19 @@ class TestSampleModel:
         assert model.divide_by_temperature is True
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
+    def test_init_list_of_diffusion_model(self):
+        # WHEN THEN
+        diffusion_model1 = BrownianTranslationalDiffusion()
+        diffusion_model2 = BrownianTranslationalDiffusion()
+        sample_model = SampleModel(
+            diffusion_models=[diffusion_model1, diffusion_model2]
+        )
+
+        # EXPECT
+        assert len(sample_model.diffusion_models) == 2
+        assert sample_model.diffusion_models[0] is diffusion_model1
+        assert sample_model.diffusion_models[1] is diffusion_model2
+
     def test_init_raises_with_invalid_diffusion_model(self):
         # WHEN / THEN / EXPECT
         with pytest.raises(
@@ -112,6 +125,22 @@ class TestSampleModel:
         model.clear_diffusion_models()
         # EXPECT
         assert len(model.diffusion_models) == 0
+
+    def test_append_diffusion_model_raises_with_invalid_type(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match="diffusion_model must be a DiffusionModelBase",
+        ):
+            sample_model.append_diffusion_model("invalid_diffusion_model")
+
+    def test_remove_diffusion_model_raises_with_invalid_name(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            ValueError,
+            match="No DiffusionModel",
+        ):
+            sample_model.remove_diffusion_model("non_existent_model")
 
     def test_diffusion_model_setter(self, sample_model):
         # WHEN
@@ -174,6 +203,12 @@ class TestSampleModel:
 
         # EXPECT
         assert model.temperature is None
+
+        # THEN
+        model.temperature = 0.0
+
+        # EXPECT
+        assert model.temperature.value == 0.0
 
     @pytest.mark.parametrize(
         "invalid_value",
@@ -252,6 +287,14 @@ class TestSampleModel:
 
         # EXPECT
         assert model.divide_by_temperature is True
+
+    def test_divide_by_temperature_setter_raises_with_invalid_type(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match="divide_by_temperature must be True or False",
+        ):
+            sample_model.divide_by_temperature = "invalid_value"
 
     def test_evaluate_calls_dbf(self, sample_model):
         # WHEN
