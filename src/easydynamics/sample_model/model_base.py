@@ -78,14 +78,16 @@ class ModelBase(EasyScienceModelBase):
         """
 
         if not self._component_collections:
-            raise ValueError("No components in the model to evaluate.")
+            raise ValueError(
+                "No components in the model to evaluate. Run generate_component_collections() first"
+            )
         y = [collection.evaluate(x) for collection in self._component_collections]
 
         return y
 
     def generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
-        # TODO only regenerate if Q or diffusion models have changed
+        # TODO regenerate automatically if Q or components have changed
 
         if self._Q is None:
             raise ValueError("Q must be set before generating component collections.")

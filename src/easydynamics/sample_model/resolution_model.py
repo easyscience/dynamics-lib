@@ -1,19 +1,29 @@
-import numpy as np
 import scipp as sc
-from numpy.typing import ArrayLike
 
 from easydynamics.sample_model.model_base import ModelBase
+from easydynamics.utils.utils import Q_type
 
 from .component_collection import ComponentCollection
 from .components import DeltaFunction, Polynomial
 from .components.model_component import ModelComponent
 
-Numeric = float | int
-Q_type = np.ndarray | Numeric | list | ArrayLike
-
 
 class ResolutionModel(ModelBase):
-    """ResolutionMmodel represents a model of the instrment resolution in an experiment at various Q."""
+    """ResolutionMmodel represents a model of the instrment resolution in an experiment at various Q.
+
+    Parameters
+    ----------
+    display_name : str
+        Display name of the model.
+    unique_name : str | None
+        Unique name of the model. If None, a unique name will be generated.
+    unit : str | sc.Unit | None
+        Unit of the model. If None, unitless.
+    components : ModelComponent | ComponentCollection | None
+        Template components of the model. If None, no components are added. These components are copied into ComponentCollections for each Q value.
+    Q : Number, list, np.ndarray or sc.Variable | None
+        Q values for the model. If None, Q is not set.
+    """
 
     def __init__(
         self,

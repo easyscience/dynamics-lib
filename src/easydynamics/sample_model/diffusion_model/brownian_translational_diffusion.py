@@ -204,7 +204,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = "Lorentzian",
+        component_display_name: str = "Brownian translational diffusion",
     ) -> List[ComponentCollection]:
         """
         Create ComponentCollection components for the Brownian translational diffusion model at given Q values.
@@ -213,11 +213,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q : Number, list, or np.ndarray
             Scattering vector values.
         component_display_name : str
-            Name of the Lorentzian component.
+            Name of the Brownian Diffusion Lorentzian component.
         Returns
         -------
         List[ComponentCollection]
-            List of ComponentCollections with Lorentzian components.
+            List of ComponentCollections with Brownian Diffusion Lorentzian components.
         """
         Q = _validate_and_convert_Q(Q)
 
@@ -236,7 +236,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
             lorentzian_component = Lorentzian(
                 display_name=component_display_name,
-                area=self.scale * QISF[i],
                 unit=self.unit,
             )
 
@@ -247,6 +246,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
+            )
+
+            # Make the area dependent on Q
+            area_dependency_map = self._write_area_dependency_map_expression()
+            lorentzian_component.area.make_dependent_on(
+                dependency_expression=self._write_area_dependency_expression(QISF[i]),
+                dependency_map=area_dependency_map,
             )
 
             # Resolving the dependency can do weird things to the units, so we make sure it's correct.
@@ -281,6 +287,27 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             "D": self.diffusion_coefficient,
             "hbar": self._hbar,
             "angstrom": self._angstrom,
+        }
+
+    def _write_area_dependency_expression(self, QISF: float) -> str:
+        """
+        Write the dependency expression for the area to make dependent Parameters.
+        Returns
+        -------
+        str
+            Dependency expression for the area.
+        """
+        if not isinstance(QISF, (float)):
+            raise TypeError("QISF must be a float.")
+
+        return f"{QISF} * scale"
+
+    def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+        """
+        Write the dependency map expression to make dependent Parameters.
+        """
+        return {
+            "scale": self.scale,
         }
 
     def __repr__(self):

@@ -210,7 +210,6 @@ class TestBrownianTranslationalDiffusion:
             model = component_collections[model_index]
             assert len(model.components) == 1
             component = model.components[0]
-            assert component.display_name == "Lorentzian"
             assert component.width.unit == brownian_diffusion_model.unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
