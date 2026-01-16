@@ -50,6 +50,14 @@ class TestModelBase:
         assert len(model.components) == 2
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
+    def test_init_raises_with_invalid_components(self):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match="components must be ",
+        ):
+            ModelBase(components="invalid_component")
+
     def test_evaluate_calls_all_component_collections(self, model_base):
         # WHEN
         x = np.array([0.0, 1.0, 2.0])
