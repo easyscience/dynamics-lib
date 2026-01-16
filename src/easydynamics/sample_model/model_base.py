@@ -51,7 +51,7 @@ class ModelBase(EasyScienceModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f"components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
+                f"Components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
             )
 
         self._components = ComponentCollection()
@@ -181,15 +181,16 @@ class ModelBase(EasyScienceModelBase):
         return self._components.components
 
     @components.setter
-    def components(self, value: ModelComponent | ComponentCollection) -> None:
+    def components(self, value: ModelComponent | ComponentCollection | None) -> None:
         """Set the components of the SampleModel."""
-        if not isinstance(value, (ModelComponent, ComponentCollection)):
+        if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
             raise TypeError(
-                "components must be a ModelComponent or a ComponentCollection"
+                "Components must be a ModelComponent or a ComponentCollection"
             )
 
         self.clear_components()
-        self.append_component(value)
+        if value is not None:
+            self.append_component(value)
 
     @property
     def Q(self) -> np.ndarray | None:

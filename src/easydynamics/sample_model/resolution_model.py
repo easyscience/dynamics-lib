@@ -46,7 +46,7 @@ class ResolutionModel(ModelBase):
         for comp in components:
             if isinstance(comp, (DeltaFunction, Polynomial)):
                 raise TypeError(
-                    f"component in ResolutionModel cannot be a "
+                    f"Component in ResolutionModel cannot be a "
                     f"{comp.__class__.__name__}"
                 )
 
