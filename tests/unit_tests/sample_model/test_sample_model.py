@@ -385,7 +385,7 @@ class TestSampleModel:
 
         # THEN / EXPECT
         assert "SampleModel" in repr_str
-        assert "unit = " in repr_str
+        assert "unit=" in repr_str
         assert "Q = " in repr_str
         assert "components" in repr_str
         assert "diffusion_models" in repr_str

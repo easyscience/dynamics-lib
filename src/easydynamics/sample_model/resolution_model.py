@@ -27,7 +27,7 @@ class ResolutionModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MySampleModel",
+        display_name: str = "MyResolutionModel",
         unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
         components: ComponentCollection | ModelComponent | None = None,

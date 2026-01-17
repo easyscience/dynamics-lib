@@ -76,11 +76,15 @@ class SampleModel(ModelBase):
         else:
             if not isinstance(temperature, Numeric):
                 raise TypeError("temperature must be a number or None")
+
+            if temperature < 0:
+                raise ValueError("temperature must be non-negative")
             self._temperature = Parameter(
                 name="Temperature",
                 value=temperature,
                 unit=temperature_unit,
                 display_name="Temperature",
+                fixed=True,
             )
         self._temperature_unit = temperature_unit
 
@@ -176,6 +180,7 @@ class SampleModel(ModelBase):
                 value=value,
                 unit=self._temperature_unit,
                 display_name="Temperature",
+                fixed=True,
             )
         else:
             self._temperature.value = value
@@ -265,16 +270,15 @@ class SampleModel(ModelBase):
         super().generate_component_collections()
 
         # Generate components from diffusion models and add to component collections
-        if self._diffusion_models is not None:
-            for diffusion_model in self._diffusion_models:
-                diffusion_collections = diffusion_model.create_component_collections(
-                    Q=self._Q
-                )
-                for target, source in zip(
-                    self._component_collections, diffusion_collections
-                ):
-                    for component in source.components:
-                        target.append_component(component)
+        for diffusion_model in self._diffusion_models:
+            diffusion_collections = diffusion_model.create_component_collections(
+                Q=self._Q
+            )
+            for target, source in zip(
+                self._component_collections, diffusion_collections
+            ):
+                for component in source.components:
+                    target.append_component(component)
 
     def get_all_variables(self):
         """Get all Parameters and Descriptors from all ComponentCollections in the SampleModel.
@@ -284,7 +288,7 @@ class SampleModel(ModelBase):
         if self._temperature is not None:
             all_vars.append(self._temperature)
 
-        for diffusion_model in self.diffusion_models:
+        for diffusion_model in self._diffusion_models:
             all_vars.extend(diffusion_model.get_all_variables())
 
         return all_vars
@@ -299,7 +303,7 @@ class SampleModel(ModelBase):
 
     def __repr__(self):
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), Q = {self.Q}, "
-            f"components = {self.components}, diffusion_models = {self.diffusion_models}, "
-            f"temperature = {self.temperature}, divide_by_temperature = {self.divide_by_temperature}"
+            f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit}), Q = {self._Q}, "
+            f"components = {self._components}, diffusion_models = {self._diffusion_models}, "
+            f"temperature = {self._temperature}, divide_by_temperature = {self._divide_by_temperature}"
         )
