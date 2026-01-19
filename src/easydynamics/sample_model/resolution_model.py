@@ -9,7 +9,7 @@ from .components.model_component import ModelComponent
 
 
 class ResolutionModel(ModelBase):
-    """ResolutionMmodel represents a model of the instrment resolution in an experiment at various Q.
+    """ResolutionModel represents a model of the instrment resolution in an experiment at various Q.
 
     Parameters
     ----------

@@ -8,9 +8,9 @@ import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase, Parameter
 
-from .components.model_component import ModelComponent
+from easydynamics.utils.utils import Numeric
 
-Numeric = float | int
+from .components.model_component import ModelComponent
 
 
 class ComponentCollection(ModelBase):

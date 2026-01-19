@@ -1,17 +1,18 @@
+import warnings
 from copy import copy
 
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
-from numpy.typing import ArrayLike
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.utils import _validate_and_convert_Q, _validate_unit
-
-Numeric = float | int
-
-Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
+from easydynamics.utils.utils import (
+    Numeric,
+    Q_type,
+    _validate_and_convert_Q,
+    _validate_unit,
+)
 
 
 class ModelBase(EasyScienceModelBase):
@@ -46,6 +47,7 @@ class ModelBase(EasyScienceModelBase):
             unique_name=unique_name,
         )
         self._unit = _validate_unit(unit)
+        self._Q = _validate_and_convert_Q(Q)
 
         if components is not None and not isinstance(
             components, (ModelComponent, ComponentCollection)
@@ -58,7 +60,7 @@ class ModelBase(EasyScienceModelBase):
         if isinstance(components, (ModelComponent, ComponentCollection)):
             self.append_component(components)
 
-            self._Q = _validate_and_convert_Q(Q)
+        self._generate_component_collections()
 
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
@@ -85,31 +87,6 @@ class ModelBase(EasyScienceModelBase):
 
         return y
 
-    def generate_component_collections(self) -> None:
-        """Generate ComponentCollections for each Q value."""
-        # TODO regenerate automatically if Q or components have changed
-
-        if self._Q is None:
-            raise ValueError("Q must be set before generating component collections.")
-
-        self._component_collections = [ComponentCollection() for _ in self._Q]
-
-        # Add copies of components from self._components to each component collection
-        for collection in self._component_collections:
-            for component in self._components.components:
-                collection.append_component(copy(component))
-
-    def get_all_variables(self):
-        """Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-        Ignores the Parameters and Descriptors in self._components as these are just templates."""
-
-        all_vars = [
-            var
-            for collection in self._component_collections
-            for var in collection.get_all_variables()
-        ]
-        return all_vars
-
     # --------------------------------------------------------------------
     # Component management
     # --------------------------------------------------------------------
@@ -120,6 +97,7 @@ class ModelBase(EasyScienceModelBase):
             component (ModelComponent | ComponentCollection): The ModelComponent or ComponentCollection to append.
         """
         self._components.append_component(component)
+        self._generate_component_collections()
 
     def remove_component(self, unique_name: str) -> None:
         """Remove a ModelComponent from the SampleModel by its unique name.
@@ -128,10 +106,12 @@ class ModelBase(EasyScienceModelBase):
             unique_name (str): The unique name of the ModelComponent to remove.
         """
         self._components.remove_component(unique_name)
+        self._generate_component_collections()
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
         self._components.clear_components()
+        self._generate_component_collections()
 
     # --------------------------------------------------------------------
     # Properties
@@ -176,6 +156,7 @@ class ModelBase(EasyScienceModelBase):
             except Exception:
                 pass  # Best effort rollback
             raise e
+        self._generate_component_collections()
 
     @property
     def components(self) -> list[ModelComponent]:
@@ -203,10 +184,40 @@ class ModelBase(EasyScienceModelBase):
     def Q(self, value: Q_type | None) -> None:
         """Set the Q values of the SampleModel."""
         self._Q = _validate_and_convert_Q(value)
+        self._generate_component_collections()
 
     # --------------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------------
+
+    def _generate_component_collections(self) -> None:
+        """Generate ComponentCollections for each Q value."""
+        # TODO regenerate automatically if Q or components have changed
+
+        if self._Q is None:
+            warnings.warn(
+                "Q is not set. No component collections generated", UserWarning
+            )
+            self._component_collections = []
+            return
+
+        self._component_collections = [ComponentCollection() for _ in self._Q]
+
+        # Add copies of components from self._components to each component collection
+        for collection in self._component_collections:
+            for component in self._components.components:
+                collection.append_component(copy(component))
+
+    def get_all_variables(self):
+        """Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
+        Ignores the Parameters and Descriptors in self._components as these are just templates."""
+
+        all_vars = [
+            var
+            for collection in self._component_collections
+            for var in collection.get_all_variables()
+        ]
+        return all_vars
 
     # --------------------------------------------------------------------
     # dunder methods

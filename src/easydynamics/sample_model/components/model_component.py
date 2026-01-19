@@ -9,7 +9,7 @@ import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
-Numeric = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class ModelComponent(ModelBase):

@@ -4,8 +4,7 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
-Numeric = int | float
-
+from easydynamics.utils.utils import Numeric
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 MINIMUM_AREA = 0.0  # To avoid negative areas

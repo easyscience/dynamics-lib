@@ -334,7 +334,7 @@ class TestSampleModel:
 
     def test_generate_component_collections(self, sample_model):
         # WHEN THEN
-        sample_model.generate_component_collections()
+        sample_model._generate_component_collections()
 
         # EXPECT
         assert len(sample_model._component_collections) == 3  # 3 Q values
@@ -353,7 +353,6 @@ class TestSampleModel:
 
     def test_get_all_variables(self, sample_model):
         # WHEN
-        sample_model.generate_component_collections()
 
         # THEN
         all_vars = sample_model.get_all_variables()

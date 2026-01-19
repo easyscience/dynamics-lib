@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
@@ -7,7 +5,7 @@ from easyscience.variable import DescriptorNumber
 from numpy.typing import ArrayLike
 from scipp import UnitError
 
-Numeric = Union[float, int]
+from easydynamics.utils.utils import Numeric
 
 Q_type = np.ndarray | Numeric | list | ArrayLike
 

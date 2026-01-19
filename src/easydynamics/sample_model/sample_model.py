@@ -50,14 +50,6 @@ class SampleModel(ModelBase):
         temperature_unit: str | sc.Unit = "K",
         divide_by_temperature: bool = True,
     ):
-        super().__init__(
-            display_name=display_name,
-            unique_name=unique_name,
-            unit=unit,
-            components=components,
-            Q=Q,
-        )
-
         if diffusion_models is None:
             self._diffusion_models = []
         elif isinstance(diffusion_models, DiffusionModelBase):
@@ -70,6 +62,14 @@ class SampleModel(ModelBase):
                     "diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase or None"
                 )
             self._diffusion_models = diffusion_models
+
+        super().__init__(
+            display_name=display_name,
+            unique_name=unique_name,
+            unit=unit,
+            components=components,
+            Q=Q,
+        )
 
         if temperature is None:
             self._temperature = None
@@ -109,6 +109,7 @@ class SampleModel(ModelBase):
             )
 
         self._diffusion_models.append(diffusion_model)
+        self._generate_component_collections()
 
     def remove_diffusion_model(self, name: "str") -> None:
         """Remove a DiffusionModel from the SampleModel by name.
@@ -119,6 +120,7 @@ class SampleModel(ModelBase):
         for i, dm in enumerate(self._diffusion_models):
             if dm.unique_name == name:
                 del self._diffusion_models[i]
+                self._generate_component_collections()
                 return
         raise ValueError(
             f"No DiffusionModel with name {name} found. The available names are: {[dm.unique_name for dm in self._diffusion_models]}"
@@ -127,6 +129,7 @@ class SampleModel(ModelBase):
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""
         self._diffusion_models.clear()
+        self._generate_component_collections()
 
     # --------------------------------------------------------------------
     # Properties
@@ -155,6 +158,7 @@ class SampleModel(ModelBase):
                 "diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, or None"
             )
         self._diffusion_models = value
+        self._generate_component_collections()
 
     @property
     def temperature(self) -> Parameter | None:
@@ -264,22 +268,6 @@ class SampleModel(ModelBase):
 
         return y
 
-    def generate_component_collections(self) -> None:
-        """Generate ComponentCollections from the DiffusionModels for each Q and add the components from self._components."""
-        # TODO regenerate automatically if Q, diffusion models or components have changed
-        super().generate_component_collections()
-
-        # Generate components from diffusion models and add to component collections
-        for diffusion_model in self._diffusion_models:
-            diffusion_collections = diffusion_model.create_component_collections(
-                Q=self._Q
-            )
-            for target, source in zip(
-                self._component_collections, diffusion_collections
-            ):
-                for component in source.components:
-                    target.append_component(component)
-
     def get_all_variables(self):
         """Get all Parameters and Descriptors from all ComponentCollections in the SampleModel.
         Also includes temperature if set and all variables from diffusion models.
@@ -296,6 +284,24 @@ class SampleModel(ModelBase):
     # --------------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------------
+
+    def _generate_component_collections(self) -> None:
+        """Generate ComponentCollections from the DiffusionModels for each Q and add the components from self._components."""
+        # TODO regenerate automatically if Q, diffusion models or components have changed
+        super()._generate_component_collections()
+
+        if self._Q is None:
+            return
+        # Generate components from diffusion models and add to component collections
+        for diffusion_model in self._diffusion_models:
+            diffusion_collections = diffusion_model.create_component_collections(
+                Q=self._Q
+            )
+            for target, source in zip(
+                self._component_collections, diffusion_collections
+            ):
+                for component in source.components:
+                    target.append_component(component)
 
     # --------------------------------------------------------------------
     # dunder methods

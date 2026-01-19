@@ -92,7 +92,7 @@ class TestModelBase:
 
     def test_generate_component_collections_with_Q(self, model_base):
         # WHEN
-        model_base.generate_component_collections()
+        model_base._generate_component_collections()
 
         # THEN
         assert len(model_base._component_collections) == len(model_base.Q)
@@ -104,17 +104,16 @@ class TestModelBase:
             assert isinstance(collection.components[1], Lorentzian)
             assert collection.components[1].display_name == "TestLorentzian1"
 
-    def test_generate_component_collections_without_Q_raises(self, model_base):
+    def test_generate_component_collections_without_Q_warns(self, model_base):
         # WHEN
         model_base._Q = None
 
         # THEN / EXPECT
-        with pytest.raises(ValueError, match="Q must be set"):
-            model_base.generate_component_collections()
+        with pytest.warns(UserWarning, match="Q is not set"):
+            model_base._generate_component_collections()
 
     def test_get_all_variables(self, model_base):
         # WHEN
-        model_base.generate_component_collections()
         all_vars = model_base.get_all_variables()
 
         # THEN
