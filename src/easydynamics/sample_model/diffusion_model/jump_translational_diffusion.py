@@ -18,10 +18,10 @@ Numeric = Union[float, int]
 Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
-class BrownianTranslationalDiffusion(DiffusionModelBase):
+class JumpTranslationalDiffusion(DiffusionModelBase):
     """
-    Model of Brownian translational diffusion, consisting of a Lorentzian
-    function for each Q-value, where the width is given by :math:`DQ^2`.
+    Model of Jump translational diffusion, consisting of a Lorentzian
+    function for each Q-value, where the width is given by :math:`D Q^2/(1+D t Q^2)`.
     Q is assumed to have units of 1/angstrom.
     Creates ComponentCollections with Lorentzian components for given Q-values.
 
@@ -30,22 +30,23 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     energy=np.linspace(-2, 2, 501)
     scale=1.0
     diffusion_coefficient = 2.4e-9  # m^2/s
-    diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel", scale=scale, diffusion_coefficient= diffusion_coefficient)
+    diffusion_model=JumpTranslationalDiffusion(display_name="DiffusionModel", scale=scale, diffusion_coefficient= diffusion_coefficient)
     component_collections=diffusion_model.create_component_collections(Q)
     See also the examples.
     """
 
     def __init__(
         self,
-        display_name: str | None = "BrownianTranslationalDiffusion",
+        display_name: str | None = "JumpTranslationalDiffusion",
         unique_name: str | None = None,
         unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
+        relaxation_time: Numeric = 1.0,
         diffusion_unit: str = "m**2/s",
     ):
         """
-        Initialize a new BrownianTranslationalDiffusion model.
+        Initialize a new JumpTranslationalDiffusion model.
 
         Parameters
         ----------
@@ -90,8 +91,21 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             fixed=False,
             unit=diffusion_unit,
         )
+
+        relaxation_time = Parameter(
+            name="relaxation_time",
+            value=float(relaxation_time),
+            fixed=False,
+            unit="ps",
+        )
+
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
+        self._relaxation_time = relaxation_time
+
+    ################################
+    # Properties
+    ################################
 
     @property
     def diffusion_coefficient(self) -> Parameter:
@@ -114,9 +128,35 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             raise TypeError("diffusion_coefficient must be a number.")
         self._diffusion_coefficient.value = diffusion_coefficient
 
+    @property
+    def relaxation_time(self) -> Parameter:
+        """
+        Get the relaxation time parameter t.
+
+        Returns
+        -------
+        Parameter
+            Relaxation time t.
+        """
+        return self._relaxation_time
+
+    @relaxation_time.setter
+    def relaxation_time(self, relaxation_time: Numeric) -> None:
+        """
+        Set the relaxation time parameter t.
+        """
+        if not isinstance(relaxation_time, Numeric):
+            raise TypeError("relaxation_time must be a number.")
+        self._relaxation_time.value = relaxation_time
+
+    ################################
+    # Other methods
+    ################################
+
     def calculate_width(self, Q: Q_type) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the diffusion model.
+        Equation: :math:`\\Gamma(Q) = \\hbar D Q^2/(1+D t Q^2)`
 
         Parameters
         ----------
@@ -131,11 +171,21 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Q = _validate_and_convert_Q(Q)
 
-        unit_conversion_factor = (
+        unit_conversion_factor_nominator = (
             self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         )
-        unit_conversion_factor.convert_unit(self.unit)
-        width = Q**2 * unit_conversion_factor.value
+        unit_conversion_factor_nominator.convert_unit(self.unit)
+
+        nominator = unit_conversion_factor_nominator.value * Q**2
+
+        unit_conversion_factor_denominator = (
+            self.diffusion_coefficient / self._angstrom**2 * self.relaxation_time
+        )
+        unit_conversion_factor_denominator.convert_unit("dimensionless")
+
+        denominator = 1 + unit_conversion_factor_denominator.value * Q**2
+
+        width = nominator / denominator
 
         return width
 
@@ -236,6 +286,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         return component_collection_list
 
+    ################################
+    # Private methods
+    ################################
+
     def _write_width_dependency_expression(self, Q: float) -> str:
         """
         Write the dependency expression for the width as a function of Q to make dependent Parameters.
@@ -252,7 +306,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             raise TypeError("Q must be a float.")
 
         # Q is given as a float, so we need to add the units
-        return f"hbar * D* {Q} **2*1/(angstrom**2)"
+        return f"hbar * D* {Q} **2*1/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))"
 
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """
@@ -260,6 +314,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
         return {
             "D": self._diffusion_coefficient,
+            "t": self._relaxation_time,
             "hbar": self._hbar,
             "angstrom": self._angstrom,
         }
@@ -282,11 +337,15 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Write the dependency map expression to make dependent Parameters.
         """
         return {
-            "scale": self.scale,
+            "scale": self._scale,
         }
+
+    ################################
+    # dunder methods
+    ################################
 
     def __repr__(self):
         """
-        String representation of the BrownianTranslationalDiffusion model.
+        String representation of the JumpTranslationalDiffusion model.
         """
-        return f"BrownianTranslationalDiffusion(display_name={self.display_name}, diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})"
+        return f"JumpTranslationalDiffusion(display_name={self.display_name}, diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})"

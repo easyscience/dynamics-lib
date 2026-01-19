@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
-from easyscience.variable import DescriptorNumber
+from easyscience.variable import DescriptorNumber, Parameter
 from numpy.typing import ArrayLike
 from scipp import UnitError
 
@@ -21,6 +21,7 @@ class DiffusionModelBase(ModelBase):
         self,
         display_name="MyDiffusionModel",
         unique_name: str | None = None,
+        scale: Numeric = 1.0,
         unit: str | sc.Unit = "meV",
     ):
         """
@@ -33,6 +34,10 @@ class DiffusionModelBase(ModelBase):
         unit : str or sc.Unit, optional
             Unit of the diffusion model. Defaults to "meV".
         """
+        if not isinstance(scale, Numeric):
+            raise TypeError("scale must be a number.")
+
+        scale = Parameter(name="scale", value=float(scale), fixed=False, min=0.0)
 
         try:
             test = DescriptorNumber(name="test", value=1, unit=unit)
@@ -44,6 +49,7 @@ class DiffusionModelBase(ModelBase):
 
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
+        self._scale = scale
 
     @property
     def unit(self) -> str:
@@ -64,6 +70,27 @@ class DiffusionModelBase(ModelBase):
                 f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
+
+    @property
+    def scale(self) -> Parameter:
+        """
+        Get the scale parameter of the diffusion model.
+
+        Returns
+        -------
+        Parameter
+            Scale parameter.
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale: Numeric) -> None:
+        """
+        Set the scale parameter of the diffusion model.
+        """
+        if not isinstance(scale, Numeric):
+            raise TypeError("scale must be a number.")
+        self._scale.value = scale
 
     def __repr__(self):
         """
