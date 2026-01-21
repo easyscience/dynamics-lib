@@ -42,7 +42,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
-        diffusion_unit: str = "m**2/s",
     ):
         """
         Initialize a new BrownianTranslationalDiffusion model.
@@ -59,8 +58,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Scale factor for the diffusion model.
         diffusion_coefficient : float  , optional
             Diffusion coefficient D. If a number is provided, it is assumed to be in the unit given by diffusion_unit. Defaults to 1.0.
-        diffusion_unit : str, optional
-            Unit for the diffusion coefficient D. Default is m**2/s. Options are 'meV*Å**2' or 'm**2/s'
 
         """
         super().__init__(
@@ -73,23 +70,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError("diffusion_coefficient must be a number.")
 
-        if not isinstance(diffusion_unit, str):
-            raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
-
-        if diffusion_unit == "meV*Å**2" or diffusion_unit == "meV*angstrom**2":
-            # In this case, hbar is absorbed in the unit of D
-            self._hbar = DescriptorNumber("hbar", 1.0)
-        elif diffusion_unit == "m**2/s" or diffusion_unit == "m^2/s":
-            self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
-        else:
-            raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
-
         diffusion_coefficient = Parameter(
             name="diffusion_coefficient",
             value=float(diffusion_coefficient),
             fixed=False,
-            unit=diffusion_unit,
+            unit="m**2/s",
         )
+        self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
 

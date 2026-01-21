@@ -34,7 +34,6 @@ class TestBrownianTranslationalDiffusion:
                     "unit": 123,
                     "scale": 1.0,
                     "diffusion_coefficient": 1.0,
-                    "diffusion_unit": "m**2/s",
                 },
                 UnitError,
                 "Invalid unit",
@@ -44,7 +43,6 @@ class TestBrownianTranslationalDiffusion:
                     "unit": "meV",
                     "scale": "invalid",
                     "diffusion_coefficient": 1.0,
-                    "diffusion_unit": "m**2/s",
                 },
                 TypeError,
                 "scale must be a number",
@@ -54,20 +52,9 @@ class TestBrownianTranslationalDiffusion:
                     "unit": "meV",
                     "scale": 1.0,
                     "diffusion_coefficient": "invalid",
-                    "diffusion_unit": "m**2/s",
                 },
                 TypeError,
                 "diffusion_coefficient must be a number",
-            ),
-            (
-                {
-                    "unit": "meV",
-                    "scale": 1.0,
-                    "diffusion_coefficient": 1.0,
-                    "diffusion_unit": 123,
-                },
-                TypeError,
-                "diffusion_unit must be ",
             ),
         ],
     )
@@ -77,17 +64,6 @@ class TestBrownianTranslationalDiffusion:
         with pytest.raises(expected_exception, match=expected_message):
             BrownianTranslationalDiffusion(
                 display_name="BrownianTranslationalDiffusion", **kwargs
-            )
-
-    def test_diffusion_unit_value_error(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="diffusion_unit must be ."):
-            BrownianTranslationalDiffusion(
-                display_name="BrownianTranslationalDiffusion",
-                unit="meV",
-                scale=1.0,
-                diffusion_coefficient=1.0,
-                diffusion_unit="invalid_unit",
             )
 
     def test_diffusion_coefficient_setter(self, brownian_diffusion_model):
@@ -123,20 +99,6 @@ class TestBrownianTranslationalDiffusion:
             "meV",
         )
         expected_widths = 1.0 * unit_conversion_factor.value * (Q_values**2)
-        np.testing.assert_allclose(widths, expected_widths, rtol=1e-5)
-
-    def test_calculate_width_diffusion_unit_mev_angstrom2(self):
-        # WHEN
-        diffusion_model = BrownianTranslationalDiffusion(
-            diffusion_coefficient=2.0, diffusion_unit="meV*Å**2"
-        )
-        Q_values = np.array([0.1, 0.2, 0.3])  # Example Q values in Å^-1
-
-        # WHEN
-        widths = diffusion_model.calculate_width(Q_values)
-
-        # THEN EXPECT
-        expected_widths = 2.0 * (Q_values**2)
         np.testing.assert_allclose(widths, expected_widths, rtol=1e-5)
 
     def test_calculate_EISF(self, brownian_diffusion_model):

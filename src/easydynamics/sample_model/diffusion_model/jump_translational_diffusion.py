@@ -43,7 +43,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
-        diffusion_unit: str = "m**2/s",
     ):
         """
         Initialize a new JumpTranslationalDiffusion model.
@@ -59,9 +58,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         scale : float  , optional
             Scale factor for the diffusion model.
         diffusion_coefficient : float  , optional
-            Diffusion coefficient D. If a number is provided, it is assumed to be in the unit given by diffusion_unit. Defaults to 1.0.
-        diffusion_unit : str, optional
-            Unit for the diffusion coefficient D. Default is m**2/s. Options are 'meV*Å**2' or 'm**2/s'
+            Diffusion coefficient D in m^2/s. Defaults to 1.0.
+        relaxation_time : float  , optional
+            Relaxation time t in ps. Defaults to 1.0.
 
         """
         super().__init__(
@@ -74,25 +73,14 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError("diffusion_coefficient must be a number.")
 
-        if not isinstance(diffusion_unit, str):
-            raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
-
         if not isinstance(relaxation_time, Numeric):
             raise TypeError("relaxation_time must be a number.")
-
-        if diffusion_unit == "meV*Å**2" or diffusion_unit == "meV*angstrom**2":
-            # In this case, hbar is absorbed in the unit of D
-            self._hbar = DescriptorNumber("hbar", 1.0)
-        elif diffusion_unit == "m**2/s" or diffusion_unit == "m^2/s":
-            self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
-        else:
-            raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
 
         diffusion_coefficient = Parameter(
             name="diffusion_coefficient",
             value=float(diffusion_coefficient),
             fixed=False,
-            unit=diffusion_unit,
+            unit="m**2/s",
         )
 
         relaxation_time = Parameter(
@@ -102,6 +90,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             unit="ps",
         )
 
+        self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
         self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
         self._relaxation_time = relaxation_time

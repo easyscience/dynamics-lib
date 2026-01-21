@@ -25,7 +25,7 @@ class TestJumpTranslationalDiffusion:
         assert jump_diffusion_model.unit == "meV"
         assert jump_diffusion_model.scale.value == 1.0
         assert jump_diffusion_model.diffusion_coefficient.value == 1.0
-        assert jump_diffusion_model.relaxation_time == 1.0
+        assert jump_diffusion_model.relaxation_time.value == 1.0
 
     @pytest.mark.parametrize(
         "kwargs,expected_exception, expected_message",
@@ -36,7 +36,6 @@ class TestJumpTranslationalDiffusion:
                     "scale": 1.0,
                     "diffusion_coefficient": 1.0,
                     "relaxation_time": 1.0,
-                    "diffusion_unit": "m**2/s",
                 },
                 UnitError,
                 "Invalid unit",
@@ -47,7 +46,6 @@ class TestJumpTranslationalDiffusion:
                     "scale": "invalid",
                     "diffusion_coefficient": 1.0,
                     "relaxation_time": 1.0,
-                    "diffusion_unit": "m**2/s",
                 },
                 TypeError,
                 "scale must be a number",
@@ -58,7 +56,6 @@ class TestJumpTranslationalDiffusion:
                     "scale": 1.0,
                     "diffusion_coefficient": "invalid",
                     "relaxation_time": 1.0,
-                    "diffusion_unit": "m**2/s",
                 },
                 TypeError,
                 "diffusion_coefficient must be a number",
@@ -67,23 +64,11 @@ class TestJumpTranslationalDiffusion:
                 {
                     "unit": "meV",
                     "scale": 1.0,
-                    "diffusion_coefficient": "invalid",
+                    "diffusion_coefficient": 1.0,
                     "relaxation_time": "invalid",
-                    "diffusion_unit": "m**2/s",
                 },
                 TypeError,
                 "relaxation_time must be a number",
-            ),
-            (
-                {
-                    "unit": "meV",
-                    "scale": 1.0,
-                    "diffusion_coefficient": 1.0,
-                    "relaxation_time": 1.0,
-                    "diffusion_unit": 123,
-                },
-                TypeError,
-                "diffusion_unit must be ",
             ),
         ],
     )
@@ -93,17 +78,6 @@ class TestJumpTranslationalDiffusion:
         with pytest.raises(expected_exception, match=expected_message):
             JumpTranslationalDiffusion(
                 display_name="JumpTranslationalDiffusion", **kwargs
-            )
-
-    def test_diffusion_unit_value_error(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="diffusion_unit must be ."):
-            JumpTranslationalDiffusion(
-                display_name="JumpTranslationalDiffusion",
-                unit="meV",
-                scale=1.0,
-                diffusion_coefficient=1.0,
-                diffusion_unit="invalid_unit",
             )
 
     def test_diffusion_coefficient_setter(self, jump_diffusion_model):
@@ -161,38 +135,6 @@ class TestJumpTranslationalDiffusion:
         expected_widths = expected_widths.to(unit=jump_diffusion_model.unit)
 
         np.testing.assert_allclose(widths, expected_widths.values, rtol=1e-5)
-
-    def test_calculate_width_diffusion_unit_mev_angstrom2(self):
-        # WHEN
-        jump_diffusion_model = JumpTranslationalDiffusion(
-            diffusion_coefficient=2.0, relaxation_time=1, diffusion_unit="meV*Å**2"
-        )
-
-        # WHEN
-        Q_values = sc.linspace("Q", 0.5, 1.5, num=6, unit="1/angstrom")
-        relaxation_time_sc = jump_diffusion_model.relaxation_time.value * sc.Unit(
-            jump_diffusion_model.relaxation_time.unit
-        )
-        diffusion_coefficient_sc = (
-            jump_diffusion_model.diffusion_coefficient.value
-            * sc.Unit(jump_diffusion_model.diffusion_coefficient.unit)
-        )
-
-        # THEN
-        # widths = jump_diffusion_model.calculate_width(Q_values)
-        # calculate_width doesn't work with these units.
-
-        denominator = (
-            diffusion_coefficient_sc * relaxation_time_sc * Q_values**2 / scipp_hbar
-        )
-        denominator = denominator.to(unit="1")
-
-        # # EXPECT
-        # expected_widths = diffusion_coefficient_sc * (Q_values**2) / (1 + denominator)
-
-        # expected_widths = expected_widths.to(unit=jump_diffusion_model.unit)
-
-        # np.testing.assert_allclose(widths, expected_widths.values, rtol=1e-5)
 
     def test_calculate_EISF(self, jump_diffusion_model):
         # WHEN
@@ -285,7 +227,9 @@ class TestJumpTranslationalDiffusion:
         expression = jump_diffusion_model._write_width_dependency_expression(0.5)
 
         # EXPECT
-        expected_expression = "hbar * D* 0.5 **2*1/(angstrom**2)"
+        expected_expression = (
+            "hbar * D* 0.5 **2*1/(angstrom**2)/(1 + (D * t* 0.5 **2/(angstrom**2)))"
+        )
         assert expression == expected_expression
 
     def test_write_width_dependency_map_expression(self, jump_diffusion_model):
@@ -295,6 +239,7 @@ class TestJumpTranslationalDiffusion:
         # EXPECT
         expected_map = {
             "D": jump_diffusion_model.diffusion_coefficient,
+            "t": jump_diffusion_model.relaxation_time,
             "hbar": jump_diffusion_model._hbar,
             "angstrom": jump_diffusion_model._angstrom,
         }
