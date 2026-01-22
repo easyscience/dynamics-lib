@@ -210,7 +210,6 @@ class TestBrownianTranslationalDiffusion:
             model = component_collections[model_index]
             assert len(model.components) == 1
             component = model.components[0]
-            assert component.display_name == "Lorentzian"
             assert component.width.unit == brownian_diffusion_model.unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
@@ -266,6 +265,10 @@ class TestBrownianTranslationalDiffusion:
     def test_write_width_dependency_expression_raises(self, brownian_diffusion_model):
         with pytest.raises(TypeError, match="Q must be a float"):
             brownian_diffusion_model._write_width_dependency_expression("invalid")
+
+    def test_write_area_dependency_expression_raises(self, brownian_diffusion_model):
+        with pytest.raises(TypeError, match="QISF must be a float"):
+            brownian_diffusion_model._write_area_dependency_expression("invalid")
 
     def test_repr(self, brownian_diffusion_model):
         # WHEN THEN

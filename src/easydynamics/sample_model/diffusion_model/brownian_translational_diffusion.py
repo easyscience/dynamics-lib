@@ -11,6 +11,7 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
     DiffusionModelBase,
 )
+from easydynamics.utils.utils import _validate_and_convert_Q
 
 Numeric = Union[float, int]
 
@@ -153,7 +154,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             HWHM values in the unit of the model (e.g., meV).
         """
 
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
 
         unit_conversion_factor = (
             self._hbar * self.diffusion_coefficient / (self._angstrom**2)
@@ -177,7 +178,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
         EISF = np.zeros_like(Q)
         return EISF
 
@@ -196,14 +197,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             QISF values (dimensionless).
         """
 
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
         QISF = np.ones_like(Q)
         return QISF
 
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = "Lorentzian",
+        component_display_name: str = "Brownian translational diffusion",
     ) -> List[ComponentCollection]:
         """
         Create ComponentCollection components for the Brownian translational diffusion model at given Q values.
@@ -212,13 +213,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q : Number, list, or np.ndarray
             Scattering vector values.
         component_display_name : str
-            Name of the Lorentzian component.
+            Name of the Brownian Diffusion Lorentzian component.
         Returns
         -------
         List[ComponentCollection]
-            List of ComponentCollections with Lorentzian components.
+            List of ComponentCollections with Brownian Diffusion Lorentzian components.
         """
-        Q = self._validate_and_convert_Q(Q)
+        Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
             raise TypeError("component_name must be a string.")
@@ -235,7 +236,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
             lorentzian_component = Lorentzian(
                 display_name=component_display_name,
-                area=self.scale * QISF[i],
                 unit=self.unit,
             )
 
@@ -248,9 +248,16 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 dependency_map=dependency_map,
             )
 
+            # Make the area dependent on Q
+            area_dependency_map = self._write_area_dependency_map_expression()
+            lorentzian_component.area.make_dependent_on(
+                dependency_expression=self._write_area_dependency_expression(QISF[i]),
+                dependency_map=area_dependency_map,
+            )
+
             # Resolving the dependency can do weird things to the units, so we make sure it's correct.
             lorentzian_component.width.convert_unit(self.unit)
-            component_collection_list[i].add_component(lorentzian_component)
+            component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list
 
@@ -280,6 +287,27 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             "D": self.diffusion_coefficient,
             "hbar": self._hbar,
             "angstrom": self._angstrom,
+        }
+
+    def _write_area_dependency_expression(self, QISF: float) -> str:
+        """
+        Write the dependency expression for the area to make dependent Parameters.
+        Returns
+        -------
+        str
+            Dependency expression for the area.
+        """
+        if not isinstance(QISF, (float)):
+            raise TypeError("QISF must be a float.")
+
+        return f"{QISF} * scale"
+
+    def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+        """
+        Write the dependency map expression to make dependent Parameters.
+        """
+        return {
+            "scale": self.scale,
         }
 
     def __repr__(self):

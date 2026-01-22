@@ -5,10 +5,9 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
-
-Numeric = float | int
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):

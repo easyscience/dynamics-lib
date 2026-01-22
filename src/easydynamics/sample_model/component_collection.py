@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import warnings
 from typing import List
 
 import numpy as np
 import scipp as sc
-
-# from easyscience.job.theoreticalmodel import TheoreticalModelBase
 from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase, Parameter
 
-from .components.model_component import ModelComponent
+from easydynamics.utils.utils import Numeric
 
-Numeric = float | int
+from .components.model_component import ModelComponent
 
 
 class ComponentCollection(ModelBase):
@@ -64,19 +64,29 @@ class ComponentCollection(ModelBase):
                     "components must be a list of ModelComponent instances."
                 )
             for comp in components:
-                self.add_component(comp)
+                self.append_component(comp)
 
-    def add_component(self, component: ModelComponent) -> None:
-        if not isinstance(component, ModelComponent):
-            raise TypeError("Component must be an instance of ModelComponent.")
+    def append_component(
+        self, component: ModelComponent | "ComponentCollection"
+    ) -> None:
+        match component:
+            case ModelComponent():
+                components = (component,)
+            case ComponentCollection(components=components):
+                pass
+            case _:
+                raise TypeError(
+                    "Component must be a ModelComponent or ComponentCollection."
+                )
 
-        if component in self._components:
-            raise ValueError(
-                f"Component '{component.unique_name}' is already in the collection."
-                f"Here is a list of the components in the collection: {self.list_component_names()} "
-            )
+        for comp in components:
+            if comp in self._components:
+                raise ValueError(
+                    f"Component '{comp.unique_name}' is already in the collection. "
+                    f"Existing components: {self.list_component_names()}"
+                )
 
-        self._components.append(component)
+            self._components.append(comp)
 
     def remove_component(self, unique_name: str) -> None:
         if not isinstance(unique_name, str):

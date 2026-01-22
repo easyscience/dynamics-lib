@@ -8,9 +8,9 @@ import scipp as sc
 from easyscience.variable import DescriptorBase, Parameter
 from scipp import UnitError
 
-from .model_component import ModelComponent
+from easydynamics.utils.utils import Numeric
 
-Numeric = float | int
+from .model_component import ModelComponent
 
 
 class Polynomial(ModelComponent):

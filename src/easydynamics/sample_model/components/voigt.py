@@ -6,10 +6,9 @@ from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
-
-Numeric = float | int
 
 
 class Voigt(CreateParametersMixin, ModelComponent):

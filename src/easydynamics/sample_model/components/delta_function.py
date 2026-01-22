@@ -5,10 +5,9 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
-
-Numeric = float | int
 
 EPSILON = 1e-8  # small number to avoid floating point issues
 
