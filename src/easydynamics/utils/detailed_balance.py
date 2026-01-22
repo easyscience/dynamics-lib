@@ -1,5 +1,4 @@
 import warnings
-from typing import Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -13,10 +12,10 @@ LARGE_THRESHOLD = 100  # For large values of x, the exponential term becomes neg
 
 
 def _detailed_balance_factor(
-    energy: Union[int, float, list, np.ndarray, sc.Variable],
-    temperature: Union[int, float, sc.Variable, Parameter],
-    energy_unit: Union[str, sc.Unit] = "meV",
-    temperature_unit: Union[str, sc.Unit] = "K",
+    energy: int | float | list | np.ndarray | sc.Variable,
+    temperature: int | float | sc.Variable | Parameter,
+    energy_unit: str | sc.Unit = "meV",
+    temperature_unit: str | sc.Unit = "K",
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
     """
@@ -141,9 +140,9 @@ def _detailed_balance_factor(
 
 
 def _convert_to_scipp_variable(
-    value: Union[int, float, list, np.ndarray, Parameter, sc.Variable],
+    value: int | float | list | np.ndarray | Parameter | sc.Variable,
     name: str,
-    unit: Optional[str] = None,
+    unit: str | None = None,
 ) -> sc.Variable:
     """Convert various input types to a scipp Variable with proper units."""
     if isinstance(value, sc.Variable):

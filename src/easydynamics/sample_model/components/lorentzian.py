@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, Union
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
-
-Numeric = Union[float, int]
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
@@ -19,42 +16,85 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
 
     Args:
-        name (str): Name of the component.
         area (Int, float or Parameter): Area of the Lorentzian.
         center (Int, float, None or Parameter): Peak center. If None, defaults to 0 and is fixed.
         width (Int, float or Parameter): Half Width at Half Maximum (HWHM)
         unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        display_name (str): Display name of the component.
+        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
     """
 
     def __init__(
         self,
-        name: Optional[str] = "Lorentzian",
-        area: Optional[Union[Numeric, Parameter]] = 1.0,
-        center: Optional[Union[Numeric, Parameter, None]] = None,
-        width: Optional[Union[Numeric, Parameter]] = 1.0,
-        unit: Optional[Union[str, sc.Unit]] = "meV",
+        area: Numeric | Parameter = 1.0,
+        center: Numeric | Parameter | None = None,
+        width: Numeric | Parameter = 1.0,
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "Lorentzian",
+        unique_name: str | None = None,
     ):
-        # Validate inputs and create Parameters if not given
-        self.validate_unit(unit)
-        self._unit = unit
+        super().__init__(
+            display_name=display_name,
+            unit=unit,
+            unique_name=unique_name,
+        )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
+        area = self._create_area_parameter(
+            area=area, name=display_name, unit=self._unit
+        )
         center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+            center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
+        width = self._create_width_parameter(
+            width=width, name=display_name, unit=self._unit
+        )
 
-        super().__init__(
-            name=name,
-            unit=unit,
-            area=area,
-            center=center,
-            width=width,
-        )
+        self._area = area
+        self._center = center
+        self._width = width
+
+    @property
+    def area(self) -> Parameter:
+        """Get the area parameter."""
+        return self._area
+
+    @area.setter
+    def area(self, value: Numeric) -> None:
+        """Set the area parameter value."""
+        if not isinstance(value, Numeric):
+            raise TypeError("area must be a number")
+        self._area.value = value
+
+    @property
+    def center(self) -> Parameter:
+        """Get the center parameter."""
+        return self._center
+
+    @center.setter
+    def center(self, value: Numeric | None) -> None:
+        """Set the center parameter value."""
+        if value is None:
+            value = 0.0
+            self._center.fixed = True
+        if not isinstance(value, Numeric):
+            raise TypeError("center must be a number")
+        self._center.value = value
+
+    @property
+    def width(self) -> Parameter:
+        """Get the width parameter."""
+        return self._width
+
+    @width.setter
+    def width(self, value: Numeric) -> None:
+        """Set the width parameter value."""
+        if not isinstance(value, Numeric):
+            raise TypeError("width must be a number")
+        self._width.value = value
 
     def evaluate(
-        self, x: Union[Numeric, list, np.ndarray, sc.Variable, sc.DataArray]
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Evaluate the Lorentzian at the given x values.
         If x is a scipp Variable, the unit of the Lorentzian will be converted to match x.
@@ -68,4 +108,4 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization / denominator
 
     def __repr__(self):
-        return f"Lorentzian(name = {self.name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f"Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"

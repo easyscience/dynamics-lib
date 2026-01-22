@@ -12,7 +12,7 @@ class TestDampedHarmonicOscillator:
     @pytest.fixture
     def dho(self):
         return DampedHarmonicOscillator(
-            name="TestDHO", area=2.0, center=1.5, width=0.3, unit="meV"
+            display_name="TestDHO", area=2.0, center=1.5, width=0.3, unit="meV"
         )
 
     def test_init_no_inputs(self):
@@ -20,7 +20,7 @@ class TestDampedHarmonicOscillator:
         dho = DampedHarmonicOscillator()
 
         # EXPECT
-        assert dho.name == "DampedHarmonicOscillator"
+        assert dho.display_name == "DampedHarmonicOscillator"
         assert dho.area.value == 1.0
         assert dho.center.value == 1.0
         assert dho.width.value == 1.0
@@ -28,7 +28,7 @@ class TestDampedHarmonicOscillator:
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        assert dho.name == "TestDHO"
+        assert dho.display_name == "TestDHO"
         assert dho.area.value == 2.0
         assert dho.center.value == 1.5
         assert dho.width.value == 0.3
@@ -42,7 +42,7 @@ class TestDampedHarmonicOscillator:
 
         # THEN
         dho = DampedHarmonicOscillator(
-            name="Paramdho",
+            display_name="Paramdho",
             area=area_param,
             center=center_param,
             width=width_param,
@@ -50,7 +50,7 @@ class TestDampedHarmonicOscillator:
         )
 
         # EXPECT
-        assert dho.name == "Paramdho"
+        assert dho.display_name == "Paramdho"
         assert dho.area is area_param
         assert dho.center is center_param
         assert dho.width is width_param
@@ -79,7 +79,7 @@ class TestDampedHarmonicOscillator:
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            DampedHarmonicOscillator(name="DampedHarmonicOscillator", **kwargs)
+            DampedHarmonicOscillator(display_name="DampedHarmonicOscillator", **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
@@ -88,7 +88,7 @@ class TestDampedHarmonicOscillator:
             match="The width of a DampedHarmonicOscillator must be greater than zero.",
         ):
             DampedHarmonicOscillator(
-                name="TestDampedHarmonicOscillator",
+                display_name="TestDampedHarmonicOscillator",
                 area=2.0,
                 center=0.5,
                 width=-0.6,
@@ -99,7 +99,7 @@ class TestDampedHarmonicOscillator:
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match="may not be physically meaningful"):
             DampedHarmonicOscillator(
-                name="TestDampedHarmonicOscillator",
+                display_name="TestDampedHarmonicOscillator",
                 area=-2.0,
                 center=0.5,
                 width=0.6,
@@ -130,6 +130,11 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(dho, prop, invalid_value)
 
+    def test_center_setter_negative_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match="center must be positive"):
+            dho.center = -1.0
+
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, 1.5, 3.0])
@@ -148,9 +153,9 @@ class TestDampedHarmonicOscillator:
         )
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_get_parameters(self, dho: DampedHarmonicOscillator):
+    def test_get_all_parameters(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
-        params = dho.get_parameters()
+        params = dho.get_all_parameters()
 
         # EXPECT
         assert len(params) == 3
@@ -192,7 +197,7 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert dho_copy is not dho
-        assert dho_copy.name == dho.name
+        assert dho_copy.display_name == dho.display_name
 
         assert dho_copy.area.value == dho.area.value
         assert dho_copy.area.fixed == dho.area.fixed
