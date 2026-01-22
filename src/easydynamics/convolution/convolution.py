@@ -24,7 +24,7 @@ class Convolution(NumericalConvolutionBase):
     Supports analytical convolution for pairs of analytical model components (DeltaFunction, Gaussian, Lorentzian, Voigt),
     while using numerical convolution for other components.
     If temperature is provided, detailed balance correction is applied to the sample model. In this case, all convolutions
-    are handled numerically.
+    are handled numerically. Includes a setting to normalize the detailed balance correction.
     Includes optional upsampling and extended range to improve accuracy of the numerical convolutions. Also warns about
     numerical instabilities if peaks are very wide or very narrow.
 
