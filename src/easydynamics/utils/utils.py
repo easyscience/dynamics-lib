@@ -52,6 +52,11 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     -------
     sc.Unit | None
         Validated unit or None.
+
+    Raises
+    ------
+    TypeError
+        If unit is not None, a string, or a scipp Unit.
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
