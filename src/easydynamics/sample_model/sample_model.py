@@ -14,7 +14,9 @@ from .components.model_component import ModelComponent
 class SampleModel(ModelBase):
     """SampleModel represents a model of a sample with components and diffusion models,
     parameterized by Q and optionally temperature.
-    Generates ComponentCollections for each Q value, combining components from the base model and diffusion models.
+    Generates ComponentCollections for each Q value, combining components
+    from the base model and diffusion models.
+
     Applies detailed balancing based on temperature if provided.
     Parameters
     ----------
