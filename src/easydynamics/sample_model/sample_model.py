@@ -114,7 +114,7 @@ class SampleModel(ModelBase):
         self._generate_component_collections()
 
     def remove_diffusion_model(self, name: "str") -> None:
-        """Remove a DiffusionModel from the SampleModel by name.
+        """Remove a DiffusionModel from the SampleModel by unique name.
 
         Args:
             name (str): The unique name of the DiffusionModel to remove.
@@ -125,7 +125,7 @@ class SampleModel(ModelBase):
                 self._generate_component_collections()
                 return
         raise ValueError(
-            f"No DiffusionModel with name {name} found. The available names are: {[dm.unique_name for dm in self._diffusion_models]}"
+            f"No DiffusionModel with unique name {name} found. The available unique names are: {[dm.unique_name for dm in self._diffusion_models]}"
         )
 
     def clear_diffusion_models(self) -> None:
