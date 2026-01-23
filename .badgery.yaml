@@ -5,19 +5,18 @@ cards:
   - group: Tests
     type: gh_action
     title: Code/package tests (GitHub)
-    file: test.yaml
+    file: test.yml
     enabled: true
-
   - group: Tests
     type: gh_action
     title: Tutorial tests (GitHub)
-    file: tutorial-tests.yaml
+    file: tutorial-tests.yml
     enabled: true
 
   - group: Tests
     type: gh_action
     title: Package tests (PyPI)
-    file: pypi-test.yaml
+    file: pypi-test.yml
     enabled: true
 
   - group: Code Quality
@@ -60,15 +59,14 @@ cards:
     title: Docstring coverage (interrogate)
     report: reports/{branch}/coverage-docstring.txt
     enabled: true
-
   - group: Build & Release
     type: gh_action
     title: Publishing (PyPI)
-    workflow: pypi-publish.yaml
+    workflow: pypi-publish.yml
     enabled: true
 
   - group: Build & Release
     type: gh_action
     title: Docs build/deployment
-    workflow: docs.yaml
+    workflow: docs.yml
     enabled: true

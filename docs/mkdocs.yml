@@ -66,7 +66,7 @@ extra:
       name: EasyDynamics Main Webpage
     - icon: app # File: overrides/.icons/app.svg
       link: https://easyscience.github.io/dynamics-app
-      name: EasyDiffraction Application Docs
+      name: EasyDynamics Application Docs
     - icon: fontawesome/brands/github # Name as in Font Awesome
       link: https://github.com/easyscience/dynamics-lib
       name: EasyDynamics Library Source Code on GitHub
