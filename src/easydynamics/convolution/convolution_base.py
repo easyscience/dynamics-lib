@@ -1,7 +1,7 @@
 import numpy as np
 import scipp as sc
 
-from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 Numerical = float | int
@@ -15,9 +15,9 @@ class ConvolutionBase:
     Args:
     energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
-    sample_model : SampleModel or ModelComponent
+    sample_components : ComponentCollection or ModelComponent
         The sample model to be convolved.
-    resolution_model : SampleModel or ModelComponent
+    resolution_components : ComponentCollection or ModelComponent
         The resolution model to convolve with.
     energy_unit : str or sc.Unit, optional
         The unit of the energy. Default is 'meV'.
@@ -26,8 +26,8 @@ class ConvolutionBase:
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_model: SampleModel | ModelComponent = None,
-        resolution_model: SampleModel | ModelComponent = None,
+        sample_components: ComponentCollection | ModelComponent = None,
+        resolution_components: ComponentCollection | ModelComponent = None,
         energy_unit: str | sc.Unit = "meV",
     ):
         if isinstance(energy, Numerical):
@@ -45,22 +45,23 @@ class ConvolutionBase:
         self._energy = energy
         self._energy_unit = energy_unit
 
-        if sample_model is not None and not (
-            isinstance(sample_model, SampleModel)
-            or isinstance(sample_model, ModelComponent)
+        if sample_components is not None and not (
+            isinstance(sample_components, ComponentCollection)
+            or isinstance(sample_components, ModelComponent)
         ):
             raise TypeError(
-                f"`sample_model` is an instance of {type(sample_model).__name__}, but must be a SampleModel or ModelComponent."
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."
             )
-        self._sample_model = sample_model
+        self._sample_components = sample_components
 
-        if resolution_model is not None and not isinstance(
-            resolution_model, SampleModel
+        if resolution_components is not None and not (
+            isinstance(resolution_components, ComponentCollection)
+            or isinstance(resolution_components, ModelComponent)
         ):
             raise TypeError(
-                f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."
             )
-        self._resolution_model = resolution_model
+        self._resolution_components = resolution_components
 
     @property
     def energy(self) -> sc.Variable:
@@ -126,43 +127,47 @@ class ConvolutionBase:
         self._energy_unit = energy_unit
 
     @property
-    def sample_model(self) -> SampleModel | ModelComponent:
+    def sample_components(self) -> ComponentCollection | ModelComponent:
         """Get the sample model"""
-        return self._sample_model
+        return self._sample_components
 
-    @sample_model.setter
-    def sample_model(self, sample_model: SampleModel | ModelComponent) -> None:
+    @sample_components.setter
+    def sample_components(
+        self, sample_components: ComponentCollection | ModelComponent
+    ) -> None:
         """Set the sample model.
         Args:
-            sample_model : SampleModel or ModelComponent
+            sample_components : ComponentCollection or ModelComponent
                 The sample model to be convolved.
 
         Raises:
-            TypeError: If sample_model is not a SampleModel or ModelComponent.
+            TypeError: If sample_components is not a ComponentCollection or ModelComponent.
         """
-        if not isinstance(sample_model, (SampleModel, ModelComponent)):
+        if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f"`sample_model` is an instance of {type(sample_model).__name__}, but must be a SampleModel or ModelComponent."
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."
             )
-        self._sample_model = sample_model
+        self._sample_components = sample_components
 
     @property
-    def resolution_model(self) -> SampleModel | ModelComponent:
+    def resolution_components(self) -> ComponentCollection | ModelComponent:
         """Get the resolution model"""
-        return self._resolution_model
+        return self._resolution_components
 
-    @resolution_model.setter
-    def resolution_model(self, resolution_model: SampleModel | ModelComponent) -> None:
+    @resolution_components.setter
+    def resolution_components(
+        self, resolution_components: ComponentCollection | ModelComponent
+    ) -> None:
         """Set the resolution model.
         Args:
-            resolution_model : SampleModel or ModelComponent
+            resolution_components : ComponentCollection or ModelComponent
                 The resolution model to convolve with.
 
         Raises:
-            TypeError: If resolution_model is not a SampleModel or ModelComponent.
+            TypeError: If resolution_components is not a ComponentCollection or ModelComponent.
         """
-        if not isinstance(resolution_model, (SampleModel, ModelComponent)):
+        if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f"`resolution_model` is an instance of {type(resolution_model).__name__}, but must be a SampleModel or ModelComponent."
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."
             )
-        self._resolution_model = resolution_model
+        self._resolution_components = resolution_components

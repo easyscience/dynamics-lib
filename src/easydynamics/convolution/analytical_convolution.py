@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 import scipp as sc
 from scipy.special import voigt_profile
@@ -9,23 +7,23 @@ from easydynamics.sample_model import (
     DeltaFunction,
     Gaussian,
     Lorentzian,
-    SampleModel,
     Voigt,
 )
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 Numerical = float | int
 
 
 class AnalyticalConvolution(ConvolutionBase):
-    """Analytical convolution of a SampleModel with a ResolutionModel.
+    """Analytical convolution of a ComponentCollection with a ResolutionModel.
     Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt profiles.
     Args:
         energy : np.ndarray or scipp.Variable
             1D array of energy values where the convolution is evaluated.
-        sample_model : SampleModel or ModelComponent
+        sample_components : ComponentCollection or ModelComponent
             The sample model to be convolved.
-        resolution_model : SampleModel or ModelComponent
+        resolution_components : ComponentCollection or ModelComponent
             The resolution model to convolve with.
     """
 
@@ -44,45 +42,45 @@ class AnalyticalConvolution(ConvolutionBase):
         self,
         energy: np.ndarray | sc.Variable,
         energy_unit: str | sc.Unit = "meV",
-        sample_model: Optional[SampleModel] = None,
-        resolution_model: Optional[SampleModel] = None,
+        sample_components: ComponentCollection | ModelComponent | None = None,
+        resolution_components: ComponentCollection | ModelComponent | None = None,
     ):
         super().__init__(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
             energy_unit=energy_unit,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
         )
 
     def convolution(
         self,
     ) -> np.ndarray:
         """
-        Convolve sample with resolution analytically if possible. Accepts SampleModel or single ModelComponent for each.
+        Convolve sample with resolution analytically if possible. Accepts ComponentCollection or single ModelComponent for each.
         Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt profiles.
 
         Returns:
             np.ndarray
-                The convolution of the sample_model and resolution_model values evaluated at energy.
+                The convolution of the sample_components and resolution_components values evaluated at energy.
 
         Raises:
             ValueError
-                If resolution_model contains delta functions.
+                If resolution_components contains delta functions.
             ValueError
                 If component pair cannot be handled analytically.
 
         """
 
         # prepare list of components
-        if isinstance(self.sample_model, SampleModel):
-            sample_components = self.sample_model.components
+        if isinstance(self.sample_components, ComponentCollection):
+            sample_components = self.sample_components.components
         else:
-            sample_components = [self.sample_model]
+            sample_components = [self.sample_components]
 
-        if isinstance(self.resolution_model, SampleModel):
-            resolution_components = self.resolution_model.components
+        if isinstance(self.resolution_components, ComponentCollection):
+            resolution_components = self.resolution_components.components
         else:
-            resolution_components = [self.resolution_model]
+            resolution_components = [self.resolution_components]
 
         total = np.zeros_like(self.energy.values, dtype=float)
 
@@ -110,7 +108,7 @@ class AnalyticalConvolution(ConvolutionBase):
         The convolution of a gaussian and a voigt profile results in another voigt profile, with the lorentzian width unchanged and the gaussian widths summed in quadrature.
         The convolution of a lorentzian and a voigt profile results in another voigt profile, with the gaussian width unchanged and the lorentzian widths summed.
         The convolution of two voigt profiles results in another voigt profile, with the gaussian widths summed in quadrature and the lorentzian widths summed.
-        The convolution of a delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.
+        The convolution of a delta function with any component or ComponentCollection results in the same component or ComponentCollection shifted by the delta center.
         All areas are multiplied.
 
 
@@ -167,22 +165,22 @@ class AnalyticalConvolution(ConvolutionBase):
     def _convolute_delta_any(
         self,
         sample_component: DeltaFunction,
-        resolution_model: SampleModel | ModelComponent,
+        resolution_components: ComponentCollection | ModelComponent,
     ):
         """
-        Convolution of delta function with any component or SampleModel results in the same component or SampleModel shifted by the delta center.
+        Convolution of delta function with any component or ComponentCollection results in the same component or ComponentCollection shifted by the delta center.
         The areas are multiplied.
 
         Args:
             sample_component : DeltaFunction
                 The sample component to be convolved.
-            resolution_model : SampleModel | ModelComponent
+            resolution_components : ComponentCollection | ModelComponent
                 The resolution model to convolve with.
         Returns:
             np.ndarray
                 The evaluated convolution values at self.energy.
         """
-        return sample_component.area.value * resolution_model.evaluate(
+        return sample_component.area.value * resolution_components.evaluate(
             self.energy.values - sample_component.center.value
         )
 

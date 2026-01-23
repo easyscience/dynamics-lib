@@ -9,8 +9,8 @@ from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.convolution.energy_grid import EnergyGrid
-from easydynamics.sample_model import (
-    SampleModel,
+from easydynamics.sample_model.component_collection import (
+    ComponentCollection,
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
 
@@ -34,10 +34,10 @@ class NumericalConvolutionBase(ConvolutionBase):
     Args:
     energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
-    sample_model : SampleModel or ModelComponent
-        The sample model to be convolved.
-    resolution_model : SampleModel or ModelComponent
-        The resolution model to convolve with.
+    sample_components : ComponentCollection or ModelComponent
+        The components to be convolved.
+    resolution_components : ComponentCollection or ModelComponent
+        The resolution components to convolve with.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
     extension_factor : float, optional
@@ -55,8 +55,8 @@ class NumericalConvolutionBase(ConvolutionBase):
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_model: SampleModel | ModelComponent,
-        resolution_model: SampleModel | ModelComponent,
+        sample_components: ComponentCollection | ModelComponent,
+        resolution_components: ComponentCollection | ModelComponent,
         upsample_factor: Numerical = 5,
         extension_factor: float = 0.2,
         temperature: Parameter | float | None = None,
@@ -66,8 +66,8 @@ class NumericalConvolutionBase(ConvolutionBase):
     ):
         super().__init__(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
             energy_unit=energy_unit,
         )
 
@@ -296,14 +296,14 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     def _check_width_thresholds(
         self,
-        model: SampleModel | ModelComponent,
+        model: ComponentCollection | ModelComponent,
         model_name: str,
     ) -> None:
         """
         Helper function to check and warn if components are wide compared to the span of the data, or narrow compared to the spacing.
         In both cases, the convolution accuracy may be compromised.
         Args:
-            model : SampleModel or ModelComponent
+            model : ComponentCollection or ModelComponent
                 The model to check.
             model_name : str
                 A string indicating whether the model is a 'sample model' or 'resolution model' for warning messages.
@@ -315,8 +315,8 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         """
 
-        # Handle SampleModel or ModelComponent
-        if isinstance(model, SampleModel):
+        # Handle ComponentCollection or ModelComponent
+        if isinstance(model, ComponentCollection):
             components = model.components
         else:
             components = [model]  # Treat single ModelComponent as a list
@@ -346,8 +346,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         return (
             f"{self.__class__.__name__}("
             f"energy=array of shape {self.energy.values.shape},\n "
-            f"sample_model={repr(self.sample_model)}, \n"
-            f"resolution_model={repr(self.resolution_model)},\n "
+            f"sample_components={repr(self.sample_components)}, \n"
+            f"resolution_components={repr(self.resolution_components)},\n "
             f"energy_unit={self._energy_unit}, "
             f"upsample_factor={self.upsample_factor}, "
             f"extension_factor={self.extension_factor}, "

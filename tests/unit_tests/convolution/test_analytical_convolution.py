@@ -43,8 +43,8 @@ class TestAnalyticalConvolution:
 
         return AnalyticalConvolution(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_model,
+            resolution_components=resolution_model,
         )
 
     @pytest.fixture

@@ -19,8 +19,8 @@ class TestNumericalConvolutionBase:
 
         return NumericalConvolutionBase(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_model,
+            resolution_components=resolution_model,
         )
 
     def test_init(self, default_numerical_convolution_base):
@@ -58,8 +58,8 @@ class TestNumericalConvolutionBase:
         # THEN
         numerical_convolution_base = NumericalConvolutionBase(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_model,
+            resolution_components=resolution_model,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -94,8 +94,8 @@ class TestNumericalConvolutionBase:
         ):
             NumericalConvolutionBase(
                 energy=energy,
-                sample_model=sample_model,
-                resolution_model=resolution_model,
+                sample_components=sample_model,
+                resolution_components=resolution_model,
                 temperature=invalid_temperature,
             )
 
@@ -113,8 +113,8 @@ class TestNumericalConvolutionBase:
         ):
             NumericalConvolutionBase(
                 energy=energy,
-                sample_model=sample_model,
-                resolution_model=resolution_model,
+                sample_components=sample_model,
+                resolution_components=resolution_model,
                 temperature_unit=invalid_temperature_unit,
             )
 

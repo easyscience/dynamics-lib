@@ -56,8 +56,8 @@ class NumericalConvolution(NumericalConvolutionBase):
     ):
         super().__init__(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_model,
+            resolution_components=resolution_model,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,

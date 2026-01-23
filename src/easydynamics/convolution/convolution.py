@@ -79,8 +79,8 @@ class Convolution(NumericalConvolutionBase):
         self._reactions_enabled = False
         super().__init__(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_model,
+            resolution_components=resolution_model,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -218,8 +218,8 @@ class Convolution(NumericalConvolutionBase):
         if self._analytical_sample_model.components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
-                sample_model=self._analytical_sample_model,
-                resolution_model=self._resolution_model,
+                sample_components=self._analytical_sample_model,
+                resolution_components=self._resolution_model,
             )
         else:
             self._analytical_convolver = None
