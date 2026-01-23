@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import numpy as np
 import scipp as sc
 from numpy.typing import ArrayLike
@@ -8,8 +11,8 @@ Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
 def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
-    """
-    Validate and convert Q to a numpy array.
+    """Validate and convert Q to a numpy array.
+
     Parameters
     ----------
     Q : Number, list, np.ndarray or sc.Variable
@@ -17,12 +20,13 @@ def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
     Returns
     -------
     np.ndarray
-        Q as a np.ndarray. TODO: Update to sc.array, also propagate that to diffusionmodel
+        Q as a np.ndarray.
+        TODO: Update to sc.array, also propagate that to diffusionmodel
     """
     if Q is None:
         return None
     if not isinstance(Q, (Numeric, list, np.ndarray, sc.Variable)):
-        raise TypeError("Q must be a number, list, numpy array, or scipp array.")
+        raise TypeError('Q must be a number, list, numpy array, or scipp array.')
 
     if isinstance(Q, Numeric):
         Q = np.array([Q])
@@ -30,20 +34,20 @@ def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
         Q = np.array(Q)
     if isinstance(Q, np.ndarray):
         if Q.ndim > 1:
-            raise ValueError("Q must be a 1-dimensional array.")
+            raise ValueError('Q must be a 1-dimensional array.')
 
-        Q = sc.array(dims=["Q"], values=Q, unit="1/angstrom")
+        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
 
     if isinstance(Q, sc.Variable):
-        if Q.dims != ("Q",):
+        if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit="1/angstrom")
+        Q = Q.to(unit='1/angstrom')
     return Q.values
 
 
 def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
-    """
-    Validate that the unit is a string or scipp Unit.
+    """Validate that the unit is a string or scipp Unit.
+
     Parameters
     ----------
     unit : str or sc.Unit or None
@@ -60,9 +64,7 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(
-            f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
-        )
+        raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
     if isinstance(unit, str):
         unit = sc.Unit(unit)
     return unit

@@ -1,0 +1,15 @@
+# Copier
+.copier-answers*.yml
+
+# Pixi
+.pixi
+pixi.lock
+
+# MkDocs
+docs/overrides/
+docs/site/
+docs/docs/assets/
+
+
+# MyPy
+.mypy_cache

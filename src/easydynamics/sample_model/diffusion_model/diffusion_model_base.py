@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
@@ -11,18 +14,15 @@ Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class DiffusionModelBase(ModelBase):
-    """
-    Base class for constructing diffusion models.
-    """
+    """Base class for constructing diffusion models."""
 
     def __init__(
         self,
-        display_name="MyDiffusionModel",
+        display_name='MyDiffusionModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
     ):
-        """
-        Initialize a new DiffusionModel.
+        """Initialize a new DiffusionModel.
 
         Parameters
         ----------
@@ -33,11 +33,11 @@ class DiffusionModelBase(ModelBase):
         """
 
         try:
-            test = DescriptorNumber(name="test", value=1, unit=unit)
-            test.convert_unit("meV")
+            test = DescriptorNumber(name='test', value=1, unit=unit)
+            test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -45,8 +45,7 @@ class DiffusionModelBase(ModelBase):
 
     @property
     def unit(self) -> str:
-        """
-        Get the unit of the DiffusionModel.
+        """Get the unit of the DiffusionModel.
 
         Returns
         -------
@@ -58,13 +57,11 @@ class DiffusionModelBase(ModelBase):
     def unit(self, unit_str: str) -> None:
         raise AttributeError(
             (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
+                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+                f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
 
     def __repr__(self):
-        """
-        String representation of the Diffusion model.
-        """
-        return f"{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})"
+        """String representation of the Diffusion model."""
+        return f'{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})'
