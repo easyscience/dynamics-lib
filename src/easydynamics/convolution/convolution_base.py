@@ -49,8 +49,7 @@ class ConvolutionBase:
             or isinstance(sample_components, ModelComponent)
         ):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, \
-                    but must be a ComponentCollection or ModelComponent.'
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         self._sample_components = sample_components
 
@@ -59,9 +58,7 @@ class ConvolutionBase:
             or isinstance(resolution_components, ModelComponent)
         ):
             raise TypeError(
-                f'`resolution_components` is an instance of \
-                    {type(resolution_components).__name__}, \
-                    but must be a ComponentCollection or ModelComponent.'
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         self._resolution_components = resolution_components
 
@@ -144,8 +141,7 @@ class ConvolutionBase:
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, \
-                but must be a ComponentCollection or ModelComponent.'
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         self._sample_components = sample_components
 
@@ -170,8 +166,6 @@ class ConvolutionBase:
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`resolution_components` is an instance of \
-                {type(resolution_components).__name__}, \
-                    but must be a ComponentCollection or ModelComponent.'
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         self._resolution_components = resolution_components

@@ -256,8 +256,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
-                    'Input array `energy` must be uniformly spaced if \
-                        upsample_factor is not given.'
+                    'Input array `energy` must be uniformly spaced if upsample_factor is not given.'  # noqa: E501
                 )
             energy_dense = self.energy.values
 
