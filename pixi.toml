@@ -27,6 +27,7 @@ PYTHONPATH = "${PIXI_PROJECT_ROOT}/src;%PYTHONPATH%"
 ###########
 
 [workspace]
+
 # Supported platforms for the lock file (pixi.lock)
 platforms = ['win-64', 'linux-64', 'osx-64', 'osx-arm64']
 
@@ -45,16 +46,12 @@ gsl = '*'    # GNU Scientific Library; required for pdffit2.
 
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
 pip = '*'                                                        # Native package installer
-uv = '*'                                                         # Package manager
-jupyterlab = '*'                                                 # Jupyter notebooks
-pixi-kernel = '*'                                                # Pixi Jupyter kernel
-easydynamics = { path = ".", editable = true, extras = ['all'] }
+easydynamics = { path = ".", editable = true, extras = ['dev'] }
 
 # Specific features: Set specific Python versions
 
 [feature.py-min.dependencies]
 python = '3.11.*'
-
 [feature.py-max.dependencies]
 python = '3.12.*'
 
@@ -66,15 +63,11 @@ python = '3.12.*'
 
 # The `default` feature is always included in all environments.
 # Additional features can be specified per environment.
+py-311-env = { features = ['default', 'py-min'] }
+py-312-env = { features = ['default', 'py-max'] }
 
 # The `default` environment is always created and includes the `default` feature.
 # It does not need to be specified explicitly unless non-default features are included.
-
-py-311-env = { features = ['default', 'py-min'] }
-py-313-env = { features = ['default', 'py-max'] }
-
-# Default environment uses the maximum supported Python version
-
 default = { features = ['default', 'py-max'] }
 
 #######
@@ -102,12 +95,6 @@ nonpy-format-check-modified = "pixi run nonpy-format-check-pre $(git diff --diff
 nonpy-format-check = "pixi run nonpy-format-check-pre ."
 notebook-format-check = 'nbqa ruff docs/docs/tutorials/'
 docs-format-check = 'docformatter src/ docs/docs/tutorials/ --check'
-# Run like a real commit: staged files only (almost)
-pre-commit-check = 'pre-commit run --hook-stage pre-commit'
-# CI check: lint/format everything
-pre-commit-check-all = 'pre-commit run --all-files --hook-stage pre-commit'
-# Pre-push check: lint/format everything
-pre-push-check = 'pre-commit run --all-files --hook-stage pre-push'
 
 check = { depends-on = [
   'docs-format-check',
@@ -124,12 +111,14 @@ nonpy-format-fix = 'pixi run nonpy-format-check --write'
 nonpy-format-fix-modified = "pixi run nonpy-format-check-modified --write"
 notebook-format-fix = 'pixi run notebook-format-check --fix'
 docs-format-fix = 'docformatter src/ docs/docs/tutorials/ --in-place'
+success-message-fix = 'echo "✅ All code auto-formatting steps have been applied."'
 
 fix = { depends-on = [
   'py-format-fix',
   'docs-format-fix',
   'py-lint-fix',
   'nonpy-format-fix',
+  'success-message-fix',
 ] }
 
 # 🧮 Code Complexity
@@ -177,24 +166,35 @@ docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-p
 docs-update-assets = 'pixi run python tools/update_docs_assets.py'
 
 # 📦 Template Management Tasks
-copier-copy-shared = "pixi run copier copy gh:easyscience/templates-shared . --data-file ../peasy/.project.yaml"
-copier-copy-lib = "pixi run copier copy gh:easyscience/templates-lib . --data-file ../peasy/.project.yaml"
-
-copier-recopy-shared = "pixi run copier recopy --answers-file .copier-answers.shared.yml --data-file ../peasy/.project.yaml"
-copier-recopy-lib = "pixi run copier recopy --answers-file .copier-answers.lib.yml --data-file ../peasy/.project.yaml"
-
-copier-update-shared = "pixi run copier update --answers-file .copier-answers.shared.yml --data-file ../peasy/.project.yaml"
-copier-update-lib = "pixi run copier update --answers-file .copier-answers.lib.yml --data-file ../peasy/.project.yaml"
+copier-copy = "pixi run copier copy gh:easyscience/templates-app . --data-file ../peasy/.copier-answers.yml --data template_type=lib"
+copier-recopy = "pixi run copier recopy --data-file ../peasy/.copier-answers.yml --data template_type=lib"
+copier-update = "pixi run copier update --data-file ../peasy/.copier-answers.yml --data template_type=lib"
 
 # 🚀 Development & Build Tasks
 default-build = 'python -m build'
 dist-build = 'python -m build --wheel --outdir dist'
-spdx-update = 'python tools/update_spdx.py'
+
 npm-config = 'npm config set registry https://registry.npmjs.org/'
 prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
-pre-commit-setup = 'pre-commit clean && pre-commit uninstall && pre-commit install --hook-type pre-commit --hook-type pre-push --overwrite'
-pre-commit-update = 'pre-commit autoupdate'
+
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
+spdx-update = 'python tools/update_spdx.py'
+
+# Run like a real commit: staged files only (almost)
+pre-commit-check = 'pre-commit run --hook-stage pre-commit'
+# CI check: lint/format everything
+pre-commit-check-all = 'pre-commit run --all-files --hook-stage pre-commit'
+# Pre-push check: lint/format everything
+pre-push-check = 'pre-commit run --all-files --hook-stage pre-push'
+
+pre-commit-clean = 'pre-commit clean'
+pre-commit-install = 'pre-commit install --hook-type pre-commit --hook-type pre-push --overwrite'
+pre-commit-uninstall = 'pre-commit uninstall --hook-type pre-commit --hook-type pre-push'
+pre-commit-setup = { depends-on = [
+  'pre-commit-clean',
+  'pre-commit-uninstall',
+  'pre-commit-install',
+] }
 
 post-install = { depends-on = [
   'npm-config',
