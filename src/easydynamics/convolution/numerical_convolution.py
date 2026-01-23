@@ -4,8 +4,8 @@ from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
-from easydynamics.sample_model import (
-    SampleModel,
+from easydynamics.sample_model.component_collection import (
+    ComponentCollection,
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.detailed_balance import (
@@ -16,7 +16,7 @@ Numerical = float | int
 
 
 class NumericalConvolution(NumericalConvolutionBase):
-    """Numerical convolution of a SampleModel with a ResolutionModel using FFT.
+    """Numerical convolution of a ComponentCollection with a ComponentCollection using FFT.
         Includes optional upsampling and extended range to improve accuracy.
         Warns about very wide or very narrow peaks in the models.
         If temperature is provided, detailed balance correction is applied to the sample model.
@@ -24,9 +24,9 @@ class NumericalConvolution(NumericalConvolutionBase):
     Args:
     energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
-    sample_model : SampleModel or ModelComponent
+    sample_components : ComponentCollection or ModelComponent
         The sample model to be convolved.
-    resolution_model : SampleModel or ModelComponent
+    resolution_components : ComponentCollection or ModelComponent
         The resolution model to convolve with.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
@@ -45,8 +45,8 @@ class NumericalConvolution(NumericalConvolutionBase):
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_model: SampleModel | ModelComponent,
-        resolution_model: SampleModel | ModelComponent,
+        sample_components: ComponentCollection | ModelComponent,
+        resolution_components: ComponentCollection | ModelComponent,
         upsample_factor: Numerical = 5,
         extension_factor: float = 0.2,
         temperature: Parameter | float | None = None,
@@ -56,8 +56,8 @@ class NumericalConvolution(NumericalConvolutionBase):
     ):
         super().__init__(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -81,16 +81,16 @@ class NumericalConvolution(NumericalConvolutionBase):
 
         # Give warnings if peaks are very wide or very narrow
         self._check_width_thresholds(
-            model=self.sample_model,
+            model=self.sample_components,
             model_name="sample model",
         )
         self._check_width_thresholds(
-            model=self.resolution_model,
+            model=self.resolution_components,
             model_name="resolution model",
         )
 
         # Evaluate sample model. If called via the Convolution class, delta functions are already filtered out.
-        sample_vals = self.sample_model.evaluate(
+        sample_vals = self.sample_components.evaluate(
             self._energy_grid.energy_dense - self._energy_grid.energy_even_length_offset
         )
 
@@ -105,7 +105,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             sample_vals *= detailed_balance_factor_correction
 
         # Evaluate resolution model
-        resolution_vals = self.resolution_model.evaluate(
+        resolution_vals = self.resolution_components.evaluate(
             self._energy_grid.energy_dense_centered
         )
 

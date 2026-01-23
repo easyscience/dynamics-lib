@@ -7,20 +7,21 @@ from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import (
     NumericalConvolutionBase,
 )
-from easydynamics.sample_model import Gaussian, SampleModel
+from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model.component_collection import ComponentCollection
 
 
 class TestNumericalConvolutionBase:
     @pytest.fixture
     def default_numerical_convolution_base(self):
         energy = np.linspace(-10, 10, 101)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
 
         return NumericalConvolutionBase(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
         )
 
     def test_init(self, default_numerical_convolution_base):
@@ -31,9 +32,12 @@ class TestNumericalConvolutionBase:
         assert np.allclose(
             default_numerical_convolution_base.energy.values, np.linspace(-10, 10, 101)
         )
-        assert isinstance(default_numerical_convolution_base._sample_model, SampleModel)
         assert isinstance(
-            default_numerical_convolution_base._resolution_model, SampleModel
+            default_numerical_convolution_base._sample_components, ComponentCollection
+        )
+        assert isinstance(
+            default_numerical_convolution_base._resolution_components,
+            ComponentCollection,
         )
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == 0.2
@@ -46,8 +50,8 @@ class TestNumericalConvolutionBase:
         "Test initialization of NumericalConvolutionBase with custom parameters."
         # WHEN
         energy = np.linspace(-5, 5, 50)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
         upsample_factor = 10
         extension_factor = 0.5
         temperature = 300.0
@@ -58,8 +62,8 @@ class TestNumericalConvolutionBase:
         # THEN
         numerical_convolution_base = NumericalConvolutionBase(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -84,8 +88,8 @@ class TestNumericalConvolutionBase:
         "Test that initialization raises TypeError for invalid temperature."
         # WHEN
         energy = np.linspace(-5, 5, 50)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
         invalid_temperature = "invalid_temperature"
 
         # THEN EXPECT
@@ -94,8 +98,8 @@ class TestNumericalConvolutionBase:
         ):
             NumericalConvolutionBase(
                 energy=energy,
-                sample_components=sample_model,
-                resolution_components=resolution_model,
+                sample_components=sample_components,
+                resolution_components=resolution_components,
                 temperature=invalid_temperature,
             )
 
@@ -103,8 +107,8 @@ class TestNumericalConvolutionBase:
         "Test that initialization raises TypeError for invalid temperature_unit."
         # WHEN
         energy = np.linspace(-5, 5, 50)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
         invalid_temperature_unit = 123  # Not a string or sc.Unit
 
         # THEN EXPECT
@@ -113,8 +117,8 @@ class TestNumericalConvolutionBase:
         ):
             NumericalConvolutionBase(
                 energy=energy,
-                sample_components=sample_model,
-                resolution_components=resolution_model,
+                sample_components=sample_components,
+                resolution_components=resolution_components,
                 temperature_unit=invalid_temperature_unit,
             )
 
@@ -382,7 +386,9 @@ class TestNumericalConvolutionBase:
     def test_check_width_large_threshold(self, default_numerical_convolution_base):
         "Test that _check_width_thresholds warns when model widths are too large compared to energy grid span."
         # WHEN
-        wide_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=15.0)
+        wide_gaussian = Gaussian(
+            display_name="ComponentCollection", area=1.0, center=0.0, width=15.0
+        )
 
         # THEN EXPECT
         with pytest.warns(
@@ -391,13 +397,15 @@ class TestNumericalConvolutionBase:
         ):
             default_numerical_convolution_base._check_width_thresholds(
                 model=wide_gaussian,
-                model_name="SampleModel",
+                model_name="ComponentCollection",
             )
 
     def test_check_width_small_threshold(self, default_numerical_convolution_base):
         "Test that _check_width_thresholds warns when model widths are too small compared to energy grid step."
         # WHEN
-        narrow_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=0.01)
+        narrow_gaussian = Gaussian(
+            display_name="ComponentCollection", area=1.0, center=0.0, width=0.000001
+        )
 
         # THEN EXPECT
         with pytest.warns(
@@ -406,20 +414,22 @@ class TestNumericalConvolutionBase:
         ):
             default_numerical_convolution_base._check_width_thresholds(
                 model=narrow_gaussian,
-                model_name="SampleModel",
+                model_name="ComponentCollection",
             )
 
     def test_check_width_no_warnings(self, default_numerical_convolution_base):
-        "Test that _check_width_thresholds does not warn when model widths are within acceptable range. Also tests that SampleModel components are checked correctly."
+        "Test that _check_width_thresholds does not warn when model widths are within acceptable range. Also tests that ComponentCollection components are checked correctly."
         # WHEN
-        good_gaussian = Gaussian(name="SampleModel", area=1.0, center=0.0, width=1.0)
-        sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(good_gaussian)
+        good_gaussian = Gaussian(
+            display_name="ComponentCollection", area=1.0, center=0.0, width=1.0
+        )
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        sample_components.append_component(good_gaussian)
 
         # THEN EXPECT
         default_numerical_convolution_base._check_width_thresholds(
-            model=sample_model,
-            model_name="SampleModel",
+            model=sample_components,
+            model_name="ComponentCollection",
         )
 
     def test_repr(self, default_numerical_convolution_base):
@@ -433,10 +443,10 @@ class TestNumericalConvolutionBase:
         assert "(101," in repr_str  # correct shape
 
         # Sample and resolution models
-        assert "SampleModel" in repr_str
+        assert "ComponentCollection" in repr_str
         assert "Components: No components" in repr_str
-        assert "sample_model=" in repr_str
-        assert "resolution_model=" in repr_str
+        assert "sample_components=" in repr_str
+        assert "resolution_components=" in repr_str
 
         # Important parameters
         assert "energy_unit=meV" in repr_str

@@ -17,36 +17,40 @@ from easydynamics.sample_model import (
     Gaussian,
     Lorentzian,
     Polynomial,
-    SampleModel,
     Voigt,
 )
+from easydynamics.sample_model.component_collection import ComponentCollection
 
 
 class TestConvolution:
     @pytest.fixture
     def default_convolution(self):
         energy = np.linspace(-10, 10, 5001)
-        sample_model = SampleModel(name="SampleModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
 
-        sample_model.add_component(
-            Gaussian(name="Gaussian1", area=2.0, center=0.1, width=0.4)
+        sample_components.append_component(
+            Gaussian(display_name="Gaussian1", area=2.0, center=0.1, width=0.4)
         )
 
-        sample_model.add_component(
-            DampedHarmonicOscillator(name="DHO1", area=2.0, center=1.0, width=0.1)
+        sample_components.append_component(
+            DampedHarmonicOscillator(
+                display_name="DHO1", area=2.0, center=1.0, width=0.1
+            )
         )
 
-        sample_model.add_component(DeltaFunction(name="Delta1", area=2.0, center=0.3))
+        sample_components.append_component(
+            DeltaFunction(display_name="Delta1", area=2.0, center=0.3)
+        )
 
-        resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(
-            Gaussian(name="GaussianRes", area=3.0, center=0.2, width=0.5)
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
+        resolution_components.append_component(
+            Gaussian(display_name="GaussianRes", area=3.0, center=0.2, width=0.5)
         )
 
         conv = Convolution(
             energy=energy,
-            sample_model=sample_model,
-            resolution_model=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
         )
         return conv
 
@@ -58,8 +62,10 @@ class TestConvolution:
         assert np.allclose(
             default_convolution.energy.values, np.linspace(-10, 10, 5001)
         )
-        assert isinstance(default_convolution._sample_model, SampleModel)
-        assert isinstance(default_convolution._resolution_model, SampleModel)
+        assert isinstance(default_convolution._sample_components, ComponentCollection)
+        assert isinstance(
+            default_convolution._resolution_components, ComponentCollection
+        )
         assert default_convolution.upsample_factor == 5
         assert default_convolution.extension_factor == 0.2
         assert default_convolution.temperature is None
@@ -67,21 +73,27 @@ class TestConvolution:
         assert default_convolution.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
-        assert isinstance(default_convolution._analytical_sample_model, SampleModel)
-        assert (
-            default_convolution._analytical_sample_model.components[0]
-            is default_convolution.sample_model.components[0]
+        assert isinstance(
+            default_convolution._analytical_sample_components, ComponentCollection
         )
-        assert isinstance(default_convolution._numerical_sample_model, SampleModel)
         assert (
-            default_convolution._numerical_sample_model.components[0]
-            is default_convolution.sample_model.components[1]
+            default_convolution._analytical_sample_components.components[0]
+            is default_convolution.sample_components.components[0]
+        )
+        assert isinstance(
+            default_convolution._numerical_sample_components, ComponentCollection
+        )
+        assert (
+            default_convolution._numerical_sample_components.components[0]
+            is default_convolution.sample_components.components[1]
         )
 
-        assert isinstance(default_convolution._delta_sample_model, SampleModel)
+        assert isinstance(
+            default_convolution._delta_sample_components, ComponentCollection
+        )
         assert (
-            default_convolution._delta_sample_model.components[0]
-            is default_convolution.sample_model.components[2]
+            default_convolution._delta_sample_components.components[0]
+            is default_convolution.sample_components.components[2]
         )
         assert default_convolution._convolution_plan_is_valid is True
         assert default_convolution._reactions_enabled is True
@@ -161,26 +173,31 @@ class TestConvolution:
 
         # WHEN
         conv = default_convolution
-        sample_model = SampleModel()
+        sample_components = ComponentCollection()
 
         if analytical_component:
-            sample_model.add_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+            sample_components.append_component(
+                Gaussian(display_name="Gaussian", area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
-            sample_model.add_component(
+            sample_components.append_component(
                 DampedHarmonicOscillator(
-                    name="DampedHarmonicOscillator", area=1.0, center=1.0, width=0.1
+                    display_name="DampedHarmonicOscillator",
+                    area=1.0,
+                    center=1.0,
+                    width=0.1,
                 )
             )
 
         if delta_component:
-            sample_model.add_component(
-                DeltaFunction(name="DeltaFunction", area=1.0, center=0.0)
+            sample_components.append_component(
+                DeltaFunction(display_name="DeltaFunction", area=1.0, center=0.0)
             )
 
-        conv.sample_model = sample_model  # This updates the internal sample models
+        conv.sample_components = (
+            sample_components  # This updates the internal sample models
+        )
 
         # THEN
         # Mock the methods to be tested. Use nullcontext if the component type is not present.
@@ -242,7 +259,7 @@ class TestConvolution:
         expected_center = 0.3 + 0.2  # Delta center + Resolution center
         expected_width = 0.5  # Resolution width
         expected_values = Gaussian(
-            name="ExpectedGaussian",
+            display_name="ExpectedGaussian",
             area=expected_area,
             center=expected_center,
             width=expected_width,
@@ -252,20 +269,26 @@ class TestConvolution:
 
     # List of analytic functions
     analytic_functions = [
-        Gaussian(name="G", area=1.0, center=0.0, width=0.1),
-        Lorentzian(name="L", area=1.0, center=0.0, width=0.1),
-        Voigt(name="V", area=1.0, center=0.0, gaussian_width=0.1, lorentzian_width=0.1),
+        Gaussian(display_name="G", area=1.0, center=0.0, width=0.1),
+        Lorentzian(display_name="L", area=1.0, center=0.0, width=0.1),
+        Voigt(
+            display_name="V",
+            area=1.0,
+            center=0.0,
+            gaussian_width=0.1,
+            lorentzian_width=0.1,
+        ),
     ]
 
     # List of non-analytic functions
     non_analytic_functions = [
-        DampedHarmonicOscillator(name="DHO", area=1.0, center=1.0, width=0.1),
-        Polynomial(name="P", coefficients=[1.0, 0.0, 0.0]),
+        DampedHarmonicOscillator(display_name="DHO", area=1.0, center=1.0, width=0.1),
+        Polynomial(display_name="P", coefficients=[1.0, 0.0, 0.0]),
     ]
 
     all_functions_except_delta = analytic_functions + non_analytic_functions
     all_functions = all_functions_except_delta + [
-        DeltaFunction(name="Delta", area=1.0, center=0.0)
+        DeltaFunction(display_name="Delta", area=1.0, center=0.0)
     ]
 
     @pytest.mark.parametrize(
@@ -303,8 +326,8 @@ class TestConvolution:
         """
         # WHEN
         conv = default_convolution
-        sample_component = Gaussian(name="G", area=1.0, center=0.0, width=0.1)
-        resolution_component = DeltaFunction(name="Delta", area=1.0, center=0.0)
+        sample_component = Gaussian(display_name="G", area=1.0, center=0.0, width=0.1)
+        resolution_component = DeltaFunction(display_name="Delta", area=1.0, center=0.0)
 
         # THEN EXPECT
         with pytest.raises(
@@ -319,8 +342,14 @@ class TestConvolution:
     @pytest.mark.parametrize(
         "sample_component,resolution_component",
         [
-            ("NotAModelComponent", Gaussian(name="G", area=1.0, center=0.0, width=0.1)),
-            (Gaussian(name="G", area=1.0, center=0.0, width=0.1), "NotAModelComponent"),
+            (
+                "NotAModelComponent",
+                Gaussian(display_name="G", area=1.0, center=0.0, width=0.1),
+            ),
+            (
+                Gaussian(display_name="G", area=1.0, center=0.0, width=0.1),
+                "NotAModelComponent",
+            ),
         ],
         ids=["invalid_sample_component", "invalid_resolution_component"],
     )
@@ -373,57 +402,68 @@ class TestConvolution:
 
         # WHEN
         conv = default_convolution
-        sample_model = SampleModel()
+        sample_components = ComponentCollection()
 
         if analytical_component:
-            sample_model.add_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+            sample_components.append_component(
+                Gaussian(display_name="Gaussian", area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
-            sample_model.add_component(
+            sample_components.append_component(
                 DampedHarmonicOscillator(
-                    name="DampedHarmonicOscillator", area=1.0, center=1.0, width=0.1
+                    display_name="DampedHarmonicOscillator",
+                    area=1.0,
+                    center=1.0,
+                    width=0.1,
                 )
             )
 
         if delta_component:
-            sample_model.add_component(
-                DeltaFunction(name="DeltaFunction", area=1.0, center=0.0)
+            sample_components.append_component(
+                DeltaFunction(display_name="DeltaFunction", area=1.0, center=0.0)
             )
 
         # THEN
-        conv.sample_model = sample_model  # This updates the internal sample models
+        conv.sample_components = (
+            sample_components  # This updates the internal sample models
+        )
         if temperature is not None:
             conv.temperature = temperature
-        conv._build_convolution_plan()  # It is already called by sample_model setter, but we now call it explicitly
+        conv._build_convolution_plan()  # It is already called by sample_components setter, but we now call it explicitly
 
         # EXPECT
-        assert isinstance(conv._analytical_sample_model, SampleModel)
+        assert isinstance(conv._analytical_sample_components, ComponentCollection)
         if analytical_component and not temperature:
-            assert len(conv._analytical_sample_model.components) == 1
-            assert conv._analytical_sample_model.components[0].name == "Gaussian"
+            assert len(conv._analytical_sample_components.components) == 1
+            assert (
+                conv._analytical_sample_components.components[0].display_name
+                == "Gaussian"
+            )
         else:
-            assert len(conv._analytical_sample_model.components) == 0
+            assert len(conv._analytical_sample_components.components) == 0
 
-        assert isinstance(conv._delta_sample_model, SampleModel)
+        assert isinstance(conv._delta_sample_components, ComponentCollection)
         if delta_component:
-            assert len(conv._delta_sample_model.components) == 1
-            assert conv._delta_sample_model.components[0].name == "DeltaFunction"
+            assert len(conv._delta_sample_components.components) == 1
+            assert (
+                conv._delta_sample_components.components[0].display_name
+                == "DeltaFunction"
+            )
         else:
-            assert len(conv._delta_sample_model.components) == 0
+            assert len(conv._delta_sample_components.components) == 0
 
-        assert isinstance(conv._numerical_sample_model, SampleModel)
+        assert isinstance(conv._numerical_sample_components, ComponentCollection)
 
         if not temperature:
             if numerical_component:
-                assert len(conv._numerical_sample_model.components) == 1
+                assert len(conv._numerical_sample_components.components) == 1
                 assert (
-                    conv._numerical_sample_model.components[0].name
+                    conv._numerical_sample_components.components[0].display_name
                     == "DampedHarmonicOscillator"
                 )
             else:
-                assert len(conv._numerical_sample_model.components) == 0
+                assert len(conv._numerical_sample_components.components) == 0
         else:
             # analytical and numerical components go to numerical when temperature is set
             expected_numerical_count = 0
@@ -432,7 +472,8 @@ class TestConvolution:
             if analytical_component:
                 expected_numerical_count += 1
             assert (
-                len(conv._numerical_sample_model.components) == expected_numerical_count
+                len(conv._numerical_sample_components.components)
+                == expected_numerical_count
             )
 
         assert conv._convolution_plan_is_valid is True
@@ -459,23 +500,28 @@ class TestConvolution:
 
         # WHEN
         conv = default_convolution
-        sample_model = SampleModel()
+        sample_components = ComponentCollection()
 
         if analytical_component:
-            sample_model.add_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+            sample_components.append_component(
+                Gaussian(display_name="Gaussian", area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
-            sample_model.add_component(
+            sample_components.append_component(
                 DampedHarmonicOscillator(
-                    name="DampedHarmonicOscillator", area=1.0, center=1.0, width=0.1
+                    display_name="DampedHarmonicOscillator",
+                    area=1.0,
+                    center=1.0,
+                    width=0.1,
                 )
             )
 
         # THEN
-        conv.sample_model = sample_model  # This updates the internal sample models
-        conv._set_convolvers()  # Should already have been called by sample_model setter, but we now call it explicitly
+        conv.sample_components = (
+            sample_components  # This updates the internal sample models
+        )
+        conv._set_convolvers()  # Should already have been called by sample_components setter, but we now call it explicitly
 
         # EXPECT
         if analytical_component:

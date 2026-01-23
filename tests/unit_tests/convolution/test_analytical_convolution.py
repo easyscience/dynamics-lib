@@ -14,9 +14,9 @@ from easydynamics.sample_model import (
     DeltaFunction,
     Gaussian,
     Lorentzian,
-    SampleModel,
     Voigt,
 )
+from easydynamics.sample_model.component_collection import ComponentCollection
 
 NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE = 1e-5
 NUMERICAL_CONVOLUTION_ABSOLUTE_TOLERANCE = 1e-6
@@ -38,13 +38,13 @@ class TestAnalyticalConvolution:
     def default_analytical_convolution(self):
         # Energy needs to be odd to avoid issues with shifts in fftconvolve.
         energy = np.linspace(-100, 100, 2**15 + 1)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
 
         return AnalyticalConvolution(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
         )
 
     @pytest.fixture
@@ -83,8 +83,12 @@ class TestAnalyticalConvolution:
             default_analytical_convolution.energy.values,
             np.linspace(-100, 100, 2**15 + 1),
         )
-        assert isinstance(default_analytical_convolution._sample_model, SampleModel)
-        assert isinstance(default_analytical_convolution._resolution_model, SampleModel)
+        assert isinstance(
+            default_analytical_convolution._sample_components, ComponentCollection
+        )
+        assert isinstance(
+            default_analytical_convolution._resolution_components, ComponentCollection
+        )
 
     def test_convolution(
         self,
@@ -97,15 +101,15 @@ class TestAnalyticalConvolution:
         """Test that the convolute method calls _convolute_analytic_pair for all component pairs."""
 
         # WHEN
-        sample_model = SampleModel(name="SampleModel")
-        sample_model.add_component(gaussian1)
-        sample_model.add_component(lorentzian1)
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        sample_components.append_component(gaussian1)
+        sample_components.append_component(lorentzian1)
 
-        resolution_model = SampleModel(name="ResolutionModel")
-        resolution_model.add_component(gaussian2)
-        resolution_model.add_component(lorentzian2)
-        default_analytical_convolution.sample_model = sample_model
-        default_analytical_convolution.resolution_model = resolution_model
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
+        resolution_components.append_component(gaussian2)
+        resolution_components.append_component(lorentzian2)
+        default_analytical_convolution.sample_components = sample_components
+        default_analytical_convolution.resolution_components = resolution_components
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair
@@ -158,8 +162,8 @@ class TestAnalyticalConvolution:
         """Test that the convolute method also works for components."""
 
         # WHEN
-        default_analytical_convolution.sample_model = gaussian1
-        default_analytical_convolution.resolution_model = lorentzian1
+        default_analytical_convolution.sample_components = gaussian1
+        default_analytical_convolution.resolution_components = lorentzian1
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair

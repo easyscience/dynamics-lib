@@ -5,20 +5,20 @@ import scipp as sc
 from easydynamics.convolution.convolution_base import (
     ConvolutionBase,
 )
-from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.component_collection import ComponentCollection
 
 
 class TestConvolutionBase:
     @pytest.fixture
     def convolution_base(self):
         energy = np.linspace(-10, 10, 100)
-        sample_model = SampleModel(name="SampleModel")
-        resolution_model = SampleModel(name="ResolutionModel")
+        sample_components = ComponentCollection(display_name="ComponentCollection")
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
 
         return ConvolutionBase(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
         )
 
     def test_init(self, convolution_base):
@@ -26,8 +26,8 @@ class TestConvolutionBase:
         assert isinstance(convolution_base, ConvolutionBase)
         assert isinstance(convolution_base.energy, sc.Variable)
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
-        assert isinstance(convolution_base._sample_model, SampleModel)
-        assert isinstance(convolution_base._resolution_model, SampleModel)
+        assert isinstance(convolution_base._sample_components, ComponentCollection)
+        assert isinstance(convolution_base._resolution_components, ComponentCollection)
 
     def test_init_energy_numerical_none_offset(self):
         # WHEN
@@ -42,8 +42,8 @@ class TestConvolutionBase:
         assert isinstance(convolution_base.energy, sc.Variable)
         assert convolution_base.energy.values == np.array([1.0])
         assert convolution_base.energy.unit == "meV"
-        assert convolution_base._sample_model is None
-        assert convolution_base._resolution_model is None
+        assert convolution_base._sample_components is None
+        assert convolution_base._resolution_components is None
 
     @pytest.mark.parametrize(
         "kwargs, expected_message",
@@ -51,8 +51,8 @@ class TestConvolutionBase:
             (
                 {
                     "energy": "invalid",
-                    "sample_model": SampleModel(),
-                    "resolution_model": SampleModel(),
+                    "sample_components": ComponentCollection(),
+                    "resolution_components": ComponentCollection(),
                     "energy_unit": "meV",
                 },
                 "Energy must be",
@@ -60,26 +60,26 @@ class TestConvolutionBase:
             (
                 {
                     "energy": np.linspace(-10, 10, 100),
-                    "sample_model": "invalid",
-                    "resolution_model": SampleModel(),
+                    "sample_components": "invalid",
+                    "resolution_components": ComponentCollection(),
                     "energy_unit": "meV",
                 },
-                "`sample_model` is an instance of str, but must be a SampleModel or ModelComponent.",
+                "`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.",
             ),
             (
                 {
                     "energy": np.linspace(-10, 10, 100),
-                    "sample_model": SampleModel(),
-                    "resolution_model": "invalid",
+                    "sample_components": ComponentCollection(),
+                    "resolution_components": "invalid",
                     "energy_unit": "meV",
                 },
-                "`resolution_model` is an instance of str, but must be a SampleModel or ModelComponent.",
+                "`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.",
             ),
             (
                 {
                     "energy": np.linspace(-10, 10, 100),
-                    "sample_model": SampleModel(),
-                    "resolution_model": SampleModel(),
+                    "sample_components": ComponentCollection(),
+                    "resolution_components": ComponentCollection(),
                     "energy_unit": 123,
                 },
                 "Energy_unit must be ",
@@ -159,46 +159,49 @@ class TestConvolutionBase:
         ):
             convolution_base.convert_energy_unit(123)
 
-    def test_sample_model_property(self, convolution_base):
+    def test_sample_components_property(self, convolution_base):
         # WHEN THEN EXPECT
-        assert isinstance(convolution_base.sample_model, SampleModel)
+        assert isinstance(convolution_base.sample_components, ComponentCollection)
 
-    def test_sample_model_setter(self, convolution_base):
+    def test_sample_components_setter(self, convolution_base):
         # WHEN
-        new_sample_model = SampleModel(name="NewSampleModel")
+        new_sample_components = ComponentCollection(
+            display_name="NewComponentCollection"
+        )
 
         # THEN
-        convolution_base.sample_model = new_sample_model
+        convolution_base.sample_components = new_sample_components
 
         # EXPECT
-        assert convolution_base.sample_model == new_sample_model
+        assert convolution_base.sample_components == new_sample_components
 
-    def test_sample_model_setter_invalid_type_raises(self, convolution_base):
+    def test_sample_components_setter_invalid_type_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="`sample_model` is an instance of str, but must be a SampleModel or ModelComponent.",
+            match="`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.",
         ):
-            convolution_base.sample_model = "invalid"
+            convolution_base.sample_components = "invalid"
 
-    def test_resolution_model_property(self, convolution_base):
+    def test_resolution_components_property(self, convolution_base):
         # WHEN THEN EXPECT
-        assert isinstance(convolution_base.resolution_model, SampleModel)
+        assert isinstance(convolution_base.resolution_components, ComponentCollection)
 
-    def test_resolution_model_setter(self, convolution_base):
+    def test_resolution_components_setter(self, convolution_base):
         # WHEN
-        new_resolution_model = SampleModel(name="NewResolutionModel")
-
+        new_resolution_components = ComponentCollection(
+            display_name="NewResolutionModel"
+        )
         # THEN
-        convolution_base.resolution_model = new_resolution_model
+        convolution_base.resolution_components = new_resolution_components
 
         # EXPECT
-        assert convolution_base.resolution_model == new_resolution_model
+        assert convolution_base.resolution_components == new_resolution_components
 
-    def test_resolution_model_setter_invalid_type_raises(self, convolution_base):
+    def test_resolution_components_setter_invalid_type_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="`resolution_model` is an instance of str, but must be a SampleModel or ModelComponent.",
+            match="`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.",
         ):
-            convolution_base.resolution_model = "invalid"
+            convolution_base.resolution_components = "invalid"

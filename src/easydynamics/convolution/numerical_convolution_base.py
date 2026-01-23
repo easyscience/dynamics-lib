@@ -328,7 +328,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                     > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense
                 ):
                     warnings.warn(
-                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is large compared to the span of the input "
+                        f"The width of the {model_name} component '{comp.unique_name}' ({comp.width.value}) is large compared to the span of the input "
                         f"array ({self._energy_grid.energy_span_dense}). This may lead to inaccuracies in the convolution. Increase extension_factor to improve accuracy.",
                         UserWarning,
                     )
@@ -337,7 +337,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                     < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step
                 ):
                     warnings.warn(
-                        f"The width of the {model_name} component '{comp.name}' ({comp.width.value}) is small compared to the spacing of the input "
+                        f"The width of the {model_name} component '{comp.unique_name}' ({comp.width.value}) is small compared to the spacing of the input "
                         f"array ({self._energy_grid.energy_dense_step}). This may lead to inaccuracies in the convolution. Increase upsample_factor to improve accuracy.",
                         UserWarning,
                     )

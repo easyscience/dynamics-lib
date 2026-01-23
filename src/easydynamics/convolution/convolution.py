@@ -6,10 +6,10 @@ from easydynamics.convolution.analytical_convolution import AnalyticalConvolutio
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import (
+    ComponentCollection,
     DeltaFunction,
     Gaussian,
     Lorentzian,
-    SampleModel,
     Voigt,
 )
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -20,7 +20,7 @@ Numerical = float | int
 class Convolution(NumericalConvolutionBase):
     """
     Convolution class that combines analytical and numerical convolution methods to efficiently perform convolutions
-    of SampleModels with ResolutionModels.
+    of ComponentCollections with ResolutionComponents.
     Supports analytical convolution for pairs of analytical model components (DeltaFunction, Gaussian, Lorentzian, Voigt),
     while using numerical convolution for other components.
     If temperature is provided, detailed balance correction is applied to the sample model. In this case, all convolutions
@@ -31,10 +31,10 @@ class Convolution(NumericalConvolutionBase):
     Args:
     energy : np.ndarray or scipp.Variable
         1D array of energy values where the convolution is evaluated.
-    sample_model : SampleModel or ModelComponent
-        The sample model to be convolved.
-    resolution_model : SampleModel or ModelComponent
-        The resolution model to convolve with.
+    sample_components : ComponentCollection or ModelComponent
+        The sample components to be convolved.
+    resolution_components : ComponentCollection or ModelComponent
+        The resolution components to convolve with.
     upsample_factor : int, optional
         The factor by which to upsample the input data before convolution. Default is 5.
     extension_factor : float, optional
@@ -54,8 +54,8 @@ class Convolution(NumericalConvolutionBase):
         "energy",
         "_energy",
         "_energy_grid",
-        "_sample_model",
-        "_resolution_model",
+        "_sample_components",
+        "_resolution_components",
         "_temperature",
         "_upsample_factor",
         "_extension_factor",
@@ -66,8 +66,8 @@ class Convolution(NumericalConvolutionBase):
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_model: SampleModel | ModelComponent,
-        resolution_model: SampleModel | ModelComponent,
+        sample_components: ComponentCollection | ModelComponent,
+        resolution_components: ComponentCollection | ModelComponent,
         upsample_factor: Numerical = 5,
         extension_factor: Numerical = 0.2,
         temperature: Parameter | Numerical | None = None,
@@ -79,8 +79,8 @@ class Convolution(NumericalConvolutionBase):
         self._reactions_enabled = False
         super().__init__(
             energy=energy,
-            sample_components=sample_model,
-            resolution_components=resolution_model,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -116,18 +116,20 @@ class Convolution(NumericalConvolutionBase):
             total += self._numerical_convolver.convolution()
 
         # Delta function components
-        if self._delta_sample_model.components:
+        if self._delta_sample_components.components:
             total += self._convolve_delta_functions()
 
         return total
 
     def _convolve_delta_functions(self) -> np.ndarray:
-        "Convolve delta function components of the sample model with the resolution model."
+        "Convolve delta function components of the sample model with the resolution components."
         "No detailed balance correction is applied to delta functions."
         return sum(
             delta.area.value
-            * self._resolution_model.evaluate(self.energy.values - delta.center.value)
-            for delta in self._delta_sample_model.components
+            * self._resolution_components.evaluate(
+                self.energy.values - delta.center.value
+            )
+            for delta in self._delta_sample_components.components
         )
 
     def _check_if_pair_is_analytic(
@@ -160,7 +162,7 @@ class Convolution(NumericalConvolutionBase):
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(
-                "Resolution model contains delta functions. This is not supported."
+                "resolution components contains delta functions. This is not supported."
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -174,24 +176,24 @@ class Convolution(NumericalConvolutionBase):
     def _build_convolution_plan(self) -> None:
         """Separate sample model components into analytical pairs, delta functions, and the rest."""
 
-        analytical_sample_model = SampleModel()
-        delta_sample_model = SampleModel()
-        numerical_sample_model = SampleModel()
+        analytical_sample_components = ComponentCollection()
+        delta_sample_components = ComponentCollection()
+        numerical_sample_components = ComponentCollection()
 
-        for sample_component in self._sample_model.components:
+        for sample_component in self._sample_components.components:
             # If delta function, put in delta sample model and go to the next component
             if isinstance(sample_component, DeltaFunction):
-                delta_sample_model.add_component(sample_component)
+                delta_sample_components.append_component(sample_component)
                 continue
 
             # If temperature is set, all other components go to numerical sample model
             if self.temperature is not None:
-                numerical_sample_model.add_component(sample_component)
+                numerical_sample_components.append_component(sample_component)
                 continue
 
             # If temperature is not set, check if all resolution components can be convolved analytically with this sample component
             pair_is_analytic = []
-            for resolution_component in self._resolution_model.components:
+            for resolution_component in self._resolution_components.components:
                 pair_is_analytic.append(
                     self._check_if_pair_is_analytic(
                         sample_component, resolution_component
@@ -199,13 +201,13 @@ class Convolution(NumericalConvolutionBase):
                 )
             # If all resolution components can be convolved analytically with this sample component, add it to analytical sample model. If not, it goes to numerical sample model.
             if all(pair_is_analytic):
-                analytical_sample_model.add_component(sample_component)
+                analytical_sample_components.append_component(sample_component)
             else:
-                numerical_sample_model.add_component(sample_component)
+                numerical_sample_components.append_component(sample_component)
 
-        self._analytical_sample_model = analytical_sample_model
-        self._delta_sample_model = delta_sample_model
-        self._numerical_sample_model = numerical_sample_model
+        self._analytical_sample_components = analytical_sample_components
+        self._delta_sample_components = delta_sample_components
+        self._numerical_sample_components = numerical_sample_components
         self._convolution_plan_is_valid = True
 
         # Update convolvers
@@ -215,20 +217,20 @@ class Convolution(NumericalConvolutionBase):
         """Initialize analytical and numerical convolvers based on sample model components.
         There is no delta function convolver, as delta functions are handled directly in the convolution method."""
 
-        if self._analytical_sample_model.components:
+        if self._analytical_sample_components.components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
-                sample_components=self._analytical_sample_model,
-                resolution_components=self._resolution_model,
+                sample_components=self._analytical_sample_components,
+                resolution_components=self._resolution_components,
             )
         else:
             self._analytical_convolver = None
 
-        if self._numerical_sample_model.components:
+        if self._numerical_sample_components.components:
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
-                sample_model=self._numerical_sample_model,
-                resolution_model=self._resolution_model,
+                sample_components=self._numerical_sample_components,
+                resolution_components=self._resolution_components,
                 upsample_factor=self.upsample_factor,
                 extension_factor=self.extension_factor,
                 temperature=self.temperature,
