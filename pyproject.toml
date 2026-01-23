@@ -22,7 +22,6 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'numpy',
   'easyscience @ git+https://github.com/easyscience/corelib.git@develop', # The base library of the EasyScience framework
   'pooch',                                                                # Data downloader
 ]

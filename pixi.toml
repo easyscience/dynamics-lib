@@ -56,7 +56,7 @@ easydynamics = { path = ".", editable = true, extras = ['all'] }
 python = '3.11.*'
 
 [feature.py-max.dependencies]
-python = '3.13.*'
+python = '3.12.*'
 
 ##############
 # ENVIRONMENTS
