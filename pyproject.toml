@@ -199,7 +199,7 @@ select = [
   'F82', # Import-related errors (e.g., unresolved imports, reimported modules)
   'I',   # Import sorting issues (e.g., unsorted imports)
   'S',   # Security-related issues (e.g., use of insecure functions or libraries)
-  #  'W',   # General PEP 8 warnings (e.g., lines too long, trailing whitespace)
+  'W',   # General PEP 8 warnings (e.g., lines too long, trailing whitespace)
 ]
 
 [tool.ruff.lint.per-file-ignores]

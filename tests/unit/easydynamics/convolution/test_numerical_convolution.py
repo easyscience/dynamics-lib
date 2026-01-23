@@ -30,7 +30,10 @@ class TestNumericalConvolution:
         )
 
     def test_init(self, default_numerical_convolution):
-        "Test initialization of NumericalConvolution with default parameters."
+        """
+        Test initialization of NumericalConvolution with
+        default parameters.
+        """
         # WHEN THEN EXPECT
         assert isinstance(default_numerical_convolution, NumericalConvolution)
         assert isinstance(default_numerical_convolution.energy, sc.Variable)
@@ -48,7 +51,10 @@ class TestNumericalConvolution:
 
     @pytest.mark.parametrize('upsample_factor', [None, 5])
     def test_convolution(self, default_numerical_convolution, upsample_factor):
-        "Test that convolution of two Gaussians produces the expected result."
+        """
+        Test that convolution of two Gaussians produces the
+        expected result.
+        """
         # WHEN THEN
         default_numerical_convolution.upsample_factor = upsample_factor
         result = default_numerical_convolution.convolution()
@@ -71,7 +77,10 @@ class TestNumericalConvolution:
         self,
         default_numerical_convolution,
     ):
-        "Test that convolution includes detailed balance correction when temperature is provided."
+        """
+        Test that convolution includes detailed balance correction
+        when temperature is provided.
+        """
 
         # WHEN
         default_numerical_convolution.temperature = 5.0  # Kelvin

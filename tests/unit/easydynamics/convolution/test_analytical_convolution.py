@@ -32,7 +32,8 @@ def function2(request):
 class TestAnalyticalConvolution:
     @pytest.fixture
     def default_analytical_convolution(self):
-        # Energy needs to be odd to avoid issues with shifts in fftconvolve.
+        # Energy needs to be odd to avoid issues with shifts in
+        # fftconvolve.
         energy = np.linspace(-100, 100, 2**15 + 1)
         sample_components = ComponentCollection(display_name='ComponentCollection')
         resolution_components = ComponentCollection(display_name='ResolutionModel')
@@ -92,7 +93,10 @@ class TestAnalyticalConvolution:
         lorentzian1,
         lorentzian2,
     ):
-        """Test that the convolute method calls _convolute_analytic_pair for all component pairs."""
+        """
+        Test that the convolute method calls _convolute_analytic_pair
+        for all component pairs.
+        """
 
         # WHEN
         sample_components = ComponentCollection(display_name='ComponentCollection')
@@ -149,7 +153,9 @@ class TestAnalyticalConvolution:
         gaussian1,
         lorentzian1,
     ):
-        """Test that the convolute method also works for components."""
+        """
+        Test that the convolute method also works for components.
+        """
 
         # WHEN
         default_analytical_convolution.sample_components = gaussian1
@@ -251,7 +257,10 @@ class TestAnalyticalConvolution:
         expected_method,
         swapped,
     ):
-        """Test that _convolute_analytic_pair calls the correct internal helper with correct order."""
+        """
+        Test that _convolute_analytic_pair calls the correct internal
+        helper with correct order.
+        """
 
         with patch.object(
             default_analytical_convolution,
@@ -274,7 +283,10 @@ class TestAnalyticalConvolution:
         ids=['gaussian', 'lorentzian', 'voigt', 'dho'],
     )
     def test_convolute_analytic_pair_delta(self, default_analytical_convolution, function1):
-        """Test that convolution with delta function returns the other function."""
+        """
+        Test that convolution with delta function returns the other
+        function.
+        """
         # WHEN THEN
         delta_function = DeltaFunction(area=2.0, center=0.5)
         function1 = Gaussian(area=3.0, center=-1.0, width=1.0)
@@ -294,7 +306,10 @@ class TestAnalyticalConvolution:
         )
 
     def test_convolute_analytic_pair_resolution_delta_raises(self, default_analytical_convolution):
-        """Test that an error is raised if the resolution function is a delta function."""
+        """
+        Test that an error is raised if the resolution function is a
+        delta function.
+        """
         # WHEN
         sample_function = Gaussian(area=2.0, center=0.0, width=1.0)
         resolution_function = DeltaFunction(area=1.0, center=0.0)
@@ -311,7 +326,10 @@ class TestAnalyticalConvolution:
     def test_convolute_analytic_pair_non_analytical_pair_raises(
         self, default_analytical_convolution, gaussian1, dho1
     ):
-        """Test that an error is raised if the function pair is not supported for analytical convolution."""
+        """
+        Test that an error is raised if the function pair is not
+        supported for analytical convolution.
+        """
         # WHEN
         sample_function = dho1
         resolution_function = gaussian1
@@ -348,8 +366,12 @@ class TestAnalyticalConvolution:
     def test_convolute_function1_function2(
         self, default_analytical_convolution, function1, function2, method_name
     ):
-        # This test is perhaps superfluous since the methods get tested indirectly above.
-        """Test that the analytical convolution methods are correct by comparing to numerical convolution."""
+        # This test is perhaps superfluous since the methods get tested
+        # indirectly above.
+        """
+        Test that the analytical convolution methods are correct by
+        comparing to numerical convolution.
+        """
         # WHEN THEN
         convoluted = getattr(default_analytical_convolution, method_name)(function1, function2)
 
@@ -363,7 +385,8 @@ class TestAnalyticalConvolution:
             - default_analytical_convolution.energy.values[0]
         )
 
-        # Numerical convolution can be inaccurate at the edges, so only compare the central part
+        # Numerical convolution can be inaccurate at the edges, so only
+        # compare the central part.
         N = len(convoluted)
         start = N // 4
         end = 3 * N // 4
@@ -382,7 +405,10 @@ class TestAnalyticalConvolution:
         ids=['gaussian', 'lorentzian', 'voigt', 'dho'],
     )
     def test_convolute_delta_any(self, default_analytical_convolution, function1):
-        """Test that convolution with delta function returns the other function."""
+        """
+        Test that convolution with delta function returns the other
+        function.
+        """
         # WHEN THEN
         delta_function = DeltaFunction(area=2.0, center=0.5)
         convoluted = default_analytical_convolution._convolute_delta_any(delta_function, function1)

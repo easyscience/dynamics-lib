@@ -83,7 +83,9 @@ class TestConvolution:
         assert default_convolution._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
-        "Test that convolution plan is built when invalid."
+        """
+        Test that convolution plan is built when invalid.
+        """
         # WHEN
         conv = default_convolution
         conv._convolution_plan_is_valid = False
@@ -94,7 +96,10 @@ class TestConvolution:
             build_plan.assert_called_once()
 
     def test_convolution_calls_analytical_convolver(self, default_convolution):
-        "Test that convolution calls analytical convolver when analytical components are present."
+        """
+        Test that convolution calls analytical convolver when analytical
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -106,7 +111,10 @@ class TestConvolution:
             analytical_conv.assert_called_once()
 
     def test_convolution_calls_numerical_convolver(self, default_convolution):
-        "Test that convolution calls numerical convolver when numerical components are present."
+        """
+        Test that convolution calls numerical convolver when numerical
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -118,7 +126,10 @@ class TestConvolution:
             numerical_conv.assert_called_once()
 
     def test_convolution_calls_convolve_delta_functions(self, default_convolution):
-        "Test that convolution calls _convolve_delta_functions when delta components are present."
+        """
+        Test that convolution calls _convolve_delta_functions when delta
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -150,7 +161,8 @@ class TestConvolution:
         delta_component,
     ):
         """
-        Tests that convolution calls the correct methods depending on which component types are present.
+        Tests that convolution calls the correct methods depending on
+        which component types are present.
         """
 
         # WHEN
@@ -180,7 +192,8 @@ class TestConvolution:
         conv.sample_components = sample_components  # This updates the internal sample models
 
         # THEN
-        # Mock the methods to be tested. Use nullcontext if the component type is not present.
+        # Mock the methods to be tested. Use nullcontext if the
+        # component type is not present.
         if analytical_component:
             patch_analytical = patch.object(
                 conv._analytical_convolver, 'convolution', return_value=np.array([1.0])
@@ -202,7 +215,8 @@ class TestConvolution:
         )
 
         # EXPECT
-        # Each method is called only if the corresponding component type is present.
+        # Each method is called only if the corresponding component
+        # type is present.
         with (
             patch_analytical as mock_analytical_method,
             patch_numerical as mock_numerical_method,
@@ -227,7 +241,9 @@ class TestConvolution:
                 mock_delta_method.assert_not_called()
 
     def test_convolve_delta_functions(self, default_convolution):
-        "Test that _convolve_delta_functions returns expected values."
+        """
+        Test that _convolve_delta_functions returns expected values.
+        """
         # WHEN
         conv = default_convolution
 
@@ -298,7 +314,8 @@ class TestConvolution:
 
     def test_check_if_pair_is_analytic_raises_with_delta_in_resolution(self, default_convolution):
         """
-        Test that _check_if_pair_is_analytic raises TypeError when resolution component is DeltaFunction.
+        Test that _check_if_pair_is_analytic raises TypeError when
+        resolution component is DeltaFunction.
         """
         # WHEN
         conv = default_convolution
@@ -333,7 +350,8 @@ class TestConvolution:
         self, default_convolution, sample_component, resolution_component
     ):
         """
-        Test that _check_if_pair_is_analytic raises TypeError when given invalid component types.
+        Test that _check_if_pair_is_analytic raises TypeError when given
+        invalid component types.
         """
         # WHEN
         conv = default_convolution
@@ -371,7 +389,8 @@ class TestConvolution:
         temperature,
     ):
         """
-        Tests that convolution calls the correct methods depending on which component types are present.
+        Tests that convolution calls the correct methods depending on
+        which component types are present.
         """
 
         # WHEN
@@ -431,7 +450,8 @@ class TestConvolution:
             else:
                 assert len(conv._numerical_sample_components.components) == 0
         else:
-            # analytical and numerical components go to numerical when temperature is set
+            # analytical and numerical components go to numerical when
+            # temperature is set
             expected_numerical_count = 0
             if numerical_component:
                 expected_numerical_count += 1
@@ -458,7 +478,8 @@ class TestConvolution:
         numerical_component,
     ):
         """
-        Tests that convolution sets the correct methods depending on which component types are present.
+        Tests that convolution sets the correct methods depending on
+        which component types are present.
         """
 
         # WHEN
