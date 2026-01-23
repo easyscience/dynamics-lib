@@ -4019,7 +4019,7 @@ packages:
   requires_python: '>=3.5'
 - pypi: ./
   name: easydynamics
-  version: 999.0.0+devdirty10
+  version: 999.0.0+devdirty9
   sha256: 16a21ddf291ca7b884c6ca9cd6ab20246c0f3fe29da4fd48c32ee6446c965f3c
   requires_dist:
   - easyscience @ git+https://github.com/easyscience/corelib.git@develop
