@@ -172,6 +172,10 @@ nav:
   - Tutorials:
       - Tutorials: tutorials/index.md
       - Getting Started:
-          - Dummy tutorial: tutorials/tutorial.ipynb
+          - Component collection: tutorials/component_collection.ipynb
+          - Components: tutorials/components.ipynb
+          - Detailed balance: tutorials/detailed_balance.ipynb
+          - Diffusion model: tutorials/diffusion_model.ipynb
+          - Sample model: tutorials/sample_model.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
