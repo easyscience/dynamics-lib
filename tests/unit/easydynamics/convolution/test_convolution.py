@@ -6,19 +6,15 @@ import pytest
 import scipp as sc
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
-from easydynamics.convolution.convolution import (
-    Convolution,
-)
+from easydynamics.convolution.convolution import Convolution
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
-from easydynamics.sample_model import (
-    DampedHarmonicOscillator,
-    DeltaFunction,
-    Gaussian,
-    Lorentzian,
-    Polynomial,
-    Voigt,
-)
+from easydynamics.sample_model import DampedHarmonicOscillator
+from easydynamics.sample_model import DeltaFunction
+from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import Lorentzian
+from easydynamics.sample_model import Polynomial
+from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 
 

@@ -2,9 +2,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from easydynamics.convolution.convolution_base import (
-    ConvolutionBase,
-)
+from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 
 

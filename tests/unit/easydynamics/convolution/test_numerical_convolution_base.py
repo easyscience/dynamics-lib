@@ -4,9 +4,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.energy_grid import EnergyGrid
-from easydynamics.convolution.numerical_convolution_base import (
-    NumericalConvolutionBase,
-)
+from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
 

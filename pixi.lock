@@ -4061,8 +4061,8 @@ packages:
   requires_python: '>=3.5'
 - pypi: ./
   name: easydynamics
-  version: 999.0.0+devdirty35
-  sha256: 6bebe599b5ae0d05d34f5cbd9325004e98bc157f9f229e34dec2fae432f87f44
+  version: 999.0.0+devdirty37
+  sha256: be37b796b555a135247e7e1bc70cc5553c541460c90d403e48cda4dc835a6a17
   requires_dist:
   - darkdetect
   - easyscience @ git+https://github.com/easyscience/corelib.git@develop

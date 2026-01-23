@@ -6,16 +6,12 @@ import scipp as sc
 from scipy.signal import fftconvolve
 
 # from easyscience.variable import Parameter
-from easydynamics.convolution.analytical_convolution import (
-    AnalyticalConvolution,
-)
-from easydynamics.sample_model import (
-    DampedHarmonicOscillator,
-    DeltaFunction,
-    Gaussian,
-    Lorentzian,
-    Voigt,
-)
+from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
+from easydynamics.sample_model import DampedHarmonicOscillator
+from easydynamics.sample_model import DeltaFunction
+from easydynamics.sample_model import Gaussian
+from easydynamics.sample_model import Lorentzian
+from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 
 NUMERICAL_CONVOLUTION_RELATIVE_TOLERANCE = 1e-5
