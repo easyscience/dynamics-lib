@@ -29,27 +29,20 @@ jobs:
         shell: bash
         run: pixi add --pypi --git https://github.com/enhantica/badgery badgery
 
-      # Temporary: Set code path based on branch type, as the default
-      # branch is currently empty and code is in 'src' subfolder in
-      # other branches.
+      # Temporary: do not use $DEFAULT_BRANCH in $DEFAULT_BRANCH $DEVELOP_BRANCH $CI_BRANCH
       - name: Run docstring coverage and code complexity/maintainability checks
         run: |
-          for BRANCH in $DEFAULT_BRANCH $DEVELOP_BRANCH $CI_BRANCH; do
+          for BRANCH in $DEVELOP_BRANCH $CI_BRANCH; do
             echo
             echo "🔹🔸🔹🔸🔹 Processing branch $BRANCH 🔹🔸🔹🔸🔹"
             if [ -d "../$BRANCH" ]; then
               echo "Branch $BRANCH already processed, skipping"
               continue
             fi
-          
-            if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then
-              CODE_PATH="../$BRANCH"
-            else
-              CODE_PATH="../$BRANCH/src"
-            fi
 
             git worktree add ../$BRANCH origin/$BRANCH
             mkdir -p reports/$BRANCH
+            CODE_PATH="../$BRANCH/src"
 
             echo "Docstring coverage for branch $BRANCH"
             pixi run interrogate -c pyproject.toml --fail-under=0 $CODE_PATH > reports/$BRANCH/coverage-docstring.txt
@@ -63,6 +56,10 @@ jobs:
             echo "Raw metrics for branch $BRANCH"
             pixi run radon raw -s -j $CODE_PATH > reports/$BRANCH/raw-metrics.json
           done
+
+      # Temporary: copy develop branch code metrics to default branch folder
+      - name: Copy develop branch reports to default branch folder
+        run: cp -r reports/$DEVELOP_BRANCH reports/$DEFAULT_BRANCH
 
       - name: Generate dashboard HTML
         run: >
