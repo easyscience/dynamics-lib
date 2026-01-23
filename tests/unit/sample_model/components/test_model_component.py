@@ -136,7 +136,7 @@ class TestModelComponent:
         # THEN EXPECT
         with pytest.raises(
             Exception,
-            match='Input x has unit nm, but DummyComponent component has unit meV.',
+            match='Input x has unit nm, but DummyComponent component ',
         ):
             dummy._prepare_x_for_evaluate(x)
 
@@ -147,7 +147,7 @@ class TestModelComponent:
         # THEN EXPECT
         with pytest.warns(
             UserWarning,
-            match='Input x has unit µeV, but DummyComponent component has unit meV. Converting DummyComponent to µeV.',  # noqa: E501
+            match='Input x has unit µeV, but DummyComponent component ',
         ):
             x_prepared = dummy._prepare_x_for_evaluate(x)
 

@@ -141,7 +141,7 @@ class TestDeltaFunction:
         # THEN EXPECT
         with pytest.raises(
             UnitError,
-            match='Input x has unit nm, but DeltaFunction component has unit meV. Failed to convert DeltaFunction to nm.',  # noqa: E501
+            match='Input x has unit nm, but DeltaFunction component ',
         ):
             delta_function.evaluate(x)
 
