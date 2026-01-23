@@ -27,6 +27,8 @@ dependencies = [
   'pandas',                                                               # Displaying tables in Jupyter notebooks
   'plotly',                                                               # Interactive plots
   'py3Dmol',                                                              # Visualisation of crystal structures
+  'ipympl',                                                               # Matplotlib Jupyter backend
+  'ipywidgets',                                                           # Jupyter widgets
   'jupyterlab',                                                           # Jupyter notebooks
   'pixi-kernel',                                                          # Pixi Jupyter kernel
 ]
