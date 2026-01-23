@@ -147,7 +147,7 @@ notebook-tweak = 'python tools/tweak_notebooks.py tutorials/'
 notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --overwrite --color=yes -n auto -v'
 
 notebook-prepare = { depends-on = [
-  'notebook-convert',
+  ###'notebook-convert',
   'notebook-strip',
   ###'notebook-tweak',
 ] }
