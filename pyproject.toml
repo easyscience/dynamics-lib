@@ -193,7 +193,7 @@ quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 25
 select = [
   #  'E',   # General PEP 8 style errors
   'E9', # Runtime errors (e.g., syntax errors, undefined names)
-  #  'F',   # Pyflakes-specific checks (e.g., unused variables, imports)
+  'F',  # Pyflakes-specific checks (e.g., unused variables, imports)
   #  'F63', # Issues related to invalid escape sequences in strings
   #  'F7',  # Type-related errors (e.g., mismatched argument types, unsupported operations)
   'F82', # Import-related errors (e.g., unresolved imports, reimported modules)
