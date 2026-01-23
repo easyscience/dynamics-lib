@@ -421,7 +421,9 @@ class TestConvolution:
         conv.sample_components = sample_components  # This updates the internal sample models
         if temperature is not None:
             conv.temperature = temperature
-        conv._build_convolution_plan()  # It is already called by sample_components setter, but we now call it explicitly
+        # It is already called by sample_components setter, but we now
+        # call it explicitly
+        conv._build_convolution_plan()
 
         # EXPECT
         assert isinstance(conv._analytical_sample_components, ComponentCollection)
@@ -503,7 +505,9 @@ class TestConvolution:
 
         # THEN
         conv.sample_components = sample_components  # This updates the internal sample models
-        conv._set_convolvers()  # Should already have been called by sample_components setter, but we now call it explicitly
+        # Should already have been called by sample_components setter,
+        # but we now call it explicitly
+        conv._set_convolvers()
 
         # EXPECT
         if analytical_component:

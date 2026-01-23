@@ -62,7 +62,10 @@ class TestConvolutionBase:
                     'resolution_components': ComponentCollection(),
                     'energy_unit': 'meV',
                 },
-                '`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',
+                (
+                    '`sample_components` is an instance of str, '
+                    'but must be a ComponentCollection or ModelComponent.'
+                ),
             ),
             (
                 {
@@ -71,7 +74,10 @@ class TestConvolutionBase:
                     'resolution_components': 'invalid',
                     'energy_unit': 'meV',
                 },
-                '`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',
+                (
+                    '`resolution_components` is an instance of str, '
+                    'but must be a ComponentCollection or ModelComponent.'
+                ),
             ),
             (
                 {
@@ -173,7 +179,10 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',
+            match=(
+                '`sample_components` is an instance of str, '
+                'but must be a ComponentCollection or ModelComponent.'
+            ),
         ):
             convolution_base.sample_components = 'invalid'
 
@@ -194,6 +203,9 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',
+            match=(
+                '`resolution_components` is an instance of str, '
+                'but must be a ComponentCollection or ModelComponent.'
+            ),
         ):
             convolution_base.resolution_components = 'invalid'
