@@ -1,0 +1,13 @@
+name: 'Publish to PyPI'
+description: 'Publish a built distribution to PyPI using pypa/gh-action-pypi-publish'
+inputs:
+  password:
+    description: 'PyPI API token (or password) for authentication'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ inputs.password }}

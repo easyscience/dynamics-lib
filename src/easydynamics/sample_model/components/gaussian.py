@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 from __future__ import annotations
 
 import numpy as np
@@ -12,16 +15,21 @@ from .model_component import ModelComponent
 
 class Gaussian(CreateParametersMixin, ModelComponent):
     """
-    Gaussian function: area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
-    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
+    Gaussian function:
+    area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
+    If the center is not provided, it will be centered at 0 and fixed,
+    which is typically what you want in QENS.
 
     Args:
         area (Int, float or Parameter): Area of the Gaussian.
-        center (Int, float, None or Parameter): Center of the Gaussian. If None, defaults to 0 and is fixed
+        center (Int, float, None or Parameter): Center of the Gaussian.
+        If None, defaults to 0 and is fixed
         width (Int, float or Parameter): Standard deviation.
-        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        unit (str or sc.Unit): Unit of the parameters.
+        Defaults to "meV".
         display_name (str): Name of the component.
-        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
+        unique_name (str or None): Unique name of the component.
+        If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -29,8 +37,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "Gaussian",
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'Gaussian',
         unique_name: str | None = None,
     ):
         # Validate inputs and create Parameters if not given
@@ -41,15 +49,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=display_name, unit=self._unit
-        )
+        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(
-            width=width, name=display_name, unit=self._unit
-        )
+        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
 
         self._area = area
         self._center = center
@@ -64,7 +68,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     def area(self, value: Numeric) -> None:
         """Set the area parameter value."""
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -79,7 +83,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
     @property
@@ -91,15 +95,17 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     def width(self, value: Numeric) -> None:
         """Set the width parameter value."""
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number")
+            raise TypeError('width must be a number')
         self._width.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         """Evaluate the Gaussian at the given x values.
-        If x is a scipp Variable, the unit of the Gaussian will be converted to match x.
-        The Gaussian evaluates to area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)"""
+
+        If x is a scipp Variable, the unit of the Gaussian will be
+        converted to match x.
+        The Gaussian evaluates to
+        area/(width*sqrt(2pi)) * exp(-0.5*((x - center)/width)^2)
+        """
 
         x = self._prepare_x_for_evaluate(x)
 
@@ -109,4 +115,5 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization * np.exp(exponent)
 
     def __repr__(self):
-        return f"Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f'Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n \
+            area = {self.area},\n center = {self.center},\n width = {self.width})'

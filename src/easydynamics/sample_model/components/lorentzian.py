@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 from __future__ import annotations
 
 import numpy as np
@@ -12,16 +15,21 @@ from .model_component import ModelComponent
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
     """
-    Lorentzian function: area*width / (pi * ( (x - center)^2 + width^2 ) )
-    If the center is not provided, it will be centered at 0 and fixed, which is typically what you want in QENS.
+    Lorentzian function:
+    area*width / (pi * ( (x - center)^2 + width^2 ) )
+    If the center is not provided, it will be centered at 0 and fixed,
+    which is typically what you want in QENS.
 
     Args:
         area (Int, float or Parameter): Area of the Lorentzian.
-        center (Int, float, None or Parameter): Peak center. If None, defaults to 0 and is fixed.
-        width (Int, float or Parameter): Half Width at Half Maximum (HWHM)
-        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV".
+        center (Int, float, None or Parameter): Peak center.
+        If None, defaults to 0 and is fixed.
+        width (Int, float or Parameter):
+        Half Width at Half Maximum (HWHM)
+        unit (str or sc.Unit): Unit of the parameters. Defaults to "meV"
         display_name (str): Display name of the component.
-        unique_name (str or None): Unique name of the component. If None, a unique_name is automatically generated.
+        unique_name (str or None): Unique name of the component.
+        If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -29,8 +37,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "Lorentzian",
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'Lorentzian',
         unique_name: str | None = None,
     ):
         super().__init__(
@@ -40,15 +48,11 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=display_name, unit=self._unit
-        )
+        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(
-            width=width, name=display_name, unit=self._unit
-        )
+        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
 
         self._area = area
         self._center = center
@@ -63,7 +67,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     def area(self, value: Numeric) -> None:
         """Set the area parameter value."""
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -78,7 +82,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
     @property
@@ -90,15 +94,17 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     def width(self, value: Numeric) -> None:
         """Set the width parameter value."""
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number")
+            raise TypeError('width must be a number')
         self._width.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         """Evaluate the Lorentzian at the given x values.
-        If x is a scipp Variable, the unit of the Lorentzian will be converted to match x.
-        The Lorentzian evaluates to area*width / (pi * ( (x - center)^2 + width^2 ) )"""
+
+        If x is a scipp Variable, the unit of the Lorentzian will be
+        converted to match x.
+        The Lorentzian evaluates to
+        area*width / (pi * ( (x - center)^2 + width^2 ) )
+        """
 
         x = self._prepare_x_for_evaluate(x)
 
@@ -108,4 +114,5 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization / denominator
 
     def __repr__(self):
-        return f"Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n area = {self.area},\n center = {self.center},\n width = {self.width})"
+        return f'Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n \
+            area = {self.area},\n center = {self.center},\n width = {self.width})'

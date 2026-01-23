@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import warnings
 from copy import copy
 
@@ -7,38 +10,41 @@ from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBas
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.utils import (
-    Numeric,
-    Q_type,
-    _validate_and_convert_Q,
-    _validate_unit,
-)
+from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import _validate_unit
 
 
 class ModelBase(EasyScienceModelBase):
     """Base class for Sample Models.
 
-    Contains common functionality for models with components and Q dependence.
+    Contains common functionality for models with components and
+    Q dependence.
 
     Parameters
     ----------
     display_name : str
         Display name of the model.
     unique_name : str | None
-        Unique name of the model. If None, a unique name will be generated.
+        Unique name of the model. If None, a unique name will be
+        generated.
     unit : str | sc.Unit | None
         Unit of the model. If None, unitless.
     components : ModelComponent | ComponentCollection | None
-        Template components of the model. If None, no components are added. These components are copied into ComponentCollections for each Q value.
+        Template components of the model. If None, no components
+        are added.
+        These components are copied into ComponentCollections for each
+        Q value.
     Q : Q_type | None
         Q values for the model. If None, Q is not set.
     """
 
     def __init__(
         self,
-        display_name: str = "MyModelBase",
+        display_name: str = 'MyModelBase',
         unique_name: str | None = None,
-        unit: str | sc.Unit | None = "meV",
+        unit: str | sc.Unit | None = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ):
@@ -53,7 +59,8 @@ class ModelBase(EasyScienceModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f"Components must be a ModelComponent, a ComponentCollection or None, got {type(components).__name__}"
+                f'Components must be a ModelComponent, a ComponentCollection or None, '
+                f'got {type(components).__name__}'
             )
 
         self._components = ComponentCollection()
@@ -65,8 +72,7 @@ class ModelBase(EasyScienceModelBase):
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> list[np.ndarray]:
-        """
-        Evaluate the sample model at all Q for the given x values
+        """Evaluate the sample model at all Q for the given x values.
 
         Parameters
         ----------
@@ -81,29 +87,34 @@ class ModelBase(EasyScienceModelBase):
 
         if not self._component_collections:
             raise ValueError(
-                "No components in the model to evaluate. Run generate_component_collections() first"
+                'No components in the model to evaluate. '
+                'Run generate_component_collections() first'
             )
         y = [collection.evaluate(x) for collection in self._component_collections]
 
         return y
 
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Component management
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
-        """Append a ModelComponent or ComponentCollection to the SampleModel.
+        """Append a ModelComponent or ComponentCollection to the
+        SampleModel.
 
         Args:
-            component (ModelComponent | ComponentCollection): The ModelComponent or ComponentCollection to append.
+            component (ModelComponent | ComponentCollection):
+            The ModelComponent or ComponentCollection to append.
         """
         self._components.append_component(component)
         self._generate_component_collections()
 
     def remove_component(self, unique_name: str) -> None:
-        """Remove a ModelComponent from the SampleModel by its unique name.
+        """Remove a ModelComponent from the SampleModel by its unique
+        name.
 
         Args:
-            unique_name (str): The unique name of the ModelComponent to remove.
+            unique_name (str): The unique name of the ModelComponent
+            to remove.
         """
         self._components.remove_component(unique_name)
         self._generate_component_collections()
@@ -113,14 +124,13 @@ class ModelBase(EasyScienceModelBase):
         self._components.clear_components()
         self._generate_component_collections()
 
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Properties
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     @property
     def unit(self) -> str | sc.Unit:
-        """
-        Get the unit of the ComponentCollection.
+        """Get the unit of the ComponentCollection.
 
         Returns
         -------
@@ -132,14 +142,14 @@ class ModelBase(EasyScienceModelBase):
     def unit(self, unit_str: str) -> None:
         raise AttributeError(
             (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
+                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+                f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """
-        Convert the unit of the ComponentCollection and all its components.
+        """Convert the unit of the ComponentCollection and all its
+        components.
         """
 
         old_unit = self._unit
@@ -153,7 +163,7 @@ class ModelBase(EasyScienceModelBase):
             try:
                 for component in self.components:
                     component.convert_unit(old_unit)
-            except Exception:
+            except Exception:  # noqa: S110
                 pass  # Best effort rollback
             raise e
         self._generate_component_collections()
@@ -167,9 +177,7 @@ class ModelBase(EasyScienceModelBase):
     def components(self, value: ModelComponent | ComponentCollection | None) -> None:
         """Set the components of the SampleModel."""
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
-            raise TypeError(
-                "Components must be a ModelComponent or a ComponentCollection"
-            )
+            raise TypeError('Components must be a ModelComponent or a ComponentCollection')
 
         self.clear_components()
         if value is not None:
@@ -186,31 +194,34 @@ class ModelBase(EasyScienceModelBase):
         self._Q = _validate_and_convert_Q(value)
         self._generate_component_collections()
 
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # Private methods
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
         # TODO regenerate automatically if Q or components have changed
 
         if self._Q is None:
-            warnings.warn(
-                "Q is not set. No component collections generated", UserWarning
-            )
+            warnings.warn('Q is not set. No component collections generated', UserWarning)
             self._component_collections = []
             return
 
         self._component_collections = [ComponentCollection() for _ in self._Q]
 
-        # Add copies of components from self._components to each component collection
+        # Add copies of components from self._components to each
+        # component collection
         for collection in self._component_collections:
             for component in self._components.components:
                 collection.append_component(copy(component))
 
     def get_all_variables(self):
-        """Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-        Ignores the Parameters and Descriptors in self._components as these are just templates."""
+        """Get all Parameters and Descriptors from all
+        ComponentCollections in the ModelBase.
+
+        Ignores the Parameters and Descriptors in self._components as
+        these are just templates.
+        """
 
         all_vars = [
             var
@@ -219,9 +230,12 @@ class ModelBase(EasyScienceModelBase):
         ]
         return all_vars
 
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # dunder methods
-    # --------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), Q = {self.Q}, components = {self.components}"
+        return (
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'unit={self.unit}), Q = {self.Q}, components = {self.components}'
+        )
