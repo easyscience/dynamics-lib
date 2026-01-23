@@ -1,3 +1,3 @@
 from .convolution import Convolution
 
-__all__ = ["Convolution"]
+__all__ = ['Convolution']
