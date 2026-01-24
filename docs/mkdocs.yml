@@ -180,3 +180,6 @@ nav:
           - Sample model: tutorials/sample_model.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
+      - convolution: api-reference/convolution.md
+      - sample_model: api-reference/sample_model.md
+      - utils: api-reference/utils.md
