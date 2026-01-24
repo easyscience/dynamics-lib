@@ -77,7 +77,7 @@ default = { features = ['default', 'py-max'] }
 [tasks]
 
 # 🧪 Testing Tasks
-unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
+unit-tests = 'python -m pytest tests/unit/ --color=yes --cov=src/easydynamics'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
 notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --color=yes -n auto -v'
 script-tests = 'python -m pytest tools/test_scripts.py --color=yes -n auto -v'
@@ -130,7 +130,7 @@ raw-metrics = 'radon raw -s src/'
 raw-metrics-json = 'radon raw -s -j src/'
 
 # 📊 Coverage
-unit-tests-coverage = 'pixi run unit-tests --forked --cov=src/easydynamics --cov-report=term-missing'
+unit-tests-coverage = 'python -m pytest tests/unit/ --color=yes --cov=src/easydynamics --cov-report=term-missing'
 integration-tests-coverage = 'pixi run integration-tests --cov=src/easydynamics --cov-report=term-missing'
 docstring-coverage = 'interrogate -c pyproject.toml src/easydynamics'
 
