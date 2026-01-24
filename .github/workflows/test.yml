@@ -240,7 +240,7 @@ jobs:
             cd easydynamics_py$py_ver
 
             echo "Running tests"
-            pixi run python -m pytest ../tests/unit/ --color=yes -v
+            pixi run python -m pytest ../tests/unit/ --color=yes --cov=../src/easydynamics
 
             echo "Exiting pixi project directory"
             cd ..
