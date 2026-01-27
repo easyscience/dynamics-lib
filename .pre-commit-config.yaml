@@ -1,0 +1,57 @@
+repos:
+  - repo: local
+    hooks:
+      # -----------------
+      # Pre-commit checks
+      # -----------------
+      - id: pixi-pyproject-check
+        name: pixi run pyproject-check
+        entry: pixi run pyproject-check
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: pixi-py-lint-check-staged
+        name: pixi run py-lint-check-staged
+        entry: pixi run py-lint-check-pre
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: pixi-py-format-check-staged
+        name: pixi run py-format-check-staged
+        entry: pixi run py-format-check-pre
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: pixi-nonpy-format-check-modified
+        name: pixi run nonpy-format-check-modified
+        entry: pixi run nonpy-format-check-modified
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: pixi-docs-format-check
+        name: pixi run docs-format-check
+        entry: pixi run docs-format-check
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # ----------------
+      # Pre-push checks
+      # ----------------
+      - id: pixi-nonpy-format-check
+        name: pixi run nonpy-format-check
+        entry: pixi run nonpy-format-check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: pixi-unit-tests
+        name: pixi run unit-tests
+        entry: pixi run unit-tests
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

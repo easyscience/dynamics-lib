@@ -1,0 +1,86 @@
+# This workflow automatically merges `master` into `develop` whenever a
+# new version tag is pushed (v*).
+#
+# Key points:
+# - Directly merges master into develop without creating a PR.
+# - Skips CI on the merge commit using [skip ci] in the commit message.
+# - The code being merged has already been tested as part of the release process.
+# - This ensures develop stays up-to-date with release changes (version bumps, etc.).
+#
+# Required organization config:
+# https://github.com/organizations/easyscience/settings/secrets/actions
+# https://github.com/organizations/easyscience/settings/variables/actions
+# - Actions secret:   EASYSCIENCE_APP_KEY  (GitHub App private key PEM)
+# - Actions variable: EASYSCIENCE_APP_ID   (GitHub App ID)
+#
+# IMPORTANT:
+# The GitHub App must be added to the develop branch ruleset bypass list.
+
+name: Backmerge (master -> develop)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backmerge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (for local actions)
+        uses: actions/checkout@v5
+
+      - name: Setup easyscience[bot]
+        id: bot
+        uses: ./.github/actions/setup-easyscience-bot
+        with:
+          app-id: ${{ vars.EASYSCIENCE_APP_ID }}
+          private-key: ${{ secrets.EASYSCIENCE_APP_KEY }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout repository (with bot token)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ steps.bot.outputs.token }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "easyscience[bot]"
+          git config user.email "${{ vars.EASYSCIENCE_APP_ID }}+easyscience[bot]@users.noreply.github.com"
+
+      - name: Merge master into develop
+        run: |
+          set -euo pipefail
+
+          echo "Fetching develop branch"
+          git fetch origin develop:develop
+
+          echo "Switching to develop branch"
+          git checkout develop
+
+          echo "Checking if already up-to-date"
+          if git merge-base --is-ancestor origin/master develop; then
+            echo "ℹ️ Develop is already up-to-date with master"
+            exit 0
+          fi
+
+          echo "Preparing merge message"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MESSAGE="Backmerge: master into develop (manual) [skip ci]"
+          else
+            TAG="${{ github.ref_name }}"
+            MESSAGE="Backmerge: ${TAG} from master into develop [skip ci]"
+          fi
+
+          echo "Merging master into develop"
+          git merge origin/master --no-ff -m "${MESSAGE}"
+
+          echo "Pushing to develop"
+          git push origin develop
+
+          echo "✅ Successfully merged master into develop"
