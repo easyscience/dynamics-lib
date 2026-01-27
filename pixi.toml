@@ -166,7 +166,7 @@ docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-p
 docs-update-assets = 'pixi run python tools/update_docs_assets.py'
 
 # 📦 Template Management Tasks
-copier-copy = "pixi run copier copy gh:easyscience/templates-app . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-copy = "pixi run copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
 copier-recopy = "pixi run copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
 copier-update = "pixi run copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
 
