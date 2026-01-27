@@ -12,6 +12,9 @@ from scipp.io import save_hdf5 as sc_save_hdf5
 class Experiment(NewBase):
     """Holds data from an experiment as a sc.DataArray along with
     metadata.
+
+    This is a minimal implementation that will be extended in the
+    future.
     """
 
     def __init__(
@@ -20,18 +23,26 @@ class Experiment(NewBase):
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
     ):
-        super().__init__(display_name, unique_name=unique_name)
+        super().__init__(
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
         if data is None:
             self._data: Optional[sc.DataArray] = None
         elif isinstance(data, str):
             self.load_hdf5(filename=data)
         elif isinstance(data, sc.DataArray):
+            self._validate_coordinates(data)
             self._data = data
         else:
             raise TypeError(
                 f'Data must be a sc.DataArray or a filename string, not {type(data).__name__}'
             )
+
+        self._binned_data = (
+            self._convert_to_bin_centers(self._data) if self._data is not None else None
+        )
 
     ###########
     # Properties
@@ -47,7 +58,21 @@ class Experiment(NewBase):
         """Set the dataset associated with this experiment."""
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
+        self._validate_coordinates(value)
         self._data = value
+        self._binned_data = (
+            self._convert_to_bin_centers(self._data) if self._data is not None else None
+        )
+
+    @property
+    def binned_data(self) -> sc.DataArray | None:
+        """Get the binned dataset associated with this experiment."""
+        return self._binned_data
+
+    @binned_data.setter
+    def binned_data(self, value: sc.DataArray):
+        """Set the binned dataset associated with this experiment."""
+        raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
     @property
     def Q(self) -> sc.Variable:
@@ -63,8 +88,7 @@ class Experiment(NewBase):
         """Set the Q values for the dataset."""
         raise AttributeError('Q is a read-only property derived from the data.')
 
-    property
-
+    @property
     def energy(self) -> sc.Variable:
         """Get the energy values from the dataset."""
         if self._data is None:
@@ -98,17 +122,15 @@ class Experiment(NewBase):
                 raise TypeError(
                     f'Display name must be a string, not {type(display_name).__name__}'
                 )
-            self.name = display_name
+            self.display_name = display_name
 
-        # TODO: Add checks of dimensions etc.
-        # I'm not yet sure what dimensions I want to allow,
-        # so for now I trust that the data is valid.
         loaded_data = sc_load_hdf5(filename)
         if not isinstance(loaded_data, sc.DataArray):
             raise TypeError(
                 f'Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}'
             )
-        self._data = loaded_data
+        self._validate_coordinates(loaded_data)
+        self.data = loaded_data
 
     def save_hdf5(self, filename: str | None = None):
         """Save the dataset to HDF5.
@@ -118,7 +140,7 @@ class Experiment(NewBase):
         """
 
         if filename is None:
-            filename = f'{self.name}.h5'
+            filename = f'{self.unique_name}.h5'
 
         if not isinstance(filename, str):
             raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
@@ -137,20 +159,61 @@ class Experiment(NewBase):
     def remove_data(self):
         """Remove the dataset from the experiment."""
         self._data = None
+        self._binned_data = None
 
-    def rebin(self, dim: str, bins: sc.Variable):
-        #   def rebin(self, dimensions: dict[str, Numeric]) -> None:
-        # """
-        raise NotImplementedError('Binning not yet implemented.')
+    def rebin(self, dimensions: dict[str, int | sc.Variable]) -> None:
+        """Rebin the dataset along specified dimensions.
+
+        Args:
+            dimensions (dict[str, int | sc.Variable]): A dictionary
+            mapping dimension names to number of bins (int) or bin
+            values (sc.Variable).
+        Raises:
+            TypeError: If dimensions is not a dictionary or if
+            keys/values are of incorrect types. KeyError: If a specified
+            dimension is not in the dataset.
+        """
+
+        if not isinstance(dimensions, dict):
+            raise TypeError(
+                'dimensions must be a dictionary mapping dimension names '
+                'to number of bins or bin values as sc.Variable.'
+            )
+        binned_data = self._data.copy()
+        for dim, value in dimensions.items():
+            if not isinstance(dim, str):
+                raise TypeError(
+                    f'Dimension keys must be strings. Got {type(dim)} for {dim} instead.'
+                )
+            if dim not in self._data.dims:
+                raise KeyError(
+                    f"Dimension '{dim}' not a valid dimension for rebinning. "
+                    f'Should be one of {self._data.dims}.'
+                )
+            if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
+                value = int(value)
+                # This line can be removed when scipp resize support
+                # resizing with coordinates
+                dimensions[dim] = value
+            if not (isinstance(value, int) or isinstance(value, sc.Variable)):
+                raise TypeError(
+                    f'Dimension values must be integers or sc.Variable. '
+                    f"Got {type(value)} for dimension '{dim}' instead."
+                )
+            binned_data = binned_data.bin({dim: value})
+
+        binned_data = binned_data.bins.mean()
+        binned_data = self._convert_to_bin_centers(binned_data)
+        self._binned_data = binned_data
 
     ###########
     # other methods
     ###########
 
-    def plot_data(self):
+    def plot_data(self, slicer=False, **kwargs) -> None:
         """Plot the dataset using plopp."""
 
-        if self._data is None:
+        if self._binned_data is None:
             raise ValueError('No data to plot. Please load data first.')
 
         if not self._in_notebook():
@@ -158,7 +221,21 @@ class Experiment(NewBase):
 
         from IPython.display import display
 
-        fig = pp.plot(self._data.transpose(), title=f'{self.name}')
+        plot_kwargs_defaults = {
+            'title': self.display_name,
+        }
+        # Overwrite defaults with any user-provided kwargs
+        plot_kwargs_defaults.update(kwargs)
+        if slicer:
+            fig = pp.slicer(
+                self._binned_data,
+                **plot_kwargs_defaults,
+            )
+        else:
+            fig = pp.plot(
+                self._binned_data.transpose(dims=['energy', 'Q']),
+                **plot_kwargs_defaults,
+            )
         display(fig)
 
     ###########
@@ -180,30 +257,47 @@ class Experiment(NewBase):
         except (NameError, ImportError):
             return False  # Standard Python (no IPython)
 
-    def _validate_coordinates(self):
+    @staticmethod
+    def _validate_coordinates(data: sc.DataArray):
         """Validate that required coordinates are present in the data.
 
         Raises:
             ValueError: If required coordinates are missing.
         """
-        if self._data is None:
-            raise ValueError('No data loaded to validate.')
+        if not isinstance(data, sc.DataArray):
+            raise ValueError('Data must be a sc.DataArray.')
 
         required_coords = ['Q', 'energy']
         for coord in required_coords:
-            if coord not in self._data.coords:
+            if coord not in data.coords:
                 raise ValueError(f"Data is missing required coordinate: '{coord}'")
+
+    def _convert_to_bin_centers(self, data: sc.DataArray) -> sc.DataArray:
+        """Convert the coordinates of the data to bin centers.
+
+        Args:
+            data (sc.DataArray): The data to check.
+
+        Returns:
+            sc.DataArray: The data with coordinates at bin centers.
+        """
+        for dim in data.dims:
+            coord = data.coords[dim]
+            if coord.ndim == 1 and coord.size == data.sizes[dim] + 1:
+                # Coordinate is at bin edges, convert to bin centers
+                data = data.assign_coords({dim: sc.midpoints(coord)})
+        return data
 
     ########
     # dunder methods
     ###########
 
     def __repr__(self) -> str:
-        return f'Experiment `{self.name}` with data: {self._data}'
+        return f'Experiment `{self.unique_name}` with data: {self._data}'
 
     def __copy__(self) -> 'Experiment':
         """Return a copy of the object."""
-        temp = self.as_dict(skip=['unique_name'])
+        temp = self.to_dict(skip=['unique_name'])
         new_obj = self.__class__.from_dict(temp)
         new_obj.data = self.data.copy() if self.data is not None else None
         return new_obj
