@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional
 
 import plopp as pp
@@ -78,10 +79,9 @@ class Experiment(NewBase):
     def Q(self) -> sc.Variable:
         """Get the Q values from the dataset."""
         if self._data is None:
-            Warning('No data loaded.', UserWarning)
-        if 'Q' not in self._data.coords:
-            raise ValueError("Data does not contain 'Q' coordinate.")
-        return self._data.coords['Q']
+            warnings.warn('No data loaded.', UserWarning)
+            return None
+        return self._binned_data.coords['Q']
 
     @Q.setter
     def Q(self, value: sc.Variable):
@@ -92,10 +92,9 @@ class Experiment(NewBase):
     def energy(self) -> sc.Variable:
         """Get the energy values from the dataset."""
         if self._data is None:
-            Warning('No data loaded.', UserWarning)
-        if 'energy' not in self._data.coords:
-            raise ValueError("Data does not contain 'energy' coordinate.")
-        return self._data.coords['energy']
+            warnings.warn('No data loaded.', UserWarning)
+            return None
+        return self._binned_data.coords['energy']
 
     @energy.setter
     def energy(self, value: sc.Variable):
@@ -166,8 +165,8 @@ class Experiment(NewBase):
 
         Args:
             dimensions (dict[str, int | sc.Variable]): A dictionary
-            mapping dimension names to number of bins (int) or bin
-            values (sc.Variable).
+            mapping dimension names to number of bins (int) or bin edges
+            (sc.Variable).
         Raises:
             TypeError: If dimensions is not a dictionary or if
             keys/values are of incorrect types. KeyError: If a specified
@@ -179,6 +178,8 @@ class Experiment(NewBase):
                 'dimensions must be a dictionary mapping dimension names '
                 'to number of bins or bin values as sc.Variable.'
             )
+        if self._data is None:
+            raise ValueError('No data to rebin. Please load data first.')
         binned_data = self._data.copy()
         for dim, value in dimensions.items():
             if not isinstance(dim, str):
@@ -265,7 +266,7 @@ class Experiment(NewBase):
             ValueError: If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
-            raise ValueError('Data must be a sc.DataArray.')
+            raise TypeError('Data must be a sc.DataArray.')
 
         required_coords = ['Q', 'energy']
         for coord in required_coords:

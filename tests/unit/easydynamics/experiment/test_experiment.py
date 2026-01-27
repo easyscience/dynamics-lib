@@ -20,6 +20,10 @@ class TestExperiment:
         experiment = Experiment(display_name='test_experiment', data=data)
         return experiment
 
+    ##############
+    # test init
+    ##############
+
     def test_init_array(self, experiment):
         "Test initialization with a Scipp DataArray"
         # WHEN THEN EXPECT
@@ -76,6 +80,10 @@ class TestExperiment:
         with pytest.raises(TypeError):
             Experiment(data=123)
 
+    ##############
+    # test data manipulation
+    ##############
+
     def test_load_hdf5(self, tmp_path, experiment):
         "Test loading data from an HDF5 file."
         'First use scipp to save data to a file, '
@@ -105,7 +113,7 @@ class TestExperiment:
     def test_load_hdf5_invalid_filename_raises(self, experiment):
         "Test loading data from an HDF5 file with an invalid filename"
         # WHEN / THEN EXPECT
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match='must be a string'):
             experiment.load_hdf5(123)
 
     def test_load_hdf5_invalid_file_raises(self, experiment):
@@ -154,7 +162,7 @@ class TestExperiment:
     def test_save_hdf5_invalid_filename_raises(self, experiment):
         "Test saving data to an HDF5 file with an invalid filename"
         # WHEN / THEN EXPECT
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match='must be a string'):
             experiment.save_hdf5(123)
 
     def test_remove_data(self, experiment):
@@ -165,31 +173,125 @@ class TestExperiment:
         # THEN EXPECT
         assert experiment._data is None
 
+    @pytest.mark.parametrize(
+        'new_Q_bins, new_energy_bins',
+        [
+            (
+                sc.linspace('Q', 0.5, 1.5, num=7, unit='1/Angstrom'),
+                sc.linspace('energy', -5, 5, num=8, unit='meV'),
+            ),
+            (
+                6,
+                7,
+            ),
+            (
+                6.0,
+                7.0,
+            ),
+            (
+                sc.linspace('Q', 0.5, 1.5, num=7, unit='1/Angstrom'),
+                7,
+            ),
+        ],
+        ids=['sc_bins', 'integers_bins', 'float_bins', 'mixed_bins'],
+    )
+    def test_rebin(self, experiment, new_Q_bins, new_energy_bins):
+        "Test rebinning data in the experiment"
+        # WHEN
+
+        # THEN
+        experiment.rebin({'Q': new_Q_bins, 'energy': new_energy_bins})
+
+        # EXPECT
+        rebinned_data = experiment.binned_data
+        assert rebinned_data.sizes['Q'] == 6
+        assert rebinned_data.sizes['energy'] == 7
+
+    def test_rebin_no_data_raises(self):
+        "Test rebinning data when no data is present"
+        # WHEN
+        experiment = Experiment()
+
+        # THEN EXPECT
+        with pytest.raises(ValueError):
+            experiment.rebin({'Q': 6, 'energy': 7})
+
+    def test_rebin_invalid_dimensions_raises(self, experiment):
+        "Test rebinning data with invalid dimensions"
+        # WHEN / THEN EXPECT
+        with pytest.raises(TypeError):
+            experiment.rebin('invalid_dimensions')
+
+    def test_rebin_invalid_dimension_name_raises(self, experiment):
+        "Test rebinning data with invalid dimension name"
+        # WHEN / THEN EXPECT
+        with pytest.raises(TypeError, match='Dimension keys must be strings'):
+            experiment.rebin({123: 6, 'energy': 7})
+
+    def test_rebin_dimension_not_in_data_raises(self, experiment):
+        "Test rebinning data with a dimension not in the data"
+        # WHEN / THEN EXPECT
+        with pytest.raises(KeyError, match="Dimension 'time' not a valid"):
+            experiment.rebin({'time': 6, 'energy': 7})
+
+    def test_rebin_invalid_bin_values_raises(self, experiment):
+        "Test rebinning data with invalid bin values"
+        # WHEN / THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Dimension values must be integers or',
+        ):
+            experiment.rebin({'Q': [0.5, 1.0, 1.5], 'energy': 7})
+
+    ##############
+    # test setters and getters
+    ##############
+
     def test_data_setter_raises_type_error(self, experiment):
         "Test setting data to an invalid type raises TypeError"
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             experiment.data = 123
 
-    def test_repr(self, experiment):
+    def test_binned_data_setter_raises(self, experiment):
+        "Test that setting binned data raises AttributeError"
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            experiment.binned_data = experiment.binned_data
+
+    def test_energy_setter_raises(self, experiment):
+        "Test that setting energy data raises AttributeError"
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            experiment.energy = experiment.energy
+
+    def test_Q_setter_raises(self, experiment):
+        "Test that setting Q data raises AttributeError"
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            experiment.Q = experiment.Q
+
+    def test_Q_getter_warns_no_data(self):
+        "Test that getting Q data with no data raises Warning"
         # WHEN
-        repr_str = repr(experiment)
+        experiment = Experiment()
 
         # THEN EXPECT
-        assert repr_str == f'Experiment `{experiment.unique_name}` with data: {experiment._data}'
+        with pytest.warns(UserWarning, match='No data loaded'):
+            _ = experiment.Q
 
-    def test_copy_experiment(self, experiment):
-        "Test copying an Experiment object."
-        'The copied object should have the same attributes '
-        'but be a different object in memory.'
+    def test_energy_getter_warns_no_data(self):
+        "Test that getting energy data with no data raises Warning"
         # WHEN
-        copied_experiment = copy(experiment)
+        experiment = Experiment()
 
         # THEN EXPECT
-        assert copied_experiment.display_name == experiment.display_name
-        assert sc.identical(copied_experiment.data, experiment.data)
-        assert copied_experiment is not experiment
-        assert copied_experiment.data is not experiment.data
+        with pytest.warns(UserWarning, match='No data loaded'):
+            _ = experiment.energy
+
+    ##############
+    # test plotting
+    ##############
 
     def test_plot_data_success(self, experiment):
         "Test plotting data successfully when in notebook environment"
@@ -232,6 +334,10 @@ class TestExperiment:
                 match='plot_data\\(\\) can only be used in a Jupyter notebook environment',
             ):
                 experiment.plot_data()
+
+    ##############
+    # test private methods
+    ##############
 
     def test_in_notebook_returns_true_for_jupyter(self, monkeypatch):
         """Should return True when IPython shell is
@@ -288,3 +394,81 @@ class TestExperiment:
 
         # EXPECT
         assert Experiment._in_notebook() is False
+
+    def test_validate_coordinates(self, experiment):
+        "Test that _validate_coordinates does not raise for valid data"
+        # WHEN / THEN EXPECT
+        experiment._validate_coordinates(experiment._data)
+
+    def test_validate_coordinates_raises_missing_Q(self, experiment):
+        "Test that _validate_coordinates raises ValueError when Q coord"
+        'is missing'
+        # WHEN
+        invalid_data = experiment._data.copy()
+        invalid_data.coords.pop('Q')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='missing required coordinate'):
+            experiment._validate_coordinates(invalid_data)
+
+    def test_validate_coordinates_raises_missing_energy(self, experiment):
+        "Test that _validate_coordinates raises ValueError when energy"
+        'coord is missing'
+        # WHEN
+        invalid_data = experiment._data.copy()
+        invalid_data.coords.pop('energy')
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='missing required coordinate'):
+            experiment._validate_coordinates(invalid_data)
+
+    def test_validate_coordinates_raises_not_DataArray(self):
+        "Test that _validate_coordinates raises TypeError when data is"
+        'not a Scipp DataArray'
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='must be a'):
+            Experiment()._validate_coordinates('not_a_data_array')
+
+    def test_convert_to_bin_centers(self, experiment):
+        "Test that _convert_to_bin_centers converts edges to centers"
+        # WHEN
+        Q_edges = sc.linspace('Q', 0.0, 2.0, num=11, unit='1/Angstrom')
+        energy_edges = sc.linspace('energy', -6, 6, num=13, unit='meV')
+        values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 12)))
+        binned_data = sc.DataArray(data=values, coords={'Q': Q_edges, 'energy': energy_edges})
+
+        # THEN
+        experiment._data = binned_data  # Set data to avoid warnings
+        converted_data = experiment._convert_to_bin_centers(binned_data)
+
+        # EXPECT
+        expected_Q = 0.5 * (Q_edges[:-1] + Q_edges[1:])
+        expected_energy = 0.5 * (energy_edges[:-1] + energy_edges[1:])
+
+        assert sc.identical(converted_data.coords['Q'], expected_Q)
+        assert sc.identical(converted_data.coords['energy'], expected_energy)
+        assert sc.identical(converted_data.data, binned_data.data)
+
+    ##############
+    # test dunder methods
+    ##############
+
+    def test_repr(self, experiment):
+        # WHEN
+        repr_str = repr(experiment)
+
+        # THEN EXPECT
+        assert repr_str == f'Experiment `{experiment.unique_name}` with data: {experiment._data}'
+
+    def test_copy_experiment(self, experiment):
+        "Test copying an Experiment object."
+        'The copied object should have the same attributes '
+        'but be a different object in memory.'
+        # WHEN
+        copied_experiment = copy(experiment)
+
+        # THEN EXPECT
+        assert copied_experiment.display_name == experiment.display_name
+        assert sc.identical(copied_experiment.data, experiment.data)
+        assert copied_experiment is not experiment
+        assert copied_experiment.data is not experiment.data
