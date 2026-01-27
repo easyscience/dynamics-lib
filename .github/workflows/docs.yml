@@ -100,7 +100,6 @@ jobs:
       # Uses frozen lockfile to ensure reproducible builds.
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
-
       # Pre-import the main package to exclude info messages from the docs
       # E.g., Matplotlib may print messages to stdout/stderr when first
       # imported. This step allows to avoid "Matplotlib is building the font

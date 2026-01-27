@@ -90,5 +90,5 @@ jobs:
   # Job 4: Build and publish dashboard (reusable workflow)
   run-reusable-workflows:
     needs: [docstring-coverage, unit-tests-coverage, integration-tests-coverage] # depend on the previous jobs
-    uses: ./.github/workflows/dashboard.yaml
+    uses: ./.github/workflows/dashboard.yml
     secrets: inherit

@@ -57,5 +57,5 @@ jobs:
   # Job 2: Build and publish dashboard (reusable workflow)
   run-reusable-workflows:
     needs: tutorial-tests # depend on previous job
-    uses: ./.github/workflows/dashboard.yaml
+    uses: ./.github/workflows/dashboard.yml
     secrets: inherit

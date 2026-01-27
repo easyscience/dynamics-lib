@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -23,8 +26,10 @@ class TestNumericalConvolutionBase:
         )
 
     def test_init(self, default_numerical_convolution_base):
-        "Test initialization of NumericalConvolutionBase with default"
-        'parameters.'
+        """
+        Test initialization of NumericalConvolutionBase with default
+        parameters.
+        """
         # WHEN THEN EXPECT
         assert isinstance(default_numerical_convolution_base, NumericalConvolutionBase)
         assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
@@ -46,8 +51,10 @@ class TestNumericalConvolutionBase:
         assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
 
     def test_init_with_custom_parameters(self):
-        "Test initialization of NumericalConvolutionBase with"
-        ' custom parameters.'
+        """
+        Test initialization of NumericalConvolutionBase with custom
+        parameters.
+        """
         # WHEN
         energy = np.linspace(-5, 5, 50)
         sample_components = ComponentCollection(display_name='ComponentCollection')
@@ -82,8 +89,10 @@ class TestNumericalConvolutionBase:
         assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
 
     def test_init_raises_type_error_for_invalid_temperature(self):
-        "Test that initialization raises TypeError for invalid"
-        'temperature.'
+        """
+        Test that initialization raises TypeError for invalid
+        temperature.
+        """
         # WHEN
         energy = np.linspace(-5, 5, 50)
         sample_components = ComponentCollection(display_name='ComponentCollection')
@@ -100,8 +109,10 @@ class TestNumericalConvolutionBase:
             )
 
     def test_init_raises_type_error_for_invalid_temperature_unit(self):
-        "Test that initialization raises TypeError for invalid"
-        'temperature_unit.'
+        """
+        Test that initialization raises TypeError for invalid
+        temperature_unit.
+        """
         # WHEN
         energy = np.linspace(-5, 5, 50)
         sample_components = ComponentCollection(display_name='ComponentCollection')
@@ -118,8 +129,10 @@ class TestNumericalConvolutionBase:
             )
 
     def test_energy_setter(self, default_numerical_convolution_base):
-        "Test setting a new energy array updates the energy"
-        'grid accordingly.'
+        """
+        Test setting a new energy array updates the energy grid
+        accordingly.
+        """
         # WHEN
         new_energy = np.linspace(-20, 20, 201)
         default_numerical_convolution_base.energy = new_energy
@@ -132,8 +145,10 @@ class TestNumericalConvolutionBase:
         )
 
     def test_upsample_factor_setter(self, default_numerical_convolution_base):
-        "Test setting a new upsample factor updates the energy g"
-        'rid accordingly.'
+        """
+        Test setting a new upsample factor updates the energy grid
+        accordingly.
+        """
         # WHEN
         new_upsample_factor = 10
         default_numerical_convolution_base.upsample_factor = new_upsample_factor
@@ -145,7 +160,9 @@ class TestNumericalConvolutionBase:
         )
 
     def test_upsample_factor_setter_none(self, default_numerical_convolution_base):
-        "Test setting upsample factor to None disables upsampling."
+        """
+        Test setting upsample factor to None disables upsampling.
+        """
         # WHEN
         new_upsample_factor = None
         default_numerical_convolution_base.upsample_factor = new_upsample_factor
@@ -170,8 +187,10 @@ class TestNumericalConvolutionBase:
         invalid_upsample_factor,
         expected_exception,
     ):
-        "Test that setting invalid upsample factors raises"
-        ' appropriate exceptions.'
+        """
+        Test that setting invalid upsample factors raises appropriate
+        exceptions.
+        """
         # WHEN THEN EXPECT
         with pytest.raises(
             expected_exception,
@@ -179,8 +198,10 @@ class TestNumericalConvolutionBase:
             default_numerical_convolution_base.upsample_factor = invalid_upsample_factor
 
     def test_extension_factor_setter(self, default_numerical_convolution_base):
-        "Test setting a new extension factor updates the"
-        'energy grid accordingly.'
+        """
+        Test setting a new extension factor updates the energy grid
+        accordingly.
+        """
         # WHEN
         new_extension_factor = 0.5
         default_numerical_convolution_base.extension_factor = new_extension_factor
@@ -207,8 +228,10 @@ class TestNumericalConvolutionBase:
         invalid_extension_factor,
         expected_exception,
     ):
-        "Test that setting invalid extension factors raises"
-        ' appropriate exceptions.'
+        """
+        Test that setting invalid extension factors raises appropriate
+        exceptions.
+        """
 
         # WHEN THEN EXPECT
         with pytest.raises(
@@ -228,7 +251,9 @@ class TestNumericalConvolutionBase:
     def test_temperature_setter(
         self, default_numerical_convolution_base, temperature_input, expected_value
     ):
-        "Test setting various valid temperature inputs."
+        """
+        Test setting various valid temperature inputs.
+        """
         # WHEN
         default_numerical_convolution_base.temperature = temperature_input
 
@@ -237,7 +262,9 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.temperature.unit == 'K'
 
     def test_temperature_setter_none(self, default_numerical_convolution_base):
-        "Test setting temperature to None."
+        """
+        Test setting temperature to None.
+        """
         # WHEN
         default_numerical_convolution_base.temperature = None
 
@@ -247,8 +274,10 @@ class TestNumericalConvolutionBase:
     def test_temperature_setter_does_not_replace_parameter(
         self, default_numerical_convolution_base
     ):
-        "Test that if setting the temperature to a value when it"
-        'already exists does not create a new Parameter'
+        """
+        Test that if setting the temperature to a value when it already
+        exists does not create a new Parameter.
+        """
         # WHEN
         temp_param = Parameter(name='TempParam', value=300.0, unit='K')
         default_numerical_convolution_base.temperature = temp_param
@@ -261,13 +290,17 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.temperature.value == 350.0
 
     def test_temperature_setter_raises(self, default_numerical_convolution_base):
-        "Test that setting an invalid temperature raises TypeError."
+        """
+        Test that setting an invalid temperature raises TypeError.
+        """
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='Temperature must be'):
             default_numerical_convolution_base.temperature = 'invalid_temperature'
 
     def test_normalize_detailed_balance_setter(self, default_numerical_convolution_base):
-        "Test setting normalize_detailed_balance to False."
+        """
+        Test setting normalize_detailed_balance to False.
+        """
         # WHEN
         default_numerical_convolution_base.normalize_detailed_balance = False
 
@@ -275,16 +308,20 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.normalize_detailed_balance is False
 
     def test_normalize_detailed_balance_setter_raises(self, default_numerical_convolution_base):
-        "Test that setting an invalid normalize_detailed_balance"
-        'raises TypeError.'
+        """
+        Test that setting an invalid normalize_detailed_balance raises
+        TypeError.
+        """
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='normalize_detailed_balance must be'):
             default_numerical_convolution_base.normalize_detailed_balance = 'invalid'
 
     def test_create_energy_grid_upsample_none(self, default_numerical_convolution_base):
-        "Test creating energy grid with upsample_factor set to None"
-        ' (no upsampling). In this case, the energy grid is '
-        'equal to the input energy'
+        """
+        Test creating energy grid with upsample_factor set to None (no
+        upsampling). In this case, the energy grid is equal to the input
+        energy.
+        """
         # WHEN
         default_numerical_convolution_base.upsample_factor = None
         energy_grid = default_numerical_convolution_base._create_energy_grid()
@@ -303,10 +340,11 @@ class TestNumericalConvolutionBase:
     def test_create_energy_grid_upsample_none_non_uniform_raises(
         self, default_numerical_convolution_base
     ):
-        "Test that creating energy grid with upsample_factor set to"
-        ' None'
-        'and non-uniform energy raises ValueError '
-        '(the energy grid must always be uniform).'
+        """
+        Test that creating energy grid with upsample_factor set to None
+        and non-uniform energy raises ValueError (the energy grid must
+        always be uniform).
+        """
         # WHEN
         default_numerical_convolution_base.energy = np.array([0, 1, 3, 6, 10])
         with pytest.raises(
@@ -319,9 +357,11 @@ class TestNumericalConvolutionBase:
     def test_create_energy_grid_upsample_and_extension(
         self, default_numerical_convolution_base, num_points
     ):
-        "Test creating energy grid with upsampling and extension."
-        'The even_length_offset is tested for both even and odd number '
-        'of input energy points.'
+        """
+        Test creating energy grid with upsampling and extension. The
+        even_length_offset is tested for both even and odd number of
+        input energy points.
+        """
         # WHEN
         default_numerical_convolution_base.energy = np.linspace(-10, 10, num_points)
 
@@ -354,9 +394,11 @@ class TestNumericalConvolutionBase:
             assert np.isclose(energy_grid.energy_even_length_offset, 0.0)
 
     def test_create_energy_grid_non_centered_energy(self, default_numerical_convolution_base):
-        "Test creating energy grid when input energy is not centered"
-        'around zero. The centered energy grid should be shifted'
-        ' accordingly.'
+        """
+        Test creating energy grid when input energy is not centered
+        around zero. The centered energy grid should be shifted
+        accordingly.
+        """
         # WHEN
         default_numerical_convolution_base.energy = np.linspace(5, 25, 101)
         energy_grid = default_numerical_convolution_base._create_energy_grid()
@@ -383,8 +425,10 @@ class TestNumericalConvolutionBase:
         assert np.isclose(energy_grid.energy_even_length_offset, 0.0)
 
     def test_check_width_large_threshold(self, default_numerical_convolution_base):
-        "Test that _check_width_thresholds warns when model widths are"
-        'too large compared to energy grid span.'
+        """
+        Test that _check_width_thresholds warns when model widths are
+        too large compared to energy grid span.
+        """
         # WHEN
         wide_gaussian = Gaussian(
             display_name='ComponentCollection', area=1.0, center=0.0, width=15.0
@@ -401,8 +445,10 @@ class TestNumericalConvolutionBase:
             )
 
     def test_check_width_small_threshold(self, default_numerical_convolution_base):
-        "Test that _check_width_thresholds warns when model widths are"
-        'too small compared to energy grid step.'
+        """
+        Test that _check_width_thresholds warns when model widths are
+        too small compared to energy grid step.
+        """
         # WHEN
         narrow_gaussian = Gaussian(
             display_name='ComponentCollection', area=1.0, center=0.0, width=0.000001
@@ -419,9 +465,11 @@ class TestNumericalConvolutionBase:
             )
 
     def test_check_width_no_warnings(self, default_numerical_convolution_base):
-        "Test that _check_width_thresholds does not warn when model"
-        'widths are within acceptable range. Also tests that '
-        'ComponentCollection components are checked correctly.'
+        """
+        Test that _check_width_thresholds does not warn when model
+        widths are within acceptable range. Also tests that
+        ComponentCollection components are checked correctly.
+        """
         # WHEN
         good_gaussian = Gaussian(
             display_name='ComponentCollection', area=1.0, center=0.0, width=1.0
@@ -436,7 +484,9 @@ class TestNumericalConvolutionBase:
         )
 
     def test_repr(self, default_numerical_convolution_base):
-        "Test the __repr__ method of NumericalConvolutionBase."
+        """
+        Test the __repr__ method of NumericalConvolutionBase.
+        """
         # WHEN
         repr_str = repr(default_numerical_convolution_base)
 

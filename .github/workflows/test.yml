@@ -45,8 +45,8 @@ concurrency:
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
   CI_BRANCH: ${{ github.head_ref || github.ref_name }}
-  PY_VERSIONS: '3.11 3.13'
-  PIXI_ENVS: 'py-311-env py-313-env'
+  PY_VERSIONS: '3.11 3.12'
+  PIXI_ENVS: 'py-311-env py-312-env'
 
 jobs:
   # Job 1: Set up environment variables
@@ -240,7 +240,7 @@ jobs:
             cd easydynamics_py$py_ver
 
             echo "Running tests"
-            pixi run python -m pytest ../tests/unit/ --color=yes -v
+            pixi run python -m pytest ../tests/unit/ --color=yes --cov= --cov-report=
 
             echo "Exiting pixi project directory"
             cd ..
@@ -268,5 +268,5 @@ jobs:
   # Job 4: Build and publish dashboard (reusable workflow)
   run-reusable-workflows:
     needs: package-test # depend on previous job
-    uses: ./.github/workflows/dashboard.yaml
+    uses: ./.github/workflows/dashboard.yml
     secrets: inherit

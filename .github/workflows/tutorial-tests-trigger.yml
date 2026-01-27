@@ -32,6 +32,6 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "tutorial-tests.yaml",
+              workflow_id: "tutorial-tests.yml",
               ref: "develop"
             });

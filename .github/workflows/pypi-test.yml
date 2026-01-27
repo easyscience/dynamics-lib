@@ -42,9 +42,9 @@ jobs:
       - name: Init pixi project
         run: pixi init easydynamics
 
-      - name: Add Python 3.13 from Conda
+      - name: Add Python 3.12 from Conda
         working-directory: easydynamics
-        run: pixi add "python=3.13"
+        run: pixi add "python=3.12"
 
       - name: Add other Conda dependencies
         working-directory: easydynamics
@@ -73,5 +73,5 @@ jobs:
   # Job 2: Build and publish dashboard (reusable workflow)
   run-reusable-workflows:
     needs: pypi-package-tests # depend on previous job
-    uses: ./.github/workflows/dashboard.yaml
+    uses: ./.github/workflows/dashboard.yml
     secrets: inherit

@@ -5,7 +5,7 @@ icon: material/cog-box
 # :material-cog-box: Installation & Setup
 
 **EasyDynamics** is a cross-platform Python library compatible with
-**Python 3.11** through **3.13**.
+**Python 3.11** through **3.12**.
 
 To install and set up EasyDynamics, we recommend using
 [**Pixi**](https://prefix.dev), a modern package manager for Windows,
@@ -42,9 +42,9 @@ This section describes the simplest way to set up EasyDynamics using
   pixi init easydynamics
   cd easydynamics
   ```
-- Set the Python version for the Pixi environment (e.g., 3.13):
+- Set the Python version for the Pixi environment (e.g., 3.12):
   ```txt
-  pixi add python=3.13
+  pixi add python=3.12
   ```
 - Add the GNU Scientific Library (GSL) dependency:
   ```txt

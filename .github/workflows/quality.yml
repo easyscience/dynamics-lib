@@ -80,15 +80,6 @@ jobs:
         shell: bash
         run: pixi run nonpy-format-check
 
-      # Check formatting of Jupyter Notebooks in the tutorials folder
-      - name: Convert tutorial scripts to notebooks and check formatting
-        id: check_notebooks_formatting
-        continue-on-error: true
-        shell: bash
-        run: |
-          pixi run notebook-prepare
-          pixi run notebook-format-check
-
       # Add summary
       - name: Add quality checks summary
         if: always()
@@ -104,17 +95,15 @@ jobs:
             echo "| py format        | ${{ steps.check_code_formatting.outcome == 'success' && '✅' || '❌' }} |"
             echo "| docstring format | ${{ steps.check_docs_formatting.outcome == 'success' && '✅' || '❌' }} |"
             echo "| nonpy format     | ${{ steps.check_others_formatting.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| notebooks format | ${{ steps.check_notebooks_formatting.outcome == 'success' && '✅' || '❌' }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Fail job if any check failed
       - name: Fail job if any check failed
         if: |
-          steps.check_pyproject.outcome == 'failure' ||
-          steps.check_code_linting.outcome == 'failure' ||
-          steps.check_code_formatting.outcome == 'failure' ||
-          steps.check_docs_formatting.outcome == 'failure' ||
-          steps.check_others_formatting.outcome == 'failure' ||
-          steps.check_notebooks_formatting.outcome == 'failure'
+          steps.check_pyproject.outcome == 'failure'
+          || steps.check_code_linting.outcome == 'failure'
+          || steps.check_code_formatting.outcome == 'failure'
+          || steps.check_docs_formatting.outcome == 'failure'
+          || steps.check_others_formatting.outcome == 'failure'
         shell: bash
         run: exit 1

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -62,7 +65,10 @@ class TestConvolutionBase:
                     'resolution_components': ComponentCollection(),
                     'energy_unit': 'meV',
                 },
-                '`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',  # noqa: E501
+                (
+                    '`sample_components` is an instance of str, '
+                    'but must be a ComponentCollection or ModelComponent.'
+                ),
             ),
             (
                 {
@@ -71,7 +77,10 @@ class TestConvolutionBase:
                     'resolution_components': 'invalid',
                     'energy_unit': 'meV',
                 },
-                '`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',  # noqa: E501
+                (
+                    '`resolution_components` is an instance of str, '
+                    'but must be a ComponentCollection or ModelComponent.'
+                ),
             ),
             (
                 {
@@ -173,7 +182,10 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='`sample_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',  # noqa: E501
+            match=(
+                '`sample_components` is an instance of str, '
+                'but must be a ComponentCollection or ModelComponent.'
+            ),
         ):
             convolution_base.sample_components = 'invalid'
 
@@ -194,6 +206,9 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='`resolution_components` is an instance of str, but must be a ComponentCollection or ModelComponent.',  # noqa: E501
+            match=(
+                '`resolution_components` is an instance of str, '
+                'but must be a ComponentCollection or ModelComponent.'
+            ),
         ):
             convolution_base.resolution_components = 'invalid'

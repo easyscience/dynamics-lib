@@ -13,9 +13,10 @@
 and ins powder data.
 
 **EasyDynamics** is available both as a Python library and as a
-cross-platform desktop application. Here, we focus on the Python
-library. For the graphical user interface (GUI), please see the
-corresponding
+cross-platform desktop application.
+
+Here, we focus on the Python library. For the graphical user interface
+(GUI), please see the corresponding
 [GUI resources](https://github.com/easyscience/dynamics-app).
 
 ## Useful Links

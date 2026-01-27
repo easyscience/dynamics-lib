@@ -10,6 +10,8 @@ docs/overrides/
 docs/site/
 docs/docs/assets/
 
+# Python
+.pytest_cache/
 
 # MyPy
 .mypy_cache

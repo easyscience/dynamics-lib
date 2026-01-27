@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 from contextlib import nullcontext
 from unittest.mock import patch
 
@@ -83,7 +86,9 @@ class TestConvolution:
         assert default_convolution._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
-        "Test that convolution plan is built when invalid."
+        """
+        Test that convolution plan is built when invalid.
+        """
         # WHEN
         conv = default_convolution
         conv._convolution_plan_is_valid = False
@@ -94,8 +99,10 @@ class TestConvolution:
             build_plan.assert_called_once()
 
     def test_convolution_calls_analytical_convolver(self, default_convolution):
-        "Test that convolution calls analytical convolver when"
-        'analytical components are present.'
+        """
+        Test that convolution calls analytical convolver when analytical
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -107,8 +114,10 @@ class TestConvolution:
             analytical_conv.assert_called_once()
 
     def test_convolution_calls_numerical_convolver(self, default_convolution):
-        "Test that convolution calls numerical convolver when numerical"
-        'components are present.'
+        """
+        Test that convolution calls numerical convolver when numerical
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -120,8 +129,10 @@ class TestConvolution:
             numerical_conv.assert_called_once()
 
     def test_convolution_calls_convolve_delta_functions(self, default_convolution):
-        "Test that convolution calls _convolve_delta_functions when"
-        'delta components are present.'
+        """
+        Test that convolution calls _convolve_delta_functions when delta
+        components are present.
+        """
         # WHEN
         conv = default_convolution
 
@@ -207,8 +218,8 @@ class TestConvolution:
         )
 
         # EXPECT
-        # Each method is called only if the corresponding
-        # component type is present.
+        # Each method is called only if the corresponding component
+        # type is present.
         with (
             patch_analytical as mock_analytical_method,
             patch_numerical as mock_numerical_method,
@@ -233,7 +244,9 @@ class TestConvolution:
                 mock_delta_method.assert_not_called()
 
     def test_convolve_delta_functions(self, default_convolution):
-        "Test that _convolve_delta_functions returns expected values."
+        """
+        Test that _convolve_delta_functions returns expected values.
+        """
         # WHEN
         conv = default_convolution
 
@@ -340,8 +353,8 @@ class TestConvolution:
         self, default_convolution, sample_component, resolution_component
     ):
         """
-        Test that _check_if_pair_is_analytic raises TypeError when
-        given invalid component types.
+        Test that _check_if_pair_is_analytic raises TypeError when given
+        invalid component types.
         """
         # WHEN
         conv = default_convolution
@@ -411,9 +424,9 @@ class TestConvolution:
         conv.sample_components = sample_components  # This updates the internal sample models
         if temperature is not None:
             conv.temperature = temperature
-        conv._build_convolution_plan()
         # It is already called by sample_components setter, but we now
         # call it explicitly
+        conv._build_convolution_plan()
 
         # EXPECT
         assert isinstance(conv._analytical_sample_components, ComponentCollection)
@@ -495,9 +508,9 @@ class TestConvolution:
 
         # THEN
         conv.sample_components = sample_components  # This updates the internal sample models
-        conv._set_convolvers()
         # Should already have been called by sample_components setter,
         # but we now call it explicitly
+        conv._set_convolvers()
 
         # EXPECT
         if analytical_component:

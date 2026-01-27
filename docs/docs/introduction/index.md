@@ -10,22 +10,23 @@ icon: material/information-slab-circle
 and ins powder data.
 
 **EasyDynamics** is available both as a Python library and as a
-cross-platform desktop application. Here, we focus on the Python
-library. For the graphical user interface (GUI), please see the
-corresponding
-[GUI resources](https://github.com/easyscience/dynamics-app).
+cross-platform desktop application.
+
+Here, we focus on the Python library. For the graphical user interface
+(GUI), please see the corresponding
+[GUI resources](https://easyscience.github.io/dynamics-app).
 
 **EasyDynamics** is developed using the
 [EasyScience framework](https://easyscience.org).
 
 ## License
 
-**EasyDynamics** is released under the
+**EasyDynamics** library is released under the
 [BSD 3-Clause License](https://raw.githubusercontent.com/easyscience/dynamics-lib/master/LICENSE).
 
 ## Releases
 
-The latest version of the **EasyDynamics** Python library is
+The latest version of the **EasyDynamics** library is
 [{{ vars.release_version }}](https://github.com/easyscience/dynamics-lib/releases/latest).
 
 For a complete list of new features, bug fixes, and improvements, see
@@ -34,8 +35,8 @@ the
 
 ## Citation
 
-If you use **EasyDynamics** in your work, please cite the specific
-version you used.
+If you use **EasyDynamics** library in your work, please cite the
+specific version you used.
 
 All official releases of the **EasyDynamics** library are archived on
 Zenodo, each with a version-specific Digital Object Identifier (DOI).
