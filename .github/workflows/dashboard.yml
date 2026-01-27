@@ -29,10 +29,9 @@ jobs:
         shell: bash
         run: pixi add --pypi --git https://github.com/enhantica/badgery badgery
 
-      # Temporary: do not use $DEFAULT_BRANCH in $DEFAULT_BRANCH $DEVELOP_BRANCH $CI_BRANCH
       - name: Run docstring coverage and code complexity/maintainability checks
         run: |
-          for BRANCH in $DEVELOP_BRANCH $CI_BRANCH; do
+          for BRANCH in $DEFAULT_BRANCH $DEVELOP_BRANCH $CI_BRANCH; do
             echo
             echo "🔹🔸🔹🔸🔹 Processing branch $BRANCH 🔹🔸🔹🔸🔹"
             if [ -d "../$BRANCH" ]; then
@@ -56,10 +55,6 @@ jobs:
             echo "Raw metrics for branch $BRANCH"
             pixi run radon raw -s -j $CODE_PATH > reports/$BRANCH/raw-metrics.json
           done
-
-      # Temporary: copy develop branch code metrics to default branch folder
-      - name: Copy develop branch reports to default branch folder
-        run: cp -r reports/$DEVELOP_BRANCH reports/$DEFAULT_BRANCH
 
       - name: Generate dashboard HTML
         run: >
