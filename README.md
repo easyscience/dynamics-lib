@@ -1,11 +1,11 @@
 <p>
   <picture>
     <!-- light mode logo -->
-    <source media='(prefers-color-scheme: light)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easypeasy/logos/light.svg'>
+    <source media='(prefers-color-scheme: light)' srcset='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_light.svg'>
     <!-- dark mode logo -->
-    <source media='(prefers-color-scheme: dark)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easypeasy/logos/dark.svg'>
+    <source media='(prefers-color-scheme: dark)' srcset='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_dark.svg'>
     <!-- default logo == light mode logo -->
-    <img src='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easypeasy/logos/light.svg' alt='EasyPeasy'>
+    <img src='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_light.svg' alt='EasyDynamics'>
   </picture>
 </p>
 
