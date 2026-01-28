@@ -3,8 +3,6 @@ from typing import Optional
 
 import plopp as pp
 import scipp as sc
-
-# from easyscience.job.experiment import ExperimentBase
 from easyscience.base_classes.new_base import NewBase
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
@@ -76,7 +74,7 @@ class Experiment(NewBase):
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
     @property
-    def Q(self) -> sc.Variable:
+    def Q(self) -> sc.Variable | None:
         """Get the Q values from the dataset."""
         if self._data is None:
             warnings.warn('No data loaded.', UserWarning)
@@ -181,7 +179,8 @@ class Experiment(NewBase):
         if self._data is None:
             raise ValueError('No data to rebin. Please load data first.')
         binned_data = self._data.copy()
-        for dim, value in dimensions.items():
+        dim_copy = dimensions.copy()
+        for dim, value in dim_copy.items():
             if not isinstance(dim, str):
                 raise TypeError(
                     f'Dimension keys must be strings. Got {type(dim)} for {dim} instead.'
@@ -244,7 +243,12 @@ class Experiment(NewBase):
     ###########
 
     @staticmethod
-    def _in_notebook():
+    def _in_notebook() -> bool:
+        """Check if the code is running in a Jupyter notebook.
+
+        Returns:
+            bool: True if in a Jupyter notebook, False otherwise.
+        """
         try:
             from IPython import get_ipython
 
@@ -259,7 +263,7 @@ class Experiment(NewBase):
             return False  # Standard Python (no IPython)
 
     @staticmethod
-    def _validate_coordinates(data: sc.DataArray):
+    def _validate_coordinates(data: sc.DataArray) -> None:
         """Validate that required coordinates are present in the data.
 
         Raises:

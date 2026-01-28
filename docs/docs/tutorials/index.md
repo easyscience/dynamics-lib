@@ -29,4 +29,4 @@ The tutorials are organized into the following categories:
   a model of diffusion
 - [Sample model](sample_model.ipynb) – Learn how to create a model of
   the scattering from your sample
-- [Experiment](experiment.ipyng) - Learn how to load and bin your data
+- [Experiment](experiment.ipynb) - Learn how to load and bin your data

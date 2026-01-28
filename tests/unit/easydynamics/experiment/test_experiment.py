@@ -108,7 +108,7 @@ class TestExperiment:
         'giving the Experiment an invalid name'
         # WHEN / THEN EXPECT
         with pytest.raises(TypeError):
-            experiment.load_hdf5('some_file.h5', name=123)
+            experiment.load_hdf5('some_file.h5', display_name=123)
 
     def test_load_hdf5_invalid_filename_raises(self, experiment):
         "Test loading data from an HDF5 file with an invalid filename"
