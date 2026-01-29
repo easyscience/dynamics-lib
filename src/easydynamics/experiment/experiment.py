@@ -1,3 +1,4 @@
+import os
 import warnings
 from typing import Optional
 
@@ -144,8 +145,6 @@ class Experiment(NewBase):
 
         if self._data is None:
             raise ValueError('No data to save.')
-
-        import os
 
         dir_name = os.path.dirname(filename)
         if dir_name:
