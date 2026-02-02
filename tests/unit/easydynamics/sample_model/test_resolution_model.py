@@ -89,7 +89,7 @@ class TestResolutionModel:
             collection.append_component(invalid_component)
             ResolutionModel(components=collection)
 
-    def test_append_and_remove_and_clear_component(self, resolution_model):
+    def test_append_and_remove_and_clear_component(self, resolution_model, reset_global_object):
         # WHEN
         new_component = Gaussian(unique_name='NewGaussian')
 
@@ -136,7 +136,9 @@ class TestResolutionModel:
         ],
         ids=['DeltaFunction', 'Polynomial'],
     )
-    def test_append_invalid_component_type_raises(self, resolution_model, invalid_component):
+    def test_append_invalid_component_type_raises(
+        self, resolution_model, invalid_component, reset_global_object
+    ):
         # WHEN / THEN / EXPECT
         # appending a single component
         with pytest.raises(
