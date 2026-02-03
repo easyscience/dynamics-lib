@@ -54,6 +54,8 @@ class ConvolutionBase:
             raise TypeError(
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+        if isinstance(sample_components, ModelComponent):
+            sample_components = ComponentCollection(components=[sample_components])
         self._sample_components = sample_components
 
         if resolution_components is not None and not (
@@ -63,6 +65,8 @@ class ConvolutionBase:
             raise TypeError(
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+        if isinstance(resolution_components, ModelComponent):
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
 
     @property
