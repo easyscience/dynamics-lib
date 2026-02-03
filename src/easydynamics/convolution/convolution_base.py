@@ -79,6 +79,8 @@ class ConvolutionBase:
             resolution_components = ComponentCollection(
                 components=[resolution_components]
             )
+        if isinstance(resolution_components, ModelComponent):
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
 
     @property
