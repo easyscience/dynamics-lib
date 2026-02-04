@@ -4,7 +4,6 @@
 from unittest.mock import Mock
 from unittest.mock import patch
 
-import easyscience.global_object
 import numpy as np
 import pytest
 from scipp import UnitError
@@ -53,7 +52,6 @@ class TestSampleModel:
         return sample_model
 
     def test_init(self, sample_model):
-        easyscience.global_object.map._clear()
 
         # WHEN THEN
         model = sample_model
@@ -146,7 +144,6 @@ class TestSampleModel:
             sample_model.remove_diffusion_model('non_existent_model')
 
     def test_diffusion_model_setter(self, sample_model):
-        easyscience.global_object.map._clear()
         # WHEN
         model = sample_model
         new_diffusion_model1 = BrownianTranslationalDiffusion()
