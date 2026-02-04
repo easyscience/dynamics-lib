@@ -57,15 +57,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Defaults to "meV".
         scale : float or Parameter, optional
             Scale factor for the diffusion model.
-        diffusion_coefficient : float or Parameter, optional
-            Diffusion coefficient D. If a number is provided,
-            it is assumed to be in the unit given by diffusion_unit.
+        diffusion_coefficient : Number, optional
+            Diffusion coefficient D in m^2/s.
             Defaults to 1.0.
         """
-        if not isinstance(scale, (Parameter, Numeric)):
+        if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
 
-        if not isinstance(diffusion_coefficient, (Parameter, Numeric)):
+        if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
 
         scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
