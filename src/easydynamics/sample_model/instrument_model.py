@@ -144,7 +144,7 @@ class InstrumentModel(NewBase):
         self._on_Q_change()
 
     @property
-    def unit(self) -> str | sc.Unit:
+    def unit(self) -> sc.Unit:
         """Get the unit of the InstrumentModel.
 
         Returns

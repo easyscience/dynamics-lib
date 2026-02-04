@@ -267,6 +267,16 @@ class TestInstrumentModel:
         assert expected_var_names == retrieved_var_names
         assert len(all_vars) == 18
 
+    def test_get_all_variables_no_Q(self, instrument_model):
+        # WHEN
+        instrument_model.Q = None
+
+        # THEN
+        all_vars = instrument_model.get_all_variables()
+
+        # EXPECT
+        assert all_vars == []
+
     def test_get_all_variables_with_Q_index(self, instrument_model):
         # WHEN
         all_vars = instrument_model.get_all_variables(Q_index=1)
