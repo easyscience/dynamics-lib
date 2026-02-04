@@ -113,6 +113,21 @@ class TestModelBase:
         with pytest.warns(UserWarning, match='Q is not set'):
             model_base._generate_component_collections()
 
+    def test_fix_free_all_parameters(self, model_base):
+        # WHEN
+        model_base.fix_all_parameters()
+
+        # THEN
+        for par in model_base.get_all_variables():
+            assert par.fixed is True
+
+        # WHEN
+        model_base.free_all_parameters()
+
+        # THEN
+        for par in model_base.get_all_variables():
+            assert par.fixed is False
+
     def test_get_all_variables(self, model_base):
         # WHEN
         all_vars = model_base.get_all_variables()

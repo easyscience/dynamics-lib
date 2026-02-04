@@ -196,25 +196,17 @@ class ModelBase(EasyScienceModelBase):
         self._on_Q_change()
 
     # ------------------------------------------------------------------
-    # Private methods
+    # Other methods
     # ------------------------------------------------------------------
+    def fix_all_parameters(self) -> None:
+        """Fix all Parameters in all ComponentCollections."""
+        for par in self.get_all_variables():
+            par.fixed = True
 
-    def _generate_component_collections(self) -> None:
-        """Generate ComponentCollections for each Q value."""
-        # TODO regenerate automatically if Q or components have changed
-
-        if self._Q is None:
-            warnings.warn('Q is not set. No component collections generated', UserWarning)
-            self._component_collections = []
-            return
-
-        self._component_collections = [ComponentCollection() for _ in self._Q]
-
-        # Add copies of components from self._components to each
-        # component collection
-        for collection in self._component_collections:
-            for component in self._components.components:
-                collection.append_component(copy(component))
+    def free_all_parameters(self) -> None:
+        """Free all Parameters in all ComponentCollections."""
+        for par in self.get_all_variables():
+            par.fixed = False
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """Get all Parameters and Descriptors from all
@@ -251,6 +243,23 @@ class ModelBase(EasyScienceModelBase):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _generate_component_collections(self) -> None:
+        """Generate ComponentCollections for each Q value."""
+        # TODO regenerate automatically if Q or components have changed
+
+        if self._Q is None:
+            warnings.warn('Q is not set. No component collections generated', UserWarning)
+            self._component_collections = []
+            return
+
+        self._component_collections = [ComponentCollection() for _ in self._Q]
+
+        # Add copies of components from self._components to each
+        # component collection
+        for collection in self._component_collections:
+            for component in self._components.components:
+                collection.append_component(copy(component))
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""

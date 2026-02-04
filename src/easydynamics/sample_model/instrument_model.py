@@ -218,7 +218,7 @@ class InstrumentModel(NewBase):
 
         self._unit = unit
 
-    def get_all_variables(self, Q_index) -> list[Parameter]:
+    def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """Get all variables in the InstrumentModel.
 
         Parameters
@@ -249,6 +249,14 @@ class InstrumentModel(NewBase):
         variables.extend(self._resolution_model.get_all_variables(Q_index=Q_index))
 
         return variables
+
+    def fix_resolution_parameters(self) -> None:
+        """Fix all parameters in the resolution model."""
+        self.resolution_model.fix_all_parameters()
+
+    def free_resolution_parameters(self) -> None:
+        """Free all parameters in the resolution model."""
+        self.resolution_model.free_all_parameters()
 
     # --------------------------------------------------------------
     # Private methods
