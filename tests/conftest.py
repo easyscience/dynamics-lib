@@ -20,6 +20,6 @@ import pytest
 #     monkeypatch.setattr(easyscience.global_object, 'map', Map())
 
 
-@pytest.fixture(autouse=False)
+@pytest.fixture(autouse=True)
 def reset_global_object():
     easyscience.global_object.map._clear()
