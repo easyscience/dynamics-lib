@@ -89,7 +89,7 @@ class TestResolutionModel:
             collection.append_component(invalid_component)
             ResolutionModel(components=collection)
 
-    def test_append_and_remove_and_clear_component(self, resolution_model, reset_global_object):
+    def test_append_and_remove_and_clear_component(self, resolution_model):
         # WHEN
         new_component = Gaussian(unique_name='NewGaussian')
 
