@@ -216,13 +216,14 @@ class TestComponentCollection:
         ) + component_collection.components[1].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_evaluate_no_components_raises(self):
+    def test_evaluate_no_components_returns_zero(self):
         # WHEN THEN
         component_collection = ComponentCollection(display_name='EmptyModel')
         x = np.linspace(-5, 5, 100)
         # EXPECT
-        with pytest.raises(ValueError, match='No components in the model to evaluate.'):
-            component_collection.evaluate(x)
+        result = component_collection.evaluate(x)
+        assert np.all(result == 0.0)
+        assert result.shape == x.shape
 
     def test_evaluate_component(self, component_collection):
         # WHEN  THEN
