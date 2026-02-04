@@ -51,7 +51,7 @@ class TestSampleModel:
 
         return sample_model
 
-    def test_init(self, sample_model):
+    def test_init(self, sample_model, reset_global_object):
         # WHEN THEN
         model = sample_model
 
@@ -142,7 +142,7 @@ class TestSampleModel:
         ):
             sample_model.remove_diffusion_model('non_existent_model')
 
-    def test_diffusion_model_setter(self, sample_model):
+    def test_diffusion_model_setter(self, sample_model, reset_global_object):
         # WHEN
         model = sample_model
         new_diffusion_model1 = BrownianTranslationalDiffusion()
