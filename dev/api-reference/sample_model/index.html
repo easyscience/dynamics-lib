@@ -23864,7 +23864,7 @@ unit : str or sc.Unit, optional
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_Q_change</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the unit of the InstrumentModel.</span>
 
 <span class="sd">        Returns</span>
@@ -24809,7 +24809,8 @@ Q : Q_type | None
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
-<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">280</span>
+<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Sample Models.</span>
 
 <span class="sd">    Contains common functionality for models with components and</span>
@@ -25003,9 +25004,10 @@ Q : Q_type | None
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all Parameters and Descriptors from all</span>
 <span class="sd">        ComponentCollections in the ModelBase. Parameters Ignores the</span>
-<span class="sd">        Parameters and Descriptors in self._components as.</span>
+<span class="sd">        Parameters and Descriptors in self._components as these are just</span>
+<span class="sd">        templates.</span>
 
-<span class="sd">        these are just templates.</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None</span>
 <span class="sd">            If int, get variables for the ComponentCollection at</span>
@@ -25503,8 +25505,9 @@ components.</p>
 
         <p>Get all Parameters and Descriptors from all
 ComponentCollections in the ModelBase. Parameters Ignores the
-Parameters and Descriptors in self._components as.</p>
-<h6 id="easydynamics.sample_model.model_base.ModelBase.get_all_variables--these-are-just-templates">these are just templates.</h6>
+Parameters and Descriptors in self._components as these are just
+templates.</p>
+<h6 id="easydynamics.sample_model.model_base.ModelBase.get_all_variables--parameters">Parameters</h6>
 <p>Q_index : int | None
     If int, get variables for the ComponentCollection at
     this index. If None, get variables for all
@@ -25549,12 +25552,14 @@ Returns</p>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
-<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">241</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all Parameters and Descriptors from all</span>
 <span class="sd">    ComponentCollections in the ModelBase. Parameters Ignores the</span>
-<span class="sd">    Parameters and Descriptors in self._components as.</span>
+<span class="sd">    Parameters and Descriptors in self._components as these are just</span>
+<span class="sd">    templates.</span>
 
-<span class="sd">    these are just templates.</span>
+<span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None</span>
 <span class="sd">        If int, get variables for the ComponentCollection at</span>
