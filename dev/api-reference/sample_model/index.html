@@ -23728,7 +23728,15 @@ unit : str or sc.Unit, optional
 <span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
-<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;InstrumentModel represents a model of the instrument in an</span>
 <span class="sd">    experiment at various Q. It can contain a model of the resolution</span>
 <span class="sd">    function for convolutions, of the background and an offset in the</span>
@@ -23930,7 +23938,7 @@ unit : str or sc.Unit, optional
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all variables in the InstrumentModel.</span>
 
 <span class="sd">        Parameters</span>
@@ -23961,6 +23969,14 @@ unit : str or sc.Unit, optional
         <span class="n">variables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolution_model</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">variables</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_resolution_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fix all parameters in the resolution model.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">fix_all_parameters</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_resolution_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free all parameters in the resolution model.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">free_all_parameters</span><span class="p">()</span>
 
     <span class="c1"># --------------------------------------------------------------</span>
     <span class="c1"># Private methods</span>
@@ -24200,8 +24216,78 @@ model.</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="easydynamics.sample_model.instrument_model.InstrumentModel.fix_resolution_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fix_resolution_parameters</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fix all parameters in the resolution model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/sample_model/instrument_model.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_resolution_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix all parameters in the resolution model.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">fix_all_parameters</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.sample_model.instrument_model.InstrumentModel.free_resolution_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">free_resolution_parameters</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Free all parameters in the resolution model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/sample_model/instrument_model.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_resolution_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Free all parameters in the resolution model.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">free_all_parameters</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="easydynamics.sample_model.instrument_model.InstrumentModel.get_all_variables" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -24254,7 +24340,7 @@ Returns</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all variables in the InstrumentModel.</span>
 
 <span class="sd">    Parameters</span>
@@ -24714,7 +24800,16 @@ Q : Q_type | None
 <span class="normal">268</span>
 <span class="normal">269</span>
 <span class="normal">270</span>
-<span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Sample Models.</span>
 
 <span class="sd">    Contains common functionality for models with components and</span>
@@ -24893,25 +24988,17 @@ Q : Q_type | None
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_Q_change</span><span class="p">()</span>
 
     <span class="c1"># ------------------------------------------------------------------</span>
-    <span class="c1"># Private methods</span>
+    <span class="c1"># Other methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fix all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
+            <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_component_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate ComponentCollections for each Q value.&quot;&quot;&quot;</span>
-        <span class="c1"># TODO regenerate automatically if Q or components have changed</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Q is not set. No component collections generated&#39;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">return</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">]</span>
-
-        <span class="c1"># Add copies of components from self._components to each</span>
-        <span class="c1"># component collection</span>
-        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
-                <span class="n">collection</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">copy</span><span class="p">(</span><span class="n">component</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
+            <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all Parameters and Descriptors from all</span>
@@ -24948,6 +25035,23 @@ Q : Q_type | None
     <span class="c1"># ------------------------------------------------------------------</span>
     <span class="c1"># Private methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_component_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate ComponentCollections for each Q value.&quot;&quot;&quot;</span>
+        <span class="c1"># TODO regenerate automatically if Q or components have changed</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Q is not set. No component collections generated&#39;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">]</span>
+
+        <span class="c1"># Add copies of components from self._components to each</span>
+        <span class="c1"># component collection</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+                <span class="n">collection</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">copy</span><span class="p">(</span><span class="n">component</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_Q_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the Q values.&quot;&quot;&quot;</span>
@@ -25315,6 +25419,80 @@ components.</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="easydynamics.sample_model.model_base.ModelBase.fix_all_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fix_all_parameters</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fix all Parameters in all ComponentCollections.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
+        <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.sample_model.model_base.ModelBase.free_all_parameters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">free_all_parameters</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Free all Parameters in all ComponentCollections.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Free all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
+        <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="easydynamics.sample_model.model_base.ModelBase.get_all_variables" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
@@ -25341,7 +25519,15 @@ Returns</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
@@ -25363,15 +25549,7 @@ Returns</p>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all Parameters and Descriptors from all</span>
 <span class="sd">    ComponentCollections in the ModelBase. Parameters Ignores the</span>
 <span class="sd">    Parameters and Descriptors in self._components as.</span>

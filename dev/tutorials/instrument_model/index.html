@@ -1496,6 +1496,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="instrument-model">Instrument Model<a class="anchor-link" href="#instrument-model">¶</a></h1><p>We here introduce the InstrumentModel, which contains all information related to the instrument: the BackgroundModel, ResolutionModel and also a fittable offset in the energy transfer due to slight instrument misalignment.</p>
+<p>The InstrumentModel does not itself do any calculations; it is merely a container for all information about the instrument.</p>
 </div>
 </div>
 </div>
@@ -1605,7 +1606,7 @@ instrument_model = InstrumentModel(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/home/runner/work/dynamics-lib/dynamics-lib/src/easydynamics/sample_model/model_base.py:207: UserWarning: Q is not set. No component collections generated
+<pre>/home/runner/work/dynamics-lib/dynamics-lib/src/easydynamics/sample_model/model_base.py:252: UserWarning: Q is not set. No component collections generated
   warnings.warn('Q is not set. No component collections generated', UserWarning)
 </pre>
 </div>
@@ -1677,9 +1678,11 @@ instrument_model = InstrumentModel(
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">instrument_model</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_resolution_parameters</span><span class="p">()</span>
+<span class="n">instrument_model</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-4">instrument_model</div>
+<div class="clipboard-copy-txt" id="cell-4">instrument_model.fix_resolution_parameters()
+instrument_model.get_all_variables(Q_index=1)</div>
 </div>
 </div>
 </div>
@@ -1691,11 +1694,13 @@ instrument_model = InstrumentModel(
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>InstrumentModel(unique_name='InstrumentModel_0', unit=meV, Q_len=5, resolution_model=ResolutionModel(unique_name=ResolutionModel_0, unit=meV), Q = [0.1   0.575 1.05  1.525 2.   ], components = [Gaussian(unique_name = Gaussian_0, unit = meV,
-             area = &lt;Parameter 'Gaussian area': 1.0000 meV, bounds=[0.0:inf]&gt;,
- center = &lt;Parameter 'Gaussian center': 0.0000 meV (fixed), bounds=[-inf:inf]&gt;,
- width = &lt;Parameter 'Gaussian width': 0.0500 meV, bounds=[1e-10:inf]&gt;)], background_model=BackgroundModel(unique_name=BackgroundModel_0, unit=meV), Q = [0.1   0.575 1.05  1.525 2.   ], components = [Polynomial(unique_name = Polynomial_0,             unit = meV,
- coefficients = [Polynomial_c0=1.0, Polynomial_c1=0.1, Polynomial_c2=0.01])])</pre>
+<pre>[&lt;Parameter 'energy_offset': 0.0000 meV, bounds=[-inf:inf]&gt;,
+ &lt;Parameter 'Polynomial_c0': 1.0000, bounds=[-inf:inf]&gt;,
+ &lt;Parameter 'Polynomial_c1': 0.1000, bounds=[-inf:inf]&gt;,
+ &lt;Parameter 'Polynomial_c2': 0.0100, bounds=[-inf:inf]&gt;,
+ &lt;Parameter 'Gaussian area': 1.0000 meV (fixed), bounds=[0.0:inf]&gt;,
+ &lt;Parameter 'Gaussian center': 0.0000 meV (fixed), bounds=[-inf:inf]&gt;,
+ &lt;Parameter 'Gaussian width': 0.0500 meV (fixed), bounds=[1e-10:inf]&gt;]</pre>
 </div>
 </div>
 </div>
