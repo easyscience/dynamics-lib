@@ -8,17 +8,6 @@
 import easyscience.global_object
 import pytest
 
-# from easyscience.global_object.map import Map
-
-
-# @pytest.fixture(autouse=True)
-# def reset_global_object(monkeypatch):
-#     # Before each test
-#     monkeypatch.setattr(easyscience.global_object, 'map', Map())
-#     yield
-#     # After each test (cleanup)
-#     monkeypatch.setattr(easyscience.global_object, 'map', Map())
-
 
 @pytest.fixture(autouse=True)
 def reset_global_object():

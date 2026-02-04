@@ -14,7 +14,7 @@ from easydynamics.sample_model.model_base import ModelBase
 
 class TestModelBase:
     @pytest.fixture
-    def model_base(self, reset_global_object):
+    def model_base(self):
         component1 = Gaussian(
             display_name='TestGaussian1',
             area=1.0,

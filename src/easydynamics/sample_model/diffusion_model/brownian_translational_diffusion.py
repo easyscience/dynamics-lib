@@ -67,8 +67,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
-
         diffusion_coefficient = Parameter(
             name='diffusion_coefficient',
             value=float(diffusion_coefficient),
@@ -79,29 +77,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             display_name=display_name,
             unique_name=unique_name,
             unit=unit,
+            scale=scale,
         )
         self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
         self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
-        self._scale = scale
         self._diffusion_coefficient = diffusion_coefficient
-
-    @property
-    def scale(self) -> Parameter:
-        """Get the scale parameter of the diffusion model.
-
-        Returns
-        -------
-        Parameter
-            Scale parameter.
-        """
-        return self._scale
-
-    @scale.setter
-    def scale(self, scale: Numeric) -> None:
-        """Set the scale parameter of the diffusion model."""
-        if not isinstance(scale, (Numeric)):
-            raise TypeError('scale must be a number.')
-        self._scale.value = scale
 
     @property
     def diffusion_coefficient(self) -> Parameter:

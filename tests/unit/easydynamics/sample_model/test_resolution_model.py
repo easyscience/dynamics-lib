@@ -136,9 +136,7 @@ class TestResolutionModel:
         ],
         ids=['DeltaFunction', 'Polynomial'],
     )
-    def test_append_invalid_component_type_raises(
-        self, resolution_model, invalid_component, reset_global_object
-    ):
+    def test_append_invalid_component_type_raises(self, resolution_model, invalid_component):
         # WHEN / THEN / EXPECT
         # appending a single component
         with pytest.raises(
