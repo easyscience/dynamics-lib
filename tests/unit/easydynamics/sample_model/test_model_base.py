@@ -132,6 +132,41 @@ class TestModelBase:
         assert expected_var_display_names == retrieved_var_display_names
         assert len(all_vars) == 18
 
+    def test_get_all_variables_with_Q_index(self, model_base):
+        # WHEN
+        all_vars = model_base.get_all_variables(Q_index=1)
+
+        # THEN
+        expected_var_display_names = {
+            'TestGaussian1 area',
+            'TestGaussian1 center',
+            'TestGaussian1 width',
+            'TestLorentzian1 area',
+            'TestLorentzian1 center',
+            'TestLorentzian1 width',
+        }
+
+        retrieved_var_display_names = {var.display_name for var in all_vars}
+
+        assert expected_var_display_names == retrieved_var_display_names
+        assert len(all_vars) == 6
+
+    def test_get_all_variables_with_invalid_Q_index_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds for component collections of length 3',
+        ):
+            model_base.get_all_variables(Q_index=5)
+
+    def test_get_all_variables_with_nonint_Q_index_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            model_base.get_all_variables(Q_index='invalid_index')
+
     def test_append_and_remove_and_clear_component(self, model_base):
         # WHEN
         new_component = Gaussian(unique_name='NewGaussian')
