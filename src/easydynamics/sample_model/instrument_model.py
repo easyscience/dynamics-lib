@@ -104,7 +104,7 @@ class InstrumentModel(NewBase):
 
     @property
     def resolution_model(self) -> ResolutionModel:
-        """The resolution model of the instrument."""
+        """Get the resolution model of the instrument."""
         return self._resolution_model
 
     @resolution_model.setter
