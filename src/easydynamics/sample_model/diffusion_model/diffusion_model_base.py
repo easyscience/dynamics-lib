@@ -39,7 +39,7 @@ class DiffusionModelBase(ModelBase):
             test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unitand convertible to meV.'
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         super().__init__(display_name=display_name, unique_name=unique_name)
