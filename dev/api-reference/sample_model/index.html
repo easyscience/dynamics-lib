@@ -21320,7 +21320,8 @@ See also the examples.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Model of Jump translational diffusion, consisting of a Lorentzian</span>
 <span class="sd">    function for each Q-value, where the width is given by :math:`D</span>
 <span class="sd">    Q^2/(1+D t Q^2)`. Q is assumed to have units of 1/angstrom. Creates</span>
@@ -21456,12 +21457,12 @@ See also the examples.</p>
 
         <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
 
-        <span class="n">unit_conversion_factor_nominator</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">unit_conversion_factor_numerator</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
 
-        <span class="n">nominator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">numerator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
         <span class="n">unit_conversion_factor_denominator</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation_time</span>
@@ -21470,8 +21471,7 @@ See also the examples.</p>
 
         <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">unit_conversion_factor_denominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
-        <span class="n">width</span> <span class="o">=</span> <span class="n">nominator</span> <span class="o">/</span> <span class="n">denominator</span>
-
+        <span class="n">width</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
         <span class="k">return</span> <span class="n">width</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -21513,19 +21513,21 @@ See also the examples.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">,</span>
-        <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">,</span>
+        <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the Brownian.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the diffusion model</span>
+<span class="sd">        at given Q values.</span>
 
-<span class="sd">        translational diffusion model at given Q values. Args:</span>
-<span class="sd">        ---------- Q : Number, list, or np.ndarray</span>
+<span class="sd">        Args:</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Q : Number, list, or np.ndarray</span>
 <span class="sd">            Scattering vector values.</span>
 <span class="sd">        component_display_name : str</span>
-<span class="sd">            Name of the Brownian Diffusion Lorentzian component.</span>
+<span class="sd">            Name of the Jump Diffusion Lorentzian component.</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        List[ComponentCollection]</span>
-<span class="sd">            List of ComponentCollections with Brownian Diffusion</span>
+<span class="sd">            List of ComponentCollections with Jump Diffusion</span>
 <span class="sd">            Lorentzian components.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
@@ -21837,14 +21839,14 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">332</span>
-<span class="normal">333</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -21888,7 +21890,8 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
+<span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
@@ -21902,8 +21905,7 @@ model.</p>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Elastic Incoherent Structure Factor (EISF).</span>
 
 <span class="sd">    Parameters</span>
@@ -21956,7 +21958,8 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
+<span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
@@ -21972,8 +21975,7 @@ model.</p>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Quasi-Elastic Incoherent Structure Factor</span>
 <span class="sd">    (QISF).</span>
 
@@ -22062,8 +22064,7 @@ t Q^2)</code></p>
 <span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the half-width at half-maximum (HWHM) for the</span>
 <span class="sd">    diffusion model. Equation: :math:`\\Gamma(Q) = \\hbar D Q^2/(1+D</span>
 <span class="sd">    t Q^2)`</span>
@@ -22081,12 +22082,12 @@ t Q^2)</code></p>
 
     <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
 
-    <span class="n">unit_conversion_factor_nominator</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">unit_conversion_factor_numerator</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
 
-    <span class="n">nominator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
     <span class="n">unit_conversion_factor_denominator</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation_time</span>
@@ -22095,8 +22096,7 @@ t Q^2)</code></p>
 
     <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">unit_conversion_factor_denominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
-    <span class="n">width</span> <span class="o">=</span> <span class="n">nominator</span> <span class="o">/</span> <span class="n">denominator</span>
-
+    <span class="n">width</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
     <span class="k">return</span> <span class="n">width</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -22113,23 +22113,24 @@ t Q^2)</code></p>
 
 
 <h4 id="easydynamics.sample_model.diffusion_model.JumpTranslationalDiffusion.create_component_collections" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">component_display_name</span><span class="o">=</span><span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">component_display_name</span><span class="o">=</span><span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">)</span></code>
 
 </h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Create ComponentCollection components for the Brownian.</p>
-<p>translational diffusion model at given Q values. Args:
----------- Q : Number, list, or np.ndarray
+        <p>Create ComponentCollection components for the diffusion model
+at given Q values.</p>
+<h6 id="easydynamics.sample_model.diffusion_model.JumpTranslationalDiffusion.create_component_collections--args">Args:</h6>
+<p>Q : Number, list, or np.ndarray
     Scattering vector values.
 component_display_name : str
-    Name of the Brownian Diffusion Lorentzian component.
+    Name of the Jump Diffusion Lorentzian component.
 Returns</p>
 <hr />
 <p>List[ComponentCollection]
-    List of ComponentCollections with Brownian Diffusion
+    List of ComponentCollections with Jump Diffusion
     Lorentzian components.</p>
 <!-- prettier-ignore-start -->
 
@@ -22138,7 +22139,8 @@ Returns</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+<span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
@@ -22200,22 +22202,25 @@ Returns</p>
 <span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
-<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">270</span>
+<span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">,</span>
-    <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">,</span>
+    <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the Brownian.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the diffusion model</span>
+<span class="sd">    at given Q values.</span>
 
-<span class="sd">    translational diffusion model at given Q values. Args:</span>
-<span class="sd">    ---------- Q : Number, list, or np.ndarray</span>
+<span class="sd">    Args:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Q : Number, list, or np.ndarray</span>
 <span class="sd">        Scattering vector values.</span>
 <span class="sd">    component_display_name : str</span>
-<span class="sd">        Name of the Brownian Diffusion Lorentzian component.</span>
+<span class="sd">        Name of the Jump Diffusion Lorentzian component.</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    List[ComponentCollection]</span>
-<span class="sd">        List of ComponentCollections with Brownian Diffusion</span>
+<span class="sd">        List of ComponentCollections with Jump Diffusion</span>
 <span class="sd">        Lorentzian components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
@@ -23665,10 +23670,7 @@ Returns</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
@@ -23740,7 +23742,10 @@ Returns</p>
 <span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DiffusionModelBase</span><span class="p">(</span><span class="n">ModelBase</span><span class="p">):</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DiffusionModelBase</span><span class="p">(</span><span class="n">ModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for constructing diffusion models.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -23853,10 +23858,7 @@ unit : str or sc.Unit, optional
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -23884,7 +23886,10 @@ unit : str or sc.Unit, optional
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyDiffusionModel&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -23946,9 +23951,9 @@ unit : str or sc.Unit, optional
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the Diffusion model.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">, unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">)&#39;</span>
 </code></pre></div></td></tr></table></div>
@@ -24445,7 +24450,8 @@ See also the examples.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">JumpTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Model of Jump translational diffusion, consisting of a Lorentzian</span>
 <span class="sd">    function for each Q-value, where the width is given by :math:`D</span>
 <span class="sd">    Q^2/(1+D t Q^2)`. Q is assumed to have units of 1/angstrom. Creates</span>
@@ -24581,12 +24587,12 @@ See also the examples.</p>
 
         <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
 
-        <span class="n">unit_conversion_factor_nominator</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">unit_conversion_factor_numerator</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
 
-        <span class="n">nominator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">numerator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
         <span class="n">unit_conversion_factor_denominator</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation_time</span>
@@ -24595,8 +24601,7 @@ See also the examples.</p>
 
         <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">unit_conversion_factor_denominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
-        <span class="n">width</span> <span class="o">=</span> <span class="n">nominator</span> <span class="o">/</span> <span class="n">denominator</span>
-
+        <span class="n">width</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
         <span class="k">return</span> <span class="n">width</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -24638,19 +24643,21 @@ See also the examples.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">,</span>
-        <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">,</span>
+        <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the Brownian.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the diffusion model</span>
+<span class="sd">        at given Q values.</span>
 
-<span class="sd">        translational diffusion model at given Q values. Args:</span>
-<span class="sd">        ---------- Q : Number, list, or np.ndarray</span>
+<span class="sd">        Args:</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Q : Number, list, or np.ndarray</span>
 <span class="sd">            Scattering vector values.</span>
 <span class="sd">        component_display_name : str</span>
-<span class="sd">            Name of the Brownian Diffusion Lorentzian component.</span>
+<span class="sd">            Name of the Jump Diffusion Lorentzian component.</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        List[ComponentCollection]</span>
-<span class="sd">            List of ComponentCollections with Brownian Diffusion</span>
+<span class="sd">            List of ComponentCollections with Jump Diffusion</span>
 <span class="sd">            Lorentzian components.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
@@ -24962,14 +24969,14 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">332</span>
-<span class="normal">333</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -25013,7 +25020,8 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
+<span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
@@ -25027,8 +25035,7 @@ model.</p>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Elastic Incoherent Structure Factor (EISF).</span>
 
 <span class="sd">    Parameters</span>
@@ -25081,7 +25088,8 @@ model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
+<span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
@@ -25097,8 +25105,7 @@ model.</p>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Quasi-Elastic Incoherent Structure Factor</span>
 <span class="sd">    (QISF).</span>
 
@@ -25187,8 +25194,7 @@ t Q^2)</code></p>
 <span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the half-width at half-maximum (HWHM) for the</span>
 <span class="sd">    diffusion model. Equation: :math:`\\Gamma(Q) = \\hbar D Q^2/(1+D</span>
 <span class="sd">    t Q^2)`</span>
@@ -25206,12 +25212,12 @@ t Q^2)</code></p>
 
     <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
 
-    <span class="n">unit_conversion_factor_nominator</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">unit_conversion_factor_numerator</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
 
-    <span class="n">nominator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_nominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">unit_conversion_factor_numerator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
     <span class="n">unit_conversion_factor_denominator</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation_time</span>
@@ -25220,8 +25226,7 @@ t Q^2)</code></p>
 
     <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">unit_conversion_factor_denominator</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span>
 
-    <span class="n">width</span> <span class="o">=</span> <span class="n">nominator</span> <span class="o">/</span> <span class="n">denominator</span>
-
+    <span class="n">width</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
     <span class="k">return</span> <span class="n">width</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -25238,23 +25243,24 @@ t Q^2)</code></p>
 
 
 <h5 id="easydynamics.sample_model.diffusion_model.jump_translational_diffusion.JumpTranslationalDiffusion.create_component_collections" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">component_display_name</span><span class="o">=</span><span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">component_display_name</span><span class="o">=</span><span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">)</span></code>
 
 </h5>
 
 
     <div class="doc doc-contents ">
 
-        <p>Create ComponentCollection components for the Brownian.</p>
-<p>translational diffusion model at given Q values. Args:
----------- Q : Number, list, or np.ndarray
+        <p>Create ComponentCollection components for the diffusion model
+at given Q values.</p>
+<h6 id="easydynamics.sample_model.diffusion_model.jump_translational_diffusion.JumpTranslationalDiffusion.create_component_collections--args">Args:</h6>
+<p>Q : Number, list, or np.ndarray
     Scattering vector values.
 component_display_name : str
-    Name of the Brownian Diffusion Lorentzian component.
+    Name of the Jump Diffusion Lorentzian component.
 Returns</p>
 <hr />
 <p>List[ComponentCollection]
-    List of ComponentCollections with Brownian Diffusion
+    List of ComponentCollections with Jump Diffusion
     Lorentzian components.</p>
 <!-- prettier-ignore-start -->
 
@@ -25263,7 +25269,8 @@ Returns</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/jump_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+<span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
@@ -25325,22 +25332,25 @@ Returns</p>
 <span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
-<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">270</span>
+<span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span><span class="p">,</span>
-    <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Brownian translational diffusion&#39;</span><span class="p">,</span>
+    <span class="n">component_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Jump translational diffusion&#39;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the Brownian.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ComponentCollection components for the diffusion model</span>
+<span class="sd">    at given Q values.</span>
 
-<span class="sd">    translational diffusion model at given Q values. Args:</span>
-<span class="sd">    ---------- Q : Number, list, or np.ndarray</span>
+<span class="sd">    Args:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Q : Number, list, or np.ndarray</span>
 <span class="sd">        Scattering vector values.</span>
 <span class="sd">    component_display_name : str</span>
-<span class="sd">        Name of the Brownian Diffusion Lorentzian component.</span>
+<span class="sd">        Name of the Jump Diffusion Lorentzian component.</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    List[ComponentCollection]</span>
-<span class="sd">        List of ComponentCollections with Brownian Diffusion</span>
+<span class="sd">        List of ComponentCollections with Jump Diffusion</span>
 <span class="sd">        Lorentzian components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Q</span> <span class="o">=</span> <span class="n">_validate_and_convert_Q</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
