@@ -175,7 +175,7 @@ class SampleModel(ModelBase):
                 'or None'
             )
         self._diffusion_models = value
-        self._generate_component_collections()
+        self._on_diffusion_models_change()
 
     @property
     def temperature(self) -> Parameter | None:
@@ -286,7 +286,7 @@ class SampleModel(ModelBase):
 
         return y
 
-    def get_all_variables(self):
+    def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """Get all Parameters and Descriptors from all
         ComponentCollections in the SampleModel.
 
@@ -294,7 +294,8 @@ class SampleModel(ModelBase):
         diffusion models. Ignores the Parameters and Descriptors in
         self._components as these are just templates.
         """
-        all_vars = super().get_all_variables()
+
+        all_vars = super().get_all_variables(Q_index=Q_index)
         if self._temperature is not None:
             all_vars.append(self._temperature)
 
@@ -324,6 +325,10 @@ class SampleModel(ModelBase):
             for target, source in zip(self._component_collections, diffusion_collections):
                 for component in source.components:
                     target.append_component(component)
+
+    def _on_diffusion_models_change(self) -> None:
+        """Handle changes to the diffusion models."""
+        self._generate_component_collections()
 
     # ------------------------------------------------------------------
     # dunder methods
