@@ -1,16 +1,13 @@
 # SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorNumber
-from numpy.typing import ArrayLike
+from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.utils.utils import Numeric
-
-Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class DiffusionModelBase(ModelBase):
@@ -20,6 +17,7 @@ class DiffusionModelBase(ModelBase):
         self,
         display_name='MyDiffusionModel',
         unique_name: str | None = None,
+        scale: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
     ):
         """Initialize a new DiffusionModel.
@@ -31,6 +29,10 @@ class DiffusionModelBase(ModelBase):
         unit : str or sc.Unit, optional
             Unit of the diffusion model. Defaults to "meV".
         """
+        if not isinstance(scale, Numeric):
+            raise TypeError('scale must be a number.')
+
+        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
 
         try:
             test = DescriptorNumber(name='test', value=1, unit=unit)
@@ -42,6 +44,11 @@ class DiffusionModelBase(ModelBase):
 
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
+        self._scale = scale
+
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
 
     @property
     def unit(self) -> str:
@@ -61,6 +68,28 @@ class DiffusionModelBase(ModelBase):
                 f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
+
+    @property
+    def scale(self) -> Parameter:
+        """Get the scale parameter of the diffusion model.
+
+        Returns
+        -------
+        Parameter
+            Scale parameter.
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale: Numeric) -> None:
+        """Set the scale parameter of the diffusion model."""
+        if not isinstance(scale, Numeric):
+            raise TypeError('scale must be a number.')
+        self._scale.value = scale
+
+    # ------------------------------------------------------------------
+    # dunder methods
+    # ------------------------------------------------------------------
 
     def __repr__(self):
         """String representation of the Diffusion model."""
