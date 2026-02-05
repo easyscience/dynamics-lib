@@ -291,7 +291,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             raise TypeError('Q must be a float.')
 
         # Q is given as a float, so we need to add the units
-        return f'hbar * D* {Q} **2*1/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
+        return f'hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
 
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent

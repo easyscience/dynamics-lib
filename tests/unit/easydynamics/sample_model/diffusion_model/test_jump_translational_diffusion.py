@@ -138,8 +138,8 @@ class TestJumpTranslationalDiffusion:
         EISF = jump_diffusion_model.calculate_EISF(Q_values)
 
         # EXPECT
-        expected_EISHF = np.zeros_like(Q_values)
-        np.testing.assert_array_equal(EISF, expected_EISHF)
+        expected_EISF = np.zeros_like(Q_values)
+        np.testing.assert_array_equal(EISF, expected_EISF)
 
     def test_calculate_EISF_type_error(self, jump_diffusion_model):
         # WHEN THEN EXPECT
@@ -218,7 +218,7 @@ class TestJumpTranslationalDiffusion:
 
         # EXPECT
         expected_expression = (
-            'hbar * D* 0.5 **2*1/(angstrom**2)/(1 + (D * t* 0.5 **2/(angstrom**2)))'
+            'hbar * D* 0.5 **2/(angstrom**2)/(1 + (D * t* 0.5 **2/(angstrom**2)))'
         )
         assert expression == expected_expression
 
