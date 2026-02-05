@@ -9,10 +9,10 @@
   </picture>
 </p>
 
-**EasyDynamics** is a scientific software for plotting and fitting QENS and INS powder data.
+**EasyDynamics** is a scientific software for plotting and fitting QENS
+and INS powder data.
 
 <!-- HOME REPOSITORY SECTION -->
-
 
 **EasyDynamics** is available both as a Python library and as a
 cross-platform desktop application.
@@ -40,5 +40,3 @@ Here, we focus on the Python library. For the graphical user interface
 - 🧑‍💻 [Source Code](https://github.com/easyscience/dynamics-lib)
 - ⚖️
   [License](https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/LICENSE)
-
-

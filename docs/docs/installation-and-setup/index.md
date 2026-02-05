@@ -8,8 +8,8 @@ icon: material/cog-box
 **Python 3.11** through **3.12**.
 
 To install and set up EasyDynamics, we recommend using
-[**Pixi**](https://pixi.prefix.dev), a modern package manager for Windows,
-macOS, and Linux.
+[**Pixi**](https://pixi.prefix.dev), a modern package manager for
+Windows, macOS, and Linux.
 
 !!! note "Main benefits of using Pixi"
 
