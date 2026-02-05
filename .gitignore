@@ -3,6 +3,11 @@ __pycache__/
 .venv/
 .coverage
 
+# PyInstaller
+dist/
+build/
+*.spec
+
 # MkDocs
 docs/site/
 

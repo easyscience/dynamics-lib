@@ -1,16 +1,18 @@
 <p>
   <picture>
     <!-- light mode logo -->
-    <source media='(prefers-color-scheme: light)' srcset='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_light.svg'>
+    <source media='(prefers-color-scheme: light)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easydynamics/logos/light.svg'>
     <!-- dark mode logo -->
-    <source media='(prefers-color-scheme: dark)' srcset='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_dark.svg'>
+    <source media='(prefers-color-scheme: dark)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easydynamics/logos/dark.svg'>
     <!-- default logo == light mode logo -->
-    <img src='https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/docs/docs/assets/images/logo_light.svg' alt='EasyDynamics'>
+    <img src='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easydynamics/logos/light.svg' alt='EasyDynamics'>
   </picture>
 </p>
 
-**EasyDynamics** is a scientific software for plotting and fitting qens
-and ins powder data.
+**EasyDynamics** is a scientific software for plotting and fitting QENS and INS powder data.
+
+<!-- HOME REPOSITORY SECTION -->
+
 
 **EasyDynamics** is available both as a Python library and as a
 cross-platform desktop application.
@@ -38,3 +40,5 @@ Here, we focus on the Python library. For the graphical user interface
 - 🧑‍💻 [Source Code](https://github.com/easyscience/dynamics-lib)
 - ⚖️
   [License](https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/LICENSE)
+
+

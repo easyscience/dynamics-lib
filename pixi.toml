@@ -76,44 +76,57 @@ default = { features = ['default', 'py-max'] }
 
 [tasks]
 
+##################
 # 🧪 Testing Tasks
-unit-tests = 'python -m pytest tests/unit/ --color=yes --cov= --cov-report='
+##################
+
+unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
 notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --color=yes -n auto -v'
 script-tests = 'python -m pytest tools/test_scripts.py --color=yes -n auto -v'
 
 test = { depends-on = ['unit-tests'] }
 
+###########
 # ✔️ Checks
+###########
+
 pyproject-check = 'python -m validate_pyproject pyproject.toml'
-py-lint-check-pre = "python -m ruff check"
-py-lint-check = 'pixi run py-lint-check-pre .'
-py-format-check-pre = "python -m ruff format --check"
-py-format-check = "pixi run py-format-check-pre ."
-nonpy-format-check-pre = "npx prettier --list-different --config=prettierrc.toml"
-nonpy-format-check-modified = "pixi run nonpy-format-check-pre $(git diff --diff-filter=d --name-only HEAD | grep -E '\\.(json|ya?ml|toml|md|css|html)$' || echo .)"
-nonpy-format-check = "pixi run nonpy-format-check-pre ."
+docs-format-check = 'docformatter --check src/ docs/docs/tutorials/'
 notebook-format-check = 'nbqa ruff docs/docs/tutorials/'
-docs-format-check = 'docformatter src/ docs/docs/tutorials/ --check'
+py-lint-check = 'ruff check src/ tests/ docs/docs/tutorials/'
+py-format-check = "ruff format --check src/ tests/ docs/docs/tutorials/"
+nonpy-format-check = "npx prettier --list-different --config=prettierrc.toml --ignore-unknown ."
+nonpy-format-check-modified = "python tools/nonpy_prettier_modified.py"
 
 check = { depends-on = [
-  'docs-format-check',
   'py-format-check',
+  'docs-format-check',
   'py-lint-check',
   'nonpy-format-check-modified',
 ] }
 
+##########
 # 🛠️ Fixes
-py-lint-fix = 'pixi run py-lint-check --fix'
-#py-format-fix = "python -m ruff format $(git diff --cached --name-only -- '*.py')"
-py-format-fix = "python -m ruff format"
-nonpy-format-fix = 'pixi run nonpy-format-check --write'
-nonpy-format-fix-modified = "pixi run nonpy-format-check-modified --write"
-notebook-format-fix = 'pixi run notebook-format-check --fix'
-docs-format-fix = 'docformatter src/ docs/docs/tutorials/ --in-place'
+##########
+
+docs-format-fix = 'docformatter --in-place src/ docs/docs/tutorials/'
+notebook-format-fix = 'nbqa ruff --fix docs/docs/tutorials/'
+py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
+py-format-fix = "ruff format src/ tests/ docs/docs/tutorials/"
+nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
+nonpy-format-fix-modified = "python tools/nonpy_prettier_modified.py --write"
 success-message-fix = 'echo "✅ All code auto-formatting steps have been applied."'
 
 fix = { depends-on = [
+  'py-format-fix',
+  'docs-format-fix',
+  'py-lint-fix',
+  'nonpy-format-fix-modified',
+  'success-message-fix',
+] }
+
+fix-all = { depends-on = [
   'py-format-fix',
   'docs-format-fix',
   'py-lint-fix',
@@ -121,7 +134,10 @@ fix = { depends-on = [
   'success-message-fix',
 ] }
 
+####################
 # 🧮 Code Complexity
+####################
+
 complexity-check = 'radon cc -s src/'
 complexity-check-json = 'radon cc -s -j src/'
 maintainability-check = 'radon mi src/'
@@ -129,8 +145,11 @@ maintainability-check-json = 'radon mi -j src/'
 raw-metrics = 'radon raw -s src/'
 raw-metrics-json = 'radon raw -s -j src/'
 
+#############
 # 📊 Coverage
-unit-tests-coverage = 'python -m pytest tests/unit/ --color=yes --cov=src/easydynamics --cov-report=term-missing'
+#############
+
+unit-tests-coverage = 'pixi run unit-tests --cov=src/easydynamics --cov-report=term-missing'
 integration-tests-coverage = 'pixi run integration-tests --cov=src/easydynamics --cov-report=term-missing'
 docstring-coverage = 'interrogate -c pyproject.toml src/easydynamics'
 
@@ -140,19 +159,25 @@ cov = { depends-on = [
   'integration-tests-coverage',
 ] }
 
+########################
 # 📓 Notebook Management
+########################
+
 notebook-convert = 'jupytext docs/docs/tutorials/*.py --from py:percent --to ipynb'
 notebook-strip = 'nbstripout docs/docs/tutorials/*.ipynb'
 notebook-tweak = 'python tools/tweak_notebooks.py tutorials/'
 notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --overwrite --color=yes -n auto -v'
 
 notebook-prepare = { depends-on = [
-  ###'notebook-convert',
+  #'notebook-convert',
   'notebook-strip',
-  ###'notebook-tweak',
+  #'notebook-tweak',
 ] }
 
+########################
 # 📚 Documentation Tasks
+########################
+
 docs-vars = "JUPYTER_PLATFORM_DIRS=1 PYTHONWARNINGS='ignore::RuntimeWarning'"
 docs-pre = "pixi run docs-vars python -m mkdocs"
 docs-serve = "pixi run docs-pre serve -f docs/mkdocs.yml"
@@ -163,22 +188,25 @@ docs-build-local = "pixi run docs-build --no-directory-urls"
 docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type redirect'
 docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-pages'
 
-docs-update-assets = 'pixi run python tools/update_docs_assets.py'
+docs-update-assets = 'python tools/update_docs_assets.py'
 
+##############################
 # 📦 Template Management Tasks
-copier-copy = "pixi run copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-recopy = "pixi run copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-update = "pixi run copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+##############################
 
-# 🚀 Development & Build Tasks
-default-build = 'python -m build'
-dist-build = 'python -m build --wheel --outdir dist'
+copier-copy = "copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-recopy = "copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-update = "copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
 
-npm-config = 'npm config set registry https://registry.npmjs.org/'
-prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
+#####################
+# 🪝 Pre-commit Hooks
+#####################
 
-clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
-spdx-update = 'python tools/update_spdx.py'
+# Pre-commit hook commands (to be used in .pre-commit-config.yaml)
+py-lint-check-pre = 'ruff check'
+py-format-check-pre = "ruff format --check"
+nonpy-format-check-pre = "npx prettier --list-different --config=prettierrc.toml --ignore-unknown"
+docs-format-check-pre = 'docformatter --check'
 
 # Run like a real commit: staged files only (almost)
 pre-commit-check = 'pre-commit run --hook-stage pre-commit'
@@ -196,11 +224,28 @@ pre-commit-setup = { depends-on = [
   'pre-commit-install',
 ] }
 
+####################################
+# 🚀 Other Development & Build Tasks
+####################################
+
+github-labels = 'python tools/update_github_labels.py'
+
+default-build = 'python -m build'
+dist-build = 'python -m build --wheel --outdir dist'
+
+npm-config = 'npm config set registry https://registry.npmjs.org/'
+prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
+
+clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
+spdx-update = 'python tools/update_spdx.py'
+
 post-install = { depends-on = [
   'npm-config',
   'prettier-install',
   'pre-commit-setup',
 ] }
 
+##########################
 # 🔗 Main Package Shortcut
+##########################
 easydynamics = 'python -m easydynamics'

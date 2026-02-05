@@ -11,32 +11,35 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: pixi-py-lint-check-staged
-        name: pixi run py-lint-check-staged
+      - id: pixi-py-lint-check
+        name: pixi run py-lint-check-pre STAGED_FILES
         entry: pixi run py-lint-check-pre
         language: system
-        pass_filenames: false
+        pass_filenames: true
+        files: ^(src/|tests/|docs/docs/tutorials/).*\.py$
         stages: [pre-commit]
 
-      - id: pixi-py-format-check-staged
-        name: pixi run py-format-check-staged
+      - id: pixi-py-format-check
+        name: pixi run py-format-check-pre STAGED_FILES
         entry: pixi run py-format-check-pre
         language: system
-        pass_filenames: false
+        pass_filenames: true
+        files: ^(src/|tests/|docs/docs/tutorials/).*\.py$
         stages: [pre-commit]
 
-      - id: pixi-nonpy-format-check-modified
-        name: pixi run nonpy-format-check-modified
-        entry: pixi run nonpy-format-check-modified
+      - id: pixi-nonpy-format-check
+        name: pixi run nonpy-format-check-pre STAGED_FILES
+        entry: pixi run nonpy-format-check-pre
         language: system
-        pass_filenames: false
+        pass_filenames: true
         stages: [pre-commit]
 
       - id: pixi-docs-format-check
-        name: pixi run docs-format-check
-        entry: pixi run docs-format-check
+        name: pixi run docs-format-check-pre STAGED_FILES
+        entry: pixi run docs-format-check-pre
         language: system
-        pass_filenames: false
+        pass_filenames: true
+        files: ^(src/|docs/docs/tutorials/).*\.py$
         stages: [pre-commit]
 
       # ----------------

@@ -107,11 +107,8 @@ jobs:
       - name: Pre-build site step
         run: pixi run python -c "import easydynamics"
 
-      # Convert Python scripts in the docs/docs/tutorials/ directory to Jupyter
-      # notebooks.
-      # This step also strips any existing output from the notebooks and
-      # prepares them for documentation.
-      - name: Convert tutorial scripts to notebooks
+      # Prepare the Jupyter notebooks for documentation (strip output, etc.).
+      - name: Prepare notebooks
         run: pixi run notebook-prepare
 
       # Execute all Jupyter notebooks to generate output cells (plots, tables, etc.).
