@@ -99,12 +99,7 @@ py-format-check = "ruff format --check src/ tests/ docs/docs/tutorials/"
 nonpy-format-check = "npx prettier --list-different --config=prettierrc.toml --ignore-unknown ."
 nonpy-format-check-modified = "python tools/nonpy_prettier_modified.py"
 
-check = { depends-on = [
-  'py-format-check',
-  'docs-format-check',
-  'py-lint-check',
-  'nonpy-format-check-modified',
-] }
+check = 'pre-commit run --hook-stage manual --all-files'
 
 ##########
 # 🛠️ Fixes
@@ -122,15 +117,8 @@ fix = { depends-on = [
   'py-format-fix',
   'docs-format-fix',
   'py-lint-fix',
-  'nonpy-format-fix-modified',
-  'success-message-fix',
-] }
-
-fix-all = { depends-on = [
-  'py-format-fix',
-  'docs-format-fix',
-  'py-lint-fix',
   'nonpy-format-fix',
+  'notebook-format-fix',
   'success-message-fix',
 ] }
 
@@ -202,19 +190,6 @@ copier-update = "copier update --data-file ../dynamics/.copier-answers.yml --dat
 # 🪝 Pre-commit Hooks
 #####################
 
-# Pre-commit hook commands (to be used in .pre-commit-config.yaml)
-py-lint-check-pre = 'ruff check'
-py-format-check-pre = "ruff format --check"
-nonpy-format-check-pre = "npx prettier --list-different --config=prettierrc.toml --ignore-unknown"
-docs-format-check-pre = 'docformatter --check'
-
-# Run like a real commit: staged files only (almost)
-pre-commit-check = 'pre-commit run --hook-stage pre-commit'
-# CI check: lint/format everything
-pre-commit-check-all = 'pre-commit run --all-files --hook-stage pre-commit'
-# Pre-push check: lint/format everything
-pre-push-check = 'pre-commit run --all-files --hook-stage pre-push'
-
 pre-commit-clean = 'pre-commit clean'
 pre-commit-install = 'pre-commit install --hook-type pre-commit --hook-type pre-push --overwrite'
 pre-commit-uninstall = 'pre-commit uninstall --hook-type pre-commit --hook-type pre-push'
@@ -242,7 +217,7 @@ spdx-update = 'python tools/update_spdx.py'
 post-install = { depends-on = [
   'npm-config',
   'prettier-install',
-  'pre-commit-setup',
+  #'pre-commit-setup',
 ] }
 
 ##########################

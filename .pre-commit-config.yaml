@@ -1,60 +1,54 @@
 repos:
   - repo: local
     hooks:
-      # -----------------
-      # Pre-commit checks
-      # -----------------
+      # -------------
+      # Manual checks
+      # -------------
       - id: pixi-pyproject-check
         name: pixi run pyproject-check
         entry: pixi run pyproject-check
         language: system
         pass_filenames: false
-        stages: [pre-commit]
+        stages: [manual]
 
       - id: pixi-py-lint-check
-        name: pixi run py-lint-check-pre STAGED_FILES
-        entry: pixi run py-lint-check-pre
+        name: pixi run py-lint-check
+        entry: pixi run py-lint-check
         language: system
-        pass_filenames: true
-        files: ^(src/|tests/|docs/docs/tutorials/).*\.py$
-        stages: [pre-commit]
+        pass_filenames: false
+        stages: [manual]
 
       - id: pixi-py-format-check
-        name: pixi run py-format-check-pre STAGED_FILES
-        entry: pixi run py-format-check-pre
+        name: pixi run py-format-check
+        entry: pixi run py-format-check
         language: system
-        pass_filenames: true
-        files: ^(src/|tests/|docs/docs/tutorials/).*\.py$
-        stages: [pre-commit]
+        pass_filenames: false
+        stages: [manual]
 
-      - id: pixi-nonpy-format-check
-        name: pixi run nonpy-format-check-pre STAGED_FILES
-        entry: pixi run nonpy-format-check-pre
-        language: system
-        pass_filenames: true
-        stages: [pre-commit]
-
-      - id: pixi-docs-format-check
-        name: pixi run docs-format-check-pre STAGED_FILES
-        entry: pixi run docs-format-check-pre
-        language: system
-        pass_filenames: true
-        files: ^(src/|docs/docs/tutorials/).*\.py$
-        stages: [pre-commit]
-
-      # ----------------
-      # Pre-push checks
-      # ----------------
       - id: pixi-nonpy-format-check
         name: pixi run nonpy-format-check
         entry: pixi run nonpy-format-check
         language: system
         pass_filenames: false
-        stages: [pre-push]
+        stages: [manual]
+
+      - id: pixi-docs-format-check
+        name: pixi run docs-format-check
+        entry: pixi run docs-format-check
+        language: system
+        pass_filenames: false
+        stages: [manual]
+
+      - id: pixi-notebook-format-check
+        name: pixi run notebook-format-check
+        entry: pixi run notebook-format-check
+        language: system
+        pass_filenames: false
+        stages: [manual]
 
       - id: pixi-unit-tests
         name: pixi run unit-tests
         entry: pixi run unit-tests
         language: system
         pass_filenames: false
-        stages: [pre-push]
+        stages: [manual]
