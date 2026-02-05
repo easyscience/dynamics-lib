@@ -21661,7 +21661,7 @@ See also the examples.</p>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Q must be a float.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Q is given as a float, so we need to add the units</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;hbar * D* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2*1/(angstrom**2)/(1 + (D * t* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)))&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;hbar * D* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)/(1 + (D * t* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)))&#39;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_width_dependency_map_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the dependency map expression to make dependent</span>
@@ -24839,7 +24839,7 @@ See also the examples.</p>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Q must be a float.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Q is given as a float, so we need to add the units</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;hbar * D* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2*1/(angstrom**2)/(1 + (D * t* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)))&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;hbar * D* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)/(1 + (D * t* </span><span class="si">{</span><span class="n">Q</span><span class="si">}</span><span class="s1"> **2/(angstrom**2)))&#39;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_width_dependency_map_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the dependency map expression to make dependent</span>
