@@ -46,6 +46,10 @@ class DiffusionModelBase(ModelBase):
         self._unit = unit
         self._scale = scale
 
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
     @property
     def unit(self) -> str:
         """Get the unit of the DiffusionModel.
@@ -82,6 +86,10 @@ class DiffusionModelBase(ModelBase):
         if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
         self._scale.value = scale
+
+    # ------------------------------------------------------------------
+    # dunder methods
+    # ------------------------------------------------------------------
 
     def __repr__(self):
         """String representation of the Diffusion model."""

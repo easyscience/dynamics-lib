@@ -83,6 +83,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
         self._diffusion_coefficient = diffusion_coefficient
 
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
     @property
     def diffusion_coefficient(self) -> Parameter:
         """Get the diffusion coefficient parameter D.
@@ -97,9 +101,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     @diffusion_coefficient.setter
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
         """Set the diffusion coefficient parameter D."""
-        if not isinstance(diffusion_coefficient, (Numeric)):
+        if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
         self._diffusion_coefficient.value = diffusion_coefficient
+
+    # ------------------------------------------------------------------
+    # Other methods
+    # ------------------------------------------------------------------
 
     def calculate_width(self, Q: Q_type) -> np.ndarray:
         """Calculate the half-width at half-maximum (HWHM) for the
@@ -226,6 +234,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         return component_collection_list
 
+    # ------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------
+
     def _write_width_dependency_expression(self, Q: float) -> str:
         """Write the dependency expression for the width as a function
         of Q to make dependent Parameters.
@@ -276,6 +288,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         return {
             'scale': self.scale,
         }
+
+    # ------------------------------------------------------------------
+    # dunder methods
+    # ------------------------------------------------------------------
 
     def __repr__(self):
         """String representation of the BrownianTranslationalDiffusion

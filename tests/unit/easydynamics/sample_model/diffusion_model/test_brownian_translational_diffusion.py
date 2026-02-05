@@ -65,18 +65,6 @@ class TestBrownianTranslationalDiffusion:
         with pytest.raises(expected_exception, match=expected_message):
             BrownianTranslationalDiffusion(display_name='BrownianTranslationalDiffusion', **kwargs)
 
-    def test_scale_setter(self, brownian_diffusion_model):
-        # WHEN
-        brownian_diffusion_model.scale = 2.0
-
-        # THEN EXPECT
-        assert brownian_diffusion_model.scale.value == 2.0
-
-    def test_scale_setter_raises(self, brownian_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='scale must be a number.'):
-            brownian_diffusion_model.scale = 'invalid'  # Invalid type
-
     def test_diffusion_coefficient_setter(self, brownian_diffusion_model):
         # WHEN
         brownian_diffusion_model.diffusion_coefficient = 3.0
