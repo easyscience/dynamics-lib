@@ -223,7 +223,7 @@ class ComponentCollection(ModelBase):
         """
 
         if not self.components:
-            raise ValueError('No components in the model to evaluate.')
+            return np.zeros_like(x)
         return sum(component.evaluate(x) for component in self.components)
 
     def evaluate_component(
