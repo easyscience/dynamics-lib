@@ -151,12 +151,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Q = _validate_and_convert_Q(Q)
 
-        unit_conversion_factor_nominator = (
+        unit_conversion_factor_numerator = (
             self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         )
-        unit_conversion_factor_nominator.convert_unit(self.unit)
+        unit_conversion_factor_numerator.convert_unit(self.unit)
 
-        nominator = unit_conversion_factor_nominator.value * Q**2
+        numerator = unit_conversion_factor_numerator.value * Q**2
 
         unit_conversion_factor_denominator = (
             self.diffusion_coefficient / self._angstrom**2 * self.relaxation_time
@@ -165,8 +165,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         denominator = 1 + unit_conversion_factor_denominator.value * Q**2
 
-        width = nominator / denominator
-
+        width = numerator / denominator
         return width
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
@@ -208,19 +207,21 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = 'Brownian translational diffusion',
+        component_display_name: str = 'Jump translational diffusion',
     ) -> List[ComponentCollection]:
-        """Create ComponentCollection components for the Brownian.
+        """Create ComponentCollection components for the diffusion model
+        at given Q values.
 
-        translational diffusion model at given Q values. Args:
-        ---------- Q : Number, list, or np.ndarray
+        Args:
+        ----------
+        Q : Number, list, or np.ndarray
             Scattering vector values.
         component_display_name : str
-            Name of the Brownian Diffusion Lorentzian component.
+            Name of the Jump Diffusion Lorentzian component.
         Returns
         -------
         List[ComponentCollection]
-            List of ComponentCollections with Brownian Diffusion
+            List of ComponentCollections with Jump Diffusion
             Lorentzian components.
         """
         Q = _validate_and_convert_Q(Q)
