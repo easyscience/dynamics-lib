@@ -7,6 +7,7 @@ from copy import copy
 import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
+from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -106,7 +107,7 @@ class ModelBase(EasyScienceModelBase):
             The ModelComponent or ComponentCollection to append.
         """
         self._components.append_component(component)
-        self._generate_component_collections()
+        self._on_components_change()
 
     def remove_component(self, unique_name: str) -> None:
         """Remove a ModelComponent from the SampleModel by its unique
@@ -117,12 +118,12 @@ class ModelBase(EasyScienceModelBase):
             to remove.
         """
         self._components.remove_component(unique_name)
-        self._generate_component_collections()
+        self._on_components_change()
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
         self._components.clear_components()
-        self._generate_component_collections()
+        self._on_components_change()
 
     # ------------------------------------------------------------------
     # Properties
@@ -166,7 +167,7 @@ class ModelBase(EasyScienceModelBase):
             except Exception:  # noqa: S110
                 pass  # Best effort rollback
             raise e
-        self._generate_component_collections()
+        self._on_components_change()
 
     @property
     def components(self) -> list[ModelComponent]:
@@ -192,7 +193,53 @@ class ModelBase(EasyScienceModelBase):
     def Q(self, value: Q_type | None) -> None:
         """Set the Q values of the SampleModel."""
         self._Q = _validate_and_convert_Q(value)
-        self._generate_component_collections()
+        self._on_Q_change()
+
+    # ------------------------------------------------------------------
+    # Other methods
+    # ------------------------------------------------------------------
+    def fix_all_parameters(self) -> None:
+        """Fix all Parameters in all ComponentCollections."""
+        for par in self.get_all_variables():
+            par.fixed = True
+
+    def free_all_parameters(self) -> None:
+        """Free all Parameters in all ComponentCollections."""
+        for par in self.get_all_variables():
+            par.fixed = False
+
+    def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """Get all Parameters and Descriptors from all
+        ComponentCollections in the ModelBase. Parameters Ignores the
+        Parameters and Descriptors in self._components as these are just
+        templates.
+
+        Parameters
+        ----------
+        Q_index : int | None
+            If int, get variables for the ComponentCollection at
+            this index. If None, get variables for all
+            ComponentCollections.
+        Returns
+        -------
+        list[Parameter]
+        """
+        if Q_index is None:
+            all_vars = [
+                var
+                for collection in self._component_collections
+                for var in collection.get_all_variables()
+            ]
+        else:
+            if not isinstance(Q_index, int):
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+            if Q_index < 0 or Q_index >= len(self._component_collections):
+                raise IndexError(
+                    f'Q_index {Q_index} is out of bounds for component collections '
+                    f'of length {len(self._component_collections)}'
+                )
+            all_vars = self._component_collections[Q_index].get_all_variables()
+        return all_vars
 
     # ------------------------------------------------------------------
     # Private methods
@@ -215,20 +262,13 @@ class ModelBase(EasyScienceModelBase):
             for component in self._components.components:
                 collection.append_component(copy(component))
 
-    def get_all_variables(self):
-        """Get all Parameters and Descriptors from all
-        ComponentCollections in the ModelBase.
+    def _on_Q_change(self) -> None:
+        """Handle changes to the Q values."""
+        self._generate_component_collections()
 
-        Ignores the Parameters and Descriptors in self._components as
-        these are just templates.
-        """
-
-        all_vars = [
-            var
-            for collection in self._component_collections
-            for var in collection.get_all_variables()
-        ]
-        return all_vars
+    def _on_components_change(self) -> None:
+        """Handle changes to the components."""
+        self._generate_component_collections()
 
     # ------------------------------------------------------------------
     # dunder methods
