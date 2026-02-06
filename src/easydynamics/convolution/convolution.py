@@ -14,8 +14,7 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.components.model_component import ModelComponent
-
-Numerical = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class Convolution(NumericalConvolutionBase):
@@ -60,16 +59,16 @@ class Convolution(NumericalConvolutionBase):
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
     _invalidate_plan_on_change = {
-        'energy',
-        '_energy',
-        '_energy_grid',
-        '_sample_components',
-        '_resolution_components',
-        '_temperature',
-        '_upsample_factor',
-        '_extension_factor',
-        '_energy_unit',
-        '_normalize_detailed_balance',
+        "energy",
+        "_energy",
+        "_energy_grid",
+        "_sample_components",
+        "_resolution_components",
+        "_temperature",
+        "_upsample_factor",
+        "_extension_factor",
+        "_energy_unit",
+        "_normalize_detailed_balance",
     }
 
     def __init__(
@@ -77,11 +76,12 @@ class Convolution(NumericalConvolutionBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
-        upsample_factor: Numerical = 5,
-        extension_factor: Numerical = 0.2,
-        temperature: Parameter | Numerical | None = None,
-        temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        energy_offset: Numeric | Parameter = 0.0,
+        upsample_factor: Numeric = 5,
+        extension_factor: Numeric = 0.2,
+        temperature: Parameter | Numeric | None = None,
+        temperature_unit: str | sc.Unit = "K",
+        energy_unit: str | sc.Unit = "meV",
         normalize_detailed_balance: bool = True,
     ):
         self._convolution_plan_is_valid = False
@@ -90,6 +90,7 @@ class Convolution(NumericalConvolutionBase):
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
+            energy_offset=energy_offset,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -136,11 +137,13 @@ class Convolution(NumericalConvolutionBase):
 
     def _convolve_delta_functions(self) -> np.ndarray:
         "Convolve delta function components of the sample model with"
-        'the resolution components.'
-        'No detailed balance correction is applied to delta functions.'
+        "the resolution components."
+        "No detailed balance correction is applied to delta functions."
         return sum(
             delta.area.value
-            * self._resolution_components.evaluate(self.energy.values - delta.center.value)
+            * self._resolution_components.evaluate(
+                self.energy_with_offset.values - delta.center.value
+            )
             for delta in self._delta_sample_components.components
         )
 
@@ -165,19 +168,19 @@ class Convolution(NumericalConvolutionBase):
 
         if not isinstance(sample_component, ModelComponent):
             raise TypeError(
-                f'`sample_component` is an instance of {type(sample_component).__name__}, \
-                but must be a ModelComponent.'
+                f"`sample_component` is an instance of {type(sample_component).__name__}, \
+                but must be a ModelComponent."
             )
 
         if not isinstance(resolution_component, ModelComponent):
             raise TypeError(
-                f'`resolution_component` is an instance of {type(resolution_component).__name__}, \
-                    but must be a ModelComponent.'
+                f"`resolution_component` is an instance of {type(resolution_component).__name__}, \
+                    but must be a ModelComponent."
             )
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(
-                'resolution components contains delta functions. This is not supported.'
+                "resolution components contains delta functions. This is not supported."
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -216,7 +219,9 @@ class Convolution(NumericalConvolutionBase):
             pair_is_analytic = []
             for resolution_component in self._resolution_components.components:
                 pair_is_analytic.append(
-                    self._check_if_pair_is_analytic(sample_component, resolution_component)
+                    self._check_if_pair_is_analytic(
+                        sample_component, resolution_component
+                    )
                 )
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
@@ -245,6 +250,7 @@ class Convolution(NumericalConvolutionBase):
         if self._analytical_sample_components.components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
+                energy_offset=self.energy_offset,
                 sample_components=self._analytical_sample_components,
                 resolution_components=self._resolution_components,
             )
@@ -254,6 +260,7 @@ class Convolution(NumericalConvolutionBase):
         if self._numerical_sample_components.components:
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
+                energy_offset=self.energy_offset,
                 sample_components=self._numerical_sample_components,
                 resolution_components=self._resolution_components,
                 upsample_factor=self.upsample_factor,
@@ -278,5 +285,8 @@ class Convolution(NumericalConvolutionBase):
         if name in self._invalidate_plan_on_change:
             self._convolution_plan_is_valid = False
 
-        if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
+        if (
+            getattr(self, "_reactions_enabled", False)
+            and name in self._invalidate_plan_on_change
+        ):
             self._build_convolution_plan()
