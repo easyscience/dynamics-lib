@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: pixi run script-tests
 
-      - name: Convert tutorial scripts to notebooks
+      - name: Prepare notebooks
         shell: bash
         run: pixi run notebook-prepare
 
