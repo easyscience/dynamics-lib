@@ -11,7 +11,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.convolution import Convolution
 from easydynamics.experiment import Experiment
-from easydynamics.sample_model import BackgroundModel
+from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import ResolutionModel
 from easydynamics.sample_model import SampleModel
 
@@ -21,55 +21,38 @@ class Analysis1d(EasyScienceModelBase):
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str = "MyAnalysis",
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
-        resolution_model: ResolutionModel | None = None,
-        background_model: BackgroundModel | None = None,
-        energy_offset: list[Parameter] | None = None,
+        instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
     ):
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         if experiment is not None and not isinstance(experiment, Experiment):
-            raise TypeError('experiment must be an instance of Experiment or None.')
+            raise TypeError("experiment must be an instance of Experiment or None.")
 
         self._experiment = experiment
 
         if sample_model is not None and not isinstance(sample_model, SampleModel):
-            raise TypeError('sample_model must be an instance of SampleModel or None.')
+            raise TypeError("sample_model must be an instance of SampleModel or None.")
         sample_model.Q = self.Q
         self._sample_model = sample_model
 
-        if resolution_model is not None and not isinstance(resolution_model, ResolutionModel):
-            raise TypeError('resolution_model must be an instance of ResolutionModel or None.')
-        resolution_model.Q = self.Q
-        self._resolution_model = resolution_model
-
-        if background_model is not None and not isinstance(background_model, BackgroundModel):
-            raise TypeError('background_model must be an instance of BackgroundModel or None.')
-        background_model.Q = self.Q
-        self._background_model = background_model
+        if instrument_model is not None and not isinstance(
+            instrument_model, InstrumentModel
+        ):
+            raise TypeError(
+                "instrument_model must be an instance of InstrumentModel or None."
+            )
+        if instrument_model is None:
+            self._instrument_model = InstrumentModel()
+        else:
+            self._instrument_model = instrument_model
 
         self._convolvers = [None] * (len(self.Q) if self.Q is not None else 0)
         self._update_models()
-
-        if not isinstance(energy_offset, list) and energy_offset is not None:
-            raise TypeError('energy_offset must be a list of Parameters or None.')
-
-        if energy_offset is not None:
-            if len(energy_offset) != len(self.Q):
-                raise ValueError('energy_offset list length must match number of Q values.')
-            for offset in energy_offset:
-                if not isinstance(offset, Parameter):
-                    raise TypeError('Each energy_offset must be an instance of Parameter.')
-        else:
-            energy_offset = [
-                Parameter(name='energy_offset', value=0.0, unit=self.sample_model.unit)
-                for _ in range(len(self.Q))
-            ]
-        self._energy_offset = energy_offset
 
         if Q_index is not None:
             if (
@@ -77,7 +60,7 @@ class Analysis1d(EasyScienceModelBase):
                 or Q_index < 0
                 or (self.Q is not None and Q_index >= len(self.Q))
             ):
-                raise ValueError('Q_index must be a valid index for the Q values.')
+                raise ValueError("Q_index must be a valid index for the Q values.")
         self._Q_index = Q_index
 
     #############
@@ -92,7 +75,7 @@ class Analysis1d(EasyScienceModelBase):
     @experiment.setter
     def experiment(self, value: Experiment | None) -> None:
         if value is not None and not isinstance(value, Experiment):
-            raise TypeError('experiment must be an instance of Experiment or None.')
+            raise TypeError("experiment must be an instance of Experiment or None.")
         self._experiment = value
         self._update_models()
 
@@ -104,7 +87,7 @@ class Analysis1d(EasyScienceModelBase):
     @sample_model.setter
     def sample_model(self, value: SampleModel | None) -> None:
         if value is not None and not isinstance(value, SampleModel):
-            raise TypeError('sample_model must be an instance of SampleModel or None.')
+            raise TypeError("sample_model must be an instance of SampleModel or None.")
         self._sample_model = value
         self._update_models()
 
@@ -116,20 +99,10 @@ class Analysis1d(EasyScienceModelBase):
     @resolution_model.setter
     def resolution_model(self, value: ResolutionModel | None) -> None:
         if value is not None and not isinstance(value, ResolutionModel):
-            raise TypeError('resolution_model must be an instance of ResolutionModel or None.')
+            raise TypeError(
+                "resolution_model must be an instance of ResolutionModel or None."
+            )
         self._resolution_model = value
-        self._update_models()
-
-    @property
-    def background_model(self) -> BackgroundModel | None:
-        """The BackgroundModel associated with this Analysis."""
-        return self._background_model
-
-    @background_model.setter
-    def background_model(self, value: BackgroundModel | None) -> None:
-        if value is not None and not isinstance(value, BackgroundModel):
-            raise TypeError('background_model must be an instance of BackgroundModel or None.')
-        self._background_model = value
         self._update_models()
 
     @property
@@ -142,7 +115,7 @@ class Analysis1d(EasyScienceModelBase):
     @Q.setter
     def Q(self, value) -> None:
         """Q is a read-only property derived from the Experiment."""
-        raise AttributeError('Q is a read-only property derived from the Experiment.')
+        raise AttributeError("Q is a read-only property derived from the Experiment.")
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -158,7 +131,9 @@ class Analysis1d(EasyScienceModelBase):
         """Energy is a read-only property derived from the
         Experiment.
         """
-        raise AttributeError('energy is a read-only property derived from the Experiment.')
+        raise AttributeError(
+            "energy is a read-only property derived from the Experiment."
+        )
 
     @property
     def temperature(self) -> Parameter | None:
@@ -172,7 +147,9 @@ class Analysis1d(EasyScienceModelBase):
         """Temperature is a read-only property derived from the
         Experiment.
         """
-        raise AttributeError('temperature is a read-only property derived from the sample model.')
+        raise AttributeError(
+            "temperature is a read-only property derived from the sample model."
+        )
 
     @property
     def energy_offset(self) -> list[Parameter] | None:
@@ -192,10 +169,14 @@ class Analysis1d(EasyScienceModelBase):
         """
         if offsets is not None:
             if len(offsets) != len(self.Q):
-                raise ValueError('energy_offset list length must match number of Q values.')
+                raise ValueError(
+                    "energy_offset list length must match number of Q values."
+                )
             for offset in offsets:
                 if not isinstance(offset, Parameter):
-                    raise TypeError('Each energy_offset must be an instance of Parameter.')
+                    raise TypeError(
+                        "Each energy_offset must be an instance of Parameter."
+                    )
         self._energy_offset = offsets
 
     @property
@@ -216,7 +197,7 @@ class Analysis1d(EasyScienceModelBase):
                 or index < 0
                 or (self.Q is not None and index >= len(self.Q))
             ):
-                raise ValueError('Q_index must be a valid index for the Q values.')
+                raise ValueError("Q_index must be a valid index for the Q values.")
         self._Q_index = index
 
     #############
@@ -233,7 +214,7 @@ class Analysis1d(EasyScienceModelBase):
         """
         Q_index = self.Q_index
         if Q_index is None:
-            raise ValueError('Q_index must be set to calculate the model.')
+            raise ValueError("Q_index must be set to calculate the model.")
 
         if energy is None:
             energy = self.energy.values
@@ -244,9 +225,9 @@ class Analysis1d(EasyScienceModelBase):
             sample_intensity = np.zeros_like(energy)
         else:
             if self.resolution_model is None:
-                sample_intensity = self.sample_model._component_collections[Q_index].evaluate(
-                    energy
-                )
+                sample_intensity = self.sample_model._component_collections[
+                    Q_index
+                ].evaluate(energy)
             else:
                 convolver = self._convolvers[Q_index]
                 sample_intensity = convolver.convolution()
@@ -254,9 +235,9 @@ class Analysis1d(EasyScienceModelBase):
         if self.background_model is None:
             background_intensity = np.zeros_like(energy)
         else:
-            background_intensity = self.background_model._component_collections[Q_index].evaluate(
-                energy
-            )
+            background_intensity = self.background_model._component_collections[
+                Q_index
+            ].evaluate(energy)
 
         sample_plus_background = sample_intensity + background_intensity
 
@@ -279,11 +260,13 @@ class Analysis1d(EasyScienceModelBase):
         background_results = []
         Q_index = self.Q_index
         if Q_index is None:
-            raise ValueError('Q_index must be set to calculate the model.')
+            raise ValueError("Q_index must be set to calculate the model.")
 
         if self.sample_model is not None:
             # Calculate sample components
-            for component in self.sample_model._component_collections[Q_index]._components:
+            for component in self.sample_model._component_collections[
+                Q_index
+            ]._components:
                 if self.resolution_model is None:
                     component_intensity = component.evaluate(self.energy)
                 else:
@@ -300,7 +283,9 @@ class Analysis1d(EasyScienceModelBase):
 
         if self.background_model is not None:
             # Calculate background components
-            for component in self.background_model._component_collections[Q_index]._components:
+            for component in self.background_model._component_collections[
+                Q_index
+            ]._components:
                 component_intensity = component.evaluate(self.energy)
                 background_results.append(component_intensity)
 
@@ -314,14 +299,14 @@ class Analysis1d(EasyScienceModelBase):
             FitResult: The result of the fit.
         """
         if self._experiment is None:
-            raise ValueError('No experiment is associated with this Analysis.')
+            raise ValueError("No experiment is associated with this Analysis.")
 
         Q_index = self.Q_index
         if Q_index is None:
-            raise ValueError('Q_index must be set to perform the fit.')
+            raise ValueError("Q_index must be set to perform the fit.")
 
-        data = self.experiment.data['Q', Q_index]
-        x = data.coords['energy'].values
+        data = self.experiment.data["Q", Q_index]
+        x = data.coords["energy"].values
         y = data.values
         e = data.variances**0.5
 
@@ -352,47 +337,47 @@ class Analysis1d(EasyScienceModelBase):
             individual components. Default is True.
         """
         if not isinstance(plot_individual_components, bool):
-            raise TypeError('plot_individual_components must be True or False.')
+            raise TypeError("plot_individual_components must be True or False.")
 
         import matplotlib.pyplot as plt
 
         Q_index = self.Q_index
         if Q_index is None:
-            raise ValueError('Q_index must be set to plot the data and model.')
+            raise ValueError("Q_index must be set to plot the data and model.")
         if self.experiment is None or self.experiment.data is None:
-            raise ValueError('Experiment data is not available for plotting.')
-        data = self.experiment.data['Q', Q_index]
-        energy = data.coords['energy'].values
+            raise ValueError("Experiment data is not available for plotting.")
+        data = self.experiment.data["Q", Q_index]
+        energy = data.coords["energy"].values
         model = self.calculate(energy=energy)
         plt.figure()
         plt.errorbar(
             energy,
             data.values,
             yerr=data.variances**0.5,
-            fmt='o',
-            label='Data',
-            color='black',
+            fmt="o",
+            label="Data",
+            color="black",
         )
-        plt.plot(energy, model, label='Model', color='red')
+        plt.plot(energy, model, label="Model", color="red")
         if plot_individual_components:
             sample_comps, background_comps = self.calculate_individual_components()
             for i, comp in enumerate(sample_comps):
                 plt.plot(
                     energy,
                     comp,
-                    label=f'Sample Component {i + 1}',
-                    linestyle='--',
+                    label=f"Sample Component {i + 1}",
+                    linestyle="--",
                 )
             for i, comp in enumerate(background_comps):
                 plt.plot(
                     energy,
                     comp,
-                    label=f'Background Component {i + 1}',
-                    linestyle=':',
+                    label=f"Background Component {i + 1}",
+                    linestyle=":",
                 )
-        plt.xlabel(f'Energy ({self.energy.unit})')
-        plt.ylabel(f'Intensity ({self.sample_model.unit})')
-        plt.title(f'Data and Model at Q index {Q_index}')
+        plt.xlabel(f"Energy ({self.energy.unit})")
+        plt.ylabel(f"Intensity ({self.sample_model.unit})")
+        plt.title(f"Data and Model at Q index {Q_index}")
         plt.legend()
         plt.show()
         # model_data_array = self._create_model_data_group(
@@ -419,15 +404,21 @@ class Analysis1d(EasyScienceModelBase):
         variables = []
         if self.sample_model is not None:
             variables.extend(
-                self.sample_model._component_collections[self.Q_index].get_all_variables()
+                self.sample_model._component_collections[
+                    self.Q_index
+                ].get_all_variables()
             )
         if self.resolution_model is not None:
             variables.extend(
-                self.resolution_model._component_collections[self.Q_index].get_all_variables()
+                self.resolution_model._component_collections[
+                    self.Q_index
+                ].get_all_variables()
             )
         if self.background_model is not None:
             variables.extend(
-                self.background_model._component_collections[self.Q_index].get_all_variables()
+                self.background_model._component_collections[
+                    self.Q_index
+                ].get_all_variables()
             )
         variables.append(self.energy_offset[self.Q_index])
         # TODO temperature and diffusion
@@ -450,7 +441,7 @@ class Analysis1d(EasyScienceModelBase):
         index.
         """
         if self.sample_model is None or self.resolution_model is None:
-            raise ValueError('Both sample_model and resolution_model must be defined.')
+            raise ValueError("Both sample_model and resolution_model must be defined.")
 
         sample_components = self.sample_model._component_collections[Q_index]
         resolution_components = self.resolution_model._component_collections[Q_index]
@@ -468,7 +459,7 @@ class Analysis1d(EasyScienceModelBase):
         and energy values.
         """
         if self.Q is None or self.energy is None:
-            raise ValueError('Q and energy must be defined in the experiment.')
+            raise ValueError("Q and energy must be defined in the experiment.")
 
         model_data = []
         for Q_index in range(len(self.Q)):
@@ -476,23 +467,31 @@ class Analysis1d(EasyScienceModelBase):
             model_data.append(model_at_Q)
 
         model_data_array = sc.DataArray(
-            data=sc.array(dims=['Q', 'energy'], values=model_data),
+            data=sc.array(dims=["Q", "energy"], values=model_data),
             coords={
-                'Q': self.Q,
-                'energy': self.energy,
+                "Q": self.Q,
+                "energy": self.energy,
             },
         )
-        model_group = sc.DataGroup({'Model': model_data_array})
+        model_group = sc.DataGroup({"Model": model_data_array})
 
         if individual_components:
             components = self.calculate_individual_components_all_Q()
             for Q_index, (sample_comps, background_comps) in enumerate(components):
                 for samp_index, samp_comp in enumerate(sample_comps):
-                    model_data_array[samp_comp.display_name] = sc.zeros_like(model_data_array.data)
-                    model_data_array[samp_comp.display_name].data[Q_index, :] = samp_comp
+                    model_data_array[samp_comp.display_name] = sc.zeros_like(
+                        model_data_array.data
+                    )
+                    model_data_array[samp_comp.display_name].data[
+                        Q_index, :
+                    ] = samp_comp
                 for back_index, back_comp in enumerate(background_comps):
-                    model_data_array[back_comp.display_name] = sc.zeros_like(model_data_array.data)
-                    model_data_array[back_comp.display_name].data[Q_index, :] = back_comp
+                    model_data_array[back_comp.display_name] = sc.zeros_like(
+                        model_data_array.data
+                    )
+                    model_data_array[back_comp.display_name].data[
+                        Q_index, :
+                    ] = back_comp
 
         model_data_array = model_data_array + model_group  # WRONG BUT LINT
         return model_data_array
