@@ -12,7 +12,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 
 
-class Analysis1Base(EasyScienceModelBase):
+class AnalysisBase(EasyScienceModelBase):
     """For analysing data."""
 
     def __init__(
@@ -22,6 +22,7 @@ class Analysis1Base(EasyScienceModelBase):
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
+        extra_parameters: Parameter | list[Parameter] | None = None,
     ):
         super().__init__(display_name=display_name, unique_name=unique_name)
 
@@ -48,8 +49,22 @@ class Analysis1Base(EasyScienceModelBase):
                 "instrument_model must be an instance of InstrumentModel or None."
             )
 
+        if extra_parameters is not None:
+            if isinstance(extra_parameters, Parameter):
+                self._extra_parameters = [extra_parameters]
+            elif isinstance(extra_parameters, list) and all(
+                isinstance(p, Parameter) for p in extra_parameters
+            ):
+                self._extra_parameters = extra_parameters
+            else:
+                raise TypeError(
+                    "extra_parameters must be a Parameter or a list of Parameters."
+                )
+        else:
+            self._extra_parameters = []
+
         self._convolvers = [None] * (len(self.Q) if self.Q is not None else 0)
-        self._update_models()
+        self._on_experiment_changed()
 
     #############
     # Properties
@@ -146,44 +161,52 @@ class Analysis1Base(EasyScienceModelBase):
     # Private methods
     #############
 
-    def _on_experiment_changed(self):
-        pass
+    def _on_experiment_changed(self) -> None:
+        self._sample_model.Q = self.Q
+        self._instrument_model.Q = self.Q
+        self._create_convolvers()
 
-    def _on_sample_model_changed(self):
-        pass
+    def _on_sample_model_changed(self) -> None:
+        self._sample_model.Q = self.Q
+        self._create_convolvers()
 
-    def _on_instrument_model_changed(self):
-        pass
+    def _on_instrument_model_changed(self) -> None:
+        self._instrument_model.Q = self.Q
+        self._create_convolvers()
 
-    # def _update_models(self):
-    #     """Update models based on the current experiment."""
-    #     if self.experiment is None:
-    #         return
+    def _create_convolvers(self) -> None:
+        """Create Convolution objects for each Q value."""
+        num_Q = len(self.Q) if self.Q is not None else 0
+        self._convolvers = [self._create_convolver(i) for i in range(num_Q)]
 
-    #     for Q_index in range(len(self.Q)):
-    #         self._convolvers[Q_index] = self._create_convolver(Q_index)
-
-    def _create_convolver(self, Q_index: int):
+    def _create_convolver(self, Q_index: int) -> Convolution:
         """Initialize and return a Convolution object for the given Q
         index.
         """
         sample_components = self.sample_model._component_collections[Q_index]
         if sample_components == []:
-            raise ValueError(f"Sample model has no components at Q index {Q_index}.")
+            return Convolution()
 
         resolution_components = (
             self.instrument_model.resolution_model._component_collections[Q_index]
         )
         if resolution_components == []:
-            raise ValueError(
-                f"Resolution model has no components at Q index {Q_index}."
-            )
+            return Convolution()
 
         energy = self.energy
+        # TODO: allow convolution options to be set.
         convolver = Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy=energy,
             temperature=self.temperature,
+            energy_offset=self.instrument_model._energy_offsets[Q_index],
         )
         return convolver
+
+    #############
+    # Dunder methods
+    #############
+
+    def __repr__(self) -> str:
+        return f"AnalysisBase(display_name={self.display_name}, unique_name={self.unique_name})"
