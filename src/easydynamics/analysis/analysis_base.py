@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
+import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
@@ -10,6 +11,8 @@ from easydynamics.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.sample_model.components.model_component import ModelComponent
 
 
 class AnalysisBase(EasyScienceModelBase):
@@ -63,7 +66,6 @@ class AnalysisBase(EasyScienceModelBase):
         else:
             self._extra_parameters = []
 
-        self._convolvers = [None] * (len(self.Q) if self.Q is not None else 0)
         self._on_experiment_changed()
 
     #############
@@ -164,45 +166,215 @@ class AnalysisBase(EasyScienceModelBase):
     def _on_experiment_changed(self) -> None:
         self._sample_model.Q = self.Q
         self._instrument_model.Q = self.Q
-        self._create_convolvers()
 
     def _on_sample_model_changed(self) -> None:
         self._sample_model.Q = self.Q
-        self._create_convolvers()
 
     def _on_instrument_model_changed(self) -> None:
         self._instrument_model.Q = self.Q
-        self._create_convolvers()
 
-    def _create_convolvers(self) -> None:
-        """Create Convolution objects for each Q value."""
-        num_Q = len(self.Q) if self.Q is not None else 0
-        self._convolvers = [self._create_convolver(i) for i in range(num_Q)]
-
-    def _create_convolver(self, Q_index: int) -> Convolution:
+    def _create_convolver(
+        self, Q_index: int, energy: np.ndarray | sc.Variable | None = None
+    ) -> Convolution | None:
         """Initialize and return a Convolution object for the given Q
         index.
         """
-        sample_components = self.sample_model._component_collections[Q_index]
-        if sample_components == []:
-            return Convolution()
+        sample_components = self.sample_model.get_component_collection(Q_index)
+        if sample_components.is_empty:
+            return None
 
         resolution_components = (
-            self.instrument_model.resolution_model._component_collections[Q_index]
+            self.instrument_model.resolution_model.get_component_collection(Q_index)
         )
-        if resolution_components == []:
-            return Convolution()
-
-        energy = self.energy
+        if resolution_components.is_empty:
+            return None
+        if energy is None:
+            energy = self.energy
         # TODO: allow convolution options to be set.
         convolver = Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy=energy,
             temperature=self.temperature,
-            energy_offset=self.instrument_model._energy_offsets[Q_index],
+            energy_offset=self.instrument_model.get_energy_offset_at_Q(Q_index),
         )
         return convolver
+
+    def _evaluate_components(
+        self,
+        components: ComponentCollection | ModelComponent,
+        energy: np.ndarray | sc.Variable | None = None,
+        convolver: Convolution | None = None,
+        convolve: bool = True,
+        Q_index: int | None = None,
+    ):
+        """
+        Calculate the contribution of a set of components, optionally
+        convolving with the resolution.
+            If convolve is True and a Convolution object is provided,
+            use it to perform the convolution of the components with the
+            resolution. If convolve is True but no Convolution object is
+            provided, create a new Convolution object for the given
+            components and energy. If convolve is False, evaluate the
+            components directly without convolution.
+        Args:
+            components (ComponentCollection | ModelComponent):
+                The components to evaluate.
+            energy (np.ndarray | sc.Variable | None):
+                The energy values to evaluate the components for. If
+                None, the energy values from the experiment will be
+                used.
+            convolver (Convolution | None):
+            An optional Convolution object to use for convolution.
+            If None, a new Convolution object will be created if
+            convolve is True.
+            convolve (bool):
+                Whether to perform convolution with the resolution.
+                Default is True.
+        """
+        if Q_index is None:
+            Q_index = self._require_Q_index()
+        energy = self._handle_energy(energy)
+        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index).value
+
+        # If there are no components, return zero
+        if isinstance(components, ComponentCollection) and components.is_empty:
+            return np.zeros_like(energy)
+
+        # No convolution
+        if not convolve:
+            return components.evaluate(energy - energy_offset)
+
+        resolution = self.instrument_model.resolution_model.get_component_collection(
+            Q_index
+        )
+        if resolution.is_empty:
+            return components.evaluate(energy - energy_offset)
+
+        # Convolution For fitting we don't want to create a new
+        # Convolution object at each iteration
+        if convolver is not None:
+            return convolver.convolution()
+
+        # For evaluating individual components
+        conv = Convolution(
+            sample_components=components,
+            resolution_components=resolution,
+            energy=energy,
+            temperature=self.temperature,
+            energy_offset=energy_offset,
+        )
+        return conv.convolution()
+
+    def _evaluate_sample(
+        self,
+        energy: np.ndarray | sc.Variable | None = None,
+        Q_index: int | None = None,
+    ):
+        """
+        Evaluate the sample contribution for a given Q index.
+
+        If a Convolution object exists for the Q index, use it to
+        perform the convolution of the sample components with the
+        resolution components. If no Convolution object exists, evaluate
+        the sample components directly without convolution.
+
+        Args:
+            energy (np.ndarray | sc.Variable | None): The energy values
+            to evaluate the sample contribution for. If None, the energy
+            values from the experiment will be used.
+        Returns:
+            np.ndarray: The evaluated sample contribution.
+        """
+        if Q_index is None:
+            Q_index = self._require_Q_index()
+        components = self.sample_model.get_component_collection(Q_index=Q_index)
+        return self._evaluate_components(
+            components=components,
+            energy=energy,
+            convolver=self._convolver,
+            convolve=True,
+        )
+
+    def _evaluate_sample_component(
+        self,
+        component,
+        energy: np.ndarray | sc.Variable | None = None,
+    ):
+        """
+        Evaluate a single sample component for a given Q index.
+        If a Convolution object exists for the Q index, use it to
+        perform the convolution of the sample component with the
+        resolution components. If no Convolution object exists, evaluate
+        the sample component directly without convolution.
+        Args:
+            component: The sample component to evaluate.
+            energy (np.ndarray | sc.Variable | None): The energy values
+            to evaluate the sample component for. If None, the energy
+            values from the experiment will be used.
+        Returns:
+            np.ndarray: The evaluated sample component contribution.
+        """
+        return self._evaluate_components(
+            components=component,
+            energy=energy,
+            convolver=None,
+            convolve=True,
+        )
+
+    def _evaluate_background(
+        self,
+        energy: np.ndarray | sc.Variable | None = None,
+        Q_index: int | None = None,
+    ):
+        """
+        Evaluate the background contribution for a given Q index.
+         Evaluate each background component separately to get individual
+         contributions. Args:
+            energy (np.ndarray | sc.Variable | None): The energy values
+            to evaluate the background contribution for. If None, the
+            energy values from the experiment will be used.
+        Returns:
+            np.ndarray: The evaluated background contribution.
+        """
+
+        if Q_index is None:
+            Q_index = self._require_Q_index()
+        background_components = (
+            self.instrument_model.background_model.get_component_collection(
+                Q_index=Q_index
+            )
+        )
+        return self._evaluate_components(
+            components=background_components,
+            energy=energy,
+            convolver=None,
+            convolve=False,
+        )
+
+    def _evaluate_background_component(
+        self,
+        component,
+        energy: np.ndarray | sc.Variable | None = None,
+    ):
+        """
+        Evaluate a single background component for a given Q index.
+        Evaluate the background component directly without convolution.
+        Args:
+            component: The background component to evaluate.
+            energy (np.ndarray | sc.Variable | None): The energy values
+            to evaluate the background component for. If None, the energy
+            values from the experiment will be used.
+        Returns:
+            np.ndarray: The evaluated background component contribution.
+        """
+
+        return self._evaluate_components(
+            components=component,
+            energy=energy,
+            convolver=None,
+            convolve=False,
+        )
 
     #############
     # Dunder methods
