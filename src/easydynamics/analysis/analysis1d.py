@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
+from inspect import Parameter
+
 import numpy as np
+import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.variable import DescriptorNumber
 
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
@@ -24,6 +26,7 @@ class Analysis1d(AnalysisBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
+        extra_parameters: Parameter | list[Parameter] | None = None,
     ):
         super().__init__(
             display_name=display_name,
@@ -43,6 +46,8 @@ class Analysis1d(AnalysisBase):
         self._Q_index = Q_index
 
         self._fit_result = None
+
+        self._convolver = self._create_convolver(Q_index=self.Q_index)
 
     #############
     # Properties
@@ -68,12 +73,13 @@ class Analysis1d(AnalysisBase):
             ):
                 raise ValueError("Q_index must be a valid index for the Q values.")
         self._Q_index = index
+        self._on_Q_index_changed()
 
     #############
     # Other methods
     #############
 
-    def calculate(self, energy: float | None = None) -> np.ndarray:
+    def calculate(self, energy: np.ndarray | sc.Variable | None = None) -> np.ndarray:
         """Calculate the model prediction for a given Q index.
 
         Args:
@@ -81,37 +87,23 @@ class Analysis1d(AnalysisBase):
         Returns:
             sc.DataArray: The calculated model prediction.
         """
-        Q_index = self._require_Q_index()
 
-        if energy is None:
-            energy = self.energy.values
+        self._convolver = self._create_convolver(Q_index=self.Q_index, energy=energy)
 
-        # TODO: handle units properly
+        return self._calculate()
 
-        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index).value
+    def _calculate(self) -> np.ndarray:
+        """Calculate the model prediction for a given Q index.
 
-        # Sample
-        sample_components = self.sample_model.get_component_collection(Q_index)
-        resolution_components = (
-            self.instrument_model.resolution_model.get_component_collection(Q_index)
-        )
+        Args:
+            energy (float): The energy value to calculate the model for.
+        Returns:
+            sc.DataArray: The calculated model prediction.
+        """
 
-        sample_intensity = self._evaluate_sample(
-            sample_components=sample_components,
-            resolution_components=resolution_components,
-            energy=energy,
-            energy_offset=energy_offset,
-        )
+        sample_intensity = self._evaluate_sample()
 
-        # Background
-        background_component_collection = (
-            self.instrument_model.background_model.get_component_collection(Q_index)
-        )
-        background_intensity = self._evaluate_background(
-            background_components=background_component_collection,
-            energy=energy,
-            energy_offset=energy_offset,
-        )
+        background_intensity = self._evaluate_background()
 
         sample_plus_background = sample_intensity + background_intensity
 
@@ -119,7 +111,7 @@ class Analysis1d(AnalysisBase):
 
     def calculate_individual_components(
         self,
-        energy: float | None = None,
+        energy: np.ndarray | sc.Variable | None = None,
     ) -> np.ndarray:
         """Calculate the model prediction for a given Q index.
 
@@ -130,21 +122,9 @@ class Analysis1d(AnalysisBase):
         """
         Q_index = self._require_Q_index()
 
-        if energy is None:
-            energy = self.energy.values
+        energy = self._handle_energy(energy)
 
-        # TODO: handle units properly
-
-        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index).value
-
-        # Sample. Convolve with resolution if resolution components are
-        # present, otherwise just evaluate sample components one by one
-        # to get individual contributions.
         sample_components = self.sample_model.get_component_collection(Q_index)
-
-        resolution_components = (
-            self.instrument_model.resolution_model.get_component_collection(Q_index)
-        )
 
         if sample_components.is_empty:
             sample_intensity = [np.zeros_like(energy)]
@@ -153,9 +133,7 @@ class Analysis1d(AnalysisBase):
             for component in sample_components.components:
                 component_intensity = self._evaluate_sample_component(
                     component=component,
-                    resolution_components=resolution_components,
                     energy=energy,
-                    energy_offset=energy_offset,
                 )
                 sample_intensity.append(component_intensity)
 
@@ -173,7 +151,6 @@ class Analysis1d(AnalysisBase):
                 component_intensity = self._evaluate_background_component(
                     component=component,
                     energy=energy,
-                    energy_offset=energy_offset,
                 )
                 background_intensity.append(component_intensity)
 
@@ -185,6 +162,12 @@ class Analysis1d(AnalysisBase):
         Args:
         Returns:
             FitResult: The result of the fit.
+
+        Notes
+        -----
+        The energy grid is fixed for the duration of the fit.
+        Convolution objects are created once and reused during
+        parameter optimization for performance reasons.
         """
         if self._experiment is None:
             raise ValueError("No experiment is associated with this Analysis.")
@@ -196,8 +179,10 @@ class Analysis1d(AnalysisBase):
         y = data.values
         e = data.variances**0.5
 
-        def fit_func(x_vals):
-            return self.calculate(energy=x_vals)
+        self._convolver = self._create_convolver(Q_index=self.Q_index, energy=x)
+
+        def fit_func(_):
+            return self._calculate()
 
         fitter = EasyScienceFitter(
             fit_object=self,
@@ -279,7 +264,7 @@ class Analysis1d(AnalysisBase):
 
         variables.extend(self.instrument_model.get_all_variables(Q_index=self.Q_index))
 
-        if self._extra_parameters != []:
+        if self._extra_parameters:
             variables.extend(self._extra_parameters)
 
         return variables
@@ -287,55 +272,51 @@ class Analysis1d(AnalysisBase):
     #############
     # Private methods
     #############
-    def _evaluate_sample(
-        self,
-        sample_components,
-        resolution_components,
-        energy,
-        energy_offset,
-    ):
-        if resolution_components.is_empty:
-            return sample_components.evaluate(energy - energy_offset)
-        convolver = self._convolvers[self._require_Q_index()]
-        return convolver.convolution()
-
-    def _evaluate_sample_component(
-        self,
-        component,
-        resolution_components,
-        energy,
-        energy_offset,
-    ):
-        if resolution_components.is_empty:
-            return component.evaluate(energy - energy_offset)
-        convolver = Convolution(
-            sample_components=component,
-            resolution_components=resolution_components,
-            energy=energy,
-            temperature=self.temperature,
-            energy_offset=energy_offset,
-        )
-        return convolver.convolution()
-
-    def _evaluate_background(
-        self,
-        background_components,
-        energy,
-        energy_offset,
-    ):
-        if background_components.is_empty:
-            return np.zeros_like(energy)
-        return background_components.evaluate(energy - energy_offset)
-
-    def _evaluate_background_component(
-        self,
-        component,
-        energy,
-        energy_offset,
-    ):
-        return component.evaluate(energy - energy_offset)
 
     def _require_Q_index(self) -> int:
+        """
+        Get the Q index for single Q analysis, ensuring it is set.
+         Raises a ValueError if the Q index is not set.
+        Returns:
+            int: The Q index.
+        """
         if self._Q_index is None:
             raise ValueError("Q_index must be set.")
         return self._Q_index
+
+    def _handle_energy(
+        self, energy: np.ndarray | sc.Variable | None
+    ) -> np.ndarray | sc.Variable:
+        """ "
+        Handle the energy input for evaluation methods.
+
+         If energy is None, use the energy values from the experiment.
+         If energy is a sc.Variable, extract the values as a numpy array.
+         If energy is already a numpy array, return it as is.
+
+         Args:
+             energy (np.ndarray | sc.Variable | None): The input energy values.
+        Returns:
+            np.ndarray: The energy values to use for evaluation.
+        """
+        # TODO: handle units properly
+
+        if energy is None:
+            energy = self.energy.values
+
+        if isinstance(energy, np.ndarray):
+            return energy
+
+        if isinstance(energy, sc.Variable):
+            return energy.values
+
+        raise TypeError("Energy must be a numpy array, sc.Variable, or None.")
+
+    def _on_Q_index_changed(self) -> None:
+        """
+        Handle changes to the Q index.
+
+        This method is called whenever the Q index is changed. It updates
+        the Convolution object for the new Q index.
+        """
+        self._convolver = self._create_convolver(Q_index=self.Q_index)
