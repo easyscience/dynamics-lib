@@ -26,7 +26,7 @@ def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
     if Q is None:
         return None
     if not isinstance(Q, (Numeric, list, np.ndarray, sc.Variable)):
-        raise TypeError('Q must be a number, list, numpy array, or scipp array.')
+        raise TypeError("Q must be a number, list, numpy array, or scipp array.")
 
     if isinstance(Q, Numeric):
         Q = np.array([Q])
@@ -34,14 +34,14 @@ def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
         Q = np.array(Q)
     if isinstance(Q, np.ndarray):
         if Q.ndim > 1:
-            raise ValueError('Q must be a 1-dimensional array.')
+            raise ValueError("Q must be a 1-dimensional array.")
 
-        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        Q = sc.array(dims=["Q"], values=Q, unit="1/angstrom")
 
     if isinstance(Q, sc.Variable):
-        if Q.dims != ('Q',):
+        if Q.dims != ("Q",):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit='1/angstrom')
+        Q = Q.to(unit="1/angstrom")
     return Q.values
 
 
@@ -64,7 +64,29 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
+        raise TypeError(
+            f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+        )
     if isinstance(unit, str):
         unit = sc.Unit(unit)
     return unit
+
+
+def _in_notebook() -> bool:
+    """Check if the code is running in a Jupyter notebook.
+
+    Returns:
+        bool: True if in a Jupyter notebook, False otherwise.
+    """
+    try:
+        from IPython import get_ipython
+
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or JupyterLab
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal IPython
+        else:
+            return False
+    except (NameError, ImportError):
+        return False  # Standard Python (no IPython)

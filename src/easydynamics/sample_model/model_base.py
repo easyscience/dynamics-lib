@@ -282,13 +282,10 @@ class ModelBase(EasyScienceModelBase):
             self._component_collections = []
             return
 
-        self._component_collections = [ComponentCollection() for _ in self._Q]
-
-        # Add copies of components from self._components to each
-        # component collection
-        for collection in self._component_collections:
-            for component in self._components.components:
-                collection.append_component(copy(component))
+        # Will fix it for my code I think
+        self._component_collections = []
+        for _ in self._Q:
+            self._component_collections.append(copy(self._components))
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
