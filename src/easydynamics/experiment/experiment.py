@@ -1,6 +1,4 @@
 import os
-import warnings
-from typing import Optional
 
 import plopp as pp
 import scipp as sc
@@ -31,7 +29,7 @@ class Experiment(NewBase):
         )
 
         if data is None:
-            self._data: Optional[sc.DataArray] = None
+            self._data = None
         elif isinstance(data, str):
             self.load_hdf5(filename=data)
         elif isinstance(data, sc.DataArray):
@@ -82,7 +80,7 @@ class Experiment(NewBase):
     def Q(self) -> sc.Variable | None:
         """Get the Q values from the dataset."""
         if self._data is None:
-            warnings.warn("No data loaded.", UserWarning)
+            # warnings.warn("No data loaded.", UserWarning)
             return None
         return self._binned_data.coords["Q"]
 
@@ -95,7 +93,7 @@ class Experiment(NewBase):
     def energy(self) -> sc.Variable:
         """Get the energy values from the dataset."""
         if self._data is None:
-            warnings.warn("No data loaded.", UserWarning)
+            # warnings.warn("No data loaded.", UserWarning)
             return None
         return self._binned_data.coords["energy"]
 

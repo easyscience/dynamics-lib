@@ -107,9 +107,7 @@ class AnalysisBase(EasyScienceModelBase):
     @property
     def Q(self) -> sc.Variable | None:
         """The Q values from the associated Experiment, if available."""
-        if self.experiment is not None:
-            return self.experiment.Q
-        return None
+        return self.experiment.Q
 
     @Q.setter
     def Q(self, value) -> None:
@@ -121,9 +119,7 @@ class AnalysisBase(EasyScienceModelBase):
         """The energy values from the associated Experiment, if
         available.
         """
-        if self.experiment is not None:
-            return self.experiment.energy
-        return None
+        return self.experiment.energy
 
     @energy.setter
     def energy(self, value) -> None:
@@ -160,14 +156,46 @@ class AnalysisBase(EasyScienceModelBase):
     #############
 
     def _on_experiment_changed(self) -> None:
+        """
+        Update the Q values in the sample and instrument models when the
+        experiment changes.
+        """
         self._sample_model.Q = self.Q
         self._instrument_model.Q = self.Q
 
     def _on_sample_model_changed(self) -> None:
+        """
+        Update the Q values in the sample model when the sample model
+        changes.
+        """
         self._sample_model.Q = self.Q
 
     def _on_instrument_model_changed(self) -> None:
+        """
+        Update the Q values in the instrument model when the instrument
+        model changes.
+        """
         self._instrument_model.Q = self.Q
+
+    def _verify_Q_index(self, Q_index: int | None) -> int | None:
+        """
+        Verify that the Q index is valid.
+
+        Params:
+            Q_index (int | None): The Q index to verify.
+        Returns:
+            int | None: The verified Q index.
+        Raises:
+            ValueError: If the Q index is not valid.
+        """
+        if Q_index is not None:
+            if (
+                not isinstance(Q_index, int)
+                or Q_index < 0
+                or (self.Q is not None and Q_index >= len(self.Q))
+            ):
+                raise ValueError("Q_index must be a valid index for the Q values.")
+        return Q_index
 
     #############
     # Dunder methods

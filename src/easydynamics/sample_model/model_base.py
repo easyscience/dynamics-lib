@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
 from copy import copy
 
 import numpy as np
@@ -194,7 +193,17 @@ class ModelBase(EasyScienceModelBase):
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
         """Set the Q values of the SampleModel."""
-        self._Q = _validate_and_convert_Q(value)
+        old_Q = self._Q
+        new_Q = _validate_and_convert_Q(value)
+
+        if (
+            old_Q is not None
+            and new_Q is not None
+            and len(old_Q) == len(new_Q)
+            and all(np.isclose(old_Q, new_Q))
+        ):
+            return  # No change in Q, so do nothing
+        self._Q = new_Q
         self._on_Q_change()
 
     # ------------------------------------------------------------------
@@ -276,9 +285,9 @@ class ModelBase(EasyScienceModelBase):
         # TODO regenerate automatically if Q or components have changed
 
         if self._Q is None:
-            warnings.warn(
-                "Q is not set. No component collections generated", UserWarning
-            )
+            # warnings.warn(
+            #     "Q is not set. No component collections generated", UserWarning
+            # )
             self._component_collections = []
             return
 
