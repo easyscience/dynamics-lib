@@ -54,7 +54,7 @@ class Experiment(NewBase):
         return self._data
 
     @data.setter
-    def data(self, value: sc.DataArray):
+    def data(self, value: sc.DataArray) -> None:
         """Set the dataset associated with this experiment."""
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
@@ -70,7 +70,7 @@ class Experiment(NewBase):
         return self._binned_data
 
     @binned_data.setter
-    def binned_data(self, value: sc.DataArray):
+    def binned_data(self, value: sc.DataArray) -> None:
         """Set the binned dataset associated with this experiment."""
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
@@ -78,25 +78,23 @@ class Experiment(NewBase):
     def Q(self) -> sc.Variable | None:
         """Get the Q values from the dataset."""
         if self._data is None:
-            # warnings.warn("No data loaded.", UserWarning)
             return None
         return self._binned_data.coords['Q']
 
     @Q.setter
-    def Q(self, value: sc.Variable):
+    def Q(self, value: sc.Variable) -> None:
         """Set the Q values for the dataset."""
         raise AttributeError('Q is a read-only property derived from the data.')
 
     @property
-    def energy(self) -> sc.Variable:
+    def energy(self) -> sc.Variable | None:
         """Get the energy values from the dataset."""
         if self._data is None:
-            # warnings.warn("No data loaded.", UserWarning)
             return None
         return self._binned_data.coords['energy']
 
     @energy.setter
-    def energy(self, value: sc.Variable):
+    def energy(self, value: sc.Variable) -> None:
         """Set the energy values for the dataset."""
         raise AttributeError('energy is a read-only property derived from the data.')
 

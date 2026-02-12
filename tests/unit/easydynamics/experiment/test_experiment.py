@@ -73,6 +73,8 @@ class TestExperiment:
         # THEN EXPECT
         assert experiment.display_name == 'empty_experiment'
         assert experiment._data is None
+        assert experiment.energy is None
+        assert experiment.Q is None
 
     def test_init_invalid_data(self):
         "Test initialization with invalid data type"

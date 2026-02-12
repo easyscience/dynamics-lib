@@ -98,6 +98,14 @@ class TestSampleModel:
         ):
             SampleModel(temperature='invalid_temperature')
 
+    def test_init_raises_with_negative_temperature(self):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            ValueError,
+            match='temperature must be non-negative',
+        ):
+            SampleModel(temperature=-5.0)
+
     def test_init_raises_with_invalid_divide_by_temperature(self):
         # WHEN / THEN / EXPECT
         with pytest.raises(

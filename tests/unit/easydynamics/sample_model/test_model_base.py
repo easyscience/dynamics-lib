@@ -174,6 +174,20 @@ class TestModelBase:
         ):
             model_base.get_all_variables(Q_index='invalid_index')
 
+    def test_get_component_collection(self, model_base):
+        # WHEN THEN
+        collection = model_base.get_component_collection(Q_index=0)
+        # EXPECT
+        assert collection is model_base._component_collections[0]
+
+    def test_get_component_collection_invalid_index_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds for ',
+        ):
+            model_base.get_component_collection(Q_index=5)
+
     def test_append_and_remove_and_clear_component(self, model_base):
         # WHEN
         new_component = Gaussian(unique_name='NewGaussian')

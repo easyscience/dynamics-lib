@@ -38,6 +38,7 @@ class Analysis1d(AnalysisBase):
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
+            extra_parameters=extra_parameters,
         )
 
         self._Q_index = self._verify_Q_index(Q_index)
