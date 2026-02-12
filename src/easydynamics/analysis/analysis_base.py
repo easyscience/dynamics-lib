@@ -16,7 +16,7 @@ class AnalysisBase(EasyScienceModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyAnalysis",
+        display_name: str = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -30,23 +30,21 @@ class AnalysisBase(EasyScienceModelBase):
         elif isinstance(experiment, Experiment):
             self._experiment = experiment
         else:
-            raise TypeError("experiment must be an instance of Experiment or None.")
+            raise TypeError('experiment must be an instance of Experiment or None.')
 
         if sample_model is None:
             self._sample_model = SampleModel()
         elif isinstance(sample_model, SampleModel):
             self._sample_model = sample_model
         else:
-            raise TypeError("sample_model must be an instance of SampleModel or None.")
+            raise TypeError('sample_model must be an instance of SampleModel or None.')
 
         if instrument_model is None:
             self._instrument_model = InstrumentModel()
         elif isinstance(instrument_model, InstrumentModel):
             self._instrument_model = instrument_model
         else:
-            raise TypeError(
-                "instrument_model must be an instance of InstrumentModel or None."
-            )
+            raise TypeError('instrument_model must be an instance of InstrumentModel or None.')
 
         if extra_parameters is not None:
             if isinstance(extra_parameters, Parameter):
@@ -56,9 +54,7 @@ class AnalysisBase(EasyScienceModelBase):
             ):
                 self._extra_parameters = extra_parameters
             else:
-                raise TypeError(
-                    "extra_parameters must be a Parameter or a list of Parameters."
-                )
+                raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
         else:
             self._extra_parameters = []
 
@@ -76,7 +72,7 @@ class AnalysisBase(EasyScienceModelBase):
     @experiment.setter
     def experiment(self, value: Experiment) -> None:
         if not isinstance(value, Experiment):
-            raise TypeError("experiment must be an instance of Experiment")
+            raise TypeError('experiment must be an instance of Experiment')
         self._experiment = value
         self._on_experiment_changed()
 
@@ -88,7 +84,7 @@ class AnalysisBase(EasyScienceModelBase):
     @sample_model.setter
     def sample_model(self, value: SampleModel) -> None:
         if not isinstance(value, SampleModel):
-            raise TypeError("sample_model must be an instance of SampleModel")
+            raise TypeError('sample_model must be an instance of SampleModel')
         self._sample_model = value
         self._on_sample_model_changed()
 
@@ -100,7 +96,7 @@ class AnalysisBase(EasyScienceModelBase):
     @instrument_model.setter
     def instrument_model(self, value: InstrumentModel) -> None:
         if not isinstance(value, InstrumentModel):
-            raise TypeError("instrument_model must be an instance of InstrumentModel")
+            raise TypeError('instrument_model must be an instance of InstrumentModel')
         self._instrument_model = value
         self._on_instrument_model_changed()
 
@@ -112,7 +108,7 @@ class AnalysisBase(EasyScienceModelBase):
     @Q.setter
     def Q(self, value) -> None:
         """Q is a read-only property derived from the Experiment."""
-        raise AttributeError("Q is a read-only property derived from the Experiment.")
+        raise AttributeError('Q is a read-only property derived from the Experiment.')
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -126,26 +122,21 @@ class AnalysisBase(EasyScienceModelBase):
         """Energy is a read-only property derived from the
         Experiment.
         """
-        raise AttributeError(
-            "energy is a read-only property derived from the Experiment."
-        )
+        raise AttributeError('energy is a read-only property derived from the Experiment.')
 
     @property
     def temperature(self) -> Parameter | None:
-        """
-        The temperature from the associated SampleModel, if available.
+        """The temperature from the associated SampleModel, if
+        available.
         """
         return self.sample_model.temperature if self.sample_model is not None else None
 
     @temperature.setter
     def temperature(self, value) -> None:
-        """
-        Temperature is a read-only property derived from the
+        """Temperature is a read-only property derived from the
         SampleModel.
         """
-        raise AttributeError(
-            "temperature is a read-only property derived from the sample model."
-        )
+        raise AttributeError('temperature is a read-only property derived from the sample model.')
 
     #############
     # Other methods
@@ -156,30 +147,26 @@ class AnalysisBase(EasyScienceModelBase):
     #############
 
     def _on_experiment_changed(self) -> None:
-        """
-        Update the Q values in the sample and instrument models when the
-        experiment changes.
+        """Update the Q values in the sample and instrument models when
+        the experiment changes.
         """
         self._sample_model.Q = self.Q
         self._instrument_model.Q = self.Q
 
     def _on_sample_model_changed(self) -> None:
-        """
-        Update the Q values in the sample model when the sample model
+        """Update the Q values in the sample model when the sample model
         changes.
         """
         self._sample_model.Q = self.Q
 
     def _on_instrument_model_changed(self) -> None:
-        """
-        Update the Q values in the instrument model when the instrument
-        model changes.
+        """Update the Q values in the instrument model when the
+        instrument model changes.
         """
         self._instrument_model.Q = self.Q
 
     def _verify_Q_index(self, Q_index: int | None) -> int | None:
-        """
-        Verify that the Q index is valid.
+        """Verify that the Q index is valid.
 
         Params:
             Q_index (int | None): The Q index to verify.
@@ -194,7 +181,7 @@ class AnalysisBase(EasyScienceModelBase):
                 or Q_index < 0
                 or (self.Q is not None and Q_index >= len(self.Q))
             ):
-                raise ValueError("Q_index must be a valid index for the Q values.")
+                raise ValueError('Q_index must be a valid index for the Q values.')
         return Q_index
 
     #############
@@ -202,4 +189,4 @@ class AnalysisBase(EasyScienceModelBase):
     #############
 
     def __repr__(self) -> str:
-        return f"AnalysisBase(display_name={self.display_name}, unique_name={self.unique_name})"
+        return f'AnalysisBase(display_name={self.display_name}, unique_name={self.unique_name})'

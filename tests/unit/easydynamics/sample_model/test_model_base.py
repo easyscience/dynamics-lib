@@ -16,26 +16,26 @@ class TestModelBase:
     @pytest.fixture
     def model_base(self):
         component1 = Gaussian(
-            display_name="TestGaussian1",
+            display_name='TestGaussian1',
             area=1.0,
             center=0.0,
             width=1.0,
-            unit="meV",
+            unit='meV',
         )
         component2 = Lorentzian(
-            display_name="TestLorentzian1",
+            display_name='TestLorentzian1',
             area=2.0,
             center=1.0,
             width=0.5,
-            unit="meV",
+            unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
         model_base = ModelBase(
-            display_name="InitModel",
+            display_name='InitModel',
             components=component_collection,
-            unit="meV",
+            unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
 
@@ -46,8 +46,8 @@ class TestModelBase:
         model = model_base
 
         # EXPECT
-        assert model.display_name == "InitModel"
-        assert model.unit == "meV"
+        assert model.display_name == 'InitModel'
+        assert model.unit == 'meV'
         assert len(model.components) == 2
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
@@ -55,9 +55,9 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="Components must be ",
+            match='Components must be ',
         ):
-            ModelBase(components="invalid_component")
+            ModelBase(components='invalid_component')
 
     def test_evaluate_calls_all_component_collections(self, model_base):
         # WHEN
@@ -88,7 +88,7 @@ class TestModelBase:
         model_base._component_collections = []
 
         # THEN / EXPECT
-        with pytest.raises(ValueError, match="No components"):
+        with pytest.raises(ValueError, match='No components'):
             model_base.evaluate(x)
 
     def test_generate_component_collections_with_Q(self, model_base):
@@ -101,24 +101,9 @@ class TestModelBase:
             assert isinstance(collection, ComponentCollection)
             assert len(collection.components) == 2
             assert isinstance(collection.components[0], Gaussian)
-            assert collection.components[0].display_name == "TestGaussian1"
+            assert collection.components[0].display_name == 'TestGaussian1'
             assert isinstance(collection.components[1], Lorentzian)
-            assert collection.components[1].display_name == "TestLorentzian1"
-
-    def test_fix_free_all_parameters(self, model_base):
-        # WHEN
-        model_base.fix_all_parameters()
-
-        # THEN
-        for par in model_base.get_all_variables():
-            assert par.fixed is True
-
-        # WHEN
-        model_base.free_all_parameters()
-
-        # THEN
-        for par in model_base.get_all_variables():
-            assert par.fixed is False
+            assert collection.components[1].display_name == 'TestLorentzian1'
 
     def test_fix_free_all_parameters(self, model_base):
         # WHEN
@@ -141,12 +126,12 @@ class TestModelBase:
 
         # THEN
         expected_var_display_names = {
-            "TestGaussian1 area",
-            "TestGaussian1 center",
-            "TestGaussian1 width",
-            "TestLorentzian1 area",
-            "TestLorentzian1 center",
-            "TestLorentzian1 width",
+            'TestGaussian1 area',
+            'TestGaussian1 center',
+            'TestGaussian1 width',
+            'TestLorentzian1 area',
+            'TestLorentzian1 center',
+            'TestLorentzian1 width',
         }
 
         retrieved_var_display_names = {var.display_name for var in all_vars}
@@ -160,12 +145,12 @@ class TestModelBase:
 
         # THEN
         expected_var_display_names = {
-            "TestGaussian1 area",
-            "TestGaussian1 center",
-            "TestGaussian1 width",
-            "TestLorentzian1 area",
-            "TestLorentzian1 center",
-            "TestLorentzian1 width",
+            'TestGaussian1 area',
+            'TestGaussian1 center',
+            'TestGaussian1 width',
+            'TestLorentzian1 area',
+            'TestLorentzian1 center',
+            'TestLorentzian1 width',
         }
 
         retrieved_var_display_names = {var.display_name for var in all_vars}
@@ -177,7 +162,7 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match="Q_index 5 is out of bounds for component collections of length 3",
+            match='Q_index 5 is out of bounds for component collections of length 3',
         ):
             model_base.get_all_variables(Q_index=5)
 
@@ -185,13 +170,13 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="Q_index must be an int or None, got str",
+            match='Q_index must be an int or None, got str',
         ):
-            model_base.get_all_variables(Q_index="invalid_index")
+            model_base.get_all_variables(Q_index='invalid_index')
 
     def test_append_and_remove_and_clear_component(self, model_base):
         # WHEN
-        new_component = Gaussian(unique_name="NewGaussian")
+        new_component = Gaussian(unique_name='NewGaussian')
 
         # THEN
         model_base.append_component(new_component)
@@ -201,7 +186,7 @@ class TestModelBase:
         assert model_base.components[-1] is new_component
 
         # THEN
-        model_base.remove_component("NewGaussian")
+        model_base.remove_component('NewGaussian')
 
         # EXPECT
         assert len(model_base.components) == 2
@@ -230,40 +215,38 @@ class TestModelBase:
 
     def test_append_component_invalid_type_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(
-            TypeError, match=" must be a ModelComponent or ComponentCollection"
-        ):
-            model_base.append_component("invalid_component")
+        with pytest.raises(TypeError, match=' must be a ModelComponent or ComponentCollection'):
+            model_base.append_component('invalid_component')
 
     def test_unit_property(self, model_base):
         # WHEN
         unit = model_base.unit
 
         # THEN / EXPECT
-        assert unit == "meV"
+        assert unit == 'meV'
 
     def test_unit_setter_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(AttributeError, match="Use convert_unit to change "):
-            model_base.unit = "K"
+        with pytest.raises(AttributeError, match='Use convert_unit to change '):
+            model_base.unit = 'K'
 
     def test_convert_unit(self, model_base):
         # WHEN
-        model_base.convert_unit("eV")
+        model_base.convert_unit('eV')
 
         # THEN / EXPECT
-        assert model_base.unit == "eV"
+        assert model_base.unit == 'eV'
         for component in model_base.components:
-            assert component.unit == "eV"
+            assert component.unit == 'eV'
 
     def test_convert_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
         with pytest.raises(Exception):
-            model_base.convert_unit("invalid_unit")
+            model_base.convert_unit('invalid_unit')
 
     def test_components_setter(self, model_base):
         # WHEN
-        new_component = Lorentzian(unique_name="NewLorentzian")
+        new_component = Lorentzian(unique_name='NewLorentzian')
         model_base.components = new_component
 
         # THEN / EXPECT
@@ -289,9 +272,9 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="Components must be ",
+            match='Components must be ',
         ):
-            model_base.components = "invalid_component"
+            model_base.components = 'invalid_component'
 
     def test_Q_setter(self, model_base):
         # WHEN
@@ -306,7 +289,7 @@ class TestModelBase:
         repr_str = repr(model_base)
 
         # THEN / EXPECT
-        assert "unique_name" in repr_str
-        assert "unit" in repr_str
-        assert "Q = " in repr_str
-        assert "components = " in repr_str
+        assert 'unique_name' in repr_str
+        assert 'unit' in repr_str
+        assert 'Q = ' in repr_str
+        assert 'components = ' in repr_str
