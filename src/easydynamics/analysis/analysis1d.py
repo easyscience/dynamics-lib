@@ -209,8 +209,9 @@ class Analysis1d(AnalysisBase):
         plot_kwargs_defaults = {
             "title": self.display_name,
             "linestyle": {"Data": "none", "Model": "-"},
-            "marker": {"Data": "o", "Model": None},
+            "marker": {"Data": "o", "Model": "none"},
             "color": {"Data": "black", "Model": "red"},
+            "markerfacecolor": {"Data": "none", "Model": "none"},
         }
 
         if plot_components:
