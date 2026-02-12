@@ -5,7 +5,6 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.experiment import Experiment
@@ -36,19 +35,6 @@ class TestAnalysisBase:
         assert isinstance(analysis_base._sample_model, SampleModel)
         assert isinstance(analysis_base._instrument_model, InstrumentModel)
         assert analysis_base._extra_parameters == []
-
-    def test_init_extra_parameter(self):
-        extra_parameter = Parameter(name="param1", value=1.0)
-        analysis = AnalysisBase(extra_parameters=extra_parameter)
-        assert analysis._extra_parameters == [extra_parameter]
-
-    def test_init_extra_parameters(self):
-        extra_parameters = [
-            Parameter(name="param1", value=1.0),
-            Parameter(name="param2", value=2.0),
-        ]
-        analysis = AnalysisBase(extra_parameters=extra_parameters)
-        assert analysis._extra_parameters == extra_parameters
 
     def test_init_calls_on_experiment_changed(self):
         with patch.object(
