@@ -8,6 +8,7 @@ import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
@@ -185,6 +186,7 @@ class Analysis(AnalysisBase):
             "linestyle": {"Data": "none", "Model": "-"},
             "marker": {"Data": "o", "Model": None},
             "color": {"Data": "black", "Model": "red"},
+            "markerfacecolor": {"Data": "none", "Model": "none"},
         }
         data_and_model = {
             "Data": self.experiment.binned_data,
@@ -206,6 +208,113 @@ class Analysis(AnalysisBase):
             **plot_kwargs_defaults,
         )
         display(fig)
+
+    def parameters_to_dataset(self) -> sc.Dataset:
+        """
+        Creates a scipp dataset with copies of the Parameters in the
+        model. Ensures unit consistency across Q.
+        """
+
+        ds = sc.Dataset(coords={"Q": self.Q})
+
+        # Collect all parameter names
+        all_names = {
+            param.name
+            for analysis in self.analysis_list
+            for param in analysis.get_all_parameters()
+        }
+
+        # Storage
+        values = {name: [] for name in all_names}
+        variances = {name: [] for name in all_names}
+        units = {}
+
+        for analysis in self.analysis_list:
+            pars = {p.name: p for p in analysis.get_all_parameters()}
+
+            for name in all_names:
+                if name in pars:
+                    p = pars[name]
+
+                    # Unit consistency check
+                    if name not in units:
+                        units[name] = p.unit
+                    elif units[name] != p.unit:
+                        try:
+                            p.unit.convert(units[name])
+                        except Exception as e:
+                            raise UnitError(
+                                f"Inconsistent units for parameter '{name}': "
+                                f"{units[name]} vs {p.unit}"
+                            ) from e
+
+                    values[name].append(p.value)
+                    variances[name].append(p.variance)
+                else:
+                    values[name].append(np.nan)
+                    variances[name].append(np.nan)
+
+        # Build dataset variables
+        for name in all_names:
+            ds[name] = sc.Variable(
+                dims=["Q"],
+                values=np.asarray(values[name], dtype=float),
+                variances=np.asarray(variances[name], dtype=float),
+                unit=units.get(name, None),
+            )
+
+        return ds
+
+    def plot_parameters(
+        self,
+        names: str | list[str] | None = None,
+        **kwargs,
+    ) -> None:
+        """
+        Plot fitted parameters as a function of Q.
+
+        Parameters:
+        ---------------
+        names: str or list of str
+            Name(s) of the parameter(s) to plot. If None, plots all
+            parameters.
+        kwargs: Additional keyword arguments passed to plopp.slicer for
+            customizing the plot (e.g., title, linestyle, marker,
+            color).
+
+        Returns: A plopp figure.
+        """
+
+        ds = self.parameters_to_dataset()
+
+        if not names:
+            names = list(ds.keys())
+
+        if isinstance(names, str):
+            names = [names]
+
+        if not isinstance(names, list) or not all(
+            isinstance(name, str) for name in names
+        ):
+            raise TypeError("names must be a string or a list of strings.")
+
+        for name in names:
+            if name not in ds:
+                raise ValueError(f"Parameter '{name}' not found in dataset.")
+
+        data_to_plot = {name: ds[name] for name in names}
+        plot_kwargs_defaults = {
+            "linestyle": {name: "none" for name in names},
+            "marker": {name: "o" for name in names},
+            "markerfacecolor": {name: "none" for name in names},
+        }
+
+        plot_kwargs_defaults.update(kwargs)
+        fig = pp.plot(
+            data_to_plot,
+            **plot_kwargs_defaults,
+        )
+        return fig
 
     #############
     # Private methods
