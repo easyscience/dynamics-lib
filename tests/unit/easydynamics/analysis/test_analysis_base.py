@@ -290,5 +290,5 @@ class TestAnalysisBase:
         invalid_Q_index = -1
 
         # THEN / EXPECT
-        with pytest.raises(ValueError, match="Q_index must be a valid index"):
+        with pytest.raises(IndexError, match="Q_index must be a valid index"):
             analysis_base._verify_Q_index(invalid_Q_index)

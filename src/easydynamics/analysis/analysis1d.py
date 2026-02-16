@@ -24,7 +24,7 @@ class Analysis1d(AnalysisBase):
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str = "MyAnalysis",
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -44,8 +44,10 @@ class Analysis1d(AnalysisBase):
         self._Q_index = self._verify_Q_index(Q_index)
 
         self._fit_result = None
-
-        self._convolver = self._create_convolver()
+        if self._Q_index is not None:
+            self._convolver = self._create_convolver()
+        else:
+            self._convolver = None
 
     #############
     # Properties
@@ -112,14 +114,7 @@ class Analysis1d(AnalysisBase):
         parameter optimization for performance reasons.
         """
         if self._experiment is None:
-            raise ValueError('No experiment is associated with this Analysis.')
-
-        Q_index = self._require_Q_index()
-
-        data = self.experiment.data['Q', Q_index]
-        x = data.coords['energy'].values
-        y = data.values
-        e = data.variances**0.5
+            raise ValueError("No experiment is associated with this Analysis.")
 
         # Create convolver once to reuse during fitting
         self._convolver = self._create_convolver()
@@ -129,13 +124,14 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        fit_result = fitter.fit(x=x, y=y, weights=1.0 / e)
+        x, y, weights = self._extract_x_y_weights_from_experiment()
+        fit_result = fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result
 
         return fit_result
 
-    def as_fit_function(self, x=None, **kwargs):
+    def as_fit_function(self, x=None, **kwargs) -> callable:
         """Return self._calculate as a fit function.
 
         The EasyScience fitter requires x as input, but
@@ -187,33 +183,37 @@ class Analysis1d(AnalysisBase):
         import plopp as pp
 
         if self.experiment.data is None:
-            raise ValueError('No data to plot. Please load data first.')
+            raise ValueError("No data to plot. Please load data first.")
 
-        data = self.experiment.data['Q', self.Q_index]
+        data = self.experiment.data["Q", self.Q_index]
         model_array = self._create_sample_scipp_array()
 
-        component_dataset = self._create_components_dataset_single_Q(add_background=add_background)
+        component_dataset = self._create_components_dataset_single_Q(
+            add_background=add_background
+        )
 
         # Create a dataset containing the data, model, and individual
         # components for plotting.
-        data_and_model = sc.Dataset({
-            'Data': data,
-            'Model': model_array,
-        })
+        data_and_model = sc.Dataset(
+            {
+                "Data": data,
+                "Model": model_array,
+            }
+        )
 
         data_and_model = sc.merge(data_and_model, component_dataset)
         plot_kwargs_defaults = {
-            'title': self.display_name,
-            'linestyle': {'Data': 'none', 'Model': '-'},
-            'marker': {'Data': 'o', 'Model': 'none'},
-            'color': {'Data': 'black', 'Model': 'red'},
-            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            "title": self.display_name,
+            "linestyle": {"Data": "none", "Model": "-"},
+            "marker": {"Data": "o", "Model": "none"},
+            "color": {"Data": "black", "Model": "red"},
+            "markerfacecolor": {"Data": "none", "Model": "none"},
         }
 
         if plot_components:
             for comp_name in component_dataset.keys():
-                plot_kwargs_defaults['linestyle'][comp_name] = '--'
-                plot_kwargs_defaults['marker'][comp_name] = None
+                plot_kwargs_defaults["linestyle"][comp_name] = "--"
+                plot_kwargs_defaults["marker"][comp_name] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -236,7 +236,7 @@ class Analysis1d(AnalysisBase):
             int: The Q index.
         """
         if self._Q_index is None:
-            raise ValueError('Q_index must be set.')
+            raise ValueError("Q_index must be set.")
         return self._Q_index
 
     def _on_Q_index_changed(self) -> None:
@@ -246,6 +246,19 @@ class Analysis1d(AnalysisBase):
         updates the Convolution object for the new Q index.
         """
         self._convolver = self._create_convolver()
+
+    def _extract_x_y_weights_from_experiment(self):
+        """
+        Extract the x, y, and weights arrays from the experiment for
+        the current Q index.
+        """
+        Q_index = self._require_Q_index()
+        data = self.experiment.data["Q", Q_index]
+        x = data.coords["energy"].values
+        y = data.values
+        e = data.variances**0.5
+        weights = 1.0 / e
+        return x, y, weights
 
     #############
     # Private methods: evaluation
@@ -291,7 +304,9 @@ class Analysis1d(AnalysisBase):
         if not convolve:
             return components.evaluate(energy - energy_offset)
 
-        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
+        resolution = self.instrument_model.resolution_model.get_component_collection(
+            Q_index
+        )
         if resolution.is_empty:
             return components.evaluate(energy - energy_offset)
 
@@ -353,8 +368,10 @@ class Analysis1d(AnalysisBase):
             np.ndarray: The evaluated background contribution.
         """
         Q_index = self._require_Q_index()
-        background_components = self.instrument_model.background_model.get_component_collection(
-            Q_index=Q_index
+        background_components = (
+            self.instrument_model.background_model.get_component_collection(
+                Q_index=Q_index
+            )
         )
         return self._evaluate_components(
             components=background_components,
@@ -395,8 +412,8 @@ class Analysis1d(AnalysisBase):
         if sample_components.is_empty:
             return None
 
-        resolution_components = self.instrument_model.resolution_model.get_component_collection(
-            Q_index
+        resolution_components = (
+            self.instrument_model.resolution_model.get_component_collection(Q_index)
         )
         if resolution_components.is_empty:
             return None
@@ -447,17 +464,19 @@ class Analysis1d(AnalysisBase):
             Q_index=self.Q_index
         ).components
 
-        background_components = self.instrument_model.background_model.get_component_collection(
-            Q_index=self.Q_index
-        ).components
+        background_components = (
+            self.instrument_model.background_model.get_component_collection(
+                Q_index=self.Q_index
+            ).components
+        )
         background = self._evaluate_background() if add_background else None
         for component in sample_components:
             scipp_arrays[component.display_name] = self._create_component_scipp_array(
                 component, background=background
             )
         for component in background_components:
-            scipp_arrays[component.display_name] = self._create_background_component_scipp_array(
-                component
+            scipp_arrays[component.display_name] = (
+                self._create_background_component_scipp_array(component)
             )
         return sc.Dataset(scipp_arrays)
 
@@ -471,9 +490,9 @@ class Analysis1d(AnalysisBase):
             sc.DataArray: The converted sc.DataArray.
         """
         return sc.DataArray(
-            data=sc.array(dims=['energy'], values=values),
+            data=sc.array(dims=["energy"], values=values),
             coords={
-                'energy': self.energy,
-                'Q': self.Q[self.Q_index],
+                "energy": self.energy,
+                "Q": self.Q[self.Q_index],
             },
         )

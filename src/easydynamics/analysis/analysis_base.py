@@ -189,7 +189,7 @@ class AnalysisBase(EasyScienceModelBase):
                 or Q_index < 0
                 or (self.Q is not None and Q_index >= len(self.Q))
             ):
-                raise ValueError("Q_index must be a valid index for the Q values.")
+                raise IndexError("Q_index must be a valid index for the Q values.")
         return Q_index
 
     #############
