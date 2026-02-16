@@ -266,3 +266,25 @@ class TestAnalysis1d:
         assert "Component1" in dataset_passed
 
         assert result is fake_fig
+
+    ########################
+
+    def test_to_scipp_array(self, analysis1d):
+        # WHEN
+        numpy_array = np.array([1.0, 2.0, 3.0])
+
+        # THEN
+        scipp_array = analysis1d._to_scipp_array(numpy_array)
+
+        # EXPECT
+        assert isinstance(scipp_array, sc.DataArray)
+        np.testing.assert_array_equal(scipp_array.values, numpy_array)
+
+        np.testing.assert_array_equal(
+            scipp_array.coords["energy"].values, analysis1d.experiment.energy.values
+        )
+
+        np.testing.assert_array_equal(
+            scipp_array.coords["Q"].values,
+            analysis1d.experiment.Q[analysis1d.Q_index].values,
+        )
