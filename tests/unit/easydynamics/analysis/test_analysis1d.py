@@ -21,8 +21,13 @@ class TestAnalysis1d:
     @pytest.fixture
     def analysis1d(self):
         Q = sc.array(dims=["Q"], values=[1, 2, 3], unit="1/Angstrom")
-        energy = sc.array(dims=["energy"], values=[10, 20, 30], unit="meV")
-        data = sc.array(dims=["Q", "energy"], values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        energy = sc.array(dims=["energy"], values=[10.0, 20.0, 30.0], unit="meV")
+        data = sc.array(
+            dims=["Q", "energy"],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
         data_array = sc.DataArray(data=data, coords={"Q": Q, "energy": energy})
 
         experiment = Experiment(data=data_array)
@@ -267,7 +272,278 @@ class TestAnalysis1d:
 
         assert result is fake_fig
 
-    ########################
+    #############
+    # Private methods: small utilities
+    #############
+
+    def test_require_Q_index(self, analysis1d):
+        # WHEN THEN
+        Q_index = analysis1d._require_Q_index()
+
+        # EXPECT
+        assert Q_index == analysis1d.Q_index
+
+    def test_require_Q_index_raises_if_no_Q_index(self, analysis1d):
+        # WHEN THEN
+        analysis1d._Q_index = None
+
+        # EXPECT
+        with pytest.raises(ValueError, match="Q_index must be set"):
+            analysis1d._require_Q_index()
+
+    def test_on_Q_index_changed(self, analysis1d):
+        # WHEN
+        analysis1d._create_convolver = MagicMock()
+
+        # THEN
+        analysis1d._on_Q_index_changed()
+
+        # EXPECT
+        analysis1d._create_convolver.assert_called_once()
+
+    def test_extract_x_y_weights_from_experiment(self, analysis1d):
+        # WHEN THEN
+        x, y, weights = analysis1d._extract_x_y_weights_from_experiment()
+
+        # EXPECT
+        assert np.array_equal(x, analysis1d.experiment.energy.values)
+        assert np.array_equal(y, analysis1d.experiment.data.values[analysis1d.Q_index])
+        assert np.array_equal(
+            weights, 1 / analysis1d.experiment.data.variances[analysis1d.Q_index] ** 0.5
+        )
+
+    #############
+    # Private methods: evaluation
+    #############
+
+    #############
+    # Private methods: create scipp arrays for plotting
+    #############
+
+    @pytest.mark.parametrize(
+        "background",
+        [
+            None,
+            np.array([0.5, 0.5, 0.5]),
+        ],
+        ids=[
+            "No background",
+            "With background",
+        ],
+    )
+    def test_create_component_scipp_array(self, analysis1d, background):
+        """Test that _create_component_scipp_array correctly evaluates
+        the component, adds the background and calls _to_scipp_array
+        with the correct values."""
+        ""
+        # WHEN
+
+        # Mock the functions that will be called.
+        analysis1d._evaluate_sample_component = MagicMock(
+            return_value=np.array([1.0, 2.0, 3.0])
+        )
+
+        analysis1d._to_scipp_array = MagicMock()
+
+        component = object()
+
+        # THEN
+        analysis1d._create_component_scipp_array(
+            component=component, background=background
+        )
+
+        # EXPECT
+        analysis1d._evaluate_sample_component.assert_called_once_with(
+            component=component
+        )
+
+        expected_values = np.array([1.0, 2.0, 3.0])
+        if background is not None:
+            expected_values += background
+
+        analysis1d._to_scipp_array.assert_called_once()
+
+        # Extract the actual call
+        _, kwargs = analysis1d._to_scipp_array.call_args
+
+        np.testing.assert_array_equal(
+            kwargs["values"],
+            expected_values,
+        )
+
+    def test_create_background_component_scipp_array(self, analysis1d):
+        """Test that _create_background_component_scipp_array correctly
+        evaluates the component, adds the background and calls
+        _to_scipp_array with the correct values."""
+
+        # WHEN
+
+        # Mock the functions that will be called.
+        analysis1d._evaluate_background_component = MagicMock(
+            return_value=np.array([1.0, 2.0, 3.0])
+        )
+        analysis1d._to_scipp_array = MagicMock()
+
+        component = object()
+
+        # THEN
+        analysis1d._create_background_component_scipp_array(component=component)
+
+        # EXPECT
+        analysis1d._evaluate_background_component.assert_called_once_with(
+            component=component
+        )
+
+        analysis1d._to_scipp_array.assert_called_once()
+
+        # Extract the actual call
+        _, kwargs = analysis1d._to_scipp_array.call_args
+
+        np.testing.assert_array_equal(
+            kwargs["values"],
+            np.array([1.0, 2.0, 3.0]),
+        )
+
+    def test_create_sample_scipp_array(self, analysis1d):
+        """Test that _create_sample_scipp_array correctly
+        evaluates the full model and calls _to_scipp_array with the
+        correct values."""
+
+        # WHEN
+
+        # Mock the functions that will be called.
+        analysis1d._calculate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+        analysis1d._to_scipp_array = MagicMock()
+
+        # THEN
+        analysis1d._create_sample_scipp_array()
+
+        # EXPECT
+        analysis1d._calculate.assert_called_once()
+
+        analysis1d._to_scipp_array.assert_called_once()
+
+        # Extract the actual call
+        _, kwargs = analysis1d._to_scipp_array.call_args
+
+        np.testing.assert_array_equal(
+            kwargs["values"],
+            np.array([1.0, 2.0, 3.0]),
+        )
+
+    @pytest.mark.parametrize(
+        "add_background",
+        [True, False],
+        ids=["With background", "Without background"],
+    )
+    def test_create_components_dataset_single_Q(
+        self,
+        analysis1d,
+        add_background,
+    ):
+        """Test orchestration of _create_components_dataset_single_Q."""
+
+        # WHEN
+
+        # Choose a particular Q_index, but without using the setter to
+        # avoid validation logic
+        analysis1d._Q_index = 5
+
+        # Mock all the things
+
+        # ---- Sample component ----
+        sample_component = MagicMock()
+        sample_component.display_name = "sample_comp"
+
+        sample_collection = MagicMock()
+        sample_collection.components = [sample_component]
+
+        analysis1d.sample_model.get_component_collection = MagicMock(
+            return_value=sample_collection
+        )
+
+        # ---- Background component ----
+        background_component = MagicMock()
+        background_component.display_name = "background_comp"
+
+        background_collection = MagicMock()
+        background_collection.components = [background_component]
+
+        analysis1d.instrument_model.background_model.get_component_collection = (
+            MagicMock(return_value=background_collection)
+        )
+
+        # ---- Background evaluation ----
+        background_value = np.array([10.0, 20.0, 30.0])
+        analysis1d._evaluate_background = MagicMock(return_value=background_value)
+
+        # ---- Return scipp DataArrays ----
+        fake_sample_da = sc.DataArray(
+            data=sc.array(dims=["energy"], values=[1.0, 2.0, 3.0])
+        )
+
+        analysis1d._create_component_scipp_array = MagicMock(
+            return_value=fake_sample_da
+        )
+
+        fake_background_da = sc.DataArray(
+            data=sc.array(dims=["energy"], values=[4.0, 5.0, 6.0])
+        )
+
+        analysis1d._create_background_component_scipp_array = MagicMock(
+            return_value=fake_background_da
+        )
+
+        # THEN
+        dataset = analysis1d._create_components_dataset_single_Q(
+            add_background=add_background
+        )
+
+        # EXPECT
+
+        # The correct component collections are requested with the
+        # correct Q_index
+        analysis1d.sample_model.get_component_collection.assert_called_once_with(
+            Q_index=analysis1d.Q_index
+        )
+
+        analysis1d.instrument_model.background_model.get_component_collection.assert_called_once_with(
+            Q_index=analysis1d.Q_index
+        )
+
+        # Background is evaluated if add_background=True, and not
+        # evaluated if False
+        if add_background:
+            analysis1d._evaluate_background.assert_called_once()
+            expected_background = background_value
+        else:
+            analysis1d._evaluate_background.assert_not_called()
+            expected_background = None
+
+        # The sample component scipp array is created with the correct
+        # component and background
+        analysis1d._create_component_scipp_array.assert_called_once()
+        _, kwargs = analysis1d._create_component_scipp_array.call_args
+
+        assert kwargs["component"] is sample_component
+
+        if expected_background is None:
+            assert kwargs["background"] is None
+        else:
+            np.testing.assert_array_equal(
+                kwargs["background"],
+                expected_background,
+            )
+
+        # Background component creation
+        analysis1d._create_background_component_scipp_array.assert_called_once_with(
+            component=background_component
+        )
+
+        # Dataset content
+        assert isinstance(dataset, sc.Dataset)
+        assert "sample_comp" in dataset
+        assert "background_comp" in dataset
 
     def test_to_scipp_array(self, analysis1d):
         # WHEN

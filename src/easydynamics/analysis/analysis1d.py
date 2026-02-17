@@ -437,24 +437,54 @@ class Analysis1d(AnalysisBase):
         component: ModelComponent,
         background: np.ndarray | None = None,
     ) -> sc.DataArray:
-        values = self._evaluate_sample_component(component)
+        """
+        Create a scipp DataArray for a single component. Adds the
+        background if it is not None.
+
+        Parameters:
+        -----------
+        component: ModelComponent.
+            The component to evaulate
+        backgrond: np.ndarray | None
+            Optional background to add to the component.
+
+        Returns:
+            sc.DataArray with the model calculation of the component.
+        """
+        values = self._evaluate_sample_component(component=component)
         if background is not None:
             values += background
-        return self._to_scipp_array(values)
+        return self._to_scipp_array(values=values)
 
     def _create_background_component_scipp_array(
         self,
         component: ModelComponent,
     ) -> sc.DataArray:
-        values = self._evaluate_background_component(component)
-        return self._to_scipp_array(values)
+        """
+        Create a scipp DataArray for a single background component.
+
+        Parameters:
+        -----------
+        component: ModelComponent.
+            The component to evaulate
+
+        Returns:
+            sc.DataArray with the model calculation of the component.
+        """
+        values = self._evaluate_background_component(component=component)
+        return self._to_scipp_array(values=values)
 
     def _create_sample_scipp_array(self) -> sc.DataArray:
+        """
+        Create a scipp DataArray for the full sample model including
+        background.
+        """
         values = self._calculate()
-        return self._to_scipp_array(values)
+        return self._to_scipp_array(values=values)
 
     def _create_components_dataset_single_Q(
-        self, add_background: bool = True
+        self,
+        add_background: bool = True,
     ) -> dict[str, sc.DataArray]:
         """Create sc.DataArrays for all sample and background
         components.
@@ -472,11 +502,11 @@ class Analysis1d(AnalysisBase):
         background = self._evaluate_background() if add_background else None
         for component in sample_components:
             scipp_arrays[component.display_name] = self._create_component_scipp_array(
-                component, background=background
+                component=component, background=background
             )
         for component in background_components:
             scipp_arrays[component.display_name] = (
-                self._create_background_component_scipp_array(component)
+                self._create_background_component_scipp_array(component=component)
             )
         return sc.Dataset(scipp_arrays)
 
