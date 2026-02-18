@@ -31,8 +31,8 @@ class ComponentCollection(ModelBase):
 
     def __init__(
         self,
-        unit: str | sc.Unit = 'meV',
-        display_name: str = 'MyComponentCollection',
+        unit: str | sc.Unit = "meV",
+        display_name: str = "MyComponentCollection",
         unique_name: str | None = None,
         components: List[ModelComponent] | None = None,
     ):
@@ -54,7 +54,7 @@ class ComponentCollection(ModelBase):
 
         if unit is not None and not isinstance(unit, (str, sc.Unit)):
             raise TypeError(
-                f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
+                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
             )
         self._unit = unit
         self._components = []
@@ -62,31 +62,55 @@ class ComponentCollection(ModelBase):
         # Add initial components if provided. Used for serialization.
         if components is not None:
             if not isinstance(components, list):
-                raise TypeError('components must be a list of ModelComponent instances.')
+                raise TypeError(
+                    "components must be a list of ModelComponent instances."
+                )
             for comp in components:
                 self.append_component(comp)
 
-    def append_component(self, component: ModelComponent | 'ComponentCollection') -> None:
-        match component:
-            case ModelComponent():
-                components = (component,)
-            case ComponentCollection(components=components):
-                pass
-            case _:
-                raise TypeError('Component must be a ModelComponent or ComponentCollection.')
+    def append_component(
+        self, component: ModelComponent | "ComponentCollection"
+    ) -> None:
+        """
+        Append a model component or the components from another
+        ComponentCollection to this ComponentCollection.
+
+        Parameters
+        ----------
+        component : ModelComponent or ComponentCollection
+            The component to append.
+        Raises
+        ------
+        TypeError
+            If the component is not a ModelComponent or
+            ComponentCollection.
+        """
+        if not isinstance(component, (ModelComponent, ComponentCollection)):
+            raise TypeError(
+                "Component must be an instance of ModelComponent or ComponentCollection. "
+                f"Got {type(component).__name__} instead."
+            )
+        elif isinstance(component, ModelComponent):
+            components = (component,)
+        elif isinstance(component, ComponentCollection):
+            components = component.components
+        else:
+            raise TypeError(
+                "Component must be an instance of ModelComponent or ComponentCollection."
+            )
 
         for comp in components:
             if comp in self._components:
                 raise ValueError(
                     f"Component '{comp.unique_name}' is already in the collection. "
-                    f'Existing components: {self.list_component_names()}'
+                    f"Existing components: {self.list_component_names()}"
                 )
 
             self._components.append(comp)
 
     def remove_component(self, unique_name: str) -> None:
         if not isinstance(unique_name, str):
-            raise TypeError('Component name must be a string.')
+            raise TypeError("Component name must be a string.")
 
         for comp in self._components:
             if comp.unique_name == unique_name:
@@ -95,8 +119,8 @@ class ComponentCollection(ModelBase):
 
         raise KeyError(
             f"No component named '{unique_name}' exists. "
-            f'Did you accidentally use the display_name? '
-            f'Here is a list of the components in the collection: {self.list_component_names()}'
+            f"Did you accidentally use the display_name? "
+            f"Here is a list of the components in the collection: {self.list_component_names()}"
         )
 
     @property
@@ -106,12 +130,12 @@ class ComponentCollection(ModelBase):
     @components.setter
     def components(self, components: List[ModelComponent]) -> None:
         if not isinstance(components, list):
-            raise TypeError('components must be a list of ModelComponent instances.')
+            raise TypeError("components must be a list of ModelComponent instances.")
         for comp in components:
             if not isinstance(comp, ModelComponent):
                 raise TypeError(
-                    'All items in components must be instances of ModelComponent. '
-                    f'Got {type(comp).__name__} instead.'
+                    "All items in components must be instances of ModelComponent. "
+                    f"Got {type(comp).__name__} instead."
                 )
 
         self._components = components
@@ -123,8 +147,8 @@ class ComponentCollection(ModelBase):
     @is_empty.setter
     def is_empty(self, value: bool) -> None:
         raise AttributeError(
-            'is_empty is a read-only property that indicates '
-            'whether the collection has components.'
+            "is_empty is a read-only property that indicates "
+            "whether the collection has components."
         )
 
     def list_component_names(self) -> List[str]:
@@ -146,27 +170,27 @@ class ComponentCollection(ModelBase):
         # Useful for convolutions.
         """Normalize the areas of all components so they sum to 1."""
         if not self.components:
-            raise ValueError('No components in the model to normalize.')
+            raise ValueError("No components in the model to normalize.")
 
         area_params = []
-        total_area = Parameter(name='total_area', value=0.0, unit=self._unit)
+        total_area = Parameter(name="total_area", value=0.0, unit=self._unit)
 
         for component in self.components:
-            if hasattr(component, 'area'):
+            if hasattr(component, "area"):
                 area_params.append(component.area)
                 total_area += component.area
             else:
                 warnings.warn(
                     f"Component '{component.unique_name}' does not have an 'area' attribute "
-                    f'and will be skipped in normalization.',
+                    f"and will be skipped in normalization.",
                     UserWarning,
                 )
 
         if total_area.value == 0:
-            raise ValueError('Total area is zero; cannot normalize.')
+            raise ValueError("Total area is zero; cannot normalize.")
 
         if not np.isfinite(total_area.value):
-            raise ValueError('Total area is not finite; cannot normalize.')
+            raise ValueError("Total area is not finite; cannot normalize.")
 
         for param in area_params:
             param.value /= total_area.value
@@ -178,7 +202,11 @@ class ComponentCollection(ModelBase):
         List[Parameter]: List of parameters in the component.
         """
 
-        return [var for component in self.components for var in component.get_all_variables()]
+        return [
+            var
+            for component in self.components
+            for var in component.get_all_variables()
+        ]
 
     @property
     def unit(self) -> str | sc.Unit:
@@ -194,8 +222,8 @@ class ComponentCollection(ModelBase):
     def unit(self, unit_str: str) -> None:
         raise AttributeError(
             (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
 
@@ -219,7 +247,9 @@ class ComponentCollection(ModelBase):
                 pass  # Best effort rollback
             raise e
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def evaluate(
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+    ) -> np.ndarray:
         """Evaluate the sum of all components.
 
         Parameters
@@ -257,11 +287,13 @@ class ComponentCollection(ModelBase):
             Evaluated values for the specified component.
         """
         if not self.components:
-            raise ValueError('No components in the model to evaluate.')
+            raise ValueError("No components in the model to evaluate.")
 
         if not isinstance(unique_name, str):
             raise TypeError(
-                (f'Component unique name must be a string, got {type(unique_name)} instead.')
+                (
+                    f"Component unique name must be a string, got {type(unique_name)} instead."
+                )
             )
 
         matches = [comp for comp in self.components if comp.unique_name == unique_name]
@@ -314,6 +346,8 @@ class ComponentCollection(ModelBase):
         -------
         str
         """
-        comp_names = ', '.join(c.unique_name for c in self.components) or 'No components'
+        comp_names = (
+            ", ".join(c.unique_name for c in self.components) or "No components"
+        )
 
         return f"<ComponentCollection unique_name='{self.unique_name}' | Components: {comp_names}>"
