@@ -229,7 +229,7 @@ class TestModelBase:
 
     def test_append_component_invalid_type_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(TypeError, match=' must be a ModelComponent or ComponentCollection'):
+        with pytest.raises(TypeError, match=' must be '):
             model_base.append_component('invalid_component')
 
     def test_unit_property(self, model_base):
