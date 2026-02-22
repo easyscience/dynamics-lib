@@ -9,7 +9,9 @@ from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
+    DiffusionModelBase,
+)
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -31,9 +33,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
     def __init__(
         self,
-        display_name: str | None = 'JumpTranslationalDiffusion',
+        display_name: str | None = "JumpTranslationalDiffusion",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
@@ -65,27 +67,27 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         )
 
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
 
         if not isinstance(relaxation_time, Numeric):
-            raise TypeError('relaxation_time must be a number.')
+            raise TypeError("relaxation_time must be a number.")
 
         diffusion_coefficient = Parameter(
-            name='diffusion_coefficient',
+            name="diffusion_coefficient",
             value=float(diffusion_coefficient),
             fixed=False,
-            unit='m**2/s',
+            unit="m**2/s",
         )
 
         relaxation_time = Parameter(
-            name='relaxation_time',
+            name="relaxation_time",
             value=float(relaxation_time),
             fixed=False,
-            unit='ps',
+            unit="ps",
         )
 
-        self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-        self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+        self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+        self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
         self._relaxation_time = relaxation_time
 
@@ -108,7 +110,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
         """Set the diffusion coefficient parameter D."""
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
         self._diffusion_coefficient.value = diffusion_coefficient
 
     @property
@@ -126,7 +128,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def relaxation_time(self, relaxation_time: Numeric) -> None:
         """Set the relaxation time parameter t."""
         if not isinstance(relaxation_time, Numeric):
-            raise TypeError('relaxation_time must be a number.')
+            raise TypeError("relaxation_time must be a number.")
         self._relaxation_time.value = relaxation_time
 
     ################################
@@ -161,7 +163,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         unit_conversion_factor_denominator = (
             self.diffusion_coefficient / self._angstrom**2 * self.relaxation_time
         )
-        unit_conversion_factor_denominator.convert_unit('dimensionless')
+        unit_conversion_factor_denominator.convert_unit("dimensionless")
 
         denominator = 1 + unit_conversion_factor_denominator.value * Q**2
 
@@ -207,7 +209,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = 'Jump translational diffusion',
+        component_display_name: str = "Jump translational diffusion",
     ) -> List[ComponentCollection]:
         """Create ComponentCollection components for the diffusion model
         at given Q values.
@@ -227,7 +229,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
-            raise TypeError('component_name must be a string.')
+            raise TypeError("component_name must be a string.")
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -239,7 +241,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         # is 0.
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f'{self.display_name}_Q{Q_value:.2f}', unit=self.unit
+                display_name=f"{self.display_name}_Q{Q_value:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
@@ -254,6 +256,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
+                desired_unit=self.unit,
             )
 
             # Make the area dependent on Q
@@ -263,9 +266,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 dependency_map=area_dependency_map,
             )
 
-            # Resolving the dependency can do weird things to the units,
-            # so we make sure it's correct.
-            lorentzian_component.width.convert_unit(self.unit)
             component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list
@@ -288,20 +288,20 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dependency expression for the width.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
         # Q is given as a float, so we need to add the units
-        return f'hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
+        return f"hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))"
 
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
         """
         return {
-            'D': self._diffusion_coefficient,
-            't': self._relaxation_time,
-            'hbar': self._hbar,
-            'angstrom': self._angstrom,
+            "D": self._diffusion_coefficient,
+            "t": self._relaxation_time,
+            "hbar": self._hbar,
+            "angstrom": self._angstrom,
         }
 
     def _write_area_dependency_expression(self, QISF: float) -> str:
@@ -314,16 +314,16 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dependency expression for the area.
         """
         if not isinstance(QISF, (float)):
-            raise TypeError('QISF must be a float.')
+            raise TypeError("QISF must be a float.")
 
-        return f'{QISF} * scale'
+        return f"{QISF} * scale"
 
     def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
         """
         return {
-            'scale': self._scale,
+            "scale": self._scale,
         }
 
     ################################
@@ -335,6 +335,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         model.
         """
         return (
-            f'JumpTranslationalDiffusion(display_name={self.display_name}, '
-            f'diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})'
+            f"JumpTranslationalDiffusion(display_name={self.display_name}, "
+            f"diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})"
         )
