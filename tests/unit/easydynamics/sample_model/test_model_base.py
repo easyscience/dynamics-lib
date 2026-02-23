@@ -180,6 +180,14 @@ class TestModelBase:
         # EXPECT
         assert collection is model_base._component_collections[0]
 
+    def test_get_component_collection_invalid_index_type_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int, got str',
+        ):
+            model_base.get_component_collection(Q_index='invalid_index')
+
     def test_get_component_collection_invalid_index_raises(self, model_base):
         # WHEN THEN EXPECT
         with pytest.raises(

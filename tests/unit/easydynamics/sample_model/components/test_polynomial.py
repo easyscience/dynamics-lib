@@ -58,6 +58,11 @@ class TestPolynomial:
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name='TestPolynomial', **kwargs)
 
+    def test_init_no_coefficients_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='At least one coefficient must be provided.'):
+            Polynomial(display_name='TestPolynomial', coefficients=[])
+
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN
         test_polynomial = Polynomial(display_name='TestPolynomial', coefficients=[-1.0])

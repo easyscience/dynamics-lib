@@ -89,10 +89,6 @@ class ComponentCollection(ModelBase):
             components = (component,)
         elif isinstance(component, ComponentCollection):
             components = component.components
-        else:
-            raise TypeError(
-                'Component must be an instance of ModelComponent or ComponentCollection.'
-            )
 
         for comp in components:
             if comp in self._components:

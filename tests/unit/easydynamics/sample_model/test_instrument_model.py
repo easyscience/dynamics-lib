@@ -206,6 +206,17 @@ class TestInstrumentModel:
         ):
             instrument_model.get_energy_offset_at_Q(5)
 
+    def test_get_energy_offset_at_Q_no_Q_raises(self, instrument_model):
+        # WHEN
+        instrument_model.Q = None
+
+        # THEN / EXPECT
+        with pytest.raises(
+            ValueError,
+            match='No Q values are set',
+        ):
+            instrument_model.get_energy_offset_at_Q(0)
+
     def test_convert_unit_calls_all_children(self, instrument_model):
         # WHEN
         new_unit = 'eV'
