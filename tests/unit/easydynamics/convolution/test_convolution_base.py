@@ -214,6 +214,14 @@ class TestConvolutionBase:
         assert convolution_base.energy_offset.value == 10
         assert convolution_base.energy_offset.unit == 'meV'
 
+    def test_energy_offset_setter_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Energy_offset must be a number or a Parameter.',
+        ):
+            convolution_base.energy_offset = 'invalid'
+
     def test_energy_with_offset_setter_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(
