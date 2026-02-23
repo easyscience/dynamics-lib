@@ -39,9 +39,6 @@ class Analysis(AnalysisBase):
             extra_parameters=extra_parameters,
         )
 
-        if experiment is not None and not isinstance(experiment, Experiment):
-            raise TypeError('experiment must be an instance of Experiment or None.')
-
         self._analysis_list = []
         if self.Q is not None:
             for Q_index in range(len(self.Q)):
@@ -240,7 +237,7 @@ class Analysis(AnalysisBase):
                         units[name] = p.unit
                     elif units[name] != p.unit:
                         try:
-                            p.unit.convert(units[name])
+                            p.convert_unit(units[name])
                         except Exception as e:
                             raise UnitError(
                                 f"Inconsistent units for parameter '{name}': "

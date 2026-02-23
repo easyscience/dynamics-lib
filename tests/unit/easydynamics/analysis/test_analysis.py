@@ -164,6 +164,15 @@ class TestAnalysis:
         ):
             analysis.fit(fit_method='invalid_fit_method')
 
+    def test_plot_data_and_model_not_in_notebook_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with patch('easydynamics.analysis.analysis._in_notebook', return_value=False):
+            with pytest.raises(
+                RuntimeError,
+                match=' can only be used in a Jupyter notebook environment',
+            ):
+                analysis.plot_data_and_model()
+
     def test_plot_data_and_model_Q_index(self, analysis):
 
         # WHEN
@@ -263,10 +272,77 @@ class TestAnalysis:
             'Model': 'none',
         }
 
+    def test_plot_data_and_model_plot_components_true(self, analysis):
+
+        # WHEN
+        fake_fig = object()
+
+        analysis._create_model_array = MagicMock(return_value='MODEL')
+        with (
+            patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
+            patch('IPython.display.display') as mock_display,
+            patch.object(
+                type(analysis.experiment),
+                'binned_data',
+                new_callable=PropertyMock,
+            ) as mock_binned,
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+        ):
+            mock_binned.return_value = 'DATA'
+            # THEN
+            analysis.plot_data_and_model(plot_components=True)
+
+        # EXPECT
+        mock_slicer.assert_called_once()
+        mock_display.assert_called_once_with(fake_fig)
+
+        # Inspect arguments passed to slicer
+        args, kwargs = mock_slicer.call_args
+
+        data_passed = args[0]
+        assert 'Data' in data_passed
+        assert 'Model' in data_passed
+
+        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Model'] == 'MODEL'
+        # Check the default kwargs
+        assert kwargs['title'] == 'TestAnalysis'
+        assert kwargs['linestyle'] == {'Data': 'none', 'Model': '-', 'Gaussian': '--'}
+        assert kwargs['marker'] == {'Data': 'o', 'Model': None, 'Gaussian': None}
+        assert kwargs['color'] == {'Data': 'black', 'Model': 'red'}
+        assert kwargs['markerfacecolor'] == {
+            'Data': 'none',
+            'Model': 'none',
+        }
+
     def test_parameters_to_dataset(self, analysis):
         # WHEN
-        # Add another component so that there are two components
         analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
+        # THEN
+        parameters_dataset = analysis.parameters_to_dataset()
+
+        # EXPECT
+        assert isinstance(parameters_dataset, sc.Dataset)
+        parameter_names = [
+            'Gaussian area',
+            'Gaussian center',
+            'Gaussian width',
+            'Gaussian2 area',
+            'Gaussian2 center',
+            'Gaussian2 width',
+            'energy_offset',
+        ]
+        for parameter_name in parameter_names:
+            assert parameter_name in parameters_dataset
+            assert 'Q' in parameters_dataset[parameter_name].dims
+
+    def test_parameters_to_dataset_different_units(self, analysis):
+
+        # WHEN
+        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
+
+        # Convert the unit of a component to eV.
+        analysis.sample_model.get_component_collection(Q_index=1).components[0].convert_unit('eV')
 
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()

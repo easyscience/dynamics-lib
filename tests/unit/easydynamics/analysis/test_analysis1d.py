@@ -11,7 +11,9 @@ from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.gaussian import Gaussian
+from easydynamics.sample_model.components.polynomial import Polynomial
 
 
 class TestAnalysis1d:
@@ -53,6 +55,14 @@ class TestAnalysis1d:
         assert analysis1d._extra_parameters == []
         assert np.array_equal(analysis1d.Q.values, [1, 2, 3])
         assert analysis1d.Q_index == 0
+
+    def test_init_no_experiment(self):
+        # WHEN
+        analysis1d = Analysis1d(display_name='TestAnalysisNoExperiment')
+
+        # THEN EXPECT
+        assert isinstance(analysis1d._experiment, Experiment)
+        assert analysis1d._convolver is None
 
     def test_Q_index_setter(self, analysis1d):
         # WHEN
@@ -293,8 +303,73 @@ class TestAnalysis1d:
     # Private methods: evaluation
     #############
 
-    def test_evaluate_components(self, analysis1d):
-        pass
+    def test_evaluate_components_no_components(self, analysis1d):
+        # WHEN
+        components = ComponentCollection()
+
+        # THEN
+        result = analysis1d._evaluate_components(components=components)
+
+        # EXPECT
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (len(analysis1d.experiment.energy),)
+        assert np.all(result == 0.0)
+
+    def test_evaluate_components_no_convolution(self, analysis1d):
+        # WHEN
+        components = Polynomial(coefficients=[1.0])
+        # THEN
+        result = analysis1d._evaluate_components(
+            components=components, convolver=None, convolve=False
+        )
+        # EXPECT
+        assert np.array_equal(result, np.array([1.0, 1.0, 1.0]))
+
+    def test_evaluate_components_convolution(self, analysis1d):
+        # WHEN
+        components = Gaussian()
+        convolver = MagicMock()
+        convolver.convolution = MagicMock(return_value=np.array([1, 2, 3]))
+
+        # THEN
+        result = analysis1d._evaluate_components(
+            components=components, convolver=convolver, convolve=True
+        )
+
+        # EXPECT
+        convolver.convolution.assert_called_once()
+        assert result is convolver.convolution.return_value
+
+    def test_evaluate_components_empty_resolution(self, analysis1d):
+        # WHEN
+        components = MagicMock()
+        components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # The default analysis1d has no resolution model components, so
+        # no convolution should be applied even if convolve=True
+
+        # THEN
+        result = analysis1d._evaluate_components(
+            components=components, convolver=None, convolve=True
+        )
+
+        # EXPECT
+        components.evaluate.assert_called_once()
+        assert np.array_equal(result, np.array([1.0, 2.0, 3.0]))
+
+    def test_evaluate_with_resolution(self, analysis1d):
+        # WHEN
+        analysis1d.instrument_model.resolution_model.components = Gaussian()
+
+        # THEN
+        with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
+            analysis1d._evaluate_components(
+                components=Gaussian(),
+                convolver=MockConvolution.return_value,
+                convolve=True,
+            )
+        # EXPECT
+        MockConvolution.return_value.convolution.assert_called_once()
 
     def test_evaluate_sample(self, analysis1d):
         # WHEN

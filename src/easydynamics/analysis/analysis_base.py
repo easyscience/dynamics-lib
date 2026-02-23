@@ -202,4 +202,5 @@ class AnalysisBase(EasyScienceModelBase):
     #############
 
     def __repr__(self) -> str:
-        return f'AnalysisBase(display_name={self.display_name}, unique_name={self.unique_name})'
+        return f' {self.__class__.__name__}  (display_name={self.display_name}, \
+        unique_name={self.unique_name})'

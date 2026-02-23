@@ -275,6 +275,7 @@ class Analysis1d(AnalysisBase):
                 Whether to perform convolution with the resolution.
                 Default is True.
         """
+
         Q_index = self._require_Q_index()
         energy = self.energy.values
         energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index).value
@@ -287,10 +288,6 @@ class Analysis1d(AnalysisBase):
         if not convolve:
             return components.evaluate(energy - energy_offset)
 
-        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
-        if resolution.is_empty:
-            return components.evaluate(energy - energy_offset)
-
         # If a convolver is provided, use it. This allows reusing the
         # same convolver for multiple evaluations during fitting for
         # performance reasons.
@@ -300,6 +297,12 @@ class Analysis1d(AnalysisBase):
         # If no convolver is provided, create a new one. This is for
         # evaluating individual components for plotting, where
         # performance is not important.
+
+        # We don't create a convolver if the resolution is empty.
+        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
+        if resolution.is_empty:
+            return components.evaluate(energy - energy_offset)
+
         conv = Convolution(
             sample_components=components,
             resolution_components=resolution,

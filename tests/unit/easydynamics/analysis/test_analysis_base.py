@@ -311,3 +311,12 @@ class TestAnalysisBase:
             weights,
             1 / analysis_base.experiment.data.variances[Q_index] ** 0.5,
         )
+
+    def test_repr(self, analysis_base):
+        # WHEN
+        repr_str = repr(analysis_base)
+
+        # THEN EXPECT
+        assert 'AnalysisBase' in repr_str
+        assert 'display_name=TestAnalysis' in repr_str
+        assert 'unique_name=' in repr_str
