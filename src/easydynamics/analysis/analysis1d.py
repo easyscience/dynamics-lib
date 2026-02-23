@@ -124,7 +124,7 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights = self._extract_x_y_weights_from_experiment()
+        x, y, weights = self._extract_x_y_weights_from_experiment(Q_index=self._require_Q_index())
         fit_result = fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result
@@ -242,18 +242,6 @@ class Analysis1d(AnalysisBase):
         updates the Convolution object for the new Q index.
         """
         self._convolver = self._create_convolver()
-
-    def _extract_x_y_weights_from_experiment(self):
-        """Extract the x, y, and weights arrays from the experiment for
-        the current Q index.
-        """
-        Q_index = self._require_Q_index()
-        data = self.experiment.data['Q', Q_index]
-        x = data.coords['energy'].values
-        y = data.values
-        e = data.variances**0.5
-        weights = 1.0 / e
-        return x, y, weights
 
     #############
     # Private methods: evaluation

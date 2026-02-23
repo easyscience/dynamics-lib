@@ -3,7 +3,6 @@
 
 
 import numpy as np
-import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
@@ -177,6 +176,7 @@ class Analysis(AnalysisBase):
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
 
+        import plopp as pp
         from IPython.display import display
 
         plot_kwargs_defaults = {
@@ -306,6 +306,9 @@ class Analysis(AnalysisBase):
         }
 
         plot_kwargs_defaults.update(kwargs)
+
+        import plopp as pp
+
         fig = pp.plot(
             data_to_plot,
             **plot_kwargs_defaults,
@@ -335,18 +338,13 @@ class Analysis(AnalysisBase):
         ws = []
 
         for analysis in self.analysis_list:
-            data = analysis.experiment.data['Q', analysis.Q_index]
-
-            x = data.coords['energy'].values
-            y = data.values
-            e = np.sqrt(data.variances)
+            x, y, weight = self._extract_x_y_weights_from_experiment(analysis.Q_index)
+            xs.append(x)
+            ys.append(y)
+            ws.append(weight)
 
             # Make sure the convolver is up to date for this Q index
             analysis._convolver = analysis._create_convolver()
-
-            xs.append(x)
-            ys.append(y)
-            ws.append(1.0 / e)
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,
@@ -386,7 +384,7 @@ class Analysis(AnalysisBase):
             Whether to add background components to the sample model
             components. Default is True.
 
-        Returns: A scipp Dataset where each variable is a component of
+        Returns: A scipp Dataset where each entry is a component of
             the model, with dimensions "Q" and "energy".
         """
         if not isinstance(add_background, bool):

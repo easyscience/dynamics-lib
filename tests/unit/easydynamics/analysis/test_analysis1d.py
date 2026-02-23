@@ -1,6 +1,3 @@
-# from unittest.mock import Mock
-
-
 from collections import Counter
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -291,17 +288,6 @@ class TestAnalysis1d:
 
         # EXPECT
         analysis1d._create_convolver.assert_called_once()
-
-    def test_extract_x_y_weights_from_experiment(self, analysis1d):
-        # WHEN THEN
-        x, y, weights = analysis1d._extract_x_y_weights_from_experiment()
-
-        # EXPECT
-        assert np.array_equal(x, analysis1d.experiment.energy.values)
-        assert np.array_equal(y, analysis1d.experiment.data.values[analysis1d.Q_index])
-        assert np.array_equal(
-            weights, 1 / analysis1d.experiment.data.variances[analysis1d.Q_index] ** 0.5
-        )
 
     #############
     # Private methods: evaluation

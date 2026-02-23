@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-
+import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
@@ -183,6 +183,19 @@ class AnalysisBase(EasyScienceModelBase):
             ):
                 raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
+
+    def _extract_x_y_weights_from_experiment(
+        self, Q_index: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Extract the x, y, and weights arrays from the experiment for
+        the given Q index.
+        """
+        data = self.experiment.data['Q', Q_index]
+        x = data.coords['energy'].values
+        y = data.values
+        e = data.variances**0.5
+        weights = 1.0 / e
+        return x, y, weights
 
     #############
     # Dunder methods
