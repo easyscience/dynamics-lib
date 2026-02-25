@@ -109,6 +109,7 @@ class Analysis1d(AnalysisBase):
         Args:
             index (int | None): The Q index.
         """
+
         self._Q_index = self._verify_Q_index(value)
         self._on_Q_index_changed()
 
@@ -117,7 +118,7 @@ class Analysis1d(AnalysisBase):
     #############
 
     def calculate(self) -> np.ndarray:
-        """Calculate the model prediction for a given Q index. Makes
+        """Calculate the model prediction for the chosen Q index. Makes
         sure the convolver is up to date before calculating.
 
         Returns:
@@ -129,10 +130,9 @@ class Analysis1d(AnalysisBase):
         return self._calculate()
 
     def _calculate(self) -> np.ndarray:
-        """Calculate the model prediction for a given Q index.
+        """Calculate the model prediction for the chosen Q index. Does
+        not check if the convolver is up to date.
 
-        Args:
-            energy (float): The energy value to calculate the model for.
         Returns:
             np.ndarray: The calculated model prediction.
         """
@@ -146,16 +146,22 @@ class Analysis1d(AnalysisBase):
         return sample_plus_background
 
     def fit(self) -> FitResults:
-        """Fit the model to the experimental data for a given Q index.
+        """Fit the model to the experimental data for the chosen Q
+        index.
+
+        The energy grid is fixed for the duration of the fit.
+        Convolution objects are created once and reused during
+        parameter optimization for performance reasons.
 
         Returns:
             FitResult: The result of the fit.
 
-        Notes
-        -----
-        The energy grid is fixed for the duration of the fit.
-        Convolution objects are created once and reused during
-        parameter optimization for performance reasons.
+        Raises:
+            ValueError: If no experiment is associated with this
+                Analysis.
+
+        Returns:
+            FitResults: The result of the fit.
         """
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
@@ -182,6 +188,11 @@ class Analysis1d(AnalysisBase):
         self._calculate() already uses the correct energy from the
         experiment. So we ignore the x input and just return the
         calculated model.
+
+        Args:
+            x: Ignored. The energy grid is taken from the experiment.
+            kwargs: Ignored. Included for compatibility with the
+                EasyScience fitter.
         """
 
         def fit_function(x, **kwargs):
@@ -210,17 +221,20 @@ class Analysis1d(AnalysisBase):
         add_background=True,
         **kwargs,
     ):
-        """Plot the experimental data and the model prediction for a
-        given Q index.
+        """Plot the experimental data and the model prediction for the
+        chosen Q index. Optionally also plot the individual components
+        of the model.
 
-        Uses Plopp for plotting.
+        Uses Plopp for plotting: https://scipp.github.io/plopp/
 
         Args:
+            plot_components (bool): Whether to plot the individual
+                components of the model. Default is True.
             add_background (bool): Whether to add the background to the
                 model prediction when plotting individual components.
-
             kwargs: Keyword arguments to pass to the plotting
                 function.
+
         Returns:
             A plot of the data and model.
         """
@@ -269,11 +283,14 @@ class Analysis1d(AnalysisBase):
     #############
 
     def _require_Q_index(self) -> int:
-        """Get the Q index, ensuring it is set.
+        """Get the Q index, ensuring it is set. Raises a ValueError if
+        the Q index is not set.
 
-        Raises a ValueError if the Q index is not set.
         Returns:
             int: The Q index.
+
+        Raises:
+            ValueError: If the Q index is not set.
         """
         if self._Q_index is None:
             raise ValueError('Q_index must be set.')
@@ -309,6 +326,7 @@ class Analysis1d(AnalysisBase):
         components (for individual components).
         If convolve is False, evaluate the components directly without
         convolution (for background).
+
         Args:
             components (ComponentCollection | ModelComponent):
                 The components to evaluate.
