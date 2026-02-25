@@ -22,14 +22,26 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
 
     Args:
-        area (Int or float): Area under the curve.
-        center (Int or float): Resonance frequency, approximately the
+        area (Int | float): Area under the curve.
+        center (Int | float): Resonance frequency, approximately the
             peak position.
-        width (Int or float): Damping constant, approximately the
+        width (Int | float): Damping constant, approximately the
             half width at half max (HWHM) of the peaks.
-        unit (str or sc.Unit): Unit of the parameters.
+        unit (str | sc.Unit): Unit of the parameters.
             Defaults to "meV".
-        display_name (str): Display name of the component.
+        display_name (str | None): Display name of the component.
+        unique_name (str | None): Unique name of the component.
+            If None, a unique_name is automatically generated.
+
+    Attributes:
+        area (Parameter): Area under the curve.
+        center (Parameter): Resonance frequency, approximately the
+            peak position.
+        width (Parameter): Damping constant, approximately the
+            half width at half max (HWHM) of the peaks.
+        unit (str | sc.Unit): Unit of the parameters.
+        display_name (str | None): Display name of the component.
+        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
