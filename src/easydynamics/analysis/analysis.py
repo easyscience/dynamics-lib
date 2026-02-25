@@ -7,6 +7,7 @@ import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.variable import Parameter
+from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
@@ -15,6 +16,8 @@ from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.utils.utils import _in_notebook
+
+# TODO: fix analysis1d regeneration if e.g. experiment changes.
 
 
 class Analysis(AnalysisBase):
@@ -265,7 +268,7 @@ class Analysis(AnalysisBase):
         self,
         names: str | list[str] | None = None,
         **kwargs,
-    ) -> None:
+    ) -> InteractiveFigure:
         """Plot fitted parameters as a function of Q.
 
         Parameters:
@@ -277,7 +280,7 @@ class Analysis(AnalysisBase):
             customizing the plot (e.g., title, linestyle, marker,
             color).
 
-        Returns: A plopp figure.
+        Returns: An InteractiveFigure.
         """
 
         ds = self.parameters_to_dataset()

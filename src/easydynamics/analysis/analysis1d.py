@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-
-from inspect import Parameter
-
 import numpy as np
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.variable import DescriptorNumber
+from easyscience.variable import Parameter
+from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.convolution.convolution import Convolution
@@ -220,7 +219,7 @@ class Analysis1d(AnalysisBase):
         plot_components: bool = True,
         add_background=True,
         **kwargs,
-    ):
+    ) -> InteractiveFigure:
         """Plot the experimental data and the model prediction for the
         chosen Q index. Optionally also plot the individual components
         of the model.
@@ -236,7 +235,7 @@ class Analysis1d(AnalysisBase):
                 function.
 
         Returns:
-            A plot of the data and model.
+            InteractiveFigure: A plot of the data and model.
         """
         import plopp as pp
 

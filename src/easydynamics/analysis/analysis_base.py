@@ -307,7 +307,7 @@ class AnalysisBase(EasyScienceModelBase):
             int | None: The verified Q index.
 
         Raises:
-            ValueError: If the Q index is not valid.
+            IndexError: If the Q index is not valid.
         """
         if Q_index is not None:
             if (
@@ -336,6 +336,8 @@ class AnalysisBase(EasyScienceModelBase):
         x = data.coords['energy'].values
         y = data.values
         e = data.variances**0.5
+        if np.any(e == 0):
+            raise ValueError('Cannot compute weights: some variances are zero.')
         weights = 1.0 / e
         return x, y, weights
 
