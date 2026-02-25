@@ -260,7 +260,8 @@ class AnalysisBase(EasyScienceModelBase):
             include in this Analysis.
 
         Raises:
-            TypeError: If value is not a Parameter or a list of Parameters.
+            TypeError: If value is not a Parameter or a list of
+            Parameters.
         """
         if isinstance(value, Parameter):
             self._extra_parameters = [value]
