@@ -20,7 +20,46 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 
 class Analysis1d(AnalysisBase):
-    """For analysing data."""
+    """For analysing one-dimensional data, i.e. intensity as function of
+    energy for a single Q index. Is used primarily in the Analysis
+    class, but can also be used on its own for simpler analyses.
+
+    Args:
+        display_name (str): Display name of the analysis.
+        unique_name (str or None): Unique name of the analysis. If None,
+            a unique name is automatically generated.
+        experiment (Experiment | None): The Experiment associated with
+            this Analysis. If None, a default Experiment is created.
+        sample_model (SampleModel | None): The SampleModel associated
+            with this Analysis. If None, a default SampleModel is
+            created.
+        instrument_model (InstrumentModel | None): The InstrumentModel
+            associated with this Analysis. If None, a default
+            InstrumentModel is created.
+        Q_index (int | None): The Q index to analyze. If None, the
+            analysis will not be able to calculate or fit until a
+            Q index is set.
+        extra_parameters (Parameter | list[Parameter] | None):
+        Extra parameters to be included in the analysis for advanced
+            users. If None, no extra parameters are added.
+
+    Attributes:
+        experiment (Experiment): The Experiment associated with this
+            Analysis.
+        sample_model (SampleModel): The SampleModel associated with this
+            Analysis.
+        instrument_model (InstrumentModel): The InstrumentModel
+            associated with this Analysis.
+        Q (sc.Variable | None): The Q values from the associated
+            Experiment, if available.
+        energy (sc.Variable | None): The energy values from the
+            associated Experiment, if available.
+        temperature (Parameter | None): The temperature from the
+            associated SampleModel, if available.
+        Q_index (int | None): The Q index being analyzed.
+        extra_parameters (list[Parameter]): The extra parameters
+        included in this Analysis.
+    """
 
     def __init__(
         self,
@@ -55,7 +94,12 @@ class Analysis1d(AnalysisBase):
 
     @property
     def Q_index(self) -> int | None:
-        """Get the Q index for single Q analysis."""
+        """Get the Q index associated with this Analysis.
+
+        Returns:
+            Experiment: The Experiment associated with this Analysis.
+        """
+
         return self._Q_index
 
     @Q_index.setter
