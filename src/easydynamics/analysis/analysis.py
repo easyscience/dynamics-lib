@@ -68,6 +68,9 @@ class Analysis(AnalysisBase):
         extra_parameters: Parameter | list[Parameter] | None = None,
     ):
 
+        # Avoid triggering updates before the object is fully
+        # initialized
+        self._call_updaters = False
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -90,6 +93,8 @@ class Analysis(AnalysisBase):
                     Q_index=Q_index,
                 )
                 self._analysis_list.append(analysis)
+        # Now we can allow updates to trigger recalculations
+        self._call_updaters = True
 
     #############
     # Properties
@@ -412,9 +417,10 @@ class Analysis(AnalysisBase):
 
         Also update all the Analysi1d objects with the new experiment.
         """
-        super()._on_experiment_changed()
-        for analysis in self.analysis_list:
-            analysis.experiment = self.experiment
+        if self._call_updaters:
+            super()._on_experiment_changed()
+            for analysis in self.analysis_list:
+                analysis.experiment = self.experiment
 
     def _on_sample_model_changed(self) -> None:
         """Update the Q values in the sample model when the sample model
@@ -422,9 +428,10 @@ class Analysis(AnalysisBase):
 
         Also update all the Analysi1d objects with the new sample model.
         """
-        super()._on_sample_model_changed()
-        for analysis in self.analysis_list:
-            analysis.sample_model = self.sample_model
+        if self._call_updaters:
+            super()._on_sample_model_changed()
+            for analysis in self.analysis_list:
+                analysis.sample_model = self.sample_model
 
     def _on_instrument_model_changed(self) -> None:
         """Update the Q values in the instrument model when the
@@ -433,9 +440,10 @@ class Analysis(AnalysisBase):
         Also update all the Analysi1d objects with the new instrument
         model.
         """
-        super()._on_instrument_model_changed()
-        for analysis in self.analysis_list:
-            analysis.instrument_model = self.instrument_model
+        if self._call_updaters:
+            super()._on_instrument_model_changed()
+            for analysis in self.analysis_list:
+                analysis.instrument_model = self.instrument_model
 
     #############
     # Private methods
