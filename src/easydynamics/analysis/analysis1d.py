@@ -394,10 +394,12 @@ class Analysis1d(AnalysisBase):
         self,
         component: ModelComponent,
     ) -> np.ndarray:
-        """Evaluate a single sample component for a given Q index.
+        """Evaluate a single sample component for the chosen Q index.
 
         Args:
-            component: The sample component to evaluate.
+            component (ModelComponent): The sample component to
+                evaluate.
+
         Returns:
             np.ndarray: The evaluated sample component contribution.
         """
@@ -408,7 +410,7 @@ class Analysis1d(AnalysisBase):
         )
 
     def _evaluate_background(self) -> np.ndarray:
-        """Evaluate the background contribution for a given Q index.
+        """Evaluate the background contribution for the chosen Q index.
 
         Returns:
             np.ndarray: The evaluated background contribution.
@@ -427,10 +429,13 @@ class Analysis1d(AnalysisBase):
         self,
         component: ModelComponent,
     ) -> np.ndarray:
-        """Evaluate a single background component for a given Q index.
+        """Evaluate a single background component for the chosen Q
+        index.
 
         Args:
-            component: The background component to evaluate.
+            component (ModelComponent): The background component to
+                evaluate.
+
         Returns:
             np.ndarray: The evaluated background component contribution.
         """
@@ -442,7 +447,7 @@ class Analysis1d(AnalysisBase):
         )
 
     def _create_convolver(self) -> Convolution | None:
-        """Initialize and return a Convolution object for the given Q
+        """Initialize and return a Convolution object for the chosen Q
         index. If the necessary components for convolution are not
         available, return None.
 
@@ -484,16 +489,15 @@ class Analysis1d(AnalysisBase):
         """Create a scipp DataArray for a single component. Adds the
         background if it is not None.
 
-        Parameters:
-        -----------
-        component: ModelComponent.
-            The component to evaulate
-        backgrond: np.ndarray | None
-            Optional background to add to the component.
+        Args:
+            component (ModelComponent): The component to evaluate
+            background (np.ndarray | None): Optional background to add
+                to the component.
 
         Returns:
-            sc.DataArray with the model calculation of the component.
+            sc.DataArray: The model calculation of the component.
         """
+
         values = self._evaluate_sample_component(component=component)
         if background is not None:
             values += background
@@ -505,20 +509,23 @@ class Analysis1d(AnalysisBase):
     ) -> sc.DataArray:
         """Create a scipp DataArray for a single background component.
 
-        Parameters:
-        -----------
-        component: ModelComponent.
-            The component to evaulate
+        Args:
+            component (ModelComponent): The component to evaluate.
 
         Returns:
-            sc.DataArray with the model calculation of the component.
+            sc.DataArray: The model calculation of the component.
         """
+
         values = self._evaluate_background_component(component=component)
         return self._to_scipp_array(values=values)
 
     def _create_sample_scipp_array(self) -> sc.DataArray:
         """Create a scipp DataArray for the full sample model including
         background.
+
+        Returns:
+            sc.DataArray: The model calculation of the full sample
+                model.
         """
         values = self._calculate()
         return self._to_scipp_array(values=values)
@@ -529,7 +536,15 @@ class Analysis1d(AnalysisBase):
     ) -> dict[str, sc.DataArray]:
         """Create sc.DataArrays for all sample and background
         components.
+
+        Args:
+            add_background (bool): Whether to add background components.
+
+        Returns:
+            dict[str, sc.DataArray]: A dictionary of component names to
+            their corresponding sc.DataArrays.
         """
+
         scipp_arrays = {}
         sample_components = self.sample_model.get_component_collection(
             Q_index=self.Q_index
@@ -555,9 +570,11 @@ class Analysis1d(AnalysisBase):
 
         Args:
             values (np.ndarray): The values to convert.
+
         Returns:
             sc.DataArray: The converted sc.DataArray.
         """
+
         return sc.DataArray(
             data=sc.array(dims=['energy'], values=values),
             coords={
