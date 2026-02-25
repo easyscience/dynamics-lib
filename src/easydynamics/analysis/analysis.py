@@ -403,6 +403,41 @@ class Analysis(AnalysisBase):
         return fig
 
     #############
+    # Private methods - updating models when things change
+    #############
+
+    def _on_experiment_changed(self) -> None:
+        """Update the Q values in the sample and instrument models when
+        the experiment changes.
+
+        Also update all the Analysi1d objects with the new experiment.
+        """
+        super()._on_experiment_changed()
+        for analysis in self.analysis_list:
+            analysis.experiment = self.experiment
+
+    def _on_sample_model_changed(self) -> None:
+        """Update the Q values in the sample model when the sample model
+        changes.
+
+        Also update all the Analysi1d objects with the new sample model.
+        """
+        super()._on_sample_model_changed()
+        for analysis in self.analysis_list:
+            analysis.sample_model = self.sample_model
+
+    def _on_instrument_model_changed(self) -> None:
+        """Update the Q values in the instrument model when the
+        instrument model changes.
+
+        Also update all the Analysi1d objects with the new instrument
+        model.
+        """
+        super()._on_instrument_model_changed()
+        for analysis in self.analysis_list:
+            analysis.instrument_model = self.instrument_model
+
+    #############
     # Private methods
     #############
 

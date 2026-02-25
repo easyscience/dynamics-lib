@@ -166,18 +166,34 @@ class ConvolutionBase:
         )  # noqa: E501
 
     def convert_energy_unit(self, energy_unit: str | sc.Unit) -> None:
-        """Convert the energy to the specified unit
+        """Convert the energy and energy_offset to the specified unit.
+
         Args:
             energy_unit : str or sc.Unit
                 The unit of the energy.
 
         Raises:
             TypeError: If energy_unit is not a string or scipp unit.
+            UnitError: If energy cannot be converted to the specified
+                unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
             raise TypeError('Energy unit must be a string or scipp unit.')
 
-        self.energy = sc.to_unit(self.energy, energy_unit)
+        old_energy = self.energy.copy()
+        try:
+            self.energy = sc.to_unit(self.energy, energy_unit)
+        except Exception as e:
+            self.energy = old_energy
+            raise e
+
+        old_energy_offset = self.energy_offset
+        try:
+            self.energy_offset.convert_unit(energy_unit)
+        except Exception as e:
+            self.energy_offset = old_energy_offset
+            raise e
+
         self._energy_unit = energy_unit
 
     @property
@@ -200,6 +216,9 @@ class ConvolutionBase:
             raise TypeError(
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+
+        if isinstance(sample_components, ModelComponent):
+            sample_components = ComponentCollection(components=[sample_components])
         self._sample_components = sample_components
 
     @property
@@ -225,4 +244,7 @@ class ConvolutionBase:
             raise TypeError(
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+
+        if isinstance(resolution_components, ModelComponent):
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
