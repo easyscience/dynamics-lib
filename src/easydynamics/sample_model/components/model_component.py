@@ -16,21 +16,27 @@ from easydynamics.utils.utils import Numeric
 
 
 class ModelComponent(ModelBase):
-    """
-    Abstract base class for all model components.
+    """Abstract base class for all model components.
 
     Args:
-        unit (str or sc.Unit): The unit of the model component.
+        unit (str | sc.Unit): The unit of the model component.
             Default is 'meV'.
-        display_name (str, optional): A human-readable name for the
+        display_name (str | None): A human-readable name for the
             component. Default is None.
-        unique_name (str, optional): A unique identifier for the
+        unique_name (str | None): A unique identifier for the
             component. Default is None.
+
+    Attributes:
+        unit (str): The unit of the model component.
+        display_name (str | None): A human-readable name for the
+            component.
+        unique_name (str | None): A unique identifier for the
+            component.
     """
 
     def __init__(
         self,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         display_name: str | None = None,
         unique_name: str | None = None,
     ):
@@ -40,8 +46,7 @@ class ModelComponent(ModelBase):
 
     @property
     def unit(self) -> str:
-        """
-        Get the unit.
+        """Get the unit.
 
         Returns:
             str: The unit of the model component.
@@ -50,10 +55,9 @@ class ModelComponent(ModelBase):
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
-        """
-        Unit is read-only. Use convert_unit to change the unit between
-        allowed types or create a new ModelComponent with the desired
-        unit.
+        """Unit is read-only. Use convert_unit to change the unit
+        between allowed types or create a new ModelComponent with the
+        desired unit.
 
         Args:
             unit_str (str): The new unit to set.
@@ -63,37 +67,32 @@ class ModelComponent(ModelBase):
         """
         raise AttributeError(
             (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
+                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+                f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
 
     def fix_all_parameters(self):
-        """
-        Fix all parameters in the model component.
-        """
+        """Fix all parameters in the model component."""
 
         pars = self.get_fittable_parameters()
         for p in pars:
             p.fixed = True
 
     def free_all_parameters(self):
-        """
-        Free all parameters in the model component.
-        """
+        """Free all parameters in the model component."""
         for p in self.get_fittable_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
         self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
-        """
-        Prepare the input x for evaluation by handling units and
+        """Prepare the input x for evaluation by handling units and
         converting to a numpy array.
 
         Args:
-            x (Numeric or List[Numeric] or np.ndarray or sc.Variable or
-                sc.DataArray): The input data to prepare.
+            x (Numeric | List[Numeric] | np.ndarray | sc.Variable |
+            sc.DataArray): The input data to prepare.
 
         Returns:
             np.ndarray: The prepared input data as a numpy array.
@@ -111,10 +110,10 @@ class ModelComponent(ModelBase):
             coords = dict(x.coords)
             ncoords = len(coords)
             if ncoords != 1:
-                coord_names = ", ".join(coords.keys())
+                coord_names = ', '.join(coords.keys())
                 raise ValueError(
-                    f"scipp.DataArray must have exactly one coordinate to be used as input `x`. "
-                    f"Found {ncoords} coordinates: {coord_names}."
+                    f'scipp.DataArray must have exactly one coordinate to be used as input `x`. '
+                    f'Found {ncoords} coordinates: {coord_names}.'
                 )
             # get the coordinate, it's a sc.Variable
             coord_name, coord_obj = next(iter(coords.items()))
@@ -132,15 +131,15 @@ class ModelComponent(ModelBase):
                     self.convert_unit(x.unit.name)
                 except Exception as e:
                     raise UnitError(
-                        f"Input x has unit {x.unit}, but {self.__class__.__name__} component \
+                        f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
                             has unit {self._unit}. \
-                                Failed to convert {self.__class__.__name__} to {x.unit}."
+                                Failed to convert {self.__class__.__name__} to {x.unit}.'
                     ) from e
 
                 warnings.warn(
-                    f"Input x has unit {x.unit}, but {self.__class__.__name__} component \
+                    f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
                         has unit {self_unit_for_warning}. \
-                            Converting {self.__class__.__name__} to {x.unit}."
+                            Converting {self.__class__.__name__} to {x.unit}.'
                 )
         else:
             x_in = x
@@ -151,29 +150,27 @@ class ModelComponent(ModelBase):
             x_in = np.array(x_in)
 
         if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
+            raise ValueError('Input x contains NaN values.')
 
         if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
+            raise ValueError('Input x contains infinite values.')
 
         return np.sort(x_in)
 
     @staticmethod
     def validate_unit(unit) -> None:
-        """
-        Validate that the unit is either a string or a scipp Unit.
+        """Validate that the unit is either a string or a scipp Unit.
 
         Raises:
             TypeError: If unit is not a string or scipp Unit.
         """
         if unit is not None and not isinstance(unit, (str, sc.Unit)):
             raise TypeError(
-                f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+                f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
             )
 
     def convert_unit(self, unit: str | sc.Unit):
-        """
-        Convert the unit of the Parameters in the component.
+        """Convert the unit of the Parameters in the component.
 
         Args:
             unit (str or sc.Unit): The new unit to convert to.
@@ -189,7 +186,7 @@ class ModelComponent(ModelBase):
             # Attempt to rollback on failure
             try:
                 for p in pars:
-                    if hasattr(p, "convert_unit"):
+                    if hasattr(p, 'convert_unit'):
                         p.convert_unit(old_unit)
             except Exception:  # noqa: S110
                 pass  # Best effort rollback
@@ -199,9 +196,8 @@ class ModelComponent(ModelBase):
     def evaluate(
         self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
-        """
-        Abstract method to evaluate the model component at input x. Must
-        be implemented by subclasses.
+        """Abstract method to evaluate the model component at input x.
+        Must be implemented by subclasses.
 
         Args:
             x (Numeric or List[Numeric] or np.ndarray or sc.Variable or
@@ -213,4 +209,10 @@ class ModelComponent(ModelBase):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})"
+        """Return a string representation of the ModelComponent.
+
+        Returns:
+            str: A string representation of the ModelComponent.
+        """
+
+        return f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})'

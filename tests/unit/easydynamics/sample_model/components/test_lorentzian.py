@@ -128,6 +128,11 @@ class TestLorentzian:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(lorentzian, prop, invalid_value)
 
+    def test_width_must_be_positive(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            lorentzian.width = -0.5
+
     def test_evaluate(self, lorentzian: Lorentzian):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])

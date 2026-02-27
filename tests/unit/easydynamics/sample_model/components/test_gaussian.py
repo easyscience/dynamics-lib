@@ -124,6 +124,11 @@ class TestGaussian:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(gaussian, prop, invalid_value)
 
+    def test_width_must_be_positive(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            gaussian.width = -0.5
+
     def test_evaluate(self, gaussian: Gaussian):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])

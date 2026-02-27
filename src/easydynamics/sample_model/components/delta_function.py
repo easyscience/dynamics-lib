@@ -16,8 +16,7 @@ EPSILON = 1e-8  # small number to avoid floating point issues
 
 
 class DeltaFunction(CreateParametersMixin, ModelComponent):
-    """
-    Delta function.
+    """Delta function.
 
     Evaluates to zero everywhere, except in convolutions, where it acts
     as an identity. This is handled by the Convolution method. If the
@@ -46,8 +45,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self,
         center: None | Numeric | Parameter = None,
         area: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "DeltaFunction",
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
     ):
         # Validate inputs and create Parameters if not given
@@ -58,9 +57,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=display_name, unit=self._unit
-        )
+        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
@@ -70,8 +67,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     @property
     def area(self) -> Parameter:
-        """
-        Get the area parameter.
+        """Get the area parameter.
 
         Returns:
             Parameter: The area parameter.
@@ -81,8 +77,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """
-        Set the value of the area parameter.
+        """Set the value of the area parameter.
 
         Args:
             value (Numeric): The new value for the area parameter.
@@ -92,13 +87,12 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
 
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
     def center(self) -> Parameter:
-        """
-        Get the center parameter.
+        """Get the center parameter.
 
         Returns:
             Parameter: The center parameter.
@@ -108,8 +102,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
-        """
-        Set the center parameter value.
+        """Set the center parameter value.
 
         Args:
             value (Numeric | None): The new value for the center
@@ -123,14 +116,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
-        """
-        Evaluate the Delta function at the given x values.
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+        """Evaluate the Delta function at the given x values.
 
         The Delta function evaluates to zero everywhere, except at the
         center. Its numerical integral is equal to the area. It acts as
@@ -176,12 +166,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         return model
 
     def __repr__(self) -> str:
-        """
-        Return a string representation of the Delta function.
+        """Return a string representation of the Delta function.
 
         Returns:
             str: A string representation of the Delta function.
         """
 
-        return f"DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \
-        area = {self.area},\n center = {self.center}"
+        return f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \
+        area = {self.area},\n center = {self.center}'
