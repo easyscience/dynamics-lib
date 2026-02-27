@@ -15,6 +15,21 @@ class Experiment(NewBase):
 
     This is a minimal implementation that will be extended in the
     future.
+
+    Args:
+        display_name (str): Display name of the experiment.
+        unique_name (str | None): Unique name of the experiment. If
+            None, a unique name will be generated.
+        data (sc.DataArray | str | None): Dataset associated with the
+            experiment. Can be a sc.DataArray or a filename string to
+            load from. If None, no data is loaded.
+
+    Attributes:
+        data (sc.DataArray | None): Dataset associated with the
+            experiment.
+        binned_data (sc.DataArray | None): Binned dataset associated
+        with the experiment. This is derived from `data` and is updated
+            whenever `data` is set.
     """
 
     def __init__(
@@ -50,12 +65,26 @@ class Experiment(NewBase):
 
     @property
     def data(self) -> sc.DataArray | None:
-        """Get the dataset associated with this experiment."""
+        """Get the dataset associated with this experiment.
+
+        Returns:
+            sc.DataArray | None: The dataset associated with this
+                experiment, or None if no data is loaded.
+        """
         return self._data
 
     @data.setter
     def data(self, value: sc.DataArray) -> None:
-        """Set the dataset associated with this experiment."""
+        """Set the dataset associated with this experiment.
+
+        Args:
+            value (sc.DataArray): The new dataset to associate with this
+                experiment.
+
+        Raises:
+            TypeError: If the value is not a sc.DataArray.
+            ValueError: If the dataset is missing required coordinates.
+        """
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
         self._validate_coordinates(value)
@@ -66,36 +95,76 @@ class Experiment(NewBase):
 
     @property
     def binned_data(self) -> sc.DataArray | None:
-        """Get the binned dataset associated with this experiment."""
+        """Get the binned dataset associated with this experiment.
+
+        Returns:
+            sc.DataArray | None: The binned dataset associated with this
+                experiment, or None if no data is loaded.
+        """
         return self._binned_data
 
     @binned_data.setter
     def binned_data(self, value: sc.DataArray) -> None:
-        """Set the binned dataset associated with this experiment."""
+        """Set the binned dataset associated with this experiment. Read-
+        only property. Use rebin() to rebin the data instead.
+
+        Args:
+            value (sc.DataArray): The new binned dataset to associate
+            with this experiment (ignored)
+
+        Raises:
+            AttributeError: Always, since binned_data is read-only.
+        """
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
     @property
     def Q(self) -> sc.Variable | None:
-        """Get the Q values from the dataset."""
+        """Get the Q values from the dataset.
+
+        Returns:
+            sc.Variable | None: The Q values from the dataset, or None
+            if no data is loaded.
+        """
         if self._data is None:
             return None
         return self._binned_data.coords['Q']
 
     @Q.setter
     def Q(self, value: sc.Variable) -> None:
-        """Set the Q values for the dataset."""
+        """Set the Q values for the dataset. Q is a read-only property
+        derived from the data, so this setter raises an error.
+
+        Args:
+            value (sc.Variable): The new Q values to set (ignored)
+
+        Raises:
+            AttributeError: Always, since Q is read-only.
+        """
         raise AttributeError('Q is a read-only property derived from the data.')
 
     @property
     def energy(self) -> sc.Variable | None:
-        """Get the energy values from the dataset."""
+        """Get the energy values from the dataset.
+
+        Returns:
+            sc.Variable | None: The energy values from the dataset, or
+                None if no data is loaded.
+        """
         if self._data is None:
             return None
         return self._binned_data.coords['energy']
 
     @energy.setter
     def energy(self, value: sc.Variable) -> None:
-        """Set the energy values for the dataset."""
+        """Set the energy values for the dataset. Energy is a read-only
+        property derived from the data, so this setter raises an error.
+
+        Args:
+            value (sc.Variable): The new energy values to set (ignored)
+
+        Raises:
+            AttributeError: Always, since energy is read-only.
+        """
         raise AttributeError('energy is a read-only property derived from the data.')
 
     ###########
@@ -109,6 +178,12 @@ class Experiment(NewBase):
             filename (str ): Path to the HDF5 file.
             display_name (str | None): Optional display name for the
             experiment.
+
+        Raises:
+            TypeError: If filename is not a string or if display_name is
+                not a string or None.
+            ValueError: If the loaded data is missing required
+                coordinates.
         """
         if not isinstance(filename, str):
             raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
@@ -133,6 +208,12 @@ class Experiment(NewBase):
 
         Args:
             filename (str | None): Path to the output HDF5 file.
+                If None, the file will be named after the unique_name of
+                the experiment with a .h5 extension.
+
+        Raises:
+            TypeError: If filename is not a string or None.
+            ValueError: If there is no data to save.
         """
 
         if filename is None:
@@ -160,12 +241,13 @@ class Experiment(NewBase):
 
         Args:
             dimensions (dict[str, int | sc.Variable]): A dictionary
-            mapping dimension names to number of bins (int) or bin edges
-            (sc.Variable).
+                mapping dimension names to number of bins (int) or bin
+                edges (sc.Variable).
+
         Raises:
             TypeError: If dimensions is not a dictionary or if
-            keys/values are of incorrect types. KeyError: If a specified
-            dimension is not in the dataset.
+                keys/values are of incorrect types.
+            KeyError: If a specified dimension is not in the dataset.
         """
 
         if not isinstance(dimensions, dict):
@@ -208,7 +290,16 @@ class Experiment(NewBase):
     ###########
 
     def plot_data(self, slicer=False, **kwargs) -> None:
-        """Plot the dataset using plopp."""
+        """Plot the dataset using plopp: https://scipp.github.io/plopp/
+
+        Args:
+            slicer (bool): If True, use plopp's slicer instead of plot.
+            **kwargs: Additional keyword arguments to pass to plopp.
+
+        Raises:
+            ValueError: If there is no data to plot.
+            RuntimeError: If not in a Jupyter notebook environment.
+        """
 
         if self._binned_data is None:
             raise ValueError('No data to plot. Please load data first.')
@@ -243,6 +334,9 @@ class Experiment(NewBase):
     def _validate_coordinates(data: sc.DataArray) -> None:
         """Validate that required coordinates are present in the data.
 
+        Args:
+            data (sc.DataArray): The data to validate.
+
         Raises:
             ValueError: If required coordinates are missing.
         """
@@ -258,7 +352,7 @@ class Experiment(NewBase):
         """Convert the coordinates of the data to bin centers.
 
         Args:
-            data (sc.DataArray): The data to check.
+            data (sc.DataArray): The data to convert.
 
         Returns:
             sc.DataArray: The data with coordinates at bin centers.
@@ -275,10 +369,20 @@ class Experiment(NewBase):
     ###########
 
     def __repr__(self) -> str:
+        """Return a string representation of the Experiment object.
+
+        Returns:
+            str: A string representation of the Experiment object.
+        """
+
         return f'Experiment `{self.unique_name}` with data: {self._data}'
 
     def __copy__(self) -> 'Experiment':
-        """Return a copy of the object."""
+        """Return a copy of the object.
+
+        Returns:
+            Experiment: A copy of the Experiment object.
+        """
         temp = self.to_dict(skip=['unique_name'])
         new_obj = self.__class__.from_dict(temp)
         new_obj.data = self.data.copy() if self.data is not None else None

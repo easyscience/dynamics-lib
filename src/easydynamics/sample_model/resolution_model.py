@@ -16,21 +16,25 @@ class ResolutionModel(ModelBase):
     """ResolutionModel represents a model of the instrment resolution in
     an experiment at various Q.
 
-    Parameters
-    ----------
-    display_name : str
-        Display name of the model.
-    unique_name : str | None
-        Unique name of the model. If None, a unique name will be
-        generated.
-    unit : str | sc.Unit | None
-        Unit of the model. If None, unitless.
-    components : ModelComponent | ComponentCollection | None
-        Template components of the model. If None, no components
-        are added. These components are copied into ComponentCollections
-        for each Q value.
-    Q : Number, list, np.ndarray or sc.Variable | None
-        Q values for the model. If None, Q is not set.
+    Args:
+        display_name (str): Display name of the model.
+        unique_name (str | None): Unique name of the model. If None, a
+            unique name will be generated.
+        unit (str | sc.Unit | None): Unit of the model. Defaults to
+            "meV".
+        components (ModelComponent | ComponentCollection | None):
+            Template components of the model. If None, no components
+            are added. These components are copied into
+            ComponentCollections for each Q value.
+        Q (Q_type | None): Q values for the model. If None, Q is not
+            set.
+
+    Attributes:
+        unit (str | sc.Unit): Unit of the model.
+        components (list[ModelComponent]): List of ModelComponents in
+            the model.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
+            | None): Q values of the model.
     """
 
     def __init__(
@@ -54,9 +58,11 @@ class ResolutionModel(ModelBase):
 
         Does not allow DeltaFunction or Polynomial components, as these
         are not physical resolution components.
+
         Args:
             component (ModelComponent | ComponentCollection):
             Component(s) to append.
+
         Raises:
             TypeError: If the component is a DeltaFunction or Polynomial
         """
