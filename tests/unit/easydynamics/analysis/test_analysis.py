@@ -236,7 +236,6 @@ class TestAnalysis:
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
-            patch('IPython.display.display') as mock_display,
             patch.object(
                 type(analysis.experiment),
                 'binned_data',
@@ -246,12 +245,11 @@ class TestAnalysis:
         ):
             mock_binned.return_value = 'DATA'
             # THEN
-            analysis.plot_data_and_model(plot_components=False)
+            fig = analysis.plot_data_and_model(plot_components=False)
 
         # EXPECT
         mock_slicer.assert_called_once()
-        mock_display.assert_called_once_with(fake_fig)
-
+        assert fig == fake_fig
         # Inspect arguments passed to slicer
         args, kwargs = mock_slicer.call_args
 
@@ -280,7 +278,6 @@ class TestAnalysis:
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
-            patch('IPython.display.display') as mock_display,
             patch.object(
                 type(analysis.experiment),
                 'binned_data',
@@ -290,12 +287,11 @@ class TestAnalysis:
         ):
             mock_binned.return_value = 'DATA'
             # THEN
-            analysis.plot_data_and_model(plot_components=True)
+            fig = analysis.plot_data_and_model(plot_components=True)
 
         # EXPECT
         mock_slicer.assert_called_once()
-        mock_display.assert_called_once_with(fake_fig)
-
+        assert fig == fake_fig
         # Inspect arguments passed to slicer
         args, kwargs = mock_slicer.call_args
 
