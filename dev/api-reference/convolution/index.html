@@ -2843,15 +2843,7 @@ Args:
 <span class="normal">467</span>
 <span class="normal">468</span>
 <span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Analytical convolution of a ModelComponent or ComponentCollection</span>
 <span class="sd">    with a ResolutionModel.</span>
 
@@ -2914,16 +2906,8 @@ Args:
 <span class="sd">                If component pair cannot be handled analytically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># prepare list of components</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
-            <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sample_components</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
-            <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">resolution_components</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">]</span>
+        <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
+        <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
 
         <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
@@ -3374,50 +3358,42 @@ components values evaluated at energy.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/analytical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolve sample with resolution analytically if possible.</span>
@@ -3437,16 +3413,8 @@ components values evaluated at energy.</p>
 <span class="sd">            If component pair cannot be handled analytically.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># prepare list of components</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
-        <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">sample_components</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
-        <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">resolution_components</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">]</span>
+    <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
+    <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
 
     <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 

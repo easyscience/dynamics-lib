@@ -5612,9 +5612,9 @@ unit : str or sc.Unit
                 <span class="s1">&#39;Component must be an instance of ModelComponent or ComponentCollection. &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> instead.&#39;</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
             <span class="n">components</span> <span class="o">=</span> <span class="p">(</span><span class="n">component</span><span class="p">,)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
             <span class="n">components</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">components</span>
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
@@ -6192,9 +6192,9 @@ Raises</p>
             <span class="s1">&#39;Component must be an instance of ModelComponent or ComponentCollection. &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> instead.&#39;</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="p">(</span><span class="n">component</span><span class="p">,)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">components</span>
 
     <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
@@ -13805,9 +13805,9 @@ unit : str or sc.Unit
                 <span class="s1">&#39;Component must be an instance of ModelComponent or ComponentCollection. &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> instead.&#39;</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
             <span class="n">components</span> <span class="o">=</span> <span class="p">(</span><span class="n">component</span><span class="p">,)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
             <span class="n">components</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">components</span>
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
@@ -14385,9 +14385,9 @@ Raises</p>
             <span class="s1">&#39;Component must be an instance of ModelComponent or ComponentCollection. &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> instead.&#39;</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="p">(</span><span class="n">component</span><span class="p">,)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">components</span>
 
     <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
