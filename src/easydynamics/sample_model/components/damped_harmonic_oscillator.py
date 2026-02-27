@@ -18,12 +18,14 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     Model of a Damped Harmonic Oscillator (DHO).
 
     The intensity is given by
-    $I(x) = 2*A*x_0^2*\gamma/\pi / ( (x^2 - x_0^2)^2 + (2*\gamma*x)^2 )$
+    $I(x) = 2*A*x_0^2*\gamma/\pi / ( (x^2-x_0^2)^2 + (2*\gamma*x)^2 )$,
+    where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
+    width.
 
 
     Args:
-        area (Int | float): Area under the curve.
-        center (Int | float): Resonance frequency, approximately the
+        area (Int | float): Area under the curve. center (Int | float):
+        Resonance frequency, approximately the
             peak position.
         width (Int | float): Damping constant, approximately the
             half width at half max (HWHM) of the peaks.
@@ -34,14 +36,14 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If None, a unique_name is automatically generated.
 
     Attributes:
-        area (Parameter): Area under the curve.
-        center (Parameter): Resonance frequency, approximately the
+        area (Parameter): Area under the curve. center (Parameter):
+        Resonance frequency, approximately the
             peak position.
         width (Parameter): Damping constant, approximately the
             half width at half max (HWHM) of the peaks.
-        unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Display name of the component.
-        unique_name (str | None): Unique name of the component.
+        unit (str | sc.Unit): Unit of the parameters. display_name (str
+        | None): Display name of the component. unique_name (str |
+        None): Unique name of the component.
     """
 
     def __init__(
@@ -182,7 +184,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         return self.area.value * normalization / (denominator)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a string representation of the Damped Harmonic
         Oscillator.

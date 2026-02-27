@@ -175,7 +175,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         return model
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a string representation of the Delta function.
 
