@@ -207,7 +207,7 @@ class Analysis(AnalysisBase):
         plot_components: bool = True,
         add_background: bool = True,
         **kwargs,
-    ) -> None:
+    ) -> InteractiveFigure:
         """Plot the experimental data and the model prediction.
         Optionally also plot the individual components of the model.
 
@@ -216,20 +216,25 @@ class Analysis(AnalysisBase):
         Args:
             Q_index (int or None): Index of the Q value to plot. If
             None, plot all Q values. Default is None.
-        plot_components (bool): Whether to plot the individual
-            components. Default is True.
-        add_background (bool): Whether to add background components to
-            the sample model components when plotting. Default is True.
-        **kwargs: Additional keyword arguments passed to plopp.slicer
-            for customizing the plot.
+            plot_components (bool): Whether to plot the individual
+                components. Default is True.
+            add_background (bool): Whether to add background components
+                to the sample model components when plotting. Default is
+                True.
+            **kwargs: Additional keyword arguments passed to plopp
+                for customizing the plot.
 
         Raises:
             ValueError: If Q_index is out of bounds, or if there is no
                 data to plot, or if there are no Q values available for
                 plotting.
-        RuntimeError: If not in a Jupyter notebook environment.
-        TypeError: If plot_components or add_background is not True or
-            False.
+            RuntimeError: If not in a Jupyter notebook environment.
+            TypeError: If plot_components or add_background is not True
+                or False.
+
+        Returns:
+            InteractiveFigure: A Plopp InteractiveFigure containing the
+                plot of the data and model.
         """
 
         if Q_index is not None:
@@ -258,7 +263,6 @@ class Analysis(AnalysisBase):
             raise TypeError('add_background must be True or False.')
 
         import plopp as pp
-        from IPython.display import display
 
         plot_kwargs_defaults = {
             'title': self.display_name,
@@ -286,7 +290,7 @@ class Analysis(AnalysisBase):
             data_and_model,
             **plot_kwargs_defaults,
         )
-        display(fig)
+        return fig
 
     def parameters_to_dataset(self) -> sc.Dataset:
         """Creates a scipp dataset with copies of the Parameters in the
