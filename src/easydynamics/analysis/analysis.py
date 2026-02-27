@@ -17,8 +17,6 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.utils.utils import _in_notebook
 
-# TODO: fix analysis1d regeneration if e.g. experiment changes.
-
 
 class Analysis(AnalysisBase):
     """For analysing two-dimensional data, i.e. intensity as function of

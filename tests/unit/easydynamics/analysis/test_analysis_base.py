@@ -219,6 +219,52 @@ class TestAnalysisBase:
         ):
             analysis_base.temperature = 300
 
+    @pytest.mark.parametrize(
+        'extra_parameters',
+        [
+            Parameter(name='param1', value=1.0),
+            [
+                Parameter(name='param1', value=1.0),
+                Parameter(name='param2', value=2.0),
+            ],
+        ],
+        ids=[
+            'single parameter',
+            'list of parameters',
+        ],
+    )
+    def test_extra_parameters_property(self, analysis_base, extra_parameters):
+        # WHEN
+        analysis_base.extra_parameters = extra_parameters
+
+        # THEN
+        analysis_base.extra_parameters = extra_parameters
+
+        # EXPECT
+        expected = (
+            [extra_parameters] if isinstance(extra_parameters, Parameter) else extra_parameters
+        )
+
+        assert analysis_base.extra_parameters == expected
+
+    @pytest.mark.parametrize(
+        'invalid_extra_parameters',
+        [
+            'not a parameter',
+            [Parameter(name='param1', value=1.0), 'not a parameter'],
+        ],
+        ids=[
+            'single invalid parameter',
+            'list with invalid parameter',
+        ],
+    )
+    def test_extra_parameters_setter_invalid_type(self, analysis_base, invalid_extra_parameters):
+        with pytest.raises(
+            TypeError,
+            match='extra_parameters must be a Parameter or a list of Parameters.',
+        ):
+            analysis_base.extra_parameters = invalid_extra_parameters
+
     def test_on_experiment_changed_updates_Q(self, analysis_base):
         # WHEN
         fake_Q = [1, 2, 3]

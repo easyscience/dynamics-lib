@@ -358,18 +358,49 @@ class TestAnalysis1d:
         assert np.array_equal(result, np.array([1.0, 2.0, 3.0]))
 
     def test_evaluate_with_resolution(self, analysis1d):
-        # WHEN
+        # WHEN (set up the resolution model and create a component to
+        # evaluate)
         analysis1d.instrument_model.resolution_model.components = Gaussian()
+        components = Gaussian()
 
-        # THEN
         with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
+            # THEN
             analysis1d._evaluate_components(
-                components=Gaussian(),
-                convolver=MockConvolution.return_value,
+                components=components,
+                convolver=None,
                 convolve=True,
             )
-        # EXPECT
-        MockConvolution.return_value.convolution.assert_called_once()
+
+            # EXPECT
+            # Ensure constructor called once
+            MockConvolution.assert_called_once()
+
+            # The convolver should be created with the correct arguments
+            resolution_components = (
+                analysis1d.instrument_model.resolution_model.get_component_collection(
+                    analysis1d.Q_index
+                )
+            )
+
+            energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+
+            # Extract call arguments
+            _, kwargs = MockConvolution.call_args
+
+            assert kwargs['sample_components'] == components
+            assert kwargs['resolution_components'] == resolution_components
+            assert kwargs['temperature'] == analysis1d.temperature
+            assert kwargs['energy_offset'] == energy_offset
+
+            # check that the energy array passed to the convolver is the
+            # same as the analysis1d energy array
+            np.testing.assert_array_equal(
+                kwargs['energy'],
+                analysis1d.energy.values,
+            )
+
+            # and check that convolution() was called
+            MockConvolution.return_value.convolution.assert_called_once_with()
 
     def test_evaluate_sample(self, analysis1d):
         # WHEN

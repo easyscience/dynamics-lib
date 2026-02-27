@@ -85,9 +85,9 @@ class ComponentCollection(ModelBase):
                 'Component must be an instance of ModelComponent or ComponentCollection. '
                 f'Got {type(component).__name__} instead.'
             )
-        elif isinstance(component, ModelComponent):
+        if isinstance(component, ModelComponent):
             components = (component,)
-        elif isinstance(component, ComponentCollection):
+        if isinstance(component, ComponentCollection):
             components = component.components
 
         for comp in components:

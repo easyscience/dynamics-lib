@@ -79,16 +79,8 @@ class AnalyticalConvolution(ConvolutionBase):
                 If component pair cannot be handled analytically.
         """
 
-        # prepare list of components
-        if isinstance(self.sample_components, ComponentCollection):
-            sample_components = self.sample_components.components
-        else:
-            sample_components = [self.sample_components]
-
-        if isinstance(self.resolution_components, ComponentCollection):
-            resolution_components = self.resolution_components.components
-        else:
-            resolution_components = [self.resolution_components]
+        sample_components = self.sample_components.components
+        resolution_components = self.resolution_components.components
 
         total = np.zeros_like(self.energy.values, dtype=float)
 

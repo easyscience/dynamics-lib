@@ -339,7 +339,7 @@ class Analysis1d(AnalysisBase):
 
         Q_index = self._require_Q_index()
         energy = self.energy.values
-        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index).value
+        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index)
 
         # If there are no components, return zero
         if isinstance(components, ComponentCollection) and components.is_empty:
@@ -347,7 +347,7 @@ class Analysis1d(AnalysisBase):
 
         # No convolution
         if not convolve:
-            return components.evaluate(energy - energy_offset)
+            return components.evaluate(energy - energy_offset.value)
 
         # If a convolver is provided, use it. This allows reusing the
         # same convolver for multiple evaluations during fitting for
@@ -362,7 +362,7 @@ class Analysis1d(AnalysisBase):
         # We don't create a convolver if the resolution is empty.
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
         if resolution.is_empty:
-            return components.evaluate(energy - energy_offset)
+            return components.evaluate(energy - energy_offset.value)
 
         conv = Convolution(
             sample_components=components,

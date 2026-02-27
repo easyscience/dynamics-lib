@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
 from easydynamics.sample_model import Gaussian
@@ -200,6 +201,33 @@ class TestConvolutionBase:
             match='Energy unit must be a string or scipp unit.',
         ):
             convolution_base.convert_energy_unit(123)
+
+    def test_convert_energy_unit_invalid_unit_rollback(self, convolution_base):
+        # WHEN THEN
+        with pytest.raises(
+            UnitError,
+            match='Conversion from `meV` to `s` is not valid.',
+        ):
+            convolution_base.convert_energy_unit('s')
+
+        # EXPECT
+        assert convolution_base.energy_unit == 'meV'
+        assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
+
+    def test_convert_energy_unit_invalid_offset_unit_rollback(self, convolution_base):
+        # WHEN
+        convolution_base.energy_offset = Parameter(name='energy_offset', value=5, unit='s')
+
+        # THEN
+        with pytest.raises(
+            UnitError,
+            match='Conversion from `s` to `meV` is not valid.',
+        ):
+            convolution_base.convert_energy_unit('meV')
+
+        # EXPECT
+        assert convolution_base.energy_unit == 'meV'
+        assert convolution_base.energy_offset.unit == 's'
 
     def test_energy_offset_property(self, convolution_base):
         # WHEN THEN EXPECT
