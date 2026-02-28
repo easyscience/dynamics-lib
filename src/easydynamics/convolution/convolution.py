@@ -14,8 +14,7 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.components.model_component import ModelComponent
-
-Numerical = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class Convolution(NumericalConvolutionBase):
@@ -77,9 +76,10 @@ class Convolution(NumericalConvolutionBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
-        upsample_factor: Numerical = 5,
-        extension_factor: Numerical = 0.2,
-        temperature: Parameter | Numerical | None = None,
+        energy_offset: Numeric | Parameter = 0.0,
+        upsample_factor: Numeric = 5,
+        extension_factor: Numeric = 0.2,
+        temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
@@ -90,6 +90,7 @@ class Convolution(NumericalConvolutionBase):
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
+            energy_offset=energy_offset,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -140,7 +141,9 @@ class Convolution(NumericalConvolutionBase):
         'No detailed balance correction is applied to delta functions.'
         return sum(
             delta.area.value
-            * self._resolution_components.evaluate(self.energy.values - delta.center.value)
+            * self._resolution_components.evaluate(
+                self.energy_with_offset.values - delta.center.value
+            )
             for delta in self._delta_sample_components.components
         )
 
@@ -245,6 +248,7 @@ class Convolution(NumericalConvolutionBase):
         if self._analytical_sample_components.components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
+                energy_offset=self.energy_offset,
                 sample_components=self._analytical_sample_components,
                 resolution_components=self._resolution_components,
             )
@@ -254,6 +258,7 @@ class Convolution(NumericalConvolutionBase):
         if self._numerical_sample_components.components:
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
+                energy_offset=self.energy_offset,
                 sample_components=self._numerical_sample_components,
                 resolution_components=self._resolution_components,
                 upsample_factor=self.upsample_factor,

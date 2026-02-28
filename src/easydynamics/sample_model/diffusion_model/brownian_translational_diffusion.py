@@ -218,6 +218,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
+                desired_unit=self.unit,
             )
 
             # Make the area dependent on Q
@@ -227,9 +228,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 dependency_map=area_dependency_map,
             )
 
-            # Resolving the dependency can do weird things to the units,
-            # so we make sure it's correct.
-            lorentzian_component.width.convert_unit(self.unit)
             component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list

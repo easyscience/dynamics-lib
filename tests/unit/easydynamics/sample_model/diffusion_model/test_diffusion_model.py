@@ -35,3 +35,12 @@ class TestDiffusionModel:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='scale must be a number.'):
             diffusion_model.scale = 'invalid'  # Invalid type
+
+    def test_repr(self, diffusion_model):
+        # WHEN THEN
+        repr_str = repr(diffusion_model)
+
+        # EXPECT
+        assert 'DiffusionModelBase' in repr_str
+        assert 'display_name=TestDiffusionModel' in repr_str
+        assert 'unit=meV' in repr_str

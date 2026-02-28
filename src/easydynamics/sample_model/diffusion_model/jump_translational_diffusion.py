@@ -50,11 +50,11 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         unit : str or sc.Unit, optional
             Energy unit for the underlying Lorentzian components.
             Defaults to "meV".
-        scale : float  , optional
+        scale : float, optional
             Scale factor for the diffusion model.
-        diffusion_coefficient : float  , optional
+        diffusion_coefficient : float, optional
             Diffusion coefficient D in m^2/s. Defaults to 1.0.
-        relaxation_time : float  , optional
+        relaxation_time : float, optional
             Relaxation time t in ps. Defaults to 1.0.
         """
         super().__init__(
@@ -254,6 +254,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
+                desired_unit=self.unit,
             )
 
             # Make the area dependent on Q
@@ -263,9 +264,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 dependency_map=area_dependency_map,
             )
 
-            # Resolving the dependency can do weird things to the units,
-            # so we make sure it's correct.
-            lorentzian_component.width.convert_unit(self.unit)
             component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list

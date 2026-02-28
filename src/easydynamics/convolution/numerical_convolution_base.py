@@ -63,6 +63,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
+        energy_offset: Numerical | Parameter = 0.0,
         upsample_factor: Numerical = 5,
         extension_factor: float = 0.2,
         temperature: Parameter | float | None = None,
@@ -75,6 +76,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_unit=energy_unit,
+            energy_offset=energy_offset,
         )
 
         if temperature is not None and not isinstance(temperature, (Numerical, Parameter)):
@@ -239,9 +241,9 @@ class NumericalConvolutionBase(ConvolutionBase):
                 The dense grid created by upsampling and extending
                 energy.
         The EnergyGrid has the following attributes:
-           energy_dense : np.ndarray
+            energy_dense : np.ndarray
                The upsampled and extended energy array.
-              energy_dense_centered : np.ndarray
+            energy_dense_centered : np.ndarray
                 The centered version of energy_dense
                 (used for resolution evaluation).
             energy_dense_step : float

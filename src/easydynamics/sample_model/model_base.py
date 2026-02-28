@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
 from copy import copy
 
 import numpy as np
@@ -192,7 +191,17 @@ class ModelBase(EasyScienceModelBase):
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
         """Set the Q values of the SampleModel."""
-        self._Q = _validate_and_convert_Q(value)
+        old_Q = self._Q
+        new_Q = _validate_and_convert_Q(value)
+
+        if (
+            old_Q is not None
+            and new_Q is not None
+            and len(old_Q) == len(new_Q)
+            and all(np.isclose(old_Q, new_Q))
+        ):
+            return  # No change in Q, so do nothing
+        self._Q = new_Q
         self._on_Q_change()
 
     # ------------------------------------------------------------------
@@ -241,26 +250,42 @@ class ModelBase(EasyScienceModelBase):
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
 
+    def get_component_collection(self, Q_index: int) -> ComponentCollection:
+        """Get the ComponentCollection at the given Q index.
+
+        Parameters
+        ----------
+        Q_index : int
+            The index of the desired ComponentCollection.
+
+        Returns
+        -------
+        ComponentCollection
+            The ComponentCollection at the specified Q index.
+        """
+        if not isinstance(Q_index, int):
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
+        if Q_index < 0 or Q_index >= len(self._component_collections):
+            raise IndexError(
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
+            )
+        return self._component_collections[Q_index]
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
-        # TODO regenerate automatically if Q or components have changed
 
         if self._Q is None:
-            warnings.warn('Q is not set. No component collections generated', UserWarning)
             self._component_collections = []
             return
 
-        self._component_collections = [ComponentCollection() for _ in self._Q]
-
-        # Add copies of components from self._components to each
-        # component collection
-        for collection in self._component_collections:
-            for component in self._components.components:
-                collection.append_component(copy(component))
+        self._component_collections = []
+        for _ in self._Q:
+            self._component_collections.append(copy(self._components))
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""

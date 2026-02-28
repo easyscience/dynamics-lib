@@ -67,13 +67,28 @@ class ComponentCollection(ModelBase):
                 self.append_component(comp)
 
     def append_component(self, component: ModelComponent | 'ComponentCollection') -> None:
-        match component:
-            case ModelComponent():
-                components = (component,)
-            case ComponentCollection(components=components):
-                pass
-            case _:
-                raise TypeError('Component must be a ModelComponent or ComponentCollection.')
+        """Append a model component or the components from another
+        ComponentCollection to this ComponentCollection.
+
+        Parameters
+        ----------
+        component : ModelComponent or ComponentCollection
+            The component to append.
+        Raises
+        ------
+        TypeError
+            If the component is not a ModelComponent or
+            ComponentCollection.
+        """
+        if not isinstance(component, (ModelComponent, ComponentCollection)):
+            raise TypeError(
+                'Component must be an instance of ModelComponent or ComponentCollection. '
+                f'Got {type(component).__name__} instead.'
+            )
+        if isinstance(component, ModelComponent):
+            components = (component,)
+        if isinstance(component, ComponentCollection):
+            components = component.components
 
         for comp in components:
             if comp in self._components:
@@ -115,6 +130,17 @@ class ComponentCollection(ModelBase):
                 )
 
         self._components = components
+
+    @property
+    def is_empty(self) -> bool:
+        return not self._components
+
+    @is_empty.setter
+    def is_empty(self, value: bool) -> None:
+        raise AttributeError(
+            'is_empty is a read-only property that indicates '
+            'whether the collection has components.'
+        )
 
     def list_component_names(self) -> List[str]:
         """List the names of all components in the model.

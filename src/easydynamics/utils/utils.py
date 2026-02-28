@@ -68,3 +68,23 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     if isinstance(unit, str):
         unit = sc.Unit(unit)
     return unit
+
+
+def _in_notebook() -> bool:
+    """Check if the code is running in a Jupyter notebook.
+
+    Returns:
+        bool: True if in a Jupyter notebook, False otherwise.
+    """
+    try:
+        from IPython import get_ipython
+
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True  # Jupyter notebook or JupyterLab
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal IPython
+        else:
+            return False
+    except (NameError, ImportError):
+        return False  # Standard Python (no IPython)

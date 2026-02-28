@@ -3,11 +3,11 @@
 
 import numpy as np
 import scipp as sc
+from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-
-Numerical = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class ConvolutionBase:
@@ -31,8 +31,9 @@ class ConvolutionBase:
         sample_components: ComponentCollection | ModelComponent = None,
         resolution_components: ComponentCollection | ModelComponent = None,
         energy_unit: str | sc.Unit = 'meV',
+        energy_offset: Numeric | Parameter = 0.0,
     ):
-        if isinstance(energy, Numerical):
+        if isinstance(energy, Numeric):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
@@ -44,8 +45,17 @@ class ConvolutionBase:
         if isinstance(energy, np.ndarray):
             energy = sc.array(dims=['energy'], values=energy, unit=energy_unit)
 
+        if isinstance(energy_offset, Numeric):
+            energy_offset = Parameter(
+                name='energy_offset', value=float(energy_offset), unit=energy_unit
+            )
+
+        if not isinstance(energy_offset, Parameter):
+            raise TypeError('Energy_offset must be a number or a Parameter.')
+
         self._energy = energy
         self._energy_unit = energy_unit
+        self._energy_offset = energy_offset
 
         if sample_components is not None and not (
             isinstance(sample_components, ComponentCollection)
@@ -54,6 +64,8 @@ class ConvolutionBase:
             raise TypeError(
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+        if isinstance(sample_components, ModelComponent):
+            sample_components = ComponentCollection(components=[sample_components])
         self._sample_components = sample_components
 
         if resolution_components is not None and not (
@@ -63,7 +75,49 @@ class ConvolutionBase:
             raise TypeError(
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+        if isinstance(resolution_components, ModelComponent):
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
+
+    @property
+    def energy_offset(self) -> Parameter:
+        """Get the energy offset."""
+        return self._energy_offset
+
+    @energy_offset.setter
+    def energy_offset(self, energy_offset: Numeric | Parameter) -> None:
+        """Set the energy offset.
+        Args:
+            energy_offset : Number or Parameter
+                The energy offset to apply to the convolution.
+
+        Raises:
+            TypeError: If energy_offset is not a number or a Parameter.
+        """
+        if not isinstance(energy_offset, Parameter | Numeric):
+            raise TypeError('Energy_offset must be a number or a Parameter.')
+
+        if isinstance(energy_offset, Numeric):
+            self._energy_offset.value = float(energy_offset)
+
+        if isinstance(energy_offset, Parameter):
+            self._energy_offset = energy_offset
+
+    @property
+    def energy_with_offset(self) -> sc.Variable:
+        """Get the energy with the offset applied."""
+        energy_with_offset = self.energy.copy()
+        energy_with_offset.values = self.energy.values - self.energy_offset.value
+        return energy_with_offset
+
+    @energy_with_offset.setter
+    def energy_with_offset(self, value) -> None:
+        """Energy with offset is a read-only property derived from
+        energy and energy_offset.
+        """
+        raise AttributeError(
+            'Energy with offset is a read-only property derived from energy and energy_offset.'
+        )
 
     @property
     def energy(self) -> sc.Variable:
@@ -84,7 +138,7 @@ class ConvolutionBase:
             scipp Variable.
         """
 
-        if isinstance(energy, Numerical):
+        if isinstance(energy, Numeric):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
@@ -112,18 +166,34 @@ class ConvolutionBase:
         )  # noqa: E501
 
     def convert_energy_unit(self, energy_unit: str | sc.Unit) -> None:
-        """Convert the energy to the specified unit
+        """Convert the energy and energy_offset to the specified unit.
+
         Args:
             energy_unit : str or sc.Unit
                 The unit of the energy.
 
         Raises:
             TypeError: If energy_unit is not a string or scipp unit.
+            UnitError: If energy cannot be converted to the specified
+                unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
             raise TypeError('Energy unit must be a string or scipp unit.')
 
-        self.energy = sc.to_unit(self.energy, energy_unit)
+        old_energy = self.energy.copy()
+        try:
+            self.energy = sc.to_unit(self.energy, energy_unit)
+        except Exception as e:
+            self.energy = old_energy
+            raise e
+
+        old_energy_offset = self.energy_offset
+        try:
+            self.energy_offset.convert_unit(energy_unit)
+        except Exception as e:
+            self.energy_offset = old_energy_offset
+            raise e
+
         self._energy_unit = energy_unit
 
     @property
@@ -146,6 +216,9 @@ class ConvolutionBase:
             raise TypeError(
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+
+        if isinstance(sample_components, ModelComponent):
+            sample_components = ComponentCollection(components=[sample_components])
         self._sample_components = sample_components
 
     @property
@@ -171,4 +244,7 @@ class ConvolutionBase:
             raise TypeError(
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
+
+        if isinstance(resolution_components, ModelComponent):
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components

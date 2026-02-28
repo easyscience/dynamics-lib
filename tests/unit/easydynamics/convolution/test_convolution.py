@@ -51,6 +51,22 @@ class TestConvolution:
         )
         return conv
 
+    @pytest.fixture
+    def convolution_with_components(self):
+        energy = np.linspace(-10, 10, 5001)
+        sample_components = Gaussian(display_name='Gaussian1', area=2.0, center=0.1, width=0.4)
+
+        resolution_components = Gaussian(
+            display_name='GaussianRes', area=3.0, center=0.2, width=0.5
+        )
+
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        return conv
+
     def test_init(self, default_convolution):
         "Test initialization of Convolution with default parameters."
         # WHEN THEN EXPECT
@@ -84,6 +100,42 @@ class TestConvolution:
         )
         assert default_convolution._convolution_plan_is_valid is True
         assert default_convolution._reactions_enabled is True
+
+    def test_init_components(self, convolution_with_components):
+        "Test initialization of Convolution with default parameters."
+        # WHEN THEN EXPECT
+        assert isinstance(convolution_with_components, Convolution)
+        assert isinstance(convolution_with_components.energy, sc.Variable)
+        assert np.allclose(convolution_with_components.energy.values, np.linspace(-10, 10, 5001))
+        assert isinstance(convolution_with_components._sample_components, ComponentCollection)
+        assert isinstance(convolution_with_components._resolution_components, ComponentCollection)
+        assert convolution_with_components.upsample_factor == 5
+        assert convolution_with_components.extension_factor == 0.2
+        assert convolution_with_components.temperature is None
+        assert convolution_with_components.energy_unit == 'meV'
+        assert convolution_with_components.normalize_detailed_balance is True
+        assert isinstance(convolution_with_components._energy_grid, EnergyGrid)
+
+        assert isinstance(
+            convolution_with_components._analytical_sample_components,
+            ComponentCollection,
+        )
+        assert (
+            convolution_with_components._analytical_sample_components.components[0]
+            is convolution_with_components.sample_components.components[0]
+        )
+        assert isinstance(
+            convolution_with_components._numerical_sample_components,
+            ComponentCollection,
+        )
+        assert convolution_with_components._numerical_sample_components.is_empty
+
+        assert isinstance(
+            convolution_with_components._delta_sample_components, ComponentCollection
+        )
+        assert convolution_with_components._delta_sample_components.is_empty
+        assert convolution_with_components._convolution_plan_is_valid is True
+        assert convolution_with_components._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
         """

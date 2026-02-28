@@ -189,6 +189,34 @@ class TestInstrumentModel:
         ):
             instrument_model.energy_offset = 'invalid_offset'
 
+    def test_get_energy_offset_at_Q(self, instrument_model):
+        # WHEN
+
+        # THEN
+        offset_at_Q0 = instrument_model.get_energy_offset_at_Q(0)
+
+        # EXPECT
+        assert offset_at_Q0.value == instrument_model.energy_offset.value
+
+    def test_get_energy_offset_at_Q_invalid_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds',
+        ):
+            instrument_model.get_energy_offset_at_Q(5)
+
+    def test_get_energy_offset_at_Q_no_Q_raises(self, instrument_model):
+        # WHEN
+        instrument_model.Q = None
+
+        # THEN / EXPECT
+        with pytest.raises(
+            ValueError,
+            match='No Q values are set',
+        ):
+            instrument_model.get_energy_offset_at_Q(0)
+
     def test_convert_unit_calls_all_children(self, instrument_model):
         # WHEN
         new_unit = 'eV'

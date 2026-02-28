@@ -3,6 +3,7 @@
 
 import numpy as np
 import scipp as sc
+from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
@@ -12,8 +13,7 @@ from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-
-Numerical = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class AnalyticalConvolution(ConvolutionBase):
@@ -49,12 +49,14 @@ class AnalyticalConvolution(ConvolutionBase):
         energy_unit: str | sc.Unit = 'meV',
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
+        energy_offset: Numeric | Parameter = 0.0,
     ):
         super().__init__(
             energy=energy,
             energy_unit=energy_unit,
             sample_components=sample_components,
             resolution_components=resolution_components,
+            energy_offset=energy_offset,
         )
 
     def convolution(
@@ -77,16 +79,8 @@ class AnalyticalConvolution(ConvolutionBase):
                 If component pair cannot be handled analytically.
         """
 
-        # prepare list of components
-        if isinstance(self.sample_components, ComponentCollection):
-            sample_components = self.sample_components.components
-        else:
-            sample_components = [self.sample_components]
-
-        if isinstance(self.resolution_components, ComponentCollection):
-            resolution_components = self.resolution_components.components
-        else:
-            resolution_components = [self.resolution_components]
+        sample_components = self.sample_components.components
+        resolution_components = self.resolution_components.components
 
         total = np.zeros_like(self.energy.values, dtype=float)
 
@@ -199,7 +193,7 @@ class AnalyticalConvolution(ConvolutionBase):
                 The evaluated convolution values at self.energy.
         """
         return sample_component.area.value * resolution_components.evaluate(
-            self.energy.values - sample_component.center.value
+            self.energy_with_offset.values - sample_component.center.value
         )
 
     def _convolute_gaussian_gaussian(
@@ -420,7 +414,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
 
         normalization = 1 / (np.sqrt(2 * np.pi) * width)
-        exponent = -0.5 * ((self.energy.values - center) / width) ** 2
+        exponent = -0.5 * ((self.energy_with_offset.values - center) / width) ** 2
 
         return area * normalization * np.exp(exponent)
 
@@ -443,7 +437,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
 
         normalization = width / np.pi
-        denominator = (self.energy.values - center) ** 2 + width**2
+        denominator = (self.energy_with_offset.values - center) ** 2 + width**2
 
         return area * normalization / denominator
 
@@ -471,4 +465,6 @@ class AnalyticalConvolution(ConvolutionBase):
                 The evaluated Voigt profile values at self.energy.
         """
 
-        return area * voigt_profile(self.energy.values - center, gaussian_width, lorentzian_width)
+        return area * voigt_profile(
+            self.energy_with_offset.values - center, gaussian_width, lorentzian_width
+        )

@@ -60,12 +60,13 @@ class TestNumericalConvolution:
         """
         # WHEN THEN
         default_numerical_convolution.upsample_factor = upsample_factor
+        default_numerical_convolution.energy_offset = 0.4
         result = default_numerical_convolution.convolution()
 
         # EXPECT
         expected_area = 2.0 * 3.0  # area of sample_components * area of resolution_components
         expected_center = (
-            0.1 + 0.2
+            0.1 + 0.2 + 0.4
         )  # center of sample_components + center of resolution_components
         expected_width = np.sqrt(0.4**2 + 0.5**2)  # sqrt(width_sample^2 + width_res^2)
         expected_result = Gaussian(

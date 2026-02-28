@@ -258,6 +258,32 @@ class InstrumentModel(NewBase):
         """Free all parameters in the resolution model."""
         self.resolution_model.free_all_parameters()
 
+    def get_energy_offset_at_Q(self, Q_index: int) -> Parameter:
+        """Get the energy offset Parameter at a specific Q index.
+
+        Parameters
+        ----------
+        Q_index : int
+            The index of the Q value to get the energy offset for.
+
+        Returns
+        -------
+        Parameter
+            The energy offset Parameter at the specified Q index.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is out of bounds.
+        """
+        if self._Q is None:
+            raise ValueError('No Q values are set in the InstrumentModel.')
+
+        if Q_index < 0 or Q_index >= len(self._Q):
+            raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
+
+        return self._energy_offsets[Q_index]
+
     # --------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------

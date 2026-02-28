@@ -73,6 +73,8 @@ class TestExperiment:
         # THEN EXPECT
         assert experiment.display_name == 'empty_experiment'
         assert experiment._data is None
+        assert experiment.energy is None
+        assert experiment.Q is None
 
     def test_init_invalid_data(self):
         "Test initialization with invalid data type"
@@ -271,24 +273,6 @@ class TestExperiment:
         with pytest.raises(AttributeError):
             experiment.Q = experiment.Q
 
-    def test_Q_getter_warns_no_data(self):
-        "Test that getting Q data with no data raises Warning"
-        # WHEN
-        experiment = Experiment()
-
-        # THEN EXPECT
-        with pytest.warns(UserWarning, match='No data loaded'):
-            _ = experiment.Q
-
-    def test_energy_getter_warns_no_data(self):
-        "Test that getting energy data with no data raises Warning"
-        # WHEN
-        experiment = Experiment()
-
-        # THEN EXPECT
-        with pytest.warns(UserWarning, match='No data loaded'):
-            _ = experiment.energy
-
     ##############
     # test plotting
     ##############
@@ -297,7 +281,7 @@ class TestExperiment:
         "Test plotting data successfully when in notebook environment"
         # WHEN
         with (
-            patch.object(Experiment, '_in_notebook', return_value=True),
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
             patch('plopp.plot') as mock_plot,
             patch('IPython.display.display') as mock_display,
         ):
@@ -327,7 +311,7 @@ class TestExperiment:
         "Test plotting data raises RuntimeError"
         'when not in notebook environment'
         # WHEN
-        with patch.object(Experiment, '_in_notebook', return_value=False):
+        with patch(f'{Experiment.__module__}._in_notebook', return_value=False):
             # THEN EXPECT
             with pytest.raises(
                 RuntimeError,
@@ -338,62 +322,6 @@ class TestExperiment:
     ##############
     # test private methods
     ##############
-
-    def test_in_notebook_returns_true_for_jupyter(self, monkeypatch):
-        """Should return True when IPython shell is
-        ZMQInteractiveShell (Jupyter)."""
-
-        # WHEN
-        class ZMQInteractiveShell:
-            __name__ = 'ZMQInteractiveShell'
-
-        # THEN
-        monkeypatch.setattr('IPython.get_ipython', lambda: ZMQInteractiveShell())
-
-        # EXPECT
-        assert Experiment._in_notebook() is True
-
-    def test_in_notebook_returns_false_for_terminal_ipython(self, monkeypatch):
-        """Should return False when IPython shell is
-        TerminalInteractiveShell."""
-
-        # WHEN
-        class TerminalInteractiveShell:
-            __name__ = 'TerminalInteractiveShell'
-
-        # THEN
-
-        monkeypatch.setattr('IPython.get_ipython', lambda: TerminalInteractiveShell())
-
-        # EXPECT
-        assert Experiment._in_notebook() is False
-
-    def test_in_notebook_returns_false_for_unknown_shell(self, monkeypatch):
-        """Should return False when IPython shell type is
-        unrecognized."""
-
-        # WHEN
-        class UnknownShell:
-            __name__ = 'UnknownShell'
-
-        # THEN
-        monkeypatch.setattr('IPython.get_ipython', lambda: UnknownShell())
-        # EXPECT
-        assert Experiment._in_notebook() is False
-
-    def test_in_notebook_returns_false_when_no_ipython(self, monkeypatch):
-        """Should return False when IPython is not installed or
-        available."""
-
-        # WHEN
-        def raise_import_error(*args, **kwargs):
-            raise ImportError
-
-        # THEN
-        monkeypatch.setattr('builtins.__import__', raise_import_error)
-
-        # EXPECT
-        assert Experiment._in_notebook() is False
 
     def test_validate_coordinates(self, experiment):
         "Test that _validate_coordinates does not raise for valid data"
