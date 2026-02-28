@@ -85,6 +85,7 @@ class Experiment(NewBase):
             TypeError: If the value is not a sc.DataArray.
             ValueError: If the dataset is missing required coordinates.
         """
+        """Set the dataset associated with this experiment."""
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
         self._validate_coordinates(value)
@@ -115,6 +116,7 @@ class Experiment(NewBase):
         Raises:
             AttributeError: Always, since binned_data is read-only.
         """
+        """Set the binned dataset associated with this experiment."""
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
     @property
@@ -140,6 +142,7 @@ class Experiment(NewBase):
         Raises:
             AttributeError: Always, since Q is read-only.
         """
+        """Set the Q values for the dataset."""
         raise AttributeError('Q is a read-only property derived from the data.')
 
     @property
@@ -150,6 +153,7 @@ class Experiment(NewBase):
             sc.Variable | None: The energy values from the dataset, or
                 None if no data is loaded.
         """
+        """Get the energy values from the dataset."""
         if self._data is None:
             return None
         return self._binned_data.coords['energy']
@@ -165,6 +169,7 @@ class Experiment(NewBase):
         Raises:
             AttributeError: Always, since energy is read-only.
         """
+        """Set the energy values for the dataset."""
         raise AttributeError('energy is a read-only property derived from the data.')
 
     ###########

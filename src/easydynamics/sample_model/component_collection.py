@@ -215,6 +215,15 @@ class ComponentCollection(ModelBase):
                 ComponentCollection.
             ValueError: If a component with the same unique name already
                 exists in the collection.
+        Parameters
+        ----------
+        component : ModelComponent or ComponentCollection
+            The component to append.
+        Raises
+        ------
+        TypeError
+            If the component is not a ModelComponent or
+            ComponentCollection.
         """
         if not isinstance(component, (ModelComponent, ComponentCollection)):
             raise TypeError(
@@ -258,6 +267,34 @@ class ComponentCollection(ModelBase):
             f"No component named '{unique_name}' exists. "
             f'Did you accidentally use the display_name? '
             f'Here is a list of the components in the collection: {self.list_component_names()}'
+        )
+
+    @property
+    def components(self) -> list[ModelComponent]:
+        return list(self._components)
+
+    @components.setter
+    def components(self, components: List[ModelComponent]) -> None:
+        if not isinstance(components, list):
+            raise TypeError('components must be a list of ModelComponent instances.')
+        for comp in components:
+            if not isinstance(comp, ModelComponent):
+                raise TypeError(
+                    'All items in components must be instances of ModelComponent. '
+                    f'Got {type(comp).__name__} instead.'
+                )
+
+        self._components = components
+
+    @property
+    def is_empty(self) -> bool:
+        return not self._components
+
+    @is_empty.setter
+    def is_empty(self, value: bool) -> None:
+        raise AttributeError(
+            'is_empty is a read-only property that indicates '
+            'whether the collection has components.'
         )
 
     def list_component_names(self) -> List[str]:

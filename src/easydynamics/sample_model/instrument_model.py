@@ -335,6 +335,20 @@ class InstrumentModel(NewBase):
         Raises:
             ValueError: If no Q values are set in the InstrumentModel.
             IndexError: If Q_index is out of bounds.
+        Parameters
+        ----------
+        Q_index : int
+            The index of the Q value to get the energy offset for.
+
+        Returns
+        -------
+        Parameter
+            The energy offset Parameter at the specified Q index.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is out of bounds.
         """
         if self._Q is None:
             raise ValueError('No Q values are set in the InstrumentModel.')
