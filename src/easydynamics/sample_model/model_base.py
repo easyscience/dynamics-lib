@@ -240,7 +240,6 @@ class ModelBase(EasyScienceModelBase):
             value (Q_type | None): The new Q values to set. If None, Q
             will be unset.
         """
-        """Set the Q values of the SampleModel."""
         old_Q = self._Q
         new_Q = _validate_and_convert_Q(value)
 
@@ -314,15 +313,6 @@ class ModelBase(EasyScienceModelBase):
             TypeError: If Q_index is not an int.
             IndexError: If Q_index is out of bounds for the number of
                 ComponentCollections.
-        Parameters
-        ----------
-        Q_index : int
-            The index of the desired ComponentCollection.
-
-        Returns
-        -------
-        ComponentCollection
-            The ComponentCollection at the specified Q index.
         """
         if not isinstance(Q_index, int):
             raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')

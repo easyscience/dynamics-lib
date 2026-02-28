@@ -86,22 +86,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             are not numbers.
         ValueError: If scale is negative.
         UnitError: If unit is not a string or scipp Unit
-        Parameters
-        ----------
-        display_name : str
-            Display name of the diffusion model.
-        unique_name : str or None
-            Unique name of the diffusion model. If None, a unique name
-            is automatically generated.
-        unit : str or sc.Unit, optional
-            Energy unit for the underlying Lorentzian components.
-            Defaults to "meV".
-        scale : float, optional
-            Scale factor for the diffusion model.
-        diffusion_coefficient : float, optional
-            Diffusion coefficient D in m^2/s. Defaults to 1.0.
-        relaxation_time : float, optional
-            Relaxation time t in ps. Defaults to 1.0.
         """
         super().__init__(
             display_name=display_name,
@@ -207,7 +191,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 value or an array of values.
 
         Returns:
-        np.ndarray: HWHM values in the unit of the model (e.g., meV).
+            np.ndarray: HWHM values in the unit of the model (e.g.,
+                meV).
         """
 
         Q = _validate_and_convert_Q(Q)

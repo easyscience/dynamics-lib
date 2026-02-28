@@ -374,7 +374,7 @@ class Analysis(AnalysisBase):
 
         Returns:
             InteractiveFigure: A Plopp InteractiveFigure containing the
-            plot of the parameters.
+                plot of the parameters.
         """
 
         ds = self.parameters_to_dataset()

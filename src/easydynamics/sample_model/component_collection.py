@@ -215,15 +215,6 @@ class ComponentCollection(ModelBase):
                 ComponentCollection.
             ValueError: If a component with the same unique name already
                 exists in the collection.
-        Parameters
-        ----------
-        component : ModelComponent or ComponentCollection
-            The component to append.
-        Raises
-        ------
-        TypeError
-            If the component is not a ModelComponent or
-            ComponentCollection.
         """
         if not isinstance(component, (ModelComponent, ComponentCollection)):
             raise TypeError(
@@ -450,8 +441,8 @@ class ComponentCollection(ModelBase):
     def __repr__(self) -> str:
         """Return a string representation of the ComponentCollection.
 
-        Returns
-        str: String representation of the ComponentCollection.
+        Returns:
+            str: String representation of the ComponentCollection.
         """
         comp_names = ', '.join(c.unique_name for c in self.components) or 'No components'
 
