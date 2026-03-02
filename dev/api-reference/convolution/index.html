@@ -1857,7 +1857,13 @@ normalize_detailed_balance : bool, optional
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -1976,9 +1982,15 @@ normalize_detailed_balance : bool, optional
         <span class="k">return</span> <span class="n">total</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_convolve_delta_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="s2">&quot;Convolve delta function components of the sample model with&quot;</span>
-        <span class="s1">&#39;the resolution components.&#39;</span>
-        <span class="s1">&#39;No detailed balance correction is applied to delta functions.&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convolve delta function components of the sample model with</span>
+<span class="sd">        the resolution components. No detailed balance correction is</span>
+<span class="sd">        applied to delta functions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray</span>
+<span class="sd">                The convolved values of the delta function components</span>
+<span class="sd">                evaluated at energy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
             <span class="n">delta</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
@@ -2160,20 +2172,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -3857,7 +3869,13 @@ normalize_detailed_balance : bool, optional
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -3976,9 +3994,15 @@ normalize_detailed_balance : bool, optional
         <span class="k">return</span> <span class="n">total</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_convolve_delta_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="s2">&quot;Convolve delta function components of the sample model with&quot;</span>
-        <span class="s1">&#39;the resolution components.&#39;</span>
-        <span class="s1">&#39;No detailed balance correction is applied to delta functions.&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convolve delta function components of the sample model with</span>
+<span class="sd">        the resolution components. No detailed balance correction is</span>
+<span class="sd">        applied to delta functions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray</span>
+<span class="sd">                The convolved values of the delta function components</span>
+<span class="sd">                evaluated at energy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
             <span class="n">delta</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
@@ -4160,20 +4184,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
