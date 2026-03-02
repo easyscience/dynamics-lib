@@ -41,7 +41,7 @@ class DiffusionModelBase(ModelBase):
             unique_name (str | None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
             scale (Numeric): Scale factor for the diffusion model. Must
-            be a non-negative number. Defaults to 1.0.
+                be a non-negative number. Defaults to 1.0.
             unit (str | sc.Unit): Unit of the diffusion model. Must be
                 convertible to meV. Defaults to "meV".
 

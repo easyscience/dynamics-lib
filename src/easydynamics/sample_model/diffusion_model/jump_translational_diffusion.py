@@ -18,10 +18,14 @@ from easydynamics.utils.utils import _validate_and_convert_Q
 class JumpTranslationalDiffusion(DiffusionModelBase):
     r"""Model of Jump translational diffusion. The model consists of a
     Lorentzian function for each Q-value, where the width is given by
-    $\Gamma(Q) = Q^2/(1+D t Q^2)$, where $D$ is the diffusion
-    coefficient and $t$ is the relaxation time. Q is assumed to have
-    units of 1/angstrom. Creates ComponentCollections with Lorentzian
-    components for given Q-values.
+
+    $$
+    \Gamma(Q) = \frac{Q^2}{1+D t Q^2}.
+    $$
+
+    where $D$ is the diffusion coefficient and $t$ is the relaxation
+    time. Q is assumed to have units of 1/angstrom. Creates
+    ComponentCollections with Lorentzian components for given Q-values.
 
     Args:
         display_name (str): Display name of the diffusion model.
@@ -254,11 +258,11 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Q (Q_type): Scattering vector in 1/angstrom. Can be a single
                 value or an array of values.
             component_display_name (str): Name of the Jump Diffusion
-            Lorentzian component.
+                Lorentzian component.
 
         Returns:
             List[ComponentCollection]: List of ComponentCollections with
-            Jump Diffusion Lorentzian components.
+                Jump Diffusion Lorentzian components.
 
         Raises:
             TypeError: If component_display_name is not a string.
@@ -378,7 +382,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Returns:
             str: String representation of the JumpTranslationalDiffusion
-            model.
+                model.
         """
         return (
             f'JumpTranslationalDiffusion(display_name={self.display_name}, '

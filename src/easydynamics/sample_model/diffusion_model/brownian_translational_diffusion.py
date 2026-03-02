@@ -19,7 +19,7 @@ from easydynamics.utils.utils import _validate_and_convert_Q
 
 
 class BrownianTranslationalDiffusion(DiffusionModelBase):
-    """Model of Brownian translational diffusion, consisting of a
+    r"""Model of Brownian translational diffusion, consisting of a
     Lorentzian function for each Q-value, where the width is given by $D
     Q^2$, where $D$ is the diffusion coefficient. The area of the
     Lorentzians is given by the scale parameter multiplied by the QISF,
@@ -69,8 +69,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Args:
             display_name (str): Display name of the diffusion model.
             unique_name (str | None): Unique name of the diffusion
-            model.
-                If None, a unique name will be generated.
+                model. If None, a unique name will be generated.
             unit (str | sc.Unit): Unit of the diffusion model. Must be
                 convertible to meV. Defaults to "meV".
             scale (Numeric): Scale factor for the diffusion model. Must
@@ -200,7 +199,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q: Q_type,
         component_display_name: str = 'Brownian translational diffusion',
     ) -> List[ComponentCollection]:
-        """Create ComponentCollection components for the Brownian
+        r"""Create ComponentCollection components for the Brownian
         translational diffusion model at given Q values.
 
         Args:
@@ -211,7 +210,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Returns:
             List[ComponentCollection]: List of ComponentCollections with
                 Lorentzian components for each Q value. Each Lorentzian
-                has a width given by D*Q^2 and an area given by the
+                has a width given by $D*Q^2$ and an area given by the
                 scale parameter multiplied by the QISF (which is 1 for
                 this model).
 

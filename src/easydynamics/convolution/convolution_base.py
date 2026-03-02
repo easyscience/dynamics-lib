@@ -15,14 +15,14 @@ class ConvolutionBase:
     base class has no convolution functionality.
 
     Args:
-    energy : np.ndarray or scipp.Variable
-        1D array of energy values where the convolution is evaluated.
-    sample_components : ComponentCollection or ModelComponent
-        The sample model to be convolved.
-    resolution_components : ComponentCollection or ModelComponent
-        The resolution model to convolve with.
-    energy_unit : str or sc.Unit, optional
-        The unit of the energy. Default is 'meV'.
+        energy : np.ndarray or scipp.Variable
+            1D array of energy values where the convolution is evaluated
+        sample_components : ComponentCollection or ModelComponent
+            The sample model to be convolved.
+        resolution_components : ComponentCollection or ModelComponent
+            The resolution model to convolve with.
+        energy_unit : str or sc.Unit, optional
+            The unit of the energy. Default is 'meV'.
     """
 
     def __init__(
@@ -126,16 +126,15 @@ class ConvolutionBase:
         return self._energy
 
     @energy.setter
-    def energy(self, energy: np.ndarray) -> None:
+    def energy(self, energy: np.ndarray | sc.Variable) -> None:
         """Set the energy.
          Args:
-            energy : np.ndarray or scipp.Variable
-                1D array of energy values where the convolution is
-                evaluated.
+            energy (np.ndarray | scipp.Variable): 1D array of energy
+            values where the convolution is evaluated.
 
         Raises:
             TypeError: If energy is not a numpy ndarray or a
-            scipp Variable.
+                scipp Variable.
         """
 
         if isinstance(energy, Numeric):
