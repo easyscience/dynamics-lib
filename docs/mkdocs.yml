@@ -86,6 +86,8 @@ extra_css:
   - assets/stylesheets/extra.css
 extra_javascript:
   - assets/javascripts/extra.js
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 # A list of extensions beyond the ones that MkDocs uses by default (meta, toc, tables, and fenced_code)
 markdown_extensions:
@@ -94,10 +96,10 @@ markdown_extensions:
   - attr_list
   - def_list
   - footnotes
-  - pymdownx.blocks.caption
-  - pymdownx.details
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.blocks.caption
+  - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -134,7 +136,7 @@ plugins:
       allow_errors: false
       include_source: true
       include_requirejs: true # Required for Plotly
-      custom_mathjax_url: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe'
+      #      custom_mathjax_url: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe'
       ignore_h1_titles: true # Use titles defined in the nav section below
       remove_tag_config:
         remove_input_tags:
@@ -145,6 +147,7 @@ plugins:
           paths: ['src'] # Change 'src' to your actual sources directory
           options:
             docstring_style: google
+            render_markdown: true
             group_by_category: false
             heading_level: 1
             show_root_heading: true

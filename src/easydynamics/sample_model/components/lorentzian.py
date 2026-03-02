@@ -14,11 +14,14 @@ from .model_component import ModelComponent
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
-    """Model of a Lorentzian function.
+    r"""Model of a Lorentzian function.
 
-    The intensity is given by $I(x) = \frac{A}{\\pi} \frac{\\Gamma}{(x -
-    x_0)^2 + \\Gamma^2}$, where $A$ is the area, $x_0$ is the center,
-    and $\\Gamma$ is the half width at half maximum (HWHM).
+    The intensity is given by
+    $$
+    I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2},
+    $$
+    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the
+    half width at half maximum (HWHM).
 
     If the center is not provided, it will be centered at 0
     and fixed, which is typically what you want in QENS.
@@ -150,13 +153,18 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Evaluate the Lorentzian at the given x values.
+        r"""Evaluate the Lorentzian at the given x values.
 
         If x is a scipp Variable, the unit of the Lorentzian will be
-        converted to match x.
-        $I(x) = \frac{A}{\\pi} \frac{\\Gamma}{(x -
-        x_0)^2 + \\Gamma^2}$, where $A$ is the area, $x_0$ is the
-        center, and $\\Gamma$ is the half width at half maximum (HWHM).
+        converted to match x. The intensity is given by
+
+        $$
+        I(x) = \frac{A}{\pi} \frac{\Gamma}{(x -
+        x_0)^2 + \Gamma^2},
+        $$
+
+        where $A$ is the area, $x_0$ is the center, and $\Gamma$ is
+        the half width at half maximum (HWHM).
 
         Args:
             x (Numeric or list or np.ndarray or sc.Variable or

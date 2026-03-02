@@ -18,11 +18,13 @@ from .model_component import ModelComponent
 
 
 class Polynomial(ModelComponent):
-    """Polynomial function component.
+    r"""Polynomial function component.
 
-    The intensity is given by $I(x) =
-    c_0 + c_1 x + c_2 x^2 + ... + c_N x^N$, where $C_i$ are the
-    coefficients.
+    The intensity is given by
+    $$
+    I(x) = c_0 + c_1 x + c_2 x^2 + ... + c_N x^N,
+    $$
+    where $C_i$ are the coefficients.
 
     Args:
         coefficients (list or tuple): Coefficients c0, c1, ..., cN
@@ -132,17 +134,20 @@ class Polynomial(ModelComponent):
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         """Evaluate the Polynomial at the given x values.
 
-        $I(x) = c_0 + c_1 x + c_2 x^2 + ... + c_N x^N$, where $C_i$ are
-        the coefficients.
+        The intensity is given by
+        $$
+        I(x) = c_0 + c_1 x + c_2 x^2 + ... + c_N x^N,
+        $$
+        where $C_i$ are the coefficients.
 
         Args:
             x (Numeric | list | np.ndarray | sc.Variable |
-            sc.DataArray):
+                sc.DataArray):
                 The x values at which to evaluate the Polynomial.
 
         Returns:
             np.ndarray: The evaluated Polynomial at the given x
-            values.
+                values.
         """
 
         x = self._prepare_x_for_evaluate(x)

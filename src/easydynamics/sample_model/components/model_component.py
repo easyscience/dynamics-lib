@@ -200,8 +200,8 @@ class ModelComponent(ModelBase):
         Must be implemented by subclasses.
 
         Args:
-            x (Numeric or List[Numeric] or np.ndarray or sc.Variable or
-            sc.DataArray): Input values.
+            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
+                sc.DataArray): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.

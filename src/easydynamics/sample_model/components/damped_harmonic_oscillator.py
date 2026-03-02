@@ -17,7 +17,10 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     r"""Model of a Damped Harmonic Oscillator (DHO).
 
     The intensity is given by
-    $I(x) = 2*A*x_0^2*\gamma/\pi / ( (x^2-x_0^2)^2 + (2*\gamma*x)^2 )$,
+    $$
+        I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 +
+        (2 \gamma x)^2 \right)},
+    $$
     where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
     width.
 
@@ -35,14 +38,14 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If None, a unique_name is automatically generated.
 
     Attributes:
-        area (Parameter): Area under the curve. center (Parameter):
-        Resonance frequency, approximately the
+        area (Parameter): Area under the curve.
+        center (Parameter): Resonance frequency, approximately the
             peak position.
         width (Parameter): Damping constant, approximately the
             half width at half max (HWHM) of the peaks.
-        unit (str | sc.Unit): Unit of the parameters. display_name (str
-        | None): Display name of the component. unique_name (str |
-        None): Unique name of the component.
+        unit (str | sc.Unit): Unit of the parameters.
+        display_name (str | None): Display name of the component.
+        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -152,13 +155,18 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         values.
 
         If x is a scipp Variable, the unit of the DHO will be converted
-        to match x. The intensity is given by $I(x) =
-        2*A*x_0^2*\gamma/\pi / ( (x^2 - x_0^2)^2 + (2*\gamma*x)^2 )$
+        to match x. The intensity is given by
+        $$
+            I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 +
+            (2 \gamma x)^2 \right)},
+        $$
+        where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
+        width.
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or
-            sc.DataArray):
-                The x values at which to evaluate the DHO.
+            x (Numeric | list | np.ndarray | sc.Variable |
+                sc.DataArray): The x values at which to evaluate the
+                DHO.
 
         Returns:
             np.ndarray: The intensity of the DHO at the given x values.

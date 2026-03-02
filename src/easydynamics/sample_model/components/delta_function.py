@@ -128,12 +128,12 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Args:
             x (Numeric | list | np.ndarray | sc.Variable |
-            sc.DataArray):
-                The x values at which to evaluate the Delta function.
+                sc.DataArray): The x values at which to evaluate the
+                Delta function.
 
         Returns:
             np.ndarray: The evaluated Delta function at the given x
-            values.
+                values.
         """
 
         # x assumed sorted, 1D numpy array

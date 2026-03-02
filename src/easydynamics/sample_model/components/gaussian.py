@@ -14,31 +14,42 @@ from .model_component import ModelComponent
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
-    """Model of a Gaussian function.
+    r"""Test Model of a Gaussian function.
 
-    The intensity is given by $I(x) = \frac{A}{\\sigma \\sqrt{2\\pi}}
-    e^{-\frac{1}{2} \\left(\frac{x - x_0}{\\sigma}\right)^2}$,
-    where $A$ is the area, $x_0$ is the center, and $\\sigma$ is the
-    width. If the center is not provided, it will be centered at 0 and
-    fixed, which is typically what you want in QENS.
+     The intensity is given by
 
-    Args:
-        area (Int | float | Parameter): Area of the Gaussian.
-        center (Int | float | None | Parameter): Center of the Gaussian.
-            If None, defaults to 0 and is fixed
-        width (Int | float | Parameter): Standard deviation.
-        unit (str | sc.Unit): Unit of the parameters. Defaults to "meV".
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component. if None,
-            a unique_name is automatically generated.
+     $$
+     I(x) = \frac{A}{\sigma \sqrt{2\pi}}
+     \exp\left(
+         -\frac{1}{2}
+         \left(\frac{x - x_0}{\sigma}\right)^2
+     \right)
+     $$
 
-    Attributes:
-        area (Parameter): Area of the Gaussian.
-        center (Parameter): Center of the Gaussian.
-        width (Parameter): Standard deviation of the Gaussian.
-        unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component.
+     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the
+     width.
+
+    If the center is not provided, it will be centered at 0 and
+     fixed, which is typically what you want in QENS.
+
+     Args:
+         area (Int | float | Parameter): Area of the Gaussian.
+         center (Int | float | None | Parameter): Center of the
+            Gaussian. If None, defaults to 0 and is fixed.
+         width (Int | float | Parameter): Standard deviation.
+         unit (str | sc.Unit): Unit of the parameters. Defaults to
+             "meV".
+         display_name (str | None): Name of the component.
+         unique_name (str | None): Unique name of the component. if
+            None, a unique_name is automatically generated.
+
+     Attributes:
+         area (Parameter): Area of the Gaussian.
+         center (Parameter): Center of the Gaussian.
+         width (Parameter): Standard deviation of the Gaussian.
+         unit (str | sc.Unit): Unit of the parameters.
+         display_name (str | None): Name of the component.
+         unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -159,9 +170,18 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         If x is a scipp Variable, the unit of the Gaussian will be
         converted to match x.
-        The intensity is given by $I(x) = \frac{A}
-        {\\sigma \\sqrt{2\\pi}}
-        e^{-\frac{1}{2} \\left(\frac{x - x_0}{\\sigma}\right)^2}$,
+        The intensity is given by
+        $$
+        I(x) = \frac{A}{\\sigma \\sqrt{2\\pi}}
+        \\exp\\left(
+            -\frac{1}{2}
+            \\left(\frac{x - x_0}{\\sigma}\right)^2
+        \right)
+        $$
+
+        where $A$ is the area, $x_0$ is the center, and $\\sigma$ is the
+        width.
+
 
         Args:
             x (Numeric or list or np.ndarray or sc.Variable or
