@@ -38,11 +38,12 @@ def _detailed_balance_factor(
     have value 1 at E=0.
 
     Args:
-        energy (number, list, np.ndarray, | scipp Variable). The energy
+        energy (number | list | np.ndarray | scipp.Variable): The energy
             transfer. If number, assumed to be in meV unless energy_unit
             is set.
-        temperature (number, scipp Variable, or Parameter). If number,
-            assumed to be in K unless temperature_unit is set.
+        temperature (number | scipp.Variable | Parameter): The
+            temperature. If number, assumed to be in K unless
+            temperature_unit is set.
         energy_unit (str | sc.Unit |None): Unit for energy if energy is
             given as a number or list. Default is 'meV'
         temperature_unit (str | sc.Unit |None): Unit for temperature if
@@ -52,9 +53,8 @@ def _detailed_balance_factor(
             Default is True.
 
     Returns:
-        DBF (np.ndarray)  Detailed balance factor evaluated at the given
-        energy and temperature.
-        TODO: change to sc.Variable?
+        DBF (np.ndarray):  Detailed balance factor evaluated at the
+            given energy and temperature.
 
     Examples
     --------
@@ -180,10 +180,9 @@ def _convert_to_scipp_variable(
 
     Args:
         value (int | float | list | np.ndarray | Parameter |
-            sc.Variable):
-            The value to convert. Can be a number, list, numpy array,
-            Parameter, or scipp Variable. If a number or list, the unit
-            must be specified in the unit argument.
+            sc.Variable): The value to convert. Can be a number, list,
+            numpy array, Parameter, or scipp Variable. If a number or
+            list, the unit must be specified in the unit argument.
         name (str): The name of the variable, used for error messages.
         unit (str | None): The unit to use if value is a number or list.
             Must be specified if value is a number or list. Ignored if
@@ -199,7 +198,7 @@ def _convert_to_scipp_variable(
 
     Returns:
         sc.Variable: The input value converted to a scipp Variable with
-        appropriate units.
+            appropriate units.
     """
     if isinstance(value, sc.Variable):
         return value

@@ -132,7 +132,7 @@ class Polynomial(ModelComponent):
         return coefficient_list
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Evaluate the Polynomial at the given x values.
+        r"""Evaluate the Polynomial at the given x values.
 
         The intensity is given by
         $$

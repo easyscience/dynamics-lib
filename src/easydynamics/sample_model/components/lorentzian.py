@@ -34,7 +34,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             (HWHM).
         unit (str | sc.Unit): Unit of the parameters. Defaults to "meV".
         display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component. if None,
+        unique_name (str | None): Unique name of the component. If None,
             a unique_name is automatically generated.
 
     Attributes:

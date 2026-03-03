@@ -14,7 +14,7 @@ from .model_component import ModelComponent
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
-    r"""Test Model of a Gaussian function.
+    r"""Model of a Gaussian function.
 
      The intensity is given by
 
@@ -166,20 +166,20 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
     ) -> np.ndarray:
-        """Evaluate the Gaussian at the given x values.
+        r"""Evaluate the Gaussian at the given x values.
 
         If x is a scipp Variable, the unit of the Gaussian will be
         converted to match x.
         The intensity is given by
         $$
-        I(x) = \frac{A}{\\sigma \\sqrt{2\\pi}}
-        \\exp\\left(
+        I(x) = \frac{A}{\sigma \sqrt{2\pi}}
+        \exp\left(
             -\frac{1}{2}
-            \\left(\frac{x - x_0}{\\sigma}\right)^2
+            \left(\frac{x - x_0}{\sigma}\right)^2
         \right)
         $$
 
-        where $A$ is the area, $x_0$ is the center, and $\\sigma$ is the
+        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the
         width.
 
 

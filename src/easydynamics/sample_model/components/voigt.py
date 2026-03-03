@@ -15,7 +15,7 @@ from .model_component import ModelComponent
 
 
 class Voigt(CreateParametersMixin, ModelComponent):
-    """Voigt profile, a convolution of Gaussian and Lorentzian. If the
+    r"""Voigt profile, a convolution of Gaussian and Lorentzian. If the
     center is not provided, it will be centered at 0 and fixed, which is
     typically what you want in QENS.
 
@@ -189,7 +189,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         self._lorentzian_width.value = value
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Evaluate the Voigt at the given x values.
+        r"""Evaluate the Voigt at the given x values.
 
         If x is a scipp Variable, the unit of the Voigt will be
         converted to match x. The Voigt evaluates to the convolution of
