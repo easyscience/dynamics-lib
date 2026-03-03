@@ -18,7 +18,7 @@ from unittest.mock import patch
 import pytest
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 def patch_easyscience_map():
     """Patch the problematic Map methods."""
     from easyscience.global_object.map import Map
