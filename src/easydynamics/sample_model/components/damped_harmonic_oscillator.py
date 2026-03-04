@@ -57,6 +57,26 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'DampedHarmonicOscillator',
         unique_name: str | None = None,
     ):
+        """Initialize the Damped Harmonic Oscillator.
+
+        Args:
+            area (Int | float): Area under the curve.
+            center (Int | float): Resonance frequency, approximately the
+                peak position.
+            width (Int | float): Damping constant, approximately the
+                half width at half max (HWHM) of the peaks.
+            unit (str | sc.Unit): Unit of the parameters.
+                Defaults to "meV".
+            display_name (str | None): Display name of the component.
+            unique_name (str | None): Unique name of the component.
+                If None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If any of the parameters are not numbers or
+                Parameters.
+            ValueError: If center or width are not positive.
+        """
+
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -90,7 +110,14 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """Set the value of the area parameter."""
+        """Set the value of the area parameter.
+
+        Args:
+            value (Numeric): The new value for the area parameter.
+
+        Raises:
+            TypeError: If the value is not a number.
+        """
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
         self._area.value = value
@@ -186,7 +213,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Returns:
             str: A string representation of the Damped Harmonic
-            Oscillator.
+                Oscillator.
         """
         return (
             f'DampedHarmonicOscillator(display_name = {self.display_name}, unit = {self._unit},\n \

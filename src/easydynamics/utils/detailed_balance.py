@@ -29,13 +29,16 @@ def _detailed_balance_factor(
     temperature_unit: str | sc.Unit = 'K',
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
-    """
-    Compute the detailed balance factor (DBF): $DBF(E, T) = E*(n(E)+1)=E
-    / (1 - exp(-E / (kB*T)))$, where $n(E)$ is the Bose-Einstein
-    distribution, $E$ is the energy transfer, and $T$ is the
-    temperature. $k_B$ is the Boltzmann constant. If
-    divide_by_temperature is True, the result is normalized by kB*T to
-    have value 1 at E=0.
+    r"""
+    Compute the detailed balance factor (DBF):
+    $$
+    DBF(E, T) = E(n(E)+1)=\frac{E}{(1 - e^{-E / (k_B*T)})}},
+    $$
+    where $n(E)$ is the Bose-Einstein distribution, $E$ is the energy
+    transfer, and $T$ is the temperature. $k_B$ is the Boltzmann
+    constant.
+    If divide_by_temperature is True, the result is normalized by
+    $k_B*T$ to have value 1 at $E=0$.
 
     Args:
         energy (number | list | np.ndarray | scipp.Variable): The energy

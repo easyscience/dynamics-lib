@@ -33,8 +33,8 @@ class AnalysisBase(EasyScienceModelBase):
         instrument_model (InstrumentModel | None): The InstrumentModel
             associated with this Analysis. If None, a default
             InstrumentModel is created.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -51,7 +51,7 @@ class AnalysisBase(EasyScienceModelBase):
         temperature (Parameter | None): The temperature from the
             associated SampleModel, if available.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(
@@ -63,6 +63,34 @@ class AnalysisBase(EasyScienceModelBase):
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ):
+        """Initialize the AnalysisBase.
+
+        Args:
+            display_name (str): Display name of the analysis.
+            unique_name (str or None): Unique name of the analysis. If
+                None, a unique name is automatically generated.
+            experiment (Experiment | None): The Experiment associated
+                with this Analysis. If None, a default Experiment is
+                created.
+            sample_model (SampleModel | None): The SampleModel
+                associated with this Analysis. If None, a default
+                SampleModel is created.
+            instrument_model (InstrumentModel | None): The
+                InstrumentModel associated with this Analysis. If None,
+                a default InstrumentModel is created.
+            extra_parameters (Parameter | list[Parameter] | None): Extra
+                parameters to be included in the analysis for advanced
+                users. If None, no extra parameters are added.
+
+        Raises:
+            TypeError: If experiment is not an Experiment or None.
+            TypeError: If sample_model is not a SampleModel or None.
+            TypeError: If instrument_model is not an InstrumentModel or
+                None.
+            TypeError: If extra_parameters is not a Parameter, a list of
+                Parameters, or None.
+        """
+
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         if experiment is None:
@@ -257,18 +285,20 @@ class AnalysisBase(EasyScienceModelBase):
 
         Args:
             value (Parameter | list[Parameter]): The extra parameters to
-            include in this Analysis.
+                include in this Analysis.
 
         Raises:
-            TypeError: If value is not a Parameter or a list of
-            Parameters.
+            TypeError: If value is not a Parameter, a list of
+            Parameters, or None.
         """
         if isinstance(value, Parameter):
             self._extra_parameters = [value]
         elif isinstance(value, list) and all(isinstance(p, Parameter) for p in value):
             self._extra_parameters = value
+        elif value is None:
+            self._extra_parameters = []
         else:
-            raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
+            raise TypeError('extra_parameters must be a Parameter, a list of Parameters, or None.')
 
     #############
     # Other methods

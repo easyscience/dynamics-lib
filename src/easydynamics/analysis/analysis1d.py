@@ -38,8 +38,8 @@ class Analysis1d(AnalysisBase):
         Q_index (int | None): The Q index to analyze. If None, the
             analysis will not be able to calculate or fit until a
             Q index is set.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -57,7 +57,7 @@ class Analysis1d(AnalysisBase):
             associated SampleModel, if available.
         Q_index (int | None): The Q index being analyzed.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(
@@ -70,6 +70,28 @@ class Analysis1d(AnalysisBase):
         Q_index: int | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ):
+        """Initialize a Analysis1d.
+
+        Args:
+            display_name (str): Display name of the analysis.
+            unique_name (str or None): Unique name of the analysis. If
+                None, a unique name is automatically generated.
+            experiment (Experiment | None): The Experiment associated
+                with this Analysis. If None, a default Experiment is
+                created.
+            sample_model (SampleModel | None): The SampleModel
+                associated with this Analysis. If None, a default
+                SampleModel is created.
+            instrument_model (InstrumentModel | None): The
+                InstrumentModel associated with this Analysis. If None,
+                a default InstrumentModel is created.
+            Q_index (int | None): The Q index to analyze. If None, the
+                analysis will not be able to calculate or fit until a
+                Q index is set.
+            extra_parameters (Parameter | list[Parameter] | None): Extra
+                parameters to be included in the analysis for advanced
+                users. If None, no extra parameters are added.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -96,7 +118,7 @@ class Analysis1d(AnalysisBase):
         """Get the Q index associated with this Analysis.
 
         Returns:
-            Experiment: The Experiment associated with this Analysis.
+            int | None: The Q index associated with this Analysis.
         """
 
         return self._Q_index
@@ -189,8 +211,9 @@ class Analysis1d(AnalysisBase):
         calculated model.
 
         Args:
-            x: Ignored. The energy grid is taken from the experiment.
-            kwargs: Ignored. Included for compatibility with the
+            x (Any): Ignored. The energy grid is taken from the
+                experiment.
+            kwargs (dict): Ignored. Included for compatibility with the
                 EasyScience fitter.
         """
 
@@ -203,7 +226,7 @@ class Analysis1d(AnalysisBase):
         """Get all variables used in the analysis.
 
         Returns:
-            List[Descriptor]: A list of all variables.
+            list[DescriptorNumber]: A list of all variables.
         """
         variables = self.sample_model.get_all_variables(Q_index=self.Q_index)
 
@@ -231,7 +254,7 @@ class Analysis1d(AnalysisBase):
                 components of the model. Default is True.
             add_background (bool): Whether to add the background to the
                 model prediction when plotting individual components.
-            kwargs: Keyword arguments to pass to the plotting
+            kwargs (dict): Keyword arguments to pass to the plotting
                 function.
 
         Returns:
@@ -327,14 +350,13 @@ class Analysis1d(AnalysisBase):
         convolution (for background).
 
         Args:
-            components (ComponentCollection | ModelComponent):
-                The components to evaluate.
+            components (ComponentCollection | ModelComponent): The
+                components to evaluate.
             convolver (Convolution | None): An optional Convolution
                 object to use for convolution. If None, a new
                 Convolution object will be created if convolve is True.
-            convolve (bool):
-                Whether to perform convolution with the resolution.
-                Default is True.
+            convolve (bool): Whether to perform convolution with the
+                resolution. Default is True.
         """
 
         Q_index = self._require_Q_index()
@@ -541,7 +563,7 @@ class Analysis1d(AnalysisBase):
 
         Returns:
             dict[str, sc.DataArray]: A dictionary of component names to
-            their corresponding sc.DataArrays.
+                their corresponding sc.DataArrays.
         """
 
         scipp_arrays = {}

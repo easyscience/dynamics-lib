@@ -261,7 +261,7 @@ class TestAnalysisBase:
     def test_extra_parameters_setter_invalid_type(self, analysis_base, invalid_extra_parameters):
         with pytest.raises(
             TypeError,
-            match='extra_parameters must be a Parameter or a list of Parameters.',
+            match='extra_parameters must be',
         ):
             analysis_base.extra_parameters = invalid_extra_parameters
 

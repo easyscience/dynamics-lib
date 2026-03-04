@@ -32,15 +32,14 @@ class ModelBase(EasyScienceModelBase):
             Template components of the model. If None, no components
             are added. These components are copied into
             ComponentCollections for each Q value.
-        Q (Q_type | None): Q values for the model. If None, Q is not
-            set.
+        Q (ArrayLike | sc.Variable | None): Q values for the model. If
+            None, Q is not set.
 
     Attributes:
         unit (str | sc.Unit): Unit of the model.
         components (list[ModelComponent]): List of ModelComponents in
             the model.
-        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
-            | None): Q values of the model.
+        Q (ArrayLike | sc.Variable | None): Q values of the model.
     """
 
     def __init__(
@@ -51,6 +50,21 @@ class ModelBase(EasyScienceModelBase):
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ):
+        """Initialize the ModelBase.
+
+        Args:
+            display_name (str): Display name of the model.
+            unique_name (str | None): Unique name of the model. If None,
+                a unique name will be generated.
+            unit (str | sc.Unit | None): Unit of the model. Defaults to
+                "meV".
+            components (ModelComponent | ComponentCollection | None):
+                Template components of the model. If None, no components
+                are added. These components are copied into
+                ComponentCollections for each Q value.
+            Q (ArrayLike | sc.Variable | None): Q values for the model.
+                If None, Q is not set.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -111,8 +125,8 @@ class ModelBase(EasyScienceModelBase):
         SampleModel.
 
         Args:
-            component (ModelComponent | ComponentCollection):
-            The ModelComponent or ComponentCollection to append.
+            component (ModelComponent | ComponentCollection): The
+                ModelComponent or ComponentCollection to append.
         """
         self._components.append_component(component)
         self._on_components_change()
@@ -123,7 +137,7 @@ class ModelBase(EasyScienceModelBase):
 
         Args:
             unique_name (str): The unique name of the ModelComponent
-            to remove.
+                to remove.
         """
         self._components.remove_component(unique_name)
         self._on_components_change()
@@ -350,7 +364,7 @@ class ModelBase(EasyScienceModelBase):
     # dunder methods
     # ------------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the ModelBase.
 
         Returns:

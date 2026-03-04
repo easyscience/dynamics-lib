@@ -40,6 +40,19 @@ class ModelComponent(ModelBase):
         display_name: str | None = None,
         unique_name: str | None = None,
     ):
+        """Initialize the ModelComponent.
+
+        Args:
+            unit (str | sc.Unit): The unit of the model component.
+                Default is 'meV'.
+            display_name (str | None): A human-readable name for the
+                component. Default is None.
+            unique_name (str | None): A unique identifier for the
+                component. Default is None.
+
+        Raises:
+            TypeError: If unit is not a string or scipp Unit.
+        """
         self.validate_unit(unit)
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
@@ -201,14 +214,14 @@ class ModelComponent(ModelBase):
 
         Args:
             x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
-                sc.DataArray): Input values.
+            sc.DataArray): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.
         """
         pass
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the ModelComponent.
 
         Returns:

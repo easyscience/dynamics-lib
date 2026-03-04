@@ -73,23 +73,24 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Initialize a new JumpTranslationalDiffusion model.
 
         Args:
-        display_name (str): Display name of the diffusion model.
-        unique_name (str | None): Unique name of the diffusion model. If
-            None, a unique name will be generated.
-        unit (str | sc.Unit): Unit of the diffusion model. Must be
-            convertible to meV. Defaults to "meV".
-        scale (Numeric): Scale factor for the diffusion model. Must be
-            a non-negative number. Defaults to 1.0.
-        diffusion_coefficient (Numeric): Diffusion coefficient D in
-            m^2/s. Defaults to 1.0.
-        relaxation_time (Numeric): Relaxation time t in ps. Defaults to
-            1.0.
+            display_name (str): Display name of the diffusion model.
+            unique_name (str | None): Unique name of the diffusion
+            model. If
+                None, a unique name will be generated.
+            unit (str | sc.Unit): Unit of the diffusion model. Must be
+                convertible to meV. Defaults to "meV".
+            scale (Numeric): Scale factor for the diffusion model. Must
+                be a non-negative number. Defaults to 1.0.
+            diffusion_coefficient (Numeric): Diffusion coefficient D in
+                m^2/s. Defaults to 1.0.
+            relaxation_time (Numeric): Relaxation time t in ps. Defaults
+                to 1.0.
 
         Raises:
-        TypeError: If scale, diffusion_coefficient, or relaxation_time
-            are not numbers.
-        ValueError: If scale is negative.
-        UnitError: If unit is not a string or scipp Unit
+            TypeError: If scale, diffusion_coefficient, or
+                relaxation_time  are not numbers.
+            ValueError: If scale is negative.
+            UnitError: If unit is not a valid unit string or scipp Unit.
         """
         super().__init__(
             display_name=display_name,
@@ -376,7 +377,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     # dunder methods
     ################################
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of the JumpTranslationalDiffusion
         model.
 

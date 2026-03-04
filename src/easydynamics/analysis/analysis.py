@@ -35,8 +35,8 @@ class Analysis(AnalysisBase):
         instrument_model (InstrumentModel | None): The InstrumentModel
             associated with this Analysis. If None, a default
             InstrumentModel is created.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -53,7 +53,7 @@ class Analysis(AnalysisBase):
         temperature (Parameter | None): The temperature from the
             associated SampleModel, if available.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(
@@ -65,6 +65,25 @@ class Analysis(AnalysisBase):
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ):
+        """Initialize an Analysis object.
+
+        Args:
+            display_name (str): Display name of the analysis.
+            unique_name (str or None): Unique name of the analysis. If
+                None, a unique name is automatically generated.
+            experiment (Experiment | None): The Experiment associated
+                with this Analysis. If None, a default Experiment is
+                created.
+            sample_model (SampleModel | None): The SampleModel
+                associated with this Analysis. If None, a default
+                SampleModel is created.
+            instrument_model (InstrumentModel | None): The
+                InstrumentModel associated with this Analysis. If None,
+                a default InstrumentModel is created.
+            extra_parameters (Parameter | list[Parameter] | None): Extra
+                parameters to be included in the analysis for advanced
+                users. If None, no extra parameters are added.
+        """
 
         # Avoid triggering updates before the object is fully
         # initialized
@@ -138,7 +157,7 @@ class Analysis(AnalysisBase):
 
         Args:
             Q_index (int or None): Index of the Q value to calculate
-            for. If None, calculate for all Q values.
+                for. If None, calculate for all Q values.
 
         Returns:
             list[np.ndarray] | np.ndarray: If Q_index is None, returns
@@ -173,9 +192,9 @@ class Analysis(AnalysisBase):
                 independently. Ignored if fit_method is "simultaneous".
                 Default is None.
 
-        Returns: Fit results, which may be a list of FitResults if
-            fitting independently, or a single FitResults object if
-            fitting simultaneously.
+        Returns:
+            FitResults: a list of FitResults if fitting independently,
+                or a single FitResults object if fitting simultaneously.
 
         Raises:
             ValueError: If fit_method is not "independent" or
@@ -215,13 +234,13 @@ class Analysis(AnalysisBase):
 
         Args:
             Q_index (int or None): Index of the Q value to plot. If
-            None, plot all Q values. Default is None.
+                None, plot all Q values. Default is None.
             plot_components (bool): Whether to plot the individual
                 components. Default is True.
             add_background (bool): Whether to add background components
                 to the sample model components when plotting. Default is
                 True.
-            **kwargs: Additional keyword arguments passed to plopp
+            **kwargs (Any): Additional keyword arguments passed to plopp
                 for customizing the plot.
 
         Raises:
@@ -366,11 +385,11 @@ class Analysis(AnalysisBase):
         """Plot fitted parameters as a function of Q.
 
         Args:
-            names (str | list[str] | None): Name(s) of the
-            parameter(s) to plot. If None, plots all parameters.
-        kwargs: Additional keyword arguments passed to plopp.slicer for
-            customizing the plot (e.g., title, linestyle, marker,
-            color).
+            names (str | list[str] | None): Name(s) of the parameter(s)
+                to plot. If None, plots all parameters.
+            kwargs (Any): Additional keyword arguments passed to
+                plopp.slicer for customizing the plot (e.g., title,
+                linestyle, marker, color).
 
         Returns:
             InteractiveFigure: A Plopp InteractiveFigure containing the
@@ -523,7 +542,7 @@ class Analysis(AnalysisBase):
 
         Returns:
             sc.DataArray: A DataArray containing the model values, with
-            dimensions "Q" and "energy".
+                dimensions "Q" and "energy".
         """
 
         model = sc.array(dims=['Q', 'energy'], values=self.calculate())
@@ -547,7 +566,7 @@ class Analysis(AnalysisBase):
 
         Returns:
             sc.Dataset: A scipp Dataset where each entry is a component
-            of the model, with dimensions "Q".
+                of the model, with dimensions "Q".
         """
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')

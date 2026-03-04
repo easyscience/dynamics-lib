@@ -64,6 +64,37 @@ class InstrumentModel(NewBase):
         energy_offset: Numeric | None = None,
         unit: str | sc.Unit = 'meV',
     ):
+        """Initialize an InstrumentModel.
+
+        Args:
+            display_name (str | None): The display name of the
+                InstrumentModel. Default is "MyInstrumentModel".
+            unique_name (str | None): The unique name of the
+                InstrumentModel. Default is None.
+            Q (np.ndarray | list | sc.Variable | None): The Q values
+                where the instrument is modelled.
+            resolution_model (ResolutionModel | None): The resolution
+                model of the instrument. If None, an empty resolution
+                model is created and no resolution convolution is
+                carried out. Default is None.
+            background_model (BackgroundModel | None): The background
+                model of the instrument. If None, an empty background
+                model is created, and the background evaluates to 0.
+                Default is None.
+            energy_offset (float | int | None): Template energy offset
+                of the instrument. Will be copied to each Q value. If
+                None, the energy offset will be 0. Default is None.
+            unit (str | sc.Unit): The unit of the energy axis. Default
+                is 'meV'.
+
+        Raises:
+            TypeError: If resolution_model is not a ResolutionModel or
+                None
+            TypeError: If background_model is not a BackgroundModel or
+                None
+            TypeError: If energy_offset is not a number or None
+            UnitError: If unit is not a valid unit string or scipp Unit.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -379,7 +410,7 @@ class InstrumentModel(NewBase):
     # Dunder methods
     # -------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the InstrumentModel.
 
         Returns:

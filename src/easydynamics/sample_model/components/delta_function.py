@@ -49,6 +49,23 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
     ):
+        """Initialize the Delta function.
+
+        Args:
+            center (Int | float | None): Center of the delta function.
+                If None, defaults to 0 and is fixed.
+            area (Int | float): Total area under the curve.
+            unit (str | sc.Unit): Unit of the parameters.
+                Defaults to "meV".
+            display_name (str | None): Name of the component.
+            unique_name (str | None): Unique name of the component.
+                If None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If center is not a number or None.
+            TypeError: If area is not a number.
+            TypeError: If unit is not a string or sc.Unit.
+        """
         # Validate inputs and create Parameters if not given
         super().__init__(
             display_name=display_name,

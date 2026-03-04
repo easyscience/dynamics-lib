@@ -44,6 +44,19 @@ class SampleModel(ModelBase):
             Defaults to "K".
         divide_by_temperature (bool): Whether to divide the detailed
             balance factor by temperature. Defaults to True.
+
+    Attributes:
+        unit (str | sc.Unit): Unit of the model.
+        components (list[ModelComponent]): List of ModelComponents in
+            the model.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
+            | None): Q values of the model.
+        diffusion_models (list[DiffusionModelBase]): List of diffusion
+            models in the SampleModel.
+        temperature (Parameter | None): Temperature Parameter for
+            detailed balancing, or None if not set.
+        divide_by_temperature (bool): Whether to divide the detailed
+            balance factor by temperature.
     """
 
     def __init__(
@@ -58,6 +71,38 @@ class SampleModel(ModelBase):
         temperature_unit: str | sc.Unit = 'K',
         divide_by_temperature: bool = True,
     ):
+        """Initialize the SampleModel.
+
+        Args:
+            display_name (str): Display name of the model.
+            unique_name (str | None): Unique name of the model. If None,
+                a unique name will be generated.
+            unit (str | sc.Unit | None): Unit of the model. If None,
+                defaults to "meV".
+            components (ModelComponent | ComponentCollection | None):
+                Template components of the model. If None, no components
+                are added. These components are copied into
+                ComponentCollections for each Q value.
+            Q (Number, list, np.ndarray, sc.array | None):
+                Q values for the model. If None, Q is not set.
+            diffusion_models (DiffusionModelBase |
+                list[DiffusionModelBase] | None): Diffusion models to
+                include in the SampleModel. If None, no diffusion models
+                are added.
+            temperature (float | None): Temperature for detailed
+                balancing. If None, no detailed balancing is applied.
+            temperature_unit (str | sc.Unit): Unit of the temperature.
+                Defaults to "K".
+            divide_by_temperature (bool): Whether to divide the detailed
+                balance factor by temperature. Defaults to True.
+
+        Raises:
+            TypeError: If diffusion_models is not a DiffusionModelBase,
+                a list of DiffusionModelBase, or None.
+            TypeError: If temperature is not a number or None.
+            ValueError: If temperature is negative.
+            TypeError: If divide_by_temperature is not a bool.
+        """
         if diffusion_models is None:
             self._diffusion_models = []
         elif isinstance(diffusion_models, DiffusionModelBase):
@@ -110,7 +155,7 @@ class SampleModel(ModelBase):
 
         Args:
             diffusion_model (DiffusionModelBase): The DiffusionModel
-            to append.
+                to append.
 
         Raises:
             TypeError: If the diffusion_model is not a
@@ -133,7 +178,7 @@ class SampleModel(ModelBase):
 
         Raises:
             ValueError: If no DiffusionModel with the given unique name
-            is found.
+                is found.
         """
         for i, dm in enumerate(self._diffusion_models):
             if dm.unique_name == name:
@@ -395,7 +440,7 @@ class SampleModel(ModelBase):
     # dunder methods
     # ------------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the SampleModel.
 
         Returns:

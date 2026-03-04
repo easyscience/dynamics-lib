@@ -56,6 +56,25 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'Lorentzian',
         unique_name: str | None = None,
     ):
+        """Initialize the Lorentzian component.
+
+        Args:
+            area (Int | float | Parameter): Area of the Lorentzian.
+            center (Int | float | None | Parameter): Center of the
+                Lorentzian. If None, defaults to 0 and is fixed
+            width (Int | float | Parameter): Half width at half maximum
+                (HWHM).
+            unit (str | sc.Unit): Unit of the parameters. Defaults to
+                "meV".
+            display_name (str | None): Name of the component.
+            unique_name (str | None): Unique name of the component. If
+                None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If any of the parameters are of the wrong type.
+            ValueError: If width is not positive.
+        """
+
         super().__init__(
             display_name=display_name,
             unit=unit,
@@ -183,7 +202,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
         return self.area.value * normalization / denominator
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the Lorentzian.
 
         Returns:

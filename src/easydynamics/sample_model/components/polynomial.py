@@ -49,6 +49,25 @@ class Polynomial(ModelComponent):
         display_name: str | None = 'Polynomial',
         unique_name: str | None = None,
     ):
+        """Initialize the Polynomial component.
+
+        Args:
+            coefficients (list or tuple): Coefficients c0, c1, ..., cN
+            unit (str or sc.Unit): Unit of the Polynomial component.
+            display_name (str): Display name of the Polynomial
+                component.
+            unique_name (str or None): Unique name of the component.
+                If None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If coefficients is not a sequence of numbers or
+                Parameters.
+            ValueError: If coefficients is an empty sequence.
+            TypeError: If any item in coefficients is not a number or
+                Parameter.
+            UnitError: If unit is not a string or sc.Unit.
+        """
+
         super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
 
         if not isinstance(coefficients, (list, tuple, np.ndarray)):

@@ -38,6 +38,21 @@ class Experiment(NewBase):
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
     ):
+        """Initialize the Experiment object.
+
+        Args:
+            display_name (str): Display name of the experiment.
+            unique_name (str | None): Unique name of the experiment. If
+                None, a unique name will be generated.
+            data (sc.DataArray | str | None): Dataset associated with
+                the experiment. Can be a sc.DataArray or a filename
+                string to load from. If None, no data is loaded.
+
+        Raises:
+            TypeError: If data is not a sc.DataArray, a string, or None.
+            ValueError: If the loaded data is missing required
+                coordinates.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -123,7 +138,7 @@ class Experiment(NewBase):
 
         Returns:
             sc.Variable | None: The Q values from the dataset, or None
-            if no data is loaded.
+                if no data is loaded.
         """
         if self._data is None:
             return None

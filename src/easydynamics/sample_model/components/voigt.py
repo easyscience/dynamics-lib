@@ -55,6 +55,28 @@ class Voigt(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'Voigt',
         unique_name: str | None = None,
     ):
+        """Initialize a Voigt component.
+
+        Args:
+            area (Int | float): Total area under the curve.
+            center (Int | float | None): Center of the Voigt profile.
+            gaussian_width (Int | float): Standard deviation of the
+                Gaussian part.
+            lorentzian_width (Int | float): Half width at half max
+                (HWHM) of the Lorentzian part.
+            unit (str | sc.Unit): Unit of the parameters. Defaults to
+                "meV"
+            display_name (str | None): Display name of the component.
+            unique_name (str | None): Unique name of the component.
+                If None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If any of the parameters are not of the correct
+                type.
+            ValueError: If any of the parameters are not valid (e.g.
+                negative widths).
+        """
+
         super().__init__(
             display_name=display_name,
             unit=unit,
@@ -199,9 +221,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or
-                sc.DataArray):
-                The x values at which to evaluate the Voigt.
+            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
+                sc.DataArray): The x values at which to evaluate the
+                Voigt.
 
         Returns:
             np.ndarray: The intensity of the Voigt at the given x
@@ -216,7 +238,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             self.lorentzian_width.value,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the Voigt.
 
         Returns:
