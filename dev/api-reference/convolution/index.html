@@ -1857,13 +1857,7 @@ normalize_detailed_balance : bool, optional
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -1982,15 +1976,9 @@ normalize_detailed_balance : bool, optional
         <span class="k">return</span> <span class="n">total</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_convolve_delta_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convolve delta function components of the sample model with</span>
-<span class="sd">        the resolution components. No detailed balance correction is</span>
-<span class="sd">        applied to delta functions.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray</span>
-<span class="sd">                The convolved values of the delta function components</span>
-<span class="sd">                evaluated at energy.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="s2">&quot;Convolve delta function components of the sample model with&quot;</span>
+        <span class="s1">&#39;the resolution components.&#39;</span>
+        <span class="s1">&#39;No detailed balance correction is applied to delta functions.&#39;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
             <span class="n">delta</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
@@ -2172,20 +2160,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -3869,13 +3857,7 @@ normalize_detailed_balance : bool, optional
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -3994,15 +3976,9 @@ normalize_detailed_balance : bool, optional
         <span class="k">return</span> <span class="n">total</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_convolve_delta_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convolve delta function components of the sample model with</span>
-<span class="sd">        the resolution components. No detailed balance correction is</span>
-<span class="sd">        applied to delta functions.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray</span>
-<span class="sd">                The convolved values of the delta function components</span>
-<span class="sd">                evaluated at energy.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="s2">&quot;Convolve delta function components of the sample model with&quot;</span>
+        <span class="s1">&#39;the resolution components.&#39;</span>
+        <span class="s1">&#39;No detailed balance correction is applied to delta functions.&#39;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
             <span class="n">delta</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
@@ -4184,20 +4160,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -4435,97 +4411,17 @@ base class has no convolution functionality.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>energy </code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>np.ndarray or scipp.Variable
-1D array of energy values where the convolution is evaluated</p>
+        <p>energy : np.ndarray or scipp.Variable
+    1D array of energy values where the convolution is evaluated.
+sample_components : ComponentCollection or ModelComponent
+    The sample model to be convolved.
+resolution_components : ComponentCollection or ModelComponent
+    The resolution model to convolve with.
+energy_unit : str or sc.Unit, optional
+    The unit of the energy. Default is 'meV'.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>sample_components </code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ComponentCollection or ModelComponent
-The sample model to be convolved.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>resolution_components </code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ComponentCollection or ModelComponent
-The resolution model to convolve with.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>energy_unit </code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>str or sc.Unit, optional
-The unit of the energy. Default is 'meV'.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
 
@@ -4772,19 +4668,20 @@ The unit of the energy. Default is 'meV'.</p>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
-<span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for convolutions of sample and resolution models. This</span>
 <span class="sd">    base class has no convolution functionality.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        energy : np.ndarray or scipp.Variable</span>
-<span class="sd">            1D array of energy values where the convolution is evaluated</span>
-<span class="sd">        sample_components : ComponentCollection or ModelComponent</span>
-<span class="sd">            The sample model to be convolved.</span>
-<span class="sd">        resolution_components : ComponentCollection or ModelComponent</span>
-<span class="sd">            The resolution model to convolve with.</span>
-<span class="sd">        energy_unit : str or sc.Unit, optional</span>
-<span class="sd">            The unit of the energy. Default is &#39;meV&#39;.</span>
+<span class="sd">    energy : np.ndarray or scipp.Variable</span>
+<span class="sd">        1D array of energy values where the convolution is evaluated.</span>
+<span class="sd">    sample_components : ComponentCollection or ModelComponent</span>
+<span class="sd">        The sample model to be convolved.</span>
+<span class="sd">    resolution_components : ComponentCollection or ModelComponent</span>
+<span class="sd">        The resolution model to convolve with.</span>
+<span class="sd">    energy_unit : str or sc.Unit, optional</span>
+<span class="sd">        The unit of the energy. Default is &#39;meV&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -4888,15 +4785,16 @@ The unit of the energy. Default is 'meV'.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy</span>
 
     <span class="nd">@energy</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the energy.</span>
 <span class="sd">         Args:</span>
-<span class="sd">            energy (np.ndarray | scipp.Variable): 1D array of energy</span>
-<span class="sd">            values where the convolution is evaluated.</span>
+<span class="sd">            energy : np.ndarray or scipp.Variable</span>
+<span class="sd">                1D array of energy values where the convolution is</span>
+<span class="sd">                evaluated.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If energy is not a numpy ndarray or a</span>
-<span class="sd">                scipp Variable.</span>
+<span class="sd">            scipp Variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
@@ -5115,8 +5013,7 @@ unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -5144,7 +5041,8 @@ unit.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">196</span>
+<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">    Args:</span>
@@ -7315,6 +7213,10 @@ on each side</p>
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../assets/javascripts/extra.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
