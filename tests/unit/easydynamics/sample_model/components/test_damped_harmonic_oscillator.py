@@ -138,6 +138,11 @@ class TestDampedHarmonicOscillator:
         with pytest.raises(ValueError, match='center must be positive'):
             dho.center = -1.0
 
+    def test_width_must_be_positive(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            dho.width = -0.5
+
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.array([0.0, 1.5, 3.0])

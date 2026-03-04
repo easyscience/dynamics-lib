@@ -16,7 +16,23 @@ from easydynamics.utils.utils import Numeric
 
 
 class ModelComponent(ModelBase):
-    """Abstract base class for all model components."""
+    """Abstract base class for all model components.
+
+    Args:
+        unit (str | sc.Unit): The unit of the model component.
+            Default is 'meV'.
+        display_name (str | None): A human-readable name for the
+            component. Default is None.
+        unique_name (str | None): A unique identifier for the
+            component. Default is None.
+
+    Attributes:
+        unit (str): The unit of the model component.
+        display_name (str | None): A human-readable name for the
+            component.
+        unique_name (str | None): A unique identifier for the
+            component.
+    """
 
     def __init__(
         self,
@@ -32,12 +48,23 @@ class ModelComponent(ModelBase):
     def unit(self) -> str:
         """Get the unit.
 
-        :return: Unit as a string.
+        Returns:
+            str: The unit of the model component.
         """
         return str(self._unit)
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
+        """Unit is read-only. Use convert_unit to change the unit
+        between allowed types or create a new ModelComponent with the
+        desired unit.
+
+        Args:
+            unit_str (str): The new unit to set.
+
+        Raises:
+            AttributeError: Always raised since unit is read-only.
+        """
         raise AttributeError(
             (
                 f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -62,6 +89,19 @@ class ModelComponent(ModelBase):
     ) -> np.ndarray:
         """Prepare the input x for evaluation by handling units and
         converting to a numpy array.
+
+        Args:
+            x (Numeric | List[Numeric] | np.ndarray | sc.Variable |
+            sc.DataArray): The input data to prepare.
+
+        Returns:
+            np.ndarray: The prepared input data as a numpy array.
+
+        Raises:
+            ValueError: If x contains NaN or infinite values, or if a
+                sc.DataArray has more than one coordinate.
+            UnitError: If x has incompatible units that cannot be
+                converted to the component's unit.
         """
 
         # Handle units
@@ -119,8 +159,10 @@ class ModelComponent(ModelBase):
 
     @staticmethod
     def validate_unit(unit) -> None:
-        """Raise TypeError if unit is not allowed (string or
-        sc.Unit).
+        """Validate that the unit is either a string or a scipp Unit.
+
+        Raises:
+            TypeError: If unit is not a string or scipp Unit.
         """
         if unit is not None and not isinstance(unit, (str, sc.Unit)):
             raise TypeError(
@@ -151,11 +193,15 @@ class ModelComponent(ModelBase):
             raise e
 
     @abstractmethod
-    def evaluate(self, x: Numeric | sc.Variable) -> np.ndarray:
-        """Evaluate the model component at input x.
+    def evaluate(
+        self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
+    ) -> np.ndarray:
+        """Abstract method to evaluate the model component at input x.
+        Must be implemented by subclasses.
 
         Args:
-            x (Numeric | sc.Variable): Input values.
+            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
+                sc.DataArray): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.
@@ -163,4 +209,10 @@ class ModelComponent(ModelBase):
         pass
 
     def __repr__(self):
+        """Return a string representation of the ModelComponent.
+
+        Returns:
+            str: A string representation of the ModelComponent.
+        """
+
         return f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})'
