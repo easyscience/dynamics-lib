@@ -319,7 +319,7 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Lorentzian,
         resolution_component: Lorentzian,
     ) -> np.ndarray:
-        """Convolution of two Lorentzian components results in another
+        r"""Convolution of two Lorentzian components results in another
         Lorentzian component with width $w_1 + w_2$. The areas are
         multiplied.
 
@@ -355,8 +355,9 @@ class AnalyticalConvolution(ConvolutionBase):
 
         Args:
             sample_component (Lorentzian): The sample Lorentzian
-            component to be convolved.
-            resolution_component (Voigt): The resolution Voigt component to convolve with.
+                component to be convolved.
+            resolution_component (Voigt): The resolution Voigt component
+                to convolve with.
         Returns:
             np.ndarray: The evaluated convolution values at self.energy.
         """

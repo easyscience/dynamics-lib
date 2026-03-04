@@ -54,7 +54,8 @@ class Polynomial(ModelComponent):
         Args:
             coefficients (list or tuple): Coefficients c0, c1, ..., cN
             unit (str or sc.Unit): Unit of the Polynomial component.
-            display_name (str): Display name of the Polynomial component.
+            display_name (str): Display name of the Polynomial
+                component.
             unique_name (str or None): Unique name of the component.
                 If None, a unique_name is automatically generated.
 

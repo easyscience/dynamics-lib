@@ -81,11 +81,11 @@ class InstrumentModel(NewBase):
                 model of the instrument. If None, an empty background
                 model is created, and the background evaluates to 0.
                 Default is None.
-            energy_offset (float | int | None): Template energy offset of
-                the instrument. Will be copied to each Q value. If None,
-                the energy offset will be 0. Default is None.
-            unit (str | sc.Unit): The unit of the energy axis. Default is
-                'meV'.
+            energy_offset (float | int | None): Template energy offset
+                of the instrument. Will be copied to each Q value. If
+                None, the energy offset will be 0. Default is None.
+            unit (str | sc.Unit): The unit of the energy axis. Default
+                is 'meV'.
 
         Raises:
             TypeError: If resolution_model is not a ResolutionModel or
