@@ -39,12 +39,33 @@ class ResolutionModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = 'MyResolutionModel',
+        display_name: str = "MyResolutionModel",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
     ):
+        """Initialize a ResolutionModel.
+
+        Args:
+            display_name (str): Display name of the model.
+            unique_name (str | None): Unique name of the model. If None,
+                a unique name will be generated.
+            unit (str | sc.Unit | None): Unit of the model. Defaults to
+                "meV".
+            components (ModelComponent | ComponentCollection | None):
+                Template components of the model. If None, no components
+                are added. These components are copied into
+                ComponentCollections for each Q value.
+            Q (Q_type | None): Q values for the model. If None, Q is not
+                set.
+
+        Raises:
+            TypeError: If components is not a ModelComponent or
+                ComponentCollection.
+            ValueError: If Q is not a valid Q_type.
+        """
+
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -53,7 +74,7 @@ class ResolutionModel(ModelBase):
             Q=Q,
         )
 
-    def append_component(self, component: ModelComponent | ComponentCollection):
+    def append_component(self, component: ModelComponent | ComponentCollection) -> None:
         """Append a component to the ResolutionModel.
 
         Does not allow DeltaFunction or Polynomial components, as these
@@ -74,7 +95,7 @@ class ResolutionModel(ModelBase):
         for comp in components:
             if isinstance(comp, (DeltaFunction, Polynomial)):
                 raise TypeError(
-                    f'Component in ResolutionModel cannot be a {comp.__class__.__name__}'
+                    f"Component in ResolutionModel cannot be a {comp.__class__.__name__}"
                 )
 
         super().append_component(component)

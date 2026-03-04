@@ -56,14 +56,47 @@ class InstrumentModel(NewBase):
 
     def __init__(
         self,
-        display_name: str = 'MyInstrumentModel',
+        display_name: str = "MyInstrumentModel",
         unique_name: str | None = None,
         Q: Q_type | None = None,
         resolution_model: ResolutionModel | None = None,
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
     ):
+        """
+        Initialize an InstrumentModel.
+
+
+        Args:
+            display_name (str | None): The display name of the
+                InstrumentModel. Default is "MyInstrumentModel".
+            unique_name (str | None): The unique name of the
+                InstrumentModel. Default is None.
+            Q (np.ndarray | list | sc.Variable | None): The Q values
+                where the instrument is modelled.
+            resolution_model (ResolutionModel | None): The resolution
+                model of the instrument. If None, an empty resolution
+                model is created and no resolution convolution is
+                carried out. Default is None.
+            background_model (BackgroundModel | None): The background
+                model of the instrument. If None, an empty background
+                model is created, and the background evaluates to 0.
+                Default is None.
+            energy_offset (float | int | None): Template energy offset of
+                the instrument. Will be copied to each Q value. If None,
+                the energy offset will be 0. Default is None.
+            unit (str | sc.Unit): The unit of the energy axis. Default is
+                'meV'.
+
+        Raises:
+            TypeError: If resolution_model is not a ResolutionModel or
+                None
+            TypeError: If background_model is not a BackgroundModel or
+                None
+            TypeError: If energy_offset is not a number or None
+            UnitError: If unit is not a valid unit string or scipp Unit.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -76,8 +109,8 @@ class InstrumentModel(NewBase):
         else:
             if not isinstance(resolution_model, ResolutionModel):
                 raise TypeError(
-                    f'resolution_model must be a ResolutionModel or None, '
-                    f'got {type(resolution_model).__name__}'
+                    f"resolution_model must be a ResolutionModel or None, "
+                    f"got {type(resolution_model).__name__}"
                 )
             self._resolution_model = resolution_model
 
@@ -86,8 +119,8 @@ class InstrumentModel(NewBase):
         else:
             if not isinstance(background_model, BackgroundModel):
                 raise TypeError(
-                    f'background_model must be a BackgroundModel or None, '
-                    f'got {type(background_model).__name__}'
+                    f"background_model must be a BackgroundModel or None, "
+                    f"got {type(background_model).__name__}"
                 )
             self._background_model = background_model
 
@@ -95,10 +128,10 @@ class InstrumentModel(NewBase):
             energy_offset = 0.0
 
         if not isinstance(energy_offset, Numeric):
-            raise TypeError('energy_offset must be a number or None')
+            raise TypeError("energy_offset must be a number or None")
 
         self._energy_offset = Parameter(
-            name='energy_offset',
+            name="energy_offset",
             value=float(energy_offset),
             unit=self.unit,
             fixed=False,
@@ -132,7 +165,7 @@ class InstrumentModel(NewBase):
         """
         if not isinstance(value, ResolutionModel):
             raise TypeError(
-                f'resolution_model must be a ResolutionModel, got {type(value).__name__}'
+                f"resolution_model must be a ResolutionModel, got {type(value).__name__}"
             )
         self._resolution_model = value
         self._on_resolution_model_change()
@@ -161,7 +194,7 @@ class InstrumentModel(NewBase):
 
         if not isinstance(value, BackgroundModel):
             raise TypeError(
-                f'background_model must be a BackgroundModel, got {type(value).__name__}'
+                f"background_model must be a BackgroundModel, got {type(value).__name__}"
             )
         self._background_model = value
         self._on_background_model_change()
@@ -215,8 +248,8 @@ class InstrumentModel(NewBase):
         """
         raise AttributeError(
             (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
 
@@ -243,7 +276,9 @@ class InstrumentModel(NewBase):
             TypeError: If value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError(f'energy_offset must be a number, got {type(value).__name__}')
+            raise TypeError(
+                f"energy_offset must be a number, got {type(value).__name__}"
+            )
         self._energy_offset.value = value
 
         self._on_energy_offset_change()
@@ -265,7 +300,7 @@ class InstrumentModel(NewBase):
         """
         unit = _validate_unit(unit_str)
         if unit is None:
-            raise ValueError('unit_str must be a valid unit string or scipp Unit')
+            raise ValueError("unit_str must be a valid unit string or scipp Unit")
 
         self._background_model.convert_unit(unit)
         self._resolution_model.convert_unit(unit)
@@ -301,10 +336,12 @@ class InstrumentModel(NewBase):
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+                raise TypeError(
+                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
+                )
             if Q_index < 0 or Q_index >= len(self._Q):
                 raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
+                    f"Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}"
                 )
             variables = [self._energy_offsets[Q_index]]
 
@@ -337,10 +374,12 @@ class InstrumentModel(NewBase):
             IndexError: If Q_index is out of bounds.
         """
         if self._Q is None:
-            raise ValueError('No Q values are set in the InstrumentModel.')
+            raise ValueError("No Q values are set in the InstrumentModel.")
 
         if Q_index < 0 or Q_index >= len(self._Q):
-            raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
+            raise IndexError(
+                f"Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}"
+            )
 
         return self._energy_offsets[Q_index]
 
@@ -387,11 +426,11 @@ class InstrumentModel(NewBase):
         """
 
         return (
-            f'{self.__class__.__name__}('
-            f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
-            f'Q_len={None if self._Q is None else len(self._Q)}, '
-            f'resolution_model={self._resolution_model!r}, '
-            f'background_model={self._background_model!r}'
-            f')'
+            f"{self.__class__.__name__}("
+            f"unique_name={self.unique_name!r}, "
+            f"unit={self.unit}, "
+            f"Q_len={None if self._Q is None else len(self._Q)}, "
+            f"resolution_model={self._resolution_model!r}, "
+            f"background_model={self._background_model!r}"
+            f")"
         )
