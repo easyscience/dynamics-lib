@@ -5,14 +5,6 @@
 # TODO: remove once weakref bug is fixed
 
 
-# import easyscience.global_object
-# import pytest
-
-
-# @pytest.fixture(autouse=True)
-# def reset_global_object():
-#     easyscience.global_object.map._clear()
-
 from unittest.mock import patch
 
 import pytest

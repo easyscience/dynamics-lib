@@ -115,7 +115,7 @@ class SampleModel(ModelBase):
 
         Args:
             diffusion_model (DiffusionModelBase): The DiffusionModel
-            to append.
+                to append.
         """
 
         if not isinstance(diffusion_model, DiffusionModelBase):
