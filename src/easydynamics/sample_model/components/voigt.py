@@ -51,8 +51,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter | None = None,
         gaussian_width: Numeric | Parameter = 1.0,
         lorentzian_width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "Voigt",
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'Voigt',
         unique_name: str | None = None,
     ):
         super().__init__(
@@ -62,22 +62,20 @@ class Voigt(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=display_name, unit=self._unit
-        )
+        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
         gaussian_width = self._create_width_parameter(
             width=gaussian_width,
             name=display_name,
-            param_name="gaussian_width",
+            param_name='gaussian_width',
             unit=self._unit,
         )
         lorentzian_width = self._create_width_parameter(
             width=lorentzian_width,
             name=display_name,
-            param_name="lorentzian_width",
+            param_name='lorentzian_width',
             unit=self._unit,
         )
 
@@ -106,7 +104,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             TypeError: If the value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -133,7 +131,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
     @property
@@ -158,9 +156,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
             ValueError: If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("gaussian_width must be a number")
+            raise TypeError('gaussian_width must be a number')
         if float(value) <= 0:
-            raise ValueError("gaussian_width must be positive")
+            raise ValueError('gaussian_width must be positive')
         self._gaussian_width.value = value
 
     @property
@@ -185,14 +183,12 @@ class Voigt(CreateParametersMixin, ModelComponent):
             ValueError: If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("lorentzian_width must be a number")
+            raise TypeError('lorentzian_width must be a number')
         if float(value) <= 0:
-            raise ValueError("lorentzian_width must be positive")
+            raise ValueError('lorentzian_width must be positive')
         self._lorentzian_width.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         r"""Evaluate the Voigt at the given x values.
 
         If x is a scipp Variable, the unit of the Voigt will be
@@ -227,8 +223,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
             str: A string representation of the Voigt.
         """
 
-        return f"Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n \
+        return f'Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n \
         area = {self.area},\n \
         center = {self.center},\n \
         gaussian_width = {self.gaussian_width},\n \
-        lorentzian_width = {self.lorentzian_width})"
+        lorentzian_width = {self.lorentzian_width})'
