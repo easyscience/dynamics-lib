@@ -3816,7 +3816,8 @@ Default is 'meV'.</p>
 <span class="normal">503</span>
 <span class="normal">504</span>
 <span class="normal">505</span>
-<span class="normal">506</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">506</span>
+<span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Analytical convolution of a ModelComponent or ComponentCollection</span>
 <span class="sd">    with a ResolutionModel.</span>
 
@@ -4119,7 +4120,7 @@ Default is 'meV'.</p>
         <span class="n">sample_component</span><span class="p">:</span> <span class="n">Lorentzian</span><span class="p">,</span>
         <span class="n">resolution_component</span><span class="p">:</span> <span class="n">Lorentzian</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convolution of two Lorentzian components results in another</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convolution of two Lorentzian components results in another</span>
 <span class="sd">        Lorentzian component with width $w_1 + w_2$. The areas are</span>
 <span class="sd">        multiplied.</span>
 
@@ -4155,8 +4156,9 @@ Default is 'meV'.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            sample_component (Lorentzian): The sample Lorentzian</span>
-<span class="sd">            component to be convolved.</span>
-<span class="sd">            resolution_component (Voigt): The resolution Voigt component to convolve with.</span>
+<span class="sd">                component to be convolved.</span>
+<span class="sd">            resolution_component (Voigt): The resolution Voigt component</span>
+<span class="sd">                to convolve with.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: The evaluated convolution values at self.energy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -8912,7 +8914,9 @@ detailed balance correction.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
 <span class="normal"> 19</span>
 <span class="normal"> 20</span>
 <span class="normal"> 21</span>
@@ -9082,9 +9086,7 @@ detailed balance correction.</p>
 <span class="normal">185</span>
 <span class="normal">186</span>
 <span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerical convolution of a ComponentCollection with a</span>
 <span class="sd">    ComponentCollection using FFT. Includes optional upsampling and</span>
 <span class="sd">    extended range to improve accuracy. Warns about very wide or very</span>
@@ -9572,7 +9574,9 @@ Parameter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 69</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
 <span class="normal"> 70</span>
 <span class="normal"> 71</span>
 <span class="normal"> 72</span>
@@ -9630,9 +9634,7 @@ Parameter.</p>
 <span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -9752,7 +9754,9 @@ The convolved values evaluated at energy.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
@@ -9809,9 +9813,7 @@ The convolved values evaluated at energy.</p>
 <span class="normal">185</span>
 <span class="normal">186</span>
 <span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the convolution of the sample and resolution models</span>
