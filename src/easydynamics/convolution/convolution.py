@@ -136,9 +136,15 @@ class Convolution(NumericalConvolutionBase):
         return total
 
     def _convolve_delta_functions(self) -> np.ndarray:
-        "Convolve delta function components of the sample model with"
-        'the resolution components.'
-        'No detailed balance correction is applied to delta functions.'
+        """Convolve delta function components of the sample model with
+        the resolution components. No detailed balance correction is
+        applied to delta functions.
+
+        Returns:
+            np.ndarray
+                The convolved values of the delta function components
+                evaluated at energy.
+        """
         return sum(
             delta.area.value
             * self._resolution_components.evaluate(
