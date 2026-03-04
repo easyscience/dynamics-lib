@@ -37,9 +37,9 @@ class BackgroundModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyBackgroundModel",
+        display_name: str = 'MyBackgroundModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
     ):
@@ -57,7 +57,6 @@ class BackgroundModel(ModelBase):
                 ComponentCollections for each Q value.
             Q (Q_type | None): Q values for the model. If None, Q is not
                 set.
-
         """
         super().__init__(
             display_name=display_name,

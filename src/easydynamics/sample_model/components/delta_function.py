@@ -45,12 +45,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self,
         center: None | Numeric | Parameter = None,
         area: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "DeltaFunction",
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
     ):
-        """
-        Initialize the Delta function.
+        """Initialize the Delta function.
 
         Args:
             center (Int | float | None): Center of the delta function.
@@ -75,9 +74,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(
-            area=area, name=display_name, unit=self._unit
-        )
+        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
@@ -107,7 +104,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
 
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -136,12 +133,10 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         """Evaluate the Delta function at the given x values.
 
         The Delta function evaluates to zero everywhere, except at the
@@ -194,5 +189,5 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             str: A string representation of the Delta function.
         """
 
-        return f"DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \
-        area = {self.area},\n center = {self.center}"
+        return f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \
+        area = {self.area},\n center = {self.center}'

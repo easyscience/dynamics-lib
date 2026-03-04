@@ -63,14 +63,14 @@ class SampleModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MySampleModel",
+        display_name: str = 'MySampleModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
         diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
         temperature: float | None = None,
-        temperature_unit: str | sc.Unit = "K",
+        temperature_unit: str | sc.Unit = 'K',
         divide_by_temperature: bool = True,
     ):
         """Initialize the SampleModel.
@@ -114,8 +114,8 @@ class SampleModel(ModelBase):
                 isinstance(dm, DiffusionModelBase) for dm in diffusion_models
             ):
                 raise TypeError(
-                    "diffusion_models must be a DiffusionModelBase, "
-                    "a list of DiffusionModelBase or None"
+                    'diffusion_models must be a DiffusionModelBase, '
+                    'a list of DiffusionModelBase or None'
                 )
             self._diffusion_models = diffusion_models
 
@@ -131,21 +131,21 @@ class SampleModel(ModelBase):
             self._temperature = None
         else:
             if not isinstance(temperature, Numeric):
-                raise TypeError("temperature must be a number or None")
+                raise TypeError('temperature must be a number or None')
 
             if temperature < 0:
-                raise ValueError("temperature must be non-negative")
+                raise ValueError('temperature must be non-negative')
             self._temperature = Parameter(
-                name="Temperature",
+                name='Temperature',
                 value=temperature,
                 unit=temperature_unit,
-                display_name="Temperature",
+                display_name='Temperature',
                 fixed=True,
             )
         self._temperature_unit = temperature_unit
 
         if not isinstance(divide_by_temperature, bool):
-            raise TypeError("divide_by_temperature must be True or False")
+            raise TypeError('divide_by_temperature must be True or False')
         self._divide_by_temperature = divide_by_temperature
 
     # ------------------------------------------------------------------
@@ -166,13 +166,13 @@ class SampleModel(ModelBase):
 
         if not isinstance(diffusion_model, DiffusionModelBase):
             raise TypeError(
-                f"diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}"  # noqa: E501
+                f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
             )
 
         self._diffusion_models.append(diffusion_model)
         self._generate_component_collections()
 
-    def remove_diffusion_model(self, name: "str") -> None:
+    def remove_diffusion_model(self, name: 'str') -> None:
         """Remove a DiffusionModel from the SampleModel by unique name.
 
         Args:
@@ -188,8 +188,8 @@ class SampleModel(ModelBase):
                 self._generate_component_collections()
                 return
         raise ValueError(
-            f"No DiffusionModel with unique name {name} found. \n"
-            f"The available unique names are: {[dm.unique_name for dm in self._diffusion_models]}"
+            f'No DiffusionModel with unique name {name} found. \n'
+            f'The available unique names are: {[dm.unique_name for dm in self._diffusion_models]}'
         )
 
     def clear_diffusion_models(self) -> None:
@@ -235,8 +235,8 @@ class SampleModel(ModelBase):
             isinstance(dm, DiffusionModelBase) for dm in value
         ):
             raise TypeError(
-                "diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, "
-                "or None"
+                'diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, '
+                'or None'
             )
         self._diffusion_models = value
         self._on_diffusion_models_change()
@@ -264,17 +264,17 @@ class SampleModel(ModelBase):
             return
 
         if not isinstance(value, Numeric):
-            raise TypeError("temperature must be a number or None")
+            raise TypeError('temperature must be a number or None')
 
         if value < 0:
-            raise ValueError("temperature must be non-negative")
+            raise ValueError('temperature must be non-negative')
 
         if self._temperature is None:
             self._temperature = Parameter(
-                name="Temperature",
+                name='Temperature',
                 value=value,
                 unit=self._temperature_unit,
-                display_name="Temperature",
+                display_name='Temperature',
                 fixed=True,
             )
         else:
@@ -302,8 +302,8 @@ class SampleModel(ModelBase):
         """
 
         raise AttributeError(
-            f"Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types "  # noqa: E501
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types '  # noqa: E501
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:
@@ -318,7 +318,7 @@ class SampleModel(ModelBase):
         """
 
         if self._temperature is None:
-            raise ValueError("Temperature is not set, cannot convert unit.")
+            raise ValueError('Temperature is not set, cannot convert unit.')
 
         old_unit = self._temperature.unit
 
@@ -354,7 +354,7 @@ class SampleModel(ModelBase):
                 temperature, False otherwise.
         """
         if not isinstance(value, bool):
-            raise TypeError("divide_by_temperature must be True or False")
+            raise TypeError('divide_by_temperature must be True or False')
         self._divide_by_temperature = value
 
     # ------------------------------------------------------------------
@@ -429,12 +429,8 @@ class SampleModel(ModelBase):
         # Generate components from diffusion models
         # and add to component collections
         for diffusion_model in self._diffusion_models:
-            diffusion_collections = diffusion_model.create_component_collections(
-                Q=self._Q
-            )
-            for target, source in zip(
-                self._component_collections, diffusion_collections
-            ):
+            diffusion_collections = diffusion_model.create_component_collections(Q=self._Q)
+            for target, source in zip(self._component_collections, diffusion_collections):
                 for component in source.components:
                     target.append_component(component)
 
@@ -454,9 +450,9 @@ class SampleModel(ModelBase):
         """
 
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit}), "
-            f"Q = {self._Q}, "
-            f"components = {self._components}, diffusion_models = {self._diffusion_models}, "
-            f"temperature = {self._temperature}, "
-            f"divide_by_temperature = {self._divide_by_temperature}"
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit}), '
+            f'Q = {self._Q}, '
+            f'components = {self._components}, diffusion_models = {self._diffusion_models}, '
+            f'temperature = {self._temperature}, '
+            f'divide_by_temperature = {self._divide_by_temperature}'
         )

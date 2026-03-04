@@ -75,8 +75,8 @@ class NumericalConvolution(NumericalConvolutionBase):
         upsample_factor: Numeric = 5,
         extension_factor: Numeric = 0.2,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = "K",
-        energy_unit: str | sc.Unit = "meV",
+        temperature_unit: str | sc.Unit = 'K',
+        energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
     ):
         """Initialize the NumericalConvolution object.
@@ -114,7 +114,6 @@ class NumericalConvolution(NumericalConvolutionBase):
             TypeError: If extension_factor is not a number.
             ValueError: If extension_factor is negative.
             TypeError: If normalize_detailed_balance is not a bool.
-
         """
         super().__init__(
             energy=energy,
@@ -144,11 +143,11 @@ class NumericalConvolution(NumericalConvolutionBase):
         # Give warnings if peaks are very wide or very narrow
         self._check_width_thresholds(
             model=self.sample_components,
-            model_name="sample model",
+            model_name='sample model',
         )
         self._check_width_thresholds(
             model=self.resolution_components,
-            model_name="resolution model",
+            model_name='resolution model',
         )
 
         # Evaluate sample model. If called via the Convolution class,
@@ -175,7 +174,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         )
 
         # Convolution
-        convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
+        convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
         convolved *= self._energy_grid.energy_dense_step  # normalize
 
         if self.upsample_factor is not None:
