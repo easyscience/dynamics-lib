@@ -57,10 +57,29 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'Gaussian',
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "Gaussian",
         unique_name: str | None = None,
     ):
+        """Initialize the Gaussian component.
+
+        Args:
+            area (Int | float | Parameter | None): Area of the Gaussian.
+            center (Int | float | Parameter | None): Center of the
+                Gaussian. If None, defaults to 0 and is fixed.
+            width (Int | float | Parameter | None): Standard deviation.
+            unit (str | sc.Unit): Unit of the parameters. Defaults to
+                "meV".
+            display_name (str | None): Name of the component.
+            unique_name (str | None): Unique name of the component. if
+                None, a unique_name is automatically generated.
+
+        Raises:
+            TypeError: If area, center, or width are not numbers or
+                Parameters.
+            ValueError: If width is not positive.
+            TypeError: If unit is not a string or sc.Unit.
+        """
         # Validate inputs and create Parameters if not given
         super().__init__(
             display_name=display_name,
@@ -69,11 +88,15 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(
+            area=area, name=display_name, unit=self._unit
+        )
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
+        width = self._create_width_parameter(
+            width=width, name=display_name, unit=self._unit
+        )
 
         self._area = area
         self._center = center
@@ -101,7 +124,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         """
 
         if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
+            raise TypeError("area must be a number")
         self._area.value = value
 
     @property
@@ -130,7 +153,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     @property
@@ -155,10 +178,10 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             ValueError: If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('width must be a number')
+            raise TypeError("width must be a number")
 
         if float(value) <= 0:
-            raise ValueError('width must be positive')
+            raise ValueError("width must be positive")
 
         self._width.value = value
 
@@ -207,5 +230,5 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             str: A string representation of the Gaussian.
         """
 
-        return f'Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n \
-            area = {self.area},\n center = {self.center},\n width = {self.width})'
+        return f"Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n \
+            area = {self.area},\n center = {self.center},\n width = {self.width})"
