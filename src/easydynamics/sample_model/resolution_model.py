@@ -39,9 +39,9 @@ class ResolutionModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = 'MyResolutionModel',
+        display_name: str = "MyResolutionModel",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
     ):
@@ -61,7 +61,7 @@ class ResolutionModel(ModelBase):
 
         Args:
             component (ModelComponent | ComponentCollection):
-            Component(s) to append.
+                Component(s) to append.
 
         Raises:
             TypeError: If the component is a DeltaFunction or Polynomial
@@ -74,7 +74,7 @@ class ResolutionModel(ModelBase):
         for comp in components:
             if isinstance(comp, (DeltaFunction, Polynomial)):
                 raise TypeError(
-                    f'Component in ResolutionModel cannot be a {comp.__class__.__name__}'
+                    f"Component in ResolutionModel cannot be a {comp.__class__.__name__}"
                 )
 
         super().append_component(component)

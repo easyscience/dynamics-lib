@@ -376,7 +376,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     # dunder methods
     ################################
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of the JumpTranslationalDiffusion
         model.
 

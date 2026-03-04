@@ -33,8 +33,8 @@ class AnalysisBase(EasyScienceModelBase):
         instrument_model (InstrumentModel | None): The InstrumentModel
             associated with this Analysis. If None, a default
             InstrumentModel is created.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -51,7 +51,7 @@ class AnalysisBase(EasyScienceModelBase):
         temperature (Parameter | None): The temperature from the
             associated SampleModel, if available.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(

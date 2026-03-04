@@ -38,8 +38,8 @@ class Analysis1d(AnalysisBase):
         Q_index (int | None): The Q index to analyze. If None, the
             analysis will not be able to calculate or fit until a
             Q index is set.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -57,7 +57,7 @@ class Analysis1d(AnalysisBase):
             associated SampleModel, if available.
         Q_index (int | None): The Q index being analyzed.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(
@@ -189,8 +189,9 @@ class Analysis1d(AnalysisBase):
         calculated model.
 
         Args:
-            x: Ignored. The energy grid is taken from the experiment.
-            kwargs: Ignored. Included for compatibility with the
+            x (Any): Ignored. The energy grid is taken from the
+                experiment.
+            kwargs (dict): Ignored. Included for compatibility with the
                 EasyScience fitter.
         """
 
@@ -203,7 +204,7 @@ class Analysis1d(AnalysisBase):
         """Get all variables used in the analysis.
 
         Returns:
-            List[Descriptor]: A list of all variables.
+            list[DescriptorNumber]: A list of all variables.
         """
         variables = self.sample_model.get_all_variables(Q_index=self.Q_index)
 
@@ -231,7 +232,7 @@ class Analysis1d(AnalysisBase):
                 components of the model. Default is True.
             add_background (bool): Whether to add the background to the
                 model prediction when plotting individual components.
-            kwargs: Keyword arguments to pass to the plotting
+            kwargs (dict): Keyword arguments to pass to the plotting
                 function.
 
         Returns:

@@ -37,9 +37,9 @@ class BackgroundModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = 'MyBackgroundModel',
+        display_name: str = "MyBackgroundModel",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
     ):

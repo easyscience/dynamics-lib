@@ -183,7 +183,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
         return self.area.value * normalization / denominator
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the Lorentzian.
 
         Returns:

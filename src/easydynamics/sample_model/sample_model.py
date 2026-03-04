@@ -110,7 +110,7 @@ class SampleModel(ModelBase):
 
         Args:
             diffusion_model (DiffusionModelBase): The DiffusionModel
-            to append.
+                to append.
 
         Raises:
             TypeError: If the diffusion_model is not a
@@ -133,7 +133,7 @@ class SampleModel(ModelBase):
 
         Raises:
             ValueError: If no DiffusionModel with the given unique name
-            is found.
+                is found.
         """
         for i, dm in enumerate(self._diffusion_models):
             if dm.unique_name == name:
@@ -395,7 +395,7 @@ class SampleModel(ModelBase):
     # dunder methods
     # ------------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the SampleModel.
 
         Returns:

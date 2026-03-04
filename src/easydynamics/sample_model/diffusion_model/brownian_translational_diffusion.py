@@ -205,7 +205,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Args:
             Q (Number, list, or np.ndarray): Scattering vector values.
             component_display_name (str): Name of the Lorentzian
-            component.
+                component.
 
         Returns:
             List[ComponentCollection]: List of ComponentCollections with
@@ -330,13 +330,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # dunder methods
     # ------------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of the BrownianTranslationalDiffusion
         model.
 
         Returns:
             str: String representation of the
-            BrownianTranslationalDiffusion model.
+                BrownianTranslationalDiffusion model.
         """
         return (
             f'BrownianTranslationalDiffusion(display_name={self.display_name},'

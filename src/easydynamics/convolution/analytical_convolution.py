@@ -68,15 +68,14 @@ class AnalyticalConvolution(ConvolutionBase):
         functions, Gaussians, Lorentzians and Voigt profiles.
 
         Returns:
-            np.ndarray
-                The convolution of the sample_components and resolution_
-                components values evaluated at energy.
+            np.ndarray: The convolution of the sample_components and
+                resolution_components values evaluated at self.energy.
 
         Raises:
-            ValueError
-                If resolution_components contains delta functions.
-            ValueError
-                If component pair cannot be handled analytically.
+            ValueError: If resolution_components contains delta
+                functions.
+            ValueError: If component pair cannot be handled
+                analytically.
         """
 
         sample_components = self.sample_components.components
@@ -121,17 +120,17 @@ class AnalyticalConvolution(ConvolutionBase):
         multiplied.
 
         Args:
-            sample_component : ModelComponent
-                The sample component to be convolved.
-            resolution_component : ModelComponent
-                The resolution component to convolve with.
+            sample_component (ModelComponent): The sample component to
+                be convolved.
+            resolution_component (ModelComponent): The resolution
+                component to convolve with.
 
         Returns:
             np.ndarray: The convolution result
 
         Raises:
-            ValueError:
-            If the component pair cannot be handled analytically.
+            ValueError: If the component pair cannot be handled
+                analytically.
         """
 
         if isinstance(resolution_component, DeltaFunction):
@@ -184,10 +183,10 @@ class AnalyticalConvolution(ConvolutionBase):
         multiplied.
 
         Args:
-            sample_component : DeltaFunction
-                The sample component to be convolved.
-            resolution_components : ComponentCollection | ModelComponent
-                The resolution model to convolve with.
+            sample_component (DeltaFunction): The sample component to
+                be convolved.
+            resolution_components (ComponentCollection | ModelComponent)
+                : The resolution model to convolve with.
         Returns:
             np.ndarray
                 The evaluated convolution values at self.energy.

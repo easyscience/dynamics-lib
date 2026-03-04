@@ -201,14 +201,14 @@ class ModelComponent(ModelBase):
 
         Args:
             x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
-                sc.DataArray): Input values.
+            sc.DataArray): Input values.
 
         Returns:
             np.ndarray: Evaluated function values.
         """
         pass
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the ModelComponent.
 
         Returns:

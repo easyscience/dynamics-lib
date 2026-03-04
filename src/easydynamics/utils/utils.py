@@ -8,6 +8,7 @@ from numpy.typing import ArrayLike
 Numeric = float | int
 
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
+energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
 def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:

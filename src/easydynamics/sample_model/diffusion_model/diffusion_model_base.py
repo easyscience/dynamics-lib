@@ -131,7 +131,7 @@ class DiffusionModelBase(ModelBase):
     # dunder methods
     # ------------------------------------------------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of the Diffusion model.
 
         Returns:

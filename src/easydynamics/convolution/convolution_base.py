@@ -15,14 +15,24 @@ class ConvolutionBase:
     base class has no convolution functionality.
 
     Args:
-        energy : np.ndarray or scipp.Variable
+        energy (np.ndarray | scipp.Variable): 1D array of energy values
+            where the convolution is evaluated.
+        sample_components (ComponentCollection | ModelComponent): The
+            sample model to be convolved.
+        resolution_components (ComponentCollection | ModelComponent):
+            The resolution model to convolve with.
+        energy_unit (str | sc.Unit, optional): The unit of the energy.
+            Default is 'meV'.
+
+    Attributes:
+        energy : scipp.Variable
             1D array of energy values where the convolution is evaluated
         sample_components : ComponentCollection or ModelComponent
             The sample model to be convolved.
         resolution_components : ComponentCollection or ModelComponent
             The resolution model to convolve with.
-        energy_unit : str or sc.Unit, optional
-            The unit of the energy. Default is 'meV'.
+        energy_unit : str
+            The unit of the energy.
     """
 
     def __init__(
@@ -81,12 +91,17 @@ class ConvolutionBase:
 
     @property
     def energy_offset(self) -> Parameter:
-        """Get the energy offset."""
+        """Get the energy offset.
+
+        Returns:
+            Parameter: The energy offset applied to the convolution.
+        """
         return self._energy_offset
 
     @energy_offset.setter
     def energy_offset(self, energy_offset: Numeric | Parameter) -> None:
         """Set the energy offset.
+
         Args:
             energy_offset : Number or Parameter
                 The energy offset to apply to the convolution.
@@ -105,7 +120,11 @@ class ConvolutionBase:
 
     @property
     def energy_with_offset(self) -> sc.Variable:
-        """Get the energy with the offset applied."""
+        """Get the energy with the offset applied.
+
+        Returns:
+            sc.Variable: The energy values with the offset applied.
+        """
         energy_with_offset = self.energy.copy()
         energy_with_offset.values = self.energy.values - self.energy_offset.value
         return energy_with_offset
@@ -121,16 +140,22 @@ class ConvolutionBase:
 
     @property
     def energy(self) -> sc.Variable:
-        """Get the energy."""
+        """Get the energy.
+
+        Returns:
+            sc.Variable: The energy values where the convolution is
+                evaluated.
+        """
 
         return self._energy
 
     @energy.setter
     def energy(self, energy: np.ndarray | sc.Variable) -> None:
         """Set the energy.
+
          Args:
             energy (np.ndarray | scipp.Variable): 1D array of energy
-            values where the convolution is evaluated.
+                values where the convolution is evaluated.
 
         Raises:
             TypeError: If energy is not a numpy ndarray or a
@@ -152,7 +177,11 @@ class ConvolutionBase:
 
     @property
     def energy_unit(self) -> str:
-        """Get the energy unit."""
+        """Get the energy unit.
+
+        Returns:
+            str: The unit of the energy.
+        """
         return self._energy_unit
 
     @energy_unit.setter
@@ -168,8 +197,7 @@ class ConvolutionBase:
         """Convert the energy and energy_offset to the specified unit.
 
         Args:
-            energy_unit : str or sc.Unit
-                The unit of the energy.
+            energy_unit (str | sc.Unit): The unit of the energy.
 
         Raises:
             TypeError: If energy_unit is not a string or scipp unit.
@@ -197,12 +225,18 @@ class ConvolutionBase:
 
     @property
     def sample_components(self) -> ComponentCollection | ModelComponent:
-        """Get the sample model."""
+        """Get the sample model.
+
+        Returns:
+            ComponentCollection or ModelComponent: The sample model to
+                be convolved.
+        """
         return self._sample_components
 
     @sample_components.setter
     def sample_components(self, sample_components: ComponentCollection | ModelComponent) -> None:
         """Set the sample model.
+
         Args:
             sample_components : ComponentCollection or ModelComponent
                 The sample model to be convolved.
@@ -222,7 +256,12 @@ class ConvolutionBase:
 
     @property
     def resolution_components(self) -> ComponentCollection | ModelComponent:
-        """Get the resolution model."""
+        """Get the resolution model.
+
+        Returns:
+            ComponentCollection or ModelComponent: The resolution model
+                to be convolved.
+        """
         return self._resolution_components
 
     @resolution_components.setter
@@ -230,14 +269,15 @@ class ConvolutionBase:
         self, resolution_components: ComponentCollection | ModelComponent
     ) -> None:
         """Set the resolution model.
+
         Args:
-            resolution_components : ComponentCollection or
-            ModelComponent
-                The resolution model to convolve with.
+            resolution_components (ComponentCollection | ModelComponent)
+            : The resolution model to be convolved. Can be a
+            ComponentCollection or a single ModelComponent
 
         Raises:
             TypeError: If resolution_components is not a
-            ComponentCollection or ModelComponent.
+                ComponentCollection or ModelComponent.
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(

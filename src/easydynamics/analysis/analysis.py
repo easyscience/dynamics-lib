@@ -35,8 +35,8 @@ class Analysis(AnalysisBase):
         instrument_model (InstrumentModel | None): The InstrumentModel
             associated with this Analysis. If None, a default
             InstrumentModel is created.
-        extra_parameters (Parameter | list[Parameter] | None):
-        Extra parameters to be included in the analysis for advanced
+        extra_parameters (Parameter | list[Parameter] | None): Extra
+            parameters to be included in the analysis for advanced
             users. If None, no extra parameters are added.
 
     Attributes:
@@ -53,7 +53,7 @@ class Analysis(AnalysisBase):
         temperature (Parameter | None): The temperature from the
             associated SampleModel, if available.
         extra_parameters (list[Parameter]): The extra parameters
-        included in this Analysis.
+            included in this Analysis.
     """
 
     def __init__(
@@ -138,7 +138,7 @@ class Analysis(AnalysisBase):
 
         Args:
             Q_index (int or None): Index of the Q value to calculate
-            for. If None, calculate for all Q values.
+                for. If None, calculate for all Q values.
 
         Returns:
             list[np.ndarray] | np.ndarray: If Q_index is None, returns
@@ -215,13 +215,13 @@ class Analysis(AnalysisBase):
 
         Args:
             Q_index (int or None): Index of the Q value to plot. If
-            None, plot all Q values. Default is None.
+                None, plot all Q values. Default is None.
             plot_components (bool): Whether to plot the individual
                 components. Default is True.
             add_background (bool): Whether to add background components
                 to the sample model components when plotting. Default is
                 True.
-            **kwargs: Additional keyword arguments passed to plopp
+            **kwargs (Any): Additional keyword arguments passed to plopp
                 for customizing the plot.
 
         Raises:
@@ -366,8 +366,8 @@ class Analysis(AnalysisBase):
         """Plot fitted parameters as a function of Q.
 
         Args:
-            names (str | list[str] | None): Name(s) of the
-            parameter(s) to plot. If None, plots all parameters.
+            names (str | list[str] | None): Name(s) of the parameter(s)
+                to plot. If None, plots all parameters.
         kwargs: Additional keyword arguments passed to plopp.slicer for
             customizing the plot (e.g., title, linestyle, marker,
             color).
