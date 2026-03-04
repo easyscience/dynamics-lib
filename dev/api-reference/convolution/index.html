@@ -1555,31 +1555,405 @@ very wide or very narrow.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-        <p>energy : np.ndarray or scipp.Variable
-    1D array of energy values where the convolution is evaluated.
-sample_components : ComponentCollection or ModelComponent
-    The sample components to be convolved.
-resolution_components : ComponentCollection or ModelComponent
-    The resolution components to convolve with.
-upsample_factor : int, optional
-    The factor by which to upsample the input data before
-    convolution. Default is 5.
-extension_factor : float, optional
-    The factor by which to extend the input data range before
-    convolution. Default is 0.2.
-temperature : Parameter, float, or None, optional
-    The temperature to use for detailed balance correction.
-    Default is None.
-temperature_unit : str or sc.Unit, optional
-    The unit of the temperature parameter. Default is 'K'.
-energy_unit : str or sc.Unit, optional
-    The unit of the energy. Default is 'meV'.
-normalize_detailed_balance : bool, optional
-    Whether to normalize the detailed balance correction.
-    Default is True.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> | <span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values
+where the convolution is evaluated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sample_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+sample components to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>upsample_factor</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample
+the input data before convolution. Default is 5.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>extension_factor</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to
+extend the input data range before convolution. Default is
+0.2.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature</code>
+            </td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | <span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+temperature to use for detailed balance correction. Default
+is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the
+temperature parameter. Default is 'K'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;K&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.
+Default is 'meV'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;meV&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>normalize_detailed_balance</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to
+normalize the detailed balance correction. Default is True.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.Convolution.energy&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy">energy</a></code></td>
+            <td>
+                  <code><span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values where the
+convolution is evaluated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.sample_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.sample_components">sample_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The sample components
+to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;resolution_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.resolution_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.resolution_components">resolution_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution
+components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_offset&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.energy_offset&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_offset">energy_offset</a></code></td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Energy offset to apply to the energy
+values before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;upsample_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.upsample_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.upsample_factor">upsample_factor</a></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample the input
+data before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extension_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor">extension_factor</a></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to extend the
+input data range before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.temperature&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.temperature">temperature</a></code></td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The temperature to use for
+detailed balance correction.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easydynamics.convolution.Convolution.temperature_unit">temperature_unit</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the temperature
+parameter.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_unit&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.energy_unit&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit">energy_unit</a></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;normalize_detailed_balance&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.Convolution.normalize_detailed_balance&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.normalize_detailed_balance">normalize_detailed_balance</a></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to normalize the
+detailed balance correction.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
 
@@ -1863,7 +2237,26 @@ normalize_detailed_balance : bool, optional
 <span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -1878,28 +2271,47 @@ normalize_detailed_balance : bool, optional
 <span class="sd">    very wide or very narrow.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    energy : np.ndarray or scipp.Variable</span>
-<span class="sd">        1D array of energy values where the convolution is evaluated.</span>
-<span class="sd">    sample_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The sample components to be convolved.</span>
-<span class="sd">    resolution_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The resolution components to convolve with.</span>
-<span class="sd">    upsample_factor : int, optional</span>
-<span class="sd">        The factor by which to upsample the input data before</span>
-<span class="sd">        convolution. Default is 5.</span>
-<span class="sd">    extension_factor : float, optional</span>
-<span class="sd">        The factor by which to extend the input data range before</span>
-<span class="sd">        convolution. Default is 0.2.</span>
-<span class="sd">    temperature : Parameter, float, or None, optional</span>
-<span class="sd">        The temperature to use for detailed balance correction.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    temperature_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">    energy_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the energy. Default is &#39;meV&#39;.</span>
-<span class="sd">    normalize_detailed_balance : bool, optional</span>
-<span class="sd">        Whether to normalize the detailed balance correction.</span>
-<span class="sd">        Default is True.</span>
+<span class="sd">        energy (np.ndarray | scipp.Variable): 1D array of energy values</span>
+<span class="sd">            where the convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection | ModelComponent): The</span>
+<span class="sd">            sample components to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
+<span class="sd">        upsample_factor (int, optional): The factor by which to upsample</span>
+<span class="sd">            the input data before convolution. Default is 5.</span>
+<span class="sd">        extension_factor (float, optional): The factor by which to</span>
+<span class="sd">            extend the input data range before convolution. Default is</span>
+<span class="sd">            0.2.</span>
+<span class="sd">        temperature (Parameter | float | None, optional): The</span>
+<span class="sd">            temperature to use for detailed balance correction. Default</span>
+<span class="sd">            is None.</span>
+<span class="sd">        temperature_unit (str | sc.Unit, optional): The unit of the</span>
+<span class="sd">            temperature parameter. Default is &#39;K&#39;.</span>
+<span class="sd">        energy_unit (str | sc.Unit, optional): The unit of the energy.</span>
+<span class="sd">            Default is &#39;meV&#39;.</span>
+<span class="sd">        normalize_detailed_balance (bool, optional): Whether to</span>
+<span class="sd">            normalize the detailed balance correction. Default is True.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        energy (scipp.Variable): 1D array of energy values where the</span>
+<span class="sd">            convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection): The sample components</span>
+<span class="sd">            to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection): The resolution</span>
+<span class="sd">            components to convolve with.</span>
+<span class="sd">        energy_offset (Parameter): Energy offset to apply to the energy</span>
+<span class="sd">            values before convolution.</span>
+<span class="sd">        upsample_factor (int): The factor by which to upsample the input</span>
+<span class="sd">            data before convolution.</span>
+<span class="sd">        extension_factor (float): The factor by which to extend the</span>
+<span class="sd">            input data range before convolution.</span>
+<span class="sd">        temperature (Parameter | None): The temperature to use for</span>
+<span class="sd">            detailed balance correction.</span>
+<span class="sd">        temperature_unit (str | sc.Unit): The unit of the temperature</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy.</span>
+<span class="sd">        normalize_detailed_balance (bool): Whether to normalize the</span>
+<span class="sd">            detailed balance correction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># When these attributes are changed, the convolution plan</span>
@@ -2123,7 +2535,7 @@ normalize_detailed_balance : bool, optional
             <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Update some setters so the internal sample models are updated</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">        attribute changes, and build a new plan.</span>
 
@@ -2172,20 +2584,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -2258,26 +2670,7 @@ The convolved values evaluated at energy.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
@@ -2285,7 +2678,26 @@ The convolved values evaluated at energy.</p>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -2854,8 +3266,7 @@ Args:
 <span class="normal">466</span>
 <span class="normal">467</span>
 <span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Analytical convolution of a ModelComponent or ComponentCollection</span>
 <span class="sd">    with a ResolutionModel.</span>
 
@@ -2907,15 +3318,14 @@ Args:
 <span class="sd">        functions, Gaussians, Lorentzians and Voigt profiles.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray</span>
-<span class="sd">                The convolution of the sample_components and resolution_</span>
-<span class="sd">                components values evaluated at energy.</span>
+<span class="sd">            np.ndarray: The convolution of the sample_components and</span>
+<span class="sd">                resolution_components values evaluated at self.energy.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError</span>
-<span class="sd">                If resolution_components contains delta functions.</span>
-<span class="sd">            ValueError</span>
-<span class="sd">                If component pair cannot be handled analytically.</span>
+<span class="sd">            ValueError: If resolution_components contains delta</span>
+<span class="sd">                functions.</span>
+<span class="sd">            ValueError: If component pair cannot be handled</span>
+<span class="sd">                analytically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
@@ -2960,17 +3370,17 @@ Args:
 <span class="sd">        multiplied.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            sample_component : ModelComponent</span>
-<span class="sd">                The sample component to be convolved.</span>
-<span class="sd">            resolution_component : ModelComponent</span>
-<span class="sd">                The resolution component to convolve with.</span>
+<span class="sd">            sample_component (ModelComponent): The sample component to</span>
+<span class="sd">                be convolved.</span>
+<span class="sd">            resolution_component (ModelComponent): The resolution</span>
+<span class="sd">                component to convolve with.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: The convolution result</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError:</span>
-<span class="sd">            If the component pair cannot be handled analytically.</span>
+<span class="sd">            ValueError: If the component pair cannot be handled</span>
+<span class="sd">                analytically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_component</span><span class="p">,</span> <span class="n">DeltaFunction</span><span class="p">):</span>
@@ -3023,10 +3433,10 @@ Args:
 <span class="sd">        multiplied.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            sample_component : DeltaFunction</span>
-<span class="sd">                The sample component to be convolved.</span>
-<span class="sd">            resolution_components : ComponentCollection | ModelComponent</span>
-<span class="sd">                The resolution model to convolve with.</span>
+<span class="sd">            sample_component (DeltaFunction): The sample component to</span>
+<span class="sd">                be convolved.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent)</span>
+<span class="sd">                : The resolution model to convolve with.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray</span>
 <span class="sd">                The evaluated convolution values at self.energy.</span>
@@ -3355,9 +3765,49 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>np.ndarray
-The convolution of the sample_components and resolution_
-components values evaluated at energy.</p>
+                <p>np.ndarray: The convolution of the sample_components and
+resolution_components values evaluated at self.energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If resolution_components contains delta
+functions.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If component pair cannot be handled
+analytically.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3404,8 +3854,7 @@ components values evaluated at energy.</p>
 <span class="normal">93</span>
 <span class="normal">94</span>
 <span class="normal">95</span>
-<span class="normal">96</span>
-<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolve sample with resolution analytically if possible.</span>
@@ -3414,15 +3863,14 @@ components values evaluated at energy.</p>
 <span class="sd">    functions, Gaussians, Lorentzians and Voigt profiles.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray</span>
-<span class="sd">            The convolution of the sample_components and resolution_</span>
-<span class="sd">            components values evaluated at energy.</span>
+<span class="sd">        np.ndarray: The convolution of the sample_components and</span>
+<span class="sd">            resolution_components values evaluated at self.energy.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If resolution_components contains delta functions.</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If component pair cannot be handled analytically.</span>
+<span class="sd">        ValueError: If resolution_components contains delta</span>
+<span class="sd">            functions.</span>
+<span class="sd">        ValueError: If component pair cannot be handled</span>
+<span class="sd">            analytically.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
@@ -3567,31 +4015,410 @@ very wide or very narrow.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-        <p>energy : np.ndarray or scipp.Variable
-    1D array of energy values where the convolution is evaluated.
-sample_components : ComponentCollection or ModelComponent
-    The sample components to be convolved.
-resolution_components : ComponentCollection or ModelComponent
-    The resolution components to convolve with.
-upsample_factor : int, optional
-    The factor by which to upsample the input data before
-    convolution. Default is 5.
-extension_factor : float, optional
-    The factor by which to extend the input data range before
-    convolution. Default is 0.2.
-temperature : Parameter, float, or None, optional
-    The temperature to use for detailed balance correction.
-    Default is None.
-temperature_unit : str or sc.Unit, optional
-    The unit of the temperature parameter. Default is 'K'.
-energy_unit : str or sc.Unit, optional
-    The unit of the energy. Default is 'meV'.
-normalize_detailed_balance : bool, optional
-    Whether to normalize the detailed balance correction.
-    Default is True.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> | <span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values
+where the convolution is evaluated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sample_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+sample components to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>upsample_factor</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample
+the input data before convolution. Default is 5.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>extension_factor</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to
+extend the input data range before convolution. Default is
+0.2.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature</code>
+            </td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | <span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+temperature to use for detailed balance correction. Default
+is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the
+temperature parameter. Default is 'K'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;K&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.
+Default is 'meV'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;meV&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>normalize_detailed_balance</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to
+normalize the detailed balance correction. Default is True.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.energy&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy">energy</a></code></td>
+            <td>
+                  <code><span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values where the
+convolution is evaluated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.sample_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.sample_components">sample_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The sample components
+to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;resolution_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.resolution_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.resolution_components">resolution_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution
+components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_offset&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.energy_offset&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_offset">energy_offset</a></code></td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Energy offset to apply to the energy
+values before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;upsample_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.upsample_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.upsample_factor">upsample_factor</a></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample the input
+data before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extension_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor">extension_factor</a></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to extend the
+input data range before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.temperature&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.temperature">temperature</a></code></td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The temperature to use for
+detailed balance correction.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easydynamics.convolution.convolution.Convolution.temperature_unit">temperature_unit</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the temperature
+parameter.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_unit&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.energy_unit&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit">energy_unit</a></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;normalize_detailed_balance&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.normalize_detailed_balance&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.normalize_detailed_balance">normalize_detailed_balance</a></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to normalize the
+detailed balance correction.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
 
@@ -3875,7 +4702,26 @@ normalize_detailed_balance : bool, optional
 <span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents. Supports analytical</span>
@@ -3890,28 +4736,47 @@ normalize_detailed_balance : bool, optional
 <span class="sd">    very wide or very narrow.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    energy : np.ndarray or scipp.Variable</span>
-<span class="sd">        1D array of energy values where the convolution is evaluated.</span>
-<span class="sd">    sample_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The sample components to be convolved.</span>
-<span class="sd">    resolution_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The resolution components to convolve with.</span>
-<span class="sd">    upsample_factor : int, optional</span>
-<span class="sd">        The factor by which to upsample the input data before</span>
-<span class="sd">        convolution. Default is 5.</span>
-<span class="sd">    extension_factor : float, optional</span>
-<span class="sd">        The factor by which to extend the input data range before</span>
-<span class="sd">        convolution. Default is 0.2.</span>
-<span class="sd">    temperature : Parameter, float, or None, optional</span>
-<span class="sd">        The temperature to use for detailed balance correction.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    temperature_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">    energy_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the energy. Default is &#39;meV&#39;.</span>
-<span class="sd">    normalize_detailed_balance : bool, optional</span>
-<span class="sd">        Whether to normalize the detailed balance correction.</span>
-<span class="sd">        Default is True.</span>
+<span class="sd">        energy (np.ndarray | scipp.Variable): 1D array of energy values</span>
+<span class="sd">            where the convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection | ModelComponent): The</span>
+<span class="sd">            sample components to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
+<span class="sd">        upsample_factor (int, optional): The factor by which to upsample</span>
+<span class="sd">            the input data before convolution. Default is 5.</span>
+<span class="sd">        extension_factor (float, optional): The factor by which to</span>
+<span class="sd">            extend the input data range before convolution. Default is</span>
+<span class="sd">            0.2.</span>
+<span class="sd">        temperature (Parameter | float | None, optional): The</span>
+<span class="sd">            temperature to use for detailed balance correction. Default</span>
+<span class="sd">            is None.</span>
+<span class="sd">        temperature_unit (str | sc.Unit, optional): The unit of the</span>
+<span class="sd">            temperature parameter. Default is &#39;K&#39;.</span>
+<span class="sd">        energy_unit (str | sc.Unit, optional): The unit of the energy.</span>
+<span class="sd">            Default is &#39;meV&#39;.</span>
+<span class="sd">        normalize_detailed_balance (bool, optional): Whether to</span>
+<span class="sd">            normalize the detailed balance correction. Default is True.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        energy (scipp.Variable): 1D array of energy values where the</span>
+<span class="sd">            convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection): The sample components</span>
+<span class="sd">            to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection): The resolution</span>
+<span class="sd">            components to convolve with.</span>
+<span class="sd">        energy_offset (Parameter): Energy offset to apply to the energy</span>
+<span class="sd">            values before convolution.</span>
+<span class="sd">        upsample_factor (int): The factor by which to upsample the input</span>
+<span class="sd">            data before convolution.</span>
+<span class="sd">        extension_factor (float): The factor by which to extend the</span>
+<span class="sd">            input data range before convolution.</span>
+<span class="sd">        temperature (Parameter | None): The temperature to use for</span>
+<span class="sd">            detailed balance correction.</span>
+<span class="sd">        temperature_unit (str | sc.Unit): The unit of the temperature</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy.</span>
+<span class="sd">        normalize_detailed_balance (bool): Whether to normalize the</span>
+<span class="sd">            detailed balance correction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># When these attributes are changed, the convolution plan</span>
@@ -4135,7 +5000,7 @@ normalize_detailed_balance : bool, optional
             <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Update some setters so the internal sample models are updated</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">        attribute changes, and build a new plan.</span>
 
@@ -4184,20 +5049,20 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -4270,26 +5135,7 @@ The convolved values evaluated at energy.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
@@ -4297,7 +5143,26 @@ The convolved values evaluated at energy.</p>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -4450,14 +5315,15 @@ base class has no convolution functionality.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>energy </code>
+                <code>energy</code>
             </td>
             <td>
+                  <code><span title="numpy.ndarray">ndarray</span> | <span title="scipp.Variable">Variable</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>np.ndarray or scipp.Variable
-1D array of energy values where the convolution is evaluated</p>
+                <p>1D array of energy values
+where the convolution is evaluated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4469,8 +5335,103 @@ base class has no convolution functionality.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>sample_components </code>
+                <code>sample_components</code>
             </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+sample model to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution model to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.
+Default is 'meV'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;meV&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution_base.ConvolutionBase.energy&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy">energy</a></code></td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>scipp.Variable
+1D array of energy values where the convolution is evaluated</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution_base.ConvolutionBase.sample_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.sample_components">sample_components</a></code></td>
             <td>
             </td>
             <td>
@@ -4482,14 +5443,14 @@ The sample model to be convolved.</p>
 <!-- prettier-ignore-end -->
               </div>
             </td>
-            <td>
-                <em>required</em>
-            </td>
           </tr>
           <tr class="doc-section-item">
-            <td>
-                <code>resolution_components </code>
-            </td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;resolution_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution_base.ConvolutionBase.resolution_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.resolution_components">resolution_components</a></code></td>
             <td>
             </td>
             <td>
@@ -4501,27 +5462,24 @@ The resolution model to convolve with.</p>
 <!-- prettier-ignore-end -->
               </div>
             </td>
-            <td>
-                <em>required</em>
-            </td>
           </tr>
           <tr class="doc-section-item">
-            <td>
-                <code>energy_unit </code>
-            </td>
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_unit&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit">energy_unit</a></code></td>
             <td>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>str or sc.Unit, optional
-The unit of the energy. Default is 'meV'.</p>
+                <p>str
+The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
-            </td>
-            <td>
-                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -4772,19 +5730,69 @@ The unit of the energy. Default is 'meV'.</p>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
-<span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for convolutions of sample and resolution models. This</span>
 <span class="sd">    base class has no convolution functionality.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        energy : np.ndarray or scipp.Variable</span>
+<span class="sd">        energy (np.ndarray | scipp.Variable): 1D array of energy values</span>
+<span class="sd">            where the convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection | ModelComponent): The</span>
+<span class="sd">            sample model to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution model to convolve with.</span>
+<span class="sd">        energy_unit (str | sc.Unit, optional): The unit of the energy.</span>
+<span class="sd">            Default is &#39;meV&#39;.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        energy : scipp.Variable</span>
 <span class="sd">            1D array of energy values where the convolution is evaluated</span>
 <span class="sd">        sample_components : ComponentCollection or ModelComponent</span>
 <span class="sd">            The sample model to be convolved.</span>
 <span class="sd">        resolution_components : ComponentCollection or ModelComponent</span>
 <span class="sd">            The resolution model to convolve with.</span>
-<span class="sd">        energy_unit : str or sc.Unit, optional</span>
-<span class="sd">            The unit of the energy. Default is &#39;meV&#39;.</span>
+<span class="sd">        energy_unit : str</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -4843,12 +5851,17 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy offset.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy offset.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parameter: The energy offset applied to the convolution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span>
 
     <span class="nd">@energy_offset</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the energy offset.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            energy_offset : Number or Parameter</span>
 <span class="sd">                The energy offset to apply to the convolution.</span>
@@ -4867,7 +5880,11 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_with_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy with the offset applied.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy with the offset applied.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sc.Variable: The energy values with the offset applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">energy_with_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">energy_with_offset</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="o">.</span><span class="n">value</span>
         <span class="k">return</span> <span class="n">energy_with_offset</span>
@@ -4883,16 +5900,22 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sc.Variable: The energy values where the convolution is</span>
+<span class="sd">                evaluated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy</span>
 
     <span class="nd">@energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the energy.</span>
+
 <span class="sd">         Args:</span>
 <span class="sd">            energy (np.ndarray | scipp.Variable): 1D array of energy</span>
-<span class="sd">            values where the convolution is evaluated.</span>
+<span class="sd">                values where the convolution is evaluated.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If energy is not a numpy ndarray or a</span>
@@ -4914,7 +5937,11 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy unit.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy unit.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The unit of the energy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span>
 
     <span class="nd">@energy_unit</span><span class="o">.</span><span class="n">setter</span>
@@ -4930,8 +5957,7 @@ The unit of the energy. Default is 'meV'.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            energy_unit : str or sc.Unit</span>
-<span class="sd">                The unit of the energy.</span>
+<span class="sd">            energy_unit (str | sc.Unit): The unit of the energy.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If energy_unit is not a string or scipp unit.</span>
@@ -4959,12 +5985,18 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sample_components</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the sample model.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the sample model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ComponentCollection or ModelComponent: The sample model to</span>
+<span class="sd">                be convolved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span>
 
     <span class="nd">@sample_components</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sample_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the sample model.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            sample_components : ComponentCollection or ModelComponent</span>
 <span class="sd">                The sample model to be convolved.</span>
@@ -4984,7 +6016,12 @@ The unit of the energy. Default is 'meV'.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolution_components</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the resolution model.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the resolution model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ComponentCollection or ModelComponent: The resolution model</span>
+<span class="sd">                to be convolved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span>
 
     <span class="nd">@resolution_components</span><span class="o">.</span><span class="n">setter</span>
@@ -4992,14 +6029,15 @@ The unit of the energy. Default is 'meV'.</p>
         <span class="bp">self</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the resolution model.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            resolution_components : ComponentCollection or</span>
-<span class="sd">            ModelComponent</span>
-<span class="sd">                The resolution model to convolve with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent)</span>
+<span class="sd">            : The resolution model to be convolved. Can be a</span>
+<span class="sd">            ComponentCollection or a single ModelComponent</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If resolution_components is not a</span>
-<span class="sd">            ComponentCollection or ModelComponent.</span>
+<span class="sd">                ComponentCollection or ModelComponent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="p">(</span><span class="n">ComponentCollection</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -5052,14 +6090,14 @@ The unit of the energy. Default is 'meV'.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit </code>
+                <code>energy_unit</code>
             </td>
             <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>str or sc.Unit
-The unit of the energy.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5115,41 +6153,39 @@ unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        energy_unit : str or sc.Unit</span>
-<span class="sd">            The unit of the energy.</span>
+<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If energy_unit is not a string or scipp unit.</span>
@@ -5207,6 +6243,33 @@ unit.</p>
 
 <!-- prettier-ignore-end -->
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>sc.Variable: The energy values where the convolution is
+evaluated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
     </div>
 
 </div>
@@ -5237,6 +6300,32 @@ unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Parameter</code></td>            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The energy offset applied to the convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -5269,6 +6358,32 @@ unit.</p>
 
 <!-- prettier-ignore-end -->
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
     </div>
 
 </div>
@@ -5299,6 +6414,32 @@ unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>sc.Variable: The energy values with the offset applied.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -5331,6 +6472,33 @@ unit.</p>
 
 <!-- prettier-ignore-end -->
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ComponentCollection or ModelComponent: The resolution model
+to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
     </div>
 
 </div>
@@ -5361,6 +6529,33 @@ unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ComponentCollection or ModelComponent: The sample model to
+be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -6249,31 +7444,383 @@ functionality.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-        <p>energy : np.ndarray or scipp.Variable
-    1D array of energy values where the convolution is evaluated.
-sample_components : ComponentCollection or ModelComponent
-    The components to be convolved.
-resolution_components : ComponentCollection or ModelComponent
-    The resolution components to convolve with.
-upsample_factor : int, optional
-    The factor by which to upsample the input data
-    before convolution. Default is 5.
-extension_factor : float, optional
-    The factor by which to extend the input data range
-    before convolution. Default is 0.2.
-temperature : Parameter, float, or None, optional
-    The temperature to use for detailed balance correction.
-    Default is None.
-temperature_unit : str or sc.Unit, optional
-    The unit of the temperature parameter. Default is 'K'.
-energy_unit : str or sc.Unit, optional
-    The unit of the energy. Default is 'meV'.
-normalize_detailed_balance : bool, optional
-    Whether to normalize the detailed balance correction.
-    Default is True.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> | <span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values
+where the convolution is evaluated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sample_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+components to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>upsample_factor</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample
+the input data before convolution. Default is 5.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>extension_factor</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to extend
+the input data range before convolution. Default is 0.2.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature</code>
+            </td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | <span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The temperature to use
+for detailed balance correction. Default is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>temperature_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the temperature
+parameter. Default is 'K'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;K&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy_unit</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy. Default is
+'meV'.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;meV&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>normalize_detailed_balance</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to normalize the
+detailed balance correction. Default is True.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy">energy</a></code></td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> | <span title="scipp.Variable">Variable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>1D array of energy values
+where the convolution is evaluated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.sample_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.sample_components">sample_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The
+components to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;resolution_components&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.resolution_components&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.resolution_components">resolution_components</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;upsample_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.upsample_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.upsample_factor">upsample_factor</a></code></td>
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to upsample
+the input data before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extension_factor&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.extension_factor">extension_factor</a></code></td>
+            <td>
+                  <code><span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The factor by which to extend
+the input data range before convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.temperature&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.temperature">temperature</a></code></td>
+            <td>
+                  <code><span title="easyscience.variable.Parameter">Parameter</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The temperature parameter for
+detailed balance correction, or None if detailed balance is
+disabled.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.temperature_unit">temperature_unit</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the temperature
+parameter.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy_unit&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy_unit&lt;/code&gt;)" href="#easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit">energy_unit</a></code></td>
+            <td>
+                  <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unit of the energy.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;normalize_detailed_balance&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.normalize_detailed_balance&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.normalize_detailed_balance">normalize_detailed_balance</a></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to normalize the
+detailed balance correction.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
 
@@ -6636,35 +8183,88 @@ normalize_detailed_balance : bool, optional
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for numerical convolutions of sample and resolution</span>
 <span class="sd">    models. Provides methods to handle upsampling, extension, and</span>
 <span class="sd">    detailed balance correction. This base class has no convolution</span>
 <span class="sd">    functionality.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    energy : np.ndarray or scipp.Variable</span>
-<span class="sd">        1D array of energy values where the convolution is evaluated.</span>
-<span class="sd">    sample_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The components to be convolved.</span>
-<span class="sd">    resolution_components : ComponentCollection or ModelComponent</span>
-<span class="sd">        The resolution components to convolve with.</span>
-<span class="sd">    upsample_factor : int, optional</span>
-<span class="sd">        The factor by which to upsample the input data</span>
-<span class="sd">        before convolution. Default is 5.</span>
-<span class="sd">    extension_factor : float, optional</span>
-<span class="sd">        The factor by which to extend the input data range</span>
-<span class="sd">        before convolution. Default is 0.2.</span>
-<span class="sd">    temperature : Parameter, float, or None, optional</span>
-<span class="sd">        The temperature to use for detailed balance correction.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    temperature_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">    energy_unit : str or sc.Unit, optional</span>
-<span class="sd">        The unit of the energy. Default is &#39;meV&#39;.</span>
-<span class="sd">    normalize_detailed_balance : bool, optional</span>
-<span class="sd">        Whether to normalize the detailed balance correction.</span>
-<span class="sd">        Default is True.</span>
+<span class="sd">        energy (np.ndarray | sc.Variable): 1D array of energy values</span>
+<span class="sd">            where the convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection | ModelComponent): The</span>
+<span class="sd">            components to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
+<span class="sd">        upsample_factor (int | None): The factor by which to upsample</span>
+<span class="sd">            the input data before convolution. Default is 5.</span>
+<span class="sd">        extension_factor (float | None): The factor by which to extend</span>
+<span class="sd">            the input data range before convolution. Default is 0.2.</span>
+<span class="sd">        temperature (Parameter | float | None): The temperature to use</span>
+<span class="sd">            for detailed balance correction. Default is None.</span>
+<span class="sd">        temperature_unit (str | sc.Unit): The unit of the temperature</span>
+<span class="sd">            parameter. Default is &#39;K&#39;.</span>
+<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy. Default is</span>
+<span class="sd">            &#39;meV&#39;.</span>
+<span class="sd">        normalize_detailed_balance (bool): Whether to normalize the</span>
+<span class="sd">            detailed balance correction. Default is True.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        energy (np.ndarray | sc.Variable): 1D array of energy values</span>
+<span class="sd">            where the convolution is evaluated.</span>
+<span class="sd">        sample_components (ComponentCollection | ModelComponent): The</span>
+<span class="sd">            components to be convolved.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
+<span class="sd">        upsample_factor (int | None): The factor by which to upsample</span>
+<span class="sd">            the input data before convolution.</span>
+<span class="sd">        extension_factor (float | None): The factor by which to extend</span>
+<span class="sd">            the input data range before convolution.</span>
+<span class="sd">        temperature (Parameter | None): The temperature parameter for</span>
+<span class="sd">            detailed balance correction, or None if detailed balance is</span>
+<span class="sd">            disabled.</span>
+<span class="sd">        temperature_unit (str | sc.Unit): The unit of the temperature</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy.</span>
+<span class="sd">        normalize_detailed_balance (bool): Whether to normalize the</span>
+<span class="sd">            detailed balance correction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6709,19 +8309,36 @@ normalize_detailed_balance : bool, optional
 
     <span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the energy array and recreate the dense grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            energy (np.ndarray): The new energy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>
         <span class="c1"># Recreate dense grid when energy is updated</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">upsample_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Numerical</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the upsample factor.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the upsample factor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Numerical: The upsample factor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upsample_factor</span>
 
     <span class="nd">@upsample_factor</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">upsample_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="n">Numerical</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the upsample factor and recreate the dense grid.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the upsample factor and recreate the dense grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            factor (Numerical): The new upsample factor.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If factor is not a number or None.</span>
+<span class="sd">            ValueError: If factor is not greater than 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">factor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_upsample_factor</span> <span class="o">=</span> <span class="n">factor</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
@@ -6746,6 +8363,9 @@ normalize_detailed_balance : bool, optional
 <span class="sd">        extended on both sides before convolution.</span>
 <span class="sd">        0.2 means extending by 20% of the original energy span</span>
 <span class="sd">        on each side</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The extension factor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extension_factor</span>
@@ -6760,12 +8380,12 @@ normalize_detailed_balance : bool, optional
 <span class="sd">        on each side.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            factor : float</span>
-<span class="sd">                The new extension factor.</span>
+<span class="sd">            factor (Numerical): The new extension factor.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If factor is not a number.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">Numerical</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Extension factor must be a number.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
@@ -6777,7 +8397,12 @@ normalize_detailed_balance : bool, optional
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the temperature.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[Parameter]: The temperature parameter, or None if</span>
+<span class="sd">                detailed balance correction is disabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span>
 
@@ -6787,11 +8412,12 @@ normalize_detailed_balance : bool, optional
 
 <span class="sd">        If None, disables detailed balance</span>
 <span class="sd">        correction and removes the temperature parameter.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            temp : Parameter, float, or None</span>
-<span class="sd">                The temperature to set. The unit will be the same as</span>
-<span class="sd">                the existing temperature parameter if it exists,</span>
-<span class="sd">                otherwise &#39;K&#39;.</span>
+<span class="sd">            temp  (Parameter | float | None): The temperature to set.</span>
+<span class="sd">                The unit will be the same as the existing temperature</span>
+<span class="sd">                parameter if it exists, otherwise &#39;K&#39;.</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If temp is not a float, Parameter, or None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -6815,7 +8441,13 @@ normalize_detailed_balance : bool, optional
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalize_detailed_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get whether to normalize the detailed balance factor.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get whether to normalize the detailed balance factor.</span>
+
+<span class="sd">        If True, the detailed balance factor is divided by temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether to normalize the detailed balance factor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_detailed_balance</span>
 
@@ -6824,9 +8456,11 @@ normalize_detailed_balance : bool, optional
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set whether to normalize the detailed balance factor.</span>
 
 <span class="sd">        If True, the detailed balance factor is divided by temperature.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            normalize : bool</span>
-<span class="sd">                Whether to normalize the detailed balance factor.</span>
+<span class="sd">            normalize (bool): Whether to normalize the detailed balance</span>
+<span class="sd">            factor.</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If normalize is not a bool.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -6845,24 +8479,10 @@ normalize_detailed_balance : bool, optional
 <span class="sd">        If upsample_factor is None, no upsampling or extension is</span>
 <span class="sd">        performed.</span>
 <span class="sd">        This dense grid is used for convolution to improve accuracy.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            EnergyGrid</span>
-<span class="sd">                The dense grid created by upsampling and extending</span>
-<span class="sd">                energy.</span>
-<span class="sd">        The EnergyGrid has the following attributes:</span>
-<span class="sd">            energy_dense : np.ndarray</span>
-<span class="sd">               The upsampled and extended energy array.</span>
-<span class="sd">            energy_dense_centered : np.ndarray</span>
-<span class="sd">                The centered version of energy_dense</span>
-<span class="sd">                (used for resolution evaluation).</span>
-<span class="sd">            energy_dense_step : float</span>
-<span class="sd">                The spacing of energy_dense</span>
-<span class="sd">                (used for width checks and normalization).</span>
-<span class="sd">            energy_span_dense : float</span>
-<span class="sd">                The total span of energy_dense. (used for width checks).</span>
-<span class="sd">            energy_even_length_offset : float</span>
-<span class="sd">                The offset to apply if energy_dense has even length</span>
-<span class="sd">                (used for convolution alignment).</span>
+<span class="sd">            EnergyGrid: The dense grid created by upsampling and</span>
+<span class="sd">                extending energy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check if the array is uniformly spaced.</span>
@@ -6935,19 +8555,13 @@ normalize_detailed_balance : bool, optional
 <span class="sd">        spacing.</span>
 
 <span class="sd">        In both cases, the convolution accuracy may be compromised.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            model : ComponentCollection or ModelComponent</span>
-<span class="sd">                The model to check.</span>
-<span class="sd">            model_name : str</span>
-<span class="sd">                A string indicating whether the model is a</span>
-<span class="sd">                &#39;sample model&#39; or &#39;resolution model&#39; for</span>
-<span class="sd">                warning messages.</span>
-<span class="sd">        returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        warns:</span>
-<span class="sd">            UserWarning</span>
-<span class="sd">                If the component widths are not appropriate for the data</span>
-<span class="sd">                span or bin spacing.</span>
+<span class="sd">            model (ComponentCollection | ModelComponent): The model to</span>
+<span class="sd">                check</span>
+<span class="sd">            model_name (str): A string indicating whether the model is a</span>
+<span class="sd">                &#39;sample model&#39; or &#39;resolution model&#39; for warning</span>
+<span class="sd">                messages.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle ComponentCollection or ModelComponent</span>
@@ -6978,6 +8592,13 @@ normalize_detailed_balance : bool, optional
                     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
+<span class="sd">        NumericalConvolutionBase.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: A string representation of the</span>
+<span class="sd">                NumericalConvolutionBase.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
@@ -6996,6 +8617,184 @@ normalize_detailed_balance : bool, optional
 
 <div class="doc doc-children">
 
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.__repr__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a string representation of the
+NumericalConvolutionBase.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A string representation of the
+NumericalConvolutionBase.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
+<span class="sd">    NumericalConvolutionBase.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A string representation of the</span>
+<span class="sd">            NumericalConvolutionBase.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;sample_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;resolution_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">)</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;energy_unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;normalize_detailed_balance=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Set the energy array and recreate the dense grid.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new energy array.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the energy array and recreate the dense grid.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        energy (np.ndarray): The new energy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>
+    <span class="c1"># Recreate dense grid when energy is updated</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
@@ -7028,6 +8827,32 @@ on each side</p>
 
 <!-- prettier-ignore-end -->
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>float</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The extension factor.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
     </div>
 
 </div>
@@ -7055,9 +8880,36 @@ on each side</p>
     <div class="doc doc-contents ">
 
         <p>Get whether to normalize the detailed balance factor.</p>
+<p>If True, the detailed balance factor is divided by temperature.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to normalize the detailed balance factor.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -7090,6 +8942,33 @@ on each side</p>
 
 <!-- prettier-ignore-end -->
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="easyscience.variable.Parameter">Parameter</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional[Parameter]: The temperature parameter, or None if
+detailed balance correction is disabled.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
     </div>
 
 </div>
@@ -7120,6 +8999,32 @@ on each side</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Numerical</code></td>            <td>
+                  <code><span title="easydynamics.convolution.numerical_convolution_base.Numerical">Numerical</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The upsample factor.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 

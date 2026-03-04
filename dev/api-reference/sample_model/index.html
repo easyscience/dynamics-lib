@@ -5074,7 +5074,7 @@ See also the examples.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">            component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">            component.</span>
+<span class="sd">                component.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[ComponentCollection]: List of ComponentCollections with</span>
@@ -5199,13 +5199,13 @@ See also the examples.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">        model.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: String representation of the</span>
-<span class="sd">            BrownianTranslationalDiffusion model.</span>
+<span class="sd">                BrownianTranslationalDiffusion model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -5547,22 +5547,12 @@ model.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>String representation of the</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-<td></td>            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>BrownianTranslationalDiffusion model.</p>
+                <p>String representation of the
+BrownianTranslationalDiffusion model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5586,13 +5576,13 @@ model.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: String representation of the</span>
-<span class="sd">        BrownianTranslationalDiffusion model.</span>
+<span class="sd">            BrownianTranslationalDiffusion model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -6038,7 +6028,8 @@ translational diffusion model at given Q values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the Lorentzian</p>
+                <p>Name of the Lorentzian
+component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6186,7 +6177,7 @@ this model).</p>
 <span class="sd">    Args:</span>
 <span class="sd">        Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">        component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">        component.</span>
+<span class="sd">            component.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List[ComponentCollection]: List of ComponentCollections with</span>
@@ -12825,7 +12816,7 @@ of the instrument. Will be copied to each Q value.</p>
     <span class="c1"># Dunder methods</span>
     <span class="c1"># -------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">        Returns:</span>
@@ -12940,6 +12931,7 @@ None if not set</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12971,7 +12963,7 @@ None if not set</p>
 <span class="normal">394</span>
 <span class="normal">395</span>
 <span class="normal">396</span>
-<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">    Returns:</span>
@@ -14473,7 +14465,7 @@ Lorentzian.</p>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">normalization</span> <span class="o">/</span> <span class="n">denominator</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">        Returns:</span>
@@ -14522,6 +14514,7 @@ Lorentzian.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -14545,7 +14538,7 @@ Lorentzian.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">    Returns:</span>
@@ -16413,7 +16406,7 @@ the model.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            component (ModelComponent | ComponentCollection):</span>
-<span class="sd">            Component(s) to append.</span>
+<span class="sd">                Component(s) to append.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If the component is a DeltaFunction or Polynomial</span>
@@ -16482,7 +16475,10 @@ are not physical resolution components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                
+                <p>Component(s) to append.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
               </div>
             </td>
             <td>
@@ -16553,7 +16549,7 @@ are not physical resolution components.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        component (ModelComponent | ComponentCollection):</span>
-<span class="sd">        Component(s) to append.</span>
+<span class="sd">            Component(s) to append.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If the component is a DeltaFunction or Polynomial</span>
@@ -17287,7 +17283,7 @@ balance factor by temperature. Defaults to True.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            diffusion_model (DiffusionModelBase): The DiffusionModel</span>
-<span class="sd">            to append.</span>
+<span class="sd">                to append.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If the diffusion_model is not a</span>
@@ -17310,7 +17306,7 @@ balance factor by temperature. Defaults to True.</p>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If no DiffusionModel with the given unique name</span>
-<span class="sd">            is found.</span>
+<span class="sd">                is found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_models</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">dm</span><span class="o">.</span><span class="n">unique_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -17572,7 +17568,7 @@ balance factor by temperature. Defaults to True.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the SampleModel.</span>
 
 <span class="sd">        Returns:</span>
@@ -17627,6 +17623,7 @@ balance factor by temperature. Defaults to True.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -17656,7 +17653,7 @@ balance factor by temperature. Defaults to True.</p>
 <span class="normal">408</span>
 <span class="normal">409</span>
 <span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the SampleModel.</span>
 
 <span class="sd">    Returns:</span>
@@ -17718,7 +17715,8 @@ balance factor by temperature. Defaults to True.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The DiffusionModel</p>
+                <p>The DiffusionModel
+to append.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -17784,7 +17782,7 @@ DiffusionModelBase</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        diffusion_model (DiffusionModelBase): The DiffusionModel</span>
-<span class="sd">        to append.</span>
+<span class="sd">            to append.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If the diffusion_model is not a</span>
@@ -18393,7 +18391,8 @@ get variables from all ComponentCollections.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If no DiffusionModel with the given unique name</p>
+                <p>If no DiffusionModel with the given unique name
+is found.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -18432,7 +18431,7 @@ get variables from all ComponentCollections.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If no DiffusionModel with the given unique name</span>
-<span class="sd">        is found.</span>
+<span class="sd">            is found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_models</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dm</span><span class="o">.</span><span class="n">unique_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -19300,9 +19299,9 @@ the Lorentzian part.</p>
 
 
 <span class="sd">        Args:</span>
-<span class="sd">            x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">                sc.DataArray):</span>
-<span class="sd">                The x values at which to evaluate the Voigt.</span>
+<span class="sd">            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">                sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">                Voigt.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: The intensity of the Voigt at the given x</span>
@@ -19317,7 +19316,7 @@ the Lorentzian part.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">        Returns:</span>
@@ -19370,6 +19369,7 @@ the Lorentzian part.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19397,7 +19397,7 @@ the Lorentzian part.</p>
 <span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
-<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">    Returns:</span>
@@ -19622,9 +19622,9 @@ values.</p>
 
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">            sc.DataArray):</span>
-<span class="sd">            The x values at which to evaluate the Voigt.</span>
+<span class="sd">        x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">            sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">            Voigt.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: The intensity of the Voigt at the given x</span>
@@ -26291,7 +26291,7 @@ Lorentzian.</p>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">normalization</span> <span class="o">/</span> <span class="n">denominator</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">        Returns:</span>
@@ -26340,6 +26340,7 @@ Lorentzian.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -26363,7 +26364,7 @@ Lorentzian.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">    Returns:</span>
@@ -28639,9 +28640,9 @@ the Lorentzian part.</p>
 
 
 <span class="sd">        Args:</span>
-<span class="sd">            x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">                sc.DataArray):</span>
-<span class="sd">                The x values at which to evaluate the Voigt.</span>
+<span class="sd">            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">                sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">                Voigt.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: The intensity of the Voigt at the given x</span>
@@ -28656,7 +28657,7 @@ the Lorentzian part.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">        Returns:</span>
@@ -28709,6 +28710,7 @@ the Lorentzian part.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -28736,7 +28738,7 @@ the Lorentzian part.</p>
 <span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
-<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">    Returns:</span>
@@ -28961,9 +28963,9 @@ values.</p>
 
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">            sc.DataArray):</span>
-<span class="sd">            The x values at which to evaluate the Voigt.</span>
+<span class="sd">        x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">            sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">            Voigt.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: The intensity of the Voigt at the given x</span>
@@ -32756,7 +32758,7 @@ Lorentzian.</p>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">normalization</span> <span class="o">/</span> <span class="n">denominator</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">        Returns:</span>
@@ -32805,6 +32807,7 @@ Lorentzian.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -32828,7 +32831,7 @@ Lorentzian.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Lorentzian.</span>
 
 <span class="sd">    Returns:</span>
@@ -34136,14 +34139,14 @@ component.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
-<span class="sd">                sc.DataArray): Input values.</span>
+<span class="sd">            sc.DataArray): Input values.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: Evaluated function values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the ModelComponent.</span>
 
 <span class="sd">        Returns:</span>
@@ -34192,6 +34195,7 @@ component.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -34215,7 +34219,7 @@ component.</p>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the ModelComponent.</span>
 
 <span class="sd">    Returns:</span>
@@ -34363,6 +34367,39 @@ Must be implemented by subclasses.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>sc.DataArray)</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Input values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
     <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
@@ -34414,7 +34451,7 @@ Must be implemented by subclasses.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
-<span class="sd">            sc.DataArray): Input values.</span>
+<span class="sd">        sc.DataArray): Input values.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: Evaluated function values.</span>
@@ -36697,9 +36734,9 @@ the Lorentzian part.</p>
 
 
 <span class="sd">        Args:</span>
-<span class="sd">            x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">                sc.DataArray):</span>
-<span class="sd">                The x values at which to evaluate the Voigt.</span>
+<span class="sd">            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">                sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">                Voigt.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray: The intensity of the Voigt at the given x</span>
@@ -36714,7 +36751,7 @@ the Lorentzian part.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">        Returns:</span>
@@ -36767,6 +36804,7 @@ the Lorentzian part.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -36794,7 +36832,7 @@ the Lorentzian part.</p>
 <span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
-<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Voigt.</span>
 
 <span class="sd">    Returns:</span>
@@ -37019,9 +37057,9 @@ values.</p>
 
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (Numeric or list or np.ndarray or sc.Variable or</span>
-<span class="sd">            sc.DataArray):</span>
-<span class="sd">            The x values at which to evaluate the Voigt.</span>
+<span class="sd">        x (Numeric | list[Numeric] | np.ndarray | sc.Variable |</span>
+<span class="sd">            sc.DataArray): The x values at which to evaluate the</span>
+<span class="sd">            Voigt.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: The intensity of the Voigt at the given x</span>
@@ -37968,7 +38006,7 @@ See also the examples.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">            component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">            component.</span>
+<span class="sd">                component.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[ComponentCollection]: List of ComponentCollections with</span>
@@ -38093,13 +38131,13 @@ See also the examples.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">        model.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: String representation of the</span>
-<span class="sd">            BrownianTranslationalDiffusion model.</span>
+<span class="sd">                BrownianTranslationalDiffusion model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -38441,22 +38479,12 @@ model.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>String representation of the</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-<td></td>            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>BrownianTranslationalDiffusion model.</p>
+                <p>String representation of the
+BrownianTranslationalDiffusion model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -38480,13 +38508,13 @@ model.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: String representation of the</span>
-<span class="sd">        BrownianTranslationalDiffusion model.</span>
+<span class="sd">            BrownianTranslationalDiffusion model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -38932,7 +38960,8 @@ translational diffusion model at given Q values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the Lorentzian</p>
+                <p>Name of the Lorentzian
+component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -39080,7 +39109,7 @@ this model).</p>
 <span class="sd">    Args:</span>
 <span class="sd">        Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">        component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">        component.</span>
+<span class="sd">            component.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List[ComponentCollection]: List of ComponentCollections with</span>
@@ -40229,7 +40258,7 @@ See also the examples.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1">################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">        model.</span>
 
@@ -40453,6 +40482,7 @@ model.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -40481,7 +40511,7 @@ model.</p>
 <span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
-<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 
@@ -42043,7 +42073,7 @@ See also the examples.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">            component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">            component.</span>
+<span class="sd">                component.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[ComponentCollection]: List of ComponentCollections with</span>
@@ -42168,13 +42198,13 @@ See also the examples.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">        model.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: String representation of the</span>
-<span class="sd">            BrownianTranslationalDiffusion model.</span>
+<span class="sd">                BrownianTranslationalDiffusion model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -42516,22 +42546,12 @@ model.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>String representation of the</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-<td></td>            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>BrownianTranslationalDiffusion model.</p>
+                <p>String representation of the
+BrownianTranslationalDiffusion model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42555,13 +42575,13 @@ model.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the BrownianTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: String representation of the</span>
-<span class="sd">        BrownianTranslationalDiffusion model.</span>
+<span class="sd">            BrownianTranslationalDiffusion model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">&#39;BrownianTranslationalDiffusion(display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,&#39;</span>
@@ -43007,7 +43027,8 @@ translational diffusion model at given Q values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the Lorentzian</p>
+                <p>Name of the Lorentzian
+component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -43155,7 +43176,7 @@ this model).</p>
 <span class="sd">    Args:</span>
 <span class="sd">        Q (Number, list, or np.ndarray): Scattering vector values.</span>
 <span class="sd">        component_display_name (str): Name of the Lorentzian</span>
-<span class="sd">        component.</span>
+<span class="sd">            component.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List[ComponentCollection]: List of ComponentCollections with</span>
@@ -43762,7 +43783,7 @@ convertible to meV. Defaults to "meV".</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the Diffusion model.</span>
 
 <span class="sd">        Returns:</span>
@@ -44051,6 +44072,7 @@ cannot be converted to meV.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -44073,7 +44095,7 @@ cannot be converted to meV.</p>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the Diffusion model.</span>
 
 <span class="sd">    Returns:</span>
@@ -45277,7 +45299,7 @@ See also the examples.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1">################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">        model.</span>
 
@@ -45501,6 +45523,7 @@ model.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -45529,7 +45552,7 @@ model.</p>
 <span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
-<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of the JumpTranslationalDiffusion</span>
 <span class="sd">    model.</span>
 
@@ -47412,7 +47435,7 @@ of the instrument. Will be copied to each Q value.</p>
     <span class="c1"># Dunder methods</span>
     <span class="c1"># -------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">        Returns:</span>
@@ -47527,6 +47550,7 @@ None if not set</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -47558,7 +47582,7 @@ None if not set</p>
 <span class="normal">394</span>
 <span class="normal">395</span>
 <span class="normal">396</span>
-<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">    Returns:</span>
@@ -48590,12 +48614,12 @@ ComponentCollections for each Q value.</p>
                 <code>Q</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Q_type">Q_type</span> | None</code>
+                  <code><span title="ArrayLike">ArrayLike</span> | <span title="scipp.Variable">Variable</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Q values for the model. If None, Q is not
-set.</p>
+                <p>Q values for the model. If
+None, Q is not set.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -48652,6 +48676,25 @@ set.</p>
               <div class="doc-md-description">
                 <p>List of ModelComponents in
 the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+      &lt;small class=&quot;doc doc-label doc-label-writable&quot;&gt;&lt;code&gt;writable&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.model_base.ModelBase.Q&lt;/code&gt;)" href="#easydynamics.sample_model.model_base.ModelBase.Q">Q</a></code></td>
+            <td>
+                  <code><span title="ArrayLike">ArrayLike</span> | <span title="scipp.Variable">Variable</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Q values of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -49012,8 +49055,7 @@ the model.</p>
 <span class="normal">358</span>
 <span class="normal">359</span>
 <span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModelBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Sample Models.</span>
 
 <span class="sd">    Contains common functionality for models with components and</span>
@@ -49029,15 +49071,14 @@ the model.</p>
 <span class="sd">            Template components of the model. If None, no components</span>
 <span class="sd">            are added. These components are copied into</span>
 <span class="sd">            ComponentCollections for each Q value.</span>
-<span class="sd">        Q (Q_type | None): Q values for the model. If None, Q is not</span>
-<span class="sd">            set.</span>
+<span class="sd">        Q (ArrayLike | sc.Variable | None): Q values for the model. If</span>
+<span class="sd">            None, Q is not set.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        unit (str | sc.Unit): Unit of the model.</span>
 <span class="sd">        components (list[ModelComponent]): List of ModelComponents in</span>
 <span class="sd">            the model.</span>
-<span class="sd">        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable</span>
-<span class="sd">            | None): Q values of the model.</span>
+<span class="sd">        Q (ArrayLike | sc.Variable | None): Q values of the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -49108,8 +49149,8 @@ the model.</p>
 <span class="sd">        SampleModel.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            component (ModelComponent | ComponentCollection):</span>
-<span class="sd">            The ModelComponent or ComponentCollection to append.</span>
+<span class="sd">            component (ModelComponent | ComponentCollection): The</span>
+<span class="sd">                ModelComponent or ComponentCollection to append.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_components_change</span><span class="p">()</span>
@@ -49120,7 +49161,7 @@ the model.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            unique_name (str): The unique name of the ModelComponent</span>
-<span class="sd">            to remove.</span>
+<span class="sd">                to remove.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">remove_component</span><span class="p">(</span><span class="n">unique_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_components_change</span><span class="p">()</span>
@@ -49347,7 +49388,7 @@ the model.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the ModelBase.</span>
 
 <span class="sd">        Returns:</span>
@@ -49456,6 +49497,7 @@ if not set.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -49472,7 +49514,8 @@ if not set.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">353</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">352</span>
+<span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span>
@@ -49480,8 +49523,7 @@ if not set.</p>
 <span class="normal">358</span>
 <span class="normal">359</span>
 <span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the ModelBase.</span>
 
 <span class="sd">    Returns:</span>
@@ -49540,7 +49582,11 @@ SampleModel.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                
+                <p>The
+ModelComponent or ComponentCollection to append.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
               </div>
             </td>
             <td>
@@ -49553,7 +49599,8 @@ SampleModel.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+<span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
@@ -49561,14 +49608,13 @@ SampleModel.</p>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Append a ModelComponent or ComponentCollection to the</span>
 <span class="sd">    SampleModel.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        component (ModelComponent | ComponentCollection):</span>
-<span class="sd">        The ModelComponent or ComponentCollection to append.</span>
+<span class="sd">        component (ModelComponent | ComponentCollection): The</span>
+<span class="sd">            ModelComponent or ComponentCollection to append.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_components_change</span><span class="p">()</span>
@@ -49602,10 +49648,10 @@ SampleModel.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
+<span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_components</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_components</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear all ModelComponents from the SampleModel.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">clear_components</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_components_change</span><span class="p">()</span>
@@ -49771,7 +49817,8 @@ current unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
+<span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -49797,8 +49844,7 @@ current unit.</p>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the unit of the ComponentCollection and all its</span>
 <span class="sd">    components.</span>
 
@@ -49919,7 +49965,8 @@ evaluate.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
+<span class="normal"> 75</span>
 <span class="normal"> 76</span>
 <span class="normal"> 77</span>
 <span class="normal"> 78</span>
@@ -49947,8 +49994,7 @@ evaluate.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate the sample model at all Q for the given x values.</span>
@@ -50008,10 +50054,10 @@ evaluate.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">258</span>
+<span class="normal">259</span>
 <span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
         <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -50045,10 +50091,10 @@ evaluate.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">264</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">263</span>
+<span class="normal">264</span>
 <span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_all_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Free all Parameters in all ComponentCollections.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">():</span>
         <span class="n">par</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
@@ -50148,7 +50194,8 @@ from the ComponentCollections in the ModelBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">269</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
+<span class="normal">269</span>
 <span class="normal">270</span>
 <span class="normal">271</span>
 <span class="normal">272</span>
@@ -50178,8 +50225,7 @@ from the ComponentCollections in the ModelBase.</p>
 <span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">299</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all Parameters and Descriptors from all</span>
 <span class="sd">    ComponentCollections in the ModelBase. Parameters Ignores the</span>
 <span class="sd">    Parameters and Descriptors in self._components as these are just</span>
@@ -50354,7 +50400,8 @@ ComponentCollections.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">302</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
+<span class="normal">302</span>
 <span class="normal">303</span>
 <span class="normal">304</span>
 <span class="normal">305</span>
@@ -50375,8 +50422,7 @@ ComponentCollections.</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_component_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span><span class="p">:</span>
+<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_component_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the ComponentCollection at the given Q index.</span>
 
 <span class="sd">    Args:</span>
@@ -50448,7 +50494,8 @@ name.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unique name of the ModelComponent</p>
+                <p>The unique name of the ModelComponent
+to remove.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50464,7 +50511,8 @@ name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
+<span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span>
@@ -50472,14 +50520,13 @@ name.</p>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a ModelComponent from the SampleModel by its unique</span>
 <span class="sd">    name.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        unique_name (str): The unique name of the ModelComponent</span>
-<span class="sd">        to remove.</span>
+<span class="sd">            to remove.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">remove_component</span><span class="p">(</span><span class="n">unique_name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_components_change</span><span class="p">()</span>
@@ -50936,7 +50983,7 @@ the model.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            component (ModelComponent | ComponentCollection):</span>
-<span class="sd">            Component(s) to append.</span>
+<span class="sd">                Component(s) to append.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If the component is a DeltaFunction or Polynomial</span>
@@ -51005,7 +51052,10 @@ are not physical resolution components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                
+                <p>Component(s) to append.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
               </div>
             </td>
             <td>
@@ -51076,7 +51126,7 @@ are not physical resolution components.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        component (ModelComponent | ComponentCollection):</span>
-<span class="sd">        Component(s) to append.</span>
+<span class="sd">            Component(s) to append.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If the component is a DeltaFunction or Polynomial</span>
@@ -51864,7 +51914,7 @@ balance factor by temperature. Defaults to True.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            diffusion_model (DiffusionModelBase): The DiffusionModel</span>
-<span class="sd">            to append.</span>
+<span class="sd">                to append.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If the diffusion_model is not a</span>
@@ -51887,7 +51937,7 @@ balance factor by temperature. Defaults to True.</p>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If no DiffusionModel with the given unique name</span>
-<span class="sd">            is found.</span>
+<span class="sd">                is found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_models</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">dm</span><span class="o">.</span><span class="n">unique_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -52149,7 +52199,7 @@ balance factor by temperature. Defaults to True.</p>
     <span class="c1"># dunder methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the SampleModel.</span>
 
 <span class="sd">        Returns:</span>
@@ -52204,6 +52254,7 @@ balance factor by temperature. Defaults to True.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -52233,7 +52284,7 @@ balance factor by temperature. Defaults to True.</p>
 <span class="normal">408</span>
 <span class="normal">409</span>
 <span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the SampleModel.</span>
 
 <span class="sd">    Returns:</span>
@@ -52295,7 +52346,8 @@ balance factor by temperature. Defaults to True.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The DiffusionModel</p>
+                <p>The DiffusionModel
+to append.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -52361,7 +52413,7 @@ DiffusionModelBase</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        diffusion_model (DiffusionModelBase): The DiffusionModel</span>
-<span class="sd">        to append.</span>
+<span class="sd">            to append.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If the diffusion_model is not a</span>
@@ -52970,7 +53022,8 @@ get variables from all ComponentCollections.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If no DiffusionModel with the given unique name</p>
+                <p>If no DiffusionModel with the given unique name
+is found.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53009,7 +53062,7 @@ get variables from all ComponentCollections.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If no DiffusionModel with the given unique name</span>
-<span class="sd">        is found.</span>
+<span class="sd">            is found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_models</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dm</span><span class="o">.</span><span class="n">unique_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
