@@ -20,16 +20,18 @@ from easydynamics.utils.utils import Numeric
 class Convolution(NumericalConvolutionBase):
     """Convolution class that combines analytical and numerical
     convolution methods to efficiently perform convolutions of
-    ComponentCollections with ResolutionComponents. Supports analytical
-    convolution for pairs of analytical model components (DeltaFunction,
-    Gaussian, Lorentzian, Voigt), while using numerical convolution for
-    other components. If temperature is provided, detailed balance
-    correction is applied to the sample model. In this case, all
-    convolutions are handled numerically. Includes a setting to
-    normalize the detailed balance correction. Includes optional
-    upsampling and extended range to improve accuracy of the numerical
-    convolutions. Also warns about numerical instabilities if peaks are
-    very wide or very narrow.
+    ComponentCollections with ResolutionComponents.
+
+    Supports analytical convolution for pairs of analytical model
+    components (DeltaFunction, Gaussian, Lorentzian, Voigt), while
+    using numerical convolution for other components.
+    If temperature is provided, detailed balance correction is applied
+    to the sample model. In this case, all convolutions are handled
+    numerically.
+    Includes a setting to normalize the detailed balance correction.
+    Includes optional upsampling and extended range to improve accuracy
+    of the numerical convolutions. Also warns about numerical
+    instabilities if peaks are very wide or very narrow.
 
     Args:
         energy (np.ndarray | scipp.Variable): 1D array of energy values
@@ -38,19 +40,19 @@ class Convolution(NumericalConvolutionBase):
             sample components to be convolved.
         resolution_components (ComponentCollection | ModelComponent):
             The resolution components to convolve with.
-        upsample_factor (int, optional): The factor by which to upsample
+        upsample_factor (int | None): The factor by which to upsample
             the input data before convolution. Default is 5.
-        extension_factor (float, optional): The factor by which to
+        extension_factor (float | None): The factor by which to
             extend the input data range before convolution. Default is
             0.2.
-        temperature (Parameter | float | None, optional): The
+        temperature (Parameter | float | None): The
             temperature to use for detailed balance correction. Default
             is None.
-        temperature_unit (str | sc.Unit, optional): The unit of the
+        temperature_unit (str | sc.Unit | None): The unit of the
             temperature parameter. Default is 'K'.
-        energy_unit (str | sc.Unit, optional): The unit of the energy.
+        energy_unit (str | sc.Unit | None): The unit of the energy.
             Default is 'meV'.
-        normalize_detailed_balance (bool, optional): Whether to
+        normalize_detailed_balance (bool | None): Whether to
             normalize the detailed balance correction. Default is True.
 
     Attributes:
@@ -78,16 +80,16 @@ class Convolution(NumericalConvolutionBase):
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
     _invalidate_plan_on_change = {
-        'energy',
-        '_energy',
-        '_energy_grid',
-        '_sample_components',
-        '_resolution_components',
-        '_temperature',
-        '_upsample_factor',
-        '_extension_factor',
-        '_energy_unit',
-        '_normalize_detailed_balance',
+        "energy",
+        "_energy",
+        "_energy_grid",
+        "_sample_components",
+        "_resolution_components",
+        "_temperature",
+        "_upsample_factor",
+        "_extension_factor",
+        "_energy_unit",
+        "_normalize_detailed_balance",
     }
 
     def __init__(
@@ -99,10 +101,39 @@ class Convolution(NumericalConvolutionBase):
         upsample_factor: Numeric = 5,
         extension_factor: Numeric = 0.2,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        temperature_unit: str | sc.Unit = "K",
+        energy_unit: str | sc.Unit = "meV",
         normalize_detailed_balance: bool = True,
     ):
+        """Initialize the Convolution class.
+
+
+        Args:
+            energy (np.ndarray | scipp.Variable): 1D array of energy
+                values where the convolution is evaluated.
+            sample_components (ComponentCollection | ModelComponent):
+                The  sample components to be convolved.
+            resolution_components (ComponentCollection |
+                ModelComponent): The resolution components to convolve
+                with.
+            upsample_factor (int | None): The factor by which to
+                upsample the input data before convolution. Default is
+                5.
+            extension_factor (float | None): The factor by which to
+                extend the input data range before convolution. Default
+                is 0.2.
+            temperature (Parameter | float | None): The
+                temperature to use for detailed balance correction.
+                Default is None.
+            temperature_unit (str | sc.Unit | None): The unit of the
+                temperature parameter. Default is 'K'.
+            energy_unit (str | sc.Unit | None): The unit of the energy.
+                Default is 'meV'.
+            normalize_detailed_balance (bool | None): Whether to
+                normalize the detailed balance correction. Default is
+                True.
+        """
+
         self._convolution_plan_is_valid = False
         self._reactions_enabled = False
         super().__init__(
@@ -133,8 +164,7 @@ class Convolution(NumericalConvolutionBase):
         components.
 
         Returns:
-            np.ndarray
-                The convolved values evaluated at energy.
+            np.ndarray: The convolved values evaluated at energy.
         """
         if not self._convolution_plan_is_valid:
             self._build_convolution_plan()
@@ -160,9 +190,8 @@ class Convolution(NumericalConvolutionBase):
         applied to delta functions.
 
         Returns:
-            np.ndarray
-                The convolved values of the delta function components
-                evaluated at energy.
+            np.ndarray: The convolved values of the delta function c
+                components evaluated at energy.
         """
         return sum(
             delta.area.value
@@ -181,31 +210,31 @@ class Convolution(NumericalConvolutionBase):
         handled analytically.
 
         Args:
-            sample_component : ModelComponent
-                The sample component to be convolved.
-            resolution_component : ModelComponent
-                The resolution component to convolve with.
+            sample_component (ModelComponent): The sample component to
+                be convolved.
+            resolution_component (ModelComponent): The resolution
+                component to convolve with.
+
         Returns:
-            bool
-                True if the component pair can be handled analytically,
-                False otherwise.
+            bool: True if the component pair can be handled
+                analytically, False otherwise.
         """
 
         if not isinstance(sample_component, ModelComponent):
             raise TypeError(
-                f'`sample_component` is an instance of {type(sample_component).__name__}, \
-                but must be a ModelComponent.'
+                f"`sample_component` is an instance of {type(sample_component).__name__}, \
+                but must be a ModelComponent."
             )
 
         if not isinstance(resolution_component, ModelComponent):
             raise TypeError(
-                f'`resolution_component` is an instance of {type(resolution_component).__name__}, \
-                    but must be a ModelComponent.'
+                f"`resolution_component` is an instance of {type(resolution_component).__name__}, \
+                    but must be a ModelComponent."
             )
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(
-                'resolution components contains delta functions. This is not supported.'
+                "resolution components contains delta functions. This is not supported."
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -244,7 +273,9 @@ class Convolution(NumericalConvolutionBase):
             pair_is_analytic = []
             for resolution_component in self._resolution_components.components:
                 pair_is_analytic.append(
-                    self._check_if_pair_is_analytic(sample_component, resolution_component)
+                    self._check_if_pair_is_analytic(
+                        sample_component, resolution_component
+                    )
                 )
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
@@ -308,5 +339,8 @@ class Convolution(NumericalConvolutionBase):
         if name in self._invalidate_plan_on_change:
             self._convolution_plan_is_valid = False
 
-        if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
+        if (
+            getattr(self, "_reactions_enabled", False)
+            and name in self._invalidate_plan_on_change
+        ):
             self._build_convolution_plan()
