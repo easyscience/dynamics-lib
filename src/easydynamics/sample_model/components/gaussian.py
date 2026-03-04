@@ -30,13 +30,13 @@ class Gaussian(CreateParametersMixin, ModelComponent):
      width.
 
     If the center is not provided, it will be centered at 0 and
-     fixed, which is typically what you want in QENS.
+    fixed, which is typically what you want in QENS.
 
      Args:
-         area (Int | float | Parameter): Area of the Gaussian.
-         center (Int | float | None | Parameter): Center of the
+         area (Int | float | Parameter | None): Area of the Gaussian.
+         center (Int | float | Parameter | None): Center of the
             Gaussian. If None, defaults to 0 and is fixed.
-         width (Int | float | Parameter): Standard deviation.
+         width (Int | float | Parameter | None): Standard deviation.
          unit (str | sc.Unit): Unit of the parameters. Defaults to
              "meV".
          display_name (str | None): Name of the component.
