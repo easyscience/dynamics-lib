@@ -95,8 +95,8 @@ This section describes the simplest way to set up EasyDynamics using
 ## Classical Installation
 
 This section describes how to install EasyDynamics using the traditional
-method with **pip**. It is assumed that you are familiar with Python package
-management and virtual environments.
+method with **pip**. It is assumed that you are familiar with Python
+package management and virtual environments.
 
 ### Environment Setup <small>optional</small> { #environment-setup data-toc-label="Environment Setup" }
 

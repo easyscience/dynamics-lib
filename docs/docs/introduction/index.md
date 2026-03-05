@@ -6,8 +6,8 @@ icon: material/information-slab-circle
 
 ## Description
 
-**EasyDynamics** is for plotting and fitting QENS and INS powder data.
-
+**EasyDynamics** is a software for plotting and fitting QENS and INS
+powder data.
 
 **EasyDynamics** is developed both as a Python library and as a
 cross-platform desktop application.
@@ -15,10 +15,6 @@ cross-platform desktop application.
 Here, we focus on the Python library. For the graphical user interface
 (GUI), please see the corresponding
 [GUI resources](https://easyscience.github.io/dynamics-app).
-
-
-
-
 
 <!--
 **EasyDynamics** is developed using the
@@ -62,7 +58,8 @@ The project is maintained by the
 [European Spallation Source (ESS)](https://ess.eu).
 
 If you would like to report a bug or request a new feature, please use
-the [GitHub Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
+the
+[GitHub Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
 (A free GitHub account is required.)
 
 To contribute code, documentation, or tests, please see our
