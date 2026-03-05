@@ -185,7 +185,10 @@ nav:
           - Detailed balance: tutorials/detailed_balance.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
           - Sample model: tutorials/sample_model.ipynb
+          - Instrument model: tutorials/instrument_model.ipynb
           - Experiment: tutorials/experiment.ipynb
+          - Analysis: tutorials/analysis.ipynb
+          - Analysis 1D: tutorials/analysis1d.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
       - convolution: api-reference/convolution.md
