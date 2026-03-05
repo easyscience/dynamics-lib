@@ -18,15 +18,20 @@ The tutorials are organized into the following categories:
 ## Getting Started
 
 - [Component collection](component_collection.ipynb) – Learn how to
-  create a collectin of components for fitting
+  create a collectin of components for fitting.
 - [Components](components.ipynb) – Learn how to use the EasyDynamics
-  components
+  components.
 - [Convolution](convolution.ipynb) – Learn how to calculate the
-  convolution of your resolution function with your model
+  convolution of your resolution function with your model.
 - [Detailed balance](detailed_balance.ipynb) – Learn how to apply
-  detailed balancing to your model
+  detailed balancing to your model.
 - [Diffusion model](diffusion_model.ipynb) – Learn how to create and use
-  a model of diffusion
+  a model of diffusion.
 - [Sample model](sample_model.ipynb) – Learn how to create a model of
-  the scattering from your sample
-- [Experiment](experiment.ipynb) - Learn how to load and bin your data
+  the scattering from your sample.
+- [Instrument model](instrument_model.ipynb) – Learn how to create a.
+  model of your instrument.
+- [Experiment](experiment.ipynb) - Learn how to load and bin your data.
+- [Analysis](analysis.ipynb) - Learn how to fit a model to your data.
+- [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your
+  data at a particular Q.

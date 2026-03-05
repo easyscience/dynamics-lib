@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
@@ -160,8 +160,7 @@ class Polynomial(ModelComponent):
         where $C_i$ are the coefficients.
 
         Args:
-            x (Numeric | list | np.ndarray | sc.Variable |
-                sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 The x values at which to evaluate the Polynomial.
 
         Returns:

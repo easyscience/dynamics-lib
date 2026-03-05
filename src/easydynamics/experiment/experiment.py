@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 import os
 
 import plopp as pp
@@ -28,8 +31,8 @@ class Experiment(NewBase):
         data (sc.DataArray | None): Dataset associated with the
             experiment.
         binned_data (sc.DataArray | None): Binned dataset associated
-        with the experiment. This is derived from `data` and is updated
-            whenever `data` is set.
+            with the experiment. This is derived from `data` and is
+            updated whenever `data` is set.
     """
 
     def __init__(
@@ -192,7 +195,7 @@ class Experiment(NewBase):
         Args:
             filename (str ): Path to the HDF5 file.
             display_name (str | None): Optional display name for the
-            experiment.
+                experiment.
 
         Raises:
             TypeError: If filename is not a string or if display_name is

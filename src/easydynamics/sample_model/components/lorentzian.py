@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
@@ -186,8 +186,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         the half width at half maximum (HWHM).
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or
-                sc.DataArray):
+            x (Numeric or list or np.ndarray or sc.Variable or sc.DataArray):
                 The x values at which to evaluate the Lorentzian.
 
         Returns:

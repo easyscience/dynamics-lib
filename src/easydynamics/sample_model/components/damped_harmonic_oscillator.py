@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
@@ -191,9 +191,8 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         width.
 
         Args:
-            x (Numeric | list | np.ndarray | sc.Variable |
-                sc.DataArray): The x values at which to evaluate the
-                DHO.
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
+                The x values at which to evaluate the DHO.
 
         Returns:
             np.ndarray: The intensity of the DHO at the given x values.

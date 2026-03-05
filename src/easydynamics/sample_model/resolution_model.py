@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import scipp as sc
@@ -33,8 +33,8 @@ class ResolutionModel(ModelBase):
         unit (str | sc.Unit): Unit of the model.
         components (list[ModelComponent]): List of ModelComponents in
             the model.
-        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
-            | None): Q values of the model.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable | None):
+            Q values of the model.
     """
 
     def __init__(

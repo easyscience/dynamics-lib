@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
@@ -221,9 +221,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
 
         Args:
-            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
-                sc.DataArray): The x values at which to evaluate the
-                Voigt.
+            x (Numeric | list[Numeric] | np.ndarray | sc.Variable | sc.DataArray):
+                The x values at which to evaluate the Voigt.
 
         Returns:
             np.ndarray: The intensity of the Voigt at the given x

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import warnings
@@ -94,9 +94,8 @@ class NumericalConvolutionBase(ConvolutionBase):
                 where the convolution is evaluated.
             sample_components (ComponentCollection | ModelComponent):
                 The components to be convolved.
-            resolution_components (ComponentCollection |
-                ModelComponent): The resolution components to convolve
-                with.
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution components to convolve with.
             upsample_factor (int | None): The factor by which to
                 upsample the input data before convolution. Default is
                 5.

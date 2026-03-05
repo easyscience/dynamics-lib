@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
@@ -53,8 +53,8 @@ class ConvolutionBase:
                 values where the convolution is evaluated.
             sample_components (ComponentCollection | ModelComponent):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection |
-                ModelComponent): The resolution model to convolve with.
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution model to convolve with.
             energy_unit (str | sc.Unit, optional): The unit of the
                 energy. Default is 'meV'.
             energy_offset (Numeric | Parameter, optional): The energy
