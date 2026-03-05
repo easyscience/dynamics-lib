@@ -66,6 +66,7 @@ dev = [
   'mkdocs-markdownextradata-plugin', # MkDocs: Markdown extra data support, such as global variables
   'mkdocstrings-python',             # MkDocs: Python docstring support
   'pyyaml',                          # YAML parser
+  'spdx-headers',                    # SPDX license header validation
 ]
 
 [project.urls]
