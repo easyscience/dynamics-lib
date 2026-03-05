@@ -227,6 +227,14 @@ pages-deployment = 'gh api -X POST repos/easyscience/dynamics-lib/pages --input 
 
 github-labels = 'python tools/update_github_labels.py'
 
+#########################
+# ⚖️ SPDX License Headers
+#########################
+
+spdx-remove = 'python tools/remove_spdx.py src/ tests/'
+spdx-add = 'python tools/add_spdx.py src/ tests/'
+spdx-check = 'python tools/check_spdx.py src/ tests/'
+
 ####################################
 # 🚀 Other Development & Build Tasks
 ####################################
@@ -238,7 +246,6 @@ npm-config = 'npm config set registry https://registry.npmjs.org/'
 prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
 
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
-spdx-update = 'python tools/update_spdx.py src/ tests/'
 
 post-install = { depends-on = [
   'npm-config',

@@ -1,9 +1,10 @@
-"""Update or insert SPDX headers in Python files.
+"""Add SPDX headers to Python files.
 
-- Ensures SPDX-FileCopyrightText has the file's creation year.
-- Ensures SPDX-License-Identifier is set to BSD-3-Clause.
+- SPDX-FileCopyrightText with the license holder name and organization
+  URL from ``pyproject.toml`` as well as the file's creation year.
+- SPDX-License-Identifier is taken from the project license value in
+  ``pyproject.toml``.
 """
-
 
 from __future__ import annotations
 
@@ -19,7 +20,6 @@ from spdx_headers.core import find_repository_root
 from spdx_headers.core import get_copyright_info
 from spdx_headers.data import load_license_data
 from spdx_headers.operations import add_header_to_single_file
-from spdx_headers.operations import remove_header_from_single_file
 
 LICENSE_DATABASE = load_license_data()
 
@@ -81,17 +81,16 @@ def get_copyright_holder(repo_path: Union[str, Path]) -> str:
     return name
 
 
-def update_spdx_header(
+def add_spdx_header(
     target_file: Union[str, Path],
     *,
     license_key: str,
     copyright_holder: str,
     org_url: str,
 ) -> None:
-    """Remove any existing SPDX header and add an updated one."""
+    """Add SPDX headers."""
     year = get_file_creation_year(target_file)
 
-    remove_header_from_single_file(target_file)
     add_header_to_single_file(
         filepath=target_file,
         license_key=license_key,
@@ -104,7 +103,7 @@ def update_spdx_header(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description='Update SPDX headers for Python files under the given paths.',
+        description='Add SPDX headers to Python files under the given paths.',
     )
     parser.add_argument(
         'paths',
@@ -129,7 +128,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             parser.error(f'Path does not exist: {base_dir}')
 
         for py_file in base_path.rglob('*.py'):
-            update_spdx_header(
+            add_spdx_header(
                 py_file,
                 license_key=license_key,
                 copyright_holder=copyright_holder,
