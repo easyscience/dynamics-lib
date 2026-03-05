@@ -17,9 +17,10 @@ The tutorials are organized into the following categories:
 
 ## Getting Started
 
-- [Component collection](component_collection.ipynb) – Learn how to create a collectin of 
-  components for fitting.
-- [Components](components.ipynb) – Learn how to use the EasyDynamics components.
+- [Component collection](component_collection.ipynb) – Learn how to
+  create a collectin of components for fitting.
+- [Components](components.ipynb) – Learn how to use the EasyDynamics
+  components.
 - [Convolution](convolution.ipynb) – Learn how to calculate the
   convolution of your resolution function with your model.
 - [Detailed balance](detailed_balance.ipynb) – Learn how to apply
@@ -32,5 +33,5 @@ The tutorials are organized into the following categories:
   model of your instrument.
 - [Experiment](experiment.ipynb) - Learn how to load and bin your data.
 - [Analysis](analysis.ipynb) - Learn how to fit a model to your data.
-- [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your 
+- [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your
   data at a particular Q.
