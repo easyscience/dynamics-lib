@@ -6,18 +6,20 @@ icon: material/information-slab-circle
 
 ## Description
 
-**EasyDynamics** is a scientific software for plotting and fitting qens
-and ins powder data.
+**EasyDynamics** is a software for plotting and fitting QENS and INS
+powder data.
 
-**EasyDynamics** is available both as a Python library and as a
+**EasyDynamics** is developed both as a Python library and as a
 cross-platform desktop application.
 
 Here, we focus on the Python library. For the graphical user interface
 (GUI), please see the corresponding
 [GUI resources](https://easyscience.github.io/dynamics-app).
 
+<!--
 **EasyDynamics** is developed using the
 [EasyScience framework](https://easyscience.org).
+-->
 
 ## License
 
@@ -47,22 +49,24 @@ BibTeX, JSON) are available on the
 
 ## Contributing
 
-We welcome contributions from the community! **EasyDynamics** is
-intended to be a community-driven, open-source project supported by a
-diverse group of contributors.
+We welcome contributions of any kind!
+
+**EasyDynamics** is intended to be a community-driven, open-source
+project supported by a diverse group of contributors.
 
 The project is maintained by the
 [European Spallation Source (ESS)](https://ess.eu).
 
-To contribute, see our
+If you would like to report a bug or request a new feature, please use
+the
+[GitHub Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
+(A free GitHub account is required.)
+
+To contribute code, documentation, or tests, please see our
 [:material-account-plus: Contributing Guidelines](https://github.com/easyscience/dynamics-lib/blob/master/CONTRIBUTING.md)
-on GitHub.
+for detailed development instructions.
 
 ## Get in Touch
 
-For general questions or feedback, contact us at
+For general questions or feedback, please contact us at
 [henrik.jacobsen@ess.eu](mailto:henrik.jacobsen@ess.eu).
-
-To report bugs or request features, please use the
-[GitHub Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
-(free registration required).

@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
 import pytest
 import scipp as sc
 
+from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 
@@ -112,3 +113,64 @@ class TestValidateUnit:
     def test_validate_unit_invalid_type(self, unit_input):
         with pytest.raises(TypeError, match='unit must be None, a string, or a scipp Unit'):
             _validate_unit(unit_input)
+
+
+# -----------------------------
+
+
+class TestInNotebook:
+    def test_in_notebook_returns_true_for_jupyter(self, monkeypatch):
+        """Should return True when IPython shell is
+        ZMQInteractiveShell (Jupyter)."""
+
+        # WHEN
+        class ZMQInteractiveShell:
+            __name__ = 'ZMQInteractiveShell'
+
+        # THEN
+        monkeypatch.setattr('IPython.get_ipython', lambda: ZMQInteractiveShell())
+
+        # EXPECT
+        assert _in_notebook() is True
+
+    def test_in_notebook_returns_false_for_terminal_ipython(self, monkeypatch):
+        """Should return False when IPython shell is
+        TerminalInteractiveShell."""
+
+        # WHEN
+        class TerminalInteractiveShell:
+            __name__ = 'TerminalInteractiveShell'
+
+        # THEN
+
+        monkeypatch.setattr('IPython.get_ipython', lambda: TerminalInteractiveShell())
+
+        # EXPECT
+        assert _in_notebook() is False
+
+    def test_in_notebook_returns_false_for_unknown_shell(self, monkeypatch):
+        """Should return False when IPython shell type is
+        unrecognized."""
+
+        # WHEN
+        class UnknownShell:
+            __name__ = 'UnknownShell'
+
+        # THEN
+        monkeypatch.setattr('IPython.get_ipython', lambda: UnknownShell())
+        # EXPECT
+        assert _in_notebook() is False
+
+    def test_in_notebook_returns_false_when_no_ipython(self, monkeypatch):
+        """Should return False when IPython is not installed or
+        available."""
+
+        # WHEN
+        def raise_import_error(*args, **kwargs):
+            raise ImportError
+
+        # THEN
+        monkeypatch.setattr('builtins.__import__', raise_import_error)
+
+        # EXPECT
+        assert _in_notebook() is False

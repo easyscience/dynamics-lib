@@ -8,10 +8,10 @@ icon: material/cog-box
 **Python 3.11** through **3.12**.
 
 To install and set up EasyDynamics, we recommend using
-[**Pixi**](https://prefix.dev), a modern package manager for Windows,
-macOS, and Linux.
+[**Pixi**](https://pixi.prefix.dev), a modern package manager for
+Windows, macOS, and Linux.
 
-!!! note "Main benefits of using Pixi"
+??? note "Main benefits of using Pixi"
 
     - **Ease of use**: Pixi simplifies the installation process, making it
       accessible even for users with limited experience in package management.
@@ -37,6 +37,26 @@ This section describes the simplest way to set up EasyDynamics using
 
 #### Setting up EasyDynamics with Pixi
 
+<!-- prettier-ignore-start -->
+
+- Choose a project location (local drive recommended).
+
+    ??? warning ":fontawesome-brands-windows: Windows + OneDrive"
+
+        We **do not recommend creating a Pixi project inside OneDrive or other
+        synced folders**.
+
+        By default, Pixi creates the virtual environment inside the project
+        directory (in `.pixi/`). On Windows, synced folders such as OneDrive
+        may cause file‑system issues (e.g., path-length limitations or
+        restricted link operations), which can lead to unexpected install
+        errors or environments being recreated.
+
+        Instead, create your project in a **local directory on your drive**
+        where you have full write permissions.
+
+<!-- prettier-ignore-end -->
+
 - Initialize a new Pixi project and navigate into it:
   ```txt
   pixi init easydynamics
@@ -46,16 +66,9 @@ This section describes the simplest way to set up EasyDynamics using
   ```txt
   pixi add python=3.12
   ```
-- Add the GNU Scientific Library (GSL) dependency:
+- Add EasyDynamics to the Pixi environment from PyPI:
   ```txt
-  pixi add gsl
-  ```
-- Add EasyDynamics with the `visualization` extras, which include
-  optional dependencies used for simplified visualization of charts and
-  tables. This can be especially useful for running the Jupyter Notebook
-  examples:
-  ```txt
-  pixi add --pypi "easydynamics[visualization]"
+  pixi add --pypi easydynamics
   ```
 - Add a Pixi task to run EasyDynamics commands easily:
   ```txt
@@ -82,19 +95,8 @@ This section describes the simplest way to set up EasyDynamics using
 ## Classical Installation
 
 This section describes how to install EasyDynamics using the traditional
-method with **pip**. This approach is more flexible and suitable for
-users familiar with Python package management and virtual environments.
-
-!!! warning
-
-    Currently, classical installation doesn't allow installing the
-    GNU Scientific Library (GSL) dependency automatically. As a result,
-    the calculation engine **pdffit2** will not be available. To make it
-    work, ensure that GSL is installed on your system.
-
-    Alternatively, consider using the **Pixi installation method** described
-    in the [Installing with Pixi](#installing-with-pixi) section, which
-    handles GSL installation automatically.
+method with **pip**. It is assumed that you are familiar with Python
+package management and virtual environments.
 
 ### Environment Setup <small>optional</small> { #environment-setup data-toc-label="Environment Setup" }
 
@@ -160,20 +162,7 @@ simply delete and recreate the environment.
 ### Installing from PyPI { #from-pypi }
 
 EasyDynamics is available on **PyPI (Python Package Index)** and can be
-installed using `pip`.
-
-We recommend installing the latest release of EasyDynamics with the
-`visualization` extras, which include optional dependencies used for
-simplified visualization of charts and tables. This can be especially
-useful for running the Jupyter Notebook examples. To do so, use the
-following command:
-
-```txt
-pip install 'easydynamics[visualization]'
-```
-
-If only the core functionality is needed, the library can be installed
-simply with:
+installed using `pip`. To do so, use the following command:
 
 ```txt
 pip install easydynamics
@@ -216,10 +205,10 @@ example:
 pip install git+https://github.com/easyscience/dynamics-lib@develop
 ```
 
-To include extra dependencies (e.g., visualization):
+To include extra dependencies (e.g., dev):
 
 ```txt
-pip install 'easydynamics[visualization] @ git+https://github.com/easyscience/dynamics-lib@develop'
+pip install 'easydynamics[dev] @ git+https://github.com/easyscience/dynamics-lib@develop'
 ```
 
 ## How to Run Tutorials

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
@@ -10,8 +10,7 @@ from easydynamics.convolution.numerical_convolution_base import NumericalConvolu
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.detailed_balance import _detailed_balance_factor as detailed_balance_factor
-
-Numerical = float | int
+from easydynamics.utils.utils import Numeric
 
 
 class NumericalConvolution(NumericalConvolutionBase):
@@ -22,30 +21,47 @@ class NumericalConvolution(NumericalConvolutionBase):
     balance correction is applied to the sample model.
 
     Args:
-    energy : np.ndarray or scipp.Variable
-        1D array of energy values where the convolution is evaluated.
-    sample_components : ComponentCollection or ModelComponent
-        The sample model to be convolved.
-    resolution_components : ComponentCollection or ModelComponent
-        The resolution model to convolve with.
-    upsample_factor : int, optional
-        The factor by which to upsample the input data
-        before convolution.
-        Default is 5.
-    extension_factor : float, optional
-        The factor by which to extend the input data range
-        before convolution.
-        Default is 0.2.
-    temperature : Parameter, float, or None, optional
-        The temperature to use for detailed balance correction.
-          Default is None.
-    temperature_unit : str or sc.Unit, optional
-        The unit of the temperature parameter. Default is 'K'.
-    energy_unit : str or sc.Unit, optional
-        The unit of the energy. Default is 'meV'.
-    normalize_detailed_balance : bool, optional
-        Whether to normalize the detailed balance correction.
-        Default is True.
+        energy (np.ndarray | sc.Variable): 1D array of energy values
+            where the convolution is evaluated.
+        sample_components (ComponentCollection | ModelComponent): The
+            sample model to be convolved.
+        resolution_components (ComponentCollection | ModelComponent):
+            The resolution model to convolve with.
+        upsample_factor (int, optional): The factor by which to upsample
+            the input data before convolution. Default is 5.
+        extension_factor (float, optional): The factor by which to
+            extend the input data range before convolution. Default is
+            0.2.
+        temperature (Parameter | float | None, optional): The
+            temperature to use for detailed balance correction. Default
+            is None.
+        temperature_unit (str | sc.Unit, optional): The unit of the
+            temperature parameter. Default is 'K'.
+        energy_unit (str | sc.Unit, optional): The unit of the energy.
+            Default is 'meV'.
+        normalize_detailed_balance (bool, optional): Whether to
+            normalize the detailed balance correction. Default is True.
+
+    Attributes:
+        energy (np.ndarray | sc.Variable): The energy values where the
+            convolution is evaluated.
+        sample_components (ComponentCollection | ModelComponent): The
+            sample model to be convolved.
+        resolution_components (ComponentCollection | ModelComponent):
+            The resolution model to convolve with.
+        energy_offset (Parameter): The energy offset to apply to the
+            sample model before convolution.
+        upsample_factor (int): The factor by which to upsample the input
+            data before convolution.
+        extension_factor (float): The factor by which to extend the
+            input data range before convolution.
+        temperature (Parameter | float | None): The temperature to use
+            for detailed balance correction.
+        temperature_unit (str | sc.Unit): The unit of the temperature
+            parameter.
+        energy_unit (str | sc.Unit): The unit of the energy.
+        normalize_detailed_balance (bool): Whether to normalize the
+            detailed balance correction.
     """
 
     def __init__(
@@ -53,17 +69,55 @@ class NumericalConvolution(NumericalConvolutionBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
-        upsample_factor: Numerical = 5,
-        extension_factor: float = 0.2,
-        temperature: Parameter | float | None = None,
+        energy_offset: Numeric | Parameter = 0.0,
+        upsample_factor: Numeric = 5,
+        extension_factor: Numeric = 0.2,
+        temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
     ):
+        """Initialize the NumericalConvolution object.
+
+        Args:
+            energy (np.ndarray | sc.Variable): 1D array of energy values
+                where the convolution is evaluated.
+            sample_components (ComponentCollection | ModelComponent):
+                The sample model to be convolved.
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution model to convolve with.
+            upsample_factor (int, optional): The factor by which to
+                upsample the input data before convolution. Default is
+                5.
+            extension_factor (float, optional): The factor by which to
+                extend the input data range before convolution. Default
+                is 0.2.
+            temperature (Parameter | float | None, optional): The
+                temperature to use for detailed balance correction.
+                Default is None.
+            temperature_unit (str | sc.Unit, optional): The unit of the
+                temperature parameter. Default is 'K'.
+            energy_unit (str | sc.Unit, optional): The unit of the
+                energy. Default is 'meV'.
+            normalize_detailed_balance (bool, optional): Whether to
+                normalize the detailed balance correction. Default is
+                True.
+
+        Raises:
+            TypeError: If temperature is not None, a number, or a
+                Parameter.
+            TypeError: If temperature_unit is not a string or sc.Unit.
+            TypeError: If upsample_factor is not a number or None.
+            ValueError: If upsample_factor is not greater than 1.
+            TypeError: If extension_factor is not a number.
+            ValueError: If extension_factor is negative.
+            TypeError: If normalize_detailed_balance is not a bool.
+        """
         super().__init__(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
+            energy_offset=energy_offset,
             upsample_factor=upsample_factor,
             extension_factor=extension_factor,
             temperature=temperature,
@@ -97,13 +151,15 @@ class NumericalConvolution(NumericalConvolutionBase):
         # Evaluate sample model. If called via the Convolution class,
         # delta functions are already filtered out.
         sample_vals = self.sample_components.evaluate(
-            self._energy_grid.energy_dense - self._energy_grid.energy_even_length_offset
+            self._energy_grid.energy_dense
+            - self._energy_grid.energy_even_length_offset
+            - self.energy_offset.value
         )
 
         # Detailed balance correction
         if self.temperature is not None:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense,
+                energy=self._energy_grid.energy_dense - self.energy_offset.value,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.normalize_detailed_balance,

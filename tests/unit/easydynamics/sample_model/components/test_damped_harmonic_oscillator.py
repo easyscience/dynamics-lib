@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -137,6 +137,11 @@ class TestDampedHarmonicOscillator:
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='center must be positive'):
             dho.center = -1.0
+
+    def test_width_must_be_positive(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            dho.width = -0.5
 
     def test_evaluate(self, dho: DampedHarmonicOscillator):
         # WHEN

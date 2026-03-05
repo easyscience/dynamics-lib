@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
@@ -37,7 +37,6 @@ class TestBrownianTranslationalDiffusion:
                     'unit': 123,
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
-                    'diffusion_unit': 'm**2/s',
                 },
                 UnitError,
                 'Invalid unit',
@@ -47,7 +46,6 @@ class TestBrownianTranslationalDiffusion:
                     'unit': 123,
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
-                    'diffusion_unit': 'm**2/s',
                 },
                 TypeError,
                 'scale must be a number',
@@ -57,49 +55,15 @@ class TestBrownianTranslationalDiffusion:
                     'unit': 123,
                     'scale': 1.0,
                     'diffusion_coefficient': 'invalid',
-                    'diffusion_unit': 'm**2/s',
                 },
                 TypeError,
                 'diffusion_coefficient must be a number',
-            ),
-            (
-                {
-                    'unit': 123,
-                    'scale': 1.0,
-                    'diffusion_coefficient': 1.0,
-                    'diffusion_unit': 123,
-                },
-                TypeError,
-                'diffusion_unit must be ',
             ),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_exception, expected_message):
         with pytest.raises(expected_exception, match=expected_message):
             BrownianTranslationalDiffusion(display_name='BrownianTranslationalDiffusion', **kwargs)
-
-    def test_diffusion_unit_value_error(self):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='diffusion_unit must be .'):
-            BrownianTranslationalDiffusion(
-                display_name='BrownianTranslationalDiffusion',
-                unit='meV',
-                scale=1.0,
-                diffusion_coefficient=1.0,
-                diffusion_unit='invalid_unit',
-            )
-
-    def test_scale_setter(self, brownian_diffusion_model):
-        # WHEN
-        brownian_diffusion_model.scale = 2.0
-
-        # THEN EXPECT
-        assert brownian_diffusion_model.scale.value == 2.0
-
-    def test_scale_setter_raises(self, brownian_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='scale must be a number.'):
-            brownian_diffusion_model.scale = 'invalid'  # Invalid type
 
     def test_diffusion_coefficient_setter(self, brownian_diffusion_model):
         # WHEN
@@ -112,6 +76,11 @@ class TestBrownianTranslationalDiffusion:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='diffusion_coefficient must be a number.'):
             brownian_diffusion_model.diffusion_coefficient = 'invalid'  # Invalid type
+
+    def test_diffusion_coefficient_setter_negative_raises(self, brownian_diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='diffusion_coefficient must be non-negative.'):
+            brownian_diffusion_model.diffusion_coefficient = -1.0  # Invalid negative value
 
     def test_calculate_width_type_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
@@ -134,20 +103,6 @@ class TestBrownianTranslationalDiffusion:
             'meV',
         )
         expected_widths = 1.0 * unit_conversion_factor.value * (Q_values**2)
-        np.testing.assert_allclose(widths, expected_widths, rtol=1e-5)
-
-    def test_calculate_width_diffusion_unit_mev_angstrom2(self):
-        # WHEN
-        diffusion_model = BrownianTranslationalDiffusion(
-            diffusion_coefficient=2.0, diffusion_unit='meV*Å**2'
-        )
-        Q_values = np.array([0.1, 0.2, 0.3])  # Example Q values in Å^-1
-
-        # WHEN
-        widths = diffusion_model.calculate_width(Q_values)
-
-        # THEN EXPECT
-        expected_widths = 2.0 * (Q_values**2)
         np.testing.assert_allclose(widths, expected_widths, rtol=1e-5)
 
     def test_calculate_EISF(self, brownian_diffusion_model):

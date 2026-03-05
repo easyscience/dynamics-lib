@@ -20,8 +20,7 @@ name: Code and package tests
 on:
   # Trigger the workflow on push
   push:
-    # Every branch
-    branches: ['**']
+    branches-ignore: [master, main] # Already verified in PR
     # But do not run this workflow on creating a new tag starting with
     # 'v', e.g. 'v1.0.3' (see publish-pypi.yml)
     tags-ignore: ['v*']

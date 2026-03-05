@@ -14,6 +14,10 @@ jobs:
   pypi-publish:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+
     steps:
       - name: Check-out repository
         uses: actions/checkout@v5
@@ -23,10 +27,20 @@ jobs:
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
 
+      # Build the Python package (to dist/ folder)
       - name: Create Python package
         run: pixi run default-build
 
+      # Publish the package to PyPI (from dist/ folder)
+      # Instead of publishing with personal access token, we use
+      # GitHub Actions OIDC to get a short-lived token from PyPI.
+      # New publisher must be previously configured in PyPI at
+      # https://pypi.org/manage/project/easydynamics/settings/publishing/
+      # Use the following data:
+      # Owner: easyscience
+      # Repository name: dynamics-lib
+      # Workflow name: pypi-publish.yml
       - name: Publish to PyPI
-        uses: ./.github/actions/publish-to-pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_PASSWORD }}
+          packages-dir: 'dist'

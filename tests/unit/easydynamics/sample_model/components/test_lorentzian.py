@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -127,6 +127,11 @@ class TestLorentzian:
         # invalid
         with pytest.raises(TypeError, match=invalid_message):
             setattr(lorentzian, prop, invalid_value)
+
+    def test_width_must_be_positive(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            lorentzian.width = -0.5
 
     def test_evaluate(self, lorentzian: Lorentzian):
         # WHEN

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -68,6 +68,11 @@ class TestComponentCollection:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='Component must be.'):
             ComponentCollection(components=['NotAComponent'])
+
+    def test_init_with_invalid_list_of_components_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='components must be a list of'):
+            ComponentCollection(components='NotAList')
 
     def test_init_with_invalid_unit_raises(self):
         # WHEN THEN EXPECT
@@ -153,6 +158,25 @@ class TestComponentCollection:
         with pytest.raises(TypeError, match='components must be a list of'):
             component_collection.components = 'NotAList'
 
+    def test_is_empty(self):
+        # WHEN THEN
+        component_collection = ComponentCollection(display_name='EmptyModel')
+        # EXPECT
+        assert component_collection.is_empty is True
+
+        # WHEN THEN
+        component = Gaussian(
+            display_name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+        )
+        component_collection.append_component(component)
+        # EXPECT
+        assert component_collection.is_empty is False
+
+    def test_is_empty_setter(self, component_collection):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='is_empty is a read-only property.'):
+            component_collection.is_empty = True
+
     def test_list_component_names(self, component_collection):
         # WHEN THEN
         components = component_collection.list_component_names()
@@ -216,13 +240,14 @@ class TestComponentCollection:
         ) + component_collection.components[1].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
-    def test_evaluate_no_components_raises(self):
+    def test_evaluate_no_components_returns_zero(self):
         # WHEN THEN
         component_collection = ComponentCollection(display_name='EmptyModel')
         x = np.linspace(-5, 5, 100)
         # EXPECT
-        with pytest.raises(ValueError, match='No components in the model to evaluate.'):
-            component_collection.evaluate(x)
+        result = component_collection.evaluate(x)
+        assert np.all(result == 0.0)
+        assert result.shape == x.shape
 
     def test_evaluate_component(self, component_collection):
         # WHEN  THEN

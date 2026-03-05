@@ -1,11 +1,14 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
 
 
@@ -29,6 +32,27 @@ class TestConvolutionBase:
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
         assert isinstance(convolution_base._sample_components, ComponentCollection)
         assert isinstance(convolution_base._resolution_components, ComponentCollection)
+
+    def test_init_with_model_component(self):
+        # WHEN
+        energy = np.linspace(-10, 10, 100)
+        sample_component = Gaussian()
+        resolution_component = Gaussian()
+
+        convolution_base = ConvolutionBase(
+            energy=energy,
+            sample_components=sample_component,
+            resolution_components=resolution_component,
+        )
+
+        # THEN EXPECT
+        assert isinstance(convolution_base, ConvolutionBase)
+        assert isinstance(convolution_base.energy, sc.Variable)
+        assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
+        assert isinstance(convolution_base.sample_components, ComponentCollection)
+        assert isinstance(convolution_base.resolution_components, ComponentCollection)
+        assert convolution_base.sample_components.components[0] == sample_component
+        assert convolution_base.resolution_components.components[0] == resolution_component
 
     def test_init_energy_numerical_none_offset(self):
         # WHEN
@@ -55,6 +79,7 @@ class TestConvolutionBase:
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
                     'energy_unit': 'meV',
+                    'energy_offset': 0,
                 },
                 'Energy must be',
             ),
@@ -64,6 +89,7 @@ class TestConvolutionBase:
                     'sample_components': 'invalid',
                     'resolution_components': ComponentCollection(),
                     'energy_unit': 'meV',
+                    'energy_offset': 0,
                 },
                 (
                     '`sample_components` is an instance of str, '
@@ -76,6 +102,7 @@ class TestConvolutionBase:
                     'sample_components': ComponentCollection(),
                     'resolution_components': 'invalid',
                     'energy_unit': 'meV',
+                    'energy_offset': 0,
                 },
                 (
                     '`resolution_components` is an instance of str, '
@@ -88,8 +115,19 @@ class TestConvolutionBase:
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
                     'energy_unit': 123,
+                    'energy_offset': 0,
                 },
                 'Energy_unit must be ',
+            ),
+            (
+                {
+                    'energy': np.linspace(-10, 10, 100),
+                    'sample_components': ComponentCollection(),
+                    'resolution_components': ComponentCollection(),
+                    'energy_unit': 'meV',
+                    'energy_offset': 'invalid',
+                },
+                'Energy_offset must be ',
             ),
         ],
     )
@@ -163,6 +201,62 @@ class TestConvolutionBase:
             match='Energy unit must be a string or scipp unit.',
         ):
             convolution_base.convert_energy_unit(123)
+
+    def test_convert_energy_unit_invalid_unit_rollback(self, convolution_base):
+        # WHEN THEN
+        with pytest.raises(
+            UnitError,
+            match='Conversion from `meV` to `s` is not valid.',
+        ):
+            convolution_base.convert_energy_unit('s')
+
+        # EXPECT
+        assert convolution_base.energy_unit == 'meV'
+        assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
+
+    def test_convert_energy_unit_invalid_offset_unit_rollback(self, convolution_base):
+        # WHEN
+        convolution_base.energy_offset = Parameter(name='energy_offset', value=5, unit='s')
+
+        # THEN
+        with pytest.raises(
+            UnitError,
+            match='Conversion from `s` to `meV` is not valid.',
+        ):
+            convolution_base.convert_energy_unit('meV')
+
+        # EXPECT
+        assert convolution_base.energy_unit == 'meV'
+        assert convolution_base.energy_offset.unit == 's'
+
+    def test_energy_offset_property(self, convolution_base):
+        # WHEN THEN EXPECT
+        assert convolution_base.energy_offset.value == 0
+
+        # THEN
+        convolution_base.energy_offset = 5
+        assert convolution_base.energy_offset.value == 5
+
+        # THEN
+        convolution_base.energy_offset = Parameter(name='energy_offset', value=10, unit='meV')
+        assert convolution_base.energy_offset.value == 10
+        assert convolution_base.energy_offset.unit == 'meV'
+
+    def test_energy_offset_setter_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Energy_offset must be a number or a Parameter.',
+        ):
+            convolution_base.energy_offset = 'invalid'
+
+    def test_energy_with_offset_setter_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            AttributeError,
+            match='is a read-only property',
+        ):
+            convolution_base.energy_with_offset = 5
 
     def test_sample_components_property(self, convolution_base):
         # WHEN THEN EXPECT

@@ -21,7 +21,7 @@ theme:
     - content.tooltips
     - navigation.footer
     - navigation.indexes
-    - navigation.instant # Instant loading (SPA-like)
+    #- navigation.instant # Instant loading, but it causes issues with rendering equations
     #- navigation.sections
     - navigation.top # Back-to-top button
     - navigation.tracking # Anchor tracking
@@ -84,8 +84,12 @@ extra:
 # Customization to be included by the theme
 extra_css:
   - assets/stylesheets/extra.css
+
 extra_javascript:
   - assets/javascripts/extra.js
+  # MathJax for rendering mathematical expressions
+  - assets/javascripts/mathjax.js # Custom MathJax config to ensure compatibility with mkdocs-jupyter
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js # Official MathJax CDN
 
 # A list of extensions beyond the ones that MkDocs uses by default (meta, toc, tables, and fenced_code)
 markdown_extensions:
@@ -94,6 +98,8 @@ markdown_extensions:
   - attr_list
   - def_list
   - footnotes
+  - pymdownx.arithmatex: # rendering of equations and integrates with MathJax or KaTeX
+      generic: true
   - pymdownx.blocks.caption
   - pymdownx.details
   - pymdownx.emoji:
@@ -132,7 +138,7 @@ plugins:
       allow_errors: false
       include_source: true
       include_requirejs: true # Required for Plotly
-      custom_mathjax_url: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe'
+      #custom_mathjax_url: 'https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js' # See 'extra_javascript' above
       ignore_h1_titles: true # Use titles defined in the nav section below
       remove_tag_config:
         remove_input_tags:
@@ -143,6 +149,7 @@ plugins:
           paths: ['src'] # Change 'src' to your actual sources directory
           options:
             docstring_style: google
+            render_markdown: true
             group_by_category: false
             heading_level: 1
             show_root_heading: true
@@ -178,8 +185,14 @@ nav:
           - Detailed balance: tutorials/detailed_balance.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
           - Sample model: tutorials/sample_model.ipynb
+          - Instrument model: tutorials/instrument_model.ipynb
+          - Experiment: tutorials/experiment.ipynb
+          - Analysis: tutorials/analysis.ipynb
+          - Analysis 1D: tutorials/analysis1d.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
       - convolution: api-reference/convolution.md
       - sample_model: api-reference/sample_model.md
+      - experiment: api-reference/experiment.md
+      - analysis: api-reference/analysis.md
       - utils: api-reference/utils.md

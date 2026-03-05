@@ -1,7 +1,16 @@
 # Verifies if a pull request has at least one label from a set of valid
 # labels before it can be merged.
+#
+# NOTE:
+# This workflow may be triggered twice in quick succession when a PR is
+# created:
+#   1) `opened`  — when the pull request is initially created
+#   2) `labeled` — if labels are added immediately after creation
+# (e.g. by manual labeling, another workflow, or GitHub App).
+#
+# These are separate GitHub events, so two workflow runs can be started.
 
-name: PR label checks
+name: PR labels check
 
 on:
   pull_request_target:
@@ -11,16 +20,17 @@ permissions:
   pull-requests: read
 
 jobs:
-  require-label:
+  check-labels:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Validate required labels
+      - name: Check for valid labels
         run: |
           PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | jq -r '.[]')
 
           echo "Current PR labels: $PR_LABELS"
           VALID_LABELS=(
-            "[bot] pull request"
+            "[bot] release"
             "[scope] bug"
             "[scope] documentation"
             "[scope] enhancement"

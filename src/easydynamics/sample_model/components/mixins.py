@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 import warnings
@@ -36,14 +36,17 @@ class CreateParametersMixin:
         If the area is negative, a warning is raised.
         If the area is non-negative, its minimum is set to 0 to avoid it
         accidentally becoming negative during fitting.
-        args:
-            area (Numeric or Parameter): The area value or Parameter.
+
+        Args:
+            area (Numeric | Parameter): The area value or Parameter.
             name (str): The name of the model component.
-            unit (str or sc.Unit): The unit of the area Parameter.
+            unit (str | sc.Unit): The unit of the area Parameter.
             minimum_area (float): The minimum allowed area.
-        returns:
+
+        Returns:
             Parameter: The validated area Parameter.
-        raises:
+
+        Raises:
             TypeError: If area is not a number or a Parameter.
             Warning: If area is negative.
         """
@@ -76,16 +79,18 @@ class CreateParametersMixin:
         """Validate and convert a number to a Parameter describing the
         center of a function.
 
-        args:
-            center (Numeric, Parameter, or None): The center value or
-            Parameter.
+        Args:
+            center (Numeric | Parameter | None): The center value or
+                Parameter.
             name (str): The name of the model component.
             fix_if_none (bool): Whether to fix the center Parameter
-            if center is None.
-            unit (str or sc.Unit): The unit of the center Parameter.
-        returns:
+                if center is None.
+            unit (str | sc.Unit): The unit of the center Parameter.
+
+        Returns:
             Parameter: The validated center Parameter.
-        raises:
+
+        Raises:
             TypeError: If center is not None, a number, or a Parameter.
         """
         if center is not None and not isinstance(center, (Numeric, Parameter)):
@@ -118,15 +123,17 @@ class CreateParametersMixin:
         """Validate and convert a number to a Parameter describing the
         width of a function.
 
-        args:
+        Args:
             width (Numeric or Parameter): The width value or Parameter.
             name (str): The name of the model component.
             param_name (str): The name of the width parameter.
             unit (str or sc.Unit): The unit of the width Parameter.
             minimum_width (float): The minimum allowed width.
-        returns:
+
+        Returns:
             Parameter: The validated width Parameter.
-        raises:
+
+        Raises:
             TypeError: If width is not a number or a Parameter.
             ValueError: If width is non-positive.
         """

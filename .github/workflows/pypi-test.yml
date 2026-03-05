@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
   CI_BRANCH: ${{ github.head_ref || github.ref_name }}

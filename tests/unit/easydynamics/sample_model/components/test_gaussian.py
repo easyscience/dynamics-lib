@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -123,6 +123,11 @@ class TestGaussian:
         # invalid
         with pytest.raises(TypeError, match=invalid_message):
             setattr(gaussian, prop, invalid_value)
+
+    def test_width_must_be_positive(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='width must be positive'):
+            gaussian.width = -0.5
 
     def test_evaluate(self, gaussian: Gaussian):
         # WHEN

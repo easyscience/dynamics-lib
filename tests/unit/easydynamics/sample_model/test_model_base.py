@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from unittest.mock import Mock
@@ -105,13 +105,20 @@ class TestModelBase:
             assert isinstance(collection.components[1], Lorentzian)
             assert collection.components[1].display_name == 'TestLorentzian1'
 
-    def test_generate_component_collections_without_Q_warns(self, model_base):
+    def test_fix_free_all_parameters(self, model_base):
         # WHEN
-        model_base._Q = None
+        model_base.fix_all_parameters()
 
-        # THEN / EXPECT
-        with pytest.warns(UserWarning, match='Q is not set'):
-            model_base._generate_component_collections()
+        # THEN
+        for par in model_base.get_all_variables():
+            assert par.fixed is True
+
+        # WHEN
+        model_base.free_all_parameters()
+
+        # THEN
+        for par in model_base.get_all_variables():
+            assert par.fixed is False
 
     def test_get_all_variables(self, model_base):
         # WHEN
@@ -131,6 +138,63 @@ class TestModelBase:
 
         assert expected_var_display_names == retrieved_var_display_names
         assert len(all_vars) == 18
+
+    def test_get_all_variables_with_Q_index(self, model_base):
+        # WHEN
+        all_vars = model_base.get_all_variables(Q_index=1)
+
+        # THEN
+        expected_var_display_names = {
+            'TestGaussian1 area',
+            'TestGaussian1 center',
+            'TestGaussian1 width',
+            'TestLorentzian1 area',
+            'TestLorentzian1 center',
+            'TestLorentzian1 width',
+        }
+
+        retrieved_var_display_names = {var.display_name for var in all_vars}
+
+        assert expected_var_display_names == retrieved_var_display_names
+        assert len(all_vars) == 6
+
+    def test_get_all_variables_with_invalid_Q_index_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds for component collections of length 3',
+        ):
+            model_base.get_all_variables(Q_index=5)
+
+    def test_get_all_variables_with_nonint_Q_index_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            model_base.get_all_variables(Q_index='invalid_index')
+
+    def test_get_component_collection(self, model_base):
+        # WHEN THEN
+        collection = model_base.get_component_collection(Q_index=0)
+        # EXPECT
+        assert collection is model_base._component_collections[0]
+
+    def test_get_component_collection_invalid_index_type_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int, got str',
+        ):
+            model_base.get_component_collection(Q_index='invalid_index')
+
+    def test_get_component_collection_invalid_index_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds for ',
+        ):
+            model_base.get_component_collection(Q_index=5)
 
     def test_append_and_remove_and_clear_component(self, model_base):
         # WHEN
@@ -173,7 +237,7 @@ class TestModelBase:
 
     def test_append_component_invalid_type_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(TypeError, match=' must be a ModelComponent or ComponentCollection'):
+        with pytest.raises(TypeError, match=' must be '):
             model_base.append_component('invalid_component')
 
     def test_unit_property(self, model_base):

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -195,6 +195,19 @@ class TestVoigt:
         # invalid
         with pytest.raises(TypeError, match=invalid_message):
             setattr(voigt, prop, invalid_value)
+
+    def test_gaussian_width_must_be_positive(self, voigt: Voigt):
+        # WHEN THEN
+        with pytest.raises(ValueError, match='gaussian_width must be positive'):
+            voigt.gaussian_width = -0.6
+
+    def test_lorentzian_width_must_be_positive(self, voigt: Voigt):
+        # WHEN THEN
+        with pytest.raises(
+            ValueError,
+            match='lorentzian_width must be positive',
+        ):
+            voigt.lorentzian_width = -0.7
 
     def test_center_is_fixed_if_set_to_None(self, voigt: Voigt):
         # WHEN

@@ -1,17 +1,16 @@
-# The workflow is divided into several steps to ensure code quality:
-#    - Check the validity of pyproject.toml
-#    - Check code linting
-#    - Check code formatting
-#    - Check formatting of docstrings in the code
-#    - Check formatting of Markdown, YAML, TOML, etc. files
+# The workflow is divided into several steps:
+#   - Check the validity of pyproject.toml
+#   - Check code linting
+#   - Check code formatting
+#   - Check formatting of docstrings in the code
+#   - Check formatting of Markdown, YAML, TOML, etc. files
 
-name: Code quality checks
+name: Lint and format checks
 
 on:
   # Trigger the workflow on push
   push:
-    # Every branch
-    branches: ['**']
+    branches-ignore: [master, main] # Already verified in PR
     # Do not run this workflow on creating a new tag starting with
     # 'v', e.g. 'v1.0.3' (see publish-pypi.yml)
     tags-ignore: ['v*']
@@ -26,12 +25,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
   CI_BRANCH: ${{ github.head_ref || github.ref_name }}
 
 jobs:
-  code-quality:
+  lint-format:
     runs-on: ubuntu-latest
 
     steps:
@@ -50,6 +52,14 @@ jobs:
         continue-on-error: true
         shell: bash
         run: pixi run pyproject-check
+
+      # Check the presence and correctness of SPDX license headers in
+      # the code files
+      - name: Check SPDX license headers
+        id: check_spdx_headers
+        continue-on-error: true
+        shell: bash
+        run: pixi run spdx-check
 
       # Check code linting with Ruff in the project root
       - name: Check code linting
@@ -80,30 +90,41 @@ jobs:
         shell: bash
         run: pixi run nonpy-format-check
 
+      # Check formatting of Jupyter Notebooks in the tutorials folder
+      - name: Prepare notebooks and check formatting
+        id: check_notebooks_formatting
+        continue-on-error: true
+        shell: bash
+        run: pixi run notebook-format-check
+
       # Add summary
       - name: Add quality checks summary
         if: always()
         shell: bash
         run: |
           {
-            echo "## 🧪 Code Quality Checks Summary"
+            echo "## 🧪 Checks Summary"
             echo ""
             echo "| Check | Status |"
             echo "|-------|--------|"
             echo "| pyproject.toml   | ${{ steps.check_pyproject.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| SPDX headers     | ${{ steps.check_spdx_headers.outcome == 'success' && '✅' || '❌' }} |"
             echo "| py lint          | ${{ steps.check_code_linting.outcome == 'success' && '✅' || '❌' }} |"
             echo "| py format        | ${{ steps.check_code_formatting.outcome == 'success' && '✅' || '❌' }} |"
             echo "| docstring format | ${{ steps.check_docs_formatting.outcome == 'success' && '✅' || '❌' }} |"
             echo "| nonpy format     | ${{ steps.check_others_formatting.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| notebooks format | ${{ steps.check_notebooks_formatting.outcome == 'success' && '✅' || '❌' }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Fail job if any check failed
       - name: Fail job if any check failed
         if: |
           steps.check_pyproject.outcome == 'failure'
+          || steps.check_spdx_headers.outcome == 'failure'
           || steps.check_code_linting.outcome == 'failure'
           || steps.check_code_formatting.outcome == 'failure'
           || steps.check_docs_formatting.outcome == 'failure'
           || steps.check_others_formatting.outcome == 'failure'
+          || steps.check_notebooks_formatting.outcome == 'failure'
         shell: bash
         run: exit 1

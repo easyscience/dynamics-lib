@@ -6,9 +6,10 @@
 name = 'easydynamics'
 dynamic = ['version'] # Use versioningit to manage the version
 description = 'QENS data analysis'
-authors = [{ name = 'EasyDynamics contributors' }]
+authors = [{ name = 'EasyScience contributors' }]
 readme = 'README.md'
-license = { file = 'LICENSE' }
+license = 'BSD-3-Clause'
+license-files = ['LICENSE']
 classifiers = [
   'Intended Audience :: Science/Research',
   'Topic :: Scientific/Engineering',
@@ -21,20 +22,22 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'easyscience @ git+https://github.com/easyscience/corelib.git@develop', # The base library of the EasyScience framework
-  'pooch',                                                                # Data downloader
-  'darkdetect',                                                           # Detecting dark mode (system-level)
-  'pandas',                                                               # Displaying tables in Jupyter notebooks
-  'plotly',                                                               # Interactive plots
-  'py3Dmol',                                                              # Visualisation of crystal structures
-  'ipympl',                                                               # Matplotlib Jupyter backend
-  'ipywidgets',                                                           # Jupyter widgets
-  'jupyterlab',                                                           # Jupyter notebooks
-  'pixi-kernel',                                                          # Pixi Jupyter kernel
+  'easyscience', # The base library of the EasyScience framework
+  'pooch',       # Data downloader
+  'darkdetect',  # Detecting dark mode (system-level)
+  'pandas',      # Displaying tables in Jupyter notebooks
+  'plotly',      # Interactive plots
+  'py3Dmol',     # Visualisation of crystal structures
+  'ipympl',      # Matplotlib Jupyter backend
+  'ipywidgets',  # Jupyter widgets
+  'jupyterlab',  # Jupyter notebooks
+  'pixi-kernel', # Pixi Jupyter kernel
+  'plopp',       # Plotting library
 ]
 
 [project.optional-dependencies]
 dev = [
+  'GitPython',                       # Interact with Git repositories
   'build',                           # Building the package
   'pre-commit',                      # Pre-commit hooks
   'jinja2',                          # Templating
@@ -63,13 +66,15 @@ dev = [
   'mkdocs-markdownextradata-plugin', # MkDocs: Markdown extra data support, such as global variables
   'mkdocstrings-python',             # MkDocs: Python docstring support
   'pyyaml',                          # YAML parser
+  'spdx-headers',                    # SPDX license header validation
 ]
 
 [project.urls]
-homepage = 'https://easyscience.github.io/dynamics'
-documentation = 'https://easyscience.github.io/dynamics-lib'
-source = 'https://github.com/easyscience/dynamics-lib'
-tracker = 'https://github.com/easyscience/dynamics-lib/issues'
+Homepage = 'https://easyscience.github.io/dynamics'
+Documentation = 'https://easyscience.github.io/dynamics-lib'
+'Release Notes' = 'https://github.com/easyscience/dynamics-lib/releases'
+'Source Code' = 'https://github.com/easyscience/dynamics-lib'
+'Issue Tracker' = 'https://github.com/easyscience/dynamics-lib/issues'
 
 ############################
 # Build system configuration
@@ -120,19 +125,6 @@ distance-dirty = '{base_version}+devdirty{distance}' # example: 0.5.8+devdirty3
 method = 'git'
 match = ['v*']
 default-tag = 'v999.0.0'
-
-################################
-# Configuration for docformatter
-################################
-
-# 'docformatter' -- Code formatter for docstrings
-# https://docformatter.readthedocs.io/en/latest/
-
-[tool.docformatter]
-recursive = true
-wrap-summaries = 72
-wrap-descriptions = 72
-close-quotes-on-newline = true
 
 ################################
 # Configuration for interrogate
@@ -215,8 +207,33 @@ force-single-line = true
 max-complexity = 10 # default is 10
 
 [tool.ruff.lint.pycodestyle]
-max-line-length = 99 # https://peps.python.org/pep-0008/#maximum-line-length
-max-doc-length = 72  # https://peps.python.org/pep-0008/#maximum-line-length
+# PEP 8 line length guidance:
+# https://peps.python.org/pep-0008/#maximum-line-length
+# Use 99 characters as the project-wide maximum for regular code lines.
+max-line-length = 99
+# allow longer lines so that parameter declarations such as
+# `name (Type | Type | None):` remain on a single line. Splitting these
+# lines can prevent tools such as MkDocs and IDEs from correctly
+# parsing and rendering parameter documentation.
+# The descriptive text itself is wrapped more strictly by
+# `docformatter` (see the configuration in [tool.docformatter] below)
+# whenever it is treated as normal paragraph text.
+# The line length for code snippets in docstrings is also more strict,
+# as defined in the [tool.ruff.format] section above.
+max-doc-length = 99
 
 [tool.ruff.lint.pydocstyle]
 convention = 'google'
+
+################################
+# Configuration for docformatter
+################################
+
+# 'docformatter' -- Code formatter for docstrings
+# https://docformatter.readthedocs.io/en/latest/
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 72
+wrap-descriptions = 72
+close-quotes-on-newline = true

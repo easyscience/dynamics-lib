@@ -1,41 +1,58 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from typing import Dict
 from typing import List
-from typing import Union
 
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
-from numpy.typing import ArrayLike
 from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
-
-Numeric = Union[float, int]
-
-Q_type = np.ndarray | Numeric | list | ArrayLike
 
 
 class BrownianTranslationalDiffusion(DiffusionModelBase):
-    """Model of Brownian translational diffusion, consisting of a
-    Lorentzian function for each Q-value, where the width is given by
-    :math:`DQ^2`. Q is assumed to have units of 1/angstrom. Creates
-    ComponentCollections with Lorentzian components for given Q-values.
+    r"""Model of Brownian translational diffusion, consisting of a
+    Lorentzian function for each Q-value, where the width is given by $D
+    Q^2$, where $D$ is the diffusion coefficient. The area of the
+    Lorentzians is given by the scale parameter multiplied by the QISF,
+    which is 1 for this model. The EISF is 0 for this model, so there is
+    no delta function component. Q is assumed to have units of
+    1/angstrom. Creates ComponentCollections with Lorentzian components
+    for given Q-values.
+
+    Args:
+        display_name (str): Display name of the diffusion model.
+        unique_name (str | None): Unique name of the diffusion model. If
+            None, a unique name will be generated.
+        unit (str | sc.Unit): Unit of the diffusion model. Must be
+            convertible to meV. Defaults to "meV".
+        scale (Numeric): Scale factor for the diffusion model. Must be
+            a non-negative number. Defaults to 1.0.
+        diffusion_coefficient (Numeric): Diffusion coefficient D in
+            m^2/s. Defaults to 1.0.
+
+    Attributes:
+        unit (str | sc.Unit): Unit of the diffusion model.
+        scale (Parameter): Scale parameter of the diffusion model.
+        diffusion_coefficient (Parameter): Diffusion coefficient D in
+            m^2/s.
 
     Example usage:
-    Q=np.linspace(0.5,2,7)
-    energy=np.linspace(-2, 2, 501)
-    scale=1.0
-    diffusion_coefficient = 2.4e-9  # m^2/s
-    diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel",
-    scale=scale, diffusion_coefficient= diffusion_coefficient)
-    component_collections=diffusion_model.create_component_collections(Q)
+    >>>Q=np.linspace(0.5,2,7)
+    >>>energy=np.linspace(-2, 2, 501)
+    >>>scale=1.0
+    >>>diffusion_coefficient = 2.4e-9  # m^2/s
+    >>>diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel",
+    >>>scale=scale, diffusion_coefficient= diffusion_coefficient)
+    >>>component_collections=diffusion_model.create_component_collections(Q)
     See also the examples.
     """
 
@@ -46,113 +63,96 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         unit: str | sc.Unit = 'meV',
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
-        diffusion_unit: str = 'm**2/s',
     ):
         """Initialize a new BrownianTranslationalDiffusion model.
 
-        Parameters
-        ----------
-        display_name : str
-            Display name of the diffusion model.
-        unique_name : str or None
-            Unique name of the diffusion model. If None, a unique name
-            is automatically generated.
-        unit : str or sc.Unit, optional
-            Energy unit for the underlying Lorentzian components.
-            Defaults to "meV".
-        scale : float or Parameter, optional
-            Scale factor for the diffusion model.
-        diffusion_coefficient : float or Parameter, optional
-            Diffusion coefficient D. If a number is provided,
-            it is assumed to be in the unit given by diffusion_unit.
-            Defaults to 1.0.
-        diffusion_unit : str, optional
-            Unit for the diffusion coefficient D. Default is m**2/s.
-            Options are 'meV*Å**2' or 'm**2/s'
+        Args:
+            display_name (str): Display name of the diffusion model.
+            unique_name (str | None): Unique name of the diffusion
+                model. If None, a unique name will be generated.
+            unit (str | sc.Unit): Unit of the diffusion model. Must be
+                convertible to meV. Defaults to "meV".
+            scale (Numeric): Scale factor for the diffusion model. Must
+                be a non-negative number. Defaults to 1.0.
+            diffusion_coefficient (Numeric): Diffusion coefficient D in
+                m^2/s. Defaults to 1.0.
+
+        Raises:
+            TypeError: If scale or diffusion_coefficient is not a
+                number.
+            ValueError: If scale is negative.
+            UnitError: If unit is not a string or scipp Unit.
         """
-        if not isinstance(scale, (Parameter, Numeric)):
+        if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
 
-        if not isinstance(diffusion_coefficient, (Parameter, Numeric)):
+        if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
-
-        if not isinstance(diffusion_unit, str):
-            raise TypeError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
-
-        if diffusion_unit == 'meV*Å**2' or diffusion_unit == 'meV*angstrom**2':
-            # In this case, hbar is absorbed in the unit of D
-            self._hbar = DescriptorNumber('hbar', 1.0)
-        elif diffusion_unit == 'm**2/s' or diffusion_unit == 'm^2/s':
-            self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-        else:
-            raise ValueError("diffusion_unit must be 'meV*Å**2' or 'm**2/s'.")
-
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
 
         diffusion_coefficient = Parameter(
             name='diffusion_coefficient',
             value=float(diffusion_coefficient),
             fixed=False,
-            unit=diffusion_unit,
+            unit='m**2/s',
+            min=0.0,
         )
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
             unit=unit,
+            scale=scale,
         )
+        self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
         self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
-        self._scale = scale
         self._diffusion_coefficient = diffusion_coefficient
 
-    @property
-    def scale(self) -> Parameter:
-        """Get the scale parameter of the diffusion model.
-
-        Returns
-        -------
-        Parameter
-            Scale parameter.
-        """
-        return self._scale
-
-    @scale.setter
-    def scale(self, scale: Numeric) -> None:
-        """Set the scale parameter of the diffusion model."""
-        if not isinstance(scale, (Numeric)):
-            raise TypeError('scale must be a number.')
-        self._scale.value = scale
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
 
     @property
     def diffusion_coefficient(self) -> Parameter:
         """Get the diffusion coefficient parameter D.
 
-        Returns
-        -------
-        Parameter
-            Diffusion coefficient D.
+        Returns:
+            Parameter: Diffusion coefficient D in m^2/s.
         """
         return self._diffusion_coefficient
 
     @diffusion_coefficient.setter
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
-        """Set the diffusion coefficient parameter D."""
-        if not isinstance(diffusion_coefficient, (Numeric)):
+        """Set the diffusion coefficient parameter D.
+
+        Args:
+            diffusion_coefficient (Numeric): The new value for the
+                diffusion coefficient D in m^2/s.
+
+        Raises:
+            TypeError: If diffusion_coefficient is not a number.
+            ValueError: If diffusion_coefficient is negative.
+        """
+        if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
-        self._diffusion_coefficient.value = diffusion_coefficient
+
+        if float(diffusion_coefficient) < 0:
+            raise ValueError('diffusion_coefficient must be non-negative.')
+        self._diffusion_coefficient.value = float(diffusion_coefficient)
+
+    # ------------------------------------------------------------------
+    # Other methods
+    # ------------------------------------------------------------------
 
     def calculate_width(self, Q: Q_type) -> np.ndarray:
         """Calculate the half-width at half-maximum (HWHM) for the
         diffusion model.
 
-        Parameters
-        ----------
-        Q : np.ndarray | Numeric | list | ArrayLike
-            Scattering vector in 1/angstrom
+        Args:
+            Q (np.ndarray | Numeric | list | ArrayLike): Scattering
+                vector in 1/angstrom
 
-        Returns
-        -------
-        np.ndarray
-            HWHM values in the unit of the model (e.g., meV).
+        Returns:
+            np.ndarray: HWHM values in the unit of the model
+                (e.g., meV).
         """
 
         Q = _validate_and_convert_Q(Q)
@@ -167,15 +167,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """Calculate the Elastic Incoherent Structure Factor (EISF) for
         the Brownian translational diffusion model.
 
-        Parameters
-        ----------
-        Q : np.ndarray | Numeric | list | ArrayLike
-            Scattering vector in 1/angstrom
+        Args:
+            Q (np.ndarray | Numeric | list | ArrayLike): Scattering
+                vector in 1/angstrom
 
-        Returns
-        -------
-        np.ndarray
-            EISF values (dimensionless).
+        Returns:
+            np.ndarray: EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
         EISF = np.zeros_like(Q)
@@ -185,15 +182,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """Calculate the Quasi-Elastic Incoherent Structure Factor
         (QISF).
 
-        Parameters
-        ----------
-        Q : np.ndarray | Numeric | list | ArrayLike
-            Scattering vector in 1/angstrom
+        Args:
+            Q (np.ndarray | Numeric | list | ArrayLike): Scattering
+                vector in 1/angstrom
 
-        Returns
-        -------
-        np.ndarray
-            QISF values (dimensionless).
+        Returns:
+            np.ndarray: QISF values (dimensionless).
         """
 
         Q = _validate_and_convert_Q(Q)
@@ -205,19 +199,23 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q: Q_type,
         component_display_name: str = 'Brownian translational diffusion',
     ) -> List[ComponentCollection]:
-        """Create ComponentCollection components for the Brownian
+        r"""Create ComponentCollection components for the Brownian
         translational diffusion model at given Q values.
 
         Args:
-        ----------
-        Q : Number, list, or np.ndarray
-            Scattering vector values.
-        component_display_name : str
-            Name of the Lorentzian component.
-        Returns
-        -------
-        List[ComponentCollection]
-            List of ComponentCollections with Lorentzian components.
+            Q (Number, list, or np.ndarray): Scattering vector values.
+            component_display_name (str): Name of the Lorentzian
+                component.
+
+        Returns:
+            List[ComponentCollection]: List of ComponentCollections with
+                Lorentzian components for each Q value. Each Lorentzian
+                has a width given by $D*Q^2$ and an area given by the
+                scale parameter multiplied by the QISF (which is 1 for
+                this model).
+
+        Raises:
+            TypeError: If component_display_name is not a string.
         """
         Q = _validate_and_convert_Q(Q)
 
@@ -249,6 +247,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
+                desired_unit=self.unit,
             )
 
             # Make the area dependent on Q
@@ -258,25 +257,26 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 dependency_map=area_dependency_map,
             )
 
-            # Resolving the dependency can do weird things to the units,
-            # so we make sure it's correct.
-            lorentzian_component.width.convert_unit(self.unit)
             component_collection_list[i].append_component(lorentzian_component)
 
         return component_collection_list
+
+    # ------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------
 
     def _write_width_dependency_expression(self, Q: float) -> str:
         """Write the dependency expression for the width as a function
         of Q to make dependent Parameters.
 
-        Parameters
-        ----------
-        Q : float
-            Scattering vector in 1/angstrom
-        Returns
-        -------
-        str
-            Dependency expression for the width.
+        Args:
+         Q (float): Scattering vector in 1/angstrom
+
+         Returns:
+             str: Dependency expression for the width.
+
+         Raises:
+             TypeError: If Q is not a float.
         """
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
@@ -287,6 +287,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
+
+        Returns:
+            Dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
             'D': self.diffusion_coefficient,
@@ -298,10 +301,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """Write the dependency expression for the area to make
         dependent Parameters.
 
-        Returns
-        -------
-        str
-            Dependency expression for the area.
+        Args:
+            QISF (float): Quasielastic Incoherent Scattering Function.
+
+        Returns:
+            str: Dependency expression for the area.
+
+        Raises:
+            TypeError: If QISF is not a float.
         """
         if not isinstance(QISF, (float)):
             raise TypeError('QISF must be a float.')
@@ -311,14 +318,25 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
+
+        Returns:
+            Dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
             'scale': self.scale,
         }
 
-    def __repr__(self):
+    # ------------------------------------------------------------------
+    # dunder methods
+    # ------------------------------------------------------------------
+
+    def __repr__(self) -> str:
         """String representation of the BrownianTranslationalDiffusion
         model.
+
+        Returns:
+            str: String representation of the
+                BrownianTranslationalDiffusion model.
         """
         return (
             f'BrownianTranslationalDiffusion(display_name={self.display_name},'

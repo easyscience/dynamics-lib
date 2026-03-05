@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
@@ -57,6 +57,11 @@ class TestPolynomial:
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name='TestPolynomial', **kwargs)
+
+    def test_init_no_coefficients_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='At least one coefficient must be provided.'):
+            Polynomial(display_name='TestPolynomial', coefficients=[])
 
     def test_negative_value_warns_in_evaluate(self):
         # WHEN THEN
