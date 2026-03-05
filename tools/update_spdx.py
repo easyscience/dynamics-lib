@@ -65,7 +65,7 @@ def get_org_url(repo_path: Union[str, Path]) -> str:
     URL.
     """
     pyproject_data = load_pyproject(repo_path)
-    repo_url = pyproject_data['project']['urls']['source']
+    repo_url = pyproject_data['project']['urls']['Source Code']
     return repo_url.rsplit('/', 1)[0]
 
 
