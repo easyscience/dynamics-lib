@@ -9,34 +9,38 @@
   </picture>
 </p>
 
-**EasyDynamics** is a scientific software for plotting and fitting QENS
-and INS powder data.
+**EasyDynamics** is for plotting and fitting QENS and INS powder data.
 
 <!-- HOME REPOSITORY SECTION -->
 
-**EasyDynamics** is available both as a Python library and as a
+
+**EasyDynamics** is developed both as a Python library and as a
 cross-platform desktop application.
 
 Here, we focus on the Python library. For the graphical user interface
 (GUI), please see the corresponding
 [GUI resources](https://github.com/easyscience/dynamics-app).
 
+
+
+
+
+License: [BSD 3-Clause](https://github.com/easyscience/dynamics-lib/blob/master/LICENSE)
+
 ## Useful Links
 
+### For Users
+
 - 📖 [Documentation](https://easyscience.github.io/dynamics-lib/latest)
-- 🚀
-  [Getting Started](https://easyscience.github.io/dynamics-lib/latest/introduction)
-- 🧪
-  [Tutorials](https://easyscience.github.io/dynamics-lib/latest/tutorials)
-- 💬
-  [Get in Touch](https://easyscience.github.io/dynamics-lib/latest/introduction/#get-in-touch)
-- 🧾
-  [Citation](https://easyscience.github.io/dynamics-lib/latest/introduction/#citation)
-- 🤝
-  [Contributing](https://easyscience.github.io/dynamics-lib/latest/introduction/#contributing)
-- 🐞 [Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
-- 💡
-  [Discussions](https://github.com/easyscience/dynamics-lib/discussions)
+- 🚀 [Getting Started](https://easyscience.github.io/dynamics-lib/latest/introduction)
+- 🧪 [Tutorials](https://easyscience.github.io/dynamics-lib/latest/tutorials)
+- 💬 [Get in Touch](https://easyscience.github.io/dynamics-lib/latest/introduction/#get-in-touch)
+- 🧾 [Citation](https://easyscience.github.io/dynamics-lib/latest/introduction/#citation)
+
+### For Contributors
+
 - 🧑‍💻 [Source Code](https://github.com/easyscience/dynamics-lib)
-- ⚖️
-  [License](https://raw.githubusercontent.com/easyscience/dynamics-lib/refs/heads/master/LICENSE)
+- 🐞 [Issue Tracker](https://github.com/easyscience/dynamics-lib/issues)
+- 💡 [Discussions](https://github.com/easyscience/dynamics-lib/discussions)
+- 🤝 [Contributing Guide](https://github.com/easyscience/dynamics-lib/blob/master/CONTRIBUTING.md)
+- 🛡 [Code of Conduct](https://github.com/easyscience/.github/blob/master/CODE_OF_CONDUCT.md)

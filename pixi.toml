@@ -42,10 +42,10 @@ channels = ['conda-forge']
 
 [dependencies]
 nodejs = '*' # Required for Prettier (non-Python formatting)
-gsl = '*'    # GNU Scientific Library; required for pdffit2.
+#gsl = '*' # GNU Scientific Library; required for pdffit2
 
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
-pip = '*'                                                        # Native package installer
+#pip = '*' # Native package installer
 easydynamics = { path = ".", editable = true, extras = ['dev'] }
 
 # Specific features: Set specific Python versions
@@ -182,9 +182,9 @@ docs-update-assets = 'python tools/update_docs_assets.py'
 # 📦 Template Management Tasks
 ##############################
 
-copier-copy = "copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-recopy = "copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-update = "copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-copy = "copier copy gh:easyscience/templates . --data-file .copier-answers.yml --data template_type=lib"
+copier-recopy = "copier recopy --data-file .copier-answers.yml --data template_type=lib"
+copier-update = "copier update --data-file .copier-answers.yml --data template_type=lib"
 
 #####################
 # 🪝 Pre-commit Hooks
@@ -199,11 +199,37 @@ pre-commit-setup = { depends-on = [
   'pre-commit-install',
 ] }
 
+#################
+# 🐙️ GitHub Tasks
+#################
+
+repo-wiki = 'gh api -X PATCH repos/easyscience/dynamics-lib -f has_wiki=false'
+repo-discussions = 'gh api -X PATCH repos/easyscience/dynamics-lib -f has_discussions=true'
+repo-description = "gh api -X PATCH repos/easyscience/dynamics-lib -f description='QENS data analysis'"
+repo-homepage = "gh api -X PATCH repos/easyscience/dynamics-lib -f homepage='https://easyscience.github.io/dynamics-lib'"
+repo-config = { depends-on = [
+  'repo-wiki',
+  'repo-discussions',
+  'repo-description',
+  'repo-homepage',
+] }
+
+master-protection = 'gh api -X POST repos/easyscience/dynamics-lib/rulesets --input .github/configs/rulesets-master.json'
+develop-protection = 'gh api -X POST repos/easyscience/dynamics-lib/rulesets --input .github/configs/rulesets-develop.json'
+gh-pages-protection = 'gh api -X POST repos/easyscience/dynamics-lib/rulesets --input .github/configs/rulesets-gh-pages.json'
+branch-protection = { depends-on = [
+  'master-protection',
+  'develop-protection',
+  'gh-pages-protection',
+] }
+
+pages-deployment = 'gh api -X POST repos/easyscience/dynamics-lib/pages --input .github/configs/pages-deployment.json'
+
+github-labels = 'python tools/update_github_labels.py'
+
 ####################################
 # 🚀 Other Development & Build Tasks
 ####################################
-
-github-labels = 'python tools/update_github_labels.py'
 
 default-build = 'python -m build'
 dist-build = 'python -m build --wheel --outdir dist'
@@ -212,7 +238,7 @@ npm-config = 'npm config set registry https://registry.npmjs.org/'
 prettier-install = 'npm install --no-save --no-audit --no-fund prettier prettier-plugin-toml'
 
 clean-pycache = "find . -type d -name '__pycache__' -prune -exec rm -rf '{}' +"
-spdx-update = 'python tools/update_spdx.py'
+spdx-update = 'python tools/update_spdx.py src/ tests/'
 
 post-install = { depends-on = [
   'npm-config',

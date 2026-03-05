@@ -11,7 +11,7 @@ To install and set up EasyDynamics, we recommend using
 [**Pixi**](https://pixi.prefix.dev), a modern package manager for
 Windows, macOS, and Linux.
 
-!!! note "Main benefits of using Pixi"
+??? note "Main benefits of using Pixi"
 
     - **Ease of use**: Pixi simplifies the installation process, making it
       accessible even for users with limited experience in package management.
@@ -36,6 +36,26 @@ This section describes the simplest way to set up EasyDynamics using
   [official Pixi Installation Guide](https://pixi.prefix.dev/latest/installation).
 
 #### Setting up EasyDynamics with Pixi
+
+<!-- prettier-ignore-start -->
+
+- Choose a project location (local drive recommended).
+
+    ??? warning ":fontawesome-brands-windows: Windows + OneDrive"
+
+        We **do not recommend creating a Pixi project inside OneDrive or other
+        synced folders**.
+
+        By default, Pixi creates the virtual environment inside the project
+        directory (in `.pixi/`). On Windows, synced folders such as OneDrive
+        may cause file‑system issues (e.g., path-length limitations or
+        restricted link operations), which can lead to unexpected install
+        errors or environments being recreated.
+
+        Instead, create your project in a **local directory on your drive**
+        where you have full write permissions.
+
+<!-- prettier-ignore-end -->
 
 - Initialize a new Pixi project and navigate into it:
   ```txt
@@ -75,19 +95,8 @@ This section describes the simplest way to set up EasyDynamics using
 ## Classical Installation
 
 This section describes how to install EasyDynamics using the traditional
-method with **pip**. This approach is more flexible and suitable for
-users familiar with Python package management and virtual environments.
-
-!!! warning
-
-    Currently, classical installation doesn't allow installing the
-    GNU Scientific Library (GSL) dependency automatically. As a result,
-    the calculation engine **pdffit2** will not be available. To make it
-    work, ensure that GSL is installed on your system.
-
-    Alternatively, consider using the **Pixi installation method** described
-    in the [Installing with Pixi](#installing-with-pixi) section, which
-    handles GSL installation automatically.
+method with **pip**. It is assumed that you are familiar with Python package
+management and virtual environments.
 
 ### Environment Setup <small>optional</small> { #environment-setup data-toc-label="Environment Setup" }
 

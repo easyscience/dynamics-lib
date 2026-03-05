@@ -1,104 +1,143 @@
 """Update or insert SPDX headers in Python files.
 
-- Ensures SPDX-FileCopyrightText has the current year.
+- Ensures SPDX-FileCopyrightText has the file's creation year.
 - Ensures SPDX-License-Identifier is set to BSD-3-Clause.
 """
 
-import fnmatch
-import re
+
+from __future__ import annotations
+
+import argparse
+import tomllib
+from datetime import datetime
 from pathlib import Path
+from typing import Optional
+from typing import Union
 
-COPYRIGHT_TEXT = '# SPDX-FileCopyrightText: 2025-2026 EasyDynamics contributors <https://github.com/easyscience>'
-LICENSE_TEXT = '# SPDX-License-Identifier: BSD-3-Clause'
+from git import Repo
+from spdx_headers.core import find_repository_root
+from spdx_headers.core import get_copyright_info
+from spdx_headers.data import load_license_data
+from spdx_headers.operations import add_header_to_single_file
+from spdx_headers.operations import remove_header_from_single_file
 
-# Patterns to exclude from SPDX header updates (vendored code)
-EXCLUDE_PATTERNS = [
-    '*/_vendored/jupyter_dark_detect/*',
-]
-
-
-def should_exclude(file_path: Path) -> bool:
-    """Check if a file should be excluded from SPDX header updates."""
-    path_str = str(file_path)
-    return any(fnmatch.fnmatch(path_str, pattern) for pattern in EXCLUDE_PATTERNS)
+LICENSE_DATABASE = load_license_data()
 
 
-def update_spdx_header(file_path: Path):
-    # Use Path.open to satisfy lint rule PTH123.
-    with file_path.open('r', encoding='utf-8') as f:
-        original_lines = f.readlines()
-
-    # Regexes for SPDX lines
-    copy_re = re.compile(r'^#\s*SPDX-FileCopyrightText:.*$')
-    lic_re = re.compile(r'^#\s*SPDX-License-Identifier:.*$')
-
-    # 1) Preserve any leading shebang / coding cookie lines
-    prefix = []
-    body_start = 0
-    if original_lines:
-        # Shebang line like "#!/usr/bin/env python3"
-        if original_lines[0].startswith('#!'):
-            prefix.append(original_lines[0])
-            body_start = 1
-        # PEP 263 coding cookie on first or second line
-        # e.g. "# -*- coding: utf-8 -*-" or "# coding: utf-8"
-        for _ in range(2):  # at most one more line to inspect
-            if body_start < len(original_lines):
-                line = original_lines[body_start]
-                if re.match(r'^#.*coding[:=]\s*[-\w.]+', line):
-                    prefix.append(line)
-                    body_start += 1
-                else:
-                    break
-
-    # 2) Work on the remaining body
-    body = original_lines[body_start:]
-
-    # Remove any existing SPDX lines anywhere in the body
-    body = [ln for ln in body if not (copy_re.match(ln) or lic_re.match(ln))]
-
-    # Strip leading blank lines in the body so header is tight
-    while body and not body[0].strip():
-        body.pop(0)
-
-    # 3) Build canonical SPDX block: two lines + exactly one blank
-    spdx_block = [
-        COPYRIGHT_TEXT + '\n',
-        LICENSE_TEXT + '\n',
-        '\n',
-    ]
-
-    # 4) New content: prefix + SPDX + body
-    new_lines = prefix + spdx_block + body
-
-    # 5) Normalize: collapse any extra blank lines immediately after
-    #    LICENSE to exactly one. This keeps the script idempotent.
-    # Find the index of LICENSE we just inserted (prefix may be 0, 1,
-    # or 2 lines)
-    lic_idx = len(prefix) + 1  # spdx_block[1] is the license line
-    # Ensure exactly one blank line after LICENSE
-    # Remove all blank lines after lic_idx, then insert a single blank.
-    j = lic_idx + 1
-    # Remove any number of blank lines following
-    while j < len(new_lines) and not new_lines[j].strip():
-        new_lines.pop(j)
-    # Insert exactly one blank line at this position
-    new_lines.insert(j, '\n')
-
-    with file_path.open('w', encoding='utf-8') as f:
-        f.writelines(new_lines)
-
-
-def main():
-    """Recursively update or insert SPDX headers in all Python files
-    under the 'src' and 'tests' directories.
+def load_pyproject(repo_path: Union[str, Path]) -> dict:
+    """Load and return parsed ``pyproject.toml`` data for the
+    repository.
     """
-    for base_dir in ('src', 'tests'):
-        for py_file in Path(base_dir).rglob('*.py'):
-            if should_exclude(py_file):
-                continue
-            update_spdx_header(py_file)
+    repo_root = find_repository_root(repo_path)
+    pyproject_path = repo_root / 'pyproject.toml'
+
+    with open(pyproject_path, 'rb') as file_handle:
+        return tomllib.load(file_handle)
+
+
+def get_file_creation_year(file_path: Union[str, Path]) -> str:
+    """Return the year the file was first added to Git history.
+
+    If the year cannot be determined, fall back to the current year.
+    """
+    file_path = Path(file_path)
+
+    repo = Repo(file_path, search_parent_directories=True)
+    root = Path(repo.working_tree_dir).resolve()
+    rel_path = file_path.resolve().relative_to(root)
+
+    output = repo.git.log(
+        '--follow',
+        '--diff-filter=A',
+        '--reverse',
+        '--max-count=1',
+        '--format=%ad',
+        '--date=format:%Y',
+        '--',
+        str(rel_path),
+    ).strip()
+
+    return output or str(datetime.now().year)
+
+
+def get_org_url(repo_path: Union[str, Path]) -> str:
+    """Return the organization URL derived from the repository source
+    URL.
+    """
+    pyproject_data = load_pyproject(repo_path)
+    repo_url = pyproject_data['project']['urls']['source']
+    return repo_url.rsplit('/', 1)[0]
+
+
+def get_project_license(repo_path: Union[str, Path]) -> str:
+    """Return the project license value from ``pyproject.toml``."""
+    pyproject_data = load_pyproject(repo_path)
+    return pyproject_data['project']['license']
+
+
+def get_copyright_holder(repo_path: Union[str, Path]) -> str:
+    """Return the repository copyright holder name."""
+    _, name, _ = get_copyright_info(repo_path)
+    return name
+
+
+def update_spdx_header(
+    target_file: Union[str, Path],
+    *,
+    license_key: str,
+    copyright_holder: str,
+    org_url: str,
+) -> None:
+    """Remove any existing SPDX header and add an updated one."""
+    year = get_file_creation_year(target_file)
+
+    remove_header_from_single_file(target_file)
+    add_header_to_single_file(
+        filepath=target_file,
+        license_key=license_key,
+        license_data=LICENSE_DATABASE,
+        year=year,
+        name=copyright_holder,
+        email=org_url,
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description='Update SPDX headers for Python files under the given paths.',
+    )
+    parser.add_argument(
+        'paths',
+        nargs='+',
+        help='Relative paths to scan (e.g. src tests)',
+    )
+    return parser
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    repo_path = Path('.').resolve()
+    license_key = get_project_license(repo_path)
+    copyright_holder = get_copyright_holder(repo_path)
+    org_url = get_org_url(repo_path)
+
+    for base_dir in args.paths:
+        base_path = Path(base_dir)
+        if not base_path.exists():
+            parser.error(f'Path does not exist: {base_dir}')
+
+        for py_file in base_path.rglob('*.py'):
+            update_spdx_header(
+                py_file,
+                license_key=license_key,
+                copyright_holder=copyright_holder,
+                org_url=org_url,
+            )
+
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
