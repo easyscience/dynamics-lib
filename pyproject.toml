@@ -22,7 +22,7 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'easyscience @ git+https://github.com/easyscience/corelib.git@develop', # The base library of the EasyScience framework
+  'easyscience', # The base library of the EasyScience framework
   'pooch',                                                                # Data downloader
   'darkdetect',                                                           # Detecting dark mode (system-level)
   'pandas',                                                               # Displaying tables in Jupyter notebooks
