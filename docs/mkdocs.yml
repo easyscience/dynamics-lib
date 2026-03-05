@@ -190,4 +190,5 @@ nav:
       - API Reference: api-reference/index.md
       - convolution: api-reference/convolution.md
       - sample_model: api-reference/sample_model.md
+      - analysis: api-reference/analysis.md
       - utils: api-reference/utils.md
