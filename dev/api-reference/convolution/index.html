@@ -569,6 +569,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -784,6 +790,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../tutorials/instrument_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrument model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../tutorials/experiment/" class="md-nav__link">
         
   
@@ -792,6 +826,62 @@
     
   
     Experiment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/analysis1d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis 1D
   
 
     
@@ -833,6 +923,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -1200,6 +1294,62 @@
     
   
     sample_model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    experiment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    analysis
   
 
     
@@ -2306,8 +2456,7 @@ detailed balance correction.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -2402,9 +2551,8 @@ detailed balance correction.</p>
 <span class="sd">                values where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The  sample components to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution components to convolve</span>
-<span class="sd">                with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution components to convolve with.</span>
 <span class="sd">            upsample_factor (int | None): The factor by which to</span>
 <span class="sd">                upsample the input data before convolution. Default is</span>
 <span class="sd">                5.</span>
@@ -2710,6 +2858,25 @@ values where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>upsample_factor</code>
             </td>
             <td>
@@ -2898,8 +3065,7 @@ True.</p>
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -2919,9 +3085,8 @@ True.</p>
 <span class="sd">            values where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The  sample components to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution components to convolve</span>
-<span class="sd">            with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        upsample_factor (int | None): The factor by which to</span>
 <span class="sd">            upsample the input data before convolution. Default is</span>
 <span class="sd">            5.</span>
@@ -2994,7 +3159,8 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">327</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
+<span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
@@ -3006,8 +3172,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -3079,7 +3244,8 @@ components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
+<span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
@@ -3104,8 +3270,7 @@ components.</p>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -3863,8 +4028,8 @@ Default is 'meV'.</p>
 <span class="sd">                where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The sample model to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution model to convolve with.</span>
 <span class="sd">            energy_offset (Numeric | Parameter, optional): An offset to</span>
 <span class="sd">                shift the energy values by. Default is 0.0.</span>
 <span class="sd">            energy_unit (str | sc.Unit, optional): The unit of the</span>
@@ -4388,6 +4553,25 @@ where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution model to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>energy_offset</code>
             </td>
             <td>
@@ -4475,8 +4659,8 @@ energy. Default is 'meV'.</p>
 <span class="sd">            where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The sample model to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_offset (Numeric | Parameter, optional): An offset to</span>
 <span class="sd">            shift the energy values by. Default is 0.0.</span>
 <span class="sd">        energy_unit (str | sc.Unit, optional): The unit of the</span>
@@ -5519,8 +5703,7 @@ detailed balance correction.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -5615,9 +5798,8 @@ detailed balance correction.</p>
 <span class="sd">                values where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The  sample components to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution components to convolve</span>
-<span class="sd">                with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution components to convolve with.</span>
 <span class="sd">            upsample_factor (int | None): The factor by which to</span>
 <span class="sd">                upsample the input data before convolution. Default is</span>
 <span class="sd">                5.</span>
@@ -5923,6 +6105,25 @@ values where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>upsample_factor</code>
             </td>
             <td>
@@ -6111,8 +6312,7 @@ True.</p>
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -6132,9 +6332,8 @@ True.</p>
 <span class="sd">            values where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The  sample components to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution components to convolve</span>
-<span class="sd">            with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        upsample_factor (int | None): The factor by which to</span>
 <span class="sd">            upsample the input data before convolution. Default is</span>
 <span class="sd">            5.</span>
@@ -6207,7 +6406,8 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">327</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
+<span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
@@ -6219,8 +6419,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -6292,7 +6491,8 @@ components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
+<span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
@@ -6317,8 +6517,7 @@ components.</p>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -7044,8 +7243,8 @@ convolution.</p>
 <span class="sd">                values where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The sample model to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution model to convolve with.</span>
 <span class="sd">            energy_unit (str | sc.Unit, optional): The unit of the</span>
 <span class="sd">                energy. Default is &#39;meV&#39;.</span>
 <span class="sd">            energy_offset (Numeric | Parameter, optional): The energy</span>
@@ -7394,6 +7593,25 @@ values where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution model to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>energy_unit</code>
             </td>
             <td>
@@ -7610,8 +7828,8 @@ ComponentCollection or ModelComponent.</p>
 <span class="sd">            values where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The sample model to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_unit (str | sc.Unit, optional): The unit of the</span>
 <span class="sd">            energy. Default is &#39;meV&#39;.</span>
 <span class="sd">        energy_offset (Numeric | Parameter, optional): The energy</span>
@@ -9157,8 +9375,8 @@ detailed balance correction.</p>
 <span class="sd">                where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The sample model to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution model to convolve with.</span>
 <span class="sd">            upsample_factor (int, optional): The factor by which to</span>
 <span class="sd">                upsample the input data before convolution. Default is</span>
 <span class="sd">                5.</span>
@@ -9330,6 +9548,25 @@ where the convolution is evaluated.</p>
             <td>
               <div class="doc-md-description">
                 <p>The sample model to be convolved.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution model to convolve with.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9654,8 +9891,8 @@ Parameter.</p>
 <span class="sd">            where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The sample model to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution model to convolve with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        upsample_factor (int, optional): The factor by which to</span>
 <span class="sd">            upsample the input data before convolution. Default is</span>
 <span class="sd">            5.</span>
@@ -10789,8 +11026,7 @@ detailed balance correction.</p>
 <span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for numerical convolutions of sample and resolution</span>
 <span class="sd">    models. Provides methods to handle upsampling, extension, and</span>
 <span class="sd">    detailed balance correction. This base class has no convolution</span>
@@ -10857,9 +11093,8 @@ detailed balance correction.</p>
 <span class="sd">                where the convolution is evaluated.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">                The components to be convolved.</span>
-<span class="sd">            resolution_components (ComponentCollection |</span>
-<span class="sd">                ModelComponent): The resolution components to convolve</span>
-<span class="sd">                with.</span>
+<span class="sd">            resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">                The resolution components to convolve with.</span>
 <span class="sd">            upsample_factor (int | None): The factor by which to</span>
 <span class="sd">                upsample the input data before convolution. Default is</span>
 <span class="sd">                5.</span>
@@ -11297,6 +11532,25 @@ where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>resolution_components</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The resolution components to convolve with.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>upsample_factor</code>
             </td>
             <td>
@@ -11600,8 +11854,7 @@ Parameter.</p>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -11621,9 +11874,8 @@ Parameter.</p>
 <span class="sd">            where the convolution is evaluated.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent):</span>
 <span class="sd">            The components to be convolved.</span>
-<span class="sd">        resolution_components (ComponentCollection |</span>
-<span class="sd">            ModelComponent): The resolution components to convolve</span>
-<span class="sd">            with.</span>
+<span class="sd">        resolution_components (ComponentCollection | ModelComponent):</span>
+<span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        upsample_factor (int | None): The factor by which to</span>
 <span class="sd">            upsample the input data before convolution. Default is</span>
 <span class="sd">            5.</span>
@@ -11733,7 +11985,8 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">436</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">435</span>
+<span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
@@ -11750,8 +12003,7 @@ NumericalConvolutionBase.</p>
 <span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
 <span class="sd">    NumericalConvolutionBase.</span>
 
@@ -11834,7 +12086,8 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
+<span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
@@ -11842,8 +12095,7 @@ NumericalConvolutionBase.</p>
 <span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the energy array and recreate the dense grid.</span>
 
@@ -12277,14 +12529,14 @@ detailed balance correction is disabled.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../assets/javascripts/extra.js"></script>
       
-        <script src="../../javascripts/mathjax.js"></script>
+        <script src="../../assets/javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

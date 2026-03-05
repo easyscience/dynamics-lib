@@ -571,6 +571,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -786,6 +792,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../tutorials/instrument_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrument model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tutorials/experiment/" class="md-nav__link">
         
   
@@ -794,6 +828,62 @@
     
   
     Experiment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/analysis1d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis 1D
   
 
     
@@ -833,6 +923,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -935,6 +1029,62 @@
     
   
     sample_model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/experiment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    experiment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    analysis
   
 
     
@@ -1150,8 +1300,8 @@
 <p>To install and set up EasyDynamics, we recommend using
 <a href="https://pixi.prefix.dev"><strong><abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></strong></a>, a modern package manager for
 Windows, macOS, and Linux.</p>
-<div class="admonition note">
-<p class="admonition-title">Main benefits of using <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></p>
+<details class="note">
+<summary>Main benefits of using <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></summary>
 <ul>
 <li><strong>Ease of use</strong>: <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> simplifies the installation process, making it
   accessible even for users with limited experience in package management.</li>
@@ -1162,7 +1312,7 @@ Windows, macOS, and Linux.</p>
 <li><strong><abbr title="The Python Package Index is a repository of software for the Python programming language.">PyPI</abbr> and <abbr title="Conda is a cross-platform, language-agnostic binary package manager.">Conda</abbr> support</strong>: <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> can install packages from both <abbr title="The Python Package Index is a repository of software for the Python programming language.">PyPI</abbr> and
   <abbr title="Conda is a cross-platform, language-agnostic binary package manager.">Conda</abbr> repositories, providing access to a wide range of libraries.</li>
 </ul>
-</div>
+</details>
 <p>An alternative installation method using the traditional <strong><abbr title="Package installer for Python.">pip</abbr></strong> package
 manager is also provided.</p>
 <h2 id="installing-with-pixi">Installing with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> <small>recommended</small></h2>
@@ -1174,6 +1324,27 @@ manager is also provided.</p>
   <a href="https://pixi.prefix.dev/latest/installation">official <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> Installation Guide</a>.</li>
 </ul>
 <h4 id="setting-up-easydynamics-with-pixi">Setting up EasyDynamics with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></h4>
+<!-- prettier-ignore-start -->
+
+<ul>
+<li>
+<p>Choose a project location (local drive recommended).</p>
+<details class="warning">
+<summary><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m0 93.7 183.6-25.3v177.4H0zm0 324.6 183.6 25.3V268.4H0zm203.8 28L448 480V268.4H203.8zm0-380.6v180.1H448V32z"/></svg></span> Windows + OneDrive</summary>
+<p>We <strong>do not recommend creating a <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> project inside OneDrive or other
+synced folders</strong>.</p>
+<p>By default, <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> creates the virtual environment inside the project
+directory (in <code>.pixi/</code>). On Windows, synced folders such as OneDrive
+may cause file‑system issues (e.g., path-length limitations or
+restricted link operations), which can lead to unexpected install
+errors or environments being recreated.</p>
+<p>Instead, create your project in a <strong>local directory on your drive</strong>
+where you have full write permissions.</p>
+</details>
+</li>
+</ul>
+<!-- prettier-ignore-end -->
+
 <ul>
 <li>Initialize a new <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> project and navigate into it:
   <div class="language-text highlight"><pre><span></span><code>pixi init easydynamics
@@ -1206,18 +1377,8 @@ cd easydynamics
 </ul>
 <h2 id="classical-installation">Classical Installation</h2>
 <p>This section describes how to install EasyDynamics using the traditional
-method with <strong><abbr title="Package installer for Python.">pip</abbr></strong>. This approach is more flexible and suitable for
-users familiar with Python package management and virtual environments.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Currently, classical installation doesn't allow installing the
-GNU Scientific Library (GSL) dependency automatically. As a result,
-the calculation engine <strong>pdffit2</strong> will not be available. To make it
-work, ensure that GSL is installed on your system.</p>
-<p>Alternatively, consider using the <strong><abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> installation method</strong> described
-in the <a href="#installing-with-pixi">Installing with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></a> section, which
-handles GSL installation automatically.</p>
-</div>
+method with <strong><abbr title="Package installer for Python.">pip</abbr></strong>. It is assumed that you are familiar with Python
+package management and virtual environments.</p>
 <h3 id="environment-setup">Environment Setup <small>optional</small></h3>
 <p>We recommend using a <strong>virtual environment</strong> to isolate dependencies and
 avoid conflicts with system-wide packages. If any issues arise, you can
@@ -1542,14 +1703,14 @@ EasyDynamics.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../assets/javascripts/extra.js"></script>
       
-        <script src="../javascripts/mathjax.js"></script>
+        <script src="../assets/javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
