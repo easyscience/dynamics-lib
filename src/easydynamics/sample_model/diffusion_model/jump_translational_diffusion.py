@@ -78,8 +78,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Args:
             display_name (str): Display name of the diffusion model.
             unique_name (str | None): Unique name of the diffusion
-            model. If
-                None, a unique name will be generated.
+                model. If None, a unique name will be generated.
             unit (str | sc.Unit): Unit of the diffusion model. Must be
                 convertible to meV. Defaults to "meV".
             scale (Numeric): Scale factor for the diffusion model. Must

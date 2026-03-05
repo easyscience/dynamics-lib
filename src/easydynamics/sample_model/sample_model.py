@@ -35,8 +35,8 @@ class SampleModel(ModelBase):
             for each Q value.
         Q (Number, list, np.ndarray, sc.array | None):
             Q values for the model. If None, Q is not set.
-        diffusion_models (DiffusionModelBase | list[DiffusionModelBase]
-            | None): Diffusion models to include in the SampleModel.
+        diffusion_models (DiffusionModelBase | list[DiffusionModelBase] | None):
+            Diffusion models to include in the SampleModel.
             If None, no diffusion models are added.
         temperature (float | None): Temperature for detailed balancing.
             If None, no detailed balancing is applied.
@@ -49,8 +49,8 @@ class SampleModel(ModelBase):
         unit (str | sc.Unit): Unit of the model.
         components (list[ModelComponent]): List of ModelComponents in
             the model.
-        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
-            | None): Q values of the model.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable | None):
+            Q values of the model.
         diffusion_models (list[DiffusionModelBase]): List of diffusion
             models in the SampleModel.
         temperature (Parameter | None): Temperature Parameter for
@@ -85,10 +85,9 @@ class SampleModel(ModelBase):
                 ComponentCollections for each Q value.
             Q (Number, list, np.ndarray, sc.array | None):
                 Q values for the model. If None, Q is not set.
-            diffusion_models (DiffusionModelBase |
-                list[DiffusionModelBase] | None): Diffusion models to
-                include in the SampleModel. If None, no diffusion models
-                are added.
+            diffusion_models (DiffusionModelBase | list[DiffusionModelBase] | None):
+                Diffusion models to include in the SampleModel. If None,
+                no diffusion models are added.
             temperature (float | None): Temperature for detailed
                 balancing. If None, no detailed balancing is applied.
             temperature_unit (str | sc.Unit): Unit of the temperature.
@@ -365,8 +364,7 @@ class SampleModel(ModelBase):
         """Evaluate the sample model at all Q for the given x values.
 
         Args:
-            x (Numeric | list | np.ndarray | sc.Variable |
-                sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 The x values to evaluate the model at. Can be a number,
                 list, numpy array, scipp Variable, or scipp DataArray.
 

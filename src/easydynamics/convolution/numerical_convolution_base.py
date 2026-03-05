@@ -94,9 +94,8 @@ class NumericalConvolutionBase(ConvolutionBase):
                 where the convolution is evaluated.
             sample_components (ComponentCollection | ModelComponent):
                 The components to be convolved.
-            resolution_components (ComponentCollection |
-                ModelComponent): The resolution components to convolve
-                with.
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution components to convolve with.
             upsample_factor (int | None): The factor by which to
                 upsample the input data before convolution. Default is
                 5.

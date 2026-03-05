@@ -186,8 +186,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         the half width at half maximum (HWHM).
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or
-                sc.DataArray):
+            x (Numeric or list or np.ndarray or sc.Variable or sc.DataArray):
                 The x values at which to evaluate the Lorentzian.
 
         Returns:

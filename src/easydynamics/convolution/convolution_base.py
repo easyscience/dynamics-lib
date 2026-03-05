@@ -53,8 +53,8 @@ class ConvolutionBase:
                 values where the convolution is evaluated.
             sample_components (ComponentCollection | ModelComponent):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection |
-                ModelComponent): The resolution model to convolve with.
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution model to convolve with.
             energy_unit (str | sc.Unit, optional): The unit of the
                 energy. Default is 'meV'.
             energy_offset (Numeric | Parameter, optional): The energy

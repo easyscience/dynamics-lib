@@ -33,8 +33,8 @@ class ResolutionModel(ModelBase):
         unit (str | sc.Unit): Unit of the model.
         components (list[ModelComponent]): List of ModelComponents in
             the model.
-        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable
-            | None): Q values of the model.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable | None):
+            Q values of the model.
     """
 
     def __init__(

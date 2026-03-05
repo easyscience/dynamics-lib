@@ -221,9 +221,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
 
         Args:
-            x (Numeric | list[Numeric] | np.ndarray | sc.Variable |
-                sc.DataArray): The x values at which to evaluate the
-                Voigt.
+            x (Numeric | list[Numeric] | np.ndarray | sc.Variable | sc.DataArray):
+                The x values at which to evaluate the Voigt.
 
         Returns:
             np.ndarray: The intensity of the Voigt at the given x

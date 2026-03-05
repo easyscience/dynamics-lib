@@ -144,9 +144,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         an identity in convolutions.
 
         Args:
-            x (Numeric | list | np.ndarray | sc.Variable |
-                sc.DataArray): The x values at which to evaluate the
-                Delta function.
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
+                The x values at which to evaluate the Delta function.
 
         Returns:
             np.ndarray: The evaluated Delta function at the given x
