@@ -16,9 +16,14 @@ section of the documentation.
 The tutorials are organized into the following categories:
 
 ## Getting Started
+- [Tutorial 1: Brownian Diffusion](analysis.ipynb) - Learn how to analyse QENS data with elastic incoherent background and Brownian diffusion.
+
+
+## Introduction to the classes and methods of EasyDynamics
+Here we go into more detail with each class that is used in the tutorials
 
 - [Component collection](component_collection.ipynb) – Learn how to
-  create a collectin of components for fitting.
+  create a collection of components for fitting.
 - [Components](components.ipynb) – Learn how to use the EasyDynamics
   components.
 - [Convolution](convolution.ipynb) – Learn how to calculate the

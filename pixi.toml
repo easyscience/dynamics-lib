@@ -47,6 +47,9 @@ nodejs = '*' # Required for Prettier (non-Python formatting)
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
 #pip = '*' # Native package installer
 easydynamics = { path = ".", editable = true, extras = ['dev'] }
+jupyterlab = ">=4.5.5, <5"
+pixi-kernel = ">=0.7.1, <0.8"
+ipykernel = ">=6.31.0, <7"
 
 # Specific features: Set specific Python versions
 
