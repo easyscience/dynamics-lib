@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
 """Test runner for tutorial scripts in the 'tutorials' directory.
 
 This test discovers and executes all Python scripts located under the
