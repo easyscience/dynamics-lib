@@ -231,42 +231,26 @@ first. This can be done individually via the :material-download:
 
 - Navigate to your existing Pixi project, created as described in the
   [Installing with Pixi](#installing-with-pixi) section.
-- Add JupyterLab and the Pixi kernel for Jupyter:
+- Launch the Jupyter Lab server:
   ```txt
-  pixi add --pypi jupyterlab pixi-kernel
-  ```
-- Download all the EasyDynamics tutorials to the `tutorials/` directory.
-  <!-- ```txt
-  pixi run easydynamics download-all-tutorials
-  ``` -->
-- Start JupyterLab in the `tutorials/` directory to access the
-  notebooks:
-  ```txt
-  pixi run jupyter lab tutorials/
+  pixi run jupyter lab
   ```
 - Your web browser should open automatically. Click on one of the
-  `*.ipynb` files and select the `Python (Pixi)` kernel to get started.
+  `*.ipynb` files downloaded previously and select the `Python (Pixi)`
+  kernel to get started.
 
 ### Classical Run Tutorials Locally
 
-- Install Jupyter Notebook and IPython kernel:
-  ```txt
-  pip install notebook ipykernel
-  ```
 - Add the virtual environment as a Jupyter kernel:
   ```txt
   python -m ipykernel install --user --name=venv --display-name "EasyDynamics Python kernel"
   ```
-- Download all the EasyDynamics tutorials to the `tutorials/` directory.
-  <!-- ```txt
-  python -m easydynamics download-all-tutorials
-  ``` -->
-- Launch the Jupyter Notebook server (opens browser automatically at
-  `http://localhost:8888/`):
+- Launch the Jupyter Notebook server:
   ```txt
-  jupyter notebook tutorials/
+  jupyter notebook
   ```
-- Open one of the `*.ipynb` files and select the
+- Your web browser should open automatically. Click on one of the
+  `*.ipynb` files downloaded previously and select the
   `EasyDynamics Python kernel` to get started.
 
 ### Run Tutorials via Google Colab
