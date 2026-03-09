@@ -312,7 +312,7 @@ class Experiment(NewBase):
 
         Args:
             slicer (bool): If True, use plopp's slicer instead of plot.
-            **kwargs: Additional keyword arguments to pass to plopp.
+            **kwargs (Any): Additional keyword arguments to pass to plopp.
 
         Raises:
             ValueError: If there is no data to plot.
@@ -324,8 +324,6 @@ class Experiment(NewBase):
 
         if not _in_notebook():
             raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
-
-        from IPython.display import display
 
         plot_kwargs_defaults = {
             'title': self.display_name,
@@ -342,7 +340,7 @@ class Experiment(NewBase):
                 self._binned_data.transpose(dims=['energy', 'Q']),
                 **plot_kwargs_defaults,
             )
-        display(fig)
+        return fig
 
     ###########
     # private methods

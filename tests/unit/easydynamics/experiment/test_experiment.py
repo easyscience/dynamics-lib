@@ -286,20 +286,19 @@ class TestExperiment:
         with (
             patch(f'{Experiment.__module__}._in_notebook', return_value=True),
             patch('plopp.plot') as mock_plot,
-            patch('IPython.display.display') as mock_display,
         ):
             mock_fig = MagicMock()
             mock_plot.return_value = mock_fig
 
             # THEN
-            experiment.plot_data()
+            result = experiment.plot_data()
 
             # EXPECT
             mock_plot.assert_called_once()
             args, kwargs = mock_plot.call_args
             assert sc.identical(args[0], experiment._data.transpose())
             assert kwargs['title'] == f'{experiment.display_name}'
-            mock_display.assert_called_once_with(mock_fig)
+            assert result == mock_fig
 
     def test_plot_data_no_data_raises(self):
         "Test plotting data raises ValueError when no data is present"

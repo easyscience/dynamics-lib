@@ -176,11 +176,16 @@ nav:
       - Installation & Setup: installation-and-setup/index.md
   - User Guide:
       - User Guide: user-guide/index.md
+      - Concept: user-guide/concept.md
+      - Data Format: user-guide/data_format.md
+      - First Steps: user-guide/first_steps.md
   - Tutorials:
       - Tutorials: tutorials/index.md
       - Getting Started:
-          - Component collection: tutorials/component_collection.ipynb
+          - Tutorial 1. Brownian Diffusion: tutorials/tutorial1_brownian.ipynb
+      - Classes and Methods:
           - Components: tutorials/components.ipynb
+          - Component collection: tutorials/component_collection.ipynb
           - Convolution: tutorials/convolution.ipynb
           - Detailed balance: tutorials/detailed_balance.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
