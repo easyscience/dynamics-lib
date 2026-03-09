@@ -312,7 +312,7 @@ class Experiment(NewBase):
 
         Args:
             slicer (bool): If True, use plopp's slicer instead of plot.
-            **kwargs: Additional keyword arguments to pass to plopp.
+            **kwargs (Any): Additional keyword arguments to pass to plopp.
 
         Raises:
             ValueError: If there is no data to plot.

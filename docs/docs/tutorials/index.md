@@ -17,29 +17,34 @@ The tutorials are organized into the following categories:
 
 ## Getting Started
 
-- [Tutorial 1: Brownian Diffusion](analysis.ipynb) - Learn how to
-  analyse QENS data with elastic incoherent background and Brownian
+We are working on expanding the list of tutorials to include advanced
+concept such as interpolating `Parameter`s, sharing `Parameter`s at
+multiple `Q` and analysing complex inelastic data.
+
+- [Tutorial 1: Brownian Diffusion](tutorial1_brownian.ipynb) - Learn how
+  to analyse QENS data with elastic incoherent background and Brownian
   diffusion.
 
 ## Introduction to the classes and methods of EasyDynamics
 
 Here we go into more detail with each class that is used in the
-tutorials
+tutorials.
 
+- [Components](components.ipynb) – Learn how to use the EasyDynamics
+  model components, which are the basic building blocks of your model.
 - [Component collection](component_collection.ipynb) – Learn how to
   create a collection of components for fitting.
-- [Components](components.ipynb) – Learn how to use the EasyDynamics
-  components.
 - [Convolution](convolution.ipynb) – Learn how to calculate the
   convolution of your resolution function with your model.
-- [Detailed balance](detailed_balance.ipynb) – Learn how to apply
-  detailed balancing to your model.
+- [Detailed balance](detailed_balance.ipynb) – Learn about detailed
+  balancing.
 - [Diffusion model](diffusion_model.ipynb) – Learn how to create and use
   a model of diffusion.
 - [Sample model](sample_model.ipynb) – Learn how to create a model of
-  the scattering from your sample.
+  the scattering from your sample including model components and
+  diffusion models.
 - [Instrument model](instrument_model.ipynb) – Learn how to create a.
-  model of your instrument.
+  model of your instrument including resolution and background.
 - [Experiment](experiment.ipynb) - Learn how to load and bin your data.
 - [Analysis](analysis.ipynb) - Learn how to fit a model to your data.
 - [Analysis 1D](analysis1d.ipynb) - Learn how to fit a model to your
