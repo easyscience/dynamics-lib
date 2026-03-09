@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
 """Add SPDX headers to Python files.
 
 - SPDX-FileCopyrightText with the license holder name and organization

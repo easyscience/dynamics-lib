@@ -22,17 +22,17 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'easyscience', # The base library of the EasyScience framework
-  'pooch',       # Data downloader
-  'darkdetect',  # Detecting dark mode (system-level)
-  'pandas',      # Displaying tables in Jupyter notebooks
-  'plotly',      # Interactive plots
-  'py3Dmol',     # Visualisation of crystal structures
-  'ipympl',      # Matplotlib Jupyter backend
-  'ipywidgets',  # Jupyter widgets
-  'jupyterlab',  # Jupyter notebooks
-  'pixi-kernel', # Pixi Jupyter kernel
-  'plopp',       # Plotting library
+  'easyscience',  # The base library of the EasyScience framework
+  'pooch',        # Data downloader
+  'darkdetect',   # Detecting dark mode (system-level)
+  'plopp',        # Plotting library
+  'jupyterlab',   # Jupyter notebooks
+  'pixi-kernel',  # Pixi Jupyter kernel
+  'ipykernel',    # Jupyter kernel (required for running notebooks)
+  'ipywidgets',   # Widgets (needed for interactive matplotlib backends)
+  'ipympl',       # Matplotlib Jupyter widget backend (%matplotlib widget)
+  'IPython',      # Interactive Python shell
+  'scipp<26.1.0', # TEMPORARY: ARM macOS fails with higher versions
 ]
 
 [project.optional-dependencies]
@@ -70,7 +70,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = 'https://easyscience.github.io/dynamics'
+Homepage = 'https://easyscience.github.io/dynamics-lib'
 Documentation = 'https://easyscience.github.io/dynamics-lib'
 'Release Notes' = 'https://github.com/easyscience/dynamics-lib/releases'
 'Source Code' = 'https://github.com/easyscience/dynamics-lib'

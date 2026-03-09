@@ -42,10 +42,8 @@ channels = ['conda-forge']
 
 [dependencies]
 nodejs = '*' # Required for Prettier (non-Python formatting)
-#gsl = '*' # GNU Scientific Library; required for pdffit2
 
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
-#pip = '*' # Native package installer
 easydynamics = { path = ".", editable = true, extras = ['dev'] }
 
 # Specific features: Set specific Python versions
@@ -182,9 +180,9 @@ docs-update-assets = 'python tools/update_docs_assets.py'
 # 📦 Template Management Tasks
 ##############################
 
-copier-copy = "copier copy gh:easyscience/templates . --data-file .copier-answers.yml --data template_type=lib"
-copier-recopy = "copier recopy --data-file .copier-answers.yml --data template_type=lib"
-copier-update = "copier update --data-file .copier-answers.yml --data template_type=lib"
+copier-copy = "copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-recopy = "copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-update = "copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
 
 #####################
 # 🪝 Pre-commit Hooks
