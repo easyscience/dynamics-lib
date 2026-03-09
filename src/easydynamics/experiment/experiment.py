@@ -325,8 +325,6 @@ class Experiment(NewBase):
         if not _in_notebook():
             raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
 
-        # from IPython.display import display
-
         plot_kwargs_defaults = {
             'title': self.display_name,
         }
