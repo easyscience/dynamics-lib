@@ -62,7 +62,7 @@ class Analysis1d(AnalysisBase):
 
     def __init__(
         self,
-        display_name: str = "MyAnalysis",
+        display_name: str = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -185,7 +185,7 @@ class Analysis1d(AnalysisBase):
             FitResults: The result of the fit.
         """
         if self._experiment is None:
-            raise ValueError("No experiment is associated with this Analysis.")
+            raise ValueError('No experiment is associated with this Analysis.')
 
         # Create convolver once to reuse during fitting
         self._convolver = self._create_convolver()
@@ -195,7 +195,7 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights = self.experiment._extract_x_y_weights(
+        x, y, weights = self.experiment._extract_x_y_weights_only_finite(
             Q_index=self._require_Q_index()
         )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
@@ -265,37 +265,33 @@ class Analysis1d(AnalysisBase):
         import plopp as pp
 
         if self.experiment.data is None:
-            raise ValueError("No data to plot. Please load data first.")
+            raise ValueError('No data to plot. Please load data first.')
 
-        data = self.experiment.data["Q", self.Q_index]
+        data = self.experiment.data['Q', self.Q_index]
         model_array = self._create_sample_scipp_array()
 
-        component_dataset = self._create_components_dataset_single_Q(
-            add_background=add_background
-        )
+        component_dataset = self._create_components_dataset_single_Q(add_background=add_background)
 
         # Create a dataset containing the data, model, and individual
         # components for plotting.
-        data_and_model = sc.Dataset(
-            {
-                "Data": data,
-                "Model": model_array,
-            }
-        )
+        data_and_model = sc.Dataset({
+            'Data': data,
+            'Model': model_array,
+        })
 
         data_and_model = sc.merge(data_and_model, component_dataset)
         plot_kwargs_defaults = {
-            "title": self.display_name,
-            "linestyle": {"Data": "none", "Model": "-"},
-            "marker": {"Data": "o", "Model": "none"},
-            "color": {"Data": "black", "Model": "red"},
-            "markerfacecolor": {"Data": "none", "Model": "none"},
+            'title': self.display_name,
+            'linestyle': {'Data': 'none', 'Model': '-'},
+            'marker': {'Data': 'o', 'Model': 'none'},
+            'color': {'Data': 'black', 'Model': 'red'},
+            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
         }
 
         if plot_components:
             for comp_name in component_dataset.keys():
-                plot_kwargs_defaults["linestyle"][comp_name] = "--"
-                plot_kwargs_defaults["marker"][comp_name] = None
+                plot_kwargs_defaults['linestyle'][comp_name] = '--'
+                plot_kwargs_defaults['marker'][comp_name] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -321,7 +317,7 @@ class Analysis1d(AnalysisBase):
             ValueError: If the Q index is not set.
         """
         if self._Q_index is None:
-            raise ValueError("Q_index must be set.")
+            raise ValueError('Q_index must be set.')
         return self._Q_index
 
     def _on_Q_index_changed(self) -> None:
@@ -388,9 +384,7 @@ class Analysis1d(AnalysisBase):
         # performance is not important.
 
         # We don't create a convolver if the resolution is empty.
-        resolution = self.instrument_model.resolution_model.get_component_collection(
-            Q_index
-        )
+        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
         if resolution.is_empty:
             return components.evaluate(energy - energy_offset.value)
 
@@ -445,10 +439,8 @@ class Analysis1d(AnalysisBase):
             np.ndarray: The evaluated background contribution.
         """
         Q_index = self._require_Q_index()
-        background_components = (
-            self.instrument_model.background_model.get_component_collection(
-                Q_index=Q_index
-            )
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
         )
         return self._evaluate_components(
             components=background_components,
@@ -492,8 +484,8 @@ class Analysis1d(AnalysisBase):
         if sample_components.is_empty:
             return None
 
-        resolution_components = (
-            self.instrument_model.resolution_model.get_component_collection(Q_index)
+        resolution_components = self.instrument_model.resolution_model.get_component_collection(
+            Q_index
         )
         if resolution_components.is_empty:
             return None
@@ -581,19 +573,17 @@ class Analysis1d(AnalysisBase):
             Q_index=self.Q_index
         ).components
 
-        background_components = (
-            self.instrument_model.background_model.get_component_collection(
-                Q_index=self.Q_index
-            ).components
-        )
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=self.Q_index
+        ).components
         background = self._evaluate_background() if add_background else None
         for component in sample_components:
             scipp_arrays[component.display_name] = self._create_component_scipp_array(
                 component=component, background=background
             )
         for component in background_components:
-            scipp_arrays[component.display_name] = (
-                self._create_background_component_scipp_array(component=component)
+            scipp_arrays[component.display_name] = self._create_background_component_scipp_array(
+                component=component
             )
         return sc.Dataset(scipp_arrays)
 
@@ -609,9 +599,9 @@ class Analysis1d(AnalysisBase):
         """
 
         return sc.DataArray(
-            data=sc.array(dims=["energy"], values=values),
+            data=sc.array(dims=['energy'], values=values),
             coords={
-                "energy": self.energy,
-                "Q": self.Q[self.Q_index],
+                'energy': self.energy,
+                'Q': self.Q[self.Q_index],
             },
         )
