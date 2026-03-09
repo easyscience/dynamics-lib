@@ -25,7 +25,7 @@ multiple `Q` and analysing complex inelastic data.
   to analyse QENS data with elastic incoherent background and Brownian
   diffusion.
 
-## Introduction to the classes and methods of EasyDynamics
+## Classes and Methods
 
 Here we go into more detail with each class that is used in the
 tutorials.

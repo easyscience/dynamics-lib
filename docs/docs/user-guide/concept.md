@@ -42,7 +42,7 @@ The most important are, in no particular order:
 So, for example, one can create a `Gaussian` and change its `Parameter`s
 like this:
 
-```
+```python
 gaussian = Gaussian()
 gaussian.area=2.0
 gaussian.area.fixed=True
