@@ -57,7 +57,7 @@ class Analysis(AnalysisBase):
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str = "MyAnalysis",
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -100,8 +100,8 @@ class Analysis(AnalysisBase):
         if self.Q is not None:
             for Q_index in range(len(self.Q)):
                 analysis = Analysis1d(
-                    display_name=f'{self.display_name}_Q{Q_index}',
-                    unique_name=(f'{self.unique_name}_Q{Q_index}'),
+                    display_name=f"{self.display_name}_Q{Q_index}",
+                    unique_name=(f"{self.unique_name}_Q{Q_index}"),
                     experiment=self.experiment,
                     sample_model=self.sample_model,
                     instrument_model=self.instrument_model,
@@ -139,9 +139,9 @@ class Analysis(AnalysisBase):
         """
 
         raise AttributeError(
-            'analysis_list is read-only. '
-            'To change the analysis list, modify the experiment, sample model, '
-            'or instrument model.'
+            "analysis_list is read-only. "
+            "To change the analysis list, modify the experiment, sample model, "
+            "or instrument model."
         )
 
     #############
@@ -176,7 +176,7 @@ class Analysis(AnalysisBase):
 
     def fit(
         self,
-        fit_method: str = 'independent',
+        fit_method: str = "independent",
         Q_index: int | None = None,
     ) -> FitResults | list[FitResults]:
         """Fit the model to the experimental data.
@@ -204,20 +204,22 @@ class Analysis(AnalysisBase):
 
         if self.Q is None:
             raise ValueError(
-                'No Q values available for fitting. Please check the experiment data.'
+                "No Q values available for fitting. Please check the experiment data."
             )
 
         Q_index = self._verify_Q_index(Q_index)
 
-        if fit_method == 'independent':
+        if fit_method == "independent":
             if Q_index is not None:
                 return self._fit_single_Q(Q_index)
             else:
                 return self._fit_all_Q_independently()
-        elif fit_method == 'simultaneous':
+        elif fit_method == "simultaneous":
             return self._fit_all_Q_simultaneously()
         else:
-            raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
+            raise ValueError(
+                "Invalid fit method. Choose 'independent' or 'simultaneous'."
+            )
 
     def plot_data_and_model(
         self,
@@ -264,42 +266,44 @@ class Analysis(AnalysisBase):
             )
 
         if self.experiment.binned_data is None:
-            raise ValueError('No data to plot. Please load data first.')
+            raise ValueError("No data to plot. Please load data first.")
 
         if not _in_notebook():
-            raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
+            raise RuntimeError(
+                "plot_data() can only be used in a Jupyter notebook environment."
+            )
 
         if self.Q is None:
             raise ValueError(
-                'No Q values available for plotting. Please check the experiment data.'
+                "No Q values available for plotting. Please check the experiment data."
             )
 
         if not isinstance(plot_components, bool):
-            raise TypeError('plot_components must be True or False.')
+            raise TypeError("plot_components must be True or False.")
 
         if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
+            raise TypeError("add_background must be True or False.")
 
         import plopp as pp
 
         plot_kwargs_defaults = {
-            'title': self.display_name,
-            'linestyle': {'Data': 'none', 'Model': '-'},
-            'marker': {'Data': 'o', 'Model': None},
-            'color': {'Data': 'black', 'Model': 'red'},
-            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            "title": self.display_name,
+            "linestyle": {"Data": "none", "Model": "-"},
+            "marker": {"Data": "o", "Model": None},
+            "color": {"Data": "black", "Model": "red"},
+            "markerfacecolor": {"Data": "none", "Model": "none"},
         }
         data_and_model = {
-            'Data': self.experiment.binned_data,
-            'Model': self._create_model_array(),
+            "Data": self.experiment.binned_data,
+            "Model": self._create_model_array(),
         }
 
         if plot_components:
             components = self._create_components_dataset(add_background=add_background)
             for key in components.keys():
                 data_and_model[key] = components[key]
-                plot_kwargs_defaults['linestyle'][key] = '--'
-                plot_kwargs_defaults['marker'][key] = None
+                plot_kwargs_defaults["linestyle"][key] = "--"
+                plot_kwargs_defaults["marker"][key] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -326,7 +330,7 @@ class Analysis(AnalysisBase):
                 parameter across different Q values.
         """
 
-        ds = sc.Dataset(coords={'Q': self.Q})
+        ds = sc.Dataset(coords={"Q": self.Q})
 
         # Collect all parameter names
         all_names = {
@@ -356,7 +360,7 @@ class Analysis(AnalysisBase):
                         except Exception as e:
                             raise UnitError(
                                 f"Inconsistent units for parameter '{name}': "
-                                f'{units[name]} vs {p.unit}'
+                                f"{units[name]} vs {p.unit}"
                             ) from e
 
                     values[name].append(p.value)
@@ -368,7 +372,7 @@ class Analysis(AnalysisBase):
         # Build dataset variables
         for name in all_names:
             ds[name] = sc.Variable(
-                dims=['Q'],
+                dims=["Q"],
                 values=np.asarray(values[name], dtype=float),
                 variances=np.asarray(variances[name], dtype=float),
                 unit=units.get(name, None),
@@ -403,8 +407,10 @@ class Analysis(AnalysisBase):
         if isinstance(names, str):
             names = [names]
 
-        if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
-            raise TypeError('names must be a string or a list of strings.')
+        if not isinstance(names, list) or not all(
+            isinstance(name, str) for name in names
+        ):
+            raise TypeError("names must be a string or a list of strings.")
 
         for name in names:
             if name not in ds:
@@ -412,9 +418,9 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'linestyle': {name: 'none' for name in names},
-            'marker': {name: 'o' for name in names},
-            'markerfacecolor': {name: 'none' for name in names},
+            "linestyle": {name: "none" for name in names},
+            "marker": {name: "o" for name in names},
+            "markerfacecolor": {name: "none" for name in names},
         }
 
         plot_kwargs_defaults.update(kwargs)
@@ -506,7 +512,7 @@ class Analysis(AnalysisBase):
         ws = []
 
         for analysis in self.analysis_list:
-            x, y, weight = self._extract_x_y_weights_from_experiment(analysis.Q_index)
+            x, y, weight = self.experiment._extract_x_y_weights(analysis.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
@@ -544,10 +550,10 @@ class Analysis(AnalysisBase):
                 dimensions "Q" and "energy".
         """
 
-        model = sc.array(dims=['Q', 'energy'], values=self.calculate())
+        model = sc.array(dims=["Q", "energy"], values=self.calculate())
         model_data_array = sc.DataArray(
             data=model,
-            coords={'Q': self.Q, 'energy': self.experiment.energy},
+            coords={"Q": self.Q, "energy": self.experiment.energy},
         )
         return model_data_array
 
@@ -568,14 +574,14 @@ class Analysis(AnalysisBase):
                 of the model, with dimensions "Q".
         """
         if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
+            raise TypeError("add_background must be True or False.")
 
         datasets = [
             analysis._create_components_dataset_single_Q(add_background=add_background)
             for analysis in self.analysis_list
         ]
 
-        return sc.concat(datasets, dim='Q')
+        return sc.concat(datasets, dim="Q")
 
     #############
     # Dunder methods

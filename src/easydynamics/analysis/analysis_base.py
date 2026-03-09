@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import numpy as np
 import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
@@ -56,7 +55,7 @@ class AnalysisBase(EasyScienceModelBase):
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str = "MyAnalysis",
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -98,21 +97,23 @@ class AnalysisBase(EasyScienceModelBase):
         elif isinstance(experiment, Experiment):
             self._experiment = experiment
         else:
-            raise TypeError('experiment must be an instance of Experiment or None.')
+            raise TypeError("experiment must be an instance of Experiment or None.")
 
         if sample_model is None:
             self._sample_model = SampleModel()
         elif isinstance(sample_model, SampleModel):
             self._sample_model = sample_model
         else:
-            raise TypeError('sample_model must be an instance of SampleModel or None.')
+            raise TypeError("sample_model must be an instance of SampleModel or None.")
 
         if instrument_model is None:
             self._instrument_model = InstrumentModel()
         elif isinstance(instrument_model, InstrumentModel):
             self._instrument_model = instrument_model
         else:
-            raise TypeError('instrument_model must be an instance of InstrumentModel or None.')
+            raise TypeError(
+                "instrument_model must be an instance of InstrumentModel or None."
+            )
 
         if extra_parameters is not None:
             if isinstance(extra_parameters, Parameter):
@@ -122,7 +123,9 @@ class AnalysisBase(EasyScienceModelBase):
             ):
                 self._extra_parameters = extra_parameters
             else:
-                raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
+                raise TypeError(
+                    "extra_parameters must be a Parameter or a list of Parameters."
+                )
         else:
             self._extra_parameters = []
 
@@ -151,7 +154,7 @@ class AnalysisBase(EasyScienceModelBase):
         """
 
         if not isinstance(value, Experiment):
-            raise TypeError('experiment must be an instance of Experiment')
+            raise TypeError("experiment must be an instance of Experiment")
         self._experiment = value
         self._on_experiment_changed()
 
@@ -173,7 +176,7 @@ class AnalysisBase(EasyScienceModelBase):
             TypeError: if value is not a SampleModel.
         """
         if not isinstance(value, SampleModel):
-            raise TypeError('sample_model must be an instance of SampleModel')
+            raise TypeError("sample_model must be an instance of SampleModel")
         self._sample_model = value
         self._on_sample_model_changed()
 
@@ -195,7 +198,7 @@ class AnalysisBase(EasyScienceModelBase):
             TypeError: if value is not an InstrumentModel.
         """
         if not isinstance(value, InstrumentModel):
-            raise TypeError('instrument_model must be an instance of InstrumentModel')
+            raise TypeError("instrument_model must be an instance of InstrumentModel")
         self._instrument_model = value
         self._on_instrument_model_changed()
 
@@ -219,7 +222,7 @@ class AnalysisBase(EasyScienceModelBase):
         Raises:
             AttributeError: If trying to set Q.
         """
-        raise AttributeError('Q is a read-only property derived from the Experiment.')
+        raise AttributeError("Q is a read-only property derived from the Experiment.")
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -243,7 +246,9 @@ class AnalysisBase(EasyScienceModelBase):
             AttributeError: If trying to set energy.
         """
 
-        raise AttributeError('energy is a read-only property derived from the Experiment.')
+        raise AttributeError(
+            "energy is a read-only property derived from the Experiment."
+        )
 
     @property
     def temperature(self) -> Parameter | None:
@@ -267,7 +272,9 @@ class AnalysisBase(EasyScienceModelBase):
             AttributeError: If trying to set temperature.
         """
 
-        raise AttributeError('temperature is a read-only property derived from the SampleModel.')
+        raise AttributeError(
+            "temperature is a read-only property derived from the SampleModel."
+        )
 
     @property
     def extra_parameters(self) -> list[Parameter]:
@@ -298,7 +305,9 @@ class AnalysisBase(EasyScienceModelBase):
         elif value is None:
             self._extra_parameters = []
         else:
-            raise TypeError('extra_parameters must be a Parameter, a list of Parameters, or None.')
+            raise TypeError(
+                "extra_parameters must be a Parameter, a list of Parameters, or None."
+            )
 
     #############
     # Other methods
@@ -345,31 +354,8 @@ class AnalysisBase(EasyScienceModelBase):
                 or Q_index < 0
                 or (self.Q is not None and Q_index >= len(self.Q))
             ):
-                raise IndexError('Q_index must be a valid index for the Q values.')
+                raise IndexError("Q_index must be a valid index for the Q values.")
         return Q_index
-
-    def _extract_x_y_weights_from_experiment(
-        self, Q_index: int
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Extract the x, y, and weights arrays from the experiment for
-        the given Q index.
-
-        Args:
-            Q_index (int): The Q index to extract the data for.
-
-        Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                weights arrays extracted from the experiment for the
-                given Q index.
-        """
-        data = self.experiment.data['Q', Q_index]
-        x = data.coords['energy'].values
-        y = data.values
-        e = data.variances**0.5
-        if np.any(e == 0):
-            raise ValueError('Cannot compute weights: some variances are zero.')
-        weights = 1.0 / e
-        return x, y, weights
 
     #############
     # Dunder methods
@@ -381,5 +367,5 @@ class AnalysisBase(EasyScienceModelBase):
         Returns:
             str: A string representation of the Analysis.
         """
-        return f' {self.__class__.__name__}  (display_name={self.display_name}, \
-        unique_name={self.unique_name})'
+        return f" {self.__class__.__name__}  (display_name={self.display_name}, \
+        unique_name={self.unique_name})"
