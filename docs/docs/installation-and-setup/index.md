@@ -225,8 +225,7 @@ Google Colab.
 
 If you decide to run the tutorials locally, you need to download them
 first. This can be done individually via the :material-download:
-**Download Notebook** button available on each tutorial page, or all at
-once using the command line, as shown below.
+**Download Notebook** button available on each tutorial page.
 
 ### Run Tutorials Locally with Pixi <small>recommended</small> { #running-with-pixi data-toc-label="Run Tutorials Locally with Pixi" }
 
@@ -236,10 +235,10 @@ once using the command line, as shown below.
   ```txt
   pixi add --pypi jupyterlab pixi-kernel
   ```
-- Download all the EasyDynamics tutorials to the `tutorials/` directory:
-  ```txt
+- Download all the EasyDynamics tutorials to the `tutorials/` directory.
+  <!-- ```txt
   pixi run easydynamics download-all-tutorials
-  ```
+  ``` -->
 - Start JupyterLab in the `tutorials/` directory to access the
   notebooks:
   ```txt
@@ -258,10 +257,10 @@ once using the command line, as shown below.
   ```txt
   python -m ipykernel install --user --name=venv --display-name "EasyDynamics Python kernel"
   ```
-- Download all the EasyDynamics tutorials to the `tutorials/` directory:
-  ```txt
+- Download all the EasyDynamics tutorials to the `tutorials/` directory.
+  <!-- ```txt
   python -m easydynamics download-all-tutorials
-  ```
+  ``` -->
 - Launch the Jupyter Notebook server (opens browser automatically at
   `http://localhost:8888/`):
   ```txt
