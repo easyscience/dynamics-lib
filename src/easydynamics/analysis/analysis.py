@@ -288,6 +288,7 @@ class Analysis(AnalysisBase):
             'marker': {'Data': 'o', 'Model': None},
             'color': {'Data': 'black', 'Model': 'red'},
             'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            'keep': 'energy',
         }
         data_and_model = {
             'Data': self.experiment.binned_data,
