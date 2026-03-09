@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -1170,6 +1170,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#introduction-to-the-classes-and-methods-of-easydynamics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction to the classes and methods of EasyDynamics
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1204,21 +1215,33 @@ grasp the workflow of data analysis using EasyDynamics.</p>
 section of the documentation.</p>
 <p>The tutorials are organized into the following categories:</p>
 <h2 id="getting-started">Getting Started</h2>
+<p>We are working on expanding the list of tutorials to include advanced
+concept such as interpolating <code>Parameter</code>s, sharing <code>Parameter</code>s at
+multiple <code>Q</code> and analysing complex inelastic data.</p>
 <ul>
-<li><a href="component_collection/">Component collection</a> – Learn how to
-  create a collectin of components for fitting.</li>
+<li><a href="tutorial1_brownian/">Tutorial 1: Brownian Diffusion</a> - Learn how
+  to analyse QENS data with elastic incoherent background and Brownian
+  diffusion.</li>
+</ul>
+<h2 id="introduction-to-the-classes-and-methods-of-easydynamics">Introduction to the classes and methods of EasyDynamics</h2>
+<p>Here we go into more detail with each class that is used in the
+tutorials.</p>
+<ul>
 <li><a href="components/">Components</a> – Learn how to use the EasyDynamics
-  components.</li>
+  model components, which are the basic building blocks of your model.</li>
+<li><a href="component_collection/">Component collection</a> – Learn how to
+  create a collection of components for fitting.</li>
 <li><a href="convolution/">Convolution</a> – Learn how to calculate the
   convolution of your resolution function with your model.</li>
-<li><a href="detailed_balance/">Detailed balance</a> – Learn how to apply
-  detailed balancing to your model.</li>
+<li><a href="detailed_balance/">Detailed balance</a> – Learn about detailed
+  balancing.</li>
 <li><a href="diffusion_model/">Diffusion model</a> – Learn how to create and use
   a model of diffusion.</li>
 <li><a href="sample_model/">Sample model</a> – Learn how to create a model of
-  the scattering from your sample.</li>
+  the scattering from your sample including model components and
+  diffusion models.</li>
 <li><a href="instrument_model/">Instrument model</a> – Learn how to create a.
-  model of your instrument.</li>
+  model of your instrument including resolution and background.</li>
 <li><a href="experiment/">Experiment</a> - Learn how to load and bin your data.</li>
 <li><a href="analysis/">Analysis</a> - Learn how to fit a model to your data.</li>
 <li><a href="analysis1d/">Analysis 1D</a> - Learn how to fit a model to your
