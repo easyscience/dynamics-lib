@@ -1486,8 +1486,7 @@ tutorials interactively in two different ways: locally or online via
 <abbr title="Cloud service that allows you to run Jupyter Notebooks in the cloud.">Google Colab</abbr>.</p>
 <p>If you decide to run the tutorials locally, you need to download them
 first. This can be done individually via the <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"/></svg></span>
-<strong>Download Notebook</strong> button available on each tutorial page, or all at
-once using the command line, as shown below.</p>
+<strong>Download Notebook</strong> button available on each tutorial page.</p>
 <h3 id="running-with-pixi">Run Tutorials Locally with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> <small>recommended</small></h3>
 <ul>
 <li>Navigate to your existing <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> project, created as described in the
@@ -1495,13 +1494,18 @@ once using the command line, as shown below.</p>
 <li>Add <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> and the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> kernel for Jupyter:
   <div class="language-text highlight"><pre><span></span><code>pixi add --pypi jupyterlab pixi-kernel
 </code></pre></div></li>
-<li>Download all the EasyDynamics tutorials to the <code>tutorials/</code> directory:
-  <div class="language-text highlight"><pre><span></span><code>pixi run easydynamics download-all-tutorials
-</code></pre></div></li>
-<li>Start <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> in the <code>tutorials/</code> directory to access the
+<li>
+<p>Download all the EasyDynamics tutorials to the <code>tutorials/</code> directory.
+  <!-- ```txt
+  pixi run easydynamics download-all-tutorials
+  ``` --></p>
+</li>
+<li>
+<p>Start <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> in the <code>tutorials/</code> directory to access the
   notebooks:
   <div class="language-text highlight"><pre><span></span><code>pixi run jupyter lab tutorials/
-</code></pre></div></li>
+</code></pre></div></p>
+</li>
 <li>Your web browser should open automatically. Click on one of the
   <code>*.ipynb</code> files and select the <code>Python (Pixi)</code> kernel to get started.</li>
 </ul>
@@ -1513,13 +1517,18 @@ once using the command line, as shown below.</p>
 <li>Add the virtual environment as a Jupyter kernel:
   <div class="language-text highlight"><pre><span></span><code>python -m ipykernel install --user --name=venv --display-name &quot;EasyDynamics Python kernel&quot;
 </code></pre></div></li>
-<li>Download all the EasyDynamics tutorials to the <code>tutorials/</code> directory:
-  <div class="language-text highlight"><pre><span></span><code>python -m easydynamics download-all-tutorials
-</code></pre></div></li>
-<li>Launch the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server (opens browser automatically at
+<li>
+<p>Download all the EasyDynamics tutorials to the <code>tutorials/</code> directory.
+  <!-- ```txt
+  python -m easydynamics download-all-tutorials
+  ``` --></p>
+</li>
+<li>
+<p>Launch the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server (opens browser automatically at
   <code>http://localhost:8888/</code>):
   <div class="language-text highlight"><pre><span></span><code>jupyter notebook tutorials/
-</code></pre></div></li>
+</code></pre></div></p>
+</li>
 <li>Open one of the <code>*.ipynb</code> files and select the
   <code>EasyDynamics Python kernel</code> to get started.</li>
 </ul>
