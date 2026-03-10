@@ -418,6 +418,8 @@ class TestExperiment:
         Q_index = 0
         invalid_data = experiment_with_data._data.copy()
         invalid_data.data.variances[Q_index] = 0  # Set variances to zero
+        # throw in a nan for good measure
+        invalid_data.data.variances[Q_index][0] = np.nan
 
         # THEN EXPECT
         with pytest.raises(ValueError, match='Cannot compute weights: some variances are zero'):
