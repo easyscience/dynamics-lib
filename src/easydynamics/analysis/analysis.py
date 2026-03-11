@@ -288,6 +288,7 @@ class Analysis(AnalysisBase):
             'marker': {'Data': 'o', 'Model': None},
             'color': {'Data': 'black', 'Model': 'red'},
             'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            'keep': 'energy',
         }
         data_and_model = {
             'Data': self.experiment.binned_data,
@@ -506,7 +507,7 @@ class Analysis(AnalysisBase):
         ws = []
 
         for analysis in self.analysis_list:
-            x, y, weight = self._extract_x_y_weights_from_experiment(analysis.Q_index)
+            x, y, weight = self.experiment._extract_x_y_weights_only_finite(analysis.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)

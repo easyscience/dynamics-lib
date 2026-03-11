@@ -195,7 +195,9 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights = self._extract_x_y_weights_from_experiment(Q_index=self._require_Q_index())
+        x, y, weights = self.experiment._extract_x_y_weights_only_finite(
+            Q_index=self._require_Q_index()
+        )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result

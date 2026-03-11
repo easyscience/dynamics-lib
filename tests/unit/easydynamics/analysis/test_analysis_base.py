@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
@@ -330,34 +329,6 @@ class TestAnalysisBase:
         # THEN / EXPECT
         with pytest.raises(IndexError, match='Q_index must be a valid index'):
             analysis_base._verify_Q_index(invalid_Q_index)
-
-    def test_extract_x_y_weights_from_experiment(self, analysis_base):
-        # WHEN
-        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
-        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
-        data = sc.array(
-            dims=['Q', 'energy'],
-            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
-            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
-        )
-
-        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
-
-        experiment = Experiment(data=data_array)
-        analysis_base.experiment = experiment
-
-        Q_index = 0
-
-        # THEN
-        x, y, weights = analysis_base._extract_x_y_weights_from_experiment(Q_index=Q_index)
-
-        # EXPECT
-        assert np.array_equal(x, analysis_base.experiment.energy.values)
-        assert np.array_equal(y, analysis_base.experiment.data.values[Q_index])
-        assert np.array_equal(
-            weights,
-            1 / analysis_base.experiment.data.variances[Q_index] ** 0.5,
-        )
 
     def test_repr(self, analysis_base):
         # WHEN
