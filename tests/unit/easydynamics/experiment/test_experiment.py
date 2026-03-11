@@ -23,6 +23,23 @@ class TestExperiment:
         experiment = Experiment(display_name='test_experiment', data=data)
         return experiment
 
+    @pytest.fixture
+    def experiment_with_data(self):
+        "Fixture that provides an Experiment with data for testing methods that require data"
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        experiment = Experiment(data=data_array)
+
+        return experiment
+
     ##############
     # test init
     ##############
@@ -378,6 +395,55 @@ class TestExperiment:
         assert sc.identical(converted_data.coords['Q'], expected_Q)
         assert sc.identical(converted_data.coords['energy'], expected_energy)
         assert sc.identical(converted_data.data, binned_data.data)
+
+    def test_extract_x_y_e(self, experiment_with_data):
+        # WHEN
+
+        Q_index = 0
+
+        # THEN
+        x, y, e = experiment_with_data._extract_x_y_e(Q_index=Q_index)
+
+        # EXPECT
+        assert np.array_equal(x, experiment_with_data.energy.values)
+        assert np.array_equal(y, experiment_with_data.data.values[Q_index])
+        assert np.array_equal(
+            e,
+            experiment_with_data.data.variances[Q_index] ** 0.5,
+        )
+
+    def test_extract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
+        "Test that _extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.variances[Q_index] = 0  # Set variances to zero
+        # throw in a nan for good measure
+        invalid_data.data.variances[Q_index][0] = np.nan
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Cannot compute weights: some variances are zero'):
+            Experiment(data=invalid_data)._extract_x_y_weights_only_finite(Q_index=Q_index)
+
+    def test_extract_x_y_weights_only_finite(self, experiment_with_data):
+        "Test that _extract_x_y_weights_only_finite only returns finite values"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+        invalid_data.data.variances[Q_index][1] = np.nan
+
+        # THEN
+        x, y, weights = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+            Q_index=Q_index
+        )
+
+        # EXPECT
+        assert np.isfinite(x).all()
+        assert np.isfinite(y).all()
+        assert np.isfinite(weights).all()
+        assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
 
     ##############
     # test dunder methods

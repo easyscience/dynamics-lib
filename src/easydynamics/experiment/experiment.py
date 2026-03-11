@@ -3,6 +3,7 @@
 
 import os
 
+import numpy as np
 import plopp as pp
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
@@ -379,6 +380,55 @@ class Experiment(NewBase):
                 # Coordinate is at bin edges, convert to bin centers
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
+
+    def _extract_x_y_e(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Extract the x, y, and weights arrays from the experiment for
+        the given Q index.
+
+        Args:
+            Q_index (int): The Q index to extract the data for.
+
+        Returns:
+            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
+                weights arrays extracted from the experiment for the
+                given Q index.
+        """
+        data = self.data['Q', Q_index]
+        x = data.coords['energy'].values
+        y = data.values
+        e = data.variances**0.5
+        return x, y, e
+
+    def _extract_x_y_weights_only_finite(
+        self, Q_index: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Extract the x, y, and weights arrays from the experiment for
+        the given Q index, removing any NaN and Inf values.
+
+        Args:
+            Q_index (int): The Q index to extract the data for.
+
+        Returns:
+            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
+                weights arrays extracted from the experiment for the
+                given Q index, with NaNs and Infs removed.
+
+        Raises:
+            ValueError: If any variances are zero after removing NaNs
+                and Infs, since this would lead to infinite weights.
+        """
+        x, y, e = self._extract_x_y_e(Q_index)
+        mask = np.isfinite(y) & np.isfinite(e) & np.isfinite(x)
+
+        x = x[mask]
+        y = y[mask]
+        e = e[mask]
+
+        if np.any(e == 0):
+            raise ValueError('Cannot compute weights: some variances are zero.')
+        weights = 1.0 / e
+
+        return x, y, weights
 
     ########
     # dunder methods

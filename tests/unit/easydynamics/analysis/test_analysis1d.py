@@ -151,7 +151,7 @@ class TestAnalysis1d:
         fake_y = np.array([10, 20, 30])
         fake_weights = np.array([0.1, 0.2, 0.3])
 
-        analysis1d._extract_x_y_weights_from_experiment = MagicMock(
+        analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
             return_value=(fake_x, fake_y, fake_weights)
         )
 
@@ -181,7 +181,7 @@ class TestAnalysis1d:
             fit_function='fit_func',
         )
 
-        analysis1d._extract_x_y_weights_from_experiment.assert_called_once()
+        analysis1d.experiment._extract_x_y_weights_only_finite.assert_called_once()
 
         fake_fitter_instance.fit.assert_called_once_with(
             x=fake_x,
