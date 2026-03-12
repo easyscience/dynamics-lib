@@ -74,7 +74,7 @@ class ConvolutionBase:
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError('Energy must be a numpy ndarray or a scipp Variable.')
+            raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
 
         if not isinstance(energy_unit, (str, sc.Unit)):
             raise TypeError('Energy_unit must be a string or sc.Unit.')

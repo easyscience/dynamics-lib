@@ -186,6 +186,32 @@ class Experiment(NewBase):
         """
         raise AttributeError('energy is a read-only property derived from the data.')
 
+    def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
+        """Get the energy values from the dataset, applying the mask if
+        present.
+
+        Returns:
+            sc.Variable | None: The masked energy values from the
+                dataset, or None if no data is loaded.
+        """
+
+        if (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or (self.Q is not None and Q_index >= len(self.Q))
+        ):
+            raise IndexError('Q_index must be a valid index for the Q values.')
+
+        if self._data is None:
+            return None
+
+        energy = self._binned_data.coords['energy']
+        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
+
+        mask_var = sc.array(dims=['energy'], values=mask)
+        masked_energy = energy[mask_var]
+        return masked_energy
+
     ###########
     # Handle data
     ###########
@@ -393,7 +419,7 @@ class Experiment(NewBase):
                 weights arrays extracted from the experiment for the
                 given Q index.
         """
-        data = self.data['Q', Q_index]
+        data = self.binned_data['Q', Q_index]
         x = data.coords['energy'].values
         y = data.values
         e = data.variances**0.5
@@ -401,7 +427,7 @@ class Experiment(NewBase):
 
     def _extract_x_y_weights_only_finite(
         self, Q_index: int
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index, removing any NaN and Inf values.
 
@@ -409,9 +435,10 @@ class Experiment(NewBase):
             Q_index (int): The Q index to extract the data for.
 
         Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                weights arrays extracted from the experiment for the
-                given Q index, with NaNs and Infs removed.
+            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: The
+                x, y, weights, and mask arrays extracted from the
+                experiment for the given Q index, with NaNs and Infs
+                removed.
 
         Raises:
             ValueError: If any variances are zero after removing NaNs
@@ -428,7 +455,7 @@ class Experiment(NewBase):
             raise ValueError('Cannot compute weights: some variances are zero.')
         weights = 1.0 / e
 
-        return x, y, weights
+        return x, y, weights, mask
 
     ########
     # dunder methods

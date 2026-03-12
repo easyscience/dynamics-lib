@@ -434,7 +434,7 @@ class TestExperiment:
         invalid_data.data.variances[Q_index][1] = np.nan
 
         # THEN
-        x, y, weights = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+        x, y, weights, mask = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
             Q_index=Q_index
         )
 
@@ -444,6 +444,8 @@ class TestExperiment:
         assert np.isfinite(weights).all()
         assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
         assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
+        # Mask should indicate which values were removed
+        assert np.array_equal(mask, [False, False, True])
 
     ##############
     # test dunder methods

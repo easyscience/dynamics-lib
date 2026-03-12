@@ -193,7 +193,7 @@ class TestAnalysis:
 
         # EXPECT
         analysis.analysis_list[1].plot_data_and_model.assert_called_once_with(
-            plot_components=True, add_background=True, **kwargs
+            plot_components=True, add_background=True, energy=None, **kwargs
         )
         assert result == 'plot_Q1'
 
@@ -279,6 +279,7 @@ class TestAnalysis:
         fake_fig = object()
 
         analysis._create_model_array = MagicMock(return_value='MODEL')
+        analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
             patch.object(

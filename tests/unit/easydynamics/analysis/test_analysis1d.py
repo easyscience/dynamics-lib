@@ -150,9 +150,10 @@ class TestAnalysis1d:
         fake_x = np.array([1, 2, 3])
         fake_y = np.array([10, 20, 30])
         fake_weights = np.array([0.1, 0.2, 0.3])
+        fake_mask = np.array([True, False, True])
 
         analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
-            return_value=(fake_x, fake_y, fake_weights)
+            return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
 
         analysis1d._create_convolver = MagicMock(return_value='fake_convolver')
@@ -397,10 +398,7 @@ class TestAnalysis1d:
 
             # check that the energy array passed to the convolver is the
             # same as the analysis1d energy array
-            np.testing.assert_array_equal(
-                kwargs['energy'],
-                analysis1d.energy.values,
-            )
+            assert sc.identical(kwargs['energy'], analysis1d.energy)
 
             # and check that convolution() was called
             MockConvolution.return_value.convolution.assert_called_once_with()
@@ -427,6 +425,7 @@ class TestAnalysis1d:
             components=analysis1d.sample_model.get_component_collection(),
             convolver=analysis1d._convolver,
             convolve=True,
+            energy=None,
         )
 
     def test_evaluate_sample_component(self, analysis1d):
@@ -445,6 +444,7 @@ class TestAnalysis1d:
             components=component,
             convolver=None,
             convolve=True,
+            energy=None,
         )
 
     def test_evaluate_background(self, analysis1d):
@@ -469,6 +469,7 @@ class TestAnalysis1d:
             components=analysis1d.instrument_model.background_model.get_component_collection(),
             convolver=None,
             convolve=False,
+            energy=None,
         )
 
     def test_evaluate_background_component(self, analysis1d):
@@ -487,6 +488,7 @@ class TestAnalysis1d:
             components=component,
             convolver=None,
             convolve=False,
+            energy=None,
         )
 
     def test_create_convolver(self, analysis1d):
@@ -582,7 +584,9 @@ class TestAnalysis1d:
         analysis1d._create_component_scipp_array(component=component, background=background)
 
         # EXPECT
-        analysis1d._evaluate_sample_component.assert_called_once_with(component=component)
+        analysis1d._evaluate_sample_component.assert_called_once_with(
+            component=component, energy=None
+        )
 
         expected_values = np.array([1.0, 2.0, 3.0])
         if background is not None:
@@ -617,7 +621,10 @@ class TestAnalysis1d:
         analysis1d._create_background_component_scipp_array(component=component)
 
         # EXPECT
-        analysis1d._evaluate_background_component.assert_called_once_with(component=component)
+        analysis1d._evaluate_background_component.assert_called_once_with(
+            component=component,
+            energy=None,
+        )
 
         analysis1d._to_scipp_array.assert_called_once()
 
@@ -699,7 +706,7 @@ class TestAnalysis1d:
         )
 
         # ---- Background evaluation ----
-        background_value = np.array([10.0, 20.0, 30.0])
+        background_value = np.array([11.0, 21.0, 31.0])
         analysis1d._evaluate_background = MagicMock(return_value=background_value)
 
         # ---- Return scipp DataArrays ----
@@ -753,9 +760,10 @@ class TestAnalysis1d:
             )
 
         # Background component creation
-        analysis1d._create_background_component_scipp_array.assert_called_once_with(
-            component=background_component
-        )
+        analysis1d._create_background_component_scipp_array.assert_called_once()
+        _, kwargs = analysis1d._create_background_component_scipp_array.call_args
+        assert kwargs['component'] is background_component
+        assert sc.identical(kwargs['energy'], analysis1d.energy)
 
         # Dataset content
         assert isinstance(dataset, sc.Dataset)
