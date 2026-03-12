@@ -12928,7 +12928,7 @@ None, a unique_name is automatically generated.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the component. unique_name</p>
+                <p>Name of the component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12936,9 +12936,9 @@ None, a unique_name is automatically generated.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="easydynamics.sample_model.Exponential.(str">(str</span></code></td>
+            <td><code><span title="easydynamics.sample_model.Exponential.unique_name">unique_name</span></code></td>
             <td>
-                  <code>| None</code>
+                  <code><span title="str">str</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13196,9 +13196,7 @@ None, a unique_name is automatically generated.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Model of an exponential function.</span>
 
 <span class="sd">    The intensity is given by</span>
@@ -13228,8 +13226,8 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        center (Parameter): Center of the exponential.</span>
 <span class="sd">        rate (Parameter): Decay or growth constant of the exponential.</span>
 <span class="sd">        unit (str | sc.Unit): Unit of the parameters.</span>
-<span class="sd">        display_name (str | None): Name of the component. unique_name</span>
-<span class="sd">        (str | None): Unique name of the component.</span>
+<span class="sd">        display_name (str | None): Name of the component.</span>
+<span class="sd">        unique_name (str | None): Unique name of the component.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -13258,7 +13256,6 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">                Parameters.</span>
-<span class="sd">            ValueError: If rate is not positive.</span>
 <span class="sd">            TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -13420,8 +13417,7 @@ None, a unique_name is automatically generated.</p>
             <span class="c1"># Attempt to rollback on failure</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
                 <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -13624,19 +13620,6 @@ Parameters.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If rate is not positive.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                   <code><span title="TypeError">TypeError</span></code>
             </td>
             <td>
@@ -13715,8 +13698,7 @@ Parameters.</p>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -13742,7 +13724,6 @@ Parameters.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">            Parameters.</span>
-<span class="sd">        ValueError: If rate is not positive.</span>
 <span class="sd">        TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -13835,15 +13816,15 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Exponential.</span>
 
 <span class="sd">    Returns:</span>
@@ -14030,7 +14011,8 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
@@ -14051,9 +14033,7 @@ Parameters.</p>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
+<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the unit of the Parameters in the component.</span>
 
 <span class="sd">    Args:</span>
@@ -14071,8 +14051,7 @@ Parameters.</p>
         <span class="c1"># Attempt to rollback on failure</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
             <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -14176,7 +14155,8 @@ values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+<span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -14203,8 +14183,7 @@ values.</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -32452,7 +32431,7 @@ None, a unique_name is automatically generated.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the component. unique_name</p>
+                <p>Name of the component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -32460,9 +32439,9 @@ None, a unique_name is automatically generated.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="easydynamics.sample_model.components.Exponential.(str">(str</span></code></td>
+            <td><code><span title="easydynamics.sample_model.components.Exponential.unique_name">unique_name</span></code></td>
             <td>
-                  <code>| None</code>
+                  <code><span title="str">str</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -32720,9 +32699,7 @@ None, a unique_name is automatically generated.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Model of an exponential function.</span>
 
 <span class="sd">    The intensity is given by</span>
@@ -32752,8 +32729,8 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        center (Parameter): Center of the exponential.</span>
 <span class="sd">        rate (Parameter): Decay or growth constant of the exponential.</span>
 <span class="sd">        unit (str | sc.Unit): Unit of the parameters.</span>
-<span class="sd">        display_name (str | None): Name of the component. unique_name</span>
-<span class="sd">        (str | None): Unique name of the component.</span>
+<span class="sd">        display_name (str | None): Name of the component.</span>
+<span class="sd">        unique_name (str | None): Unique name of the component.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -32782,7 +32759,6 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">                Parameters.</span>
-<span class="sd">            ValueError: If rate is not positive.</span>
 <span class="sd">            TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -32944,8 +32920,7 @@ None, a unique_name is automatically generated.</p>
             <span class="c1"># Attempt to rollback on failure</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
                 <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -33148,19 +33123,6 @@ Parameters.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If rate is not positive.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                   <code><span title="TypeError">TypeError</span></code>
             </td>
             <td>
@@ -33239,8 +33201,7 @@ Parameters.</p>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -33266,7 +33227,6 @@ Parameters.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">            Parameters.</span>
-<span class="sd">        ValueError: If rate is not positive.</span>
 <span class="sd">        TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -33359,15 +33319,15 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Exponential.</span>
 
 <span class="sd">    Returns:</span>
@@ -33554,7 +33514,8 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
@@ -33575,9 +33536,7 @@ Parameters.</p>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
+<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the unit of the Parameters in the component.</span>
 
 <span class="sd">    Args:</span>
@@ -33595,8 +33554,7 @@ Parameters.</p>
         <span class="c1"># Attempt to rollback on failure</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
             <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -33700,7 +33658,8 @@ values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+<span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -33727,8 +33686,7 @@ values.</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -42730,7 +42688,7 @@ None, a unique_name is automatically generated.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the component. unique_name</p>
+                <p>Name of the component.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42738,9 +42696,9 @@ None, a unique_name is automatically generated.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="easydynamics.sample_model.components.exponential.Exponential.(str">(str</span></code></td>
+            <td><code><span title="easydynamics.sample_model.components.exponential.Exponential.unique_name">unique_name</span></code></td>
             <td>
-                  <code>| None</code>
+                  <code><span title="str">str</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -42998,9 +42956,7 @@ None, a unique_name is automatically generated.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Model of an exponential function.</span>
 
 <span class="sd">    The intensity is given by</span>
@@ -43030,8 +42986,8 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        center (Parameter): Center of the exponential.</span>
 <span class="sd">        rate (Parameter): Decay or growth constant of the exponential.</span>
 <span class="sd">        unit (str | sc.Unit): Unit of the parameters.</span>
-<span class="sd">        display_name (str | None): Name of the component. unique_name</span>
-<span class="sd">        (str | None): Unique name of the component.</span>
+<span class="sd">        display_name (str | None): Name of the component.</span>
+<span class="sd">        unique_name (str | None): Unique name of the component.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -43060,7 +43016,6 @@ None, a unique_name is automatically generated.</p>
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">                Parameters.</span>
-<span class="sd">            ValueError: If rate is not positive.</span>
 <span class="sd">            TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -43222,8 +43177,7 @@ None, a unique_name is automatically generated.</p>
             <span class="c1"># Attempt to rollback on failure</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
                 <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -43426,19 +43380,6 @@ Parameters.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If rate is not positive.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                   <code><span title="TypeError">TypeError</span></code>
             </td>
             <td>
@@ -43517,8 +43458,7 @@ Parameters.</p>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -43544,7 +43484,6 @@ Parameters.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If amplitude, center, or rate are not numbers or</span>
 <span class="sd">            Parameters.</span>
-<span class="sd">        ValueError: If rate is not positive.</span>
 <span class="sd">        TypeError: If unit is not a string or sc.Unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Validate inputs and create Parameters if not given</span>
@@ -43637,15 +43576,15 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Exponential.</span>
 
 <span class="sd">    Returns:</span>
@@ -43832,7 +43771,8 @@ Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
@@ -43853,9 +43793,7 @@ Parameters.</p>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
+<span class="normal">241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the unit of the Parameters in the component.</span>
 
 <span class="sd">    Args:</span>
@@ -43873,8 +43811,7 @@ Parameters.</p>
         <span class="c1"># Attempt to rollback on failure</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;convert_unit&#39;</span><span class="p">):</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">old_unit</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="s1">&#39;1/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_unit</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: S110</span>
             <span class="k">pass</span>  <span class="c1"># Best effort rollback</span>
@@ -43978,7 +43915,8 @@ values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/exponential.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+<span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -44005,8 +43943,7 @@ values.</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
