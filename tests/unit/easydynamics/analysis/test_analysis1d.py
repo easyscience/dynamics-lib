@@ -303,6 +303,72 @@ class TestAnalysis1d:
         # EXPECT
         analysis1d._create_convolver.assert_called_once()
 
+    def test_verify_energy(self, analysis1d):
+        # WHEN
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+
+        # THEN
+        result = analysis1d._verify_energy(energy)
+
+        # EXPECT
+        assert sc.identical(result, energy)
+
+    def test_verify_energy_None(self, analysis1d):
+        # WHEN
+        energy = None
+
+        # THEN
+        result = analysis1d._verify_energy(energy)
+
+        # EXPECT
+        assert result is None
+
+    def test_verify_energy_raises(self, analysis1d):
+        # WHEN
+        energy = np.array([10.0, 20.0])
+
+        # THEN / EXPECT
+        with pytest.raises(TypeError, match='Energy must be a sc.Variable or None'):
+            analysis1d._verify_energy(energy)
+
+    def test_calculate_energy_with_offset(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset.value = 1.0  # override with a simple value for testing
+
+        # THEN
+        result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
+        # EXPECT
+        expected = energy.values - energy_offset.value
+        np.testing.assert_array_equal(result.values, expected)
+
+    def test_calculate_energy_with_offset_different_units(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset.value = 1.0  # override with a simple value for testing
+        energy_offset.convert_unit('eV')
+
+        # THEN
+        result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
+        # EXPECT
+        expected = energy.values - energy_offset.value
+        np.testing.assert_array_equal(result.values, expected)
+
+    def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
+
+        # THEN / EXPECT
+        with pytest.raises(
+            sc.UnitError, match='Energy and energy offset must have compatible units'
+        ):
+            analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
     #############
     # Private methods: evaluation
     #############
