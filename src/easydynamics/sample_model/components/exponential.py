@@ -43,8 +43,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
         center (Parameter): Center of the exponential.
         rate (Parameter): Decay or growth constant of the exponential.
         unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Name of the component. unique_name
-        (str | None): Unique name of the component.
+        display_name (str | None): Name of the component.
+        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -73,7 +73,6 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Raises:
             TypeError: If amplitude, center, or rate are not numbers or
                 Parameters.
-            ValueError: If rate is not positive.
             TypeError: If unit is not a string or sc.Unit.
         """
         # Validate inputs and create Parameters if not given
@@ -235,8 +234,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             # Attempt to rollback on failure
             try:
                 for p in pars:
-                    if hasattr(p, 'convert_unit'):
-                        p.convert_unit(old_unit)
+                    p.convert_unit(old_unit)
                 self.rate.convert_unit('1/' + str(old_unit))
             except Exception:  # noqa: S110
                 pass  # Best effort rollback

@@ -6,6 +6,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model import Exponential
 
@@ -84,6 +85,23 @@ class TestExponential:
             Exponential(display_name='TestExponential', **kwargs)
 
     @pytest.mark.parametrize(
+        'kwargs, expected_message',
+        [
+            (
+                {'amplitude': np.nan, 'center': 0.5, 'rate': 1.0, 'unit': 'meV'},
+                'amplitude must be a finite number or a Parameter',
+            ),
+            (
+                {'amplitude': 2.0, 'center': 0.5, 'rate': np.nan, 'unit': 'meV'},
+                'rate must be a finite number or a Parameter',
+            ),
+        ],
+    )
+    def test_input_value_validation_raises(self, kwargs, expected_message):
+        with pytest.raises(ValueError, match=expected_message):
+            Exponential(display_name='TestExponential', **kwargs)
+
+    @pytest.mark.parametrize(
         'prop, valid_value, invalid_value, invalid_message',
         [
             ('amplitude', 3.0, 'invalid', r'must be a number'),
@@ -149,6 +167,23 @@ class TestExponential:
         # rate should scale inversely
         assert exponential.rate.value == 1.2 / 1e3
         assert str(exponential.rate.unit) == '1/ueV'
+
+    def test_convert_unit_rollback(self, exponential: Exponential):
+        # WHEN
+        with pytest.raises(
+            UnitError,
+            match='Failed to convert unit: Conversion from `meV` to `m` is not valid.',
+        ):
+            exponential.convert_unit('m')
+
+        # THEN EXPECT - values should be unchanged
+        assert exponential.unit == 'meV'
+        assert exponential.amplitude.value == 2.0
+        assert exponential.amplitude.unit == 'meV'
+        assert exponential.center.value == 0.5
+        assert exponential.center.unit == 'meV'
+        assert exponential.rate.value == 1.2
+        assert exponential.rate.unit == '1/meV'
 
     def test_copy(self, exponential: Exponential):
         # WHEN
