@@ -12,7 +12,9 @@ from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
+    DiffusionModelBase,
+)
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -28,24 +30,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     1/angstrom. Creates ComponentCollections with Lorentzian components
     for given Q-values.
 
-    Args:
-        display_name (str): Display name of the diffusion model.
-        unique_name (str | None): Unique name of the diffusion model. If
-            None, a unique name will be generated.
-        unit (str | sc.Unit): Unit of the diffusion model. Must be
-            convertible to meV. Defaults to "meV".
-        scale (Numeric): Scale factor for the diffusion model. Must be
-            a non-negative number. Defaults to 1.0.
-        diffusion_coefficient (Numeric): Diffusion coefficient D in
-            m^2/s. Defaults to 1.0.
-
-    Attributes:
-        unit (str | sc.Unit): Unit of the diffusion model.
-        scale (Parameter): Scale parameter of the diffusion model.
-        diffusion_coefficient (Parameter): Diffusion coefficient D in
-            m^2/s.
-
-    Example usage:
+    Example:
     >>>Q=np.linspace(0.5,2,7)
     >>>energy=np.linspace(-2, 2, 501)
     >>>scale=1.0
@@ -53,47 +38,45 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     >>>diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel",
     >>>scale=scale, diffusion_coefficient= diffusion_coefficient)
     >>>component_collections=diffusion_model.create_component_collections(Q)
-    See also the examples.
+    See also the tutorials.
     """
 
     def __init__(
         self,
-        display_name: str | None = 'BrownianTranslationalDiffusion',
+        display_name: str | None = "BrownianTranslationalDiffusion",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
     ):
         """Initialize a new BrownianTranslationalDiffusion model.
 
         Args:
-            display_name (str): Display name of the diffusion model.
-            unique_name (str | None): Unique name of the diffusion
+            display_name (str | None, default='BrownianTranslationalDiffusion'): Display name of the diffusion model.
+            unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
-            unit (str | sc.Unit): Unit of the diffusion model. Must be
-                convertible to meV. Defaults to "meV".
-            scale (Numeric): Scale factor for the diffusion model. Must
-                be a non-negative number. Defaults to 1.0.
-            diffusion_coefficient (Numeric): Diffusion coefficient D in
-                m^2/s. Defaults to 1.0.
+            unit (str | sc.Unit, default='meV'): Unit of the diffusion model. Must be
+                convertible to meV.
+            scale (Numeric, default=1.0): Scale factor for the diffusion model. Must
+                be a non-negative number.
+            diffusion_coefficient (Numeric, default=1.0): Diffusion coefficient D in
+                m^2/s.
 
         Raises:
             TypeError: If scale or diffusion_coefficient is not a
                 number.
-            ValueError: If scale is negative.
-            UnitError: If unit is not a string or scipp Unit.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
 
         diffusion_coefficient = Parameter(
-            name='diffusion_coefficient',
+            name="diffusion_coefficient",
             value=float(diffusion_coefficient),
             fixed=False,
-            unit='m**2/s',
+            unit="m**2/s",
             min=0.0,
         )
         super().__init__(
@@ -102,8 +85,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             unit=unit,
             scale=scale,
         )
-        self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-        self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+        self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+        self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
 
     # ------------------------------------------------------------------
@@ -132,10 +115,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             ValueError: If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
 
         if float(diffusion_coefficient) < 0:
-            raise ValueError('diffusion_coefficient must be non-negative.')
+            raise ValueError("diffusion_coefficient must be non-negative.")
         self._diffusion_coefficient.value = float(diffusion_coefficient)
 
     # ------------------------------------------------------------------
@@ -157,7 +140,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Q = _validate_and_convert_Q(Q)
 
-        unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
+        unit_conversion_factor = (
+            self._hbar * self.diffusion_coefficient / (self._angstrom**2)
+        )
         unit_conversion_factor.convert_unit(self.unit)
         width = Q**2 * unit_conversion_factor.value
 
@@ -197,7 +182,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = 'Brownian translational diffusion',
+        component_display_name: str = "Brownian translational diffusion",
     ) -> List[ComponentCollection]:
         r"""Create ComponentCollection components for the Brownian
         translational diffusion model at given Q values.
@@ -220,7 +205,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
-            raise TypeError('component_name must be a string.')
+            raise TypeError("component_name must be a string.")
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -232,7 +217,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         # No delta function, as the EISF is 0.
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f'{self.display_name}_Q{Q_value:.2f}', unit=self.unit
+                display_name=f"{self.display_name}_Q{Q_value:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
@@ -270,7 +255,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         of Q to make dependent Parameters.
 
         Args:
-         Q (float): Scattering vector in 1/angstrom
+            Q (float): Scattering vector in 1/angstrom
 
          Returns:
              str: Dependency expression for the width.
@@ -279,10 +264,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
              TypeError: If Q is not a float.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
         # Q is given as a float, so we need to add the units
-        return f'hbar * D* {Q} **2*1/(angstrom**2)'
+        return f"hbar * D* {Q} **2*1/(angstrom**2)"
 
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
@@ -292,9 +277,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
-            'D': self.diffusion_coefficient,
-            'hbar': self._hbar,
-            'angstrom': self._angstrom,
+            "D": self.diffusion_coefficient,
+            "hbar": self._hbar,
+            "angstrom": self._angstrom,
         }
 
     def _write_area_dependency_expression(self, QISF: float) -> str:
@@ -311,9 +296,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             TypeError: If QISF is not a float.
         """
         if not isinstance(QISF, (float)):
-            raise TypeError('QISF must be a float.')
+            raise TypeError("QISF must be a float.")
 
-        return f'{QISF} * scale'
+        return f"{QISF} * scale"
 
     def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
@@ -323,7 +308,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
-            'scale': self.scale,
+            "scale": self.scale,
         }
 
     # ------------------------------------------------------------------
@@ -339,6 +324,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 BrownianTranslationalDiffusion model.
         """
         return (
-            f'BrownianTranslationalDiffusion(display_name={self.display_name},'
-            f'diffusion_coefficient={self.diffusion_coefficient}, scale={self.scale})'
+            f"BrownianTranslationalDiffusion(display_name={self.display_name},"
+            f"diffusion_coefficient={self.diffusion_coefficient}, scale={self.scale})"
         )

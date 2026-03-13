@@ -15,7 +15,7 @@ class DiffusionModelBase(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyDiffusionModel",
+        display_name: str | None = "MyDiffusionModel",
         unique_name: str | None = None,
         scale: Numeric = 1.0,
         unit: str | sc.Unit = "meV",
@@ -23,7 +23,7 @@ class DiffusionModelBase(ModelBase):
         """Initialize a new DiffusionModel.
 
         Args:
-            display_name (str, default='MyDiffusionModel'): Display name of the diffusion model.
+            display_name (str | None, default='MyDiffusionModel'): Display name of the diffusion model.
             unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
             scale (Numeric, default=1.0): Scale factor for the diffusion model. Must
