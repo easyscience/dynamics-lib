@@ -150,6 +150,7 @@ class Analysis(AnalysisBase):
     def calculate(
         self,
         Q_index: int | None = None,
+        energy: sc.Variable | None = None,
     ) -> list[np.ndarray] | np.ndarray:
         """Calculate model data for a specific Q index. If Q_index is
         None, calculate for all Q indices and return a list of arrays.
@@ -167,12 +168,14 @@ class Analysis(AnalysisBase):
         Raises:
             IndexError: If Q_index is not None and is out of bounds.
         """
+        if energy is None:
+            energy = self.energy
 
         if Q_index is None:
-            return [analysis.calculate() for analysis in self.analysis_list]
+            return [analysis.calculate(energy=energy) for analysis in self.analysis_list]
 
         Q_index = self._verify_Q_index(Q_index)
-        return self.analysis_list[Q_index].calculate()
+        return self.analysis_list[Q_index].calculate(energy=energy)
 
     def fit(
         self,
@@ -224,6 +227,7 @@ class Analysis(AnalysisBase):
         Q_index: int | None = None,
         plot_components: bool = True,
         add_background: bool = True,
+        energy: sc.Variable | None = None,
         **kwargs,
     ) -> InteractiveFigure:
         """Plot the experimental data and the model prediction.
@@ -260,6 +264,7 @@ class Analysis(AnalysisBase):
             return self.analysis_list[Q_index].plot_data_and_model(
                 plot_components=plot_components,
                 add_background=add_background,
+                energy=energy,
                 **kwargs,
             )
 
@@ -280,6 +285,9 @@ class Analysis(AnalysisBase):
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
 
+        if energy is None:
+            energy = self.energy
+
         import plopp as pp
 
         plot_kwargs_defaults = {
@@ -292,11 +300,13 @@ class Analysis(AnalysisBase):
         }
         data_and_model = {
             'Data': self.experiment.binned_data,
-            'Model': self._create_model_array(),
+            'Model': self._create_model_array(energy=energy),
         }
 
         if plot_components:
-            components = self._create_components_dataset(add_background=add_background)
+            components = self._create_components_dataset(
+                add_background=add_background, energy=energy
+            )
             for key in components.keys():
                 data_and_model[key] = components[key]
                 plot_kwargs_defaults['linestyle'][key] = '--'
@@ -507,13 +517,13 @@ class Analysis(AnalysisBase):
         ws = []
 
         for analysis in self.analysis_list:
-            x, y, weight = self.experiment._extract_x_y_weights_only_finite(analysis.Q_index)
+            x, y, weight, _ = self.experiment._extract_x_y_weights_only_finite(analysis.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
 
             # Make sure the convolver is up to date for this Q index
-            analysis._convolver = analysis._create_convolver()
+            analysis._convolver = analysis._create_convolver(energy=x)
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,
@@ -537,22 +547,27 @@ class Analysis(AnalysisBase):
         """
         return [analysis.as_fit_function() for analysis in self.analysis_list]
 
-    def _create_model_array(self) -> sc.DataArray:
+    def _create_model_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
         """Create a scipp array for the model.
 
         Returns:
             sc.DataArray: A DataArray containing the model values, with
                 dimensions "Q" and "energy".
         """
-
-        model = sc.array(dims=['Q', 'energy'], values=self.calculate())
+        if energy is None:
+            energy = self.energy
+        model = sc.array(dims=['Q', 'energy'], values=self.calculate(energy=energy))
         model_data_array = sc.DataArray(
             data=model,
-            coords={'Q': self.Q, 'energy': self.experiment.energy},
+            coords={'Q': self.Q, 'energy': energy},
         )
         return model_data_array
 
-    def _create_components_dataset(self, add_background: bool = True) -> sc.Dataset:
+    def _create_components_dataset(
+        self,
+        add_background: bool = True,
+        energy: sc.Variable | None = None,
+    ) -> sc.Dataset:
         """Create a scipp dataset containing the individual components
         of the model for plotting.
 
@@ -571,8 +586,13 @@ class Analysis(AnalysisBase):
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
 
+        if energy is None:
+            energy = self.energy
+
         datasets = [
-            analysis._create_components_dataset_single_Q(add_background=add_background)
+            analysis._create_components_dataset_single_Q(
+                add_background=add_background, energy=energy
+            )
             for analysis in self.analysis_list
         ]
 

@@ -293,6 +293,44 @@ class TestExperiment:
         with pytest.raises(AttributeError):
             experiment.Q = experiment.Q
 
+    def test_get_masked_energy(self, experiment_with_data):
+        "Test getting masked energy"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+        invalid_data.data.variances[Q_index][1] = np.nan
+
+        experiment_with_data.data = invalid_data
+
+        # THEN
+        masked_energy = experiment_with_data.get_masked_energy(Q_index=Q_index)
+
+        # EXPECT
+        assert len(masked_energy) == 1
+        assert masked_energy.values == 30.0
+
+    def test_get_masked_energy_no_data_returns_None(self):
+        "Test getting masked energy returns zero when no data is present"
+
+        experiment = Experiment()
+        # WHEN THEN
+        masked_energy = experiment.get_masked_energy(Q_index=0)
+
+        # EXPECT
+        assert masked_energy is None
+
+    @pytest.mark.parametrize(
+        'Q_index',
+        [-1, 100, 'not an index'],
+        ids=['negative_index', 'out_of_bounds_index', 'invalid_type'],
+    )
+    def test_get_masked_energy_invalid_Q_index_raises(self, experiment_with_data, Q_index):
+        "Test getting masked energy raises IndexError when Q index is invalid"
+        # WHEN THEN EXPECT
+        with pytest.raises(IndexError):
+            experiment_with_data.get_masked_energy(Q_index=Q_index)
+
     ##############
     # test plotting
     ##############
@@ -396,20 +434,20 @@ class TestExperiment:
         assert sc.identical(converted_data.coords['energy'], expected_energy)
         assert sc.identical(converted_data.data, binned_data.data)
 
-    def test_extract_x_y_e(self, experiment_with_data):
+    def test_extract_x_y_var(self, experiment_with_data):
         # WHEN
 
         Q_index = 0
 
         # THEN
-        x, y, e = experiment_with_data._extract_x_y_e(Q_index=Q_index)
+        x, y, var = experiment_with_data._extract_x_y_var(Q_index=Q_index)
 
         # EXPECT
         assert np.array_equal(x, experiment_with_data.energy.values)
         assert np.array_equal(y, experiment_with_data.data.values[Q_index])
         assert np.array_equal(
-            e,
-            experiment_with_data.data.variances[Q_index] ** 0.5,
+            var,
+            experiment_with_data.data.variances[Q_index],
         )
 
     def test_extract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
@@ -434,7 +472,7 @@ class TestExperiment:
         invalid_data.data.variances[Q_index][1] = np.nan
 
         # THEN
-        x, y, weights = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+        x, y, weights, mask = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
             Q_index=Q_index
         )
 
@@ -444,6 +482,28 @@ class TestExperiment:
         assert np.isfinite(weights).all()
         assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
         assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
+        # Mask should indicate which values were removed
+        assert np.array_equal(mask, [False, False, True])
+
+    def test_extract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
+        "Test getting x y and weights when variances are None"
+        # WHEN
+        Q_index = 0
+        data = experiment_with_data._data.copy()
+        data.variances = None
+
+        experiment_with_data.data = data
+
+        # THEN
+        x, y, weights, mask = experiment_with_data._extract_x_y_weights_only_finite(
+            Q_index=Q_index
+        )
+
+        # EXPECT
+        assert np.array_equal(x, experiment_with_data.energy.values)
+        assert np.array_equal(y, experiment_with_data.data.values[Q_index])
+        assert np.array_equal(weights, np.ones_like(y))
+        assert np.array_equal(mask, np.isfinite(y) & np.isfinite(x))
 
     ##############
     # test dunder methods
