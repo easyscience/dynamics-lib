@@ -88,6 +88,22 @@ class TestAnalysis:
 
         # EXPECT
         analysis.analysis_list[1].calculate.assert_called_once()
+        _, kwargs = analysis.analysis_list[1].calculate.call_args
+        assert sc.identical(kwargs['energy'], analysis.energy)
+        np.testing.assert_array_equal(result, np.array([4.0, 5.0, 6.0]))
+
+    def test_calculate_with_Q_index_and_energy(self, analysis):
+        # WHEN
+        analysis.analysis_list[1].calculate = MagicMock(return_value=np.array([4.0, 5.0, 6.0]))
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+
+        # THEN
+        result = analysis.calculate(Q_index=1, energy=energy)
+
+        # EXPECT
+        analysis.analysis_list[1].calculate.assert_called_once()
+        _, kwargs = analysis.analysis_list[1].calculate.call_args
+        assert kwargs['energy'] is energy
         np.testing.assert_array_equal(result, np.array([4.0, 5.0, 6.0]))
 
     def test_calculate_without_Q_index(self, analysis):
@@ -193,7 +209,7 @@ class TestAnalysis:
 
         # EXPECT
         analysis.analysis_list[1].plot_data_and_model.assert_called_once_with(
-            plot_components=True, add_background=True, **kwargs
+            plot_components=True, add_background=True, energy=None, **kwargs
         )
         assert result == 'plot_Q1'
 
@@ -279,6 +295,7 @@ class TestAnalysis:
         fake_fig = object()
 
         analysis._create_model_array = MagicMock(return_value='MODEL')
+        analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
             patch.object(

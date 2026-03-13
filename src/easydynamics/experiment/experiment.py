@@ -144,7 +144,7 @@ class Experiment(NewBase):
             sc.Variable | None: The Q values from the dataset, or None
                 if no data is loaded.
         """
-        if self._data is None:
+        if self._binned_data is None:
             return None
         return self._binned_data.coords['Q']
 
@@ -169,7 +169,7 @@ class Experiment(NewBase):
             sc.Variable | None: The energy values from the dataset, or
                 None if no data is loaded.
         """
-        if self._data is None:
+        if self._binned_data is None:
             return None
         return self._binned_data.coords['energy']
 
@@ -185,6 +185,35 @@ class Experiment(NewBase):
             AttributeError: Always, since energy is read-only.
         """
         raise AttributeError('energy is a read-only property derived from the data.')
+
+    def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
+        """Get the energy values from the dataset, removing points where
+        the y values or variances are NaN or Inf for the given Q index.
+
+        Args:
+            Q_index (int): The Q index to get the masked energy values
+                for.
+
+        Returns:
+            sc.Variable | None: The masked energy values from the
+                dataset, or None if no data is loaded.
+        """
+        if self._binned_data is None:
+            return None
+
+        if (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or (self.Q is not None and Q_index >= len(self.Q))
+        ):
+            raise IndexError('Q_index must be a valid index for the Q values.')
+
+        energy = self._binned_data.coords['energy']
+        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
+
+        mask_var = sc.array(dims=['energy'], values=mask)
+        masked_energy = energy[mask_var]
+        return masked_energy
 
     ###########
     # Handle data
@@ -381,7 +410,7 @@ class Experiment(NewBase):
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
 
-    def _extract_x_y_e(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index.
 
@@ -390,18 +419,18 @@ class Experiment(NewBase):
 
         Returns:
             tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                weights arrays extracted from the experiment for the
+                variances arrays extracted from the experiment for the
                 given Q index.
         """
-        data = self.data['Q', Q_index]
+        data = self.binned_data['Q', Q_index]
         x = data.coords['energy'].values
         y = data.values
-        e = data.variances**0.5
-        return x, y, e
+        var = data.variances
+        return x, y, var
 
     def _extract_x_y_weights_only_finite(
         self, Q_index: int
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index, removing any NaN and Inf values.
 
@@ -409,26 +438,35 @@ class Experiment(NewBase):
             Q_index (int): The Q index to extract the data for.
 
         Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                weights arrays extracted from the experiment for the
-                given Q index, with NaNs and Infs removed.
+            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: The
+                x, y, weights, and mask arrays extracted from the
+                experiment for the given Q index, with NaNs and Infs
+                removed.
 
         Raises:
             ValueError: If any variances are zero after removing NaNs
                 and Infs, since this would lead to infinite weights.
         """
-        x, y, e = self._extract_x_y_e(Q_index)
-        mask = np.isfinite(y) & np.isfinite(e) & np.isfinite(x)
+        x, y, var = self._extract_x_y_var(Q_index)
+
+        if var is None:
+            mask = np.isfinite(y) & np.isfinite(x)
+            # If variances are not provided, set them to 1 to make all
+            # weights be 1
+            var = np.ones_like(y)
+        else:
+            mask = np.isfinite(y) & np.isfinite(var) & np.isfinite(x)
 
         x = x[mask]
         y = y[mask]
-        e = e[mask]
+        var = var[mask]
 
-        if np.any(e == 0):
+        if np.any(var == 0):
             raise ValueError('Cannot compute weights: some variances are zero.')
-        weights = 1.0 / e
 
-        return x, y, weights
+        weights = 1.0 / var**0.5
+
+        return x, y, weights, mask
 
     ########
     # dunder methods
