@@ -9878,13 +9878,13 @@ included in this Analysis.</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">conv</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the sample contribution for a given Q index.</span>
 
 <span class="sd">        Assumes that self._convolver is up to date.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            energy (sc.DataArray | None): Optional energy grid to use for</span>
+<span class="sd">            energy (sc.Variable | None): Optional energy grid to use for</span>
 <span class="sd">                evaluation. If None, the energy grid from the experiment</span>
 <span class="sd">                is used.</span>
 
@@ -9924,11 +9924,11 @@ included in this Analysis.</p>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the background contribution for the chosen Q index.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            energy (sc.DataArray | None): Optional energy grid to use for</span>
+<span class="sd">            energy (sc.Variable | None): Optional energy grid to use for</span>
 <span class="sd">                evaluation. If None, the energy grid from the experiment</span>
 <span class="sd">                is used.</span>
 
