@@ -39,7 +39,7 @@ class ModelComponent(ModelBase):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = None,
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the ModelComponent.
 
         Args:
@@ -85,14 +85,14 @@ class ModelComponent(ModelBase):
             )
         )  # noqa: E501
 
-    def fix_all_parameters(self):
+    def fix_all_parameters(self) -> None:
         """Fix all parameters in the model component."""
 
         pars = self.get_fittable_parameters()
         for p in pars:
             p.fixed = True
 
-    def free_all_parameters(self):
+    def free_all_parameters(self) -> None:
         """Free all parameters in the model component."""
         for p in self.get_fittable_parameters():
             p.fixed = False
@@ -182,7 +182,7 @@ class ModelComponent(ModelBase):
                 f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
             )
 
-    def convert_unit(self, unit: str | sc.Unit):
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the Parameters in the component.
 
         Args:

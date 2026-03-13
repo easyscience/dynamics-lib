@@ -42,7 +42,7 @@ class BackgroundModel(ModelBase):
         unit: str | sc.Unit = 'meV',
         components: ComponentCollection | ModelComponent | None = None,
         Q: Q_type | None = None,
-    ):
+    ) -> None:
         """Initialize the BackgroundModel.
 
         Args:

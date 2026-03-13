@@ -48,7 +48,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Delta function.
 
         Args:

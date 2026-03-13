@@ -41,7 +41,7 @@ class Experiment(NewBase):
         display_name: str = 'MyExperiment',
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
-    ):
+    ) -> None:
         """Initialize the Experiment object.
 
         Args:
@@ -219,7 +219,7 @@ class Experiment(NewBase):
     # Handle data
     ###########
 
-    def load_hdf5(self, filename: str, display_name: str | None = None):
+    def load_hdf5(self, filename: str, display_name: str | None = None) -> None:
         """Load data from an HDF5 file.
 
         Args:
@@ -251,7 +251,7 @@ class Experiment(NewBase):
         self._validate_coordinates(loaded_data)
         self.data = loaded_data
 
-    def save_hdf5(self, filename: str | None = None):
+    def save_hdf5(self, filename: str | None = None) -> None:
         """Save the dataset to HDF5.
 
         Args:
@@ -279,7 +279,7 @@ class Experiment(NewBase):
 
         sc_save_hdf5(self._data, filename)
 
-    def remove_data(self):
+    def remove_data(self) -> None:
         """Remove the dataset from the experiment."""
         self._data = None
         self._binned_data = None

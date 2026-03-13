@@ -44,7 +44,7 @@ class ComponentCollection(ModelBase):
         display_name: str = 'MyComponentCollection',
         unique_name: str | None = None,
         components: List[ModelComponent] | None = None,
-    ):
+    ) -> None:
         """Initialize a new ComponentCollection.
 
         Args:

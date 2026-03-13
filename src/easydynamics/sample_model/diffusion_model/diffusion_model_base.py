@@ -19,7 +19,7 @@ class DiffusionModelBase(ModelBase):
         unique_name: str | None = None,
         scale: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
-    ):
+    ) -> None:
         """Initialize a new DiffusionModel.
 
         Args:

@@ -54,7 +54,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Voigt',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize a Voigt component.
 
         Args:

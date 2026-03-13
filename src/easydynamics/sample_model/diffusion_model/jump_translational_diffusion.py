@@ -52,7 +52,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
-    ):
+    ) -> None:
         """Initialize a new JumpTranslationalDiffusion model.
 
         Args:

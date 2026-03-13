@@ -61,7 +61,7 @@ class AnalysisBase(EasyScienceModelBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
-    ):
+    ) -> None:
         """Initialize the AnalysisBase.
 
         Args:

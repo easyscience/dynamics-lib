@@ -60,7 +60,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Gaussian',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Gaussian component.
 
         Args:

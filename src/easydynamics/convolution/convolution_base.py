@@ -45,7 +45,7 @@ class ConvolutionBase:
         resolution_components: ComponentCollection | ModelComponent = None,
         energy_unit: str | sc.Unit = 'meV',
         energy_offset: Numeric | Parameter = 0.0,
-    ):
+    ) -> None:
         """Initialize the ConvolutionBase.
 
         Args:

@@ -69,7 +69,7 @@ class Analysis1d(AnalysisBase):
         instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
-    ):
+    ) -> None:
         """Initialize a Analysis1d.
 
         Args:

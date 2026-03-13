@@ -33,7 +33,7 @@ class InstrumentModel(NewBase):
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
         unit: str | sc.Unit = 'meV',
-    ):
+    ) -> None:
         """Initialize an InstrumentModel.
 
         Args:

@@ -35,7 +35,7 @@ class SampleModel(ModelBase):
         temperature: float | None = None,
         temperature_unit: str | sc.Unit = 'K',
         divide_by_temperature: bool = True,
-    ):
+    ) -> None:
         """Initialize the SampleModel.
 
         Args:

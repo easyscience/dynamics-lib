@@ -24,7 +24,7 @@ class ResolutionModel(ModelBase):
         unit: str | sc.Unit = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
-    ):
+    ) -> None:
         """Initialize a ResolutionModel.
 
         Args:

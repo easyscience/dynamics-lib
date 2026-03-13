@@ -56,7 +56,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'DampedHarmonicOscillator',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Damped Harmonic Oscillator.
 
         Args:

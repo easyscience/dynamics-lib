@@ -54,7 +54,7 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
-    ):
+    ) -> None:
         """Initialize an AnalyticalConvolution.
 
         Args:

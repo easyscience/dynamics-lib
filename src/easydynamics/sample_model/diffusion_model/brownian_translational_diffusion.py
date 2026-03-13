@@ -46,7 +46,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         unit: str | sc.Unit = 'meV',
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
-    ):
+    ) -> None:
         """Initialize a new BrownianTranslationalDiffusion model.
 
         Args:

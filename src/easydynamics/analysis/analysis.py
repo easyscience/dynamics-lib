@@ -63,7 +63,7 @@ class Analysis(AnalysisBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
-    ):
+    ) -> None:
         """Initialize an Analysis object.
 
         Args:

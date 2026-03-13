@@ -55,7 +55,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Lorentzian',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Lorentzian component.
 
         Args:

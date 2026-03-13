@@ -30,7 +30,7 @@ class ModelBase(EasyScienceModelBase):
         unit: str | sc.Unit | None = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
-    ):
+    ) -> None:
         """Initialize the ModelBase.
 
         Args:

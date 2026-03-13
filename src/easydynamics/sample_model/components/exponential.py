@@ -55,7 +55,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Exponential',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Exponential component.
 
         Args:
@@ -216,7 +216,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         return self.amplitude.value * np.exp(exponent)
 
-    def convert_unit(self, unit: str | sc.Unit):
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the Parameters in the component.
 
         Args:

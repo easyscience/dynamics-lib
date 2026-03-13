@@ -76,7 +76,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         temperature_unit: str | sc.Unit = 'K',
         energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
-    ):
+    ) -> None:
         """Initialize the NumericalConvolution object.
 
         Args:

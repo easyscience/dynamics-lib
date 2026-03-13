@@ -48,7 +48,7 @@ class Polynomial(ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Polynomial',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Polynomial component.
 
         Args:
@@ -216,7 +216,7 @@ class Polynomial(ModelComponent):
         """
         return list(self._coefficients)
 
-    def convert_unit(self, unit: str | sc.Unit):
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the polynomial.
 
         Args:
