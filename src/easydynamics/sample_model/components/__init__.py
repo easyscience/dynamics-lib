@@ -3,6 +3,7 @@
 
 from .damped_harmonic_oscillator import DampedHarmonicOscillator
 from .delta_function import DeltaFunction
+from .exponential import Exponential
 from .gaussian import Gaussian
 from .lorentzian import Lorentzian
 from .polynomial import Polynomial
@@ -15,4 +16,5 @@ __all__ = [
     'DeltaFunction',
     'DampedHarmonicOscillator',
     'Polynomial',
+    'Exponential',
 ]
