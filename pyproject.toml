@@ -32,7 +32,6 @@ dependencies = [
   'ipywidgets',   # Widgets (needed for interactive matplotlib backends)
   'ipympl',       # Matplotlib Jupyter widget backend (%matplotlib widget)
   'IPython',      # Interactive Python shell
-  'scipp<26.1.0', # TEMPORARY: ARM macOS fails with higher versions
 ]
 
 [project.optional-dependencies]
