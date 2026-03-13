@@ -22,48 +22,32 @@ class ModelBase(EasyScienceModelBase):
     Contains common functionality for models with components and
     Q dependence.
 
-    Args:
-        display_name (str): Display name of the model.
-        unique_name (str | None): Unique name of the model. If None, a
-            unique name will be generated.
-        unit (str | sc.Unit | None): Unit of the model. Defaults to
-            "meV".
-        components (ModelComponent | ComponentCollection | None):
-            Template components of the model. If None, no components
-            are added. These components are copied into
-            ComponentCollections for each Q value.
-        Q (ArrayLike | sc.Variable | None): Q values for the model. If
-            None, Q is not set.
-
-    Attributes:
-        unit (str | sc.Unit): Unit of the model.
-        components (list[ModelComponent]): List of ModelComponents in
-            the model.
-        Q (ArrayLike | sc.Variable | None): Q values of the model.
     """
 
     def __init__(
         self,
-        display_name: str = 'MyModelBase',
+        display_name: str = "MyModelBase",
         unique_name: str | None = None,
-        unit: str | sc.Unit | None = 'meV',
+        unit: str | sc.Unit | None = "meV",
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ):
         """Initialize the ModelBase.
 
         Args:
-            display_name (str): Display name of the model.
-            unique_name (str | None): Unique name of the model. If None,
+            display_name (str, default="MyModelBase"): Display name of the model.
+            unique_name (str | None, default=None): Unique name of the model. If None,
                 a unique name will be generated.
-            unit (str | sc.Unit | None): Unit of the model. Defaults to
-                "meV".
-            components (ModelComponent | ComponentCollection | None):
+            unit (str | sc.Unit | None, default="meV"): Unit of the model.
+            components (ModelComponent | ComponentCollection | None, default=None):
                 Template components of the model. If None, no components
                 are added. These components are copied into
                 ComponentCollections for each Q value.
-            Q (ArrayLike | sc.Variable | None): Q values for the model.
+            Q (Q_type | None, default=None): Q values for the model.
                 If None, Q is not set.
+
+        Raises:
+            TypeError: If components is not a ModelComponent or ComponentCollection.
         """
         super().__init__(
             display_name=display_name,
@@ -76,8 +60,8 @@ class ModelBase(EasyScienceModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f'Components must be a ModelComponent, a ComponentCollection or None, '
-                f'got {type(components).__name__}'
+                f"Components must be a ModelComponent, a ComponentCollection or None, "
+                f"got {type(components).__name__}"
             )
 
         self._components = ComponentCollection()
@@ -92,11 +76,11 @@ class ModelBase(EasyScienceModelBase):
         """Evaluate the sample model at all Q for the given x values.
 
         Args:
-        x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-            Energy axis values to evaluate the model at. If a scipp
-            Variable or DataArray is provided, the unit of the model
-            will be converted to match the unit of x for evaluation, and
-            the result will be returned in the same unit as x.
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
+                Energy axis values to evaluate the model at. If a scipp
+                Variable or DataArray is provided, the unit of the model
+                will be converted to match the unit of x for evaluation, and
+                the result will be returned in the same unit as x.
 
         Returns:
             list[np.ndarray]: A list of numpy arrays containing the
@@ -110,8 +94,8 @@ class ModelBase(EasyScienceModelBase):
 
         if not self._component_collections:
             raise ValueError(
-                'No components in the model to evaluate. '
-                'Run generate_component_collections() first'
+                "No components in the model to evaluate. "
+                "Run generate_component_collections() first"
             )
         y = [collection.evaluate(x) for collection in self._component_collections]
 
@@ -152,11 +136,11 @@ class ModelBase(EasyScienceModelBase):
     # ------------------------------------------------------------------
 
     @property
-    def unit(self) -> str | sc.Unit:
+    def unit(self) -> str | sc.Unit | None:
         """Get the unit of the ComponentCollection.
 
         Returns:
-            str | sc.Unit |None: The unit of the ComponentCollection.
+            str | sc.Unit | None: The unit of the ComponentCollection.
         """
 
         return self._unit
@@ -174,8 +158,8 @@ class ModelBase(EasyScienceModelBase):
         """
         raise AttributeError(
             (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
 
@@ -188,12 +172,16 @@ class ModelBase(EasyScienceModelBase):
 
         Raises:
             TypeError: If the provided unit is not a string or sc.Unit.
-            UnitError: If the provided unit is not compatible with the
+            Exception: If the provided unit is not compatible with the
                 current unit.
         """
 
         old_unit = self._unit
 
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(
+                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
+            )
         try:
             for component in self.components:
                 component.convert_unit(unit)
@@ -223,14 +211,16 @@ class ModelBase(EasyScienceModelBase):
 
         Args:
             value (ModelComponent | ComponentCollection | None): The new
-            components to set. If None, all components will be cleared.
+                components to set. If None, all components will be cleared.
 
         Raises:
             TypeError: If value is not a ModelComponent,
                 ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
-            raise TypeError('Components must be a ModelComponent or a ComponentCollection')
+            raise TypeError(
+                "Components must be a ModelComponent or a ComponentCollection"
+            )
 
         self.clear_components()
         if value is not None:
@@ -252,7 +242,7 @@ class ModelBase(EasyScienceModelBase):
 
         Args:
             value (Q_type | None): The new Q values to set. If None, Q
-            will be unset.
+                will be unset.
         """
         old_Q = self._Q
         new_Q = _validate_and_convert_Q(value)
@@ -287,13 +277,18 @@ class ModelBase(EasyScienceModelBase):
         templates.
 
         Args:
-            Q_index  (int | None): If None, get variables for all
+            Q_index  (int | None, default=None): If None, get variables for all
                 ComponentCollections. If int, get variables for the
                 ComponentCollection at this index. Defaults to None.
 
         Returns:
             list[Parameter]: A list of all Parameters and Descriptors
                 from the ComponentCollections in the ModelBase.
+
+        Raises:
+            TypeError: If Q_index is not an int or None.
+            IndexError: If Q_index is out of bounds for the number of
+                ComponentCollections.
         """
 
         if Q_index is None:
@@ -304,11 +299,13 @@ class ModelBase(EasyScienceModelBase):
             ]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+                raise TypeError(
+                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
+                )
             if Q_index < 0 or Q_index >= len(self._component_collections):
                 raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for component collections '
-                    f'of length {len(self._component_collections)}'
+                    f"Q_index {Q_index} is out of bounds for component collections "
+                    f"of length {len(self._component_collections)}"
                 )
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
@@ -329,11 +326,11 @@ class ModelBase(EasyScienceModelBase):
                 ComponentCollections.
         """
         if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
+            raise TypeError(f"Q_index must be an int, got {type(Q_index).__name__}")
         if Q_index < 0 or Q_index >= len(self._component_collections):
             raise IndexError(
-                f'Q_index {Q_index} is out of bounds for component collections '
-                f'of length {len(self._component_collections)}'
+                f"Q_index {Q_index} is out of bounds for component collections "
+                f"of length {len(self._component_collections)}"
             )
         return self._component_collections[Q_index]
 
@@ -371,6 +368,6 @@ class ModelBase(EasyScienceModelBase):
             str: A string representation of the ModelBase.
         """
         return (
-            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
-            f'unit={self.unit}), Q = {self.Q}, components = {self.components}'
+            f"{self.__class__.__name__}(unique_name={self.unique_name}, "
+            f"unit={self.unit}), Q = {self.Q}, components = {self.components}"
         )
