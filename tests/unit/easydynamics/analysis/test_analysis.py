@@ -250,7 +250,15 @@ class TestAnalysis:
     def test_plot_data_and_model_defaults(self, analysis):
 
         # WHEN
-        fake_fig = object()
+        # Create fake widget
+        fake_widget = MagicMock()
+        fake_widget.slider_toggler = MagicMock()
+        fake_widget.slider_toggler.value = None
+
+        # Create fake fig with required structure
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
@@ -292,7 +300,15 @@ class TestAnalysis:
     def test_plot_data_and_model_plot_components_true(self, analysis):
 
         # WHEN
-        fake_fig = object()
+        # Create fake widget
+        fake_widget = MagicMock()
+        fake_widget.slider_toggler = MagicMock()
+        fake_widget.slider_toggler.value = None
+
+        # Create fake fig with required structure
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
         analysis._create_model_array = MagicMock(return_value='MODEL')
         analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
