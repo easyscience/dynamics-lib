@@ -12,7 +12,9 @@ from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
+    DiffusionModelBase,
+)
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -30,27 +32,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     time. Q is assumed to have units of 1/angstrom. Creates
     ComponentCollections with Lorentzian components for given Q-values.
 
-    Args:
-        display_name (str): Display name of the diffusion model.
-        unique_name (str | None): Unique name of the diffusion model. If
-            None, a unique name will be generated.
-        unit (str | sc.Unit): Unit of the diffusion model. Must be
-            convertible to meV. Defaults to "meV".
-        scale (Numeric): Scale factor for the diffusion model. Must be
-            a non-negative number. Defaults to 1.0.
-        diffusion_coefficient (Numeric): Diffusion coefficient D in
-            m^2/s. Defaults to 1.0.
-        relaxation_time (Numeric): Relaxation time t in ps. Defaults to
-            1.0.
-
-    Attributes:
-        unit (str | sc.Unit): Unit of the diffusion model.
-        scale (Parameter): Scale parameter of the diffusion model.
-        diffusion_coefficient (Parameter): Diffusion coefficient D in
-            m^2/s.
-        relaxation_time (Parameter): Relaxation time t in ps.
-
-    Example usage:
+    Example:
     >>> Q = np.linspace(0.5, 2, 7)
     >>> energy = np.linspace(-2, 2, 501)
     >>> scale = 1.0
@@ -61,14 +43,14 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     >>> relaxation_time=relaxation_time)
     >>> component_collections=
     >>> diffusion_model.create_component_collections(Q)
-    See also the examples.
+    See also the tutorials..
     """
 
     def __init__(
         self,
-        display_name: str | None = 'JumpTranslationalDiffusion',
+        display_name: str | None = "JumpTranslationalDiffusion",
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
@@ -76,23 +58,20 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Initialize a new JumpTranslationalDiffusion model.
 
         Args:
-            display_name (str): Display name of the diffusion model.
-            unique_name (str | None): Unique name of the diffusion
+            display_name (str | None, default="JumpTranslationalDiffusion"): Display name of the diffusion model.
+            unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
-            unit (str | sc.Unit): Unit of the diffusion model. Must be
-                convertible to meV. Defaults to "meV".
-            scale (Numeric): Scale factor for the diffusion model. Must
-                be a non-negative number. Defaults to 1.0.
-            diffusion_coefficient (Numeric): Diffusion coefficient D in
-                m^2/s. Defaults to 1.0.
-            relaxation_time (Numeric): Relaxation time t in ps. Defaults
-                to 1.0.
+            unit (str | sc.Unit, default="meV"): Unit of the diffusion model. Must be
+                convertible to meV.
+            scale (Numeric, default=1.0): Scale factor for the diffusion model. Must
+                be a non-negative number.
+            diffusion_coefficient (Numeric, default=1.0): Diffusion coefficient D in
+                m^2/s.
+            relaxation_time (Numeric, default=1.0): Relaxation time t in ps.
 
         Raises:
             TypeError: If scale, diffusion_coefficient, or
                 relaxation_time  are not numbers.
-            ValueError: If scale is negative.
-            UnitError: If unit is not a valid unit string or scipp Unit.
         """
         super().__init__(
             display_name=display_name,
@@ -102,27 +81,27 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         )
 
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
 
         if not isinstance(relaxation_time, Numeric):
-            raise TypeError('relaxation_time must be a number.')
+            raise TypeError("relaxation_time must be a number.")
 
         diffusion_coefficient = Parameter(
-            name='diffusion_coefficient',
+            name="diffusion_coefficient",
             value=float(diffusion_coefficient),
             fixed=False,
-            unit='m**2/s',
+            unit="m**2/s",
         )
 
         relaxation_time = Parameter(
-            name='relaxation_time',
+            name="relaxation_time",
             value=float(relaxation_time),
             fixed=False,
-            unit='ps',
+            unit="ps",
         )
 
-        self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-        self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+        self._hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+        self._angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
         self._diffusion_coefficient = diffusion_coefficient
         self._relaxation_time = relaxation_time
 
@@ -152,9 +131,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             ValueError: If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError('diffusion_coefficient must be a number.')
+            raise TypeError("diffusion_coefficient must be a number.")
         if float(diffusion_coefficient) < 0:
-            raise ValueError('diffusion_coefficient must be non-negative.')
+            raise ValueError("diffusion_coefficient must be non-negative.")
         self._diffusion_coefficient.value = float(diffusion_coefficient)
 
     @property
@@ -178,10 +157,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             ValueError: If relaxation_time is negative.
         """
         if not isinstance(relaxation_time, Numeric):
-            raise TypeError('relaxation_time must be a number.')
+            raise TypeError("relaxation_time must be a number.")
 
         if float(relaxation_time) < 0:
-            raise ValueError('relaxation_time must be non-negative.')
+            raise ValueError("relaxation_time must be non-negative.")
         self._relaxation_time.value = float(relaxation_time)
 
     ################################
@@ -214,7 +193,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         unit_conversion_factor_denominator = (
             self.diffusion_coefficient / self._angstrom**2 * self.relaxation_time
         )
-        unit_conversion_factor_denominator.convert_unit('dimensionless')
+        unit_conversion_factor_denominator.convert_unit("dimensionless")
 
         denominator = 1 + unit_conversion_factor_denominator.value * Q**2
 
@@ -252,7 +231,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
-        component_display_name: str = 'Jump translational diffusion',
+        component_display_name: str = "Jump translational diffusion",
     ) -> List[ComponentCollection]:
         """Create ComponentCollection components for the diffusion model
         at given Q values.
@@ -260,7 +239,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Args:
             Q (Q_type): Scattering vector in 1/angstrom. Can be a single
                 value or an array of values.
-            component_display_name (str): Name of the Jump Diffusion
+            component_display_name (str, default="Jump translational diffusion"): Name of the Jump Diffusion
                 Lorentzian component.
 
         Returns:
@@ -273,7 +252,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
-            raise TypeError('component_name must be a string.')
+            raise TypeError("component_name must be a string.")
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -285,7 +264,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         # is 0.
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f'{self.display_name}_Q{Q_value:.2f}', unit=self.unit
+                display_name=f"{self.display_name}_Q{Q_value:.2f}", unit=self.unit
             )
 
             lorentzian_component = Lorentzian(
@@ -327,12 +306,15 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Returns:
             str: Dependency expression for the width.
+
+        Raises:
+            TypeError: If Q is not a float.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
         # Q is given as a float, so we need to add the units
-        return f'hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
+        return f"hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))"
 
     def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
@@ -342,10 +324,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
-            'D': self._diffusion_coefficient,
-            't': self._relaxation_time,
-            'hbar': self._hbar,
-            'angstrom': self._angstrom,
+            "D": self._diffusion_coefficient,
+            "t": self._relaxation_time,
+            "hbar": self._hbar,
+            "angstrom": self._angstrom,
         }
 
     def _write_area_dependency_expression(self, QISF: float) -> str:
@@ -357,12 +339,15 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Returns:
             str: Dependency expression for the area.
+
+        Raises:
+            TypeError: If QISF is not a float.
         """
 
         if not isinstance(QISF, (float)):
-            raise TypeError('QISF must be a float.')
+            raise TypeError("QISF must be a float.")
 
-        return f'{QISF} * scale'
+        return f"{QISF} * scale"
 
     def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
@@ -372,7 +357,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
-            'scale': self._scale,
+            "scale": self._scale,
         }
 
     ################################
@@ -388,6 +373,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 model.
         """
         return (
-            f'JumpTranslationalDiffusion(display_name={self.display_name}, '
-            f'diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})'
+            f"JumpTranslationalDiffusion(display_name={self.display_name}, "
+            f"diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})"
         )
