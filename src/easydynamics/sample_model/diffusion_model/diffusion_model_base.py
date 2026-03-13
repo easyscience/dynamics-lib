@@ -15,10 +15,10 @@ class DiffusionModelBase(ModelBase):
 
     def __init__(
         self,
-        display_name: str | None = "MyDiffusionModel",
+        display_name: str | None = 'MyDiffusionModel',
         unique_name: str | None = None,
         scale: Numeric = 1.0,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
     ):
         """Initialize a new DiffusionModel.
 
@@ -37,16 +37,16 @@ class DiffusionModelBase(ModelBase):
                 cannot be converted to meV.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
-        scale = Parameter(name="scale", value=float(scale), fixed=False, min=0.0)
+        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
 
         try:
-            test = DescriptorNumber(name="test", value=1, unit=unit)
-            test.convert_unit("meV")
+            test = DescriptorNumber(name='test', value=1, unit=unit)
+            test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -80,8 +80,8 @@ class DiffusionModelBase(ModelBase):
         """
         raise AttributeError(
             (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
+                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+                f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
 
@@ -107,10 +107,10 @@ class DiffusionModelBase(ModelBase):
             ValueError: If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
         if float(scale) < 0:
-            raise ValueError("scale must be non-negative.")
+            raise ValueError('scale must be non-negative.')
         self._scale.value = scale
 
     # ------------------------------------------------------------------
@@ -123,4 +123,4 @@ class DiffusionModelBase(ModelBase):
         Returns:
             str: String representation of the DiffusionModel.
         """
-        return f"{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})"
+        return f'{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})'
