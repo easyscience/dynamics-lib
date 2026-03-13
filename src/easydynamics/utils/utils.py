@@ -11,20 +11,28 @@ Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 
-def _validate_and_convert_Q(Q: Q_type | None) -> np.ndarray | None:
+def _validate_and_convert_Q(
+    Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
+) -> np.ndarray | None:
     """Validate and convert Q to a numpy array.
 
     Args:
-        Q (Number, list, np.ndarray or sc.Variable): Scattering vector
-            values in 1/angstrom.
+        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable | None):
+            Scattering vector values in 1/angstrom.
 
     Returns:
-        np.ndarray: Q as a np.ndarray.
+        np.ndarray | None: Q as a np.ndarray or None if Q is None.
+
+    Raises:
+        TypeError: If Q is not a number, list, numpy array, or scipp
+            Variable.
+        ValueError: If Q is a numpy array with more than 1 dimension, or
+            if Q is a scipp Variable that does not have a single dimension named 'Q'.
     """
     if Q is None:
         return None
-    if not isinstance(Q, (Numeric, list, np.ndarray, sc.Variable)):
-        raise TypeError('Q must be a number, list, numpy array, or scipp array.')
+    if not isinstance(Q, (np.ndarray | Numeric | list | ArrayLike | sc.Variable)):
+        raise TypeError('Q must be a number, list, numpy array, or scipp Variable.')
 
     if isinstance(Q, Numeric):
         Q = np.array([Q])

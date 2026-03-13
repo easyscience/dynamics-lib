@@ -25,8 +25,8 @@ LARGE_THRESHOLD = 100
 def _detailed_balance_factor(
     energy: int | float | list | np.ndarray | sc.Variable,
     temperature: int | float | sc.Variable | Parameter,
-    energy_unit: str | sc.Unit = 'meV',
-    temperature_unit: str | sc.Unit = 'K',
+    energy_unit: str | sc.Unit = "meV",
+    temperature_unit: str | sc.Unit = "K",
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
     r"""
@@ -41,26 +41,32 @@ def _detailed_balance_factor(
     $k_B*T$ to have value 1 at $E=0$.
 
     Args:
-        energy (number | list | np.ndarray | scipp.Variable): The energy
+        energy (int | float | list | np.ndarray | sc.Variable): The energy
             transfer. If number, assumed to be in meV unless energy_unit
             is set.
-        temperature (number | scipp.Variable | Parameter): The
+        temperature (int | float | sc.Variable | Parameter): The
             temperature. If number, assumed to be in K unless
             temperature_unit is set.
-        energy_unit (str | sc.Unit |None): Unit for energy if energy is
+        energy_unit (str | sc.Unit, default='meV'): Unit for energy if energy is
             given as a number or list. Default is 'meV'
-        temperature_unit (str | sc.Unit |None): Unit for temperature if
+        temperature_unit (str | sc.Unit, default='K'): Unit for temperature if
             temperature is given as a number. Default is 'K'
-        divide_by_temperature (bool | None): If True, divide the result
+        divide_by_temperature (bool, default=True): If True, divide the result
             by $k_B*T$ to make it dimensionless and have value 1 at E=0.
             Default is True.
 
     Returns:
-        DBF (np.ndarray):  Detailed balance factor evaluated at the
+        np.ndarray:  Detailed balance factor evaluated at the
             given energy and temperature.
 
-    Examples
-    --------
+    Raises:
+        TypeError: If energy or temperature is not a number, list, numpy array, or scipp Variable, or if energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature is not a boolean.
+        ValueError: If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if temperature is a scipp Variable that does not have a single dimension named 'temperature', or if energy is a scipp Variable that does not have a single dimension named 'energy'.
+        UnitError: If the provided energy_unit or temperature_unit is invalid, or if the units of energy or temperature cannot be converted to the expected
+            units.
+        ZeroDivisionError: If divide_by_temperature is True and temperature is zero.
+
+    Examples:
     >>> detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
     >>> detailed_balance_factor(
     ...     energy=[1.0, 2.0],
@@ -73,60 +79,60 @@ def _detailed_balance_factor(
 
     # Input validation
     if not isinstance(divide_by_temperature, bool):
-        raise TypeError('divide_by_temperature must be True or False.')
+        raise TypeError("divide_by_temperature must be True or False.")
 
     if not isinstance(energy_unit, (str, sc.Unit)):
-        raise TypeError('energy_unit must be a string or scipp.Unit.')
+        raise TypeError("energy_unit must be a string or scipp.Unit.")
 
     if not isinstance(temperature_unit, (str, sc.Unit)):
-        raise TypeError('temperature_unit must be a string or scipp.Unit.')
+        raise TypeError("temperature_unit must be a string or scipp.Unit.")
 
     # Convert temperature and energy to sc variables
     # to make units easy to handle
     temperature = _convert_to_scipp_variable(
-        value=temperature, unit=temperature_unit, name='temperature'
+        value=temperature, unit=temperature_unit, name="temperature"
     )
 
     if temperature.value < 0:
-        raise ValueError('Temperature must be non-negative.')
+        raise ValueError("Temperature must be non-negative.")
 
-    energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name='energy')
+    energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name="energy")
 
     # What if people give units that don't make sense?
     try:
-        sc.to_unit(energy, unit='meV')
+        sc.to_unit(energy, unit="meV")
     except Exception as e:
         raise UnitError(
-            f'The unit of energy is wrong: {energy.unit}: {e} Check that energy has a valid unit.'
+            f"The unit of energy is wrong: {energy.unit}: {e} Check that energy has a valid unit."
         )
     # We give users the option to specify the unit of the energy,
     # but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(
-            f'Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. '
-            f'Using {energy.unit}.'
+            f"Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. "
+            f"Using {energy.unit}."
         )
 
     # Same for temperature
     try:
-        sc.to_unit(temperature, unit='K')
+        sc.to_unit(temperature, unit="K")
     except Exception as e:
         raise UnitError(
-            f'The unit of temperature is wrong: {temperature.unit}: {e} '
-            f'Check that temperature has a valid unit.'
+            f"The unit of temperature is wrong: {temperature.unit}: {e} "
+            f"Check that temperature has a valid unit."
         )
 
     if temperature.unit != temperature_unit:
         warnings.warn(
-            f'Input temperature has unit {temperature.unit}, '
-            f'but temperature_unit was set to {temperature_unit}. Using {temperature.unit}.'
+            f"Input temperature has unit {temperature.unit}, "
+            f"but temperature_unit was set to {temperature_unit}. Using {temperature.unit}."
         )
 
     # Zero temperature deserves special treatment.
     # Here, DBF is 0 for energy<0 and energy for energy>0
     if temperature.value == 0:
         if divide_by_temperature:
-            raise ZeroDivisionError('Cannot divide by T when T = 0.')
+            raise ZeroDivisionError("Cannot divide by T when T = 0.")
         DBF = sc.where(energy < 0.0 * energy.unit, 0.0 * energy.unit, energy)
 
         if DBF.sizes == {}:
@@ -142,7 +148,7 @@ def _detailed_balance_factor(
 
     x = energy / (kB * temperature)
 
-    x = sc.to_unit(x, unit='1')  # Make sure the unit is 1 and not e.g. 1e3
+    x = sc.to_unit(x, unit="1")  # Make sure the unit is 1 and not e.g. 1e3
 
     # Now compute DBF. First handle small and large x, then general.
 
@@ -159,7 +165,9 @@ def _detailed_balance_factor(
 
     # General case: exact formula
     mid = sc.logical_not(small) & sc.logical_not(large)
-    DBF = sc.where(mid, x / (1 - sc.exp(-x)), DBF)  # zeros in x are handled by SMALL_THRESHOLD
+    DBF = sc.where(
+        mid, x / (1 - sc.exp(-x)), DBF
+    )  # zeros in x are handled by SMALL_THRESHOLD
 
     #
     if not divide_by_temperature:
@@ -182,12 +190,12 @@ def _convert_to_scipp_variable(
     units.
 
     Args:
-        value (int | float | list | np.ndarray | Parameter |
-            sc.Variable): The value to convert. Can be a number, list,
-            numpy array, Parameter, or scipp Variable. If a number or
-            list, the unit must be specified in the unit argument.
+        value (int | float | list | np.ndarray | Parameter | sc.Variable):
+            The value to convert. Can be a number, list, numpy array,
+            Parameter, or scipp Variable. If a number or list, the unit
+            must be specified in the unit argument.
         name (str): The name of the variable, used for error messages.
-        unit (str | None): The unit to use if value is a number or list.
+        unit (str | None, default=None): The unit to use if value is a number or list.
             Must be specified if value is a number or list. Ignored if
             value is a Parameter or sc.Variable, which have their own
             units.
@@ -195,8 +203,6 @@ def _convert_to_scipp_variable(
     Raises:
         TypeError: If value is not one of the accepted types, or if unit
             is not a string when needed.
-        ValueError: If value is a number or list and unit is not
-            provided.
         UnitError: If the provided unit is invalid.
 
     Returns:
@@ -217,11 +223,13 @@ def _convert_to_scipp_variable(
         array_value = np.array(value.value)
         unit = value.unit
     else:
-        if name == 'energy':
-            raise TypeError(f'{name} must be a number, list, numpy array or scipp Variable')
+        if name == "energy":
+            raise TypeError(
+                f"{name} must be a number, list, numpy array or scipp Variable"
+            )
         else:
             raise TypeError(
-                f'{name} must be a number, list, numpy array, Parameter or scipp Variable'
+                f"{name} must be a number, list, numpy array, Parameter or scipp Variable"
             )
 
     # Create appropriate scipp variable based on shape
@@ -234,6 +242,6 @@ def _convert_to_scipp_variable(
     else:
         # Multi-element array
         try:
-            return sc.array(dims=['x'], values=array_value, unit=unit)
+            return sc.array(dims=["x"], values=array_value, unit=unit)
         except UnitError as e:
             raise UnitError(f"Invalid unit string '{unit}' for {name}: {e}")
