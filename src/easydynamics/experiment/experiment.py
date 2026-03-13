@@ -187,8 +187,12 @@ class Experiment(NewBase):
         raise AttributeError('energy is a read-only property derived from the data.')
 
     def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
-        """Get the energy values from the dataset, applying the mask if
-        present.
+        """Get the energy values from the dataset, removing points where
+        the y values or variances are NaN or Inf for the given Q index.
+
+        Args:
+            Q_index (int): The Q index to get the masked energy values
+                for.
 
         Returns:
             sc.Variable | None: The masked energy values from the

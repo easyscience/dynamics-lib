@@ -307,7 +307,7 @@ class TestExperiment:
         masked_energy = experiment_with_data.get_masked_energy(Q_index=Q_index)
 
         # EXPECT
-        len(masked_energy) == 1
+        assert len(masked_energy) == 1
         assert masked_energy.values == 30.0
 
     def test_get_masked_energy_no_data_returns_None(self):

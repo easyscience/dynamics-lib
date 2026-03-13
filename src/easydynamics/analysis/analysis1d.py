@@ -490,13 +490,13 @@ class Analysis1d(AnalysisBase):
         )
         return conv.convolution()
 
-    def _evaluate_sample(self, energy: sc.DataArray | None = None) -> np.ndarray:
+    def _evaluate_sample(self, energy: sc.Variable | None = None) -> np.ndarray:
         """Evaluate the sample contribution for a given Q index.
 
         Assumes that self._convolver is up to date.
 
         Args:
-            energy (sc.DataArray | None): Optional energy grid to use for
+            energy (sc.Variable | None): Optional energy grid to use for
                 evaluation. If None, the energy grid from the experiment
                 is used.
 
@@ -536,11 +536,11 @@ class Analysis1d(AnalysisBase):
             energy=energy,
         )
 
-    def _evaluate_background(self, energy: sc.DataArray | None = None) -> np.ndarray:
+    def _evaluate_background(self, energy: sc.Variable | None = None) -> np.ndarray:
         """Evaluate the background contribution for the chosen Q index.
 
         Args:
-            energy (sc.DataArray | None): Optional energy grid to use for
+            energy (sc.Variable | None): Optional energy grid to use for
                 evaluation. If None, the energy grid from the experiment
                 is used.
 
