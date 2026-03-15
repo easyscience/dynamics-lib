@@ -25,26 +25,6 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     If the center is not provided, it will be centered at 0
     and fixed, which is typically what you want in QENS.
-
-    Args:
-        area (Int | float | Parameter): Area of the Lorentzian.
-        center (Int | float | None | Parameter): Center of the
-            Lorentzian. If None, defaults to 0 and is fixed
-        width (Int | float | Parameter): Half width at half maximum
-            (HWHM).
-        unit (str | sc.Unit): Unit of the parameters. Defaults to "meV".
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component. If None,
-            a unique_name is automatically generated.
-
-    Attributes:
-        area (Parameter): Area of the Lorentzian.
-        center (Parameter): Center of the Lorentzian.
-        width (Parameter): Half width at half maximum (HWHM) of the
-            Lorentzian.
-        unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -52,27 +32,22 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         area: Numeric | Parameter = 1.0,
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'Lorentzian',
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "Lorentzian",
         unique_name: str | None = None,
     ) -> None:
         """Initialize the Lorentzian component.
 
         Args:
-            area (Int | float | Parameter): Area of the Lorentzian.
-            center (Int | float | None | Parameter): Center of the
-                Lorentzian. If None, defaults to 0 and is fixed
-            width (Int | float | Parameter): Half width at half maximum
+            area (Numeric | Parameter, default=1.0): Area of the Lorentzian.
+            center (Numeric | Parameter | None, default=None): Center of the
+                Lorentzian. If None, defaults to 0 and is fixed.
+            width (Numeric | Parameter, default=1.0): Half width at half maximum
                 (HWHM).
-            unit (str | sc.Unit): Unit of the parameters. Defaults to
-                "meV".
-            display_name (str | None): Name of the component.
-            unique_name (str | None): Unique name of the component. If
+            unit (str | sc.Unit, default='meV'): Unit of the parameters.
+            display_name (str | None, default='Lorentzian'): Name of the component.
+            unique_name (str | None, default=None): Unique name of the component. If
                 None, a unique_name is automatically generated.
-
-        Raises:
-            TypeError: If any of the parameters are of the wrong type.
-            ValueError: If width is not positive.
         """
 
         super().__init__(
@@ -82,11 +57,15 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(
+            area=area, name=display_name, unit=self._unit
+        )
         center = self._create_center_parameter(
             center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
+        width = self._create_width_parameter(
+            width=width, name=display_name, unit=self._unit
+        )
 
         self._area = area
         self._center = center
@@ -112,7 +91,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             TypeError: If the value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
+            raise TypeError("area must be a number")
         self._area.value = value
 
     @property
@@ -140,7 +119,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     @property
@@ -157,21 +136,23 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         """Set the width parameter value (HWHM).
 
         Args:
-            value (Numeric | None): The new value for the width
-            parameter.
+            value (Numeric): The new value for the width
+                parameter.
 
         Raises:
-            TypeError: If the value is not a number or None.
+            TypeError: If the value is not a number.
             ValueError: If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('width must be a number')
+            raise TypeError("width must be a number")
 
         if float(value) <= 0:
-            raise ValueError('width must be positive')
+            raise ValueError("width must be positive")
         self._width.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def evaluate(
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+    ) -> np.ndarray:
         r"""Evaluate the Lorentzian at the given x values.
 
         If x is a scipp Variable, the unit of the Lorentzian will be
@@ -186,7 +167,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         the half width at half maximum (HWHM).
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 The x values at which to evaluate the Lorentzian.
 
         Returns:
@@ -207,5 +188,5 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Returns:
             str: A string representation of the Lorentzian.
         """
-        return f'Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n \
-            area = {self.area},\n center = {self.center},\n width = {self.width})'
+        return f"Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n \
+            area = {self.area},\n center = {self.center},\n width = {self.width})"
