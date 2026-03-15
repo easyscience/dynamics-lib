@@ -19,43 +19,26 @@ class Experiment(NewBase):
 
     This is a minimal implementation that will be extended in the
     future.
-
-    Args:
-        display_name (str): Display name of the experiment.
-        unique_name (str | None): Unique name of the experiment. If
-            None, a unique name will be generated.
-        data (sc.DataArray | str | None): Dataset associated with the
-            experiment. Can be a sc.DataArray or a filename string to
-            load from. If None, no data is loaded.
-
-    Attributes:
-        data (sc.DataArray | None): Dataset associated with the
-            experiment.
-        binned_data (sc.DataArray | None): Binned dataset associated
-            with the experiment. This is derived from `data` and is
-            updated whenever `data` is set.
     """
 
     def __init__(
         self,
-        display_name: str = 'MyExperiment',
+        display_name: str | None = "MyExperiment",
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
     ) -> None:
         """Initialize the Experiment object.
 
         Args:
-            display_name (str): Display name of the experiment.
-            unique_name (str | None): Unique name of the experiment. If
+            display_name (str | None, default="MyExperiment"): Display name of the experiment.
+            unique_name (str | None, default=None): Unique name of the experiment. If
                 None, a unique name will be generated.
-            data (sc.DataArray | str | None): Dataset associated with
+            data (sc.DataArray | str | None, default=None): Dataset associated with
                 the experiment. Can be a sc.DataArray or a filename
                 string to load from. If None, no data is loaded.
 
         Raises:
             TypeError: If data is not a sc.DataArray, a string, or None.
-            ValueError: If the loaded data is missing required
-                coordinates.
         """
         super().__init__(
             display_name=display_name,
@@ -71,7 +54,7 @@ class Experiment(NewBase):
             self._data = data
         else:
             raise TypeError(
-                f'Data must be a sc.DataArray or a filename string, not {type(data).__name__}'
+                f"Data must be a sc.DataArray or a filename string, not {type(data).__name__}"
             )
 
         self._binned_data = (
@@ -102,10 +85,9 @@ class Experiment(NewBase):
 
         Raises:
             TypeError: If the value is not a sc.DataArray.
-            ValueError: If the dataset is missing required coordinates.
         """
         if not isinstance(value, sc.DataArray):
-            raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
+            raise TypeError(f"Data must be a sc.DataArray, not {type(value).__name__}")
         self._validate_coordinates(value)
         self._data = value
         self._binned_data = (
@@ -129,12 +111,14 @@ class Experiment(NewBase):
 
         Args:
             value (sc.DataArray): The new binned dataset to associate
-            with this experiment (ignored)
+                with this experiment (ignored)
 
         Raises:
             AttributeError: Always, since binned_data is read-only.
         """
-        raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
+        raise AttributeError(
+            "binned_data is a read-only property. Use rebin() to rebin the data"
+        )
 
     @property
     def Q(self) -> sc.Variable | None:
@@ -146,7 +130,7 @@ class Experiment(NewBase):
         """
         if self._binned_data is None:
             return None
-        return self._binned_data.coords['Q']
+        return self._binned_data.coords["Q"]
 
     @Q.setter
     def Q(self, value: sc.Variable) -> None:
@@ -159,7 +143,7 @@ class Experiment(NewBase):
         Raises:
             AttributeError: Always, since Q is read-only.
         """
-        raise AttributeError('Q is a read-only property derived from the data.')
+        raise AttributeError("Q is a read-only property derived from the data.")
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -171,7 +155,7 @@ class Experiment(NewBase):
         """
         if self._binned_data is None:
             return None
-        return self._binned_data.coords['energy']
+        return self._binned_data.coords["energy"]
 
     @energy.setter
     def energy(self, value: sc.Variable) -> None:
@@ -184,7 +168,7 @@ class Experiment(NewBase):
         Raises:
             AttributeError: Always, since energy is read-only.
         """
-        raise AttributeError('energy is a read-only property derived from the data.')
+        raise AttributeError("energy is a read-only property derived from the data.")
 
     def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
         """Get the energy values from the dataset, removing points where
@@ -197,6 +181,9 @@ class Experiment(NewBase):
         Returns:
             sc.Variable | None: The masked energy values from the
                 dataset, or None if no data is loaded.
+
+        Raises:
+            IndexError: If Q_index is not a valid index for the Q values.
         """
         if self._binned_data is None:
             return None
@@ -206,12 +193,12 @@ class Experiment(NewBase):
             or Q_index < 0
             or (self.Q is not None and Q_index >= len(self.Q))
         ):
-            raise IndexError('Q_index must be a valid index for the Q values.')
+            raise IndexError("Q_index must be a valid index for the Q values.")
 
-        energy = self._binned_data.coords['energy']
+        energy = self._binned_data.coords["energy"]
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
 
-        mask_var = sc.array(dims=['energy'], values=mask)
+        mask_var = sc.array(dims=["energy"], values=mask)
         masked_energy = energy[mask_var]
         return masked_energy
 
@@ -224,29 +211,27 @@ class Experiment(NewBase):
 
         Args:
             filename (str ): Path to the HDF5 file.
-            display_name (str | None): Optional display name for the
+            display_name (str | None, default=None): Optional display name for the
                 experiment.
 
         Raises:
             TypeError: If filename is not a string or if display_name is
-                not a string or None.
-            ValueError: If the loaded data is missing required
-                coordinates.
+                not a string or None or if the loaded data is not a sc.DataArray.
         """
         if not isinstance(filename, str):
-            raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
+            raise TypeError(f"Filename must be a string, not {type(filename).__name__}")
 
         if display_name is not None:
             if not isinstance(display_name, str):
                 raise TypeError(
-                    f'Display name must be a string, not {type(display_name).__name__}'
+                    f"Display name must be a string, not {type(display_name).__name__}"
                 )
             self.display_name = display_name
 
         loaded_data = sc_load_hdf5(filename)
         if not isinstance(loaded_data, sc.DataArray):
             raise TypeError(
-                f'Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}'
+                f"Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}"
             )
         self._validate_coordinates(loaded_data)
         self.data = loaded_data
@@ -255,7 +240,7 @@ class Experiment(NewBase):
         """Save the dataset to HDF5.
 
         Args:
-            filename (str | None): Path to the output HDF5 file.
+            filename (str | None, default=None): Path to the output HDF5 file.
                 If None, the file will be named after the unique_name of
                 the experiment with a .h5 extension.
 
@@ -265,13 +250,13 @@ class Experiment(NewBase):
         """
 
         if filename is None:
-            filename = f'{self.unique_name}.h5'
+            filename = f"{self.unique_name}.h5"
 
         if not isinstance(filename, str):
-            raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
+            raise TypeError(f"Filename must be a string, not {type(filename).__name__}")
 
         if self._data is None:
-            raise ValueError('No data to save.')
+            raise ValueError("No data to save.")
 
         dir_name = os.path.dirname(filename)
         if dir_name:
@@ -295,36 +280,39 @@ class Experiment(NewBase):
         Raises:
             TypeError: If dimensions is not a dictionary or if
                 keys/values are of incorrect types.
+            ValueError: If there is no data to rebin.
             KeyError: If a specified dimension is not in the dataset.
         """
 
         if not isinstance(dimensions, dict):
             raise TypeError(
-                'dimensions must be a dictionary mapping dimension names '
-                'to number of bins or bin values as sc.Variable.'
+                "dimensions must be a dictionary mapping dimension names "
+                "to number of bins or bin values as sc.Variable."
             )
         if self._data is None:
-            raise ValueError('No data to rebin. Please load data first.')
+            raise ValueError("No data to rebin. Please load data first.")
         binned_data = self._data.copy()
         dim_copy = dimensions.copy()
         for dim, value in dim_copy.items():
             if not isinstance(dim, str):
                 raise TypeError(
-                    f'Dimension keys must be strings. Got {type(dim)} for {dim} instead.'
+                    f"Dimension keys must be strings. Got {type(dim)} for {dim} instead."
                 )
             if dim not in self._data.dims:
                 raise KeyError(
                     f"Dimension '{dim}' not a valid dimension for rebinning. "
-                    f'Should be one of {self._data.dims}.'
+                    f"Should be one of {self._data.dims}."
                 )
-            if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
+            if (
+                isinstance(value, float) and value.is_integer()
+            ):  # I allow eg. 2.0 as well as 2
                 value = int(value)
                 # This line can be removed when scipp resize support
                 # resizing with coordinates
                 dimensions[dim] = value
             if not (isinstance(value, int) or isinstance(value, sc.Variable)):
                 raise TypeError(
-                    f'Dimension values must be integers or sc.Variable. '
+                    f"Dimension values must be integers or sc.Variable. "
                     f"Got {type(value)} for dimension '{dim}' instead."
                 )
             binned_data = binned_data.bin({dim: value})
@@ -337,12 +325,12 @@ class Experiment(NewBase):
     # other methods
     ###########
 
-    def plot_data(self, slicer=False, **kwargs) -> None:
+    def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
         """Plot the dataset using plopp: https://scipp.github.io/plopp/
 
         Args:
-            slicer (bool): If True, use plopp's slicer instead of plot.
-            **kwargs (Any): Additional keyword arguments to pass to plopp.
+            slicer (bool, default=False): If True, use plopp's slicer instead of plot.
+            **kwargs (dict): Additional keyword arguments to pass to plopp.
 
         Raises:
             ValueError: If there is no data to plot.
@@ -350,13 +338,15 @@ class Experiment(NewBase):
         """
 
         if self._binned_data is None:
-            raise ValueError('No data to plot. Please load data first.')
+            raise ValueError("No data to plot. Please load data first.")
 
         if not _in_notebook():
-            raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
+            raise RuntimeError(
+                "plot_data() can only be used in a Jupyter notebook environment."
+            )
 
         plot_kwargs_defaults = {
-            'title': self.display_name,
+            "title": self.display_name,
         }
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -367,7 +357,7 @@ class Experiment(NewBase):
             )
         else:
             fig = pp.plot(
-                self._binned_data.transpose(dims=['energy', 'Q']),
+                self._binned_data.transpose(dims=["energy", "Q"]),
                 **plot_kwargs_defaults,
             )
         return fig
@@ -384,12 +374,13 @@ class Experiment(NewBase):
             data (sc.DataArray): The data to validate.
 
         Raises:
+            TypeError: If data is not a sc.DataArray.
             ValueError: If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
-            raise TypeError('Data must be a sc.DataArray.')
+            raise TypeError("Data must be a sc.DataArray.")
 
-        required_coords = ['Q', 'energy']
+        required_coords = ["Q", "energy"]
         for coord in required_coords:
             if coord not in data.coords:
                 raise ValueError(f"Data is missing required coordinate: '{coord}'")
@@ -410,7 +401,9 @@ class Experiment(NewBase):
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
 
-    def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _extract_x_y_var(
+        self, Q_index: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index.
 
@@ -422,8 +415,8 @@ class Experiment(NewBase):
                 variances arrays extracted from the experiment for the
                 given Q index.
         """
-        data = self.binned_data['Q', Q_index]
-        x = data.coords['energy'].values
+        data = self.binned_data["Q", Q_index]
+        x = data.coords["energy"].values
         y = data.values
         var = data.variances
         return x, y, var
@@ -462,7 +455,7 @@ class Experiment(NewBase):
         var = var[mask]
 
         if np.any(var == 0):
-            raise ValueError('Cannot compute weights: some variances are zero.')
+            raise ValueError("Cannot compute weights: some variances are zero.")
 
         weights = 1.0 / var**0.5
 
@@ -479,15 +472,15 @@ class Experiment(NewBase):
             str: A string representation of the Experiment object.
         """
 
-        return f'Experiment `{self.unique_name}` with data: {self._data}'
+        return f"Experiment `{self.unique_name}` with data: {self._data}"
 
-    def __copy__(self) -> 'Experiment':
+    def __copy__(self) -> "Experiment":
         """Return a copy of the object.
 
         Returns:
             Experiment: A copy of the Experiment object.
         """
-        temp = self.to_dict(skip=['unique_name'])
+        temp = self.to_dict(skip=["unique_name"])
         new_obj = self.__class__.from_dict(temp)
         new_obj.data = self.data.copy() if self.data is not None else None
         return new_obj
