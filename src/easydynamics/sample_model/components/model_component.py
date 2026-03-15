@@ -171,9 +171,14 @@ class ModelComponent(ModelBase):
             unit (str | sc.Unit): The new unit to convert to.
 
         Raises:
+            TypeError: If the provided unit is not a str or sc.Unit
             Exception: If the provided unit is invalid or incompatible
                 with the component's parameters.
         """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(
+                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
+            )
 
         old_unit = self._unit
         pars = self.get_all_parameters()
