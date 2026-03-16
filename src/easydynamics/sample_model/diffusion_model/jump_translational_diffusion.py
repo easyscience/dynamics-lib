@@ -8,7 +8,6 @@ import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
-from scipp.constants import hbar as scipp_hbar
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
@@ -16,6 +15,8 @@ from easydynamics.sample_model.diffusion_model.diffusion_model_base import Diffu
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import angstrom
+from easydynamics.utils.utils import hbar
 
 
 class JumpTranslationalDiffusion(DiffusionModelBase):
@@ -99,8 +100,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             unit='ps',
         )
 
-        self._hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-        self._angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+        self._hbar = hbar
+        self._angstrom = angstrom
         self._diffusion_coefficient = diffusion_coefficient
         self._relaxation_time = relaxation_time
 

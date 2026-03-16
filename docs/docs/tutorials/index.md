@@ -24,6 +24,11 @@ multiple `Q` and analysing complex inelastic data.
 - [Tutorial 1: Brownian Diffusion](tutorial1_brownian.ipynb) - Learn how
   to analyse QENS data with elastic incoherent background and Brownian
   diffusion.
+- [Tutorial 2: Magnetic nanoparticles](tutorial2_nanoparticles.ipynb) -
+  Learn how to do advanced QENS and INS analysis to understand the
+  magnetic dynamics of nanoparticles, fitting and subsequently fixing
+  background parameters and fixing some parameters to be equal when
+  fitting.
 
 ## Classes and Methods
 

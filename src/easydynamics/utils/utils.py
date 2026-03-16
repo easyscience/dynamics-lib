@@ -3,12 +3,17 @@
 
 import numpy as np
 import scipp as sc
+from easyscience.variable import DescriptorNumber
 from numpy.typing import ArrayLike
+from scipp.constants import hbar as scipp_hbar
 
 Numeric = float | int
 
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
+
+hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
+angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
 
 def _validate_and_convert_Q(

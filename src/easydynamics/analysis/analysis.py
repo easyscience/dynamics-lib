@@ -296,6 +296,9 @@ class Analysis(AnalysisBase):
             data_and_model,
             **plot_kwargs_defaults,
         )
+        for widget in fig.bottom_bar[0].controls.values():
+            widget.slider_toggler.value = '-o-'
+
         return fig
 
     def parameters_to_dataset(self) -> sc.Dataset:
