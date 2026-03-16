@@ -32,64 +32,21 @@ class Convolution(NumericalConvolutionBase):
     Includes optional upsampling and extended range to improve accuracy
     of the numerical convolutions. Also warns about numerical
     instabilities if peaks are very wide or very narrow.
-
-    Args:
-        energy (np.ndarray | scipp.Variable): 1D array of energy values
-            where the convolution is evaluated.
-        sample_components (ComponentCollection | ModelComponent): The
-            sample components to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution components to convolve with.
-        upsample_factor (int | None): The factor by which to upsample
-            the input data before convolution. Default is 5.
-        extension_factor (float | None): The factor by which to
-            extend the input data range before convolution. Default is
-            0.2.
-        temperature (Parameter | float | None): The
-            temperature to use for detailed balance correction. Default
-            is None.
-        temperature_unit (str | sc.Unit | None): The unit of the
-            temperature parameter. Default is 'K'.
-        energy_unit (str | sc.Unit | None): The unit of the energy.
-            Default is 'meV'.
-        normalize_detailed_balance (bool | None): Whether to
-            normalize the detailed balance correction. Default is True.
-
-    Attributes:
-        energy (scipp.Variable): 1D array of energy values where the
-            convolution is evaluated.
-        sample_components (ComponentCollection): The sample components
-            to be convolved.
-        resolution_components (ComponentCollection): The resolution
-            components to convolve with.
-        energy_offset (Parameter): Energy offset to apply to the energy
-            values before convolution.
-        upsample_factor (int): The factor by which to upsample the input
-            data before convolution.
-        extension_factor (float): The factor by which to extend the
-            input data range before convolution.
-        temperature (Parameter | None): The temperature to use for
-            detailed balance correction.
-        temperature_unit (str | sc.Unit): The unit of the temperature
-            parameter.
-        energy_unit (str | sc.Unit): The unit of the energy.
-        normalize_detailed_balance (bool): Whether to normalize the
-            detailed balance correction.
     """
 
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
     _invalidate_plan_on_change = {
-        'energy',
-        '_energy',
-        '_energy_grid',
-        '_sample_components',
-        '_resolution_components',
-        '_temperature',
-        '_upsample_factor',
-        '_extension_factor',
-        '_energy_unit',
-        '_normalize_detailed_balance',
+        "energy",
+        "_energy",
+        "_energy_grid",
+        "_sample_components",
+        "_resolution_components",
+        "_temperature",
+        "_upsample_factor",
+        "_extension_factor",
+        "_energy_unit",
+        "_normalize_detailed_balance",
     }
 
     def __init__(
@@ -98,36 +55,38 @@ class Convolution(NumericalConvolutionBase):
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
         energy_offset: Numeric | Parameter = 0.0,
-        upsample_factor: Numeric = 5,
-        extension_factor: Numeric = 0.2,
+        upsample_factor: Numeric | None = 5,
+        extension_factor: Numeric | None = 0.2,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        temperature_unit: str | sc.Unit = "K",
+        energy_unit: str | sc.Unit = "meV",
         normalize_detailed_balance: bool = True,
     ) -> None:
         """Initialize the Convolution class.
 
         Args:
-            energy (np.ndarray | scipp.Variable): 1D array of energy
+            energy (np.ndarray | sc.Variable): 1D array of energy
                 values where the convolution is evaluated.
             sample_components (ComponentCollection | ModelComponent):
                 The  sample components to be convolved.
             resolution_components (ComponentCollection | ModelComponent):
                 The resolution components to convolve with.
-            upsample_factor (int | None): The factor by which to
+            energy_offset (Numeric | Parameter, default=0.0): An energy
+                offset to apply to the energy values before convolution.
+            upsample_factor (Numeric | None, default=5): The factor by which to
                 upsample the input data before convolution. Default is
                 5.
-            extension_factor (float | None): The factor by which to
+            extension_factor (Numeric | None, default=0.2): The factor by which to
                 extend the input data range before convolution. Default
                 is 0.2.
-            temperature (Parameter | float | None): The
+            temperature (Parameter | Numeric | None, default=None): The
                 temperature to use for detailed balance correction.
                 Default is None.
-            temperature_unit (str | sc.Unit | None): The unit of the
+            temperature_unit (str | sc.Unit, default='K'): The unit of the
                 temperature parameter. Default is 'K'.
-            energy_unit (str | sc.Unit | None): The unit of the energy.
+            energy_unit (str | sc.Unit, default='meV'): The unit of the energy.
                 Default is 'meV'.
-            normalize_detailed_balance (bool | None): Whether to
+            normalize_detailed_balance (bool, default=True): Whether to
                 normalize the detailed balance correction. Default is
                 True.
         """
@@ -216,23 +175,27 @@ class Convolution(NumericalConvolutionBase):
         Returns:
             bool: True if the component pair can be handled
                 analytically, False otherwise.
+
+        Raises:
+            TypeError: If either component is not a ModelComponent, or if
+                the resolution component is a DeltaFunction.
         """
 
         if not isinstance(sample_component, ModelComponent):
             raise TypeError(
-                f'`sample_component` is an instance of {type(sample_component).__name__}, \
-                but must be a ModelComponent.'
+                f"`sample_component` is an instance of {type(sample_component).__name__}, \
+                but must be a ModelComponent."
             )
 
         if not isinstance(resolution_component, ModelComponent):
             raise TypeError(
-                f'`resolution_component` is an instance of {type(resolution_component).__name__}, \
-                    but must be a ModelComponent.'
+                f"`resolution_component` is an instance of {type(resolution_component).__name__}, \
+                    but must be a ModelComponent."
             )
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(
-                'resolution components contains delta functions. This is not supported.'
+                "resolution components contains delta functions. This is not supported."
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -271,7 +234,9 @@ class Convolution(NumericalConvolutionBase):
             pair_is_analytic = []
             for resolution_component in self._resolution_components.components:
                 pair_is_analytic.append(
-                    self._check_if_pair_is_analytic(sample_component, resolution_component)
+                    self._check_if_pair_is_analytic(
+                        sample_component, resolution_component
+                    )
                 )
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
@@ -323,17 +288,24 @@ class Convolution(NumericalConvolutionBase):
             self._numerical_convolver = None
 
     # Update some setters so the internal sample models are updated
-    def __setattr__(self, name, value) -> None:
+    def __setattr__(self, name: str, value: any) -> None:
         """Custom setattr to invalidate convolution plan on relevant
         attribute changes, and build a new plan.
 
         The new plan is only built after initialization (when
         _reactions_enabled is True) to avoid issues during __init__.
+
+        Args:
+            name (str): The name of the attribute to set.
+            value (any): The value to set the attribute to.
         """
         super().__setattr__(name, value)
 
         if name in self._invalidate_plan_on_change:
             self._convolution_plan_is_valid = False
 
-        if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
+        if (
+            getattr(self, "_reactions_enabled", False)
+            and name in self._invalidate_plan_on_change
+        ):
             self._build_convolution_plan()

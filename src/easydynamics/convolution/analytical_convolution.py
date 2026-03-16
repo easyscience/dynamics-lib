@@ -22,35 +22,23 @@ class AnalyticalConvolution(ConvolutionBase):
 
     Possible analytical convolutions are any combination of
     delta functions, Gaussians, Lorentzians and Voigt profiles.
-
-    Args:
-        energy (np.ndarray | sc.Variable): 1D array of energy values
-            where the convolution is evaluated.
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_offset (Numeric | Parameter, optional): An offset to
-            shift the energy values by. Default is 0.0.
-        energy_unit (str | sc.Unit, optional): The unit of the energy.
-            Default is 'meV'.
     """
 
     # Mapping of supported component type pairs to convolution methods.
     # Delta functions are handled separately.
     _CONVOLUTIONS = {
-        ('Gaussian', 'Gaussian'): '_convolute_gaussian_gaussian',
-        ('Gaussian', 'Lorentzian'): '_convolute_gaussian_lorentzian',
-        ('Gaussian', 'Voigt'): '_convolute_gaussian_voigt',
-        ('Lorentzian', 'Lorentzian'): '_convolute_lorentzian_lorentzian',
-        ('Lorentzian', 'Voigt'): '_convolute_lorentzian_voigt',
-        ('Voigt', 'Voigt'): '_convolute_voigt_voigt',
+        ("Gaussian", "Gaussian"): "_convolute_gaussian_gaussian",
+        ("Gaussian", "Lorentzian"): "_convolute_gaussian_lorentzian",
+        ("Gaussian", "Voigt"): "_convolute_gaussian_voigt",
+        ("Lorentzian", "Lorentzian"): "_convolute_lorentzian_lorentzian",
+        ("Lorentzian", "Voigt"): "_convolute_lorentzian_voigt",
+        ("Voigt", "Voigt"): "_convolute_voigt_voigt",
     }
 
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        energy_unit: str | sc.Unit = 'meV',
+        energy_unit: str | sc.Unit = "meV",
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
@@ -60,14 +48,14 @@ class AnalyticalConvolution(ConvolutionBase):
         Args:
             energy (np.ndarray | sc.Variable): 1D array of energy values
                 where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
+            energy_unit (str | sc.Unit, default='meV'): The unit of the
+                energy.
+            sample_components (ComponentCollection | ModelComponent | None, default=None):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
+            resolution_components (ComponentCollection | ModelComponent | None, default=None):
                 The resolution model to convolve with.
-            energy_offset (Numeric | Parameter, optional): An offset to
-                shift the energy values by. Default is 0.0.
-            energy_unit (str | sc.Unit, optional): The unit of the
-                energy. Default is 'meV'.
+            energy_offset (Numeric | Parameter, default=0.0): An offset to
+                shift the energy values by.
         """
         super().__init__(
             energy=energy,
@@ -88,12 +76,6 @@ class AnalyticalConvolution(ConvolutionBase):
         Returns:
             np.ndarray: The convolution of the sample_components and
                 resolution_components values evaluated at self.energy.
-
-        Raises:
-            ValueError: If resolution_components contains delta
-                functions.
-            ValueError: If component pair cannot be handled
-                analytically.
         """
 
         sample_components = self.sample_components.components
@@ -164,8 +146,8 @@ class AnalyticalConvolution(ConvolutionBase):
 
         if isinstance(resolution_component, DeltaFunction):
             raise ValueError(
-                'Analytical convolution with a delta function \
-                    in the resolution model is not supported.'
+                "Analytical convolution with a delta function \
+                    in the resolution model is not supported."
             )
 
         # Delta function + anything -->
@@ -191,8 +173,8 @@ class AnalyticalConvolution(ConvolutionBase):
 
         if func_name is None:
             raise ValueError(
-                f'Analytical convolution not supported for component pair: '
-                f'{type(sample_component).__name__}, {type(resolution_component).__name__}'
+                f"Analytical convolution not supported for component pair: "
+                f"{type(sample_component).__name__}, {type(resolution_component).__name__}"
             )
 
         # Call the corresponding method
@@ -205,7 +187,7 @@ class AnalyticalConvolution(ConvolutionBase):
         self,
         sample_component: DeltaFunction,
         resolution_components: ComponentCollection | ModelComponent,
-    ):
+    ) -> np.ndarray:
         """Convolution of delta function with any ModelComponent or
         ComponentCollection results in the same component or
         ComponentCollection shifted by the delta center. The areas are
@@ -243,7 +225,9 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray: The evaluated convolution values at self.energy.
         """
 
-        width = np.sqrt(sample_component.width.value**2 + resolution_component.width.value**2)
+        width = np.sqrt(
+            sample_component.width.value**2 + resolution_component.width.value**2
+        )
 
         area = sample_component.area.value * resolution_component.area.value
 
@@ -302,7 +286,8 @@ class AnalyticalConvolution(ConvolutionBase):
         center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
-            sample_component.width.value**2 + resolution_component.gaussian_width.value**2
+            sample_component.width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
         lorentzian_width = resolution_component.lorentzian_width.value
@@ -404,11 +389,13 @@ class AnalyticalConvolution(ConvolutionBase):
         center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
-            sample_component.gaussian_width.value**2 + resolution_component.gaussian_width.value**2
+            sample_component.gaussian_width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
         lorentzian_width = (
-            sample_component.lorentzian_width.value + resolution_component.lorentzian_width.value
+            sample_component.lorentzian_width.value
+            + resolution_component.lorentzian_width.value
         )
         return self._voigt_eval(
             area=area,

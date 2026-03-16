@@ -13,82 +13,59 @@ from easydynamics.utils.utils import Numeric
 class ConvolutionBase:
     """Base class for convolutions of sample and resolution models. This
     base class has no convolution functionality.
-
-    Args:
-        energy (np.ndarray | scipp.Variable): 1D array of energy values
-            where the convolution is evaluated.
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_unit (str | sc.Unit, optional): The unit of the energy.
-            Default is 'meV'.
-        energy_offset (Numeric | Parameter, optional): The energy offset
-            applied to the convolution. Default is 0.0.
-
-    Attributes:
-        energy (scipp.Variable): 1D array of energy values where the
-            convolution is evaluated
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_unit (str | sc.Unit): The unit of the energy.
-        energy_offset (Parameter): The energy offset applied to the
-            convolution.
     """
 
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_components: ComponentCollection | ModelComponent = None,
-        resolution_components: ComponentCollection | ModelComponent = None,
-        energy_unit: str | sc.Unit = 'meV',
+        sample_components: ComponentCollection | ModelComponent | None = None,
+        resolution_components: ComponentCollection | ModelComponent | None = None,
+        energy_unit: str | sc.Unit = "meV",
         energy_offset: Numeric | Parameter = 0.0,
     ) -> None:
         """Initialize the ConvolutionBase.
 
         Args:
-            energy (np.ndarray | scipp.Variable): 1D array of energy
+            energy (np.ndarray | sc.Variable): 1D array of energy
                 values where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
+            sample_components (ComponentCollection | ModelComponent | None, default=None):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
+            resolution_components (ComponentCollection | ModelComponent | None, default=None):
                 The resolution model to convolve with.
-            energy_unit (str | sc.Unit, optional): The unit of the
-                energy. Default is 'meV'.
-            energy_offset (Numeric | Parameter, optional): The energy
+            energy_unit (str | sc.Unit, default='meV'): The unit of the
+                energy.
+            energy_offset (Numeric | Parameter, default=0.0): The energy
                 offset applied to the convolution. Default is 0.0.
 
         Raises:
             TypeError: If energy is not a numpy ndarray or a scipp
-                Variable.
-            TypeError: If energy_unit is not a string or scipp unit.
-            TypeError: If energy_offset is not a number or a Parameter.
-            TypeError: If sample_components is not a ComponentCollection
-                or ModelComponent.
-            TypeError: If resolution_components is not a
-                ComponentCollection or ModelComponent.
+                Variable or if energy_unit is not a string or scipp unit, or if
+                energy_offset is not a number or a Parameter, or if
+                sample_components is not a ComponentCollection or ModelComponent, or if
+                resolution_components is not a ComponentCollection or ModelComponent.
+
         """
         if isinstance(energy, Numeric):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
+            raise TypeError(
+                f"Energy must be a numpy ndarray or a scipp Variable. Got {energy}"
+            )
 
         if not isinstance(energy_unit, (str, sc.Unit)):
-            raise TypeError('Energy_unit must be a string or sc.Unit.')
+            raise TypeError("Energy_unit must be a string or sc.Unit.")
 
         if isinstance(energy, np.ndarray):
-            energy = sc.array(dims=['energy'], values=energy, unit=energy_unit)
+            energy = sc.array(dims=["energy"], values=energy, unit=energy_unit)
 
         if isinstance(energy_offset, Numeric):
             energy_offset = Parameter(
-                name='energy_offset', value=float(energy_offset), unit=energy_unit
+                name="energy_offset", value=float(energy_offset), unit=energy_unit
             )
 
         if not isinstance(energy_offset, Parameter):
-            raise TypeError('Energy_offset must be a number or a Parameter.')
+            raise TypeError("Energy_offset must be a number or a Parameter.")
 
         self._energy = energy
         self._energy_unit = energy_unit
@@ -99,7 +76,7 @@ class ConvolutionBase:
             or isinstance(sample_components, ModelComponent)
         ):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
             )
         if isinstance(sample_components, ModelComponent):
             sample_components = ComponentCollection(components=[sample_components])
@@ -110,10 +87,12 @@ class ConvolutionBase:
             or isinstance(resolution_components, ModelComponent)
         ):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
             )
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(components=[resolution_components])
+            resolution_components = ComponentCollection(
+                components=[resolution_components]
+            )
         self._resolution_components = resolution_components
 
     @property
@@ -130,14 +109,14 @@ class ConvolutionBase:
         """Set the energy offset.
 
         Args:
-            energy_offset : Number or Parameter
-                The energy offset to apply to the convolution.
+            energy_offset (Numeric | Parameter): The energy offset to
+                apply to the convolution.
 
         Raises:
             TypeError: If energy_offset is not a number or a Parameter.
         """
         if not isinstance(energy_offset, Parameter | Numeric):
-            raise TypeError('Energy_offset must be a number or a Parameter.')
+            raise TypeError("Energy_offset must be a number or a Parameter.")
 
         if isinstance(energy_offset, Numeric):
             self._energy_offset.value = float(energy_offset)
@@ -157,19 +136,19 @@ class ConvolutionBase:
         return energy_with_offset
 
     @energy_with_offset.setter
-    def energy_with_offset(self, value) -> None:
+    def energy_with_offset(self, value: sc.Variable) -> None:
         """Energy with offset is a read-only property derived from
         energy and energy_offset.
 
         Args:
-            value: The value to set (ignored).
+            value (sc.Variable): The value to set (ignored).
 
         Raises:
             AttributeError: Always raised since energy_with_offset is
                 read-only.
         """
         raise AttributeError(
-            'Energy with offset is a read-only property derived from energy and energy_offset.'
+            "Energy with offset is a read-only property derived from energy and energy_offset."
         )
 
     @property
@@ -187,8 +166,8 @@ class ConvolutionBase:
     def energy(self, energy: np.ndarray | sc.Variable) -> None:
         """Set the energy.
 
-         Args:
-            energy (np.ndarray | scipp.Variable): 1D array of energy
+        Args:
+            energy (np.ndarray | sc.Variable): 1D array of energy
                 values where the convolution is evaluated.
 
         Raises:
@@ -200,10 +179,14 @@ class ConvolutionBase:
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError('Energy must be a Number, a numpy ndarray or a scipp Variable.')
+            raise TypeError(
+                "Energy must be a Number, a numpy ndarray or a scipp Variable."
+            )
 
         if isinstance(energy, np.ndarray):
-            self._energy = sc.array(dims=['energy'], values=energy, unit=self._energy.unit)
+            self._energy = sc.array(
+                dims=["energy"], values=energy, unit=self._energy.unit
+            )
 
         if isinstance(energy, sc.Variable):
             self._energy = energy
@@ -222,8 +205,8 @@ class ConvolutionBase:
     def energy_unit(self, unit_str: str) -> None:
         raise AttributeError(
             (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
+                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+                f"or create a new {self.__class__.__name__} with the desired unit."
             )
         )  # noqa: E501
 
@@ -235,11 +218,11 @@ class ConvolutionBase:
 
         Raises:
             TypeError: If energy_unit is not a string or scipp unit.
-            UnitError: If energy cannot be converted to the specified
+            Exception: If energy cannot be converted to the specified
                 unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
-            raise TypeError('Energy unit must be a string or scipp unit.')
+            raise TypeError("Energy unit must be a string or scipp unit.")
 
         old_energy = self.energy.copy()
         try:
@@ -262,17 +245,19 @@ class ConvolutionBase:
         """Get the sample model.
 
         Returns:
-            ComponentCollection or ModelComponent: The sample model to
+            ComponentCollection | ModelComponent: The sample model to
                 be convolved.
         """
         return self._sample_components
 
     @sample_components.setter
-    def sample_components(self, sample_components: ComponentCollection | ModelComponent) -> None:
+    def sample_components(
+        self, sample_components: ComponentCollection | ModelComponent
+    ) -> None:
         """Set the sample model.
 
         Args:
-            sample_components : ComponentCollection or ModelComponent
+            sample_components (ComponentCollection | ModelComponent):
                 The sample model to be convolved.
 
         Raises:
@@ -281,7 +266,7 @@ class ConvolutionBase:
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
             )
 
         if isinstance(sample_components, ModelComponent):
@@ -293,7 +278,7 @@ class ConvolutionBase:
         """Get the resolution model.
 
         Returns:
-            ComponentCollection or ModelComponent: The resolution model
+            ComponentCollection | ModelComponent: The resolution model
                 to be convolved.
         """
         return self._resolution_components
@@ -305,9 +290,9 @@ class ConvolutionBase:
         """Set the resolution model.
 
         Args:
-            resolution_components (ComponentCollection | ModelComponent)
-            : The resolution model to be convolved. Can be a
-            ComponentCollection or a single ModelComponent
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution model to be convolved. Can be a
+                ComponentCollection or a single ModelComponent
 
         Raises:
             TypeError: If resolution_components is not a
@@ -315,9 +300,11 @@ class ConvolutionBase:
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
             )
 
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(components=[resolution_components])
+            resolution_components = ComponentCollection(
+                components=[resolution_components]
+            )
         self._resolution_components = resolution_components
