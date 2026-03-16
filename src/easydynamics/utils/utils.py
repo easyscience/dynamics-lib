@@ -31,7 +31,7 @@ def _validate_and_convert_Q(
     """
     if Q is None:
         return None
-    if not isinstance(Q, (np.ndarray | Numeric | list | ArrayLike | sc.Variable)):
+    if not isinstance(Q, (np.ndarray, Numeric, list, sc.Variable)):
         raise TypeError('Q must be a number, list, numpy array, or scipp Variable.')
 
     if isinstance(Q, Numeric):

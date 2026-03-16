@@ -352,7 +352,7 @@ class TestSampleModel:
             assert collection.components[0].area.value == 1.0
             assert collection.components[1].display_name == 'TestLorentzian1'
             assert collection.components[1].area.value == 2.0
-            assert collection.components[2].display_name == 'Brownian translational diffusion'
+            assert collection.components[2].display_name == 'Brownian diffusion'
             assert isinstance(collection.components[2], Lorentzian)
 
     def test_get_all_variables(self, sample_model):
