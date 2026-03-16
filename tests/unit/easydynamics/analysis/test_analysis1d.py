@@ -150,9 +150,10 @@ class TestAnalysis1d:
         fake_x = np.array([1, 2, 3])
         fake_y = np.array([10, 20, 30])
         fake_weights = np.array([0.1, 0.2, 0.3])
+        fake_mask = np.array([True, False, True])
 
-        analysis1d._extract_x_y_weights_from_experiment = MagicMock(
-            return_value=(fake_x, fake_y, fake_weights)
+        analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
 
         analysis1d._create_convolver = MagicMock(return_value='fake_convolver')
@@ -181,7 +182,7 @@ class TestAnalysis1d:
             fit_function='fit_func',
         )
 
-        analysis1d._extract_x_y_weights_from_experiment.assert_called_once()
+        analysis1d.experiment._extract_x_y_weights_only_finite.assert_called_once()
 
         fake_fitter_instance.fit.assert_called_once_with(
             x=fake_x,
@@ -302,6 +303,72 @@ class TestAnalysis1d:
         # EXPECT
         analysis1d._create_convolver.assert_called_once()
 
+    def test_verify_energy(self, analysis1d):
+        # WHEN
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+
+        # THEN
+        result = analysis1d._verify_energy(energy)
+
+        # EXPECT
+        assert sc.identical(result, energy)
+
+    def test_verify_energy_None(self, analysis1d):
+        # WHEN
+        energy = None
+
+        # THEN
+        result = analysis1d._verify_energy(energy)
+
+        # EXPECT
+        assert result is None
+
+    def test_verify_energy_raises(self, analysis1d):
+        # WHEN
+        energy = np.array([10.0, 20.0])
+
+        # THEN / EXPECT
+        with pytest.raises(TypeError, match='Energy must be a sc.Variable or None'):
+            analysis1d._verify_energy(energy)
+
+    def test_calculate_energy_with_offset(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset.value = 1.0  # override with a simple value for testing
+
+        # THEN
+        result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
+        # EXPECT
+        expected = energy.values - energy_offset.value
+        np.testing.assert_array_equal(result.values, expected)
+
+    def test_calculate_energy_with_offset_different_units(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset.value = 1.0  # override with a simple value for testing
+        energy_offset.convert_unit('eV')
+
+        # THEN
+        result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
+        # EXPECT
+        expected = energy.values - energy_offset.value
+        np.testing.assert_array_equal(result.values, expected)
+
+    def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
+        # WHEN
+        energy = analysis1d.experiment.energy
+        energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
+
+        # THEN / EXPECT
+        with pytest.raises(
+            sc.UnitError, match='Energy and energy offset must have compatible units'
+        ):
+            analysis1d._calculate_energy_with_offset(energy, energy_offset)
+
     #############
     # Private methods: evaluation
     #############
@@ -397,10 +464,7 @@ class TestAnalysis1d:
 
             # check that the energy array passed to the convolver is the
             # same as the analysis1d energy array
-            np.testing.assert_array_equal(
-                kwargs['energy'],
-                analysis1d.energy.values,
-            )
+            assert sc.identical(kwargs['energy'], analysis1d.energy)
 
             # and check that convolution() was called
             MockConvolution.return_value.convolution.assert_called_once_with()
@@ -427,6 +491,7 @@ class TestAnalysis1d:
             components=analysis1d.sample_model.get_component_collection(),
             convolver=analysis1d._convolver,
             convolve=True,
+            energy=None,
         )
 
     def test_evaluate_sample_component(self, analysis1d):
@@ -445,6 +510,7 @@ class TestAnalysis1d:
             components=component,
             convolver=None,
             convolve=True,
+            energy=None,
         )
 
     def test_evaluate_background(self, analysis1d):
@@ -469,6 +535,7 @@ class TestAnalysis1d:
             components=analysis1d.instrument_model.background_model.get_component_collection(),
             convolver=None,
             convolve=False,
+            energy=None,
         )
 
     def test_evaluate_background_component(self, analysis1d):
@@ -487,6 +554,7 @@ class TestAnalysis1d:
             components=component,
             convolver=None,
             convolve=False,
+            energy=None,
         )
 
     def test_create_convolver(self, analysis1d):
@@ -582,7 +650,9 @@ class TestAnalysis1d:
         analysis1d._create_component_scipp_array(component=component, background=background)
 
         # EXPECT
-        analysis1d._evaluate_sample_component.assert_called_once_with(component=component)
+        analysis1d._evaluate_sample_component.assert_called_once_with(
+            component=component, energy=None
+        )
 
         expected_values = np.array([1.0, 2.0, 3.0])
         if background is not None:
@@ -617,7 +687,10 @@ class TestAnalysis1d:
         analysis1d._create_background_component_scipp_array(component=component)
 
         # EXPECT
-        analysis1d._evaluate_background_component.assert_called_once_with(component=component)
+        analysis1d._evaluate_background_component.assert_called_once_with(
+            component=component,
+            energy=None,
+        )
 
         analysis1d._to_scipp_array.assert_called_once()
 
@@ -699,7 +772,7 @@ class TestAnalysis1d:
         )
 
         # ---- Background evaluation ----
-        background_value = np.array([10.0, 20.0, 30.0])
+        background_value = np.array([11.0, 21.0, 31.0])
         analysis1d._evaluate_background = MagicMock(return_value=background_value)
 
         # ---- Return scipp DataArrays ----
@@ -753,9 +826,10 @@ class TestAnalysis1d:
             )
 
         # Background component creation
-        analysis1d._create_background_component_scipp_array.assert_called_once_with(
-            component=background_component
-        )
+        analysis1d._create_background_component_scipp_array.assert_called_once()
+        _, kwargs = analysis1d._create_background_component_scipp_array.call_args
+        assert kwargs['component'] is background_component
+        assert sc.identical(kwargs['energy'], analysis1d.energy)
 
         # Dataset content
         assert isinstance(dataset, sc.Dataset)

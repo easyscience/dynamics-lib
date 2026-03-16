@@ -11,49 +11,32 @@ from easydynamics.utils.utils import Numeric
 
 
 class DiffusionModelBase(ModelBase):
-    """Base class for constructing diffusion models.
-
-    Args:
-        display_name (str): Display name of the diffusion model.
-        unique_name (str | None): Unique name of the diffusion model.
-            If None, a unique name will be generated.
-        scale (Numeric): Scale factor for the diffusion model. Must be a
-            non-negative number. Defaults to 1.0.
-        unit (str | sc.Unit): Unit of the diffusion model. Must be
-            convertible to meV. Defaults to "meV".
-
-    Attributes:
-        unit (str | sc.Unit): Unit of the diffusion model.
-        scale (Parameter): Scale parameter of the diffusion model.
-    """
+    """Base class for constructing diffusion models."""
 
     def __init__(
         self,
-        display_name='MyDiffusionModel',
+        display_name: str | None = 'MyDiffusionModel',
         unique_name: str | None = None,
         scale: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
-    ):
+    ) -> None:
         """Initialize a new DiffusionModel.
 
         Args:
-            display_name (str): Display name of the diffusion model.
-            unique_name (str | None): Unique name of the diffusion
+            display_name (str | None, default='MyDiffusionModel'):
+                Display name of the diffusion model.
+            unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
-            scale (Numeric): Scale factor for the diffusion model. Must
-                be a non-negative number. Defaults to 1.0.
-            unit (str | sc.Unit): Unit of the diffusion model. Must be
-                convertible to meV. Defaults to "meV".
+            scale (Numeric, default=1.0): Scale factor for the diffusion model. Must
+                be a non-negative number.
+            unit (str | sc.Unit, default='meV'): Unit of the diffusion model. Must be
+                convertible to meV.
 
         Raises:
             TypeError: If scale is not a number.
             UnitError: If unit is not a string or scipp Unit, or if it
                 cannot be converted to meV.
         """
-        if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
-
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0)
 
         try:
             test = DescriptorNumber(name='test', value=1, unit=unit)
@@ -62,6 +45,11 @@ class DiffusionModelBase(ModelBase):
             raise UnitError(
                 f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
+
+        if not isinstance(scale, Numeric):
+            raise TypeError('scale must be a number.')
+
+        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
 
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = unit
@@ -72,11 +60,11 @@ class DiffusionModelBase(ModelBase):
     # ------------------------------------------------------------------
 
     @property
-    def unit(self) -> str:
+    def unit(self) -> str | sc.Unit | None:
         """Get the unit of the energy axis of the DiffusionModel.
 
         Returns:
-            (str | sc.Unit | None): Unit of the DiffusionModel.
+            str | sc.Unit | None: Unit of the DiffusionModel.
         """
         return str(self._unit)
 

@@ -23,29 +23,6 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
     $$
     where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
     width.
-
-
-    Args:
-        area (Int | float): Area under the curve.
-        center (Int | float): Resonance frequency, approximately the
-            peak position.
-        width (Int | float): Damping constant, approximately the
-            half width at half max (HWHM) of the peaks.
-        unit (str | sc.Unit): Unit of the parameters.
-            Defaults to "meV".
-        display_name (str | None): Display name of the component.
-        unique_name (str | None): Unique name of the component.
-            If None, a unique_name is automatically generated.
-
-    Attributes:
-        area (Parameter): Area under the curve.
-        center (Parameter): Resonance frequency, approximately the
-            peak position.
-        width (Parameter): Damping constant, approximately the
-            half width at half max (HWHM) of the peaks.
-        unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Display name of the component.
-        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -56,25 +33,20 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'DampedHarmonicOscillator',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Damped Harmonic Oscillator.
 
         Args:
-            area (Int | float): Area under the curve.
-            center (Int | float): Resonance frequency, approximately the
+            area (Numeric | Parameter, default=1.0): Area under the curve.
+            center (Numeric | Parameter, default=1.0): Resonance frequency, approximately the
                 peak position.
-            width (Int | float): Damping constant, approximately the
+            width (Numeric | Parameter, default=1.0): Damping constant, approximately the
                 half width at half max (HWHM) of the peaks.
-            unit (str | sc.Unit): Unit of the parameters.
-                Defaults to "meV".
-            display_name (str | None): Display name of the component.
-            unique_name (str | None): Unique name of the component.
+            unit (str | sc.Unit, default='meV'): Unit of the parameters.
+            display_name (str | None, default='DampedHarmonicOscillator'):
+                Display name of the component.
+            unique_name (str | None, default=None): Unique name of the component.
                 If None, a unique_name is automatically generated.
-
-        Raises:
-            TypeError: If any of the parameters are not numbers or
-                Parameters.
-            ValueError: If center or width are not positive.
         """
 
         super().__init__(

@@ -23,6 +23,23 @@ class TestExperiment:
         experiment = Experiment(display_name='test_experiment', data=data)
         return experiment
 
+    @pytest.fixture
+    def experiment_with_data(self):
+        "Fixture that provides an Experiment with data for testing methods that require data"
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        experiment = Experiment(data=data_array)
+
+        return experiment
+
     ##############
     # test init
     ##############
@@ -276,6 +293,44 @@ class TestExperiment:
         with pytest.raises(AttributeError):
             experiment.Q = experiment.Q
 
+    def test_get_masked_energy(self, experiment_with_data):
+        "Test getting masked energy"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+        invalid_data.data.variances[Q_index][1] = np.nan
+
+        experiment_with_data.data = invalid_data
+
+        # THEN
+        masked_energy = experiment_with_data.get_masked_energy(Q_index=Q_index)
+
+        # EXPECT
+        assert len(masked_energy) == 1
+        assert masked_energy.values == 30.0
+
+    def test_get_masked_energy_no_data_returns_None(self):
+        "Test getting masked energy returns zero when no data is present"
+
+        experiment = Experiment()
+        # WHEN THEN
+        masked_energy = experiment.get_masked_energy(Q_index=0)
+
+        # EXPECT
+        assert masked_energy is None
+
+    @pytest.mark.parametrize(
+        'Q_index',
+        [-1, 100, 'not an index'],
+        ids=['negative_index', 'out_of_bounds_index', 'invalid_type'],
+    )
+    def test_get_masked_energy_invalid_Q_index_raises(self, experiment_with_data, Q_index):
+        "Test getting masked energy raises IndexError when Q index is invalid"
+        # WHEN THEN EXPECT
+        with pytest.raises(IndexError):
+            experiment_with_data.get_masked_energy(Q_index=Q_index)
+
     ##############
     # test plotting
     ##############
@@ -378,6 +433,77 @@ class TestExperiment:
         assert sc.identical(converted_data.coords['Q'], expected_Q)
         assert sc.identical(converted_data.coords['energy'], expected_energy)
         assert sc.identical(converted_data.data, binned_data.data)
+
+    def test_extract_x_y_var(self, experiment_with_data):
+        # WHEN
+
+        Q_index = 0
+
+        # THEN
+        x, y, var = experiment_with_data._extract_x_y_var(Q_index=Q_index)
+
+        # EXPECT
+        assert np.array_equal(x, experiment_with_data.energy.values)
+        assert np.array_equal(y, experiment_with_data.data.values[Q_index])
+        assert np.array_equal(
+            var,
+            experiment_with_data.data.variances[Q_index],
+        )
+
+    def test_extract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
+        "Test that _extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.variances[Q_index] = 0  # Set variances to zero
+        # throw in a nan for good measure
+        invalid_data.data.variances[Q_index][0] = np.nan
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Cannot compute weights: some variances are zero'):
+            Experiment(data=invalid_data)._extract_x_y_weights_only_finite(Q_index=Q_index)
+
+    def test_extract_x_y_weights_only_finite(self, experiment_with_data):
+        "Test that _extract_x_y_weights_only_finite only returns finite values"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+        invalid_data.data.variances[Q_index][1] = np.nan
+
+        # THEN
+        x, y, weights, mask = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+            Q_index=Q_index
+        )
+
+        # EXPECT
+        assert np.isfinite(x).all()
+        assert np.isfinite(y).all()
+        assert np.isfinite(weights).all()
+        assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
+        # Mask should indicate which values were removed
+        assert np.array_equal(mask, [False, False, True])
+
+    def test_extract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
+        "Test getting x y and weights when variances are None"
+        # WHEN
+        Q_index = 0
+        data = experiment_with_data._data.copy()
+        data.variances = None
+
+        experiment_with_data.data = data
+
+        # THEN
+        x, y, weights, mask = experiment_with_data._extract_x_y_weights_only_finite(
+            Q_index=Q_index
+        )
+
+        # EXPECT
+        assert np.array_equal(x, experiment_with_data.energy.values)
+        assert np.array_equal(y, experiment_with_data.data.values[Q_index])
+        assert np.array_equal(weights, np.ones_like(y))
+        assert np.array_equal(mask, np.isfinite(y) & np.isfinite(x))
 
     ##############
     # test dunder methods

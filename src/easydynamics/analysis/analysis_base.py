@@ -20,75 +20,42 @@ class AnalysisBase(EasyScienceModelBase):
     SampleModel contains the model for the sample, and the
     InstrumentModel contains the model for the instrument, including
     background and resolution
-
-    Args:
-        display_name (str): Display name of the analysis.
-        unique_name (str or None): Unique name of the analysis. If None,
-            a unique name is automatically generated.
-        experiment (Experiment | None): The Experiment associated with
-            this Analysis. If None, a default Experiment is created.
-        sample_model (SampleModel | None): The SampleModel associated
-            with this Analysis. If None, a default SampleModel is
-            created.
-        instrument_model (InstrumentModel | None): The InstrumentModel
-            associated with this Analysis. If None, a default
-            InstrumentModel is created.
-        extra_parameters (Parameter | list[Parameter] | None): Extra
-            parameters to be included in the analysis for advanced
-            users. If None, no extra parameters are added.
-
-    Attributes:
-        experiment (Experiment): The Experiment associated with this
-            Analysis.
-        sample_model (SampleModel): The SampleModel associated with this
-            Analysis.
-        instrument_model (InstrumentModel): The InstrumentModel
-            associated with this Analysis.
-        Q (sc.Variable | None): The Q values from the associated
-            Experiment, if available.
-        energy (sc.Variable | None): The energy values from the
-            associated Experiment, if available.
-        temperature (Parameter | None): The temperature from the
-            associated SampleModel, if available.
-        extra_parameters (list[Parameter]): The extra parameters
-            included in this Analysis.
     """
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str | None = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
-    ):
+    ) -> None:
         """Initialize the AnalysisBase.
 
         Args:
-            display_name (str): Display name of the analysis.
-            unique_name (str or None): Unique name of the analysis. If
+            display_name (str | None, default='MyAnalysis'): Display name of the analysis.
+            unique_name (str | None, default=None): Unique name of the analysis. If
                 None, a unique name is automatically generated.
-            experiment (Experiment | None): The Experiment associated
+            experiment (Experiment | None, default=None): The Experiment associated
                 with this Analysis. If None, a default Experiment is
                 created.
-            sample_model (SampleModel | None): The SampleModel
+            sample_model (SampleModel | None, default=None): The SampleModel
                 associated with this Analysis. If None, a default
                 SampleModel is created.
-            instrument_model (InstrumentModel | None): The
+            instrument_model (InstrumentModel | None, default=None): The
                 InstrumentModel associated with this Analysis. If None,
                 a default InstrumentModel is created.
-            extra_parameters (Parameter | list[Parameter] | None): Extra
+            extra_parameters (Parameter | list[Parameter] | None, default=None): Extra
                 parameters to be included in the analysis for advanced
                 users. If None, no extra parameters are added.
 
         Raises:
-            TypeError: If experiment is not an Experiment or None.
-            TypeError: If sample_model is not a SampleModel or None.
-            TypeError: If instrument_model is not an InstrumentModel or
-                None.
-            TypeError: If extra_parameters is not a Parameter, a list of
-                Parameters, or None.
+            TypeError: If experiment is not an Experiment or None or
+                if sample_model is not a SampleModel or None or if
+                instrument_model is not an InstrumentModel or None or if
+                extra_parameters is not a Parameter, a list of Parameters,
+                or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -146,6 +113,9 @@ class AnalysisBase(EasyScienceModelBase):
     def experiment(self, value: Experiment) -> None:
         """Set the Experiment for this Analysis.
 
+        Args:
+            value (Experiment): The Experiment to set for this Analysis.
+
         Raises:
             TypeError: if value is not an Experiment.
         """
@@ -169,6 +139,9 @@ class AnalysisBase(EasyScienceModelBase):
     def sample_model(self, value: SampleModel) -> None:
         """Set the SampleModel for this Analysis.
 
+        Args:
+            value (SampleModel): The SampleModel to set for this Analysis.
+
         Raises:
             TypeError: if value is not a SampleModel.
         """
@@ -191,6 +164,10 @@ class AnalysisBase(EasyScienceModelBase):
     def instrument_model(self, value: InstrumentModel) -> None:
         """Set the InstrumentModel for this Analysis.
 
+        Args:
+            value (InstrumentModel): The InstrumentModel to set for this
+                Analysis.
+
         Raises:
             TypeError: if value is not an InstrumentModel.
         """
@@ -205,16 +182,19 @@ class AnalysisBase(EasyScienceModelBase):
         available.
 
         Returns:
-            sc.Variable: The Q values from the associated Experiment,
-                if available.
-            None: If the Experiment does not have any data.
+            sc.Variable | None: The Q values from the associated Experiment,
+                if available, and None if not.
         """
         return self.experiment.Q
 
     @Q.setter
-    def Q(self, value) -> None:
+    def Q(self, value: sc.Variable) -> None:
         """Q cannot be set, as it is a read-only property derived from
         the Experiment.
+
+        Args:
+            value (sc.Variable): The Q values to set. This argument is
+                ignored, as Q is a read-only property.
 
         Raises:
             AttributeError: If trying to set Q.
@@ -227,17 +207,20 @@ class AnalysisBase(EasyScienceModelBase):
         available.
 
         Returns:
-            sc.Variable: The energy values from the associated
-            Experiment, if available.
-            None: If the Experiment does not have any data.
+            sc.Variable | None: The energy values from the associated
+            Experiment, if available, and None if not.
         """
 
         return self.experiment.energy
 
     @energy.setter
-    def energy(self, value) -> None:
+    def energy(self, value: sc.Variable) -> None:
         """Energy cannot be set, as it is a read-only property derived
         from the Experiment.
+
+        Args:
+            value (sc.Variable): The energy values to set. This argument is
+                ignored, as energy is a read-only property.
 
         Raises:
             AttributeError: If trying to set energy.
@@ -251,17 +234,20 @@ class AnalysisBase(EasyScienceModelBase):
         available.
 
         Returns:
-            Parameter: The temperature from the associated SampleModel,
-            if available.
-            None: If the SampleModel does not have a temperature.
+            Parameter | None: The temperature from the associated SampleModel,
+            if available, and None if not.
         """
 
         return self.sample_model.temperature
 
     @temperature.setter
-    def temperature(self, value) -> None:
+    def temperature(self, value: np.ndarray | Parameter) -> None:
         """Temperature cannot be set, as it is a read-only property
         derived from the SampleModel.
+
+        Args:
+            value (np.ndarray | Parameter): The temperature to set. This argument is
+                ignored, as temperature is a read-only property.
 
         Raises:
             AttributeError: If trying to set temperature.
@@ -289,7 +275,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises:
             TypeError: If value is not a Parameter, a list of
-            Parameters, or None.
+                Parameters, or None.
         """
         if isinstance(value, Parameter):
             self._extra_parameters = [value]
@@ -347,29 +333,6 @@ class AnalysisBase(EasyScienceModelBase):
             ):
                 raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
-
-    def _extract_x_y_weights_from_experiment(
-        self, Q_index: int
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Extract the x, y, and weights arrays from the experiment for
-        the given Q index.
-
-        Args:
-            Q_index (int): The Q index to extract the data for.
-
-        Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                weights arrays extracted from the experiment for the
-                given Q index.
-        """
-        data = self.experiment.data['Q', Q_index]
-        x = data.coords['energy'].values
-        y = data.values
-        e = data.variances**0.5
-        if np.any(e == 0):
-            raise ValueError('Cannot compute weights: some variances are zero.')
-        weights = 1.0 / e
-        return x, y, weights
 
     #############
     # Dunder methods

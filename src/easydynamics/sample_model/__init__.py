@@ -5,6 +5,7 @@ from .background_model import BackgroundModel
 from .component_collection import ComponentCollection
 from .components import DampedHarmonicOscillator
 from .components import DeltaFunction
+from .components import Exponential
 from .components import Gaussian
 from .components import Lorentzian
 from .components import Polynomial
@@ -22,6 +23,7 @@ __all__ = [
     'DeltaFunction',
     'DampedHarmonicOscillator',
     'Polynomial',
+    'Exponential',
     'BrownianTranslationalDiffusion',
     'SampleModel',
     'ResolutionModel',

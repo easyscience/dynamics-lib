@@ -3,6 +3,7 @@
 
 import os
 
+import numpy as np
 import plopp as pp
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
@@ -18,43 +19,26 @@ class Experiment(NewBase):
 
     This is a minimal implementation that will be extended in the
     future.
-
-    Args:
-        display_name (str): Display name of the experiment.
-        unique_name (str | None): Unique name of the experiment. If
-            None, a unique name will be generated.
-        data (sc.DataArray | str | None): Dataset associated with the
-            experiment. Can be a sc.DataArray or a filename string to
-            load from. If None, no data is loaded.
-
-    Attributes:
-        data (sc.DataArray | None): Dataset associated with the
-            experiment.
-        binned_data (sc.DataArray | None): Binned dataset associated
-            with the experiment. This is derived from `data` and is
-            updated whenever `data` is set.
     """
 
     def __init__(
         self,
-        display_name: str = 'MyExperiment',
+        display_name: str | None = 'MyExperiment',
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
-    ):
+    ) -> None:
         """Initialize the Experiment object.
 
         Args:
-            display_name (str): Display name of the experiment.
-            unique_name (str | None): Unique name of the experiment. If
+            display_name (str | None, default="MyExperiment"): Display name of the experiment.
+            unique_name (str | None, default=None): Unique name of the experiment. If
                 None, a unique name will be generated.
-            data (sc.DataArray | str | None): Dataset associated with
+            data (sc.DataArray | str | None, default=None): Dataset associated with
                 the experiment. Can be a sc.DataArray or a filename
                 string to load from. If None, no data is loaded.
 
         Raises:
             TypeError: If data is not a sc.DataArray, a string, or None.
-            ValueError: If the loaded data is missing required
-                coordinates.
         """
         super().__init__(
             display_name=display_name,
@@ -101,7 +85,6 @@ class Experiment(NewBase):
 
         Raises:
             TypeError: If the value is not a sc.DataArray.
-            ValueError: If the dataset is missing required coordinates.
         """
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
@@ -128,7 +111,7 @@ class Experiment(NewBase):
 
         Args:
             value (sc.DataArray): The new binned dataset to associate
-            with this experiment (ignored)
+                with this experiment (ignored)
 
         Raises:
             AttributeError: Always, since binned_data is read-only.
@@ -143,7 +126,7 @@ class Experiment(NewBase):
             sc.Variable | None: The Q values from the dataset, or None
                 if no data is loaded.
         """
-        if self._data is None:
+        if self._binned_data is None:
             return None
         return self._binned_data.coords['Q']
 
@@ -168,7 +151,7 @@ class Experiment(NewBase):
             sc.Variable | None: The energy values from the dataset, or
                 None if no data is loaded.
         """
-        if self._data is None:
+        if self._binned_data is None:
             return None
         return self._binned_data.coords['energy']
 
@@ -185,23 +168,53 @@ class Experiment(NewBase):
         """
         raise AttributeError('energy is a read-only property derived from the data.')
 
+    def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
+        """Get the energy values from the dataset, removing points where
+        the y values or variances are NaN or Inf for the given Q index.
+
+        Args:
+            Q_index (int): The Q index to get the masked energy values
+                for.
+
+        Returns:
+            sc.Variable | None: The masked energy values from the
+                dataset, or None if no data is loaded.
+
+        Raises:
+            IndexError: If Q_index is not a valid index for the Q values.
+        """
+        if self._binned_data is None:
+            return None
+
+        if (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or (self.Q is not None and Q_index >= len(self.Q))
+        ):
+            raise IndexError('Q_index must be a valid index for the Q values.')
+
+        energy = self._binned_data.coords['energy']
+        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
+
+        mask_var = sc.array(dims=['energy'], values=mask)
+        masked_energy = energy[mask_var]
+        return masked_energy
+
     ###########
     # Handle data
     ###########
 
-    def load_hdf5(self, filename: str, display_name: str | None = None):
+    def load_hdf5(self, filename: str, display_name: str | None = None) -> None:
         """Load data from an HDF5 file.
 
         Args:
             filename (str ): Path to the HDF5 file.
-            display_name (str | None): Optional display name for the
+            display_name (str | None, default=None): Optional display name for the
                 experiment.
 
         Raises:
             TypeError: If filename is not a string or if display_name is
-                not a string or None.
-            ValueError: If the loaded data is missing required
-                coordinates.
+                not a string or None or if the loaded data is not a sc.DataArray.
         """
         if not isinstance(filename, str):
             raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
@@ -221,11 +234,11 @@ class Experiment(NewBase):
         self._validate_coordinates(loaded_data)
         self.data = loaded_data
 
-    def save_hdf5(self, filename: str | None = None):
+    def save_hdf5(self, filename: str | None = None) -> None:
         """Save the dataset to HDF5.
 
         Args:
-            filename (str | None): Path to the output HDF5 file.
+            filename (str | None, default=None): Path to the output HDF5 file.
                 If None, the file will be named after the unique_name of
                 the experiment with a .h5 extension.
 
@@ -249,7 +262,7 @@ class Experiment(NewBase):
 
         sc_save_hdf5(self._data, filename)
 
-    def remove_data(self):
+    def remove_data(self) -> None:
         """Remove the dataset from the experiment."""
         self._data = None
         self._binned_data = None
@@ -265,6 +278,7 @@ class Experiment(NewBase):
         Raises:
             TypeError: If dimensions is not a dictionary or if
                 keys/values are of incorrect types.
+            ValueError: If there is no data to rebin.
             KeyError: If a specified dimension is not in the dataset.
         """
 
@@ -307,12 +321,12 @@ class Experiment(NewBase):
     # other methods
     ###########
 
-    def plot_data(self, slicer=False, **kwargs) -> None:
+    def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
         """Plot the dataset using plopp: https://scipp.github.io/plopp/
 
         Args:
-            slicer (bool): If True, use plopp's slicer instead of plot.
-            **kwargs (Any): Additional keyword arguments to pass to plopp.
+            slicer (bool, default=False): If True, use plopp's slicer instead of plot.
+            **kwargs (dict): Additional keyword arguments to pass to plopp.
 
         Raises:
             ValueError: If there is no data to plot.
@@ -335,6 +349,9 @@ class Experiment(NewBase):
                 self._binned_data,
                 **plot_kwargs_defaults,
             )
+            for widget in fig.bottom_bar[0].controls.values():
+                widget.slider_toggler.value = '-o-'
+
         else:
             fig = pp.plot(
                 self._binned_data.transpose(dims=['energy', 'Q']),
@@ -354,6 +371,7 @@ class Experiment(NewBase):
             data (sc.DataArray): The data to validate.
 
         Raises:
+            TypeError: If data is not a sc.DataArray.
             ValueError: If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
@@ -379,6 +397,64 @@ class Experiment(NewBase):
                 # Coordinate is at bin edges, convert to bin centers
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
+
+    def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Extract the x, y, and weights arrays from the experiment for
+        the given Q index.
+
+        Args:
+            Q_index (int): The Q index to extract the data for.
+
+        Returns:
+            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
+                variances arrays extracted from the experiment for the
+                given Q index.
+        """
+        data = self.binned_data['Q', Q_index]
+        x = data.coords['energy'].values
+        y = data.values
+        var = data.variances
+        return x, y, var
+
+    def _extract_x_y_weights_only_finite(
+        self, Q_index: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Extract the x, y, and weights arrays from the experiment for
+        the given Q index, removing any NaN and Inf values.
+
+        Args:
+            Q_index (int): The Q index to extract the data for.
+
+        Returns:
+            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: The
+                x, y, weights, and mask arrays extracted from the
+                experiment for the given Q index, with NaNs and Infs
+                removed.
+
+        Raises:
+            ValueError: If any variances are zero after removing NaNs
+                and Infs, since this would lead to infinite weights.
+        """
+        x, y, var = self._extract_x_y_var(Q_index)
+
+        if var is None:
+            mask = np.isfinite(y) & np.isfinite(x)
+            # If variances are not provided, set them to 1 to make all
+            # weights be 1
+            var = np.ones_like(y)
+        else:
+            mask = np.isfinite(y) & np.isfinite(var) & np.isfinite(x)
+
+        x = x[mask]
+        y = y[mask]
+        var = var[mask]
+
+        if np.any(var == 0):
+            raise ValueError('Cannot compute weights: some variances are zero.')
+
+        weights = 1.0 / var**0.5
+
+        return x, y, weights, mask
 
     ########
     # dunder methods

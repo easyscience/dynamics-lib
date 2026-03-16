@@ -11,70 +11,45 @@ from easydynamics.utils.utils import Numeric
 
 
 class ConvolutionBase:
-    """Base class for convolutions of sample and resolution models. This
-    base class has no convolution functionality.
+    """Base class for convolutions of sample and resolution models.
 
-    Args:
-        energy (np.ndarray | scipp.Variable): 1D array of energy values
-            where the convolution is evaluated.
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_unit (str | sc.Unit, optional): The unit of the energy.
-            Default is 'meV'.
-        energy_offset (Numeric | Parameter, optional): The energy offset
-            applied to the convolution. Default is 0.0.
-
-    Attributes:
-        energy (scipp.Variable): 1D array of energy values where the
-            convolution is evaluated
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_unit (str | sc.Unit): The unit of the energy.
-        energy_offset (Parameter): The energy offset applied to the
-            convolution.
+    This base class has no convolution functionality.
     """
 
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        sample_components: ComponentCollection | ModelComponent = None,
-        resolution_components: ComponentCollection | ModelComponent = None,
+        sample_components: ComponentCollection | ModelComponent | None = None,
+        resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_unit: str | sc.Unit = 'meV',
         energy_offset: Numeric | Parameter = 0.0,
-    ):
+    ) -> None:
         """Initialize the ConvolutionBase.
 
         Args:
-            energy (np.ndarray | scipp.Variable): 1D array of energy
+            energy (np.ndarray | sc.Variable): 1D array of energy
                 values where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
+            sample_components (ComponentCollection | ModelComponent | None, default=None):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
+            resolution_components (ComponentCollection | ModelComponent | None, default=None):
                 The resolution model to convolve with.
-            energy_unit (str | sc.Unit, optional): The unit of the
-                energy. Default is 'meV'.
-            energy_offset (Numeric | Parameter, optional): The energy
+            energy_unit (str | sc.Unit, default='meV'): The unit of the
+                energy.
+            energy_offset (Numeric | Parameter, default=0.0): The energy
                 offset applied to the convolution. Default is 0.0.
 
         Raises:
             TypeError: If energy is not a numpy ndarray or a scipp
-                Variable.
-            TypeError: If energy_unit is not a string or scipp unit.
-            TypeError: If energy_offset is not a number or a Parameter.
-            TypeError: If sample_components is not a ComponentCollection
-                or ModelComponent.
-            TypeError: If resolution_components is not a
-                ComponentCollection or ModelComponent.
+                Variable or if energy_unit is not a string or scipp unit, or if
+                energy_offset is not a number or a Parameter, or if
+                sample_components is not a ComponentCollection or ModelComponent, or if
+                resolution_components is not a ComponentCollection or ModelComponent.
         """
         if isinstance(energy, Numeric):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError('Energy must be a numpy ndarray or a scipp Variable.')
+            raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
 
         if not isinstance(energy_unit, (str, sc.Unit)):
             raise TypeError('Energy_unit must be a string or sc.Unit.')
@@ -130,8 +105,8 @@ class ConvolutionBase:
         """Set the energy offset.
 
         Args:
-            energy_offset : Number or Parameter
-                The energy offset to apply to the convolution.
+            energy_offset (Numeric | Parameter): The energy offset to
+                apply to the convolution.
 
         Raises:
             TypeError: If energy_offset is not a number or a Parameter.
@@ -157,12 +132,12 @@ class ConvolutionBase:
         return energy_with_offset
 
     @energy_with_offset.setter
-    def energy_with_offset(self, value) -> None:
+    def energy_with_offset(self, value: sc.Variable) -> None:
         """Energy with offset is a read-only property derived from
         energy and energy_offset.
 
         Args:
-            value: The value to set (ignored).
+            value (sc.Variable): The value to set (ignored).
 
         Raises:
             AttributeError: Always raised since energy_with_offset is
@@ -187,8 +162,8 @@ class ConvolutionBase:
     def energy(self, energy: np.ndarray | sc.Variable) -> None:
         """Set the energy.
 
-         Args:
-            energy (np.ndarray | scipp.Variable): 1D array of energy
+        Args:
+            energy (np.ndarray | sc.Variable): 1D array of energy
                 values where the convolution is evaluated.
 
         Raises:
@@ -235,7 +210,7 @@ class ConvolutionBase:
 
         Raises:
             TypeError: If energy_unit is not a string or scipp unit.
-            UnitError: If energy cannot be converted to the specified
+            Exception: If energy cannot be converted to the specified
                 unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
@@ -262,7 +237,7 @@ class ConvolutionBase:
         """Get the sample model.
 
         Returns:
-            ComponentCollection or ModelComponent: The sample model to
+            ComponentCollection | ModelComponent: The sample model to
                 be convolved.
         """
         return self._sample_components
@@ -272,7 +247,7 @@ class ConvolutionBase:
         """Set the sample model.
 
         Args:
-            sample_components : ComponentCollection or ModelComponent
+            sample_components (ComponentCollection | ModelComponent):
                 The sample model to be convolved.
 
         Raises:
@@ -293,7 +268,7 @@ class ConvolutionBase:
         """Get the resolution model.
 
         Returns:
-            ComponentCollection or ModelComponent: The resolution model
+            ComponentCollection | ModelComponent: The resolution model
                 to be convolved.
         """
         return self._resolution_components
@@ -305,9 +280,9 @@ class ConvolutionBase:
         """Set the resolution model.
 
         Args:
-            resolution_components (ComponentCollection | ModelComponent)
-            : The resolution model to be convolved. Can be a
-            ComponentCollection or a single ModelComponent
+            resolution_components (ComponentCollection | ModelComponent):
+                The resolution model to be convolved. Can be a
+                ComponentCollection or a single ModelComponent
 
         Raises:
             TypeError: If resolution_components is not a

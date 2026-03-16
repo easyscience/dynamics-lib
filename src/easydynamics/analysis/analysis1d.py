@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import Any
+
 import numpy as np
 import scipp as sc
 from easyscience.fitting.fitter import Fitter as EasyScienceFitter
@@ -20,75 +22,41 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 
 class Analysis1d(AnalysisBase):
     """For analysing one-dimensional data, i.e. intensity as function of
-    energy for a single Q index. Is used primarily in the Analysis
-    class, but can also be used on its own for simpler analyses.
+    energy for a single Q index.
 
-    Args:
-        display_name (str): Display name of the analysis.
-        unique_name (str or None): Unique name of the analysis. If None,
-            a unique name is automatically generated.
-        experiment (Experiment | None): The Experiment associated with
-            this Analysis. If None, a default Experiment is created.
-        sample_model (SampleModel | None): The SampleModel associated
-            with this Analysis. If None, a default SampleModel is
-            created.
-        instrument_model (InstrumentModel | None): The InstrumentModel
-            associated with this Analysis. If None, a default
-            InstrumentModel is created.
-        Q_index (int | None): The Q index to analyze. If None, the
-            analysis will not be able to calculate or fit until a
-            Q index is set.
-        extra_parameters (Parameter | list[Parameter] | None): Extra
-            parameters to be included in the analysis for advanced
-            users. If None, no extra parameters are added.
-
-    Attributes:
-        experiment (Experiment): The Experiment associated with this
-            Analysis.
-        sample_model (SampleModel): The SampleModel associated with this
-            Analysis.
-        instrument_model (InstrumentModel): The InstrumentModel
-            associated with this Analysis.
-        Q (sc.Variable | None): The Q values from the associated
-            Experiment, if available.
-        energy (sc.Variable | None): The energy values from the
-            associated Experiment, if available.
-        temperature (Parameter | None): The temperature from the
-            associated SampleModel, if available.
-        Q_index (int | None): The Q index being analyzed.
-        extra_parameters (list[Parameter]): The extra parameters
-            included in this Analysis.
+    Is used primarily in the Analysis class, but can also be used on its
+    own for simpler analyses.
     """
 
     def __init__(
         self,
-        display_name: str = 'MyAnalysis',
+        display_name: str | None = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
-    ):
+    ) -> None:
         """Initialize a Analysis1d.
 
         Args:
-            display_name (str): Display name of the analysis.
-            unique_name (str or None): Unique name of the analysis. If
+            display_name (str | None, default='MyAnalysis'): Display name of the analysis.
+            unique_name (str | None, default=None): Unique name of the analysis. If
                 None, a unique name is automatically generated.
-            experiment (Experiment | None): The Experiment associated
+            experiment (Experiment | None, default=None): The Experiment associated
                 with this Analysis. If None, a default Experiment is
                 created.
-            sample_model (SampleModel | None): The SampleModel
+            sample_model (SampleModel | None, default=None): The SampleModel
                 associated with this Analysis. If None, a default
                 SampleModel is created.
-            instrument_model (InstrumentModel | None): The
+            instrument_model (InstrumentModel | None, default=None): The
                 InstrumentModel associated with this Analysis. If None,
                 a default InstrumentModel is created.
-            Q_index (int | None): The Q index to analyze. If None, the
+            Q_index (int | None, default=None): The Q index to analyze. If None, the
                 analysis will not be able to calculate or fit until a
                 Q index is set.
-            extra_parameters (Parameter | list[Parameter] | None): Extra
+            extra_parameters (Parameter | list[Parameter] | None, default=None): Extra
                 parameters to be included in the analysis for advanced
                 users. If None, no extra parameters are added.
         """
@@ -102,6 +70,12 @@ class Analysis1d(AnalysisBase):
         )
 
         self._Q_index = self._verify_Q_index(Q_index)
+
+        if self._Q_index is not None and self.experiment is not None:
+            masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
+            self._masked_energy = masked_energy
+        else:
+            self._masked_energy = None
 
         self._fit_result = None
         if self._Q_index is not None:
@@ -128,7 +102,7 @@ class Analysis1d(AnalysisBase):
         """Set the Q index for single Q analysis.
 
         Args:
-            index (int | None): The Q index.
+            value (int | None): The Q index.
         """
 
         self._Q_index = self._verify_Q_index(value)
@@ -138,29 +112,39 @@ class Analysis1d(AnalysisBase):
     # Other methods
     #############
 
-    def calculate(self) -> np.ndarray:
+    def calculate(self, energy: sc.Variable | None = None) -> np.ndarray:
         """Calculate the model prediction for the chosen Q index. Makes
         sure the convolver is up to date before calculating.
 
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                calculation. If None, the energy grid from the experiment
+                is used.
+
         Returns:
             np.ndarray: The calculated model prediction.
         """
+        energy = self._verify_energy(energy)
+        self._convolver = self._create_convolver(energy=energy)
 
-        self._convolver = self._create_convolver()
+        return self._calculate(energy=energy)
 
-        return self._calculate()
-
-    def _calculate(self) -> np.ndarray:
+    def _calculate(self, energy: sc.Variable | None = None) -> np.ndarray:
         """Calculate the model prediction for the chosen Q index. Does
         not check if the convolver is up to date.
 
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                calculation. If None, the energy grid from the experiment
+                is used.
+
         Returns:
             np.ndarray: The calculated model prediction.
         """
 
-        sample_intensity = self._evaluate_sample()
+        sample_intensity = self._evaluate_sample(energy=energy)
 
-        background_intensity = self._evaluate_background()
+        background_intensity = self._evaluate_background(energy=energy)
 
         sample_plus_background = sample_intensity + background_intensity
 
@@ -175,14 +159,11 @@ class Analysis1d(AnalysisBase):
         parameter optimization for performance reasons.
 
         Returns:
-            FitResult: The result of the fit.
+            FitResults: The result of the fit.
 
         Raises:
             ValueError: If no experiment is associated with this
                 Analysis.
-
-        Returns:
-            FitResults: The result of the fit.
         """
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
@@ -195,14 +176,18 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights = self._extract_x_y_weights_from_experiment(Q_index=self._require_Q_index())
+        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(
+            Q_index=self._require_Q_index()
+        )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result
 
         return fit_result
 
-    def as_fit_function(self, x=None, **kwargs) -> callable:
+    def as_fit_function(
+        self, x: np.ndarray | sc.Variable | None = None, **kwargs: dict[str, Any]
+    ) -> callable:
         """Return self._calculate as a fit function.
 
         The EasyScience fitter requires x as input, but
@@ -211,13 +196,20 @@ class Analysis1d(AnalysisBase):
         calculated model.
 
         Args:
-            x (Any): Ignored. The energy grid is taken from the
-                experiment.
-            kwargs (dict): Ignored. Included for compatibility with the
+            x (np.ndarray | sc.Variable | None, default=None): Ignored.
+                The energy grid is taken from the experiment.
+            **kwargs (dict[str, Any]): Ignored. Included for compatibility with the
                 EasyScience fitter.
+
+        Returns:
+            callable: A function that can be used as a fit function in the
+                EasyScience fitter, which returns the calculated model.
         """
 
-        def fit_function(x, **kwargs):
+        def fit_function(
+            x: np.ndarray | sc.Variable | None = None,
+            **kwargs: dict[str, Any],
+        ) -> np.ndarray:
             return self._calculate()
 
         return fit_function
@@ -240,8 +232,9 @@ class Analysis1d(AnalysisBase):
     def plot_data_and_model(
         self,
         plot_components: bool = True,
-        add_background=True,
-        **kwargs,
+        add_background: bool = True,
+        energy: sc.Variable | None = None,
+        **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
         """Plot the experimental data and the model prediction for the
         chosen Q index. Optionally also plot the individual components
@@ -250,25 +243,37 @@ class Analysis1d(AnalysisBase):
         Uses Plopp for plotting: https://scipp.github.io/plopp/
 
         Args:
-            plot_components (bool): Whether to plot the individual
-                components of the model. Default is True.
-            add_background (bool): Whether to add the background to the
+            plot_components (bool, default=True): Whether to plot the individual
+                components of the model.
+            add_background (bool, default=True): Whether to add the background to the
                 model prediction when plotting individual components.
-            kwargs (dict): Keyword arguments to pass to the plotting
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                plotting. If None, the energy grid from the experiment
+                is used.
+            **kwargs (dict[str, Any]): Keyword arguments to pass to the plotting
                 function.
 
         Returns:
             InteractiveFigure: A plot of the data and model.
+
+        Raises:
+            ValueError: If no data is available to plot.
         """
         import plopp as pp
 
         if self.experiment.data is None:
             raise ValueError('No data to plot. Please load data first.')
 
-        data = self.experiment.data['Q', self.Q_index]
-        model_array = self._create_sample_scipp_array()
+        energy = self._verify_energy(energy)
+        if energy is None:
+            energy = self._masked_energy
 
-        component_dataset = self._create_components_dataset_single_Q(add_background=add_background)
+        data = self.experiment.data['Q', self.Q_index]
+        model_array = self._create_sample_scipp_array(energy=energy)
+
+        component_dataset = self._create_components_dataset_single_Q(
+            add_background=add_background, energy=energy
+        )
 
         # Create a dataset containing the data, model, and individual
         # components for plotting.
@@ -322,9 +327,62 @@ class Analysis1d(AnalysisBase):
         """Handle changes to the Q index.
 
         This method is called whenever the Q index is changed. It
-        updates the Convolution object for the new Q index.
+        updates the Convolution object for the new Q index and the
+        masked energy from the experiment for the new Q index.
         """
+        masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
+        self._masked_energy = masked_energy
         self._convolver = self._create_convolver()
+
+    def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:
+        """Verify that the provided energy is the correct type.
+
+        Args:
+            energy (sc.Variable | None): The energy to verify.
+
+        Returns:
+            sc.Variable | None: The verified energy, or None if no
+                energy is provided.
+
+        Raises:
+            TypeError: If energy is not a sc.Variable or None.
+        """
+
+        if energy is not None and not isinstance(energy, sc.Variable):
+            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
+        return energy
+
+    def _calculate_energy_with_offset(
+        self,
+        energy: sc.Variable,
+        energy_offset: Parameter,
+    ) -> sc.Variable:
+        """Calculate the energy grid with the energy offset applied.
+
+        Args:
+            energy (sc.Variable): The energy grid to apply the offset to.
+            energy_offset (Parameter): The energy offset to apply.
+
+        Returns:
+            sc.Variable: The energy grid with the offset applied.
+
+        Raises:
+            sc.UnitError: If the energy and energy offset have
+                incompatible units.
+        """
+
+        if energy.unit != energy_offset.unit:
+            try:
+                energy_offset.convert_unit(str(energy.unit))
+            except Exception as e:
+                raise sc.UnitError(
+                    f'Energy and energy offset must have compatible units. '
+                    f'Got {energy.unit} and {energy_offset.unit}.'
+                ) from e
+
+        energy_with_offset = energy.copy(deep=True)
+        energy_with_offset.values -= energy_offset.value
+        return energy_with_offset
 
     #############
     # Private methods: evaluation
@@ -335,6 +393,7 @@ class Analysis1d(AnalysisBase):
         components: ComponentCollection | ModelComponent,
         convolver: Convolution | None = None,
         convolve: bool = True,
+        energy: sc.Variable | None = None,
     ) -> np.ndarray:
         """Calculate the contribution of a set of components, optionally
         convolving with the resolution.
@@ -352,24 +411,36 @@ class Analysis1d(AnalysisBase):
         Args:
             components (ComponentCollection | ModelComponent): The
                 components to evaluate.
-            convolver (Convolution | None): An optional Convolution
+            convolver (Convolution | None, default=None): An optional Convolution
                 object to use for convolution. If None, a new
                 Convolution object will be created if convolve is True.
-            convolve (bool): Whether to perform convolution with the
+            convolve (bool, default=True): Whether to perform convolution with the
                 resolution. Default is True.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
+
+        Returns:
+            np.ndarray: The evaluated contribution of the components.
         """
 
         Q_index = self._require_Q_index()
-        energy = self.energy.values
+        if energy is None:
+            energy = self._masked_energy
+
         energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index)
+        energy_with_offset = self._calculate_energy_with_offset(
+            energy=energy,
+            energy_offset=energy_offset,
+        )
 
         # If there are no components, return zero
         if isinstance(components, ComponentCollection) and components.is_empty:
-            return np.zeros_like(energy)
+            return np.zeros_like(energy.values)
 
         # No convolution
         if not convolve:
-            return components.evaluate(energy - energy_offset.value)
+            return components.evaluate(energy_with_offset)
 
         # If a convolver is provided, use it. This allows reusing the
         # same convolver for multiple evaluations during fitting for
@@ -384,7 +455,7 @@ class Analysis1d(AnalysisBase):
         # We don't create a convolver if the resolution is empty.
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
         if resolution.is_empty:
-            return components.evaluate(energy - energy_offset.value)
+            return components.evaluate(energy_with_offset)
 
         conv = Convolution(
             sample_components=components,
@@ -395,10 +466,18 @@ class Analysis1d(AnalysisBase):
         )
         return conv.convolution()
 
-    def _evaluate_sample(self) -> np.ndarray:
+    def _evaluate_sample(
+        self,
+        energy: sc.Variable | None = None,
+    ) -> np.ndarray:
         """Evaluate the sample contribution for a given Q index.
 
         Assumes that self._convolver is up to date.
+
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             np.ndarray: The evaluated sample contribution.
@@ -409,17 +488,22 @@ class Analysis1d(AnalysisBase):
             components=components,
             convolver=self._convolver,
             convolve=True,
+            energy=energy,
         )
 
     def _evaluate_sample_component(
         self,
         component: ModelComponent,
+        energy: sc.Variable | None = None,
     ) -> np.ndarray:
         """Evaluate a single sample component for the chosen Q index.
 
         Args:
             component (ModelComponent): The sample component to
                 evaluate.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             np.ndarray: The evaluated sample component contribution.
@@ -428,10 +512,16 @@ class Analysis1d(AnalysisBase):
             components=component,
             convolver=None,
             convolve=True,
+            energy=energy,
         )
 
-    def _evaluate_background(self) -> np.ndarray:
+    def _evaluate_background(self, energy: sc.Variable | None = None) -> np.ndarray:
         """Evaluate the background contribution for the chosen Q index.
+
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             np.ndarray: The evaluated background contribution.
@@ -444,11 +534,13 @@ class Analysis1d(AnalysisBase):
             components=background_components,
             convolver=None,
             convolve=False,
+            energy=energy,
         )
 
     def _evaluate_background_component(
         self,
         component: ModelComponent,
+        energy: sc.Variable | None = None,
     ) -> np.ndarray:
         """Evaluate a single background component for the chosen Q
         index.
@@ -456,6 +548,9 @@ class Analysis1d(AnalysisBase):
         Args:
             component (ModelComponent): The background component to
                 evaluate.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             np.ndarray: The evaluated background component contribution.
@@ -465,18 +560,30 @@ class Analysis1d(AnalysisBase):
             components=component,
             convolver=None,
             convolve=False,
+            energy=energy,
         )
 
-    def _create_convolver(self) -> Convolution | None:
+    def _create_convolver(
+        self,
+        energy: sc.Variable | None = None,
+    ) -> Convolution | None:
         """Initialize and return a Convolution object for the chosen Q
         index. If the necessary components for convolution are not
         available, return None.
+
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                convolution. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             Convolution | None: The initialized Convolution object or
                 None if not available.
         """
         Q_index = self._require_Q_index()
+
+        if energy is None:
+            energy = self._masked_energy
 
         sample_components = self.sample_model.get_component_collection(Q_index)
         if sample_components.is_empty:
@@ -487,7 +594,7 @@ class Analysis1d(AnalysisBase):
         )
         if resolution_components.is_empty:
             return None
-        energy = self.energy
+
         # TODO: allow convolution options to be set.
         convolver = Convolution(
             sample_components=sample_components,
@@ -506,66 +613,85 @@ class Analysis1d(AnalysisBase):
         self,
         component: ModelComponent,
         background: np.ndarray | None = None,
+        energy: sc.Variable | None = None,
     ) -> sc.DataArray:
         """Create a scipp DataArray for a single component. Adds the
         background if it is not None.
 
         Args:
-            component (ModelComponent): The component to evaluate
-            background (np.ndarray | None): Optional background to add
+            component (ModelComponent): The component to evaluate.
+            background (np.ndarray | None, default=None): Optional background to add
                 to the component.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             sc.DataArray: The model calculation of the component.
         """
 
-        values = self._evaluate_sample_component(component=component)
+        values = self._evaluate_sample_component(component=component, energy=energy)
         if background is not None:
             values += background
-        return self._to_scipp_array(values=values)
+        return self._to_scipp_array(values=values, energy=energy)
 
     def _create_background_component_scipp_array(
         self,
         component: ModelComponent,
+        energy: sc.Variable | None = None,
     ) -> sc.DataArray:
         """Create a scipp DataArray for a single background component.
 
         Args:
             component (ModelComponent): The component to evaluate.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             sc.DataArray: The model calculation of the component.
         """
 
-        values = self._evaluate_background_component(component=component)
-        return self._to_scipp_array(values=values)
+        values = self._evaluate_background_component(
+            component=component,
+            energy=energy,
+        )
+        return self._to_scipp_array(values=values, energy=energy)
 
-    def _create_sample_scipp_array(self) -> sc.DataArray:
+    def _create_sample_scipp_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
         """Create a scipp DataArray for the full sample model including
         background.
+
+        Args:
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             sc.DataArray: The model calculation of the full sample
                 model.
         """
-        values = self._calculate()
-        return self._to_scipp_array(values=values)
+        values = self.calculate(energy=energy)
+        return self._to_scipp_array(values=values, energy=energy)
 
     def _create_components_dataset_single_Q(
         self,
         add_background: bool = True,
+        energy: sc.Variable | None = None,
     ) -> dict[str, sc.DataArray]:
         """Create sc.DataArrays for all sample and background
         components.
 
         Args:
-            add_background (bool): Whether to add background components.
+            add_background (bool, default=True): Whether to add background components.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for
+                evaluation. If None, the energy grid from the experiment
+                is used.
 
         Returns:
             dict[str, sc.DataArray]: A dictionary of component names to
                 their corresponding sc.DataArrays.
         """
-
         scipp_arrays = {}
         sample_components = self.sample_model.get_component_collection(
             Q_index=self.Q_index
@@ -574,32 +700,46 @@ class Analysis1d(AnalysisBase):
         background_components = self.instrument_model.background_model.get_component_collection(
             Q_index=self.Q_index
         ).components
-        background = self._evaluate_background() if add_background else None
+
+        if energy is None:
+            energy = self._masked_energy
+
+        background = self._evaluate_background(energy=energy) if add_background else None
+
         for component in sample_components:
             scipp_arrays[component.display_name] = self._create_component_scipp_array(
-                component=component, background=background
+                component=component, background=background, energy=energy
             )
         for component in background_components:
             scipp_arrays[component.display_name] = self._create_background_component_scipp_array(
-                component=component
+                component=component, energy=energy
             )
         return sc.Dataset(scipp_arrays)
 
-    def _to_scipp_array(self, values: np.ndarray) -> sc.DataArray:
+    def _to_scipp_array(
+        self,
+        values: np.ndarray,
+        energy: sc.Variable | None = None,
+    ) -> sc.DataArray:
         """Convert a numpy array of values to a sc.DataArray with the
         correct coordinates for energy and Q.
 
         Args:
             values (np.ndarray): The values to convert.
+            energy (sc.Variable | None, default=None): Optional energy grid to use for the
+                energy coordinate. If None, the energy grid from the
+                experiment is used.
 
         Returns:
             sc.DataArray: The converted sc.DataArray.
         """
 
+        if energy is None:
+            energy = self._masked_energy
         return sc.DataArray(
             data=sc.array(dims=['energy'], values=values),
             coords={
-                'energy': self.energy,
+                'energy': energy,
                 'Q': self.Q[self.Q_index],
             },
         )
