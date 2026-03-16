@@ -349,6 +349,9 @@ class Experiment(NewBase):
                 self._binned_data,
                 **plot_kwargs_defaults,
             )
+            for widget in fig.bottom_bar[0].controls.values():
+                widget.slider_toggler.value = '-o-'
+
         else:
             fig = pp.plot(
                 self._binned_data.transpose(dims=['energy', 'Q']),
