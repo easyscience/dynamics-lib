@@ -50,7 +50,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """Initialize a new BrownianTranslationalDiffusion model.
 
         Args:
-            display_name (str | None, default='BrownianTranslationalDiffusion'): Display name of the diffusion model.
+            display_name (str | None, default='BrownianTranslationalDiffusion'):
+                Display name of the diffusion model.
             unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
             unit (str | sc.Unit, default='meV'): Unit of the diffusion model. Must be

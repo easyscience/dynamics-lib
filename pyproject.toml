@@ -22,16 +22,16 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'easyscience',  # The base library of the EasyScience framework
-  'pooch',        # Data downloader
-  'darkdetect',   # Detecting dark mode (system-level)
-  'plopp',        # Plotting library
-  'jupyterlab',   # Jupyter notebooks
-  'pixi-kernel',  # Pixi Jupyter kernel
-  'ipykernel',    # Jupyter kernel (required for running notebooks)
-  'ipywidgets',   # Widgets (needed for interactive matplotlib backends)
-  'ipympl',       # Matplotlib Jupyter widget backend (%matplotlib widget)
-  'IPython',      # Interactive Python shell
+  'easyscience', # The base library of the EasyScience framework
+  'pooch',       # Data downloader
+  'darkdetect',  # Detecting dark mode (system-level)
+  'plopp',       # Plotting library
+  'jupyterlab',  # Jupyter notebooks
+  'pixi-kernel', # Pixi Jupyter kernel
+  'ipykernel',   # Jupyter kernel (required for running notebooks)
+  'ipywidgets',  # Widgets (needed for interactive matplotlib backends)
+  'ipympl',      # Matplotlib Jupyter widget backend (%matplotlib widget)
+  'IPython',     # Interactive Python shell
 ]
 
 [project.optional-dependencies]
@@ -194,7 +194,7 @@ quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 25
 select = [
   # Various rules
   #'C90',  # https://docs.astral.sh/ruff/rules/#mccabe-c90
-  'F',   # https://docs.astral.sh/ruff/rules/#pyflakes-f
+  'F', # https://docs.astral.sh/ruff/rules/#pyflakes-f
   #'FLY',  # https://docs.astral.sh/ruff/rules/#flynt-fly
   #'FURB', # https://docs.astral.sh/ruff/rules/#refurb-furb
   'I', # https://docs.astral.sh/ruff/rules/#isort-i
@@ -215,7 +215,7 @@ select = [
   #'PLW', # https://docs.astral.sh/ruff/rules/#warning-plw
   # flake8 rules
   #'A',     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
-  'ANN',   # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'ANN', # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
   #'ARG',   # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
   #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
   #'B',     # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b

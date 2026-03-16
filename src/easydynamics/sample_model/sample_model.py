@@ -62,7 +62,9 @@ class SampleModel(ModelBase):
 
         Raises:
             TypeError: If diffusion_models is not a DiffusionModelBase,
-                a list of DiffusionModelBase, or None, or if temperature is not a number or None, or if divide_by_temperature is not a bool.
+                a list of DiffusionModelBase, or None, or if temperature
+                is not a number or None, or if divide_by_temperature is
+                not a bool.
             ValueError: If temperature is negative.
         """
         if diffusion_models is None:
@@ -373,7 +375,9 @@ class SampleModel(ModelBase):
                 get variables from all ComponentCollections.
 
         Returns:
-            list[Parameter]: List of all Parameters and Descriptors, including temperature if set and all variables from diffusion models.
+            list[Parameter]: List of all Parameters and Descriptors,
+                including temperature if set and all variables from
+                diffusion models.
         """
 
         all_vars = super().get_all_variables(Q_index=Q_index)

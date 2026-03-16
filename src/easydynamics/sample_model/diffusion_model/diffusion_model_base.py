@@ -23,7 +23,8 @@ class DiffusionModelBase(ModelBase):
         """Initialize a new DiffusionModel.
 
         Args:
-            display_name (str | None, default='MyDiffusionModel'): Display name of the diffusion model.
+            display_name (str | None, default='MyDiffusionModel'):
+                Display name of the diffusion model.
             unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
             scale (Numeric, default=1.0): Scale factor for the diffusion model. Must

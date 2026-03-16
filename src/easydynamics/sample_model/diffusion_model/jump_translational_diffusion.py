@@ -56,7 +56,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Initialize a new JumpTranslationalDiffusion model.
 
         Args:
-            display_name (str | None, default="JumpTranslationalDiffusion"): Display name of the diffusion model.
+            display_name (str | None, default="JumpTranslationalDiffusion"):
+                Display name of the diffusion model.
             unique_name (str | None, default=None): Unique name of the diffusion
                 model. If None, a unique name will be generated.
             unit (str | sc.Unit, default="meV"): Unit of the diffusion model. Must be
@@ -237,8 +238,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Args:
             Q (Q_type): Scattering vector in 1/angstrom. Can be a single
                 value or an array of values.
-            component_display_name (str, default="Jump translational diffusion"): Name of the Jump Diffusion
-                Lorentzian component.
+            component_display_name (str, default="Jump translational diffusion"):
+                Name of the Jump Diffusion Lorentzian component.
 
         Returns:
             List[ComponentCollection]: List of ComponentCollections with

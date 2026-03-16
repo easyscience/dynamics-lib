@@ -60,10 +60,18 @@ def _detailed_balance_factor(
             given energy and temperature.
 
     Raises:
-        TypeError: If energy or temperature is not a number, list, numpy array, or scipp Variable, or if energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature is not a boolean.
-        ValueError: If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if temperature is a scipp Variable that does not have a single dimension named 'temperature', or if energy is a scipp Variable that does not have a single dimension named 'energy'.
-        UnitError: If the provided energy_unit or temperature_unit is invalid, or if the units of energy or temperature cannot be converted to the expected
-            units.
+        TypeError: If energy or temperature is not a number, list,
+            numpy array, or scipp Variable, or if energy_unit or
+            temperature_unit is not a string or scipp Unit,
+            or if divide_by_temperature is not a boolean.
+        ValueError: If temperature is negative, or if energy is a numpy
+            array with more than 1 dimension, or if temperature is a
+            scipp Variable that does not have a single dimension named
+            'temperature', or if energy is a scipp Variable that does
+            not have a single dimension named 'energy'.
+        UnitError: If the provided energy_unit or temperature_unit is
+            invalid, or if the units of energy or temperature cannot be
+            converted to the expected units.
         ZeroDivisionError: If divide_by_temperature is True and temperature is zero.
 
     Examples:
