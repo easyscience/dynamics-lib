@@ -39,6 +39,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             amplitude (Numeric | Parameter, default=1.0): Amplitude of the
                 Exponential.
             center (Numeric | Parameter | None, default=None): Center of the Exponential.
+                If None, the center is fixed at 0.
             rate (Numeric | Parameter, default=1.0): Decay or growth
                 constant of the Exponential.
             unit (str | sc.Unit, default='meV'): Unit of the parameters.
@@ -70,7 +71,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             )
 
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=False, unit=self._unit
+            center=center, name=display_name, fix_if_none=True, unit=self._unit
         )
 
         if not isinstance(rate, (Parameter, Numeric)):

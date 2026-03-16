@@ -177,6 +177,10 @@ class TestComponentCollection:
         with pytest.raises(AttributeError, match='is_empty is a read-only property.'):
             component_collection.is_empty = True
 
+    def test_component_setter_empty_list(self, component_collection):
+        component_collection.components = []
+        assert component_collection.components == []
+
     def test_list_component_names(self, component_collection):
         # WHEN THEN
         components = component_collection.list_component_names()
@@ -197,6 +201,11 @@ class TestComponentCollection:
         # EXPECT
         for component in component_collection.components:
             assert component.unit == 'eV'
+
+    def test_convert_unit_incorrect_unit_raises(self, component_collection):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Unit must be a string or sc.Unit'):
+            component_collection.convert_unit(123)
 
     def test_convert_unit_failure_rolls_back(self, component_collection):
         # WHEN THEN
