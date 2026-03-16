@@ -20,46 +20,29 @@ from .components.model_component import ModelComponent
 class ComponentCollection(ModelBase):
     """Collection of model components representing a sample, background
     or resolution model.
-
-    Args:
-        unit (str | sc.Unit): Unit of the sample model. Defaults to
-            "meV".
-        display_name (str): Display name of the sample model.
-        unique_name (str | None): Unique name of the sample model.
-            If None, a unique_name is automatically generated.
-        components (List[ModelComponent] | None): Initial model
-            components to add to the ComponentCollection.
-
-    Attributes:
-        components (List[ModelComponent]): List of model components in
-            the collection.
-        unit (str | sc.Unit): Unit of the sample model.
-        display_name (str): Display name of the sample model.
-        unique_name (str): Unique name of the sample model.
     """
 
     def __init__(
         self,
         unit: str | sc.Unit = 'meV',
-        display_name: str = 'MyComponentCollection',
+        display_name: str | None = 'MyComponentCollection',
         unique_name: str | None = None,
-        components: List[ModelComponent] | None = None,
-    ):
+        components: list[ModelComponent] | None = None,
+    ) -> None:
         """Initialize a new ComponentCollection.
 
         Args:
-        unit (str | sc.Unit | None): Unit of the sample model.
-            Defaults to "meV".
-        display_name (str | None): Display name of the sample model.
-        unique_name (str | None): Unique name of the sample model.
-            Defaults to None.
-        components (List[ModelComponent] | None): Initial model
-            components to add to the ComponentCollection.
+            unit (str | sc.Unit, default='meV'): Unit of the collection.
+            display_name (str | None, default="MyComponentCollection"): Display
+                name of the collection
+            unique_name (str | None, default=None): Unique name of the collection
+                Defaults to None.
+            components (list[ModelComponent] | None, default=None): Initial model
+                components to add to the ComponentCollection.
 
         Raises:
             TypeError: If unit is not a string or sc.Unit,
                 or if components is not a list of ModelComponent.
-            ValueError: If components contains duplicate unique names.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -87,17 +70,17 @@ class ComponentCollection(ModelBase):
         """Get the list of components in the collection.
 
         Returns:
-            List[ModelComponent]: The components in the collection.
+            list[ModelComponent]: The components in the collection.
         """
 
         return list(self._components)
 
     @components.setter
-    def components(self, components: List[ModelComponent]) -> None:
+    def components(self, components: list[ModelComponent]) -> None:
         """Set the list of components in the collection.
 
         Args:
-            components (List[ModelComponent]): The new list of
+            components (list[ModelComponent]): The new list of
                 components.
 
         Raises:
@@ -147,7 +130,7 @@ class ComponentCollection(ModelBase):
 
         Returns:
             str | sc.Unit | None: The unit of the ComponentCollection,
-            which is the same as the unit of its components.
+                which is the same as the unit of its components.
         """
         return self._unit
 
@@ -178,9 +161,12 @@ class ComponentCollection(ModelBase):
 
         Raises:
             TypeError: If unit is not a string or sc.Unit.
-            UnitError: If any component cannot be converted to the
+            Exception: If any component cannot be converted to the
                 specified unit.
         """
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
         old_unit = self._unit
 
@@ -206,9 +192,9 @@ class ComponentCollection(ModelBase):
         ComponentCollection to this ComponentCollection.
 
         Args:
-        component (ModelComponent | ComponentCollection): The component
-            to append. If a ComponentCollection is provided, all of its
-            components will be appended.
+            component (ModelComponent | "ComponentCollection"): The component
+                to append. If a ComponentCollection is provided, all of its
+                components will be appended.
 
         Raises:
             TypeError: If component is not a ModelComponent or
@@ -240,6 +226,7 @@ class ComponentCollection(ModelBase):
 
         Args:
             unique_name (str): Unique name of the component to remove.
+
         Raises:
             TypeError: If unique_name is not a string.
             KeyError: If no component with the given unique name exists
@@ -262,10 +249,23 @@ class ComponentCollection(ModelBase):
 
     @property
     def components(self) -> list[ModelComponent]:
+        """Get the list of components in the collection.
+
+        Returns:
+            list[ModelComponent]: The components in the collection.
+        """
         return list(self._components)
 
     @components.setter
-    def components(self, components: List[ModelComponent]) -> None:
+    def components(self, components: list[ModelComponent]) -> None:
+        """Set the components in the collection.
+
+        Args:
+            components (list[ModelComponent]): The new components in the collection
+
+        Raises:
+            TypeError: If components is not a list of ModelComponent
+        """
         if not isinstance(components, list):
             raise TypeError('components must be a list of ModelComponent instances.')
         for comp in components:
@@ -279,10 +279,24 @@ class ComponentCollection(ModelBase):
 
     @property
     def is_empty(self) -> bool:
+        """Returns True if the collection has no components, otherwise
+        False.
+
+        Returns:
+            bool: True if the collection has no components, otherwise False
+        """
         return not self._components
 
     @is_empty.setter
     def is_empty(self, value: bool) -> None:
+        """is_empty is read-only.
+
+        Args:
+            value (bool): ignored.
+
+        Raises:
+            AttributeError: Always raised since is_empty is read-only
+        """
         raise AttributeError(
             'is_empty is a read-only property that indicates '
             'whether the collection has components.'
@@ -293,7 +307,7 @@ class ComponentCollection(ModelBase):
 
         Returns:
             List[str]: List of unique names of the components in the
-            collection.
+                collection.
         """
 
         return [component.unique_name for component in self._components]
@@ -307,8 +321,8 @@ class ComponentCollection(ModelBase):
         is useful for convolutions.
 
         Raises:
-            ValueError: If there are no components in the model.
-            ValueError: If the total area is zero or not finite, which
+            ValueError: If there are no components in the model or
+                if the total area is zero or not finite, which
                 would prevent normalization.
         """
         if not self.components:
@@ -345,7 +359,7 @@ class ComponentCollection(ModelBase):
         """Get all parameters from the model component.
 
         Returns:
-            List[Parameter]: List of parameters in the component.
+            list[DescriptorBase]: List of parameters in the component.
         """
 
         return [var for component in self.components for var in component.get_all_variables()]
@@ -354,10 +368,10 @@ class ComponentCollection(ModelBase):
         """Evaluate the sum of all components.
 
         Args:
-            x (Number, list, np.ndarray, sc.Variable, or sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 Energy axis.
 
-        Returns
+        Returns:
             np.ndarray: Evaluated model values.
         """
 
@@ -373,7 +387,7 @@ class ComponentCollection(ModelBase):
         """Evaluate a single component by name.
 
         Args:
-            x (Number, list, np.ndarray, sc.Variable, or sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 Energy axis.
             unique_name (str): Component unique name.
 
@@ -422,7 +436,7 @@ class ComponentCollection(ModelBase):
         in the ComponentCollection.
 
         Args:
-            item (str or ModelComponent): The component name or instance
+            item (str | ModelComponent): The component name or instance
                 to check for.
 
         Returns:

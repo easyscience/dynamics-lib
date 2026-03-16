@@ -31,25 +31,6 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     If the center is not provided, it will be centered at 0 and
     fixed, which is typically what you want in QENS.
-
-     Args:
-         area (Int | float | Parameter | None): Area of the Gaussian.
-         center (Int | float | Parameter | None): Center of the
-            Gaussian. If None, defaults to 0 and is fixed.
-         width (Int | float | Parameter | None): Standard deviation.
-         unit (str | sc.Unit): Unit of the parameters. Defaults to
-             "meV".
-         display_name (str | None): Name of the component.
-         unique_name (str | None): Unique name of the component. if
-            None, a unique_name is automatically generated.
-
-     Attributes:
-         area (Parameter): Area of the Gaussian.
-         center (Parameter): Center of the Gaussian.
-         width (Parameter): Standard deviation of the Gaussian.
-         unit (str | sc.Unit): Unit of the parameters.
-         display_name (str | None): Name of the component.
-         unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
@@ -60,25 +41,18 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Gaussian',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Gaussian component.
 
         Args:
-            area (Int | float | Parameter | None): Area of the Gaussian.
-            center (Int | float | Parameter | None): Center of the
+            area (Numeric | Parameter, default=1.0): Area of the Gaussian.
+            center (Numeric | Parameter | None, default=None): Center of the
                 Gaussian. If None, defaults to 0 and is fixed.
-            width (Int | float | Parameter | None): Standard deviation.
-            unit (str | sc.Unit): Unit of the parameters. Defaults to
-                "meV".
-            display_name (str | None): Name of the component.
-            unique_name (str | None): Unique name of the component. if
-                None, a unique_name is automatically generated.
-
-        Raises:
-            TypeError: If area, center, or width are not numbers or
-                Parameters.
-            ValueError: If width is not positive.
-            TypeError: If unit is not a string or sc.Unit.
+            width (Numeric | Parameter, default=1.0): Standard deviation.
+            unit (str | sc.Unit, default='meV'): Unit of the parameters.
+            display_name (str | None, default='Gaussian'): Name of the component.
+            unique_name (str | None, default=None): Unique name of the component.
+                if None, a unique_name is automatically generated.
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
@@ -134,12 +108,12 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         return self._center
 
     @center.setter
-    def center(self, value: Numeric) -> None:
+    def center(self, value: Numeric | None) -> None:
         """Set the center parameter value.
 
         Args:
             value (Numeric | None): The new value for the center
-            parameter. If None, defaults to 0 and is fixed.
+                parameter. If None, defaults to 0 and is fixed.
 
         Raises:
             TypeError: If the value is not a number or None.
@@ -166,8 +140,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         """Set the width parameter value.
 
         Args:
-            value (Numeric | None): The new value for the width
-            parameter.
+            value (Numeric): The new value for the width
+                parameter.
 
         Raises:
             TypeError: If the value is not a number or None.
@@ -203,7 +177,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
 
         Args:
-            x (Numeric or list or np.ndarray or sc.Variable or sc.DataArray):
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
                 The x values at which to evaluate the Gaussian.
 
         Returns:

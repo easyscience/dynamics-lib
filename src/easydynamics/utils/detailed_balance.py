@@ -41,26 +41,40 @@ def _detailed_balance_factor(
     $k_B*T$ to have value 1 at $E=0$.
 
     Args:
-        energy (number | list | np.ndarray | scipp.Variable): The energy
+        energy (int | float | list | np.ndarray | sc.Variable): The energy
             transfer. If number, assumed to be in meV unless energy_unit
             is set.
-        temperature (number | scipp.Variable | Parameter): The
+        temperature (int | float | sc.Variable | Parameter): The
             temperature. If number, assumed to be in K unless
             temperature_unit is set.
-        energy_unit (str | sc.Unit |None): Unit for energy if energy is
+        energy_unit (str | sc.Unit, default='meV'): Unit for energy if energy is
             given as a number or list. Default is 'meV'
-        temperature_unit (str | sc.Unit |None): Unit for temperature if
+        temperature_unit (str | sc.Unit, default='K'): Unit for temperature if
             temperature is given as a number. Default is 'K'
-        divide_by_temperature (bool | None): If True, divide the result
+        divide_by_temperature (bool, default=True): If True, divide the result
             by $k_B*T$ to make it dimensionless and have value 1 at E=0.
             Default is True.
 
     Returns:
-        DBF (np.ndarray):  Detailed balance factor evaluated at the
+        np.ndarray:  Detailed balance factor evaluated at the
             given energy and temperature.
 
-    Examples
-    --------
+    Raises:
+        TypeError: If energy or temperature is not a number, list,
+            numpy array, or scipp Variable, or if energy_unit or
+            temperature_unit is not a string or scipp Unit,
+            or if divide_by_temperature is not a boolean.
+        ValueError: If temperature is negative, or if energy is a numpy
+            array with more than 1 dimension, or if temperature is a
+            scipp Variable that does not have a single dimension named
+            'temperature', or if energy is a scipp Variable that does
+            not have a single dimension named 'energy'.
+        UnitError: If the provided energy_unit or temperature_unit is
+            invalid, or if the units of energy or temperature cannot be
+            converted to the expected units.
+        ZeroDivisionError: If divide_by_temperature is True and temperature is zero.
+
+    Examples:
     >>> detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
     >>> detailed_balance_factor(
     ...     energy=[1.0, 2.0],
@@ -182,12 +196,12 @@ def _convert_to_scipp_variable(
     units.
 
     Args:
-        value (int | float | list | np.ndarray | Parameter |
-            sc.Variable): The value to convert. Can be a number, list,
-            numpy array, Parameter, or scipp Variable. If a number or
-            list, the unit must be specified in the unit argument.
+        value (int | float | list | np.ndarray | Parameter | sc.Variable):
+            The value to convert. Can be a number, list, numpy array,
+            Parameter, or scipp Variable. If a number or list, the unit
+            must be specified in the unit argument.
         name (str): The name of the variable, used for error messages.
-        unit (str | None): The unit to use if value is a number or list.
+        unit (str | None, default=None): The unit to use if value is a number or list.
             Must be specified if value is a number or list. Ignored if
             value is a Parameter or sc.Variable, which have their own
             units.
@@ -195,8 +209,6 @@ def _convert_to_scipp_variable(
     Raises:
         TypeError: If value is not one of the accepted types, or if unit
             is not a string when needed.
-        ValueError: If value is a number or list and unit is not
-            provided.
         UnitError: If the provided unit is invalid.
 
     Returns:

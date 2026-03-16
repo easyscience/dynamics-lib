@@ -125,6 +125,17 @@ class TestExponential:
         with pytest.raises(TypeError, match=invalid_message):
             setattr(exponential, prop, invalid_value)
 
+    def test_center_is_fixed_if_set_to_None(self, exponential: Exponential):
+        # WHEN
+        assert exponential.center.fixed is False
+
+        # THEN
+        exponential.center = None
+
+        # EXPECT
+        assert exponential.center.value == 0.0
+        assert exponential.center.fixed is True
+
     def test_evaluate(self, exponential: Exponential):
         # WHEN
         x = np.array([0.0, 0.5, 1.0])
@@ -167,6 +178,11 @@ class TestExponential:
         # rate should scale inversely
         assert exponential.rate.value == 1.2 / 1e3
         assert str(exponential.rate.unit) == '1/ueV'
+
+    def test_convert_unit_incorrect_unit_raises(self, exponential: Exponential):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='unit must be a string or sc.Unit'):
+            exponential.convert_unit(123)
 
     def test_convert_unit_rollback(self, exponential: Exponential):
         # WHEN

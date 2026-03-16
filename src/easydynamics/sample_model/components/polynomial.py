@@ -25,21 +25,6 @@ class Polynomial(ModelComponent):
     I(x) = c_0 + c_1 x + c_2 x^2 + ... + c_N x^N,
     $$
     where $C_i$ are the coefficients.
-
-    Args:
-        coefficients (list or tuple): Coefficients c0, c1, ..., cN
-        unit (str or sc.Unit): Unit of the Polynomial component.
-        display_name (str): Display name of the Polynomial component.
-        unique_name (str or None): Unique name of the component.
-            If None, a unique_name is automatically generated.
-
-    Attributes:
-        coefficients (list of Parameter): Coefficients of the polynomial
-            as Parameters.
-        unit (str): Unit of the Polynomial component.
-        display_name (str): Display name of the Polynomial component.
-        unique_name (str or None): Unique name of the component.
-            If None, a unique_name is automatically generated.
     """
 
     def __init__(
@@ -48,24 +33,25 @@ class Polynomial(ModelComponent):
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'Polynomial',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Polynomial component.
 
         Args:
-            coefficients (list or tuple): Coefficients c0, c1, ..., cN
-            unit (str or sc.Unit): Unit of the Polynomial component.
-            display_name (str): Display name of the Polynomial
+            coefficients (Sequence[Numeric | Parameter], default=(0.0,)):
+                Coefficients c0, c1, ..., cN
+            unit (str | sc.Unit, default='meV'): Unit of the Polynomial
                 component.
-            unique_name (str or None): Unique name of the component.
-                If None, a unique_name is automatically generated.
+            display_name (str | None, default='Polynomial'): Display
+                name of the Polynomial component.
+            unique_name (str | None, default=None): Unique name of the
+                component. If None, a unique_name is automatically
+                generated.
 
         Raises:
             TypeError: If coefficients is not a sequence of numbers or
-                Parameters.
+                Parameters or if any item in coefficients is not a
+                number or Parameter.
             ValueError: If coefficients is an empty sequence.
-            TypeError: If any item in coefficients is not a number or
-                Parameter.
-            UnitError: If unit is not a string or sc.Unit.
         """
 
         super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
@@ -118,11 +104,9 @@ class Polynomial(ModelComponent):
 
         Raises:
             TypeError: If coeffs is not a sequence of numbers or
-                Parameters.
+                Parameters or if any item in coeffs is not a number or Parameter.
             ValueError: If the length of coeffs does not match the
                 existing number of coefficients.
-            TypeError: If any item in coeffs is not a number or
-                Parameter.
         """
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -209,18 +193,18 @@ class Polynomial(ModelComponent):
         )
 
     def get_all_variables(self) -> list[DescriptorBase]:
-        """Get all parameters from the model component.
+        """Get all variables from the model component.
 
         Returns:
-        List[Parameter]: List of parameters in the component.
+            list[DescriptorBase]: List of variables in the component.
         """
         return list(self._coefficients)
 
-    def convert_unit(self, unit: str | sc.Unit):
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the polynomial.
 
         Args:
-            unit (str or sc.Unit): The target unit to convert to.
+            unit (str | sc.Unit): The target unit to convert to.
 
         Raises:
             UnitError: If the provided unit is not a string or sc.Unit.

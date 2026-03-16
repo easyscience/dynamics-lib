@@ -40,15 +40,16 @@ class CreateParametersMixin:
         Args:
             area (Numeric | Parameter): The area value or Parameter.
             name (str): The name of the model component.
-            unit (str | sc.Unit): The unit of the area Parameter.
-            minimum_area (float): The minimum allowed area.
+            unit (str | sc.Unit, default='meV'): The unit of the area Parameter.
+            minimum_area (float, default=MINIMUM_AREA): The minimum allowed area.
 
         Returns:
             Parameter: The validated area Parameter.
 
         Raises:
             TypeError: If area is not a number or a Parameter.
-            Warning: If area is negative.
+            ValueError: If area is not a finite number or if the area
+                Parameter has a non-finite value.
         """
         if not isinstance(area, (Parameter, Numeric)):
             raise TypeError('area must be a number or a Parameter.')
@@ -85,13 +86,19 @@ class CreateParametersMixin:
             name (str): The name of the model component.
             fix_if_none (bool): Whether to fix the center Parameter
                 if center is None.
-            unit (str | sc.Unit): The unit of the center Parameter.
+            unit (str | sc.Unit, default='meV'): The unit of the center
+                Parameter.
+            enforce_minimum_center (bool, default=False): Whether to
+                enforce a minimum center value to avoid zero center in
+                DHO.
 
         Returns:
             Parameter: The validated center Parameter.
 
         Raises:
             TypeError: If center is not None, a number, or a Parameter.
+            ValueError: If center is a number but not finite, or if
+                center is a Parameter but has a non-finite value.
         """
         if center is not None and not isinstance(center, (Numeric, Parameter)):
             raise TypeError('center must be None, a number, or a Parameter.')
@@ -124,11 +131,12 @@ class CreateParametersMixin:
         width of a function.
 
         Args:
-            width (Numeric or Parameter): The width value or Parameter.
+            width (Numeric | Parameter): The width value or Parameter.
             name (str): The name of the model component.
-            param_name (str): The name of the width parameter.
-            unit (str or sc.Unit): The unit of the width Parameter.
-            minimum_width (float): The minimum allowed width.
+            param_name (str, default='width'): The name of the width parameter.
+            unit (str | sc.Unit, default='meV'): The unit of the width Parameter.
+            minimum_width (float, default=MINIMUM_WIDTH): The minimum
+                allowed width.
 
         Returns:
             Parameter: The validated width Parameter.

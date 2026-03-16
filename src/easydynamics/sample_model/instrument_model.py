@@ -18,40 +18,10 @@ from easydynamics.utils.utils import _validate_unit
 
 class InstrumentModel(NewBase):
     """InstrumentModel represents a model of the instrument in an
-    experiment at various Q. It can contain a model of the resolution
-    function for convolutions, of the background and an offset in the
-    energy axis.
+    experiment at various Q.
 
-    Args:
-        display_name (str | None): The display name of the
-            InstrumentModel. Default is "MyInstrumentModel".
-        unique_name (str | None): The unique name of the
-            InstrumentModel. Default is None.
-        Q (np.ndarray | list | sc.Variable | None): The Q values where
-            the instrument is modelled.
-        resolution_model (ResolutionModel | None): The resolution model
-            of the instrument. If None, an empty resolution model is
-            created and no resolution convolution is carried out.
-            Default is None.
-        background_model (BackgroundModel | None): The background model
-            of the instrument. If None, an empty background model is
-            created, and the background evaluates to 0. Default is None.
-        energy_offset (float | int | None): Template energy offset of
-            the instrument. Will be copied to each Q value. If None, the
-            energy offset will be 0. Default is None.
-        unit (str | sc.Unit): The unit of the energy axis. Default is
-            'meV'.
-
-    Attributes:
-        resolution_model (ResolutionModel): The resolution model of the
-            instrument.
-        background_model (BackgroundModel): The background model of the
-            instrument.
-        Q (np.ndarray | None): The Q values where the instrument is
-            modelled.
-        energy_offset (Parameter): The template energy offset Parameter
-            of the instrument. Will be copied to each Q value.
-        unit (str | sc.Unit): The unit of the energy axis.
+    It can contain a model of the resolution function for convolutions,
+    of the background and an offset in the energy axis.
     """
 
     def __init__(
@@ -63,37 +33,31 @@ class InstrumentModel(NewBase):
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
         unit: str | sc.Unit = 'meV',
-    ):
+    ) -> None:
         """Initialize an InstrumentModel.
 
         Args:
-            display_name (str | None): The display name of the
+            display_name (str, default="MyInstrumentModel"): The display name of the
                 InstrumentModel. Default is "MyInstrumentModel".
-            unique_name (str | None): The unique name of the
-                InstrumentModel. Default is None.
-            Q (np.ndarray | list | sc.Variable | None): The Q values
-                where the instrument is modelled.
-            resolution_model (ResolutionModel | None): The resolution
+            unique_name (str | None, default=None): The unique name of the
+                InstrumentModel.
+            Q (Q_type | None, default=None): The Q values where the instrument is modelled.
+            resolution_model (ResolutionModel | None, default=None): The resolution
                 model of the instrument. If None, an empty resolution
                 model is created and no resolution convolution is
-                carried out. Default is None.
-            background_model (BackgroundModel | None): The background
+                carried out.
+            background_model (BackgroundModel | None, default=None): The background
                 model of the instrument. If None, an empty background
                 model is created, and the background evaluates to 0.
-                Default is None.
-            energy_offset (float | int | None): Template energy offset
+            energy_offset (Numeric | None, default=None): Template energy offset
                 of the instrument. Will be copied to each Q value. If
-                None, the energy offset will be 0. Default is None.
-            unit (str | sc.Unit): The unit of the energy axis. Default
-                is 'meV'.
+                None, the energy offset will be 0.
+            unit (str | sc.Unit, default="meV"): The unit of the energy axis.
 
         Raises:
             TypeError: If resolution_model is not a ResolutionModel or
-                None
-            TypeError: If background_model is not a BackgroundModel or
-                None
-            TypeError: If energy_offset is not a number or None
-            UnitError: If unit is not a valid unit string or scipp Unit.
+                None, or if background_model is not a BackgroundModel or None, or
+                if energy_offset is not a number or None.
         """
         super().__init__(
             display_name=display_name,
@@ -151,7 +115,7 @@ class InstrumentModel(NewBase):
         return self._resolution_model
 
     @resolution_model.setter
-    def resolution_model(self, value: ResolutionModel):
+    def resolution_model(self, value: ResolutionModel) -> None:
         """Set the resolution model of the instrument.
 
         Args:
@@ -179,7 +143,7 @@ class InstrumentModel(NewBase):
         return self._background_model
 
     @background_model.setter
-    def background_model(self, value: BackgroundModel):
+    def background_model(self, value: BackgroundModel) -> None:
         """Set the background model of the instrument.
 
         Args:
@@ -202,7 +166,7 @@ class InstrumentModel(NewBase):
         """Get the Q values of the InstrumentModel.
 
         Returns:
-            np.ndarray or None: The Q values of the InstrumentModel, or
+            np.ndarray | None: The Q values of the InstrumentModel, or
                 None if not set
         """
         return self._Q
@@ -213,20 +177,17 @@ class InstrumentModel(NewBase):
 
         Args:
             value (Q_type | None): The new Q values for the
-            InstrumentModel.
-
-        Raises:
-            TypeError: If value is not a valid Q_type or None.
+                InstrumentModel.
         """
         self._Q = _validate_and_convert_Q(value)
         self._on_Q_change()
 
     @property
-    def unit(self) -> sc.Unit:
+    def unit(self) -> str | sc.Unit:
         """Get the unit of the InstrumentModel.
 
         Returns:
-            (str | sc.Unit): The unit of the InstrumentModel.
+            str | sc.Unit: The unit of the InstrumentModel.
         """
         return self._unit
 
@@ -263,11 +224,11 @@ class InstrumentModel(NewBase):
         return self._energy_offset
 
     @energy_offset.setter
-    def energy_offset(self, value: Numeric):
+    def energy_offset(self, value: Numeric) -> None:
         """Set the offset parameter of the instrument model.
 
         Args:
-            value (float | int): The new value for the energy offset
+            value (Numeric): The new value for the energy offset
                 parameter. Will be copied to all Q values.
 
         Raises:
@@ -290,7 +251,6 @@ class InstrumentModel(NewBase):
             unit_str (str | sc.Unit): The unit to convert to.
 
         Raises:
-            TypeError: If unit_str is not a string or scipp Unit.
             ValueError: If unit_str is not a valid unit string or
                 scipp Unit.
         """
@@ -310,7 +270,7 @@ class InstrumentModel(NewBase):
         """Get all variables in the InstrumentModel.
 
         Args:
-            Q_index (int | None): The index of the Q value to get
+            Q_index (int | None, default=None): The index of the Q value to get
                 variables for. If None, get variables for all Q values.
 
         Returns:
