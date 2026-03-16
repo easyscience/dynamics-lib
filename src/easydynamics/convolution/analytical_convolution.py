@@ -20,20 +20,8 @@ class AnalyticalConvolution(ConvolutionBase):
     """Analytical convolution of a ModelComponent or ComponentCollection
     with a ResolutionModel.
 
-    Possible analytical convolutions are any combination of
-    delta functions, Gaussians, Lorentzians and Voigt profiles.
-
-    Args:
-        energy (np.ndarray | sc.Variable): 1D array of energy values
-            where the convolution is evaluated.
-        sample_components (ComponentCollection | ModelComponent): The
-            sample model to be convolved.
-        resolution_components (ComponentCollection | ModelComponent):
-            The resolution model to convolve with.
-        energy_offset (Numeric | Parameter, optional): An offset to
-            shift the energy values by. Default is 0.0.
-        energy_unit (str | sc.Unit, optional): The unit of the energy.
-            Default is 'meV'.
+    Possible analytical convolutions are any combination of delta
+    functions, Gaussians, Lorentzians and Voigt profiles.
     """
 
     # Mapping of supported component type pairs to convolution methods.
@@ -54,20 +42,20 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
-    ):
+    ) -> None:
         """Initialize an AnalyticalConvolution.
 
         Args:
             energy (np.ndarray | sc.Variable): 1D array of energy values
                 where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
+            energy_unit (str | sc.Unit, default='meV'): The unit of the
+                energy.
+            sample_components (ComponentCollection | ModelComponent | None, default=None):
                 The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
+            resolution_components (ComponentCollection | ModelComponent | None, default=None):
                 The resolution model to convolve with.
-            energy_offset (Numeric | Parameter, optional): An offset to
-                shift the energy values by. Default is 0.0.
-            energy_unit (str | sc.Unit, optional): The unit of the
-                energy. Default is 'meV'.
+            energy_offset (Numeric | Parameter, default=0.0): An offset to
+                shift the energy values by.
         """
         super().__init__(
             energy=energy,
@@ -88,12 +76,6 @@ class AnalyticalConvolution(ConvolutionBase):
         Returns:
             np.ndarray: The convolution of the sample_components and
                 resolution_components values evaluated at self.energy.
-
-        Raises:
-            ValueError: If resolution_components contains delta
-                functions.
-            ValueError: If component pair cannot be handled
-                analytically.
         """
 
         sample_components = self.sample_components.components
@@ -205,7 +187,7 @@ class AnalyticalConvolution(ConvolutionBase):
         self,
         sample_component: DeltaFunction,
         resolution_components: ComponentCollection | ModelComponent,
-    ):
+    ) -> np.ndarray:
         """Convolution of delta function with any ModelComponent or
         ComponentCollection results in the same component or
         ComponentCollection shifted by the delta center. The areas are

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -16,42 +15,22 @@ from easydynamics.utils.utils import Numeric
 
 
 class ModelComponent(ModelBase):
-    """Abstract base class for all model components.
-
-    Args:
-        unit (str | sc.Unit): The unit of the model component.
-            Default is 'meV'.
-        display_name (str | None): A human-readable name for the
-            component. Default is None.
-        unique_name (str | None): A unique identifier for the
-            component. Default is None.
-
-    Attributes:
-        unit (str): The unit of the model component.
-        display_name (str | None): A human-readable name for the
-            component.
-        unique_name (str | None): A unique identifier for the
-            component.
-    """
+    """Abstract base class for all model components."""
 
     def __init__(
         self,
         unit: str | sc.Unit = 'meV',
         display_name: str | None = None,
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the ModelComponent.
 
         Args:
-            unit (str | sc.Unit): The unit of the model component.
-                Default is 'meV'.
-            display_name (str | None): A human-readable name for the
-                component. Default is None.
-            unique_name (str | None): A unique identifier for the
-                component. Default is None.
-
-        Raises:
-            TypeError: If unit is not a string or scipp Unit.
+            unit (str | sc.Unit, default="meV"): The unit of the model component.
+            display_name (str | None, default=None): A human-readable name for the
+                component.
+            unique_name (str | None, default=None): A unique identifier for the
+                component.
         """
         self.validate_unit(unit)
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -85,27 +64,27 @@ class ModelComponent(ModelBase):
             )
         )  # noqa: E501
 
-    def fix_all_parameters(self):
+    def fix_all_parameters(self) -> None:
         """Fix all parameters in the model component."""
 
         pars = self.get_fittable_parameters()
         for p in pars:
             p.fixed = True
 
-    def free_all_parameters(self):
+    def free_all_parameters(self) -> None:
         """Free all parameters in the model component."""
         for p in self.get_fittable_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
-        self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
         """Prepare the input x for evaluation by handling units and
         converting to a numpy array.
 
         Args:
-            x (Numeric | List[Numeric] | np.ndarray | sc.Variable |
-            sc.DataArray): The input data to prepare.
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
+                The input data to prepare.
 
         Returns:
             np.ndarray: The prepared input data as a numpy array.
@@ -171,8 +150,11 @@ class ModelComponent(ModelBase):
         return np.sort(x_in)
 
     @staticmethod
-    def validate_unit(unit) -> None:
+    def validate_unit(unit: str | sc.Unit | None) -> None:
         """Validate that the unit is either a string or a scipp Unit.
+
+        Args:
+            unit (str | sc.Unit | None): The unit to validate.
 
         Raises:
             TypeError: If unit is not a string or scipp Unit.
@@ -182,12 +164,19 @@ class ModelComponent(ModelBase):
                 f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
             )
 
-    def convert_unit(self, unit: str | sc.Unit):
+    def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the Parameters in the component.
 
         Args:
-            unit (str or sc.Unit): The new unit to convert to.
+            unit (str | sc.Unit): The new unit to convert to.
+
+        Raises:
+            TypeError: If the provided unit is not a str or sc.Unit
+            Exception: If the provided unit is invalid or incompatible
+                with the component's parameters.
         """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
         old_unit = self._unit
         pars = self.get_all_parameters()
@@ -206,15 +195,13 @@ class ModelComponent(ModelBase):
             raise e
 
     @abstractmethod
-    def evaluate(
-        self, x: Numeric | List[Numeric] | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         """Abstract method to evaluate the model component at input x.
         Must be implemented by subclasses.
 
         Args:
-            x (Numeric | list[Numeric] | np.ndarray | sc.Variable | sc.DataArray):
-                Input values.
+            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
+                The x values at which to evaluate the component.
 
         Returns:
             np.ndarray: Evaluated function values.

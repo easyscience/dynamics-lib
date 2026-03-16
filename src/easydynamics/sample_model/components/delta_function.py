@@ -22,49 +22,26 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     as an identity. This is handled by the Convolution method. If the
     center is not provided, it will be centered at 0 and fixed, which is
     typically what you want in QENS.
-
-    Args:
-        center (Int | float | None): Center of the delta function. If
-            None, defaults to 0 and is fixed.
-        area (Int | float): Total area under the curve.
-        unit (str | sc.Unit): Unit of the parameters.
-            Defaults to "meV".
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component.
-            If None, a unique_name is automatically generated.
-
-    Attributes:
-        center (Parameter): Center of the delta function.
-        area (Parameter): Total area under the curve.
-        unit (str | sc.Unit): Unit of the parameters.
-        display_name (str | None): Name of the component.
-        unique_name (str | None): Unique name of the component.
     """
 
     def __init__(
         self,
-        center: None | Numeric | Parameter = None,
+        center: Numeric | Parameter | None = None,
         area: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
-    ):
+    ) -> None:
         """Initialize the Delta function.
 
         Args:
-            center (Int | float | None): Center of the delta function.
+            center (Numeric | Parameter | None, default=None): Center of the delta function.
                 If None, defaults to 0 and is fixed.
-            area (Int | float): Total area under the curve.
-            unit (str | sc.Unit): Unit of the parameters.
-                Defaults to "meV".
-            display_name (str | None): Name of the component.
-            unique_name (str | None): Unique name of the component.
+            area (Numeric | Parameter, default=1.0): Total area under the curve.
+            unit (str | sc.Unit, default='meV'): Unit of the parameters.
+            display_name (str | None, default='DeltaFunction'): Name of the component.
+            unique_name (str | None, default=None): Unique name of the component.
                 If None, a unique_name is automatically generated.
-
-        Raises:
-            TypeError: If center is not a number or None.
-            TypeError: If area is not a number.
-            TypeError: If unit is not a string or sc.Unit.
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
@@ -123,7 +100,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Args:
             value (Numeric | None): The new value for the center
-            parameter. If None, defaults to 0 and is fixed.
+                parameter. If None, defaults to 0 and is fixed.
 
         Raises:
             TypeError: If the value is not a number or None.

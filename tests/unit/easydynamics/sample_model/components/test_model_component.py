@@ -46,6 +46,11 @@ class TestModelComponent:
         assert dummy.center.value == 2 * 1e3
         assert dummy.width.value == 3 * 1e3
 
+    def test_convert_unit_incorrect_unit_raises(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Unit must be a string or sc.Unit'):
+            dummy.convert_unit(123)
+
     def test_free_and_fix_all_parameters(self, dummy):
         # WHEN THEN EXPECT
         dummy.free_all_parameters()
