@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
     
     
       
@@ -14525,7 +14525,14 @@ of the background and an offset in the energy axis.</p>
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
-<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;InstrumentModel represents a model of the instrument in an</span>
 <span class="sd">    experiment at various Q.</span>
 
@@ -14857,10 +14864,17 @@ of the background and an offset in the energy axis.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_Q_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the Q values.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_energy_offsets</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_background_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the Q values.</span>
+
+<span class="sd">        If Q is None, we do nothing. Q can be None when initializing the</span>
+<span class="sd">        InstrumentModel without Q values, and in that case we don&#39;t want</span>
+<span class="sd">        to overwrite any information in the resolution and background</span>
+<span class="sd">        models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_energy_offsets</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_background_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_energy_offset_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the energy offset.&quot;&quot;&quot;</span>
@@ -15377,14 +15391,7 @@ if energy_offset is not a number or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/instrument_model.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span>
@@ -15392,7 +15399,14 @@ if energy_offset is not a number or None.</p>
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
-<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">    Returns:</span>
@@ -52795,7 +52809,14 @@ of the background and an offset in the energy axis.</p>
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
-<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InstrumentModel</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;InstrumentModel represents a model of the instrument in an</span>
 <span class="sd">    experiment at various Q.</span>
 
@@ -53127,10 +53148,17 @@ of the background and an offset in the energy axis.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_Q_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the Q values.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_energy_offsets</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_background_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the Q values.</span>
+
+<span class="sd">        If Q is None, we do nothing. Q can be None when initializing the</span>
+<span class="sd">        InstrumentModel without Q values, and in that case we don&#39;t want</span>
+<span class="sd">        to overwrite any information in the resolution and background</span>
+<span class="sd">        models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_energy_offsets</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_background_model</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_energy_offset_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle changes to the energy offset.&quot;&quot;&quot;</span>
@@ -53647,14 +53675,7 @@ if energy_offset is not a number or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/instrument_model.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span>
@@ -53662,7 +53683,14 @@ if energy_offset is not a number or None.</p>
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
-<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the InstrumentModel.</span>
 
 <span class="sd">    Returns:</span>
