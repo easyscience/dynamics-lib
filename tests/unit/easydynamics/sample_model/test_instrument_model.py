@@ -25,7 +25,7 @@ class TestInstrumentModel:
         resolution_model = ResolutionModel(components=component2, Q=Q)
 
         instrument_model = InstrumentModel(
-            display_name='TestInstrumentModel',
+            display_name="TestInstrumentModel",
             background_model=background_model,
             resolution_model=resolution_model,
             Q=Q,
@@ -50,12 +50,16 @@ class TestInstrumentModel:
         model = instrument_model
 
         # EXPECT
-        assert model.display_name == 'TestInstrumentModel'
+        assert model.display_name == "TestInstrumentModel"
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
         assert isinstance(model.background_model, BackgroundModel)
         assert isinstance(model.resolution_model, ResolutionModel)
-        np.testing.assert_array_equal(model.background_model.Q, np.array([1.0, 2.0, 3.0]))
-        np.testing.assert_array_equal(model.resolution_model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(
+            model.background_model.Q, np.array([1.0, 2.0, 3.0])
+        )
+        np.testing.assert_array_equal(
+            model.resolution_model.Q, np.array([1.0, 2.0, 3.0])
+        )
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
     def test_init_defaults(self):
@@ -63,40 +67,40 @@ class TestInstrumentModel:
         model = InstrumentModel()
 
         # EXPECT
-        assert model.display_name == 'MyInstrumentModel'
+        assert model.display_name == "MyInstrumentModel"
         assert isinstance(model.background_model, BackgroundModel)
         assert isinstance(model.resolution_model, ResolutionModel)
         assert model.Q is None
 
     @pytest.mark.parametrize(
-        'kwargs, expected_exception, expected_message',
+        "kwargs, expected_exception, expected_message",
         [
             (
-                {'resolution_model': 123},
+                {"resolution_model": 123},
                 TypeError,
-                'resolution_model must be a ResolutionModel',
+                "resolution_model must be a ResolutionModel",
             ),
             (
-                {'background_model': 'not a model'},
+                {"background_model": "not a model"},
                 TypeError,
-                'background_model must be a BackgroundModel',
+                "background_model must be a BackgroundModel",
             ),
             (
-                {'energy_offset': 'abc'},
+                {"energy_offset": "abc"},
                 TypeError,
-                'energy_offset must be a number',
+                "energy_offset must be a number",
             ),
             (
-                {'unit': 123},
+                {"unit": 123},
                 TypeError,
-                'unit must be',
+                "unit must be",
             ),
         ],
         ids=[
-            'invalid resolution_model',
-            'invalid background_model',
-            'invalid energy_offset',
-            'invalid unit',
+            "invalid resolution_model",
+            "invalid background_model",
+            "invalid energy_offset",
+            "invalid unit",
         ],
     )
     def test_instrument_model_init_invalid_inputs(
@@ -105,7 +109,9 @@ class TestInstrumentModel:
         with pytest.raises(expected_exception, match=expected_message):
             InstrumentModel(**kwargs)
 
-    def test_resolution_model_setter_calls_update(self, instrument_model, resolution_model):
+    def test_resolution_model_setter_calls_update(
+        self, instrument_model, resolution_model
+    ):
         # WHEN
         instrument_model._on_resolution_model_change = MagicMock()
 
@@ -120,11 +126,13 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='resolution_model must be a ResolutionModel',
+            match="resolution_model must be a ResolutionModel",
         ):
-            instrument_model.resolution_model = 'invalid_model'
+            instrument_model.resolution_model = "invalid_model"
 
-    def test_background_model_setter_calls_update(self, instrument_model, background_model):
+    def test_background_model_setter_calls_update(
+        self, instrument_model, background_model
+    ):
         # WHEN
         instrument_model._on_background_model_change = MagicMock()
 
@@ -139,7 +147,7 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='background_model must be a BackgroundModel',
+            match="background_model must be a BackgroundModel",
         ):
             instrument_model.background_model = 123
 
@@ -152,7 +160,7 @@ class TestInstrumentModel:
 
         # THEN EXPECT
         with patch(
-            'easydynamics.sample_model.instrument_model._validate_and_convert_Q',
+            "easydynamics.sample_model.instrument_model._validate_and_convert_Q",
             return_value=new_Q,
         ) as mock_validate:
             instrument_model.Q = new_Q
@@ -165,9 +173,9 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             AttributeError,
-            match='Unit is read-only. Use convert_unit to change the unit between allowed types ',
+            match="Unit is read-only. Use convert_unit to change the unit between allowed types ",
         ):
-            instrument_model.unit = 'meV'
+            instrument_model.unit = "meV"
 
     def test_energy_offset_setter(self, instrument_model):
         # WHEN
@@ -184,9 +192,9 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='energy_offset must be a number',
+            match="energy_offset must be a number",
         ):
-            instrument_model.energy_offset = 'invalid_offset'
+            instrument_model.energy_offset = "invalid_offset"
 
     def test_get_energy_offset_at_Q(self, instrument_model):
         # WHEN
@@ -201,7 +209,7 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds',
+            match="Q_index 5 is out of bounds",
         ):
             instrument_model.get_energy_offset_at_Q(5)
 
@@ -212,13 +220,13 @@ class TestInstrumentModel:
         # THEN / EXPECT
         with pytest.raises(
             ValueError,
-            match='No Q values are set',
+            match="No Q values are set",
         ):
             instrument_model.get_energy_offset_at_Q(0)
 
     def test_convert_unit_calls_all_children(self, instrument_model):
         # WHEN
-        new_unit = 'eV'
+        new_unit = "eV"
 
         # THEN
         # Mock downstream convert_unit calls
@@ -229,7 +237,7 @@ class TestInstrumentModel:
             offset.convert_unit = MagicMock()
 
         with patch(
-            'easydynamics.sample_model.instrument_model._validate_unit',
+            "easydynamics.sample_model.instrument_model._validate_unit",
             return_value=new_unit,
         ) as mock_validate:
             instrument_model.convert_unit(new_unit)
@@ -237,9 +245,15 @@ class TestInstrumentModel:
             # EXPECT
             mock_validate.assert_called_once_with(new_unit)
 
-            instrument_model._background_model.convert_unit.assert_called_once_with(new_unit)
-            instrument_model._resolution_model.convert_unit.assert_called_once_with(new_unit)
-            instrument_model._energy_offset.convert_unit.assert_called_once_with(new_unit)
+            instrument_model._background_model.convert_unit.assert_called_once_with(
+                new_unit
+            )
+            instrument_model._resolution_model.convert_unit.assert_called_once_with(
+                new_unit
+            )
+            instrument_model._energy_offset.convert_unit.assert_called_once_with(
+                new_unit
+            )
 
             for offset in instrument_model._energy_offsets:
                 offset.convert_unit.assert_called_once_with(new_unit)
@@ -251,7 +265,7 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             ValueError,
-            match=' must be a valid unit',
+            match=" must be a valid unit",
         ):
             instrument_model.convert_unit(None)
 
@@ -281,12 +295,12 @@ class TestInstrumentModel:
 
         # THEN
         expected_var_names = {
-            'energy_offset',
-            'Polynomial_c0',
-            'Polynomial_c1',
-            'Gaussian area',
-            'Gaussian center',
-            'Gaussian width',
+            "energy_offset",
+            "Polynomial_c0",
+            "Polynomial_c1",
+            "Gaussian area",
+            "Gaussian center",
+            "Gaussian width",
         }
 
         retrieved_var_names = {var.name for var in all_vars}
@@ -310,12 +324,12 @@ class TestInstrumentModel:
 
         # THEN
         expected_var_names = {
-            'energy_offset',
-            'Polynomial_c0',
-            'Polynomial_c1',
-            'Gaussian area',
-            'Gaussian center',
-            'Gaussian width',
+            "energy_offset",
+            "Polynomial_c0",
+            "Polynomial_c1",
+            "Gaussian area",
+            "Gaussian center",
+            "Gaussian width",
         }
 
         retrieved_var_names = {var.name for var in all_vars}
@@ -327,7 +341,7 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds',
+            match="Q_index 5 is out of bounds",
         ):
             instrument_model.get_all_variables(Q_index=5)
 
@@ -335,9 +349,9 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='Q_index must be an int or None, got str',
+            match="Q_index must be an int or None, got str",
         ):
-            instrument_model.get_all_variables(Q_index='invalid_index')
+            instrument_model.get_all_variables(Q_index="invalid_index")
 
     def test_generate_energy_offsets_Q_none(self, instrument_model):
         # WHEN
@@ -359,7 +373,7 @@ class TestInstrumentModel:
         # EXPECT
         assert len(instrument_model._energy_offsets) == 4
         for offset in instrument_model._energy_offsets:
-            assert offset.name == 'energy_offset'
+            assert offset.name == "energy_offset"
             assert offset.unit == instrument_model.unit
             assert offset.value == instrument_model.energy_offset.value
 
@@ -370,6 +384,16 @@ class TestInstrumentModel:
 
         # THEN
         instrument_model._Q = new_Q
+        instrument_model._on_Q_change()
+
+        # EXPECT
+        instrument_model._generate_energy_offsets.assert_called_once()
+        instrument_model._background_model.Q = new_Q
+        instrument_model._resolution_model.Q = new_Q
+
+        # Setting Q to None has no effect.
+        # THEN
+        instrument_model._Q = None
         instrument_model._on_Q_change()
 
         # EXPECT
@@ -416,10 +440,10 @@ class TestInstrumentModel:
         repr_str = repr(instrument_model)
 
         # EXPECT
-        assert repr_str.startswith('InstrumentModel(')
-        assert f'unique_name={instrument_model.unique_name!r}' in repr_str
-        assert f'unit={instrument_model.unit}' in repr_str
-        assert 'Q_len=3' in repr_str
-        assert f'resolution_model={instrument_model._resolution_model!r}' in repr_str
-        assert f'background_model={instrument_model._background_model!r}' in repr_str
-        assert repr_str.endswith(')')
+        assert repr_str.startswith("InstrumentModel(")
+        assert f"unique_name={instrument_model.unique_name!r}" in repr_str
+        assert f"unit={instrument_model.unit}" in repr_str
+        assert "Q_len=3" in repr_str
+        assert f"resolution_model={instrument_model._resolution_model!r}" in repr_str
+        assert f"background_model={instrument_model._background_model!r}" in repr_str
+        assert repr_str.endswith(")")
