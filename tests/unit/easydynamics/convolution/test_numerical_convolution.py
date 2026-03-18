@@ -10,7 +10,7 @@ from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
-from easydynamics.utils.detailed_balance import _detailed_balance_factor as detailed_balance_factor
+from easydynamics.utils.detailed_balance import detailed_balance_factor as detailed_balance_factor
 
 
 class TestNumericalConvolution:

@@ -62,7 +62,9 @@ class CreateParametersMixin:
 
         if area.value < 0:
             warnings.warn(
-                f'The area of {name} is negative, which may not be physically meaningful.'
+                f'The area of {name} is negative, which may not be physically meaningful.',
+                UserWarning,
+                stacklevel=3,
             )
         else:
             area.min = minimum_area

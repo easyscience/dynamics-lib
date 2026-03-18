@@ -495,8 +495,8 @@ class TestAnalysis:
         # EXPECT
         assert np.array_equal(analysis.Q.values, [2, 3, 4])
         assert len(analysis.analysis_list) == 3
-        for analysis in analysis.analysis_list:
-            assert analysis.experiment is new_experiment
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.experiment is new_experiment
 
     def test_on_sample_model_changed(self, analysis):
         # WHEN
@@ -508,8 +508,8 @@ class TestAnalysis:
 
         # EXPECT
         assert analysis.sample_model is new_sample_model
-        for analysis in analysis.analysis_list:
-            assert analysis.sample_model is new_sample_model
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.sample_model is new_sample_model
 
     def test_on_instrument_model_changed(self, analysis):
         # WHEN
@@ -521,8 +521,8 @@ class TestAnalysis:
 
         # EXPECT
         assert analysis.instrument_model is new_instrument_model
-        for analysis in analysis.analysis_list:
-            assert analysis.instrument_model is new_instrument_model
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.instrument_model is new_instrument_model
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
@@ -590,8 +590,8 @@ class TestAnalysis:
         expected_xs = []
         expected_ys = []
         expected_ws = []
-        for analysis in analysis.analysis_list:
-            data = analysis.experiment.data['Q', analysis.Q_index]
+        for analysis1d in analysis.analysis_list:
+            data = analysis1d.experiment.data['Q', analysis1d.Q_index]
 
             expected_xs.append(data.coords['energy'].values)
             expected_ys.append(data.values)

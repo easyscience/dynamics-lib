@@ -340,6 +340,7 @@ class ComponentCollection(ModelBase):
                     f"Component '{component.unique_name}' does not have an 'area' attribute "
                     f'and will be skipped in normalization.',
                     UserWarning,
+                    stacklevel=2,
                 )
 
         if total_area.value == 0:

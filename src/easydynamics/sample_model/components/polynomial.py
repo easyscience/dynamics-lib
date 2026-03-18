@@ -163,6 +163,7 @@ class Polynomial(ModelComponent):
                 f'The Polynomial with unique_name {self.unique_name} has negative values, '
                 'which may not be physically meaningful.',
                 UserWarning,
+                stacklevel=2,
             )
         return result
 

@@ -131,7 +131,9 @@ class ModelComponent(ModelBase):
                 warnings.warn(
                     f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
                         has unit {self_unit_for_warning}. \
-                            Converting {self.__class__.__name__} to {x.unit}.'
+                            Converting {self.__class__.__name__} to {x.unit}.',
+                    UserWarning,
+                    stacklevel=3,
                 )
         else:
             x_in = x

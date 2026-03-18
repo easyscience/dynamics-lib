@@ -7,7 +7,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.sample_model.model_base import ModelBase
-from easydynamics.utils import _detailed_balance_factor
+from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 
@@ -351,7 +351,7 @@ class SampleModel(ModelBase):
         y = super().evaluate(x)
 
         if self._temperature is not None:
-            DBF = _detailed_balance_factor(
+            DBF = detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
                 divide_by_temperature=self._divide_by_temperature,
@@ -407,7 +407,9 @@ class SampleModel(ModelBase):
         # and add to component collections
         for diffusion_model in self._diffusion_models:
             diffusion_collections = diffusion_model.create_component_collections(Q=self._Q)
-            for target, source in zip(self._component_collections, diffusion_collections):
+            for target, source in zip(
+                self._component_collections, diffusion_collections, strict=True
+            ):
                 for component in source.components:
                     target.append_component(component)
 

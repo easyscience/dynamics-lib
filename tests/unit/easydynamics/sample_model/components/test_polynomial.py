@@ -184,7 +184,9 @@ class TestPolynomial:
         assert polynomial_copy.display_name == polynomial.display_name
         assert len(polynomial_copy.coefficients) == len(polynomial.coefficients)
         for original_coeff, copied_coeff in zip(
-            polynomial.get_all_parameters(), polynomial_copy.get_all_parameters()
+            polynomial.get_all_parameters(),
+            polynomial_copy.get_all_parameters(),
+            strict=True,
         ):
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed

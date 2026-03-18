@@ -382,6 +382,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                             This may lead to inaccuracies in the convolution. \
                                 Increase extension_factor to improve accuracy.',
                         UserWarning,
+                        stacklevel=3,
                     )
                 if comp.width.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
                     warnings.warn(
@@ -391,6 +392,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                             This may lead to inaccuracies in the convolution. \
                                 Increase upsample_factor to improve accuracy.',
                         UserWarning,
+                        stacklevel=3,
                     )
 
     def __repr__(self) -> str:
