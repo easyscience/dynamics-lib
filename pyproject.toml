@@ -204,7 +204,7 @@ select = [
   #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
   #'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
   #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
-  #'UP',   # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
   'E', # https://docs.astral.sh/ruff/rules/#error-e
   'W', # https://docs.astral.sh/ruff/rules/#warning-w

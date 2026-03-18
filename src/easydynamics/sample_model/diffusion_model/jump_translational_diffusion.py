@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Dict
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -232,7 +230,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         self,
         Q: Q_type,
         component_display_name: str = 'Jump translational diffusion',
-    ) -> List[ComponentCollection]:
+    ) -> list[ComponentCollection]:
         """Create ComponentCollection components for the diffusion model
         at given Q values.
 
@@ -316,7 +314,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         # Q is given as a float, so we need to add the units
         return f'hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
 
-    def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 
@@ -349,7 +347,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         return f'{QISF} * scale'
 
-    def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 

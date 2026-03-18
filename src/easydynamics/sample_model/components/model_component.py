@@ -58,10 +58,8 @@ class ModelComponent(ModelBase):
             AttributeError: Always raised since unit is read-only.
         """
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def fix_all_parameters(self) -> None:

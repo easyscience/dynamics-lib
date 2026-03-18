@@ -196,10 +196,8 @@ class ConvolutionBase:
     @energy_unit.setter
     def energy_unit(self, unit_str: str) -> None:
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def convert_energy_unit(self, energy_unit: str | sc.Unit) -> None:
