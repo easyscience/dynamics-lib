@@ -241,7 +241,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 Name of the Jump Diffusion Lorentzian component.
 
         Returns:
-            List[ComponentCollection]: List of ComponentCollections with
+            list[ComponentCollection]: List of ComponentCollections with
                 Jump Diffusion Lorentzian components.
 
         Raises:
@@ -319,7 +319,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the width.
+            dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
             'D': self._diffusion_coefficient,
@@ -352,7 +352,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the area.
+            dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
             'scale': self._scale,

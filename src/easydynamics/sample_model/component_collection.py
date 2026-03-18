@@ -303,7 +303,7 @@ class ComponentCollection(ModelBase):
         """List the names of all components in the model.
 
         Returns:
-            List[str]: List of unique names of the components in the
+            list[str]: List of unique names of the components in the
                 collection.
         """
 

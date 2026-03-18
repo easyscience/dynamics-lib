@@ -187,7 +187,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 Name of the Lorentzian component.
 
         Returns:
-            List[ComponentCollection]: List of ComponentCollections with
+            list[ComponentCollection]: List of ComponentCollections with
                 Lorentzian components for each Q value. Each Lorentzian
                 has a width given by $D*Q^2$ and an area given by the
                 scale parameter multiplied by the QISF (which is 1 for
@@ -268,7 +268,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the width.
+            dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
             'D': self.diffusion_coefficient,
@@ -299,7 +299,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the area.
+            dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
             'scale': self.scale,
