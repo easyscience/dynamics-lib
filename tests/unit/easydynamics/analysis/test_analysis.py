@@ -228,24 +228,22 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
 
         with (
-            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True), pytest.raises(
+            TypeError,
+            match='plot_components must be True or False',
+        )
         ):
-            with pytest.raises(
-                TypeError,
-                match='plot_components must be True or False',
-            ):
-                analysis.plot_data_and_model(plot_components='not_a_boolean')
+            analysis.plot_data_and_model(plot_components='not_a_boolean')
 
     def test_plot_data_and_model_invalid_add_background_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with (
-            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True), pytest.raises(
+            TypeError,
+            match='add_background must be True or False',
+        )
         ):
-            with pytest.raises(
-                TypeError,
-                match='add_background must be True or False',
-            ):
-                analysis.plot_data_and_model(add_background='not_a_boolean')
+            analysis.plot_data_and_model(add_background='not_a_boolean')
 
     def test_plot_data_and_model_defaults(self, analysis):
 

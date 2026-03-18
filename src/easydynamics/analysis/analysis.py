@@ -362,7 +362,7 @@ class Analysis(AnalysisBase):
                 dims=['Q'],
                 values=np.asarray(values[name], dtype=float),
                 variances=np.asarray(variances[name], dtype=float),
-                unit=units.get(name, None),
+                unit=units.get(name),
             )
 
         return ds

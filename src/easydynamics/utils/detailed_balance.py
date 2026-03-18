@@ -221,9 +221,7 @@ def _convert_to_scipp_variable(
         return value
 
     # Convert to numpy array first for consistent handling
-    if isinstance(value, (int, float)):
-        array_value = np.array(value)
-    elif isinstance(value, (list)):
+    if isinstance(value, (int, float)) or isinstance(value, (list)):
         array_value = np.array(value)
     elif isinstance(value, np.ndarray):
         array_value = value
