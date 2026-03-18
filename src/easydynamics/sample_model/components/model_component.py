@@ -111,10 +111,7 @@ class ModelComponent(ModelBase):
         if isinstance(x, sc.Variable):
             # Need to check if the units are consistent,
             # and convert if not.
-            if x.sizes == {}:  # scalar
-                x_in = x.value
-            else:  # array
-                x_in = x.values
+            x_in = x.value if x.sizes == {} else x.values
             if self._unit is not None and x.unit != self._unit:
                 self_unit_for_warning = self._unit
                 try:

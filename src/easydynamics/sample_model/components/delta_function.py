@@ -140,16 +140,10 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             i = np.argmin(np.abs(x - center))
 
             # left half-width
-            if i == 0:
-                left = x[1] - x[0] if x.size > 1 else 0.5
-            else:
-                left = x[i] - x[i - 1]
+            left = (x[1] - x[0] if x.size > 1 else 0.5) if i == 0 else x[i] - x[i - 1]
 
             # right half-width
-            if i == x.size - 1:
-                right = x[-1] - x[-2] if x.size > 1 else 0.5
-            else:
-                right = x[i + 1] - x[i]
+            right = (x[-1] - x[-2] if x.size > 1 else 0.5) if i == x.size - 1 else x[i + 1] - x[i]
 
             # effective bin width: half left + half right
             bin_width = 0.5 * (left + right)

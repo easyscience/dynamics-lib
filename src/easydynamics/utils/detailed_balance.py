@@ -145,10 +145,7 @@ def detailed_balance_factor(
             raise ZeroDivisionError('Cannot divide by T when T = 0.')
         DBF = sc.where(energy < 0.0 * energy.unit, 0.0 * energy.unit, energy)
 
-        if DBF.sizes == {}:
-            DBF_values = np.array([DBF.value])
-        else:
-            DBF_values = DBF.values
+        DBF_values = np.array([DBF.value]) if DBF.sizes == {} else DBF.values
         return DBF_values
 
     # Now work with finite temperatures.
@@ -182,10 +179,7 @@ def detailed_balance_factor(
         DBF = DBF * (kB * temperature)
         DBF = sc.to_unit(DBF, unit=energy.unit)
 
-    if DBF.sizes == {}:
-        DBF_values = np.array([DBF.value])
-    else:
-        DBF_values = DBF.values
+    DBF_values = np.array([DBF.value]) if DBF.sizes == {} else DBF.values
     return DBF_values
 
 
@@ -221,7 +215,7 @@ def _convert_to_scipp_variable(
         return value
 
     # Convert to numpy array first for consistent handling
-    if isinstance(value, (int, float)) or isinstance(value, (list)):
+    if isinstance(value, (int, float, list)):
         array_value = np.array(value)
     elif isinstance(value, np.ndarray):
         array_value = value

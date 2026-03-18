@@ -185,12 +185,14 @@ class TestAnalysis:
 
     def test_plot_data_and_model_not_in_notebook_raises(self, analysis):
         # WHEN / THEN / EXPECT
-        with patch('easydynamics.analysis.analysis._in_notebook', return_value=False):
-            with pytest.raises(
+        with (
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=False),
+            pytest.raises(
                 RuntimeError,
-                match=' can only be used in a Jupyter notebook environment',
-            ):
-                analysis.plot_data_and_model()
+                match=r'can only be used in a Jupyter notebook environment',
+            ),
+        ):
+            analysis.plot_data_and_model()
 
     def test_plot_data_and_model_Q_index(self, analysis):
 
@@ -228,20 +230,22 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
 
         with (
-            patch('easydynamics.analysis.analysis._in_notebook', return_value=True), pytest.raises(
-            TypeError,
-            match='plot_components must be True or False',
-        )
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            pytest.raises(
+                TypeError,
+                match='plot_components must be True or False',
+            ),
         ):
             analysis.plot_data_and_model(plot_components='not_a_boolean')
 
     def test_plot_data_and_model_invalid_add_background_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with (
-            patch('easydynamics.analysis.analysis._in_notebook', return_value=True), pytest.raises(
-            TypeError,
-            match='add_background must be True or False',
-        )
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            pytest.raises(
+                TypeError,
+                match='add_background must be True or False',
+            ),
         ):
             analysis.plot_data_and_model(add_background='not_a_boolean')
 

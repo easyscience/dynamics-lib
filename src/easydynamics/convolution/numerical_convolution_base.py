@@ -320,10 +320,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         # select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by
         # 0.5*dx from the true center at index 3.5.
-        if len(energy_dense) % 2 == 0:
-            energy_even_length_offset = -0.5 * energy_dense_step
-        else:
-            energy_even_length_offset = 0.0
+        energy_even_length_offset = -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
 
         # Handle the case when energy_dense is not symmetric around 0.
         # The resolution is still centered around zero (or close to it),
@@ -365,10 +362,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         # Handle ComponentCollection or ModelComponent
-        if isinstance(model, ComponentCollection):
-            components = model.components
-        else:
-            components = [model]  # Treat single ModelComponent as a list
+        components = model.components if isinstance(model, ComponentCollection) else [model]
 
         for comp in components:
             if hasattr(comp, 'width'):

@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from contextlib import suppress
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -295,13 +297,11 @@ class SampleModel(ModelBase):
         try:
             self._temperature.convert_unit(unit)
             self._temperature_unit = unit
-        except Exception as e:
+        except Exception:
             # Attempt to rollback on failure
-            try:
+            with suppress(Exception):
                 self._temperature.convert_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
+            raise
 
     @property
     def divide_by_temperature(self) -> bool:

@@ -110,10 +110,7 @@ class TestPolynomial:
 
         # THEN EXPECT: Parameter values match the new inputs
         for i, val in enumerate(values):
-            if isinstance(val, Parameter):
-                expected = val.value
-            else:
-                expected = val
+            expected = val.value if isinstance(val, Parameter) else val
             assert np.isclose(polynomial.coefficients[i].value, expected)
 
     def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):

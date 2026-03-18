@@ -306,7 +306,7 @@ class Experiment(NewBase):
                 # This line can be removed when scipp resize support
                 # resizing with coordinates
                 dimensions[dim] = value
-            if not (isinstance(value, int) or isinstance(value, sc.Variable)):
+            if not (isinstance(value, (int, sc.Variable))):
                 raise TypeError(
                     f'Dimension values must be integers or sc.Variable. '
                     f"Got {type(value)} for dimension '{dim}' instead."
