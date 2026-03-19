@@ -9,7 +9,7 @@ from scipy.signal import fftconvolve
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.detailed_balance import detailed_balance_factor as detailed_balance_factor
+from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 
 
