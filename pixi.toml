@@ -119,6 +119,7 @@ check = 'pre-commit run --hook-stage manual --all-files'
 docs-format-fix = 'docformatter --in-place src/ docs/docs/tutorials/'
 notebook-lint-fix = 'nbqa ruff --fix docs/docs/tutorials/'
 py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
+py-lint-fix-unsafe = 'ruff check --fix --unsafe-fixes src/ tests/ docs/docs/tutorials/'
 py-format-fix = "ruff format src/ tests/ docs/docs/tutorials/"
 nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
 nonpy-format-fix-modified = "python tools/nonpy_prettier_modified.py --write"

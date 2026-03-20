@@ -58,10 +58,8 @@ class ModelComponent(ModelBase):
             AttributeError: Always raised since unit is read-only.
         """
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def fix_all_parameters(self) -> None:
@@ -113,10 +111,7 @@ class ModelComponent(ModelBase):
         if isinstance(x, sc.Variable):
             # Need to check if the units are consistent,
             # and convert if not.
-            if x.sizes == {}:  # scalar
-                x_in = x.value
-            else:  # array
-                x_in = x.values
+            x_in = x.value if x.sizes == {} else x.values
             if self._unit is not None and x.unit != self._unit:
                 self_unit_for_warning = self._unit
                 try:
@@ -131,7 +126,9 @@ class ModelComponent(ModelBase):
                 warnings.warn(
                     f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
                         has unit {self_unit_for_warning}. \
-                            Converting {self.__class__.__name__} to {x.unit}.'
+                            Converting {self.__class__.__name__} to {x.unit}.',
+                    UserWarning,
+                    stacklevel=3,
                 )
         else:
             x_in = x

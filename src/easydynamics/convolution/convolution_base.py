@@ -70,8 +70,7 @@ class ConvolutionBase:
         self._energy_offset = energy_offset
 
         if sample_components is not None and not (
-            isinstance(sample_components, ComponentCollection)
-            or isinstance(sample_components, ModelComponent)
+            isinstance(sample_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
@@ -81,8 +80,7 @@ class ConvolutionBase:
         self._sample_components = sample_components
 
         if resolution_components is not None and not (
-            isinstance(resolution_components, ComponentCollection)
-            or isinstance(resolution_components, ModelComponent)
+            isinstance(resolution_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
@@ -196,10 +194,8 @@ class ConvolutionBase:
     @energy_unit.setter
     def energy_unit(self, unit_str: str) -> None:
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def convert_energy_unit(self, energy_unit: str | sc.Unit) -> None:

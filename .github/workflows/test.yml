@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
@@ -163,7 +163,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
@@ -202,11 +202,8 @@ jobs:
             echo "Adding Python $py_ver"
             pixi add "python=$py_ver"
 
-            echo "Adding Conda dependencies"
-            pixi add gsl
-
-            #echo "Adding PyPI dependencies"
-            #pixi add --pypi pytest pytest-xdist
+            echo "Setting macOS 14.0 as minimum required"
+            pixi project system-requirements add macos 14.0
 
             echo "Looking for wheel in ../dist/py$py_ver/"
             ls -l "../dist/py$py_ver/"

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import warnings
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -146,10 +145,8 @@ class ComponentCollection(ModelBase):
         """
 
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
@@ -187,7 +184,7 @@ class ComponentCollection(ModelBase):
     # Component management
     # ------------------------------------------------------------------
 
-    def append_component(self, component: ModelComponent | 'ComponentCollection') -> None:
+    def append_component(self, component: ModelComponent | ComponentCollection) -> None:
         """Append a model component or the components from another
         ComponentCollection to this ComponentCollection.
 
@@ -302,11 +299,11 @@ class ComponentCollection(ModelBase):
             'whether the collection has components.'
         )
 
-    def list_component_names(self) -> List[str]:
+    def list_component_names(self) -> list[str]:
         """List the names of all components in the model.
 
         Returns:
-            List[str]: List of unique names of the components in the
+            list[str]: List of unique names of the components in the
                 collection.
         """
 
@@ -340,6 +337,7 @@ class ComponentCollection(ModelBase):
                     f"Component '{component.unique_name}' does not have an 'area' attribute "
                     f'and will be skipped in normalization.',
                     UserWarning,
+                    stacklevel=2,
                 )
 
         if total_area.value == 0:
@@ -404,7 +402,7 @@ class ComponentCollection(ModelBase):
 
         if not isinstance(unique_name, str):
             raise TypeError(
-                (f'Component unique name must be a string, got {type(unique_name)} instead.')
+                f'Component unique name must be a string, got {type(unique_name)} instead.'
             )
 
         matches = [comp for comp in self.components if comp.unique_name == unique_name]

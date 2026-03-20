@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import scipp as sc
@@ -163,6 +163,7 @@ class Polynomial(ModelComponent):
                 f'The Polynomial with unique_name {self.unique_name} has negative values, '
                 'which may not be physically meaningful.',
                 UserWarning,
+                stacklevel=2,
             )
         return result
 

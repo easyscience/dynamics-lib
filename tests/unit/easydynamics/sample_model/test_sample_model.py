@@ -317,7 +317,7 @@ class TestSampleModel:
 
         sample_model._component_collections = [collection1, collection2]
 
-        with patch('easydynamics.sample_model.sample_model._detailed_balance_factor') as mock_dbf:
+        with patch('easydynamics.sample_model.sample_model.detailed_balance_factor') as mock_dbf:
             mock_dbf.return_value = np.array([10.0, 10.0, 10.0])  # simplified DBF
             # THEN
             result = sample_model.evaluate(x)

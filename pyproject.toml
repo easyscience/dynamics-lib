@@ -204,7 +204,7 @@ select = [
   #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
   #'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
   #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
-  #'UP',   # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
   'E', # https://docs.astral.sh/ruff/rules/#error-e
   'W', # https://docs.astral.sh/ruff/rules/#warning-w
@@ -218,7 +218,7 @@ select = [
   'ANN', # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
   #'ARG',   # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
   #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
-  #'B',     # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  'B', # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
   #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
   #'C4',    # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
   #'COM',   # https://docs.astral.sh/ruff/rules/#flake8-commas-com
@@ -238,8 +238,8 @@ select = [
   #'PYI',   # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
   #'RET',   # https://docs.astral.sh/ruff/rules/#flake8-return-ret
   #'RSE',   # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
-  'S', # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
-  #'SIM',   # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  'S',   # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+  'SIM', # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
   #'SLF',   # https://docs.astral.sh/ruff/rules/#flake8-self-slf
   #'SLOT',  # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
   #'T20',   # https://docs.astral.sh/ruff/rules/#flake8-print-t20
