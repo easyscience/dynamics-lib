@@ -325,13 +325,12 @@ class AnalysisBase(EasyScienceModelBase):
         Raises:
             IndexError: If the Q index is not valid.
         """
-        if Q_index is not None:
-            if (
-                not isinstance(Q_index, int)
-                or Q_index < 0
-                or (self.Q is not None and Q_index >= len(self.Q))
-            ):
-                raise IndexError('Q_index must be a valid index for the Q values.')
+        if Q_index is not None and (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or (self.Q is not None and Q_index >= len(self.Q))
+        ):
+            raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
 
     #############

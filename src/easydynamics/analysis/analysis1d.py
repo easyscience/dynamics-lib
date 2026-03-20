@@ -292,7 +292,7 @@ class Analysis1d(AnalysisBase):
         }
 
         if plot_components:
-            for comp_name in component_dataset.keys():
+            for comp_name in component_dataset:
                 plot_kwargs_defaults['linestyle'][comp_name] = '--'
                 plot_kwargs_defaults['marker'][comp_name] = None
 

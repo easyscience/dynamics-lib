@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from scipp import UnitError
 
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import Gaussian
@@ -263,7 +264,7 @@ class TestModelBase:
 
     def test_convert_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(Exception):
+        with pytest.raises(UnitError):
             model_base.convert_unit('invalid_unit')
 
     def test_convert_unit_incorrect_unit_raises(self, model_base):

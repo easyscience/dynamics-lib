@@ -81,10 +81,8 @@ class DiffusionModelBase(ModelBase):
             AttributeError: Always, since the unit is read-only.
         """
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     @property

@@ -198,12 +198,10 @@ class Convolution(NumericalConvolutionBase):
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
-        if isinstance(sample_component, analytical_types) and isinstance(
-            resolution_component, analytical_types
-        ):
-            return True
-
-        return False
+        return bool(
+            isinstance(sample_component, analytical_types)
+            and isinstance(resolution_component, analytical_types)
+        )
 
     def _build_convolution_plan(self) -> None:
         """Separate sample model components into analytical pairs, delta

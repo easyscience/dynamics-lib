@@ -368,13 +368,14 @@ class TestExperiment:
         "Test plotting data raises RuntimeError"
         'when not in notebook environment'
         # WHEN
-        with patch(f'{Experiment.__module__}._in_notebook', return_value=False):
-            # THEN EXPECT
-            with pytest.raises(
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=False),
+            pytest.raises(
                 RuntimeError,
                 match='plot_data\\(\\) can only be used in a Jupyter notebook environment',
-            ):
-                experiment.plot_data()
+            ),
+        ):
+            experiment.plot_data()
 
     ##############
     # test private methods

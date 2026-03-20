@@ -140,13 +140,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             i = np.argmin(np.abs(x - center))
 
             # left half-width
-            if i == 0:
+            if i == 0:  # noqa: SIM108
                 left = x[1] - x[0] if x.size > 1 else 0.5
             else:
                 left = x[i] - x[i - 1]
 
             # right half-width
-            if i == x.size - 1:
+            if i == x.size - 1:  # noqa: SIM108
                 right = x[-1] - x[-2] if x.size > 1 else 0.5
             else:
                 right = x[i + 1] - x[i]

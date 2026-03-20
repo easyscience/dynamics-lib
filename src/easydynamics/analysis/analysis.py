@@ -284,7 +284,7 @@ class Analysis(AnalysisBase):
             components = self._create_components_dataset(
                 add_background=add_background, energy=energy
             )
-            for key in components.keys():
+            for key in components:
                 data_and_model[key] = components[key]
                 plot_kwargs_defaults['linestyle'][key] = '--'
                 plot_kwargs_defaults['marker'][key] = None
@@ -362,7 +362,7 @@ class Analysis(AnalysisBase):
                 dims=['Q'],
                 values=np.asarray(values[name], dtype=float),
                 variances=np.asarray(variances[name], dtype=float),
-                unit=units.get(name, None),
+                unit=units.get(name),
             )
 
         return ds
