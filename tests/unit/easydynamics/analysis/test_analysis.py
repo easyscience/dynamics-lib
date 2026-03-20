@@ -19,22 +19,22 @@ from easydynamics.sample_model.components.gaussian import Gaussian
 class TestAnalysis:
     @pytest.fixture
     def analysis(self):
-        Q = sc.array(dims=["Q"], values=[1, 2, 3], unit="1/Angstrom")
-        energy = sc.array(dims=["energy"], values=[10.0, 20.0, 30.0], unit="meV")
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
         data = sc.array(
-            dims=["Q", "energy"],
+            dims=['Q', 'energy'],
             values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
             variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
         )
 
-        data_array = sc.DataArray(data=data, coords={"Q": Q, "energy": energy})
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         experiment = Experiment(data=data_array)
-        sample_model = SampleModel(components=Gaussian(), display_name="Gaussian")
+        sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
         instrument_model = InstrumentModel()
 
         analysis = Analysis(
-            display_name="TestAnalysis",
+            display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
@@ -47,7 +47,7 @@ class TestAnalysis:
         # WHEN THEN
 
         # EXPECT
-        assert analysis.display_name == "TestAnalysis"
+        assert analysis.display_name == 'TestAnalysis'
         assert isinstance(analysis._experiment, Experiment)
         assert isinstance(analysis._sample_model, SampleModel)
         assert isinstance(analysis._instrument_model, InstrumentModel)
@@ -59,9 +59,9 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="experiment must be an instance of Experiment",
+            match='experiment must be an instance of Experiment',
         ):
-            Analysis(experiment="invalid_experiment")
+            Analysis(experiment='invalid_experiment')
 
     def test_analysis_list_contains_all_Q_indices(self, analysis):
         # WHEN THEN
@@ -75,15 +75,13 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             AttributeError,
-            match="analysis_list is read-only",
+            match='analysis_list is read-only',
         ):
-            analysis.analysis_list = "invalid_analysis_list"
+            analysis.analysis_list = 'invalid_analysis_list'
 
     def test_calculate_with_Q_index(self, analysis):
         # WHEN
-        analysis.analysis_list[1].calculate = MagicMock(
-            return_value=np.array([4.0, 5.0, 6.0])
-        )
+        analysis.analysis_list[1].calculate = MagicMock(return_value=np.array([4.0, 5.0, 6.0]))
 
         # THEN
         result = analysis.calculate(Q_index=1)
@@ -91,15 +89,13 @@ class TestAnalysis:
         # EXPECT
         analysis.analysis_list[1].calculate.assert_called_once()
         _, kwargs = analysis.analysis_list[1].calculate.call_args
-        assert sc.identical(kwargs["energy"], analysis.energy)
+        assert sc.identical(kwargs['energy'], analysis.energy)
         np.testing.assert_array_equal(result, np.array([4.0, 5.0, 6.0]))
 
     def test_calculate_with_Q_index_and_energy(self, analysis):
         # WHEN
-        analysis.analysis_list[1].calculate = MagicMock(
-            return_value=np.array([4.0, 5.0, 6.0])
-        )
-        energy = sc.array(dims=["energy"], values=[20.0, 30.0, 40.0], unit="meV")
+        analysis.analysis_list[1].calculate = MagicMock(return_value=np.array([4.0, 5.0, 6.0]))
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
 
         # THEN
         result = analysis.calculate(Q_index=1, energy=energy)
@@ -107,7 +103,7 @@ class TestAnalysis:
         # EXPECT
         analysis.analysis_list[1].calculate.assert_called_once()
         _, kwargs = analysis.analysis_list[1].calculate.call_args
-        assert kwargs["energy"] is energy
+        assert kwargs['energy'] is energy
         np.testing.assert_array_equal(result, np.array([4.0, 5.0, 6.0]))
 
     def test_calculate_without_Q_index(self, analysis):
@@ -129,7 +125,7 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match="must be a valid index",
+            match='must be a valid index',
         ):
             analysis.calculate(Q_index=3)
 
@@ -140,46 +136,44 @@ class TestAnalysis:
         # THEN EXPECT
         with pytest.raises(
             ValueError,
-            match="No Q values available for fitting",
+            match='No Q values available for fitting',
         ):
             analysis.fit()
 
     def test_fit_fit_method_independent_with_Q_index(self, analysis):
         # WHEN
-        analysis.analysis_list[1].fit = MagicMock(return_value="fit_result_Q1")
+        analysis.analysis_list[1].fit = MagicMock(return_value='fit_result_Q1')
 
         # THEN
-        result = analysis.fit(fit_method="independent", Q_index=1)
+        result = analysis.fit(fit_method='independent', Q_index=1)
 
         # EXPECT
         analysis.analysis_list[1].fit.assert_called_once()
-        assert result == "fit_result_Q1"
+        assert result == 'fit_result_Q1'
 
     def test_fit_fit_method_independent_without_Q_index(self, analysis):
         # WHEN
         for i in range(3):
-            analysis.analysis_list[i].fit = MagicMock(return_value=f"fit_result_Q{i}")
+            analysis.analysis_list[i].fit = MagicMock(return_value=f'fit_result_Q{i}')
 
         # THEN
-        result = analysis.fit(fit_method="independent")
+        result = analysis.fit(fit_method='independent')
 
         # EXPECT
         for i in range(3):
             analysis.analysis_list[i].fit.assert_called_once()
-            assert result[i] == f"fit_result_Q{i}"
+            assert result[i] == f'fit_result_Q{i}'
 
     def test_fit_fit_method_simultaneous(self, analysis):
         # WHEN
-        analysis._fit_all_Q_simultaneously = MagicMock(
-            return_value="simultaneous_fit_result"
-        )
+        analysis._fit_all_Q_simultaneously = MagicMock(return_value='simultaneous_fit_result')
 
         # THEN
-        result = analysis.fit(fit_method="simultaneous")
+        result = analysis.fit(fit_method='simultaneous')
 
         # EXPECT
         analysis._fit_all_Q_simultaneously.assert_called_once()
-        assert result == "simultaneous_fit_result"
+        assert result == 'simultaneous_fit_result'
 
     def test_fit_with_invalid_fit_method(self, analysis):
         # WHEN / THEN / EXPECT
@@ -187,15 +181,15 @@ class TestAnalysis:
             ValueError,
             match="Invalid fit method. Choose 'independent' or 'simultaneous'.",
         ):
-            analysis.fit(fit_method="invalid_fit_method")
+            analysis.fit(fit_method='invalid_fit_method')
 
     def test_plot_data_and_model_not_in_notebook_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with (
-            patch("easydynamics.analysis.analysis._in_notebook", return_value=False),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=False),
             pytest.raises(
                 RuntimeError,
-                match=r"can only be used in a Jupyter notebook environment",
+                match=r'can only be used in a Jupyter notebook environment',
             ),
         ):
             analysis.plot_data_and_model()
@@ -203,13 +197,11 @@ class TestAnalysis:
     def test_plot_data_and_model_Q_index(self, analysis):
 
         # WHEN
-        analysis.analysis_list[1].plot_data_and_model = MagicMock(
-            return_value="plot_Q1"
-        )
+        analysis.analysis_list[1].plot_data_and_model = MagicMock(return_value='plot_Q1')
 
         kwargs = {
-            "marker": {"amplitude": "x", "width": "s"},
-            "title": "My Plot",
+            'marker': {'amplitude': 'x', 'width': 's'},
+            'title': 'My Plot',
         }
 
         # THEN
@@ -221,7 +213,7 @@ class TestAnalysis:
         analysis.analysis_list[1].plot_data_and_model.assert_called_once_with(
             plot_components=True, add_background=True, energy=None, **kwargs
         )
-        assert result == "plot_Q1"
+        assert result == 'plot_Q1'
 
     def test_plot_data_and_model_no_data_raises(self, analysis):
         # WHEN
@@ -230,7 +222,7 @@ class TestAnalysis:
         # THEN EXPECT
         with pytest.raises(
             ValueError,
-            match="No data to plot",
+            match='No data to plot',
         ):
             analysis.plot_data_and_model()
 
@@ -238,24 +230,24 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
 
         with (
-            patch("easydynamics.analysis.analysis._in_notebook", return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
             pytest.raises(
                 TypeError,
-                match="plot_components must be True or False",
+                match='plot_components must be True or False',
             ),
         ):
-            analysis.plot_data_and_model(plot_components="not_a_boolean")
+            analysis.plot_data_and_model(plot_components='not_a_boolean')
 
     def test_plot_data_and_model_invalid_add_background_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with (
-            patch("easydynamics.analysis.analysis._in_notebook", return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
             pytest.raises(
                 TypeError,
-                match="add_background must be True or False",
+                match='add_background must be True or False',
             ),
         ):
-            analysis.plot_data_and_model(add_background="not_a_boolean")
+            analysis.plot_data_and_model(add_background='not_a_boolean')
 
     def test_plot_data_and_model_defaults(self, analysis):
 
@@ -268,19 +260,19 @@ class TestAnalysis:
         # Create fake fig with required structure
         fake_fig = MagicMock()
         fake_fig.bottom_bar = [MagicMock()]
-        fake_fig.bottom_bar[0].controls = {"test": fake_widget}
+        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
-        analysis._create_model_array = MagicMock(return_value="MODEL")
+        analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
-            patch("plopp.slicer", return_value=fake_fig) as mock_slicer,
+            patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
             patch.object(
                 type(analysis.experiment),
-                "binned_data",
+                'binned_data',
                 new_callable=PropertyMock,
             ) as mock_binned,
-            patch("easydynamics.analysis.analysis._in_notebook", return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = "DATA"
+            mock_binned.return_value = 'DATA'
             # THEN
             fig = analysis.plot_data_and_model(plot_components=False)
 
@@ -291,20 +283,20 @@ class TestAnalysis:
         args, kwargs = mock_slicer.call_args
 
         data_passed = args[0]
-        assert "Data" in data_passed
-        assert "Model" in data_passed
+        assert 'Data' in data_passed
+        assert 'Model' in data_passed
 
-        assert data_passed["Data"] == "DATA"
-        assert data_passed["Model"] == "MODEL"
+        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Model'] == 'MODEL'
 
         # Check the default kwargs
-        assert kwargs["title"] == "TestAnalysis"
-        assert kwargs["linestyle"] == {"Data": "none", "Model": "-"}
-        assert kwargs["marker"] == {"Data": "o", "Model": None}
-        assert kwargs["color"] == {"Data": "black", "Model": "red"}
-        assert kwargs["markerfacecolor"] == {
-            "Data": "none",
-            "Model": "none",
+        assert kwargs['title'] == 'TestAnalysis'
+        assert kwargs['linestyle'] == {'Data': 'none', 'Model': '-'}
+        assert kwargs['marker'] == {'Data': 'o', 'Model': None}
+        assert kwargs['color'] == {'Data': 'black', 'Model': 'red'}
+        assert kwargs['markerfacecolor'] == {
+            'Data': 'none',
+            'Model': 'none',
         }
 
     def test_plot_data_and_model_plot_components_true(self, analysis):
@@ -318,22 +310,20 @@ class TestAnalysis:
         # Create fake fig with required structure
         fake_fig = MagicMock()
         fake_fig.bottom_bar = [MagicMock()]
-        fake_fig.bottom_bar[0].controls = {"test": fake_widget}
+        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
-        analysis._create_model_array = MagicMock(return_value="MODEL")
-        analysis._create_components_dataset = MagicMock(
-            return_value={"Gaussian": "GAUSS"}
-        )
+        analysis._create_model_array = MagicMock(return_value='MODEL')
+        analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
-            patch("plopp.slicer", return_value=fake_fig) as mock_slicer,
+            patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
             patch.object(
                 type(analysis.experiment),
-                "binned_data",
+                'binned_data',
                 new_callable=PropertyMock,
             ) as mock_binned,
-            patch("easydynamics.analysis.analysis._in_notebook", return_value=True),
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = "DATA"
+            mock_binned.return_value = 'DATA'
             # THEN
             fig = analysis.plot_data_and_model(plot_components=True)
 
@@ -344,55 +334,49 @@ class TestAnalysis:
         args, kwargs = mock_slicer.call_args
 
         data_passed = args[0]
-        assert "Data" in data_passed
-        assert "Model" in data_passed
+        assert 'Data' in data_passed
+        assert 'Model' in data_passed
 
-        assert data_passed["Data"] == "DATA"
-        assert data_passed["Model"] == "MODEL"
+        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Model'] == 'MODEL'
         # Check the default kwargs
-        assert kwargs["title"] == "TestAnalysis"
-        assert kwargs["linestyle"] == {"Data": "none", "Model": "-", "Gaussian": "--"}
-        assert kwargs["marker"] == {"Data": "o", "Model": None, "Gaussian": None}
-        assert kwargs["color"] == {"Data": "black", "Model": "red"}
-        assert kwargs["markerfacecolor"] == {
-            "Data": "none",
-            "Model": "none",
+        assert kwargs['title'] == 'TestAnalysis'
+        assert kwargs['linestyle'] == {'Data': 'none', 'Model': '-', 'Gaussian': '--'}
+        assert kwargs['marker'] == {'Data': 'o', 'Model': None, 'Gaussian': None}
+        assert kwargs['color'] == {'Data': 'black', 'Model': 'red'}
+        assert kwargs['markerfacecolor'] == {
+            'Data': 'none',
+            'Model': 'none',
         }
 
     def test_parameters_to_dataset(self, analysis):
         # WHEN
-        analysis.sample_model.append_component(
-            Gaussian(display_name="Gaussian2", area=0.5)
-        )
+        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()
 
         # EXPECT
         assert isinstance(parameters_dataset, sc.Dataset)
         parameter_names = [
-            "Gaussian area",
-            "Gaussian center",
-            "Gaussian width",
-            "Gaussian2 area",
-            "Gaussian2 center",
-            "Gaussian2 width",
-            "energy_offset",
+            'Gaussian area',
+            'Gaussian center',
+            'Gaussian width',
+            'Gaussian2 area',
+            'Gaussian2 center',
+            'Gaussian2 width',
+            'energy_offset',
         ]
         for parameter_name in parameter_names:
             assert parameter_name in parameters_dataset
-            assert "Q" in parameters_dataset[parameter_name].dims
+            assert 'Q' in parameters_dataset[parameter_name].dims
 
     def test_parameters_to_dataset_different_units(self, analysis):
 
         # WHEN
-        analysis.sample_model.append_component(
-            Gaussian(display_name="Gaussian2", area=0.5)
-        )
+        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
 
         # Convert the unit of a component to eV.
-        analysis.sample_model.get_component_collection(Q_index=1).components[
-            0
-        ].convert_unit("eV")
+        analysis.sample_model.get_component_collection(Q_index=1).components[0].convert_unit('eV')
 
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()
@@ -400,47 +384,45 @@ class TestAnalysis:
         # EXPECT
         assert isinstance(parameters_dataset, sc.Dataset)
         parameter_names = [
-            "Gaussian area",
-            "Gaussian center",
-            "Gaussian width",
-            "Gaussian2 area",
-            "Gaussian2 center",
-            "Gaussian2 width",
-            "energy_offset",
+            'Gaussian area',
+            'Gaussian center',
+            'Gaussian width',
+            'Gaussian2 area',
+            'Gaussian2 center',
+            'Gaussian2 width',
+            'energy_offset',
         ]
         for parameter_name in parameter_names:
             assert parameter_name in parameters_dataset
-            assert "Q" in parameters_dataset[parameter_name].dims
+            assert 'Q' in parameters_dataset[parameter_name].dims
 
     @pytest.mark.parametrize(
-        "parameter_names",
+        'parameter_names',
         [
             123,  # not str or list
-            ["parameter_name", 123],  # list contains non-string
-            {"a": 1},  # completely wrong type
+            ['parameter_name', 123],  # list contains non-string
+            {'a': 1},  # completely wrong type
         ],
         ids=[
-            "not_string_or_list",
-            "list_contains_non_string",
-            "wrong_container_type",
+            'not_string_or_list',
+            'list_contains_non_string',
+            'wrong_container_type',
         ],
     )
-    def test_plot_parameters_raises_with_invalid_parameter_names(
-        self, analysis, parameter_names
-    ):
+    def test_plot_parameters_raises_with_invalid_parameter_names(self, analysis, parameter_names):
 
         with pytest.raises(
             TypeError,
-            match="names must be a string or a list of strings",
+            match='names must be a string or a list of strings',
         ):
             analysis.plot_parameters(names=parameter_names)
 
     def test_plot_parameters_raises_with_nonexistent_parameter_names(self, analysis):
         with pytest.raises(
             ValueError,
-            match="not found in dataset",
+            match='not found in dataset',
         ):
-            analysis.plot_parameters(names="nonexistent_parameter")
+            analysis.plot_parameters(names='nonexistent_parameter')
 
     def test_plot_parameters(self, analysis):
 
@@ -449,18 +431,18 @@ class TestAnalysis:
         # Mock all the methods that are called.
         fake_fig = object()
         user_kwargs = {
-            "title": "My Plot",
-            "marker": {"amplitude": "x", "width": "s"},
+            'title': 'My Plot',
+            'marker': {'amplitude': 'x', 'width': 's'},
         }
 
         fake_dataset = {
-            "amplitude": object(),
-            "width": object(),
+            'amplitude': object(),
+            'width': object(),
         }
 
         analysis.parameters_to_dataset = MagicMock(return_value=fake_dataset)
 
-        with patch("plopp.plot", return_value=fake_fig) as mock_plot:
+        with patch('plopp.plot', return_value=fake_fig) as mock_plot:
             # THEN
             result = analysis.plot_parameters(**user_kwargs)
 
@@ -475,21 +457,21 @@ class TestAnalysis:
         assert dataset_passed == fake_dataset
 
         # Check default kwargs
-        assert "linestyle" in kwargs
-        assert kwargs["linestyle"] == {
-            "amplitude": "none",
-            "width": "none",
+        assert 'linestyle' in kwargs
+        assert kwargs['linestyle'] == {
+            'amplitude': 'none',
+            'width': 'none',
         }
 
-        assert "markerfacecolor" in kwargs
-        assert kwargs["markerfacecolor"] == {
-            "amplitude": "none",
-            "width": "none",
+        assert 'markerfacecolor' in kwargs
+        assert kwargs['markerfacecolor'] == {
+            'amplitude': 'none',
+            'width': 'none',
         }
 
         # Check that user kwargs override defaults
-        assert kwargs["marker"] == user_kwargs["marker"]
-        assert kwargs["title"] == "My Plot"
+        assert kwargs['marker'] == user_kwargs['marker']
+        assert kwargs['title'] == 'My Plot'
 
         # and that we return the figure
         assert result is fake_fig
@@ -497,15 +479,15 @@ class TestAnalysis:
     def test_on_experiment_changed_similar_Q(self, analysis):
         # WHEN
         # Create a new experiment.
-        Q = sc.array(dims=["Q"], values=[1, 2, 3], unit="1/Angstrom")
-        energy = sc.array(dims=["energy"], values=[20.0, 30.0, 40.0], unit="meV")
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
         data = sc.array(
-            dims=["Q", "energy"],
+            dims=['Q', 'energy'],
             values=[[2.0, 3.0, 4.0], [5.0, 6.0, 7.0], [8.0, 9.0, 10.0]],
             variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
         )
 
-        data_array = sc.DataArray(data=data, coords={"Q": Q, "energy": energy})
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         new_experiment = Experiment(data=data_array)
 
@@ -521,22 +503,22 @@ class TestAnalysis:
     def test_on_experiment_changed_different_Q_raises(self, analysis):
         # WHEN
         # Create a new experiment with different Q values.
-        Q = sc.array(dims=["Q"], values=[4, 5, 6], unit="1/Angstrom")
-        energy = sc.array(dims=["energy"], values=[20.0, 30.0, 40.0], unit="meV")
+        Q = sc.array(dims=['Q'], values=[4, 5, 6], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
         data = sc.array(
-            dims=["Q", "energy"],
+            dims=['Q', 'energy'],
             values=[[2.0, 3.0, 4.0], [5.0, 6.0, 7.0], [8.0, 9.0, 10.0]],
             variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
         )
 
-        data_array = sc.DataArray(data=data, coords={"Q": Q, "energy": energy})
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         new_experiment = Experiment(data=data_array)
 
         # THEN / EXPECT
         with pytest.raises(
             ValueError,
-            match="New Q values are not similar to the old ones",
+            match='New Q values are not similar to the old ones',
         ):
             analysis.experiment = new_experiment
 
@@ -568,27 +550,27 @@ class TestAnalysis:
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
-        analysis.analysis_list[1].fit = MagicMock(return_value="fit_result_Q1")
+        analysis.analysis_list[1].fit = MagicMock(return_value='fit_result_Q1')
 
         # THEN
         result = analysis._fit_single_Q(Q_index=1)
 
         # EXPECT
         analysis.analysis_list[1].fit.assert_called_once()
-        assert result == "fit_result_Q1"
+        assert result == 'fit_result_Q1'
 
     def test_fit_single_Q_invalid_Q_index(self, analysis):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match="must be a valid index",
+            match='must be a valid index',
         ):
             analysis._fit_single_Q(Q_index=3)
 
     def test_fit_all_Q_independently(self, analysis):
         # WHEN
         for i in range(3):
-            analysis.analysis_list[i].fit = MagicMock(return_value=f"fit_result_Q{i}")
+            analysis.analysis_list[i].fit = MagicMock(return_value=f'fit_result_Q{i}')
 
         # THEN
         result = analysis._fit_all_Q_independently()
@@ -596,7 +578,7 @@ class TestAnalysis:
         # EXPECT
         for i in range(3):
             analysis.analysis_list[i].fit.assert_called_once()
-            assert result[i] == f"fit_result_Q{i}"
+            assert result[i] == f'fit_result_Q{i}'
 
     def test_fit_all_Q_simultaneously(self, analysis):
         # WHEN
@@ -610,10 +592,10 @@ class TestAnalysis:
         # Also mock the get_fit_functions method to return a list of fit
         # functions for each Q index
         analysis.get_fit_functions = MagicMock(
-            return_value=["fit_function_Q0", "fit_function_Q1", "fit_function_Q2"]
+            return_value=['fit_function_Q0', 'fit_function_Q1', 'fit_function_Q2']
         )
         with patch(
-            "easydynamics.analysis.analysis.MultiFitter",
+            'easydynamics.analysis.analysis.MultiFitter',
             return_value=fake_fitter_instance,
         ) as mock_fitter:
             result = analysis._fit_all_Q_simultaneously()
@@ -624,8 +606,8 @@ class TestAnalysis:
         expected_fit_functions = analysis.get_fit_functions()
         mock_fitter.assert_called_once()
         args, kwargs = mock_fitter.call_args
-        assert kwargs["fit_objects"] == expected_fit_objects
-        assert kwargs["fit_functions"] == expected_fit_functions
+        assert kwargs['fit_objects'] == expected_fit_objects
+        assert kwargs['fit_functions'] == expected_fit_functions
 
         # And check that the correct x, y, and weights arrays are passed
         # to the fit method of the MultiFitter
@@ -633,17 +615,17 @@ class TestAnalysis:
         expected_ys = []
         expected_ws = []
         for analysis1d in analysis.analysis_list:
-            data = analysis1d.experiment.data["Q", analysis1d.Q_index]
+            data = analysis1d.experiment.data['Q', analysis1d.Q_index]
 
-            expected_xs.append(data.coords["energy"].values)
+            expected_xs.append(data.coords['energy'].values)
             expected_ys.append(data.values)
             expected_ws.append(1.0 / np.sqrt(data.variances))
         fake_fitter_instance.fit.assert_called_once()
 
         args, kwargs = fake_fitter_instance.fit.call_args
-        np.testing.assert_array_equal(kwargs["x"], expected_xs)
-        np.testing.assert_array_equal(kwargs["y"], expected_ys)
-        np.testing.assert_array_equal(kwargs["weights"], expected_ws)
+        np.testing.assert_array_equal(kwargs['x'], expected_xs)
+        np.testing.assert_array_equal(kwargs['y'], expected_ys)
+        np.testing.assert_array_equal(kwargs['weights'], expected_ws)
 
         # And that the result from the fit method is returned
         assert result == fake_fit_result
@@ -672,11 +654,11 @@ class TestAnalysis:
         # EXPECT
         analysis.calculate.assert_called_once()
         assert isinstance(model_array, sc.DataArray)
-        assert "Q" in model_array.dims
-        assert "energy" in model_array.dims
-        assert sc.identical(model_array.coords["Q"], analysis.Q)
+        assert 'Q' in model_array.dims
+        assert 'energy' in model_array.dims
+        assert sc.identical(model_array.coords['Q'], analysis.Q)
         assert sc.identical(
-            model_array.coords["energy"], analysis.experiment.data.coords["energy"]
+            model_array.coords['energy'], analysis.experiment.data.coords['energy']
         )
         np.testing.assert_array_equal(
             model_array.values,
@@ -687,26 +669,22 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match="add_background must be True or False",
+            match='add_background must be True or False',
         ):
-            analysis._create_components_dataset(add_background="123")
+            analysis._create_components_dataset(add_background='123')
 
     def test_create_components_dataset(self, analysis):
         # WHEN
         # Add another component so that there are two components
-        analysis.sample_model.append_component(
-            Gaussian(display_name="Gaussian2", area=0.5)
-        )
+        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
 
         # THEN
         components_dataset = analysis._create_components_dataset(add_background=True)
 
         # THEN EXPECT
         assert isinstance(components_dataset, sc.Dataset)
-        component_names = [
-            comp.display_name for comp in analysis.sample_model.components
-        ]
+        component_names = [comp.display_name for comp in analysis.sample_model.components]
         for component_name in component_names:
             assert component_name in components_dataset
-            assert "Q" in components_dataset[component_name].dims
-            assert "energy" in components_dataset[component_name].dims
+            assert 'Q' in components_dataset[component_name].dims
+            assert 'energy' in components_dataset[component_name].dims
