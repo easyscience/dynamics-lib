@@ -25,9 +25,9 @@ class ModelBase(EasyScienceModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyModelBase",
+        display_name: str = 'MyModelBase',
         unique_name: str | None = None,
-        unit: str | sc.Unit | None = "meV",
+        unit: str | sc.Unit | None = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
@@ -59,8 +59,8 @@ class ModelBase(EasyScienceModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f"Components must be a ModelComponent, a ComponentCollection or None, "
-                f"got {type(components).__name__}"
+                f'Components must be a ModelComponent, a ComponentCollection or None, '
+                f'got {type(components).__name__}'
             )
 
         self._components = ComponentCollection()
@@ -93,8 +93,8 @@ class ModelBase(EasyScienceModelBase):
 
         if not self._component_collections:
             raise ValueError(
-                "No components in the model to evaluate. "
-                "Run generate_component_collections() first"
+                'No components in the model to evaluate. '
+                'Run generate_component_collections() first'
             )
         y = [collection.evaluate(x) for collection in self._component_collections]
 
@@ -157,8 +157,8 @@ class ModelBase(EasyScienceModelBase):
         """
         raise AttributeError(
             (
-                f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-                f"or create a new {self.__class__.__name__} with the desired unit."
+                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+                f'or create a new {self.__class__.__name__} with the desired unit.'
             )
         )  # noqa: E501
 
@@ -178,9 +178,7 @@ class ModelBase(EasyScienceModelBase):
         old_unit = self._unit
 
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
-            )
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
         try:
             for component in self.components:
                 component.convert_unit(unit)
@@ -217,9 +215,7 @@ class ModelBase(EasyScienceModelBase):
                 ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
-            raise TypeError(
-                "Components must be a ModelComponent or a ComponentCollection"
-            )
+            raise TypeError('Components must be a ModelComponent or a ComponentCollection')
 
         self.clear_components()
         if value is not None:
@@ -237,10 +233,9 @@ class ModelBase(EasyScienceModelBase):
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
-        """Set the Q values of the SampleModel. If Q is already set,
-        it throws an error if the new Q values are not similar to the
-        old ones. To change Q values, first run clear_Q().
-
+        """Set the Q values of the SampleModel. If Q is already set, it
+        throws an error if the new Q values are not similar to the old
+        ones. To change Q values, first run clear_Q().
 
         Args:
             value (Q_type | None): The new Q values to set.
@@ -249,10 +244,10 @@ class ModelBase(EasyScienceModelBase):
             ValueError: If the new Q values are not similar to the old
                 ones when Q is already set.
         """
+        if value is None:
+            return
         old_Q = self._Q
         new_Q = _validate_and_convert_Q(value)
-        if new_Q is None:
-            return
 
         if old_Q is None:
             self._Q = new_Q
@@ -261,12 +256,13 @@ class ModelBase(EasyScienceModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                "New Q values are not similar to the old ones. "
-                "To change Q values, first run clear_Q()."
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
-        """Clear the Q values of the SampleModel.
+        """Clear the Q values of the SampleModel, removing all component
+        collections and their associated Parameters.
 
         Args:
             confirm (bool, default=False): Confirmation to clear Q values.
@@ -276,7 +272,7 @@ class ModelBase(EasyScienceModelBase):
         """
         if not confirm:
             raise ValueError(
-                "Clearing Q values requires confirmation. Set confirm=True to proceed."
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
         self._on_Q_change()
@@ -323,13 +319,11 @@ class ModelBase(EasyScienceModelBase):
             ]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(
-                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
-                )
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
             if Q_index < 0 or Q_index >= len(self._component_collections):
                 raise IndexError(
-                    f"Q_index {Q_index} is out of bounds for component collections "
-                    f"of length {len(self._component_collections)}"
+                    f'Q_index {Q_index} is out of bounds for component collections '
+                    f'of length {len(self._component_collections)}'
                 )
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
@@ -350,11 +344,11 @@ class ModelBase(EasyScienceModelBase):
                 ComponentCollections.
         """
         if not isinstance(Q_index, int):
-            raise TypeError(f"Q_index must be an int, got {type(Q_index).__name__}")
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
         if Q_index < 0 or Q_index >= len(self._component_collections):
             raise IndexError(
-                f"Q_index {Q_index} is out of bounds for component collections "
-                f"of length {len(self._component_collections)}"
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
 
@@ -392,6 +386,6 @@ class ModelBase(EasyScienceModelBase):
             str: A string representation of the ModelBase.
         """
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, "
-            f"unit={self.unit}), Q = {self.Q}, components = {self.components}"
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'unit={self.unit}), Q = {self.Q}, components = {self.components}'
         )

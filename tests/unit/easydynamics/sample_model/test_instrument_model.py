@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import scipp as sc
 
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Polynomial
@@ -32,6 +33,21 @@ class TestInstrumentModel:
         )
 
         return instrument_model
+
+    @pytest.fixture
+    def instrument_model_without_Q(self):
+        component1 = Polynomial(coefficients=[1.0, 2.0])
+        background_model = BackgroundModel(components=component1)
+
+        component2 = Gaussian()
+        resolution_model = ResolutionModel(components=component2)
+
+        instrument_model_without_Q = InstrumentModel(
+            display_name='TestInstrumentModel',
+            background_model=background_model,
+            resolution_model=resolution_model,
+        )
+        return instrument_model_without_Q
 
     @pytest.fixture
     def resolution_model(self):
@@ -143,23 +159,23 @@ class TestInstrumentModel:
         ):
             instrument_model.background_model = 123
 
-    def test_Q_setter(self, instrument_model):
-        "Test that Q setter calls the appropriate methods."
-        # WHEN
-        new_Q = np.array([4.0, 5.0, 6.0])
+    # def test_Q_setter(self, instrument_model):
+    #     "Test that Q setter calls the appropriate methods."
+    #     # WHEN
+    #     new_Q = np.array([4.0, 5.0, 6.0])
 
-        instrument_model._on_Q_change = MagicMock()
+    #     instrument_model._on_Q_change = MagicMock()
 
-        # THEN EXPECT
-        with patch(
-            'easydynamics.sample_model.instrument_model._validate_and_convert_Q',
-            return_value=new_Q,
-        ) as mock_validate:
-            instrument_model.Q = new_Q
+    #     # THEN EXPECT
+    #     with patch(
+    #         "easydynamics.sample_model.instrument_model._validate_and_convert_Q",
+    #         return_value=new_Q,
+    #     ) as mock_validate:
+    #         instrument_model.Q = new_Q
 
-            np.testing.assert_array_equal(instrument_model.Q, new_Q)
-            mock_validate.assert_called_once_with(new_Q)
-            instrument_model._on_Q_change.assert_called_once()
+    #         np.testing.assert_array_equal(instrument_model.Q, new_Q)
+    #         mock_validate.assert_called_once_with(new_Q)
+    #         instrument_model._on_Q_change.assert_called_once()
 
     def test_unit_setter_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
@@ -207,7 +223,7 @@ class TestInstrumentModel:
 
     def test_get_energy_offset_at_Q_no_Q_raises(self, instrument_model):
         # WHEN
-        instrument_model.Q = None
+        instrument_model.clear_Q(confirm=True)
 
         # THEN / EXPECT
         with pytest.raises(
@@ -296,7 +312,7 @@ class TestInstrumentModel:
 
     def test_get_all_variables_no_Q(self, instrument_model):
         # WHEN
-        instrument_model.Q = None
+        instrument_model.clear_Q(confirm=True)
 
         # THEN
         all_vars = instrument_model.get_all_variables()
@@ -363,29 +379,68 @@ class TestInstrumentModel:
             assert offset.unit == instrument_model.unit
             assert offset.value == instrument_model.energy_offset.value
 
-    def test_on_Q_change(self, instrument_model):
+    # def test_on_Q_change(self, instrument_model):
+    #     # WHEN
+    #     instrument_model._generate_energy_offsets = MagicMock()
+    #     new_Q = np.array([1.0, 2.0, 3.0, 4.0])
+
+    #     # THEN
+    #     instrument_model._Q = new_Q
+    #     instrument_model._on_Q_change()
+
+    #     # EXPECT
+    #     instrument_model._generate_energy_offsets.assert_called_once()
+    #     instrument_model._background_model.Q = new_Q
+    #     instrument_model._resolution_model.Q = new_Q
+
+    #     # Setting Q to None has no effect.
+    #     # THEN
+    #     instrument_model._Q = None
+    #     instrument_model._on_Q_change()
+
+    #     # EXPECT
+    #     instrument_model._generate_energy_offsets.assert_called_once()
+    #     instrument_model._background_model.Q = new_Q
+    #     instrument_model._resolution_model.Q = new_Q
+
+    def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
-        instrument_model._generate_energy_offsets = MagicMock()
-        new_Q = np.array([1.0, 2.0, 3.0, 4.0])
+        instrument_model_without_Q._generate_energy_offsets = MagicMock()
+        first_new_Q = np.array([1.0, 2.0, 3.0])
 
         # THEN
-        instrument_model._Q = new_Q
-        instrument_model._on_Q_change()
+        instrument_model_without_Q.Q = first_new_Q
 
         # EXPECT
-        instrument_model._generate_energy_offsets.assert_called_once()
-        instrument_model._background_model.Q = new_Q
-        instrument_model._resolution_model.Q = new_Q
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
 
-        # Setting Q to None has no effect.
         # THEN
-        instrument_model._Q = None
-        instrument_model._on_Q_change()
+        new_Q = np.array([4.0, 5.0, 6.0])
 
         # EXPECT
-        instrument_model._generate_energy_offsets.assert_called_once()
-        instrument_model._background_model.Q = new_Q
-        instrument_model._resolution_model.Q = new_Q
+        with pytest.raises(ValueError, match='New Q values are not similar to the old ones'):
+            instrument_model_without_Q.Q = new_Q
+
+        # THEN
+        new_Q = None
+        instrument_model_without_Q.Q = new_Q
+
+        # EXPECT
+        # No new calls to _generate_energy_offsets, and Q values remain unchanged
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+
+        # THEN
+        new_Q = sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom')
+
+        # EXPECT
+        # No new calls to _generate_energy_offsets, and Q values remain unchanged
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
 
     def test_on_energy_offset_change(self, instrument_model):
         # WHEN

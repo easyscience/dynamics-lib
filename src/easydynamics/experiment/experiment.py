@@ -342,6 +342,10 @@ class Experiment(NewBase):
         plot_kwargs_defaults = {
             'title': self.display_name,
         }
+
+        if slicer:
+            plot_kwargs_defaults['keep'] = 'energy'
+
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
         if slicer:
