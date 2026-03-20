@@ -2204,7 +2204,9 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -2385,10 +2387,12 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="p">)</span>
 
         <span class="n">analytical_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">Gaussian</span><span class="p">,</span> <span class="n">Lorentzian</span><span class="p">,</span> <span class="n">Voigt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">resolution_component</span><span class="p">,</span> <span class="n">analytical_types</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_convolution_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Separate sample model components into analytical pairs, delta</span>
@@ -2948,9 +2952,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
 <span class="normal">291</span>
@@ -2965,7 +2967,9 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -4856,7 +4860,9 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -5037,10 +5043,12 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="p">)</span>
 
         <span class="n">analytical_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">Gaussian</span><span class="p">,</span> <span class="n">Lorentzian</span><span class="p">,</span> <span class="n">Voigt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">analytical_types</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">resolution_component</span><span class="p">,</span> <span class="n">analytical_types</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_convolution_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Separate sample model components into analytical pairs, delta</span>
@@ -5600,9 +5608,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
 <span class="normal">291</span>
@@ -5617,7 +5623,9 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -6147,7 +6155,11 @@ components.</p>
 <span class="normal">291</span>
 <span class="normal">292</span>
 <span class="normal">293</span>
-<span class="normal">294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for convolutions of sample and resolution models.</span>
 
 <span class="sd">    This base class has no convolution functionality.</span>
@@ -6207,7 +6219,8 @@ components.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span> <span class="o">=</span> <span class="n">energy_offset</span>
 
         <span class="k">if</span> <span class="n">sample_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="p">(</span><span class="n">ComponentCollection</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">))</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;`sample_components` is an instance of </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_components</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, but must be a ComponentCollection or ModelComponent.&#39;</span>  <span class="c1"># noqa: E501</span>
@@ -6217,7 +6230,8 @@ components.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span> <span class="o">=</span> <span class="n">sample_components</span>
 
         <span class="k">if</span> <span class="n">resolution_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="p">(</span><span class="n">ComponentCollection</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">))</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;`resolution_components` is an instance of </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, but must be a ComponentCollection or ModelComponent.&#39;</span>  <span class="c1"># noqa: E501</span>
@@ -6331,8 +6345,10 @@ components.</p>
     <span class="nd">@energy_unit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Unit is read-only. Use convert_unit to change the unit between allowed types &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;or create a new </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> with the desired unit.&#39;</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unit is read-only. Use convert_unit to change the unit between allowed types &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;or create a new </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> with the desired unit.&#39;</span>
+            <span class="p">)</span>
         <span class="p">)</span>  <span class="c1"># noqa: E501</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -6675,7 +6691,9 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <span class="normal">87</span>
 <span class="normal">88</span>
 <span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6729,7 +6747,8 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span> <span class="o">=</span> <span class="n">energy_offset</span>
 
     <span class="k">if</span> <span class="n">sample_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="p">(</span><span class="n">ComponentCollection</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">))</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_components</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;`sample_components` is an instance of </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sample_components</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, but must be a ComponentCollection or ModelComponent.&#39;</span>  <span class="c1"># noqa: E501</span>
@@ -6739,7 +6758,8 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span> <span class="o">=</span> <span class="n">sample_components</span>
 
     <span class="k">if</span> <span class="n">resolution_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="p">(</span><span class="n">ComponentCollection</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">))</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;`resolution_components` is an instance of </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">resolution_components</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, but must be a ComponentCollection or ModelComponent.&#39;</span>  <span class="c1"># noqa: E501</span>
@@ -6851,11 +6871,7 @@ unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
@@ -6879,7 +6895,11 @@ unit.</p>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
-<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">    Args:</span>
@@ -8468,9 +8488,7 @@ functionality.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -8849,7 +8867,13 @@ functionality.</p>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for numerical convolutions of sample and resolution</span>
 <span class="sd">    models.</span>
 
@@ -9017,11 +9041,11 @@ functionality.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the temperature.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parameter | None: The temperature parameter, or None if</span>
+<span class="sd">            Optional[Parameter]: The temperature parameter, or None if</span>
 <span class="sd">                detailed balance correction is disabled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -9145,7 +9169,10 @@ functionality.</p>
         <span class="c1"># select the 4 central points we either get</span>
         <span class="c1"># indices [2,3,4,5] or [1,2,3,4], both of which are offset by</span>
         <span class="c1"># 0.5*dx from the true center at index 3.5.</span>
-        <span class="n">energy_even_length_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">energy_dense_step</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_dense</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_dense</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">energy_even_length_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">energy_dense_step</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">energy_even_length_offset</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="c1"># Handle the case when energy_dense is not symmetric around 0.</span>
         <span class="c1"># The resolution is still centered around zero (or close to it),</span>
@@ -9187,7 +9214,10 @@ functionality.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle ComponentCollection or ModelComponent</span>
-        <span class="n">components</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">components</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">components</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>  <span class="c1"># Treat single ModelComponent as a list</span>
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">):</span>
@@ -9199,7 +9229,6 @@ functionality.</p>
 <span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
 <span class="s1">                                Increase extension_factor to improve accuracy.&#39;</span><span class="p">,</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
-                        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">SMALL_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -9209,7 +9238,6 @@ functionality.</p>
 <span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
 <span class="s1">                                Increase upsample_factor to improve accuracy.&#39;</span><span class="p">,</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
-                        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -9504,9 +9532,7 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 38</span>
 <span class="normal"> 39</span>
 <span class="normal"> 40</span>
 <span class="normal"> 41</span>
@@ -9571,7 +9597,9 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -9697,13 +9725,7 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
@@ -9715,7 +9737,13 @@ NumericalConvolutionBase.</p>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
 <span class="sd">    NumericalConvolutionBase.</span>
 
@@ -9798,16 +9826,16 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the energy array and recreate the dense grid.</span>
 
@@ -9981,11 +10009,11 @@ on each side</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="easyscience.variable.Parameter">Parameter</span> | None</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="easyscience.variable.Parameter">Parameter</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Parameter | None: The temperature parameter, or None if
+                <p>Optional[Parameter]: The temperature parameter, or None if
 detailed balance correction is disabled.</p>
 <!-- prettier-ignore-start -->
 

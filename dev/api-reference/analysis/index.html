@@ -2689,7 +2689,7 @@ all Q.</p>
             <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset</span><span class="p">(</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">data_and_model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2767,7 +2767,7 @@ all Q.</p>
                 <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span>
                 <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
                 <span class="n">variances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-                <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ds</span>
@@ -4019,7 +4019,7 @@ parameter across different Q values.</p>
             <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span>
             <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
             <span class="n">variances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ds</span>
@@ -4445,7 +4445,7 @@ plot of the data and model.</p>
         <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset</span><span class="p">(</span>
             <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">data_and_model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -5637,7 +5637,7 @@ all Q.</p>
             <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset</span><span class="p">(</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">data_and_model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -5715,7 +5715,7 @@ all Q.</p>
                 <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span>
                 <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
                 <span class="n">variances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-                <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ds</span>
@@ -6967,7 +6967,7 @@ parameter across different Q values.</p>
             <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span>
             <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
             <span class="n">variances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ds</span>
@@ -7393,7 +7393,7 @@ plot of the data and model.</p>
         <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset</span><span class="p">(</span>
             <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">data_and_model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8774,7 +8774,7 @@ own for simpler analyses.</p>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">plot_components</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -10430,7 +10430,7 @@ function.</p>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">plot_components</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -10898,7 +10898,8 @@ background and resolution</p>
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for analysis in EasyDynamics. This class is not meant</span>
 <span class="sd">    to be used directly.</span>
 
@@ -11212,12 +11213,13 @@ background and resolution</p>
 <span class="sd">        Raises:</span>
 <span class="sd">            IndexError: If the Q index is not valid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="n">Q_index</span> <span class="o">&lt;</span> <span class="mi">0</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Q_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">))</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">Q_index</span> <span class="o">&lt;</span> <span class="mi">0</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Q_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">))</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Q_index</span>
 
     <span class="c1">#############</span>
@@ -11690,14 +11692,14 @@ or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
-<span class="normal">341</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Analysis.</span>
 
 <span class="sd">    Returns:</span>
