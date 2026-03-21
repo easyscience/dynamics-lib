@@ -278,6 +278,8 @@ class InstrumentModel(NewBase):
                 'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
+        self.background_model.clear_Q(confirm=True)
+        self.resolution_model.clear_Q(confirm=True)
         self._on_Q_change()
 
     def convert_unit(self, unit_str: str | sc.Unit) -> None:

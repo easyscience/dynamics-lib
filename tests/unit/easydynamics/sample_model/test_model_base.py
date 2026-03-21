@@ -305,13 +305,6 @@ class TestModelBase:
         ):
             model_base.components = 'invalid_component'
 
-    # def test_Q_setter(self, model_base):
-    #     # WHEN
-    #     new_Q = [0.5, 1.5, 2.5]
-    #     model_base.Q = new_Q
-
-    #     # THEN / EXPECT
-    #     np.testing.assert_array_equal(model_base.Q, np.array(new_Q))
     def test_Q_setter_raises_if_Q_is_not_similar(self, model_base):
         # WHEN / THEN / EXPECT
         with pytest.raises(ValueError, match='New Q values are not similar to'):

@@ -159,23 +159,19 @@ class TestInstrumentModel:
         ):
             instrument_model.background_model = 123
 
-    # def test_Q_setter(self, instrument_model):
-    #     "Test that Q setter calls the appropriate methods."
-    #     # WHEN
-    #     new_Q = np.array([4.0, 5.0, 6.0])
+    def test_clear_Q(self, instrument_model):
+        # WHEN
+        instrument_model.clear_Q(confirm=True)
 
-    #     instrument_model._on_Q_change = MagicMock()
+        # THEN / EXPECT
+        assert instrument_model.Q is None
+        assert instrument_model.background_model.Q is None
+        assert instrument_model.resolution_model.Q is None
 
-    #     # THEN EXPECT
-    #     with patch(
-    #         "easydynamics.sample_model.instrument_model._validate_and_convert_Q",
-    #         return_value=new_Q,
-    #     ) as mock_validate:
-    #         instrument_model.Q = new_Q
-
-    #         np.testing.assert_array_equal(instrument_model.Q, new_Q)
-    #         mock_validate.assert_called_once_with(new_Q)
-    #         instrument_model._on_Q_change.assert_called_once()
+    def test_clear_Q_raises_without_confirm(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(ValueError, match='Clearing Q values requires confirmation'):
+            instrument_model.clear_Q()
 
     def test_unit_setter_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
@@ -378,30 +374,6 @@ class TestInstrumentModel:
             assert offset.name == 'energy_offset'
             assert offset.unit == instrument_model.unit
             assert offset.value == instrument_model.energy_offset.value
-
-    # def test_on_Q_change(self, instrument_model):
-    #     # WHEN
-    #     instrument_model._generate_energy_offsets = MagicMock()
-    #     new_Q = np.array([1.0, 2.0, 3.0, 4.0])
-
-    #     # THEN
-    #     instrument_model._Q = new_Q
-    #     instrument_model._on_Q_change()
-
-    #     # EXPECT
-    #     instrument_model._generate_energy_offsets.assert_called_once()
-    #     instrument_model._background_model.Q = new_Q
-    #     instrument_model._resolution_model.Q = new_Q
-
-    #     # Setting Q to None has no effect.
-    #     # THEN
-    #     instrument_model._Q = None
-    #     instrument_model._on_Q_change()
-
-    #     # EXPECT
-    #     instrument_model._generate_energy_offsets.assert_called_once()
-    #     instrument_model._background_model.Q = new_Q
-    #     instrument_model._resolution_model.Q = new_Q
 
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
