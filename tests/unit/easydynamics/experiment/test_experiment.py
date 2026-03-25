@@ -351,8 +351,29 @@ class TestExperiment:
             # EXPECT
             mock_plot.assert_called_once()
             args, kwargs = mock_plot.call_args
-            assert sc.identical(args[0], experiment._data.transpose())
+            assert sc.identical(args[0], experiment.data.transpose())
             assert kwargs['title'] == f'{experiment.display_name}'
+            assert result == mock_fig
+
+    def test_plot_data_slicer_success(self, experiment):
+        "Test plotting data successfully when in notebook environment"
+        # WHEN
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            patch('plopp.slicer') as mock_plot,
+        ):
+            mock_fig = MagicMock()
+            mock_plot.return_value = mock_fig
+
+            # THEN
+            result = experiment.plot_data(slicer=True)
+
+            # EXPECT
+            mock_plot.assert_called_once()
+            args, kwargs = mock_plot.call_args
+            assert sc.identical(args[0], experiment.data)
+            assert kwargs['title'] == f'{experiment.display_name}'
+            assert kwargs['keep'] == 'energy'
             assert result == mock_fig
 
     def test_plot_data_no_data_raises(self):

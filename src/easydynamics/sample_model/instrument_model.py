@@ -173,14 +173,34 @@ class InstrumentModel(NewBase):
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
-        """Set the Q values of the InstrumentModel.
+        """Set the Q values of the InstrumentModel. If Q is already set,
+        it raises an error if the new Q values are not similar to the
+        old ones to prevent accidental changes to the background and
+        resolution models. To change Q values, first run clear_Q().
 
         Args:
-            value (Q_type | None): The new Q values for the
-                InstrumentModel.
+            value (Q_type | None): The new Q values to set.
+                If None, Q values are not changed.
+
+        Raises:
+            ValueError: If the new Q values are not similar to the old
+                ones when Q is not None
         """
-        self._Q = _validate_and_convert_Q(value)
-        self._on_Q_change()
+        if value is None:
+            return
+        old_Q = self._Q
+        new_Q = _validate_and_convert_Q(value)
+
+        if old_Q is None:
+            self._Q = new_Q
+            self._on_Q_change()
+            return
+
+        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+            raise ValueError(
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
+            )
 
     @property
     def unit(self) -> str | sc.Unit:
@@ -241,6 +261,27 @@ class InstrumentModel(NewBase):
     # --------------------------------------------------------------
     # Other methods
     # --------------------------------------------------------------
+
+    def clear_Q(self, confirm: bool = False) -> None:
+        """Clear the Q values of the InstrumentModel and any associated
+        ResolutionModel and BackgroundModel, removing all component
+        collections and their associated Parameters.
+
+        Args:
+            confirm (bool, default=False): Confirmation to clear Q
+                values.
+
+        Raises:
+            ValueError: If confirm is not True.
+        """
+        if not confirm:
+            raise ValueError(
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
+            )
+        self._Q = None
+        self.background_model.clear_Q(confirm=True)
+        self.resolution_model.clear_Q(confirm=True)
+        self._on_Q_change()
 
     def convert_unit(self, unit_str: str | sc.Unit) -> None:
         """Convert the unit of the InstrumentModel.
@@ -348,8 +389,8 @@ class InstrumentModel(NewBase):
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
         self._generate_energy_offsets()
-        self._resolution_model.Q = self._Q
-        self._background_model.Q = self._Q
+        self.resolution_model.Q = self.Q
+        self.background_model.Q = self.Q
 
     def _on_energy_offset_change(self) -> None:
         """Handle changes to the energy offset."""
@@ -358,11 +399,11 @@ class InstrumentModel(NewBase):
 
     def _on_resolution_model_change(self) -> None:
         """Handle changes to the resolution model."""
-        self._resolution_model.Q = self._Q
+        self.resolution_model.Q = self.Q
 
     def _on_background_model_change(self) -> None:
         """Handle changes to the background model."""
-        self._background_model.Q = self._Q
+        self.background_model.Q = self.Q
 
     # -------------------------------------------------------------
     # Dunder methods

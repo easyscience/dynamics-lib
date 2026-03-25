@@ -476,10 +476,10 @@ class TestAnalysis:
         # and that we return the figure
         assert result is fake_fig
 
-    def test_on_experiment_changed(self, analysis):
+    def test_on_experiment_changed_similar_Q(self, analysis):
         # WHEN
         # Create a new experiment.
-        Q = sc.array(dims=['Q'], values=[2, 3, 4], unit='1/Angstrom')
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
         data = sc.array(
             dims=['Q', 'energy'],
@@ -491,14 +491,36 @@ class TestAnalysis:
 
         new_experiment = Experiment(data=data_array)
 
-        # THEN (this call _on_experiment_changed internally)
+        # THEN (this calls _on_experiment_changed internally)
         analysis.experiment = new_experiment
 
         # EXPECT
-        assert np.array_equal(analysis.Q.values, [2, 3, 4])
+        assert np.array_equal(analysis.Q.values, [1, 2, 3])
         assert len(analysis.analysis_list) == 3
         for analysis1d in analysis.analysis_list:
             assert analysis1d.experiment is new_experiment
+
+    def test_on_experiment_changed_different_Q_raises(self, analysis):
+        # WHEN
+        # Create a new experiment with different Q values.
+        Q = sc.array(dims=['Q'], values=[4, 5, 6], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[2.0, 3.0, 4.0], [5.0, 6.0, 7.0], [8.0, 9.0, 10.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        new_experiment = Experiment(data=data_array)
+
+        # THEN / EXPECT
+        with pytest.raises(
+            ValueError,
+            match='New Q values are not similar to the old ones',
+        ):
+            analysis.experiment = new_experiment
 
     def test_on_sample_model_changed(self, analysis):
         # WHEN

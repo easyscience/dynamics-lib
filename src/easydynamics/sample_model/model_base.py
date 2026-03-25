@@ -231,23 +231,49 @@ class ModelBase(EasyScienceModelBase):
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
-        """Set the Q values of the SampleModel.
+        """Set the Q values of the SampleModel. If Q is already set, it
+        throws an error if the new Q values are not similar to the old
+        ones. To change Q values, first run clear_Q().
 
         Args:
-            value (Q_type | None): The new Q values to set. If None, Q
-                will be unset.
+            value (Q_type | None): The new Q values to set.
+                If None, Q values are not changed.
+
+        Raises:
+            ValueError: If the new Q values are not similar to the old
+                ones when Q is already set.
         """
+        if value is None:
+            return
         old_Q = self._Q
         new_Q = _validate_and_convert_Q(value)
 
-        if (
-            old_Q is not None
-            and new_Q is not None
-            and len(old_Q) == len(new_Q)
-            and all(np.isclose(old_Q, new_Q))
-        ):
-            return  # No change in Q, so do nothing
-        self._Q = new_Q
+        if old_Q is None:
+            self._Q = new_Q
+            self._on_Q_change()
+            return
+
+        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+            raise ValueError(
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
+            )
+
+    def clear_Q(self, confirm: bool = False) -> None:
+        """Clear the Q values of the SampleModel, removing all component
+        collections and their associated Parameters.
+
+        Args:
+            confirm (bool, default=False): Confirmation to clear Q values.
+
+        Raises:
+            ValueError: If confirm is not True.
+        """
+        if not confirm:
+            raise ValueError(
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
+            )
+        self._Q = None
         self._on_Q_change()
 
     # ------------------------------------------------------------------

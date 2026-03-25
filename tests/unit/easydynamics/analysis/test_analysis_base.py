@@ -33,9 +33,9 @@ class TestAnalysisBase:
 
         # EXPECT
         assert analysis_base.display_name == 'TestAnalysis'
-        assert isinstance(analysis_base._experiment, Experiment)
-        assert isinstance(analysis_base._sample_model, SampleModel)
-        assert isinstance(analysis_base._instrument_model, InstrumentModel)
+        assert isinstance(analysis_base.experiment, Experiment)
+        assert isinstance(analysis_base.sample_model, SampleModel)
+        assert isinstance(analysis_base.instrument_model, InstrumentModel)
         assert analysis_base._extra_parameters == []
 
     def test_init_extra_parameter(self):
