@@ -476,6 +476,43 @@ class TestAnalysis:
         # and that we return the figure
         assert result is fake_fig
 
+    def test_fix_and_free_energy_offset(self, analysis):
+        # EXPECT
+        offsets = analysis.instrument_model.get_energy_offset()
+        for offset in offsets:
+            assert offset.fixed is False
+
+        # THEN
+        analysis.fix_energy_offset()
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is True
+
+        # THEN
+        analysis.free_energy_offset()
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is False
+
+        # THEN
+        analysis.fix_energy_offset(Q_index=1)
+
+        # EXPECT
+        for i, offset in enumerate(offsets):
+            if i == 1:
+                assert offset.fixed is True
+            else:
+                assert offset.fixed is False
+
+        # THEN
+        analysis.free_energy_offset(Q_index=1)
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is False
+
     def test_on_experiment_changed_similar_Q(self, analysis):
         # WHEN
         # Create a new experiment.

@@ -351,32 +351,96 @@ class InstrumentModel(NewBase):
         """Free all parameters in the resolution model."""
         self.resolution_model.free_all_parameters()
 
-    def get_energy_offset_at_Q(self, Q_index: int) -> Parameter:
+    def get_energy_offset(
+        self,
+        Q_index: int | None = None,
+    ) -> Parameter | list[Parameter]:
         """Get the energy offset Parameter at a specific Q index.
 
         Args:
-            Q_index (int): The index of the Q value to get the energy
-                offset for.
+            Q_index (int | None, default=None): The index of the Q value to get the energy
+                offset for. If None, get the energy offset for all Q values.
 
         Returns:
-            Parameter: The energy offset Parameter at the specified Q
-                index.
+            Parameter | list[Parameter]: The energy offset Parameter at the specified Q
+                index, or a list of Parameters if Q_index is None.
 
         Raises:
             ValueError: If no Q values are set in the InstrumentModel.
             IndexError: If Q_index is out of bounds.
+            TypeError: If Q_index is not an int or None.
         """
         if self._Q is None:
             raise ValueError('No Q values are set in the InstrumentModel.')
+
+        if Q_index is None:
+            return self._energy_offsets
+
+        if not isinstance(Q_index, int):
+            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
 
         if Q_index < 0 or Q_index >= len(self._Q):
             raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
 
         return self._energy_offsets[Q_index]
 
+    def fix_energy_offset(self, Q_index: int | None = None) -> None:
+        """Fix energy offset parameters. If Q_index is specified, only
+        fix the energy offset for that Q value. If Q_index is None, fix
+        energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to fix the energy offset for. If None, fix energy
+                offsets for all Q values.
+        """
+        self._fix_or_free_energy_offset(Q_index, fixed=True)
+
+    def free_energy_offset(self, Q_index: int | None = None) -> None:
+        """Free energy offset parameters. If Q_index is specified, only
+        free the energy offset for that Q value. If Q_index is None,
+        free energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to free the energy offset for. If None, free energy
+                offsets for all Q values.
+        """
+        self._fix_or_free_energy_offset(Q_index, fixed=False)
+
     # --------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------
+    def _fix_or_free_energy_offset(self, Q_index: int | None = None, fixed: bool = True) -> None:
+        """Fix or free energy offset parameters. If Q_index is
+        specified, only fix or free the energy offset for that Q value.
+        If Q_index is None, fix or free energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to fix or free the energy offset for. If None, fix or
+                free energy offsets for all Q values.
+            fixed (bool, default=True): Whether to fix (True) or free
+                (False) the energy offset.
+
+        Raises:
+            TypeError: If Q_index is not an int or None.
+            IndexError: If Q_index is out of bounds for the Q values in
+                the InstrumentModel.
+        """
+
+        if Q_index is None:
+            for offset in self._energy_offsets:
+                offset.fixed = fixed
+        else:
+            if not isinstance(Q_index, int):
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+
+            if Q_index < 0 or Q_index >= len(self._Q):
+                raise IndexError(
+                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
+                )
+            self._energy_offsets[Q_index].fixed = fixed
 
     def _generate_energy_offsets(self) -> None:
         """Generate energy offset Parameters for each Q value."""
