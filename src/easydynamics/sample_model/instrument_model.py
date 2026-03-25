@@ -180,6 +180,7 @@ class InstrumentModel(NewBase):
 
         Args:
             value (Q_type | None): The new Q values to set.
+                If None, Q values are not changed.
 
         Raises:
             ValueError: If the new Q values are not similar to the old

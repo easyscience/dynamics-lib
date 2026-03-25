@@ -235,7 +235,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Returns:
             Parameter | None: The temperature from the associated SampleModel,
-            if available, and None if not.
+                if available, and None if not.
         """
 
         return self.sample_model.temperature
