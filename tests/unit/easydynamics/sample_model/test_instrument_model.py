@@ -217,6 +217,14 @@ class TestInstrumentModel:
         ):
             instrument_model.get_energy_offset(5)
 
+    def test_get_energy_offset_nonint_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.get_energy_offset('invalid_index')
+
     def test_get_energy_offset_no_Q_raises(self, instrument_model):
         # WHEN
         instrument_model.clear_Q(confirm=True)
