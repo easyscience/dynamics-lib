@@ -369,7 +369,7 @@ class TestModelBase:
         # EXPECT
         for collection in model_base._component_collections:
             total_area = sum(component.area.value for component in collection.components)
-            assert total_area == 1.0
+            assert total_area == pytest.approx(1.0)
 
     def test_repr(self, model_base):
         # WHEN
