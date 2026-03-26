@@ -197,8 +197,7 @@ class Experiment(NewBase):
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
 
         mask_var = sc.array(dims=['energy'], values=mask)
-        masked_energy = energy[mask_var]
-        return masked_energy
+        return energy[mask_var]
 
     ###########
     # Handle data

@@ -332,15 +332,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        energy_grid = EnergyGrid(
+        return EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
-
-        return energy_grid
 
     def _check_width_thresholds(
         self,

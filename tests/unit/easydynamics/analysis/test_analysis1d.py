@@ -36,7 +36,7 @@ class TestAnalysis1d:
         sample_model = SampleModel(components=Gaussian())
         instrument_model = InstrumentModel()
 
-        analysis1d = Analysis1d(
+        return Analysis1d(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
@@ -44,8 +44,6 @@ class TestAnalysis1d:
             Q_index=0,
             extra_parameters=None,
         )
-
-        return analysis1d
 
     def test_init(self, analysis1d):
         # WHEN THEN

@@ -32,14 +32,12 @@ class TestResolutionModel:
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
-        resolution_model = ResolutionModel(
+        return ResolutionModel(
             display_name='InitModel',
             components=component_collection,
             unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
-
-        return resolution_model
 
     def test_init(self, resolution_model):
         # WHEN THEN

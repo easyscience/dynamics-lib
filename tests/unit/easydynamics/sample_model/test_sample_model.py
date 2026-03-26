@@ -44,7 +44,7 @@ class TestSampleModel:
             display_name='DiffusionModel', unique_name='DiffusionModel'
         )
 
-        sample_model = SampleModel(
+        return SampleModel(
             display_name='InitModel',
             components=component_collection,
             diffusion_models=diffusion_model,
@@ -52,8 +52,6 @@ class TestSampleModel:
             Q=np.array([1.0, 2.0, 3.0]),
             temperature=10.0,
         )
-
-        return sample_model
 
     def test_init(self, sample_model):
 

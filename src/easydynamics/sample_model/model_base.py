@@ -96,9 +96,7 @@ class ModelBase(EasyScienceModelBase):
                 'No components in the model to evaluate. '
                 'Run generate_component_collections() first'
             )
-        y = [collection.evaluate(x) for collection in self._component_collections]
-
-        return y
+        return [collection.evaluate(x) for collection in self._component_collections]
 
     # ------------------------------------------------------------------
     # Component management

@@ -146,9 +146,7 @@ class Analysis1d(AnalysisBase):
 
         background_intensity = self._evaluate_background(energy=energy)
 
-        sample_plus_background = sample_intensity + background_intensity
-
-        return sample_plus_background
+        return sample_intensity + background_intensity
 
     def fit(self) -> FitResults:
         """Fit the model to the experimental data for the chosen Q
@@ -299,11 +297,10 @@ class Analysis1d(AnalysisBase):
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
 
-        fig = pp.plot(
+        return pp.plot(
             data_and_model,
             **plot_kwargs_defaults,
         )
-        return fig
 
     #############
     # Private methods: small utilities
@@ -596,14 +593,13 @@ class Analysis1d(AnalysisBase):
             return None
 
         # TODO: allow convolution options to be set.
-        convolver = Convolution(
+        return Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy=energy,
             temperature=self.temperature,
             energy_offset=self.instrument_model.get_energy_offset_at_Q(Q_index),
         )
-        return convolver
 
     #############
     # Private methods: create scipp arrays for plotting

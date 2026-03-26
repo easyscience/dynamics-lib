@@ -411,9 +411,7 @@ class ComponentCollection(ModelBase):
 
         component = matches[0]
 
-        result = component.evaluate(x)
-
-        return result
+        return component.evaluate(x)
 
     def fix_all_parameters(self) -> None:
         """Fix all free parameters in the model."""
@@ -444,11 +442,10 @@ class ComponentCollection(ModelBase):
         if isinstance(item, str):
             # Check by component unique name
             return any(comp.unique_name == item for comp in self.components)
-        elif isinstance(item, ModelComponent):
+        if isinstance(item, ModelComponent):
             # Check by component instance
             return any(comp is item for comp in self.components)
-        else:
-            return False
+        return False
 
     def __repr__(self) -> str:
         """Return a string representation of the ComponentCollection.

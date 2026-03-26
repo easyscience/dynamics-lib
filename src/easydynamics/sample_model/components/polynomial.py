@@ -131,8 +131,7 @@ class Polynomial(ModelComponent):
         Returns:
             list[float]: The coefficient values of the polynomial.
         """
-        coefficient_list = [param.value for param in self._coefficients]
-        return coefficient_list
+        return [param.value for param in self._coefficients]
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         r"""Evaluate the Polynomial at the given x values.

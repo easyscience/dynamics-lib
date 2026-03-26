@@ -44,12 +44,11 @@ class TestConvolution:
             Gaussian(display_name='GaussianRes', area=3.0, center=0.2, width=0.5)
         )
 
-        conv = Convolution(
+        return Convolution(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
         )
-        return conv
 
     @pytest.fixture
     def convolution_with_components(self):
@@ -60,12 +59,11 @@ class TestConvolution:
             display_name='GaussianRes', area=3.0, center=0.2, width=0.5
         )
 
-        conv = Convolution(
+        return Convolution(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
         )
-        return conv
 
     def test_init(self, default_convolution):
         "Test initialization of Convolution with default parameters."
