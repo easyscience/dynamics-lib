@@ -3646,8 +3646,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Analytical convolution of a ModelComponent or ComponentCollection</span>
 <span class="sd">    with a ResolutionModel.</span>
 
@@ -3811,8 +3810,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
         <span class="c1"># Call the corresponding method</span>
         <span class="k">if</span> <span class="n">swapped</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)(</span><span class="n">resolution_component</span><span class="p">,</span> <span class="n">sample_component</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">resolution_component</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">resolution_component</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_convolute_delta_any</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -6267,12 +6265,12 @@ components.</p>
         <span class="k">return</span> <span class="n">energy_with_offset</span>
 
     <span class="nd">@energy_with_offset</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">energy_with_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">energy_with_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy with offset is a read-only property derived from</span>
 <span class="sd">        energy and energy_offset.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            value (sc.Variable): The value to set (ignored).</span>
+<span class="sd">            _value (sc.Variable): The value to set (ignored).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            AttributeError: Always raised since energy_with_offset is</span>
@@ -6329,7 +6327,7 @@ components.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span>
 
     <span class="nd">@energy_unit</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_unit_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Unit is read-only. Use convert_unit to change the unit between allowed types &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;or create a new </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> with the desired unit.&#39;</span>
@@ -8847,9 +8845,7 @@ functionality.</p>
 <span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for numerical convolutions of sample and resolution</span>
 <span class="sd">    models.</span>
 
@@ -9157,15 +9153,13 @@ functionality.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">energy_dense_centered</span> <span class="o">=</span> <span class="n">energy_dense</span>
 
-        <span class="n">energy_grid</span> <span class="o">=</span> <span class="n">EnergyGrid</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">EnergyGrid</span><span class="p">(</span>
             <span class="n">energy_dense</span><span class="o">=</span><span class="n">energy_dense</span><span class="p">,</span>
             <span class="n">energy_dense_centered</span><span class="o">=</span><span class="n">energy_dense_centered</span><span class="p">,</span>
             <span class="n">energy_dense_step</span><span class="o">=</span><span class="n">energy_dense_step</span><span class="p">,</span>
             <span class="n">energy_span_dense</span><span class="o">=</span><span class="n">energy_span_dense</span><span class="p">,</span>
             <span class="n">energy_even_length_offset</span><span class="o">=</span><span class="n">energy_even_length_offset</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">energy_grid</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_width_thresholds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -9697,7 +9691,9 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
@@ -9713,9 +9709,7 @@ NumericalConvolutionBase.</p>
 <span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
 <span class="sd">    NumericalConvolutionBase.</span>
 
