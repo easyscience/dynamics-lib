@@ -265,6 +265,21 @@ class TestAnalysisBase:
         ):
             analysis_base.extra_parameters = invalid_extra_parameters
 
+    #############
+    # Other methods
+    #############
+
+    def test_normalize_resolution_calls_instrument_model(self, analysis_base):
+        with patch.object(
+            analysis_base.instrument_model, 'normalize_resolution'
+        ) as mock_normalize_resolution:
+            analysis_base.normalize_resolution()
+            mock_normalize_resolution.assert_called_once()
+
+    #############
+    # Private methods
+    #############
+
     def test_on_experiment_changed_updates_Q(self, analysis_base):
         # WHEN
         fake_Q = [1, 2, 3]
