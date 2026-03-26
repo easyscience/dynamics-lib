@@ -130,12 +130,12 @@ class ConvolutionBase:
         return energy_with_offset
 
     @energy_with_offset.setter
-    def energy_with_offset(self, value: sc.Variable) -> None:
+    def energy_with_offset(self, _value: sc.Variable) -> None:
         """Energy with offset is a read-only property derived from
         energy and energy_offset.
 
         Args:
-            value (sc.Variable): The value to set (ignored).
+            _value (sc.Variable): The value to set (ignored).
 
         Raises:
             AttributeError: Always raised since energy_with_offset is
@@ -192,7 +192,7 @@ class ConvolutionBase:
         return self._energy_unit
 
     @energy_unit.setter
-    def energy_unit(self, unit_str: str) -> None:
+    def energy_unit(self, _unit_str: str) -> None:
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'

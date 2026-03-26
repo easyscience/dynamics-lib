@@ -99,14 +99,14 @@ class Analysis(AnalysisBase):
         return self._analysis_list
 
     @analysis_list.setter
-    def analysis_list(self, value: list[Analysis1d]) -> None:
+    def analysis_list(self, _value: list[Analysis1d]) -> None:
         """analysis_list is read-only.
 
         To change the analysis list, modify the experiment, sample
         model, or instrument model.
 
         Args:
-            value (list[Analysis1d]): The new list of Analysis1d objects. This
+            _value (list[Analysis1d]): The new list of Analysis1d objects. This
                 argument is ignored, as analysis_list is read-only.
 
         Raises:

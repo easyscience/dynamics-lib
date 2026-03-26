@@ -211,7 +211,7 @@ class TestComponentCollection:
         # WHEN THEN
         # Introduce a faulty component that will fail conversion
         class FaultyComponent(Gaussian):
-            def convert_unit(self, unit: str) -> None:
+            def convert_unit(self, _unit: str) -> None:
                 raise RuntimeError('Conversion failed.')
 
         faulty_component = FaultyComponent(

@@ -212,14 +212,14 @@ class InstrumentModel(NewBase):
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Set the unit of the InstrumentModel. The unit is read-only
         and cannot be set directly. Use convert_unit to change the unit
         between allowed types or create a new InstrumentModel with the
         desired unit.
 
         Args:
-            unit_str (str): The new unit for the InstrumentModel
+            _unit_str (str): The new unit for the InstrumentModel
                 (ignored)
 
         Raises:

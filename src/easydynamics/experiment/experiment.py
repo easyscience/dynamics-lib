@@ -106,12 +106,12 @@ class Experiment(NewBase):
         return self._binned_data
 
     @binned_data.setter
-    def binned_data(self, value: sc.DataArray) -> None:
+    def binned_data(self, _value: sc.DataArray) -> None:
         """Set the binned dataset associated with this experiment. Read-
         only property. Use rebin() to rebin the data instead.
 
         Args:
-            value (sc.DataArray): The new binned dataset to associate
+            _value (sc.DataArray): The new binned dataset to associate
                 with this experiment (ignored)
 
         Raises:
@@ -132,12 +132,12 @@ class Experiment(NewBase):
         return self._binned_data.coords['Q']
 
     @Q.setter
-    def Q(self, value: sc.Variable) -> None:
+    def Q(self, _value: sc.Variable) -> None:
         """Set the Q values for the dataset. Q is a read-only property
         derived from the data, so this setter raises an error.
 
         Args:
-            value (sc.Variable): The new Q values to set (ignored)
+            _value (sc.Variable): The new Q values to set (ignored)
 
         Raises:
             AttributeError: Always, since Q is read-only.
@@ -157,12 +157,12 @@ class Experiment(NewBase):
         return self._binned_data.coords['energy']
 
     @energy.setter
-    def energy(self, value: sc.Variable) -> None:
+    def energy(self, _value: sc.Variable) -> None:
         """Set the energy values for the dataset. Energy is a read-only
         property derived from the data, so this setter raises an error.
 
         Args:
-            value (sc.Variable): The new energy values to set (ignored)
+            _value (sc.Variable): The new energy values to set (ignored)
 
         Raises:
             AttributeError: Always, since energy is read-only.

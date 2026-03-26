@@ -176,20 +176,20 @@ class Polynomial(ModelComponent):
         return len(self._coefficients) - 1
 
     @degree.setter
-    def degree(self, value: int) -> None:
+    def degree(self, _value: int) -> None:
         """The degree is determined by the number of coefficients and
         cannot be set directly.
 
         Args:
-            value (int): The new degree of the polynomial.
+            _value (int): The new degree of the polynomial.
 
         Raises:
             AttributeError: Always raised since degree cannot be set
                 directly.
         """
         raise AttributeError(
-            'The degree of the polynomial is determined by the number of coefficients \
-                and cannot be set directly.'
+            'The degree of the polynomial is determined by the number of coefficients '
+            'and cannot be set directly.'
         )
 
     def get_all_variables(self) -> list[DescriptorBase]:
@@ -233,8 +233,10 @@ class Polynomial(ModelComponent):
         """
 
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
-        return f'Polynomial(unique_name = {self.unique_name}, \
-            unit = {self._unit},\n coefficients = [{coeffs_str}])'
+        return (
+            f'Polynomial(unique_name = {self.unique_name}, '
+            f'unit = {self._unit},\n coefficients = [{coeffs_str}])'
+        )
 
 
 # from typing import Callable, Dict

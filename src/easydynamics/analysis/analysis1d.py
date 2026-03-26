@@ -184,7 +184,9 @@ class Analysis1d(AnalysisBase):
         return fit_result
 
     def as_fit_function(
-        self, x: np.ndarray | sc.Variable | None = None, **kwargs: dict[str, Any]
+        self,
+        _x: np.ndarray | sc.Variable | None = None,
+        **kwargs: dict[str, Any],  # noqa: ARG002
     ) -> callable:
         """Return self._calculate as a fit function.
 
@@ -194,7 +196,7 @@ class Analysis1d(AnalysisBase):
         calculated model.
 
         Args:
-            x (np.ndarray | sc.Variable | None, default=None): Ignored.
+            _x (np.ndarray | sc.Variable | None, default=None): Ignored.
                 The energy grid is taken from the experiment.
             **kwargs (dict[str, Any]): Ignored. Included for compatibility with the
                 EasyScience fitter.
@@ -205,8 +207,8 @@ class Analysis1d(AnalysisBase):
         """
 
         def fit_function(
-            x: np.ndarray | sc.Variable | None = None,
-            **kwargs: dict[str, Any],
+            _x: np.ndarray | sc.Variable | None = None,
+            **kwargs: dict[str, Any],  # noqa: ARG001
         ) -> np.ndarray:
             return self._calculate()
 

@@ -188,12 +188,12 @@ class AnalysisBase(EasyScienceModelBase):
         return self.experiment.Q
 
     @Q.setter
-    def Q(self, value: sc.Variable) -> None:
+    def Q(self, _value: sc.Variable) -> None:
         """Q cannot be set, as it is a read-only property derived from
         the Experiment.
 
         Args:
-            value (sc.Variable): The Q values to set. This argument is
+            _value (sc.Variable): The Q values to set. This argument is
                 ignored, as Q is a read-only property.
 
         Raises:
@@ -214,12 +214,12 @@ class AnalysisBase(EasyScienceModelBase):
         return self.experiment.energy
 
     @energy.setter
-    def energy(self, value: sc.Variable) -> None:
+    def energy(self, _value: sc.Variable) -> None:
         """Energy cannot be set, as it is a read-only property derived
         from the Experiment.
 
         Args:
-            value (sc.Variable): The energy values to set. This argument is
+            _value (sc.Variable): The energy values to set. This argument is
                 ignored, as energy is a read-only property.
 
         Raises:
@@ -241,13 +241,14 @@ class AnalysisBase(EasyScienceModelBase):
         return self.sample_model.temperature
 
     @temperature.setter
-    def temperature(self, value: np.ndarray | Parameter) -> None:
+    def temperature(self, _value: np.ndarray | Parameter) -> None:
         """Temperature cannot be set, as it is a read-only property
         derived from the SampleModel.
 
         Args:
-            value (np.ndarray | Parameter): The temperature to set. This argument is
-                ignored, as temperature is a read-only property.
+            _value (np.ndarray | Parameter): The temperature to set.
+                This argument is ignored, as temperature is a read-only
+                property.
 
         Raises:
             AttributeError: If trying to set temperature.
