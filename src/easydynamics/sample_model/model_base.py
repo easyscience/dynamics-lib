@@ -351,6 +351,11 @@ class ModelBase(EasyScienceModelBase):
             )
         return self._component_collections[Q_index]
 
+    def normalize_area(self) -> None:
+        """Normalize the area of the model across all Q values."""
+        for collection in self._component_collections:
+            collection.normalize_area()
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------

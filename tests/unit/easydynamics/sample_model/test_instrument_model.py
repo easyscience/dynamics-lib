@@ -351,6 +351,16 @@ class TestInstrumentModel:
         ):
             instrument_model.get_all_variables(Q_index='invalid_index')
 
+    def test_normalize_resolution(self, instrument_model):
+        # WHEN
+        instrument_model.resolution_model.normalize_area = MagicMock()
+
+        # THEN
+        instrument_model.normalize_resolution()
+
+        # EXPECT
+        instrument_model.resolution_model.normalize_area.assert_called_once()
+
     def test_generate_energy_offsets_Q_none(self, instrument_model):
         # WHEN
         instrument_model._Q = None

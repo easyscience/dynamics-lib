@@ -290,6 +290,15 @@ class AnalysisBase(EasyScienceModelBase):
     # Other methods
     #############
 
+    def normalize_resolution(self) -> None:
+        """Normalize the resolution in the InstrumentModel to ensure
+        that it integrates to 1.
+
+        This is important for accurate fitting and interpretation of the
+        results.
+        """
+        self.instrument_model.normalize_resolution()
+
     #############
     # Private methods
     #############
