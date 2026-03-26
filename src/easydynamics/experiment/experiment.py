@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import os
+
+from pathlib import Path
 
 import numpy as np
 import plopp as pp
@@ -255,10 +256,8 @@ class Experiment(NewBase):
         if self._data is None:
             raise ValueError('No data to save.')
 
-        dir_name = os.path.dirname(filename)
-        if dir_name:
-            os.makedirs(dir_name, exist_ok=True)
-
+        path = Path(filename)
+        path.parent.mkdir(exist_ok=True, parents=True)
         sc_save_hdf5(self._data, filename)
 
     def remove_data(self) -> None:
