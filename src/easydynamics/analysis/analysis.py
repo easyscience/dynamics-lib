@@ -407,9 +407,9 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'linestyle': {name: 'none' for name in names},
-            'marker': {name: 'o' for name in names},
-            'markerfacecolor': {name: 'none' for name in names},
+            'linestyle': dict.fromkeys(names, 'none'),
+            'marker': dict.fromkeys(names, 'o'),
+            'markerfacecolor': dict.fromkeys(names, 'none'),
         }
 
         plot_kwargs_defaults.update(kwargs)

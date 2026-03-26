@@ -220,7 +220,7 @@ select = [
   #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
   'B', # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
   #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
-  #'C4',    # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  'C4', # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
   #'COM',   # https://docs.astral.sh/ruff/rules/#flake8-commas-com
   #'DTZ',   # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
   #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
