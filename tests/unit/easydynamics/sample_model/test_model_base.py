@@ -360,6 +360,17 @@ class TestModelBase:
         with pytest.raises(ValueError, match='Clearing Q values requires confirmation'):
             model_base.clear_Q()
 
+    def test_normalize_area(self, model_base):
+        # WHEN
+
+        # THEN
+        model_base.normalize_area()
+
+        # EXPECT
+        for collection in model_base._component_collections:
+            total_area = sum(component.area.value for component in collection.components)
+            assert total_area == pytest.approx(1.0)
+
     def test_repr(self, model_base):
         # WHEN
         repr_str = repr(model_base)

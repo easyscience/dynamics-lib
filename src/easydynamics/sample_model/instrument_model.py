@@ -351,6 +351,10 @@ class InstrumentModel(NewBase):
         """Free all parameters in the resolution model."""
         self.resolution_model.free_all_parameters()
 
+    def normalize_resolution(self) -> None:
+        """Normalize the resolution model to have area 1."""
+        self.resolution_model.normalize_area()
+
     def get_energy_offset(
         self,
         Q_index: int | None = None,
