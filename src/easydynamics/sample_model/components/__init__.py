@@ -4,6 +4,7 @@
 from .damped_harmonic_oscillator import DampedHarmonicOscillator
 from .delta_function import DeltaFunction
 from .exponential import Exponential
+from .expression_component import ExpressionComponent
 from .gaussian import Gaussian
 from .lorentzian import Lorentzian
 from .polynomial import Polynomial
@@ -17,4 +18,5 @@ __all__ = [
     'DampedHarmonicOscillator',
     'Polynomial',
     'Exponential',
+    'ExpressionComponent',
 ]
