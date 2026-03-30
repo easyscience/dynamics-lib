@@ -2204,7 +2204,15 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -2247,6 +2255,8 @@ instabilities if peaks are very wide or very narrow.</p>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
 
@@ -2275,6 +2285,10 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">                normalize the detailed balance correction. Default is</span>
 <span class="sd">                True.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">                name of the convolution.</span>
+<span class="sd">            unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">                convolution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2290,6 +2304,8 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_reactions_enabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2505,7 +2521,7 @@ instabilities if peaks are very wide or very narrow.</p>
 
 
 <h3 id="easydynamics.convolution.Convolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2731,6 +2747,46 @@ True.</p>
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The display
+name of the convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolution&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unique name of the
+convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2799,7 +2855,15 @@ True.</p>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
-<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -2811,6 +2875,8 @@ True.</p>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
 
@@ -2839,6 +2905,10 @@ True.</p>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">            normalize the detailed balance correction. Default is</span>
 <span class="sd">            True.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">            name of the convolution.</span>
+<span class="sd">        unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">            convolution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2854,6 +2924,8 @@ True.</p>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
         <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_reactions_enabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2948,15 +3020,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -2965,7 +3029,15 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -3041,15 +3113,7 @@ components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
@@ -3067,7 +3131,15 @@ components.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -3647,7 +3719,14 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 <span class="normal">486</span>
 <span class="normal">487</span>
 <span class="normal">488</span>
-<span class="normal">489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Analytical convolution of a ModelComponent or ComponentCollection</span>
 <span class="sd">    with a ResolutionModel.</span>
 
@@ -3673,6 +3752,8 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
         <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an AnalyticalConvolution.</span>
 
@@ -3687,6 +3768,9 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 <span class="sd">                The resolution model to convolve with.</span>
 <span class="sd">            energy_offset (Numeric | Parameter, default=0.0): An offset to</span>
 <span class="sd">                shift the energy values by.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;): Display name of the model.</span>
+<span class="sd">            unique_name (str | None, default=None): Unique name of the model. If None,</span>
+<span class="sd">                a unique name will be generated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -3694,6 +3778,8 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
             <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
@@ -4135,7 +4221,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 
 
 <h4 id="easydynamics.convolution.analytical_convolution.AnalyticalConvolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -4257,6 +4343,45 @@ shift the energy values by.</p>
                   <code>0.0</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Display name of the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolution&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique name of the model. If None,
+a unique name will be generated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -4291,13 +4416,22 @@ shift the energy values by.</p>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an AnalyticalConvolution.</span>
 
@@ -4312,6 +4446,9 @@ shift the energy values by.</p>
 <span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_offset (Numeric | Parameter, default=0.0): An offset to</span>
 <span class="sd">            shift the energy values by.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;): Display name of the model.</span>
+<span class="sd">        unique_name (str | None, default=None): Unique name of the model. If None,</span>
+<span class="sd">            a unique name will be generated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -4319,6 +4456,8 @@ shift the energy values by.</p>
         <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4380,35 +4519,35 @@ resolution_components values evaluated at self.energy.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/analytical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span>
-<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolve sample with resolution analytically if possible.</span>
@@ -4856,7 +4995,15 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution class that combines analytical and numerical</span>
 <span class="sd">    convolution methods to efficiently perform convolutions of</span>
 <span class="sd">    ComponentCollections with ResolutionComponents.</span>
@@ -4899,6 +5046,8 @@ instabilities if peaks are very wide or very narrow.</p>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
 
@@ -4927,6 +5076,10 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">                normalize the detailed balance correction. Default is</span>
 <span class="sd">                True.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">                name of the convolution.</span>
+<span class="sd">            unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">                convolution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -4942,6 +5095,8 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_reactions_enabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -5157,7 +5312,7 @@ instabilities if peaks are very wide or very narrow.</p>
 
 
 <h4 id="easydynamics.convolution.convolution.Convolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -5383,6 +5538,46 @@ True.</p>
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The display
+name of the convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolution&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unique name of the
+convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -5451,7 +5646,15 @@ True.</p>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
-<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -5463,6 +5666,8 @@ True.</p>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
 
@@ -5491,6 +5696,10 @@ True.</p>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">            normalize the detailed balance correction. Default is</span>
 <span class="sd">            True.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">            name of the convolution.</span>
+<span class="sd">        unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">            convolution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -5506,6 +5715,8 @@ True.</p>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
         <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_reactions_enabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -5600,15 +5811,7 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -5617,7 +5820,15 @@ _reactions_enabled is True) to avoid issues during <strong>init</strong>.</p>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom setattr to invalidate convolution plan on relevant</span>
 <span class="sd">    attribute changes, and build a new plan.</span>
 
@@ -5693,15 +5904,7 @@ components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
@@ -5719,7 +5922,15 @@ components.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform convolution using analytical convolutions where</span>
@@ -6152,7 +6363,7 @@ components.</p>
         <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the ConvolutionBase.</span>
@@ -6168,7 +6379,7 @@ components.</p>
 <span class="sd">                energy axis.</span>
 <span class="sd">            energy_offset (Numeric | Parameter, default=0.0): The energy</span>
 <span class="sd">                offset applied to the convolution. Default is 0.0.</span>
-<span class="sd">            display_name (str | None, default=&#39;MyConvolutionModel&#39;):</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;):</span>
 <span class="sd">                The display name of the model.</span>
 <span class="sd">            unique_name (str | None, default=None): The unique name of</span>
 <span class="sd">                the model. If None, a unique name will be generated.</span>
@@ -6428,7 +6639,7 @@ components.</p>
 
 
 <h4 id="easydynamics.convolution.convolution_base.ConvolutionBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -6555,7 +6766,7 @@ offset applied to the convolution. Default is 0.0.</p>
                 <code>display_name</code>
             </td>
             <td>
-                  <code>str | None, default=&#39;MyConvolutionModel&#39;</code>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6566,7 +6777,7 @@ offset applied to the convolution. Default is 0.0.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;MyConvolutionModel&#39;</code>
+                  <code>&#39;MyConvolution&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6709,7 +6920,7 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
     <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the ConvolutionBase.</span>
@@ -6725,7 +6936,7 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <span class="sd">            energy axis.</span>
 <span class="sd">        energy_offset (Numeric | Parameter, default=0.0): The energy</span>
 <span class="sd">            offset applied to the convolution. Default is 0.0.</span>
-<span class="sd">        display_name (str | None, default=&#39;MyConvolutionModel&#39;):</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;):</span>
 <span class="sd">            The display name of the model.</span>
 <span class="sd">        unique_name (str | None, default=None): The unique name of</span>
 <span class="sd">            the model. If None, a unique name will be generated.</span>
@@ -7684,7 +7895,15 @@ the sample model.</p>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerical convolution of a ComponentCollection with a</span>
 <span class="sd">    ComponentCollection using FFT.</span>
 
@@ -7706,6 +7925,8 @@ the sample model.</p>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolution object.</span>
 
@@ -7729,6 +7950,10 @@ the sample model.</p>
 <span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">                normalize the detailed balance correction.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">                name of the convolution.</span>
+<span class="sd">            unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">                convolution. If None, a unique name will be generated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -7741,6 +7966,8 @@ the sample model.</p>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
@@ -7819,7 +8046,7 @@ the sample model.</p>
 
 
 <h4 id="easydynamics.convolution.numerical_convolution.NumericalConvolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -8040,6 +8267,46 @@ normalize the detailed balance correction.</p>
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The display
+name of the convolution.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolution&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unique name of the
+convolution. If None, a unique name will be generated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -8093,7 +8360,15 @@ normalize the detailed balance correction.</p>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
-<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -8105,6 +8380,8 @@ normalize the detailed balance correction.</p>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolution object.</span>
 
@@ -8128,6 +8405,10 @@ normalize the detailed balance correction.</p>
 <span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">            normalize the detailed balance correction.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;): The display</span>
+<span class="sd">            name of the convolution.</span>
+<span class="sd">        unique_name (str | None, default=None): The unique name of the</span>
+<span class="sd">            convolution. If None, a unique name will be generated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -8140,6 +8421,8 @@ normalize the detailed balance correction.</p>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
         <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8199,15 +8482,7 @@ correction if temperature is provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
 <span class="normal"> 84</span>
 <span class="normal"> 85</span>
 <span class="normal"> 86</span>
@@ -8257,7 +8532,15 @@ correction if temperature is provided.</p>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the convolution of the sample and resolution models</span>
@@ -8814,7 +9097,14 @@ functionality.</p>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for numerical convolutions of sample and resolution</span>
 <span class="sd">    models.</span>
 
@@ -8835,6 +9125,8 @@ functionality.</p>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolutionBase.</span>
 
@@ -8858,6 +9150,9 @@ functionality.</p>
 <span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to normalize the</span>
 <span class="sd">                detailed balance correction.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolution&#39;): Display name of the model.</span>
+<span class="sd">            unique_name (str | None, default=None): Unique name of the model. If None,</span>
+<span class="sd">                a unique name will be generated.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If temperature is not None, a number, or a</span>
@@ -8871,6 +9166,8 @@ functionality.</p>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
@@ -9213,7 +9510,7 @@ functionality.</p>
 
 
 <h4 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -9434,6 +9731,45 @@ detailed balance correction.</p>
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolution&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Display name of the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolution&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique name of the model. If None,
+a unique name will be generated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -9536,7 +9872,14 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -9548,6 +9891,8 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolutionBase.</span>
 
@@ -9571,6 +9916,9 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
 <span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to normalize the</span>
 <span class="sd">            detailed balance correction.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolution&#39;): Display name of the model.</span>
+<span class="sd">        unique_name (str | None, default=None): Unique name of the model. If None,</span>
+<span class="sd">            a unique name will be generated.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If temperature is not None, a number, or a</span>
@@ -9584,6 +9932,8 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
         <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
         <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
@@ -9662,14 +10012,7 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
 <span class="normal">400</span>
@@ -9680,7 +10023,14 @@ NumericalConvolutionBase.</p>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the</span>
 <span class="sd">    NumericalConvolutionBase.</span>
 
@@ -9763,16 +10113,16 @@ NumericalConvolutionBase.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the energy array and recreate the dense grid.</span>
 
