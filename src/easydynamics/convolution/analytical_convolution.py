@@ -42,6 +42,8 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """Initialize an AnalyticalConvolution.
 
@@ -56,6 +58,9 @@ class AnalyticalConvolution(ConvolutionBase):
                 The resolution model to convolve with.
             energy_offset (Numeric | Parameter, default=0.0): An offset to
                 shift the energy values by.
+            display_name (str | None, default='MyConvolution'): Display name of the model.
+            unique_name (str | None, default=None): Unique name of the model. If None,
+                a unique name will be generated.
         """
         super().__init__(
             energy=energy,
@@ -63,6 +68,8 @@ class AnalyticalConvolution(ConvolutionBase):
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_offset=energy_offset,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
     def convolution(

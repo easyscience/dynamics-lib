@@ -45,6 +45,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         temperature_unit: str | sc.Unit = 'K',
         unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """Initialize the NumericalConvolutionBase.
 
@@ -68,6 +70,9 @@ class NumericalConvolutionBase(ConvolutionBase):
             unit (str | sc.Unit, default='meV'): The unit of the energy.
             normalize_detailed_balance (bool, default=True): Whether to normalize the
                 detailed balance correction.
+            display_name (str | None, default='MyConvolution'): Display name of the model.
+            unique_name (str | None, default=None): Unique name of the model. If None,
+                a unique name will be generated.
 
         Raises:
             TypeError: If temperature is not None, a number, or a
@@ -81,6 +86,8 @@ class NumericalConvolutionBase(ConvolutionBase):
             resolution_components=resolution_components,
             unit=unit,
             energy_offset=energy_offset,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
         if temperature is not None and not isinstance(temperature, (Numeric, Parameter)):

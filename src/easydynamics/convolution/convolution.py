@@ -60,6 +60,8 @@ class Convolution(NumericalConvolutionBase):
         temperature_unit: str | sc.Unit = 'K',
         unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """Initialize the Convolution class.
 
@@ -88,6 +90,10 @@ class Convolution(NumericalConvolutionBase):
             normalize_detailed_balance (bool, default=True): Whether to
                 normalize the detailed balance correction. Default is
                 True.
+            display_name (str | None, default='MyConvolution'): The display
+                name of the convolution.
+            unique_name (str | None, default=None): The unique name of the
+                convolution.
         """
 
         self._convolution_plan_is_valid = False
@@ -103,6 +109,8 @@ class Convolution(NumericalConvolutionBase):
             temperature_unit=temperature_unit,
             unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
         self._reactions_enabled = True

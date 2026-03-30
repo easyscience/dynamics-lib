@@ -24,7 +24,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         resolution_components: ComponentCollection | ModelComponent | None = None,
         unit: str | sc.Unit = 'meV',
         energy_offset: Numeric | Parameter = 0.0,
-        display_name: str | None = 'MyConvolutionModel',
+        display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
         """Initialize the ConvolutionBase.
@@ -40,7 +40,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
                 energy axis.
             energy_offset (Numeric | Parameter, default=0.0): The energy
                 offset applied to the convolution. Default is 0.0.
-            display_name (str | None, default='MyConvolutionModel'):
+            display_name (str | None, default='MyConvolution'):
                 The display name of the model.
             unique_name (str | None, default=None): The unique name of
                 the model. If None, a unique name will be generated.

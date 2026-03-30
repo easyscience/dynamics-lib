@@ -35,6 +35,8 @@ class NumericalConvolution(NumericalConvolutionBase):
         temperature_unit: str | sc.Unit = 'K',
         unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """Initialize the NumericalConvolution object.
 
@@ -58,6 +60,10 @@ class NumericalConvolution(NumericalConvolutionBase):
             unit (str | sc.Unit, default='meV'): The unit of the energy.
             normalize_detailed_balance (bool, default=True): Whether to
                 normalize the detailed balance correction.
+            display_name (str | None, default='MyConvolution'): The display
+                name of the convolution.
+            unique_name (str | None, default=None): The unique name of the
+                convolution. If None, a unique name will be generated.
         """
         super().__init__(
             energy=energy,
@@ -70,6 +76,8 @@ class NumericalConvolution(NumericalConvolutionBase):
             temperature_unit=temperature_unit,
             unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
     def convolution(

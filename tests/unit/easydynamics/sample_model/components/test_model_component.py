@@ -8,8 +8,6 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numeric = float | int
-
 
 class DummyComponent(ModelComponent):
     def __init__(self):
