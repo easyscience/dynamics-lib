@@ -12,8 +12,8 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
-hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
 
 
 def _validate_and_convert_Q(
@@ -37,7 +37,7 @@ def _validate_and_convert_Q(
     if Q is None:
         return None
     if not isinstance(Q, (np.ndarray, Numeric, list, sc.Variable)):
-        raise TypeError('Q must be a number, list, numpy array, or scipp Variable.')
+        raise TypeError("Q must be a number, list, numpy array, or scipp Variable.")
 
     if isinstance(Q, Numeric):
         Q = np.array([Q])
@@ -45,14 +45,14 @@ def _validate_and_convert_Q(
         Q = np.array(Q)
     if isinstance(Q, np.ndarray):
         if Q.ndim > 1:
-            raise ValueError('Q must be a 1-dimensional array.')
+            raise ValueError("Q must be a 1-dimensional array.")
 
-        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        Q = sc.array(dims=["Q"], values=Q, unit="1/angstrom")
 
     if isinstance(Q, sc.Variable):
-        if Q.dims != ('Q',):
+        if Q.dims != ("Q",):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit='1/angstrom')
+        Q = Q.to(unit="1/angstrom")
     return Q.values
 
 
@@ -70,9 +70,14 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
-    if isinstance(unit, str):
-        unit = sc.Unit(unit)
+        raise TypeError(
+            f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+        )
+    # if isinstance(unit, str):
+    #     unit = sc.Unit(unit)
+
+    if isinstance(unit, sc.Unit):
+        unit = str(unit)
     return unit
 
 
@@ -86,9 +91,9 @@ def _in_notebook() -> bool:
         from IPython import get_ipython
 
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
+        if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or JupyterLab
-        elif shell == 'TerminalInteractiveShell':
+        elif shell == "TerminalInteractiveShell":
             return False  # Terminal IPython
         else:
             return False

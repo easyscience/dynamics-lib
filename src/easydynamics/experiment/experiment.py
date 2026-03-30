@@ -6,14 +6,14 @@ import os
 import numpy as np
 import plopp as pp
 import scipp as sc
-from easyscience.base_classes.new_base import NewBase
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
 
+from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.utils.utils import _in_notebook
 
 
-class Experiment(NewBase):
+class Experiment(EasyDynamicsBase):
     """Holds data from an experiment as a sc.DataArray along with
     metadata.
 

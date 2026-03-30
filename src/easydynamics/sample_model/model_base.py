@@ -5,18 +5,17 @@ from copy import copy
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
-from easydynamics.utils.utils import _validate_unit
 
 
-class ModelBase(EasyScienceModelBase):
+class ModelBase(EasyDynamicsModelBase):
     """Base class for Sample Models.
 
     Contains common functionality for models with components and Q
@@ -49,10 +48,10 @@ class ModelBase(EasyScienceModelBase):
             TypeError: If components is not a ModelComponent or ComponentCollection.
         """
         super().__init__(
+            unit=unit,
             display_name=display_name,
             unique_name=unique_name,
         )
-        self._unit = _validate_unit(unit)
         self._Q = _validate_and_convert_Q(Q)
 
         if components is not None and not isinstance(
@@ -133,63 +132,6 @@ class ModelBase(EasyScienceModelBase):
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
-
-    @property
-    def unit(self) -> str | sc.Unit | None:
-        """Get the unit of the ComponentCollection.
-
-        Returns:
-            str | sc.Unit | None: The unit of the ComponentCollection.
-        """
-
-        return self._unit
-
-    @unit.setter
-    def unit(self, unit_str: str) -> None:
-        """Unit is read-only and cannot be set directly.
-
-        Args:
-            unit_str (str): The new unit to set (ignored).
-
-        Raises:
-            AttributeError: Always raised to indicate that the unit is
-                read-only.
-        """
-        raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
-
-    def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the ComponentCollection and all its
-        components.
-
-        Args:
-            unit (str | sc.Unit): The new unit to convert to.
-
-        Raises:
-            TypeError: If the provided unit is not a string or sc.Unit.
-            Exception: If the provided unit is not compatible with the
-                current unit.
-        """
-
-        old_unit = self._unit
-
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
-        try:
-            for component in self.components:
-                component.convert_unit(unit)
-            self._unit = unit
-        except Exception as e:
-            # Attempt to rollback on failure
-            try:
-                for component in self.components:
-                    component.convert_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
-        self._on_components_change()
 
     @property
     def components(self) -> list[ModelComponent]:
@@ -279,6 +221,38 @@ class ModelBase(EasyScienceModelBase):
     # ------------------------------------------------------------------
     # Other methods
     # ------------------------------------------------------------------
+
+    def convert_unit(self, unit: str | sc.Unit) -> None:
+        """Convert the unit of the ComponentCollection and all its
+        components.
+
+        Args:
+            unit (str | sc.Unit): The new unit to convert to.
+
+        Raises:
+            TypeError: If the provided unit is not a string or sc.Unit.
+            Exception: If the provided unit is not compatible with the
+                current unit.
+        """
+
+        old_unit = self._unit
+
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
+        try:
+            for component in self.components:
+                component.convert_unit(unit)
+            self._unit = unit
+        except Exception as e:
+            # Attempt to rollback on failure
+            try:
+                for component in self.components:
+                    component.convert_unit(old_unit)
+            except Exception:  # noqa: S110
+                pass  # Best effort rollback
+            raise e
+        self._on_components_change()
+
     def fix_all_parameters(self) -> None:
         """Fix all Parameters in all ComponentCollections."""
         for par in self.get_all_variables():

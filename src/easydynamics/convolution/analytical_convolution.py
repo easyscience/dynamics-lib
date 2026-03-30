@@ -27,18 +27,18 @@ class AnalyticalConvolution(ConvolutionBase):
     # Mapping of supported component type pairs to convolution methods.
     # Delta functions are handled separately.
     _CONVOLUTIONS = {
-        ('Gaussian', 'Gaussian'): '_convolute_gaussian_gaussian',
-        ('Gaussian', 'Lorentzian'): '_convolute_gaussian_lorentzian',
-        ('Gaussian', 'Voigt'): '_convolute_gaussian_voigt',
-        ('Lorentzian', 'Lorentzian'): '_convolute_lorentzian_lorentzian',
-        ('Lorentzian', 'Voigt'): '_convolute_lorentzian_voigt',
-        ('Voigt', 'Voigt'): '_convolute_voigt_voigt',
+        ("Gaussian", "Gaussian"): "_convolute_gaussian_gaussian",
+        ("Gaussian", "Lorentzian"): "_convolute_gaussian_lorentzian",
+        ("Gaussian", "Voigt"): "_convolute_gaussian_voigt",
+        ("Lorentzian", "Lorentzian"): "_convolute_lorentzian_lorentzian",
+        ("Lorentzian", "Voigt"): "_convolute_lorentzian_voigt",
+        ("Voigt", "Voigt"): "_convolute_voigt_voigt",
     }
 
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        energy_unit: str | sc.Unit = 'meV',
+        energy_unit: str | sc.Unit = "meV",
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
@@ -59,7 +59,7 @@ class AnalyticalConvolution(ConvolutionBase):
         """
         super().__init__(
             energy=energy,
-            energy_unit=energy_unit,
+            unit=energy_unit,
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_offset=energy_offset,
@@ -146,8 +146,8 @@ class AnalyticalConvolution(ConvolutionBase):
 
         if isinstance(resolution_component, DeltaFunction):
             raise ValueError(
-                'Analytical convolution with a delta function \
-                    in the resolution model is not supported.'
+                "Analytical convolution with a delta function \
+                    in the resolution model is not supported."
             )
 
         # Delta function + anything -->
@@ -173,8 +173,8 @@ class AnalyticalConvolution(ConvolutionBase):
 
         if func_name is None:
             raise ValueError(
-                f'Analytical convolution not supported for component pair: '
-                f'{type(sample_component).__name__}, {type(resolution_component).__name__}'
+                f"Analytical convolution not supported for component pair: "
+                f"{type(sample_component).__name__}, {type(resolution_component).__name__}"
             )
 
         # Call the corresponding method
@@ -225,7 +225,9 @@ class AnalyticalConvolution(ConvolutionBase):
             np.ndarray: The evaluated convolution values at self.energy.
         """
 
-        width = np.sqrt(sample_component.width.value**2 + resolution_component.width.value**2)
+        width = np.sqrt(
+            sample_component.width.value**2 + resolution_component.width.value**2
+        )
 
         area = sample_component.area.value * resolution_component.area.value
 
@@ -284,7 +286,8 @@ class AnalyticalConvolution(ConvolutionBase):
         center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
-            sample_component.width.value**2 + resolution_component.gaussian_width.value**2
+            sample_component.width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
         lorentzian_width = resolution_component.lorentzian_width.value
@@ -386,11 +389,13 @@ class AnalyticalConvolution(ConvolutionBase):
         center = sample_component.center.value + resolution_component.center.value
 
         gaussian_width = np.sqrt(
-            sample_component.gaussian_width.value**2 + resolution_component.gaussian_width.value**2
+            sample_component.gaussian_width.value**2
+            + resolution_component.gaussian_width.value**2
         )
 
         lorentzian_width = (
-            sample_component.lorentzian_width.value + resolution_component.lorentzian_width.value
+            sample_component.lorentzian_width.value
+            + resolution_component.lorentzian_width.value
         )
         return self._voigt_eval(
             area=area,
