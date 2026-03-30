@@ -2245,7 +2245,7 @@ instabilities if peaks are very wide or very narrow.</p>
         <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
@@ -2270,7 +2270,7 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="sd">                Default is None.</span>
 <span class="sd">            temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">                temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">                Default is &#39;meV&#39;.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">                normalize the detailed balance correction. Default is</span>
@@ -2288,7 +2288,7 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-            <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -2505,7 +2505,7 @@ instabilities if peaks are very wide or very narrow.</p>
 
 
 <h3 id="easydynamics.convolution.Convolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2692,7 +2692,7 @@ temperature parameter. Default is 'K'.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
@@ -2809,7 +2809,7 @@ True.</p>
     <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
@@ -2834,7 +2834,7 @@ True.</p>
 <span class="sd">            Default is None.</span>
 <span class="sd">        temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">            temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            Default is &#39;meV&#39;.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">            normalize the detailed balance correction. Default is</span>
@@ -2852,7 +2852,7 @@ True.</p>
         <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -3669,7 +3669,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -3679,7 +3679,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            energy (np.ndarray | sc.Variable): 1D array of energy values</span>
 <span class="sd">                where the convolution is evaluated.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
 <span class="sd">                energy.</span>
 <span class="sd">            sample_components (ComponentCollection | ModelComponent | None, default=None):</span>
 <span class="sd">                The sample model to be convolved.</span>
@@ -3690,7 +3690,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
-            <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -4135,7 +4135,7 @@ functions, Gaussians, Lorentzians and Voigt profiles.</p>
 
 
 <h4 id="easydynamics.convolution.analytical_convolution.AnalyticalConvolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 </h4>
 
@@ -4181,7 +4181,7 @@ where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
@@ -4294,7 +4294,7 @@ shift the energy values by.</p>
 <span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -4304,7 +4304,7 @@ shift the energy values by.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        energy (np.ndarray | sc.Variable): 1D array of energy values</span>
 <span class="sd">            where the convolution is evaluated.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
 <span class="sd">            energy.</span>
 <span class="sd">        sample_components (ComponentCollection | ModelComponent | None, default=None):</span>
 <span class="sd">            The sample model to be convolved.</span>
@@ -4315,7 +4315,7 @@ shift the energy values by.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -4897,7 +4897,7 @@ instabilities if peaks are very wide or very narrow.</p>
         <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
@@ -4922,7 +4922,7 @@ instabilities if peaks are very wide or very narrow.</p>
 <span class="sd">                Default is None.</span>
 <span class="sd">            temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">                temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">                Default is &#39;meV&#39;.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">                normalize the detailed balance correction. Default is</span>
@@ -4940,7 +4940,7 @@ instabilities if peaks are very wide or very narrow.</p>
             <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-            <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -5157,7 +5157,7 @@ instabilities if peaks are very wide or very narrow.</p>
 
 
 <h4 id="easydynamics.convolution.convolution.Convolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h4>
 
@@ -5344,7 +5344,7 @@ temperature parameter. Default is 'K'.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
@@ -5461,7 +5461,7 @@ True.</p>
     <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Convolution class.</span>
@@ -5486,7 +5486,7 @@ True.</p>
 <span class="sd">            Default is None.</span>
 <span class="sd">        temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">            temperature parameter. Default is &#39;K&#39;.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            Default is &#39;meV&#39;.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
 <span class="sd">            normalize the detailed balance correction. Default is</span>
@@ -5504,7 +5504,7 @@ True.</p>
         <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -5848,6 +5848,8 @@ components.</p>
 
 
     <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="easydynamics.base_classes.EasyDynamicsModelBase">EasyDynamicsModelBase</span></code></p>
 
 
 
@@ -5866,8 +5868,7 @@ components.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 13</span>
-<span class="normal"> 14</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 14</span>
 <span class="normal"> 15</span>
 <span class="normal"> 16</span>
 <span class="normal"> 17</span>
@@ -6138,16 +6139,7 @@ components.</p>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">:</span>
+<span class="normal">285</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConvolutionBase</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for convolutions of sample and resolution models.</span>
 
 <span class="sd">    This base class has no convolution functionality.</span>
@@ -6158,8 +6150,10 @@ components.</p>
         <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
         <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the ConvolutionBase.</span>
 
@@ -6170,40 +6164,44 @@ components.</p>
 <span class="sd">                The sample model to be convolved.</span>
 <span class="sd">            resolution_components (ComponentCollection | ModelComponent | None, default=None):</span>
 <span class="sd">                The resolution model to convolve with.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
-<span class="sd">                energy.</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
+<span class="sd">                energy axis.</span>
 <span class="sd">            energy_offset (Numeric | Parameter, default=0.0): The energy</span>
 <span class="sd">                offset applied to the convolution. Default is 0.0.</span>
+<span class="sd">            display_name (str | None, default=&#39;MyConvolutionModel&#39;):</span>
+<span class="sd">                The display name of the model.</span>
+<span class="sd">            unique_name (str | None, default=None): The unique name of</span>
+<span class="sd">                the model. If None, a unique name will be generated.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If energy is not a numpy ndarray or a scipp</span>
-<span class="sd">                Variable or if energy_unit is not a string or scipp unit, or if</span>
+<span class="sd">                Variable or if</span>
 <span class="sd">                energy_offset is not a number or a Parameter, or if</span>
 <span class="sd">                sample_components is not a ComponentCollection or ModelComponent, or if</span>
 <span class="sd">                resolution_components is not a ComponentCollection or ModelComponent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
             <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">energy</span><span class="p">)])</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Energy must be a numpy ndarray or a scipp Variable. Got </span><span class="si">{</span><span class="n">energy</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy_unit must be a string or sc.Unit.&#39;</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">)</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="n">energy_offset</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;energy_offset&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">energy_unit</span>
-            <span class="p">)</span>
+            <span class="n">energy_offset</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;energy_offset&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy_offset must be a number or a Parameter.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy</span> <span class="o">=</span> <span class="n">energy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span> <span class="o">=</span> <span class="n">energy_unit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span> <span class="o">=</span> <span class="n">energy_offset</span>
 
         <span class="k">if</span> <span class="n">sample_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
@@ -6317,53 +6315,37 @@ components.</p>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_energy</span> <span class="o">=</span> <span class="n">energy</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">unit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">unit</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the energy unit.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: The unit of the energy.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span>
-
-    <span class="nd">@energy_unit</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Unit is read-only. Use convert_unit to change the unit between allowed types &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;or create a new </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> with the desired unit.&#39;</span>
-        <span class="p">)</span>  <span class="c1"># noqa: E501</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            energy_unit (str | sc.Unit): The unit of the energy.</span>
+<span class="sd">            unit (str | sc.Unit): The unit of the energy.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            TypeError: If energy_unit is not a string or scipp unit.</span>
+<span class="sd">            TypeError: If unit is not a string or scipp unit.</span>
 <span class="sd">            Exception: If energy cannot be converted to the specified</span>
 <span class="sd">                unit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy unit must be a string or scipp unit.&#39;</span><span class="p">)</span>
 
         <span class="n">old_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">to_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">to_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">old_energy</span>
             <span class="k">raise</span> <span class="n">e</span>
 
         <span class="n">old_energy_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span> <span class="o">=</span> <span class="n">old_energy_offset</span>
             <span class="k">raise</span> <span class="n">e</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span> <span class="o">=</span> <span class="n">energy_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sample_components</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">:</span>
@@ -6446,7 +6428,7 @@ components.</p>
 
 
 <h4 id="easydynamics.convolution.convolution_base.ConvolutionBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -6530,7 +6512,7 @@ values where the convolution is evaluated.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
@@ -6538,7 +6520,7 @@ values where the convolution is evaluated.</p>
             <td>
               <div class="doc-md-description">
                 <p>The unit of the
-energy.</p>
+energy axis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6568,6 +6550,45 @@ offset applied to the convolution. Default is 0.0.</p>
                   <code>0.0</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>display_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=&#39;MyConvolutionModel&#39;</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The display name of the model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>&#39;MyConvolutionModel&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>unique_name</code>
+            </td>
+            <td>
+                  <code>str | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unique name of
+the model. If None, a unique name will be generated.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -6588,7 +6609,7 @@ offset applied to the convolution. Default is 0.0.</p>
             <td>
               <div class="doc-md-description">
                 <p>If energy is not a numpy ndarray or a scipp
-Variable or if energy_unit is not a string or scipp unit, or if
+Variable or if
 energy_offset is not a number or a Parameter, or if
 sample_components is not a ComponentCollection or ModelComponent, or if
 resolution_components is not a ComponentCollection or ModelComponent.</p>
@@ -6604,8 +6625,7 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
-<span class="normal">20</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
@@ -6675,13 +6695,22 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <span class="normal">87</span>
 <span class="normal">88</span>
 <span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resolution_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">energy_offset</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolutionModel&#39;</span><span class="p">,</span>
+    <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the ConvolutionBase.</span>
 
@@ -6692,40 +6721,44 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <span class="sd">            The sample model to be convolved.</span>
 <span class="sd">        resolution_components (ComponentCollection | ModelComponent | None, default=None):</span>
 <span class="sd">            The resolution model to convolve with.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
-<span class="sd">            energy.</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
+<span class="sd">            energy axis.</span>
 <span class="sd">        energy_offset (Numeric | Parameter, default=0.0): The energy</span>
 <span class="sd">            offset applied to the convolution. Default is 0.0.</span>
+<span class="sd">        display_name (str | None, default=&#39;MyConvolutionModel&#39;):</span>
+<span class="sd">            The display name of the model.</span>
+<span class="sd">        unique_name (str | None, default=None): The unique name of</span>
+<span class="sd">            the model. If None, a unique name will be generated.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: If energy is not a numpy ndarray or a scipp</span>
-<span class="sd">            Variable or if energy_unit is not a string or scipp unit, or if</span>
+<span class="sd">            Variable or if</span>
 <span class="sd">            energy_offset is not a number or a Parameter, or if</span>
 <span class="sd">            sample_components is not a ComponentCollection or ModelComponent, or if</span>
 <span class="sd">            resolution_components is not a ComponentCollection or ModelComponent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
         <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">energy</span><span class="p">)])</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Energy must be a numpy ndarray or a scipp Variable. Got </span><span class="si">{</span><span class="n">energy</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy_unit must be a string or sc.Unit.&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">)</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-        <span class="n">energy_offset</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;energy_offset&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">energy_unit</span>
-        <span class="p">)</span>
+        <span class="n">energy_offset</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;energy_offset&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_offset</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy_offset must be a number or a Parameter.&#39;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_energy</span> <span class="o">=</span> <span class="n">energy</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span> <span class="o">=</span> <span class="n">energy_unit</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_energy_offset</span> <span class="o">=</span> <span class="n">energy_offset</span>
 
     <span class="k">if</span> <span class="n">sample_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
@@ -6761,8 +6794,8 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.convolution.convolution_base.ConvolutionBase.convert_energy_unit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">convert_energy_unit</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">)</span></code>
+<h4 id="easydynamics.convolution.convolution_base.ConvolutionBase.convert_unit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">convert_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></code>
 
 </h4>
 
@@ -6788,7 +6821,7 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code><span title="str">str</span> | <span title="scipp.Unit">Unit</span></code>
@@ -6824,7 +6857,7 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If energy_unit is not a string or scipp unit.</p>
+                <p>If unit is not a string or scipp unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6851,7 +6884,16 @@ unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
@@ -6870,44 +6912,35 @@ unit.</p>
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_energy_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the energy and energy_offset to the specified unit.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        energy_unit (str | sc.Unit): The unit of the energy.</span>
+<span class="sd">        unit (str | sc.Unit): The unit of the energy.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        TypeError: If energy_unit is not a string or scipp unit.</span>
+<span class="sd">        TypeError: If unit is not a string or scipp unit.</span>
 <span class="sd">        Exception: If energy cannot be converted to the specified</span>
 <span class="sd">            unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Energy unit must be a string or scipp unit.&#39;</span><span class="p">)</span>
 
     <span class="n">old_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">to_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="n">energy_unit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">to_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">old_energy</span>
         <span class="k">raise</span> <span class="n">e</span>
 
     <span class="n">old_energy_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">energy_unit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="o">.</span><span class="n">convert_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span> <span class="o">=</span> <span class="n">old_energy_offset</span>
         <span class="k">raise</span> <span class="n">e</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span> <span class="o">=</span> <span class="n">energy_unit</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7016,63 +7049,6 @@ evaluated.</p>
             <td>
               <div class="doc-md-description">
                 <p>The energy offset applied to the convolution.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-</div>
-
-
-
-
-
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h4 id="easydynamics.convolution.convolution_base.ConvolutionBase.energy_unit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">energy_unit</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
-  </span>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the energy unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7267,6 +7243,10 @@ be convolved.</p>
     </div>
 
 </div>
+
+
+
+
 
 
 
@@ -7704,10 +7684,7 @@ the sample model.</p>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerical convolution of a ComponentCollection with a</span>
 <span class="sd">    ComponentCollection using FFT.</span>
 
@@ -7727,7 +7704,7 @@ the sample model.</p>
         <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolution object.</span>
@@ -7747,14 +7724,11 @@ the sample model.</p>
 <span class="sd">                extend the input data range before convolution.</span>
 <span class="sd">            temperature (Parameter | Numeric | None, default=None): The</span>
 <span class="sd">                temperature to use for detailed balance correction.</span>
-<span class="sd">                Default is None.</span>
 <span class="sd">            temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">                temperature parameter.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
-<span class="sd">                energy. Default is &#39;meV&#39;.</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to</span>
-<span class="sd">                normalize the detailed balance correction. Default is</span>
-<span class="sd">                True.</span>
+<span class="sd">                normalize the detailed balance correction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -7765,7 +7739,7 @@ the sample model.</p>
             <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
             <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-            <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -7845,7 +7819,7 @@ the sample model.</p>
 
 
 <h4 id="easydynamics.convolution.numerical_convolution.NumericalConvolution.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h4>
 
@@ -7997,8 +7971,7 @@ extend the input data range before convolution.</p>
             <td>
               <div class="doc-md-description">
                 <p>The
-temperature to use for detailed balance correction.
-Default is None.</p>
+temperature to use for detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8030,15 +8003,14 @@ temperature parameter.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the
-energy. Default is 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8058,8 +8030,7 @@ energy. Default is 'meV'.</p>
             <td>
               <div class="doc-md-description">
                 <p>Whether to
-normalize the detailed balance correction. Default is
-True.</p>
+normalize the detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8122,10 +8093,7 @@ True.</p>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -8135,7 +8103,7 @@ True.</p>
     <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolution object.</span>
@@ -8155,14 +8123,11 @@ True.</p>
 <span class="sd">            extend the input data range before convolution.</span>
 <span class="sd">        temperature (Parameter | Numeric | None, default=None): The</span>
 <span class="sd">            temperature to use for detailed balance correction.</span>
-<span class="sd">            Default is None.</span>
 <span class="sd">        temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">            temperature parameter.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the</span>
-<span class="sd">            energy. Default is &#39;meV&#39;.</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to</span>
-<span class="sd">            normalize the detailed balance correction. Default is</span>
-<span class="sd">            True.</span>
+<span class="sd">            normalize the detailed balance correction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -8173,7 +8138,7 @@ True.</p>
         <span class="n">extension_factor</span><span class="o">=</span><span class="n">extension_factor</span><span class="p">,</span>
         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="o">=</span><span class="n">temperature_unit</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -8234,7 +8199,10 @@ correction if temperature is provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 78</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
 <span class="normal"> 79</span>
 <span class="normal"> 80</span>
 <span class="normal"> 81</span>
@@ -8289,10 +8257,7 @@ correction if temperature is provided.</p>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the convolution of the sample and resolution models</span>
@@ -8868,7 +8833,7 @@ functionality.</p>
         <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolutionBase.</span>
@@ -8890,7 +8855,7 @@ functionality.</p>
 <span class="sd">                use for detailed balance correction.</span>
 <span class="sd">            temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">                temperature parameter.</span>
-<span class="sd">            energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">            unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">            normalize_detailed_balance (bool, default=True): Whether to normalize the</span>
 <span class="sd">                detailed balance correction.</span>
 
@@ -8904,7 +8869,7 @@ functionality.</p>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
             <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
-            <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -9225,7 +9190,7 @@ functionality.</p>
             <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;sample_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;resolution_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">)</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;energy_unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s1">, &#39;</span>
@@ -9248,7 +9213,7 @@ functionality.</p>
 
 
 <h4 id="easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">energy_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">sample_components</span><span class="p">,</span> <span class="n">resolution_components</span><span class="p">,</span> <span class="n">energy_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upsample_factor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h4>
 
@@ -9432,7 +9397,7 @@ temperature parameter.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>energy_unit</code>
+                <code>unit</code>
             </td>
             <td>
                   <code>str | sc.Unit, default=&#39;meV&#39;</code>
@@ -9581,7 +9546,7 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
     <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
-    <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the NumericalConvolutionBase.</span>
@@ -9603,7 +9568,7 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
 <span class="sd">            use for detailed balance correction.</span>
 <span class="sd">        temperature_unit (str | sc.Unit, default=&#39;K&#39;): The unit of the</span>
 <span class="sd">            temperature parameter.</span>
-<span class="sd">        energy_unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
+<span class="sd">        unit (str | sc.Unit, default=&#39;meV&#39;): The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance (bool, default=True): Whether to normalize the</span>
 <span class="sd">            detailed balance correction.</span>
 
@@ -9617,7 +9582,7 @@ is not a number, or if normalize_detailed_balance is not a bool.</p>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
         <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
         <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
-        <span class="n">energy_unit</span><span class="o">=</span><span class="n">energy_unit</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
         <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -9728,7 +9693,7 @@ NumericalConvolutionBase.</p>
         <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
         <span class="sa">f</span><span class="s1">&#39;sample_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;resolution_components=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">)</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
-        <span class="sa">f</span><span class="s1">&#39;energy_unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_unit</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">, &#39;</span>
         <span class="sa">f</span><span class="s1">&#39;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
         <span class="sa">f</span><span class="s1">&#39;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
         <span class="sa">f</span><span class="s1">&#39;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s1">, &#39;</span>
