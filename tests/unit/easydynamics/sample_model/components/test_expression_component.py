@@ -89,6 +89,12 @@ class TestExpressionComponent:
 
         # EXPECT
         assert expr.A.value == 3.0
+        assert isinstance(expr.A, Parameter)
+
+    def test_parameter_getter_invalid_name(self, expr: ExpressionComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match="has no attribute 'invalid_param'"):
+            _invalid_param = expr.invalid_param
 
     def test_parameter_setter_invalid(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
