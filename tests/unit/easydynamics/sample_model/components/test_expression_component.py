@@ -49,6 +49,11 @@ class TestExpressionComponent:
         with pytest.raises(ValueError, match='NumPy syntax'):
             ExpressionComponent('np.exp(x)')
 
+    def test_invalid_function_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Unsupported function'):
+            ExpressionComponent('A * unknown_func(x)')
+
     @pytest.mark.parametrize(
         'parameters',
         [

@@ -119,9 +119,33 @@ class ExpressionComponent(ModelComponent):
         if 'x' not in symbol_names:
             raise ValueError("Expression must contain 'x' as independent variable")
 
+        # Reject unknown functions early so invalid expressions fail at init,
+        # not later during numerical evaluation.
+        allowed_function_names = set(self._ALLOWED_FUNCS) | {
+            func.__name__ for func in self._ALLOWED_FUNCS.values()
+        }
+
+        # Walk all function-call nodes in the parsed expression (e.g. sin(x), foo(x)).
+        # Keep only function names that are not in our allowlist.
+        unknown_function_names: set[str] = set()
+        function_atoms = self._expr.atoms(sp.Function)
+        for function_atom in function_atoms:
+            function_name = function_atom.func.__name__
+            if function_name not in allowed_function_names:
+                unknown_function_names.add(function_name)
+
+        unknown_functions = sorted(unknown_function_names)
+
+        if unknown_functions:
+            raise ValueError(
+                f'Unsupported function(s) in expression: {", ".join(unknown_functions)}'
+            )
+
         # Create parameters
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError('Parameters must be None or a dictionary')
+            raise TypeError(
+                f'Parameters must be None or a dictionary, got {type(parameters).__name__}'
+            )
 
         if parameters is not None:
             for name, value in parameters.items():
