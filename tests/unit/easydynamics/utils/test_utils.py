@@ -12,7 +12,7 @@ from easydynamics.utils.utils import _validate_unit
 
 class TestValidateAndConvertQ:
     @pytest.mark.parametrize(
-        "Q_input, expected",
+        'Q_input, expected',
         [
             (1.0, np.array([1.0])),
             (2, np.array([2])),
@@ -30,7 +30,7 @@ class TestValidateAndConvertQ:
 
     def test_validate_and_convert_Q_scipp_variable(self):
         # WHEN
-        Q = sc.array(dims=["Q"], values=[1.0, 2.0], unit="1/angstrom")
+        Q = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
 
         # THEN
         result = _validate_and_convert_Q(Q)
@@ -44,29 +44,29 @@ class TestValidateAndConvertQ:
         assert _validate_and_convert_Q(None) is None
 
     @pytest.mark.parametrize(
-        "Q_input",
+        'Q_input',
         [
-            "invalid",
-            {"a": 1},
+            'invalid',
+            {'a': 1},
             (1, 2),
             object(),
         ],
     )
     def test_validate_and_convert_Q_invalid_type(self, Q_input):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match="Q must be a number"):
+        with pytest.raises(TypeError, match='Q must be a number'):
             _validate_and_convert_Q(Q_input)
 
     def test_validate_and_convert_Q_ndarray_wrong_dim(self):
         # WHEN THEN
         Q = np.array([[1.0, 2.0]])
         # EXPECT
-        with pytest.raises(ValueError, match="Q must be a 1-dimensional array"):
+        with pytest.raises(ValueError, match='Q must be a 1-dimensional array'):
             _validate_and_convert_Q(Q)
 
     def test_validate_and_convert_Q_scipp_wrong_dims(self):
         # WHEN THEN
-        Q = sc.array(dims=["x"], values=[1.0, 2.0], unit="1/angstrom")
+        Q = sc.array(dims=['x'], values=[1.0, 2.0], unit='1/angstrom')
 
         # EXPECT
         with pytest.raises(ValueError, match="single dimension named 'Q'"):
@@ -78,12 +78,12 @@ class TestValidateAndConvertQ:
 
 class TestValidateUnit:
     @pytest.mark.parametrize(
-        "unit_input",
+        'unit_input',
         [
             None,
-            "1/angstrom",
-            "meV",
-            sc.Unit("meV"),
+            '1/angstrom',
+            'meV',
+            sc.Unit('meV'),
         ],
     )
     def test_validate_unit_valid(self, unit_input):
@@ -95,13 +95,13 @@ class TestValidateUnit:
             assert isinstance(unit, str)
 
     def test_validate_unit_string_conversion(self):
-        unit = _validate_unit(sc.Unit("meV"))
+        unit = _validate_unit(sc.Unit('meV'))
 
         assert isinstance(unit, str)
-        assert unit == "meV"
+        assert unit == 'meV'
 
     @pytest.mark.parametrize(
-        "unit_input",
+        'unit_input',
         [
             123,
             45.6,
@@ -111,9 +111,7 @@ class TestValidateUnit:
         ],
     )
     def test_validate_unit_invalid_type(self, unit_input):
-        with pytest.raises(
-            TypeError, match="unit must be None, a string, or a scipp Unit"
-        ):
+        with pytest.raises(TypeError, match='unit must be None, a string, or a scipp Unit'):
             _validate_unit(unit_input)
 
 
@@ -127,10 +125,10 @@ class TestInNotebook:
 
         # WHEN
         class ZMQInteractiveShell:
-            __name__ = "ZMQInteractiveShell"
+            __name__ = 'ZMQInteractiveShell'
 
         # THEN
-        monkeypatch.setattr("IPython.get_ipython", lambda: ZMQInteractiveShell())
+        monkeypatch.setattr('IPython.get_ipython', lambda: ZMQInteractiveShell())
 
         # EXPECT
         assert _in_notebook() is True
@@ -141,11 +139,11 @@ class TestInNotebook:
 
         # WHEN
         class TerminalInteractiveShell:
-            __name__ = "TerminalInteractiveShell"
+            __name__ = 'TerminalInteractiveShell'
 
         # THEN
 
-        monkeypatch.setattr("IPython.get_ipython", lambda: TerminalInteractiveShell())
+        monkeypatch.setattr('IPython.get_ipython', lambda: TerminalInteractiveShell())
 
         # EXPECT
         assert _in_notebook() is False
@@ -156,10 +154,10 @@ class TestInNotebook:
 
         # WHEN
         class UnknownShell:
-            __name__ = "UnknownShell"
+            __name__ = 'UnknownShell'
 
         # THEN
-        monkeypatch.setattr("IPython.get_ipython", lambda: UnknownShell())
+        monkeypatch.setattr('IPython.get_ipython', lambda: UnknownShell())
         # EXPECT
         assert _in_notebook() is False
 
@@ -172,7 +170,7 @@ class TestInNotebook:
             raise ImportError
 
         # THEN
-        monkeypatch.setattr("builtins.__import__", raise_import_error)
+        monkeypatch.setattr('builtins.__import__', raise_import_error)
 
         # EXPECT
         assert _in_notebook() is False

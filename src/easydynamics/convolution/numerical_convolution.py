@@ -33,7 +33,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         extension_factor: Numeric | None = 0.2,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
     ) -> None:
         """Initialize the NumericalConvolution object.
@@ -53,14 +53,11 @@ class NumericalConvolution(NumericalConvolutionBase):
                 extend the input data range before convolution.
             temperature (Parameter | Numeric | None, default=None): The
                 temperature to use for detailed balance correction.
-                Default is None.
             temperature_unit (str | sc.Unit, default='K'): The unit of the
                 temperature parameter.
-            energy_unit (str | sc.Unit, default='meV'): The unit of the
-                energy. Default is 'meV'.
+            unit (str | sc.Unit, default='meV'): The unit of the energy.
             normalize_detailed_balance (bool, default=True): Whether to
-                normalize the detailed balance correction. Default is
-                True.
+                normalize the detailed balance correction.
         """
         super().__init__(
             energy=energy,
@@ -71,7 +68,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             extension_factor=extension_factor,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            energy_unit=energy_unit,
+            unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
 

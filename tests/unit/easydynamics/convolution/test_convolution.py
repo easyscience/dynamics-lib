@@ -78,7 +78,7 @@ class TestConvolution:
         assert default_convolution.upsample_factor == 5
         assert default_convolution.extension_factor == 0.2
         assert default_convolution.temperature is None
-        assert default_convolution.energy_unit == 'meV'
+        assert default_convolution.unit == 'meV'
         assert default_convolution.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
@@ -112,7 +112,7 @@ class TestConvolution:
         assert convolution_with_components.upsample_factor == 5
         assert convolution_with_components.extension_factor == 0.2
         assert convolution_with_components.temperature is None
-        assert convolution_with_components.energy_unit == 'meV'
+        assert convolution_with_components.unit == 'meV'
         assert convolution_with_components.normalize_detailed_balance is True
         assert isinstance(convolution_with_components._energy_grid, EnergyGrid)
 

@@ -17,7 +17,7 @@ class EasyDynamicsBase(NewBase):
 
         Args:
             name (str | None, default="MyEasyDynamicsModel"): Name of the model.
-            display_name (str, default="MyEasyDynamicsModel"): Display name of the model.
+            display_name (str | None, default="MyEasyDynamicsModel"): Display name of the model.
             unique_name (str | None, default=None): Unique name of the model. If None,
                 a unique name will be generated.
 
@@ -45,6 +45,9 @@ class EasyDynamicsBase(NewBase):
 
         Args:
             name_str (str | None): The new name to set.
+
+        Raises:
+            TypeError: If name_str is not a string or None.
         """
 
         if name_str is not None and not isinstance(name_str, str):

@@ -12,9 +12,9 @@ class EasyDynamicsModelBase(ModelBase):
 
     def __init__(
         self,
-        unit: str | sc.Unit = "meV",
-        name: str | None = "MyEasyDynamicsModel",
-        display_name: str | None = "MyEasyDynamicsModel",
+        unit: str | sc.Unit = 'meV',
+        name: str | None = 'MyEasyDynamicsModel',
+        display_name: str | None = 'MyEasyDynamicsModel',
         unique_name: str | None = None,
     ) -> None:
         """Initialize the EasyDynamicsModelBase.
@@ -33,7 +33,7 @@ class EasyDynamicsModelBase(ModelBase):
         self._unit = _validate_unit(unit)
 
         if name is not None and not isinstance(name, str):
-            raise TypeError("Name must be a string or None.")
+            raise TypeError('Name must be a string or None.')
         self._name = name
 
     @property
@@ -58,8 +58,8 @@ class EasyDynamicsModelBase(ModelBase):
                 read-only.
         """
         raise AttributeError(
-            f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     @property
@@ -83,5 +83,5 @@ class EasyDynamicsModelBase(ModelBase):
         """
 
         if name_str is not None and not isinstance(name_str, str):
-            raise TypeError("Name must be a string or None.")
+            raise TypeError('Name must be a string or None.')
         self._name = name_str
