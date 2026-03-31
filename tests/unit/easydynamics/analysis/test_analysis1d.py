@@ -79,9 +79,9 @@ class TestAnalysis1d:
         [
             (-1, IndexError, 'Q_index must be'),
             (10, IndexError, 'Q_index must be'),
-            ('invalid', IndexError, 'Q_index must be '),
-            (np.nan, IndexError, 'Q_index must be '),
-            ([1, 2], IndexError, 'Q_index must be '),
+            ('invalid', TypeError, 'Q_index must be '),
+            (np.nan, TypeError, 'Q_index must be '),
+            ([1, 2], TypeError, 'Q_index must be '),
         ],
         ids=[
             'Negative index',
