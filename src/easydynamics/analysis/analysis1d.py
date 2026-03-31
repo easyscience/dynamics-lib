@@ -305,6 +305,14 @@ class Analysis1d(AnalysisBase):
         )
         return fig
 
+    def fix_energy_offset(self) -> None:
+        """Fix the energy offset parameter for the current Q index."""
+        self.instrument_model.fix_energy_offset(Q_index=self._require_Q_index())
+
+    def free_energy_offset(self) -> None:
+        """Free the energy offset parameter for the current Q index."""
+        self.instrument_model.free_energy_offset(Q_index=self._require_Q_index())
+
     #############
     # Private methods: small utilities
     #############
@@ -428,7 +436,7 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
 
-        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index)
+        energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(
             energy=energy,
             energy_offset=energy_offset,
@@ -601,7 +609,7 @@ class Analysis1d(AnalysisBase):
             resolution_components=resolution_components,
             energy=energy,
             temperature=self.temperature,
-            energy_offset=self.instrument_model.get_energy_offset_at_Q(Q_index),
+            energy_offset=self.instrument_model.get_energy_offset(Q_index),
         )
         return convolver
 
