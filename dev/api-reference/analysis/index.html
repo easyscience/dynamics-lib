@@ -1377,6 +1377,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#easydynamics.analysis.Analysis.fix_energy_offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_energy_offset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#easydynamics.analysis.Analysis.free_energy_offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        free_energy_offset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#easydynamics.analysis.Analysis.get_fit_functions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1629,6 +1651,28 @@
     <span class="md-ellipsis">
       
         fit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#easydynamics.analysis.Analysis.fix_energy_offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fix_energy_offset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#easydynamics.analysis.Analysis.free_energy_offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        free_energy_offset
       
     </span>
   </a>
@@ -2424,7 +2468,40 @@ all Q.</p>
 <span class="normal">588</span>
 <span class="normal">589</span>
 <span class="normal">590</span>
-<span class="normal">591</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For analysing two-dimensional data, i.e. intensity as function of</span>
 <span class="sd">    energy and Q.</span>
 
@@ -2827,6 +2904,38 @@ all Q.</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter(s) for a specific Q index, or</span>
+<span class="sd">        for all Q indices if Q_index is None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">                fix the energy offset for. If None, fixes the energy</span>
+<span class="sd">                offset for all Q values. Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter(s) for a specific Q index,</span>
+<span class="sd">        or for all Q indices if Q_index is None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">                free the energy offset for. If None, frees the energy</span>
+<span class="sd">                offset for all Q values. Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+
     <span class="c1">#############</span>
     <span class="c1"># Private methods - updating models when things change</span>
     <span class="c1">#############</span>
@@ -2835,7 +2944,7 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the sample and instrument models when</span>
 <span class="sd">        the experiment changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new experiment.</span>
+<span class="sd">        Also update all the Analysis1d objects with the new experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_experiment_changed</span><span class="p">()</span>
@@ -2846,7 +2955,8 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the sample model when the sample model</span>
 <span class="sd">        changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new sample model.</span>
+<span class="sd">        Also update all the Analysis1d objects with the new sample</span>
+<span class="sd">        model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_sample_model_changed</span><span class="p">()</span>
@@ -2857,7 +2967,7 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the instrument model when the</span>
 <span class="sd">        instrument model changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new instrument</span>
+<span class="sd">        Also update all the Analysis1d objects with the new instrument</span>
 <span class="sd">        model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
@@ -3746,6 +3856,198 @@ or a single FitResults object if fitting simultaneously.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="easydynamics.analysis.Analysis.fix_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fix the energy offset parameter(s) for a specific Q index, or
+for all Q indices if Q_index is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code>int | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index of the Q value to
+fix the energy offset for. If None, fixes the energy
+offset for all Q values. Default is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter(s) for a specific Q index, or</span>
+<span class="sd">    for all Q indices if Q_index is None.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">            fix the energy offset for. If None, fixes the energy</span>
+<span class="sd">            offset for all Q values. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="easydynamics.analysis.Analysis.free_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Free the energy offset parameter(s) for a specific Q index,
+or for all Q indices if Q_index is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code>int | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index of the Q value to
+free the energy offset for. If None, frees the energy
+offset for all Q values. Default is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter(s) for a specific Q index,</span>
+<span class="sd">    or for all Q indices if Q_index is None.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">            free the energy offset for. If None, frees the energy</span>
+<span class="sd">            offset for all Q values. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="easydynamics.analysis.Analysis.get_fit_functions" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_fit_functions</span><span class="p">()</span></code>
 
@@ -3790,15 +4092,15 @@ Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get fit functions for all Q indices, which can be used for</span>
 <span class="sd">    simultaneous fitting.</span>
 
@@ -5372,7 +5674,40 @@ all Q.</p>
 <span class="normal">588</span>
 <span class="normal">589</span>
 <span class="normal">590</span>
-<span class="normal">591</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For analysing two-dimensional data, i.e. intensity as function of</span>
 <span class="sd">    energy and Q.</span>
 
@@ -5775,6 +6110,38 @@ all Q.</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter(s) for a specific Q index, or</span>
+<span class="sd">        for all Q indices if Q_index is None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">                fix the energy offset for. If None, fixes the energy</span>
+<span class="sd">                offset for all Q values. Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter(s) for a specific Q index,</span>
+<span class="sd">        or for all Q indices if Q_index is None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">                free the energy offset for. If None, frees the energy</span>
+<span class="sd">                offset for all Q values. Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+
     <span class="c1">#############</span>
     <span class="c1"># Private methods - updating models when things change</span>
     <span class="c1">#############</span>
@@ -5783,7 +6150,7 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the sample and instrument models when</span>
 <span class="sd">        the experiment changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new experiment.</span>
+<span class="sd">        Also update all the Analysis1d objects with the new experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_experiment_changed</span><span class="p">()</span>
@@ -5794,7 +6161,8 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the sample model when the sample model</span>
 <span class="sd">        changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new sample model.</span>
+<span class="sd">        Also update all the Analysis1d objects with the new sample</span>
+<span class="sd">        model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_sample_model_changed</span><span class="p">()</span>
@@ -5805,7 +6173,7 @@ all Q.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the Q values in the instrument model when the</span>
 <span class="sd">        instrument model changes.</span>
 
-<span class="sd">        Also update all the Analysi1d objects with the new instrument</span>
+<span class="sd">        Also update all the Analysis1d objects with the new instrument</span>
 <span class="sd">        model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_updaters</span><span class="p">:</span>
@@ -6694,6 +7062,198 @@ or a single FitResults object if fitting simultaneously.</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="easydynamics.analysis.analysis.Analysis.fix_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fix the energy offset parameter(s) for a specific Q index, or
+for all Q indices if Q_index is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code>int | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index of the Q value to
+fix the energy offset for. If None, fixes the energy
+offset for all Q values. Default is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter(s) for a specific Q index, or</span>
+<span class="sd">    for all Q indices if Q_index is None.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">            fix the energy offset for. If None, fixes the energy</span>
+<span class="sd">            offset for all Q values. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.analysis.analysis.Analysis.free_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Free the energy offset parameter(s) for a specific Q index,
+or for all Q indices if Q_index is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code>int | None, default=None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index of the Q value to
+free the energy offset for. If None, frees the energy
+offset for all Q values. Default is None.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter(s) for a specific Q index,</span>
+<span class="sd">    or for all Q indices if Q_index is None.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Q_index (int | None, default=None): Index of the Q value to</span>
+<span class="sd">            free the energy offset for. If None, frees the energy</span>
+<span class="sd">            offset for all Q values. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="easydynamics.analysis.analysis.Analysis.get_fit_functions" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_fit_functions</span><span class="p">()</span></code>
 
@@ -6738,15 +7298,15 @@ Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get fit functions for all Q indices, which can be used for</span>
 <span class="sd">    simultaneous fitting.</span>
 
@@ -8502,7 +9062,15 @@ own for simpler analyses.</p>
 <span class="normal">742</span>
 <span class="normal">743</span>
 <span class="normal">744</span>
-<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For analysing one-dimensional data, i.e. intensity as function of</span>
 <span class="sd">    energy for a single Q index.</span>
 
@@ -8787,6 +9355,14 @@ own for simpler analyses.</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
+
     <span class="c1">#############</span>
     <span class="c1"># Private methods: small utilities</span>
     <span class="c1">#############</span>
@@ -8910,7 +9486,7 @@ own for simpler analyses.</p>
         <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
 
-        <span class="n">energy_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">get_energy_offset_at_Q</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="n">energy_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">get_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
         <span class="n">energy_with_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energy_with_offset</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -9083,7 +9659,7 @@ own for simpler analyses.</p>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
-            <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">get_energy_offset_at_Q</span><span class="p">(</span><span class="n">Q_index</span><span class="p">),</span>
+            <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">get_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">convolver</span>
 
@@ -10043,6 +10619,76 @@ Analysis.</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="easydynamics.analysis.analysis1d.Analysis1d.fix_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fix_energy_offset</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fix the energy offset parameter for the current Q index.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easydynamics.analysis.analysis1d.Analysis1d.free_energy_offset" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">free_energy_offset</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Free the energy offset parameter for the current Q index.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="easydynamics.analysis.analysis1d.Analysis1d.get_all_variables" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_all_variables</span><span class="p">()</span></code>
 
@@ -10907,7 +11553,10 @@ background and resolution</p>
 <span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
-<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for analysis in EasyDynamics. This class is not meant</span>
 <span class="sd">    to be used directly.</span>
 
@@ -11228,13 +11877,16 @@ background and resolution</p>
 <span class="sd">            int | None: The verified Q index.</span>
 
 <span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If Q_index is not an integer or None.</span>
 <span class="sd">            IndexError: If the Q index is not valid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="n">Q_index</span> <span class="o">&lt;</span> <span class="mi">0</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Q_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">))</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Q_index must be an integer or None.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">Q_index</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Q_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Q_index</span>
 
@@ -11708,14 +12360,14 @@ or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">352</span>
 <span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
-<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Analysis.</span>
 
 <span class="sd">    Returns:</span>
