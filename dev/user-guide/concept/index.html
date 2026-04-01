@@ -1362,8 +1362,8 @@
 
   <h1>Concept</h1>
 
-<p>The goal of EasyDynamics is to make it easy to fit QENS and powder INS
-data.</p>
+<p>EasyDynamics is a a fitting tool for neutron spectroscopy, mainly
+dedicated to amorphous materials and crystalline powders.</p>
 <p>The fit is carried out by an <code>Analysis</code> object, which contains an
 <code>Experiment</code> that contains the data, a <code>SampleModel</code> that describes the
 scattering from the sample, and an <code>InstrumentModel</code> that describes the
@@ -1403,10 +1403,10 @@ The most important are, in no particular order:</p>
 <p>So, for example, one can create a <code>Gaussian</code> and change its <code>Parameter</code>s
 like this:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="n">gaussian</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">()</span>
-<span class="n">gaussian</span><span class="o">.</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span>
-<span class="n">gaussian</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">fixed</span><span class="o">=</span><span class="kc">True</span>
-<span class="n">gaussian</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">fixed</span><span class="o">=</span><span class="kc">False</span>
-<span class="n">gaussian</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">min</span><span class="o">=</span><span class="mf">0.5</span>
+<span class="n">gaussian</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">gaussian</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">gaussian</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">gaussian</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="mf">0.5</span>
 </code></pre></div>
 <p>And so on.</p>
 <p>It is furthermore possible to make a <code>Parameter</code> depend on another
