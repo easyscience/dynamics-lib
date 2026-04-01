@@ -333,13 +333,16 @@ class AnalysisBase(EasyScienceModelBase):
             int | None: The verified Q index.
 
         Raises:
+            TypeError: If Q_index is not an integer or None.
             IndexError: If the Q index is not valid.
         """
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or (self.Q is not None and Q_index >= len(self.Q))
-        ):
+        if Q_index is None:
+            return None
+
+        if not isinstance(Q_index, int):
+            raise TypeError('Q_index must be an integer or None.')
+
+        if Q_index < 0 or (self.Q is not None and Q_index >= len(self.Q)):
             raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
 

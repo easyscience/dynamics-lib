@@ -32,6 +32,7 @@ dependencies = [
   'ipywidgets',  # Widgets (needed for interactive matplotlib backends)
   'ipympl',      # Matplotlib Jupyter widget backend (%matplotlib widget)
   'IPython',     # Interactive Python shell
+  'sympy',       # Symbolic mathematics (used for expression components)
 ]
 
 [project.optional-dependencies]

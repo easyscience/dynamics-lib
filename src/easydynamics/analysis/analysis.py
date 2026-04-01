@@ -419,6 +419,38 @@ class Analysis(AnalysisBase):
             **plot_kwargs_defaults,
         )
 
+    def fix_energy_offset(self, Q_index: int | None = None) -> None:
+        """Fix the energy offset parameter(s) for a specific Q index, or
+        for all Q indices if Q_index is None.
+
+        Args:
+            Q_index (int | None, default=None): Index of the Q value to
+                fix the energy offset for. If None, fixes the energy
+                offset for all Q values. Default is None.
+        """
+        if Q_index is not None:
+            Q_index = self._verify_Q_index(Q_index)
+            self.analysis_list[Q_index].fix_energy_offset()
+        else:
+            for analysis in self.analysis_list:
+                analysis.fix_energy_offset()
+
+    def free_energy_offset(self, Q_index: int | None = None) -> None:
+        """Free the energy offset parameter(s) for a specific Q index,
+        or for all Q indices if Q_index is None.
+
+        Args:
+            Q_index (int | None, default=None): Index of the Q value to
+                free the energy offset for. If None, frees the energy
+                offset for all Q values. Default is None.
+        """
+        if Q_index is not None:
+            Q_index = self._verify_Q_index(Q_index)
+            self.analysis_list[Q_index].free_energy_offset()
+        else:
+            for analysis in self.analysis_list:
+                analysis.free_energy_offset()
+
     #############
     # Private methods - updating models when things change
     #############
@@ -427,7 +459,7 @@ class Analysis(AnalysisBase):
         """Update the Q values in the sample and instrument models when
         the experiment changes.
 
-        Also update all the Analysi1d objects with the new experiment.
+        Also update all the Analysis1d objects with the new experiment.
         """
         if self._call_updaters:
             super()._on_experiment_changed()
@@ -438,7 +470,8 @@ class Analysis(AnalysisBase):
         """Update the Q values in the sample model when the sample model
         changes.
 
-        Also update all the Analysi1d objects with the new sample model.
+        Also update all the Analysis1d objects with the new sample
+        model.
         """
         if self._call_updaters:
             super()._on_sample_model_changed()
@@ -449,7 +482,7 @@ class Analysis(AnalysisBase):
         """Update the Q values in the instrument model when the
         instrument model changes.
 
-        Also update all the Analysi1d objects with the new instrument
+        Also update all the Analysis1d objects with the new instrument
         model.
         """
         if self._call_updaters:
