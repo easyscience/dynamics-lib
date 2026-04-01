@@ -1,5 +1,5 @@
-The goal of EasyDynamics is to make it easy to fit QENS and powder INS
-data.
+EasyDynamics is a a fitting tool for neutron spectroscopy, mainly
+dedicated to amorphous materials and crystalline powders.
 
 The fit is carried out by an `Analysis` object, which contains an
 `Experiment` that contains the data, a `SampleModel` that describes the
@@ -44,10 +44,10 @@ like this:
 
 ```python
 gaussian = Gaussian()
-gaussian.area=2.0
-gaussian.area.fixed=True
-gaussian.width.fixed=False
-gaussian.width.min=0.5
+gaussian.area = 2.0
+gaussian.area.fixed = True
+gaussian.width.fixed = False
+gaussian.width.min = 0.5
 ```
 
 And so on.

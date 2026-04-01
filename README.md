@@ -9,8 +9,9 @@
   </picture>
 </p>
 
-**EasyDynamics** is a software for plotting and fitting QENS and INS
-powder data.
+**EasyDynamics** is a software for plotting and fitting neutron
+spectroscopy data (QENS and INS), mainly dedicated to amorphous
+materials and crystalline powders. powder data.
 
 <!-- HOME REPOSITORY SECTION -->
 
