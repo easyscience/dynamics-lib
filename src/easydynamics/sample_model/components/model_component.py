@@ -46,13 +46,13 @@ class ModelComponent(ModelBase):
         return str(self._unit)
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Unit is read-only. Use convert_unit to change the unit
         between allowed types or create a new ModelComponent with the
         desired unit.
 
         Args:
-            unit_str (str): The new unit to set.
+            _unit_str (str): The new unit to set.
 
         Raises:
             AttributeError: Always raised since unit is read-only.

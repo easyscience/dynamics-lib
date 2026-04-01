@@ -25,14 +25,12 @@ class TestInstrumentModel:
         component2 = Gaussian()
         resolution_model = ResolutionModel(components=component2, Q=Q)
 
-        instrument_model = InstrumentModel(
+        return InstrumentModel(
             display_name='TestInstrumentModel',
             background_model=background_model,
             resolution_model=resolution_model,
             Q=Q,
         )
-
-        return instrument_model
 
     @pytest.fixture
     def instrument_model_without_Q(self):
@@ -42,24 +40,21 @@ class TestInstrumentModel:
         component2 = Gaussian()
         resolution_model = ResolutionModel(components=component2)
 
-        instrument_model_without_Q = InstrumentModel(
+        return InstrumentModel(
             display_name='TestInstrumentModel',
             background_model=background_model,
             resolution_model=resolution_model,
         )
-        return instrument_model_without_Q
 
     @pytest.fixture
     def resolution_model(self):
         component = Gaussian()
-        resolution_model = ResolutionModel(components=component)
-        return resolution_model
+        return ResolutionModel(components=component)
 
     @pytest.fixture
     def background_model(self):
         component = Polynomial(coefficients=[1.0, 2.0])
-        background_model = BackgroundModel(components=component)
-        return background_model
+        return BackgroundModel(components=component)
 
     def test_init(self, instrument_model):
         # WHEN THEN

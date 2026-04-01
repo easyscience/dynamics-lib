@@ -261,11 +261,11 @@ class SampleModel(ModelBase):
         return self._temperature_unit
 
     @temperature_unit.setter
-    def temperature_unit(self, value: str | sc.Unit) -> None:
+    def temperature_unit(self, _value: str | sc.Unit) -> None:
         """The temperature unit of the SampleModel is read-only.
 
         Args:
-            value (str | sc.Unit): The unit to set for the temperature
+            _value (str | sc.Unit): The unit to set for the temperature
                 Parameter.
 
         Raises:

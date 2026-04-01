@@ -108,12 +108,12 @@ class ComponentCollection(ModelBase):
         return not self._components
 
     @is_empty.setter
-    def is_empty(self, value: bool) -> None:
+    def is_empty(self, _value: bool) -> None:
         """is_empty is a read-only property that indicates whether the
         collection has components.
 
         Args:
-            value (bool): The value to set (ignored).
+            _value (bool): The value to set (ignored).
 
         Raises:
             AttributeError: Always raised since is_empty is read-only.
@@ -134,11 +134,11 @@ class ComponentCollection(ModelBase):
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Unit is read-only and cannot be set directly.
 
         Args:
-            unit_str (str): The unit to set (ignored).
+            _unit_str (str): The unit to set (ignored).
 
         Raises:
             AttributeError: Always raised since unit is read-only.
@@ -285,11 +285,11 @@ class ComponentCollection(ModelBase):
         return not self._components
 
     @is_empty.setter
-    def is_empty(self, value: bool) -> None:
+    def is_empty(self, _value: bool) -> None:
         """is_empty is read-only.
 
         Args:
-            value (bool): ignored.
+            _value (bool): ignored.
 
         Raises:
             AttributeError: Always raised since is_empty is read-only
@@ -411,9 +411,7 @@ class ComponentCollection(ModelBase):
 
         component = matches[0]
 
-        result = component.evaluate(x)
-
-        return result
+        return component.evaluate(x)
 
     def fix_all_parameters(self) -> None:
         """Fix all free parameters in the model."""
@@ -444,11 +442,10 @@ class ComponentCollection(ModelBase):
         if isinstance(item, str):
             # Check by component unique name
             return any(comp.unique_name == item for comp in self.components)
-        elif isinstance(item, ModelComponent):
+        if isinstance(item, ModelComponent):
             # Check by component instance
             return any(comp is item for comp in self.components)
-        else:
-            return False
+        return False
 
     def __repr__(self) -> str:
         """Return a string representation of the ComponentCollection.

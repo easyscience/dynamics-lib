@@ -20,8 +20,7 @@ class TestExperiment:
         values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 11)))
         data = sc.DataArray(data=values, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(display_name='test_experiment', data=data)
-        return experiment
+        return Experiment(display_name='test_experiment', data=data)
 
     @pytest.fixture
     def experiment_with_data(self):
@@ -36,9 +35,7 @@ class TestExperiment:
 
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(data=data_array)
-
-        return experiment
+        return Experiment(data=data_array)
 
     ##############
     # test init

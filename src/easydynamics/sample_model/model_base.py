@@ -96,9 +96,7 @@ class ModelBase(EasyScienceModelBase):
                 'No components in the model to evaluate. '
                 'Run generate_component_collections() first'
             )
-        y = [collection.evaluate(x) for collection in self._component_collections]
-
-        return y
+        return [collection.evaluate(x) for collection in self._component_collections]
 
     # ------------------------------------------------------------------
     # Component management
@@ -145,11 +143,11 @@ class ModelBase(EasyScienceModelBase):
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Unit is read-only and cannot be set directly.
 
         Args:
-            unit_str (str): The new unit to set (ignored).
+            _unit_str (str): The new unit to set (ignored).
 
         Raises:
             AttributeError: Always raised to indicate that the unit is

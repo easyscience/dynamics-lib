@@ -166,7 +166,7 @@ class TestInNotebook:
         available."""
 
         # WHEN
-        def raise_import_error(*args, **kwargs):
+        def raise_import_error(*args, **kwargs):  # noqa: ARG001
             raise ImportError
 
         # THEN

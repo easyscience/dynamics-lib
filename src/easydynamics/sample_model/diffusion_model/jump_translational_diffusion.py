@@ -195,8 +195,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         denominator = 1 + unit_conversion_factor_denominator.value * Q**2
 
-        width = numerator / denominator
-        return width
+        return numerator / denominator
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Elastic Incoherent Structure Factor (EISF).
@@ -209,8 +208,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        EISF = np.zeros_like(Q)
-        return EISF
+        return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Quasi-Elastic Incoherent Structure Factor
@@ -223,8 +221,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: QISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        QISF = np.ones_like(Q)
-        return QISF
+        return np.ones_like(Q)
 
     def create_component_collections(
         self,

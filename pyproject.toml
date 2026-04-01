@@ -217,11 +217,11 @@ select = [
   # flake8 rules
   #'A',     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
   'ANN', # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-  #'ARG',   # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+  'ARG', # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
   #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
   'B', # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
   #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
-  #'C4',    # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  'C4', # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
   #'COM',   # https://docs.astral.sh/ruff/rules/#flake8-commas-com
   #'DTZ',   # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
   #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
@@ -235,9 +235,9 @@ select = [
   #'LOG',   # https://docs.astral.sh/ruff/rules/#flake8-logging-log
   #'PIE',   # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
   #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
-  #'PTH',   # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+  'PTH', # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
   #'PYI',   # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
-  #'RET',   # https://docs.astral.sh/ruff/rules/#flake8-return-ret
+  'RET', # https://docs.astral.sh/ruff/rules/#flake8-return-ret
   #'RSE',   # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
   'S',   # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
   'SIM', # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim

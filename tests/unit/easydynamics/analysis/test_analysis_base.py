@@ -20,13 +20,12 @@ class TestAnalysisBase:
         experiment = Experiment()
         sample_model = SampleModel()
         instrument_model = InstrumentModel()
-        analysis_base = AnalysisBase(
+        return AnalysisBase(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
         )
-        return analysis_base
 
     def test_init(self, analysis_base):
         # WHEN THEN

@@ -33,15 +33,13 @@ class TestAnalysis:
         sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
         instrument_model = InstrumentModel()
 
-        analysis = Analysis(
+        return Analysis(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
             extra_parameters=None,
         )
-
-        return analysis
 
     def test_init(self, analysis):
         # WHEN THEN

@@ -99,14 +99,14 @@ class Analysis(AnalysisBase):
         return self._analysis_list
 
     @analysis_list.setter
-    def analysis_list(self, value: list[Analysis1d]) -> None:
+    def analysis_list(self, _value: list[Analysis1d]) -> None:
         """analysis_list is read-only.
 
         To change the analysis list, modify the experiment, sample
         model, or instrument model.
 
         Args:
-            value (list[Analysis1d]): The new list of Analysis1d objects. This
+            _value (list[Analysis1d]): The new list of Analysis1d objects. This
                 argument is ignored, as analysis_list is read-only.
 
         Raises:
@@ -189,12 +189,10 @@ class Analysis(AnalysisBase):
         if fit_method == 'independent':
             if Q_index is not None:
                 return self._fit_single_Q(Q_index)
-            else:
-                return self._fit_all_Q_independently()
-        elif fit_method == 'simultaneous':
+            return self._fit_all_Q_independently()
+        if fit_method == 'simultaneous':
             return self._fit_all_Q_simultaneously()
-        else:
-            raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
+        raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
 
     def plot_data_and_model(
         self,
@@ -407,20 +405,19 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'linestyle': {name: 'none' for name in names},
-            'marker': {name: 'o' for name in names},
-            'markerfacecolor': {name: 'none' for name in names},
+            'linestyle': dict.fromkeys(names, 'none'),
+            'marker': dict.fromkeys(names, 'o'),
+            'markerfacecolor': dict.fromkeys(names, 'none'),
         }
 
         plot_kwargs_defaults.update(kwargs)
 
         import plopp as pp
 
-        fig = pp.plot(
+        return pp.plot(
             data_to_plot,
             **plot_kwargs_defaults,
         )
-        return fig
 
     def fix_energy_offset(self, Q_index: int | None = None) -> None:
         """Fix the energy offset parameter(s) for a specific Q index, or
@@ -547,12 +544,11 @@ class Analysis(AnalysisBase):
             fit_functions=self.get_fit_functions(),
         )
 
-        results = mf.fit(
+        return mf.fit(
             x=xs,
             y=ys,
             weights=ws,
         )
-        return results
 
     def get_fit_functions(self) -> list[callable]:
         """Get fit functions for all Q indices, which can be used for
@@ -579,11 +575,10 @@ class Analysis(AnalysisBase):
         if energy is None:
             energy = self.energy
         model = sc.array(dims=['Q', 'energy'], values=self.calculate(energy=energy))
-        model_data_array = sc.DataArray(
+        return sc.DataArray(
             data=model,
             coords={'Q': self.Q, 'energy': energy},
         )
-        return model_data_array
 
     def _create_components_dataset(
         self,

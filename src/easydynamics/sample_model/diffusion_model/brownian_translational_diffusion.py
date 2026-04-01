@@ -139,9 +139,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         unit_conversion_factor.convert_unit(self.unit)
-        width = Q**2 * unit_conversion_factor.value
-
-        return width
+        return Q**2 * unit_conversion_factor.value
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Elastic Incoherent Structure Factor (EISF) for
@@ -155,8 +153,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        EISF = np.zeros_like(Q)
-        return EISF
+        return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Quasi-Elastic Incoherent Structure Factor
@@ -170,8 +167,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
 
         Q = _validate_and_convert_Q(Q)
-        QISF = np.ones_like(Q)
-        return QISF
+        return np.ones_like(Q)
 
     def create_component_collections(
         self,

@@ -88,9 +88,8 @@ def _in_notebook() -> bool:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
             return True  # Jupyter notebook or JupyterLab
-        elif shell == 'TerminalInteractiveShell':
+        if shell == 'TerminalInteractiveShell':
             return False  # Terminal IPython
-        else:
-            return False
+        return False
     except (NameError, ImportError):
         return False  # Standard Python (no IPython)
