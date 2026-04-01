@@ -5,6 +5,8 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+import scipp as sc
+from scipp import UnitError
 
 from easydynamics.sample_model import ComponentCollection
 from easydynamics.sample_model import Gaussian
@@ -32,14 +34,12 @@ class TestModelBase:
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
-        model_base = ModelBase(
+        return ModelBase(
             display_name='InitModel',
             components=component_collection,
             unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
-
-        return model_base
 
     def test_init(self, model_base):
         # WHEN THEN
@@ -263,7 +263,7 @@ class TestModelBase:
 
     def test_convert_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(Exception):
+        with pytest.raises(UnitError):
             model_base.convert_unit('invalid_unit')
 
     def test_convert_unit_incorrect_unit_raises(self, model_base):
@@ -303,13 +303,71 @@ class TestModelBase:
         ):
             model_base.components = 'invalid_component'
 
-    def test_Q_setter(self, model_base):
+    def test_Q_setter_raises_if_Q_is_not_similar(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(ValueError, match='New Q values are not similar to'):
+            model_base.Q = [10.0, 20.0, 30.0]
+
+    @pytest.mark.parametrize(
+        'new_Q',
+        [
+            [1.0, 2.0, 3.0],
+            np.array([1.0, 2.0, 3.0]),
+            sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom'),
+        ],
+        ids=['list', 'numpy_array', 'scipp_variable'],
+    )
+    def test_Q_setter_with_similar_Q(self, model_base, new_Q):
         # WHEN
-        new_Q = [0.5, 1.5, 2.5]
+        old_Q = model_base.Q
+
+        # THEN
         model_base.Q = new_Q
 
+        # EXPECT
+        np.testing.assert_array_equal(model_base.Q, old_Q)
+
+    def test_Q_setter_with_none(self, model_base):
+        # WHEN
+        model_base.Q = None
+        old_Q = model_base.Q
+
         # THEN / EXPECT
+        assert model_base.Q is old_Q
+
+    def test_Q_setter_when_current_Q_is_none(self, model_base):
+        # WHEN
+        model_base._Q = None
+        new_Q = [0.5, 1.5, 2.5]
+
+        # THEN
+        model_base.Q = new_Q
+
+        # EXPECT
         np.testing.assert_array_equal(model_base.Q, np.array(new_Q))
+
+    def test_clear_Q(self, model_base):
+        # WHEN
+        model_base.clear_Q(confirm=True)
+
+        # THEN / EXPECT
+        assert model_base.Q is None
+
+    def test_clear_Q_raises_without_confirm(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(ValueError, match='Clearing Q values requires confirmation'):
+            model_base.clear_Q()
+
+    def test_normalize_area(self, model_base):
+        # WHEN
+
+        # THEN
+        model_base.normalize_area()
+
+        # EXPECT
+        for collection in model_base._component_collections:
+            total_area = sum(component.area.value for component in collection.components)
+            assert total_area == pytest.approx(1.0)
 
     def test_repr(self, model_base):
         # WHEN

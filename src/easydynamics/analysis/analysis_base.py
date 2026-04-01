@@ -188,12 +188,12 @@ class AnalysisBase(EasyScienceModelBase):
         return self.experiment.Q
 
     @Q.setter
-    def Q(self, value: sc.Variable) -> None:
+    def Q(self, _value: sc.Variable) -> None:
         """Q cannot be set, as it is a read-only property derived from
         the Experiment.
 
         Args:
-            value (sc.Variable): The Q values to set. This argument is
+            _value (sc.Variable): The Q values to set. This argument is
                 ignored, as Q is a read-only property.
 
         Raises:
@@ -214,12 +214,12 @@ class AnalysisBase(EasyScienceModelBase):
         return self.experiment.energy
 
     @energy.setter
-    def energy(self, value: sc.Variable) -> None:
+    def energy(self, _value: sc.Variable) -> None:
         """Energy cannot be set, as it is a read-only property derived
         from the Experiment.
 
         Args:
-            value (sc.Variable): The energy values to set. This argument is
+            _value (sc.Variable): The energy values to set. This argument is
                 ignored, as energy is a read-only property.
 
         Raises:
@@ -235,19 +235,20 @@ class AnalysisBase(EasyScienceModelBase):
 
         Returns:
             Parameter | None: The temperature from the associated SampleModel,
-            if available, and None if not.
+                if available, and None if not.
         """
 
         return self.sample_model.temperature
 
     @temperature.setter
-    def temperature(self, value: np.ndarray | Parameter) -> None:
+    def temperature(self, _value: np.ndarray | Parameter) -> None:
         """Temperature cannot be set, as it is a read-only property
         derived from the SampleModel.
 
         Args:
-            value (np.ndarray | Parameter): The temperature to set. This argument is
-                ignored, as temperature is a read-only property.
+            _value (np.ndarray | Parameter): The temperature to set.
+                This argument is ignored, as temperature is a read-only
+                property.
 
         Raises:
             AttributeError: If trying to set temperature.
@@ -290,6 +291,15 @@ class AnalysisBase(EasyScienceModelBase):
     # Other methods
     #############
 
+    def normalize_resolution(self) -> None:
+        """Normalize the resolution in the InstrumentModel to ensure
+        that it integrates to 1.
+
+        This is important for accurate fitting and interpretation of the
+        results.
+        """
+        self.instrument_model.normalize_resolution()
+
     #############
     # Private methods
     #############
@@ -323,15 +333,17 @@ class AnalysisBase(EasyScienceModelBase):
             int | None: The verified Q index.
 
         Raises:
+            TypeError: If Q_index is not an integer or None.
             IndexError: If the Q index is not valid.
         """
-        if Q_index is not None:
-            if (
-                not isinstance(Q_index, int)
-                or Q_index < 0
-                or (self.Q is not None and Q_index >= len(self.Q))
-            ):
-                raise IndexError('Q_index must be a valid index for the Q values.')
+        if Q_index is None:
+            return None
+
+        if not isinstance(Q_index, int):
+            raise TypeError('Q_index must be an integer or None.')
+
+        if Q_index < 0 or (self.Q is not None and Q_index >= len(self.Q)):
+            raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
 
     #############

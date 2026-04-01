@@ -180,8 +180,7 @@ class AnalyticalConvolution(ConvolutionBase):
         # Call the corresponding method
         if swapped:
             return getattr(self, func_name)(resolution_component, sample_component)
-        else:
-            return getattr(self, func_name)(sample_component, resolution_component)
+        return getattr(self, func_name)(sample_component, resolution_component)
 
     def _convolute_delta_any(
         self,

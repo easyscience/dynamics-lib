@@ -20,8 +20,7 @@ class TestExperiment:
         values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 11)))
         data = sc.DataArray(data=values, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(display_name='test_experiment', data=data)
-        return experiment
+        return Experiment(display_name='test_experiment', data=data)
 
     @pytest.fixture
     def experiment_with_data(self):
@@ -36,9 +35,7 @@ class TestExperiment:
 
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(data=data_array)
-
-        return experiment
+        return Experiment(data=data_array)
 
     ##############
     # test init
@@ -351,8 +348,29 @@ class TestExperiment:
             # EXPECT
             mock_plot.assert_called_once()
             args, kwargs = mock_plot.call_args
-            assert sc.identical(args[0], experiment._data.transpose())
+            assert sc.identical(args[0], experiment.data.transpose())
             assert kwargs['title'] == f'{experiment.display_name}'
+            assert result == mock_fig
+
+    def test_plot_data_slicer_success(self, experiment):
+        "Test plotting data successfully when in notebook environment"
+        # WHEN
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            patch('plopp.slicer') as mock_plot,
+        ):
+            mock_fig = MagicMock()
+            mock_plot.return_value = mock_fig
+
+            # THEN
+            result = experiment.plot_data(slicer=True)
+
+            # EXPECT
+            mock_plot.assert_called_once()
+            args, kwargs = mock_plot.call_args
+            assert sc.identical(args[0], experiment.data)
+            assert kwargs['title'] == f'{experiment.display_name}'
+            assert kwargs['keep'] == 'energy'
             assert result == mock_fig
 
     def test_plot_data_no_data_raises(self):
@@ -368,13 +386,14 @@ class TestExperiment:
         "Test plotting data raises RuntimeError"
         'when not in notebook environment'
         # WHEN
-        with patch(f'{Experiment.__module__}._in_notebook', return_value=False):
-            # THEN EXPECT
-            with pytest.raises(
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=False),
+            pytest.raises(
                 RuntimeError,
                 match='plot_data\\(\\) can only be used in a Jupyter notebook environment',
-            ):
-                experiment.plot_data()
+            ),
+        ):
+            experiment.plot_data()
 
     ##############
     # test private methods

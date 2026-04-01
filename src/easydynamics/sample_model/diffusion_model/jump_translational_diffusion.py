@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Dict
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -197,8 +195,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         denominator = 1 + unit_conversion_factor_denominator.value * Q**2
 
-        width = numerator / denominator
-        return width
+        return numerator / denominator
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Elastic Incoherent Structure Factor (EISF).
@@ -211,8 +208,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        EISF = np.zeros_like(Q)
-        return EISF
+        return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Quasi-Elastic Incoherent Structure Factor
@@ -225,14 +221,13 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: QISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        QISF = np.ones_like(Q)
-        return QISF
+        return np.ones_like(Q)
 
     def create_component_collections(
         self,
         Q: Q_type,
         component_display_name: str = 'Jump translational diffusion',
-    ) -> List[ComponentCollection]:
+    ) -> list[ComponentCollection]:
         """Create ComponentCollection components for the diffusion model
         at given Q values.
 
@@ -243,7 +238,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
                 Name of the Jump Diffusion Lorentzian component.
 
         Returns:
-            List[ComponentCollection]: List of ComponentCollections with
+            list[ComponentCollection]: List of ComponentCollections with
                 Jump Diffusion Lorentzian components.
 
         Raises:
@@ -316,12 +311,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         # Q is given as a float, so we need to add the units
         return f'hbar * D* {Q} **2/(angstrom**2)/(1 + (D * t* {Q} **2/(angstrom**2)))'
 
-    def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the width.
+            dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
             'D': self._diffusion_coefficient,
@@ -349,12 +344,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         return f'{QISF} * scale'
 
-    def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the area.
+            dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
             'scale': self._scale,

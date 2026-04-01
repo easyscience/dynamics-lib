@@ -173,14 +173,34 @@ class InstrumentModel(NewBase):
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
-        """Set the Q values of the InstrumentModel.
+        """Set the Q values of the InstrumentModel. If Q is already set,
+        it raises an error if the new Q values are not similar to the
+        old ones to prevent accidental changes to the background and
+        resolution models. To change Q values, first run clear_Q().
 
         Args:
-            value (Q_type | None): The new Q values for the
-                InstrumentModel.
+            value (Q_type | None): The new Q values to set.
+                If None, Q values are not changed.
+
+        Raises:
+            ValueError: If the new Q values are not similar to the old
+                ones when Q is not None
         """
-        self._Q = _validate_and_convert_Q(value)
-        self._on_Q_change()
+        if value is None:
+            return
+        old_Q = self._Q
+        new_Q = _validate_and_convert_Q(value)
+
+        if old_Q is None:
+            self._Q = new_Q
+            self._on_Q_change()
+            return
+
+        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+            raise ValueError(
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
+            )
 
     @property
     def unit(self) -> str | sc.Unit:
@@ -192,24 +212,22 @@ class InstrumentModel(NewBase):
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Set the unit of the InstrumentModel. The unit is read-only
         and cannot be set directly. Use convert_unit to change the unit
         between allowed types or create a new InstrumentModel with the
         desired unit.
 
         Args:
-            unit_str (str): The new unit for the InstrumentModel
+            _unit_str (str): The new unit for the InstrumentModel
                 (ignored)
 
         Raises:
             AttributeError: Always, as the unit is read-only.
         """
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     @property
@@ -243,6 +261,27 @@ class InstrumentModel(NewBase):
     # --------------------------------------------------------------
     # Other methods
     # --------------------------------------------------------------
+
+    def clear_Q(self, confirm: bool = False) -> None:
+        """Clear the Q values of the InstrumentModel and any associated
+        ResolutionModel and BackgroundModel, removing all component
+        collections and their associated Parameters.
+
+        Args:
+            confirm (bool, default=False): Confirmation to clear Q
+                values.
+
+        Raises:
+            ValueError: If confirm is not True.
+        """
+        if not confirm:
+            raise ValueError(
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
+            )
+        self._Q = None
+        self.background_model.clear_Q(confirm=True)
+        self.resolution_model.clear_Q(confirm=True)
+        self._on_Q_change()
 
     def convert_unit(self, unit_str: str | sc.Unit) -> None:
         """Convert the unit of the InstrumentModel.
@@ -312,32 +351,100 @@ class InstrumentModel(NewBase):
         """Free all parameters in the resolution model."""
         self.resolution_model.free_all_parameters()
 
-    def get_energy_offset_at_Q(self, Q_index: int) -> Parameter:
+    def normalize_resolution(self) -> None:
+        """Normalize the resolution model to have area 1."""
+        self.resolution_model.normalize_area()
+
+    def get_energy_offset(
+        self,
+        Q_index: int | None = None,
+    ) -> Parameter | list[Parameter]:
         """Get the energy offset Parameter at a specific Q index.
 
         Args:
-            Q_index (int): The index of the Q value to get the energy
-                offset for.
+            Q_index (int | None, default=None): The index of the Q value to get the energy
+                offset for. If None, get the energy offset for all Q values.
 
         Returns:
-            Parameter: The energy offset Parameter at the specified Q
-                index.
+            Parameter | list[Parameter]: The energy offset Parameter at the specified Q
+                index, or a list of Parameters if Q_index is None.
 
         Raises:
             ValueError: If no Q values are set in the InstrumentModel.
             IndexError: If Q_index is out of bounds.
+            TypeError: If Q_index is not an int or None.
         """
         if self._Q is None:
             raise ValueError('No Q values are set in the InstrumentModel.')
+
+        if Q_index is None:
+            return self._energy_offsets
+
+        if not isinstance(Q_index, int):
+            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
 
         if Q_index < 0 or Q_index >= len(self._Q):
             raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
 
         return self._energy_offsets[Q_index]
 
+    def fix_energy_offset(self, Q_index: int | None = None) -> None:
+        """Fix energy offset parameters. If Q_index is specified, only
+        fix the energy offset for that Q value. If Q_index is None, fix
+        energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to fix the energy offset for. If None, fix energy
+                offsets for all Q values.
+        """
+        self._fix_or_free_energy_offset(Q_index, fixed=True)
+
+    def free_energy_offset(self, Q_index: int | None = None) -> None:
+        """Free energy offset parameters. If Q_index is specified, only
+        free the energy offset for that Q value. If Q_index is None,
+        free energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to free the energy offset for. If None, free energy
+                offsets for all Q values.
+        """
+        self._fix_or_free_energy_offset(Q_index, fixed=False)
+
     # --------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------
+    def _fix_or_free_energy_offset(self, Q_index: int | None = None, fixed: bool = True) -> None:
+        """Fix or free energy offset parameters. If Q_index is
+        specified, only fix or free the energy offset for that Q value.
+        If Q_index is None, fix or free energy offsets for all Q values.
+
+        Args:
+            Q_index (int | None, default=None): The index of the Q value
+                to fix or free the energy offset for. If None, fix or
+                free energy offsets for all Q values.
+            fixed (bool, default=True): Whether to fix (True) or free
+                (False) the energy offset.
+
+        Raises:
+            TypeError: If Q_index is not an int or None.
+            IndexError: If Q_index is out of bounds for the Q values in
+                the InstrumentModel.
+        """
+
+        if Q_index is None:
+            for offset in self._energy_offsets:
+                offset.fixed = fixed
+        else:
+            if not isinstance(Q_index, int):
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+
+            if Q_index < 0 or Q_index >= len(self._Q):
+                raise IndexError(
+                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
+                )
+            self._energy_offsets[Q_index].fixed = fixed
 
     def _generate_energy_offsets(self) -> None:
         """Generate energy offset Parameters for each Q value."""
@@ -350,8 +457,8 @@ class InstrumentModel(NewBase):
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
         self._generate_energy_offsets()
-        self._resolution_model.Q = self._Q
-        self._background_model.Q = self._Q
+        self.resolution_model.Q = self.Q
+        self.background_model.Q = self.Q
 
     def _on_energy_offset_change(self) -> None:
         """Handle changes to the energy offset."""
@@ -360,11 +467,11 @@ class InstrumentModel(NewBase):
 
     def _on_resolution_model_change(self) -> None:
         """Handle changes to the resolution model."""
-        self._resolution_model.Q = self._Q
+        self.resolution_model.Q = self.Q
 
     def _on_background_model_change(self) -> None:
         """Handle changes to the background model."""
-        self._background_model.Q = self._Q
+        self.background_model.Q = self.Q
 
     # -------------------------------------------------------------
     # Dunder methods

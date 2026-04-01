@@ -20,22 +20,21 @@ class TestAnalysisBase:
         experiment = Experiment()
         sample_model = SampleModel()
         instrument_model = InstrumentModel()
-        analysis_base = AnalysisBase(
+        return AnalysisBase(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
         )
-        return analysis_base
 
     def test_init(self, analysis_base):
         # WHEN THEN
 
         # EXPECT
         assert analysis_base.display_name == 'TestAnalysis'
-        assert isinstance(analysis_base._experiment, Experiment)
-        assert isinstance(analysis_base._sample_model, SampleModel)
-        assert isinstance(analysis_base._instrument_model, InstrumentModel)
+        assert isinstance(analysis_base.experiment, Experiment)
+        assert isinstance(analysis_base.sample_model, SampleModel)
+        assert isinstance(analysis_base.instrument_model, InstrumentModel)
         assert analysis_base._extra_parameters == []
 
     def test_init_extra_parameter(self):
@@ -264,6 +263,21 @@ class TestAnalysisBase:
             match='extra_parameters must be',
         ):
             analysis_base.extra_parameters = invalid_extra_parameters
+
+    #############
+    # Other methods
+    #############
+
+    def test_normalize_resolution_calls_instrument_model(self, analysis_base):
+        with patch.object(
+            analysis_base.instrument_model, 'normalize_resolution'
+        ) as mock_normalize_resolution:
+            analysis_base.normalize_resolution()
+            mock_normalize_resolution.assert_called_once()
+
+    #############
+    # Private methods
+    #############
 
     def test_on_experiment_changed_updates_Q(self, analysis_base):
         # WHEN

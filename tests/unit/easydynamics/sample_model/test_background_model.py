@@ -30,14 +30,12 @@ class TestBackgroundModel:
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
-        background_model = BackgroundModel(
+        return BackgroundModel(
             display_name='InitModel',
             components=component_collection,
             unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
-
-        return background_model
 
     def test_init(self, background_model):
         # WHEN THEN

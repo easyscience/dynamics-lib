@@ -110,10 +110,7 @@ class TestPolynomial:
 
         # THEN EXPECT: Parameter values match the new inputs
         for i, val in enumerate(values):
-            if isinstance(val, Parameter):
-                expected = val.value
-            else:
-                expected = val
+            expected = val.value if isinstance(val, Parameter) else val
             assert np.isclose(polynomial.coefficients[i].value, expected)
 
     def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):
@@ -184,7 +181,9 @@ class TestPolynomial:
         assert polynomial_copy.display_name == polynomial.display_name
         assert len(polynomial_copy.coefficients) == len(polynomial.coefficients)
         for original_coeff, copied_coeff in zip(
-            polynomial.get_all_parameters(), polynomial_copy.get_all_parameters()
+            polynomial.get_all_parameters(),
+            polynomial_copy.get_all_parameters(),
+            strict=True,
         ):
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed

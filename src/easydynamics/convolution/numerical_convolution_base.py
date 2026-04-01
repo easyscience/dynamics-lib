@@ -4,8 +4,6 @@
 import warnings
 
 # from dataclasses import dataclass
-from typing import Optional
-
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -194,11 +192,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         self._energy_grid = self._create_energy_grid()
 
     @property
-    def temperature(self) -> Optional[Parameter]:
+    def temperature(self) -> Parameter | None:
         """Get the temperature.
 
         Returns:
-            Optional[Parameter]: The temperature parameter, or None if
+            Parameter | None: The temperature parameter, or None if
                 detailed balance correction is disabled.
         """
 
@@ -322,10 +320,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         # select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by
         # 0.5*dx from the true center at index 3.5.
-        if len(energy_dense) % 2 == 0:
-            energy_even_length_offset = -0.5 * energy_dense_step
-        else:
-            energy_even_length_offset = 0.0
+        energy_even_length_offset = -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
 
         # Handle the case when energy_dense is not symmetric around 0.
         # The resolution is still centered around zero (or close to it),
@@ -337,15 +332,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        energy_grid = EnergyGrid(
+        return EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
-
-        return energy_grid
 
     def _check_width_thresholds(
         self,
@@ -367,10 +360,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         # Handle ComponentCollection or ModelComponent
-        if isinstance(model, ComponentCollection):
-            components = model.components
-        else:
-            components = [model]  # Treat single ModelComponent as a list
+        components = model.components if isinstance(model, ComponentCollection) else [model]
 
         for comp in components:
             if hasattr(comp, 'width'):
@@ -382,6 +372,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                             This may lead to inaccuracies in the convolution. \
                                 Increase extension_factor to improve accuracy.',
                         UserWarning,
+                        stacklevel=3,
                     )
                 if comp.width.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
                     warnings.warn(
@@ -391,6 +382,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                             This may lead to inaccuracies in the convolution. \
                                 Increase upsample_factor to improve accuracy.',
                         UserWarning,
+                        stacklevel=3,
                     )
 
     def __repr__(self) -> str:

@@ -211,7 +211,7 @@ class TestComponentCollection:
         # WHEN THEN
         # Introduce a faulty component that will fail conversion
         class FaultyComponent(Gaussian):
-            def convert_unit(self, unit: str) -> None:
+            def convert_unit(self, _unit: str) -> None:
                 raise RuntimeError('Conversion failed.')
 
         faulty_component = FaultyComponent(
@@ -438,7 +438,9 @@ class TestComponentCollection:
         assert model_dict['unit'] == component_collection.unit
         assert len(model_dict['components']) == len(component_collection.components)
 
-        for comp, comp_dict in zip(component_collection.components, model_dict['components']):
+        for comp, comp_dict in zip(
+            component_collection.components, model_dict['components'], strict=True
+        ):
             assert comp_dict['@class'] == type(comp).__name__
             assert comp_dict['display_name'] == comp.display_name
             assert comp_dict['unit'] == comp.unit
@@ -455,7 +457,9 @@ class TestComponentCollection:
         assert len(new_model.components) == len(component_collection.components)
 
         # Compare each component and its parameters
-        for orig_comp, new_comp in zip(component_collection.components, new_model.components):
+        for orig_comp, new_comp in zip(
+            component_collection.components, new_model.components, strict=True
+        ):
             assert type(new_comp) is type(orig_comp)
             assert new_comp.display_name == orig_comp.display_name
             assert new_comp.unit == orig_comp.unit
@@ -463,7 +467,7 @@ class TestComponentCollection:
             orig_params = orig_comp.get_all_parameters()
             new_params = new_comp.get_all_parameters()
             assert len(orig_params) == len(new_params)
-            for param_orig, param_new in zip(orig_params, new_params):
+            for param_orig, param_new in zip(orig_params, new_params, strict=True):
                 assert param_new.name == param_orig.name
                 assert param_new.value == param_orig.value
                 assert param_new.fixed == param_orig.fixed
@@ -479,7 +483,9 @@ class TestComponentCollection:
         assert len(model_copy.components) == len(component_collection.components)
 
         # EXPECT: deep copy, same order
-        for orig_comp, copied_comp in zip(component_collection.components, model_copy.components):
+        for orig_comp, copied_comp in zip(
+            component_collection.components, model_copy.components, strict=True
+        ):
             # New object
             assert copied_comp is not orig_comp
 
@@ -494,7 +500,7 @@ class TestComponentCollection:
 
             assert len(orig_params) == len(copied_params)
 
-            for param_orig, param_copy in zip(orig_params, copied_params):
+            for param_orig, param_copy in zip(orig_params, copied_params, strict=True):
                 assert param_copy is not param_orig
                 assert param_copy.value == param_orig.value
                 assert param_copy.min == param_orig.min

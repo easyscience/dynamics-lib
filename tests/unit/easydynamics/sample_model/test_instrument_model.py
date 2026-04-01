@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import scipp as sc
 
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Polynomial
@@ -24,26 +25,36 @@ class TestInstrumentModel:
         component2 = Gaussian()
         resolution_model = ResolutionModel(components=component2, Q=Q)
 
-        instrument_model = InstrumentModel(
+        return InstrumentModel(
             display_name='TestInstrumentModel',
             background_model=background_model,
             resolution_model=resolution_model,
             Q=Q,
         )
 
-        return instrument_model
+    @pytest.fixture
+    def instrument_model_without_Q(self):
+        component1 = Polynomial(coefficients=[1.0, 2.0])
+        background_model = BackgroundModel(components=component1)
+
+        component2 = Gaussian()
+        resolution_model = ResolutionModel(components=component2)
+
+        return InstrumentModel(
+            display_name='TestInstrumentModel',
+            background_model=background_model,
+            resolution_model=resolution_model,
+        )
 
     @pytest.fixture
     def resolution_model(self):
         component = Gaussian()
-        resolution_model = ResolutionModel(components=component)
-        return resolution_model
+        return ResolutionModel(components=component)
 
     @pytest.fixture
     def background_model(self):
         component = Polynomial(coefficients=[1.0, 2.0])
-        background_model = BackgroundModel(components=component)
-        return background_model
+        return BackgroundModel(components=component)
 
     def test_init(self, instrument_model):
         # WHEN THEN
@@ -143,23 +154,19 @@ class TestInstrumentModel:
         ):
             instrument_model.background_model = 123
 
-    def test_Q_setter(self, instrument_model):
-        "Test that Q setter calls the appropriate methods."
+    def test_clear_Q(self, instrument_model):
         # WHEN
-        new_Q = np.array([4.0, 5.0, 6.0])
+        instrument_model.clear_Q(confirm=True)
 
-        instrument_model._on_Q_change = MagicMock()
+        # THEN / EXPECT
+        assert instrument_model.Q is None
+        assert instrument_model.background_model.Q is None
+        assert instrument_model.resolution_model.Q is None
 
-        # THEN EXPECT
-        with patch(
-            'easydynamics.sample_model.instrument_model._validate_and_convert_Q',
-            return_value=new_Q,
-        ) as mock_validate:
-            instrument_model.Q = new_Q
-
-            np.testing.assert_array_equal(instrument_model.Q, new_Q)
-            mock_validate.assert_called_once_with(new_Q)
-            instrument_model._on_Q_change.assert_called_once()
+    def test_clear_Q_raises_without_confirm(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(ValueError, match='Clearing Q values requires confirmation'):
+            instrument_model.clear_Q()
 
     def test_unit_setter_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
@@ -188,33 +195,41 @@ class TestInstrumentModel:
         ):
             instrument_model.energy_offset = 'invalid_offset'
 
-    def test_get_energy_offset_at_Q(self, instrument_model):
+    def test_get_energy_offset(self, instrument_model):
         # WHEN
 
         # THEN
-        offset_at_Q0 = instrument_model.get_energy_offset_at_Q(0)
+        offset_at_Q0 = instrument_model.get_energy_offset(0)
 
         # EXPECT
         assert offset_at_Q0.value == instrument_model.energy_offset.value
 
-    def test_get_energy_offset_at_Q_invalid_index_raises(self, instrument_model):
+    def test_get_energy_offset_invalid_index_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
             match='Q_index 5 is out of bounds',
         ):
-            instrument_model.get_energy_offset_at_Q(5)
+            instrument_model.get_energy_offset(5)
 
-    def test_get_energy_offset_at_Q_no_Q_raises(self, instrument_model):
+    def test_get_energy_offset_nonint_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.get_energy_offset('invalid_index')
+
+    def test_get_energy_offset_no_Q_raises(self, instrument_model):
         # WHEN
-        instrument_model.Q = None
+        instrument_model.clear_Q(confirm=True)
 
         # THEN / EXPECT
         with pytest.raises(
             ValueError,
             match='No Q values are set',
         ):
-            instrument_model.get_energy_offset_at_Q(0)
+            instrument_model.get_energy_offset(0)
 
     def test_convert_unit_calls_all_children(self, instrument_model):
         # WHEN
@@ -296,7 +311,7 @@ class TestInstrumentModel:
 
     def test_get_all_variables_no_Q(self, instrument_model):
         # WHEN
-        instrument_model.Q = None
+        instrument_model.clear_Q(confirm=True)
 
         # THEN
         all_vars = instrument_model.get_all_variables()
@@ -339,6 +354,16 @@ class TestInstrumentModel:
         ):
             instrument_model.get_all_variables(Q_index='invalid_index')
 
+    def test_normalize_resolution(self, instrument_model):
+        # WHEN
+        instrument_model.resolution_model.normalize_area = MagicMock()
+
+        # THEN
+        instrument_model.normalize_resolution()
+
+        # EXPECT
+        instrument_model.resolution_model.normalize_area.assert_called_once()
+
     def test_generate_energy_offsets_Q_none(self, instrument_model):
         # WHEN
         instrument_model._Q = None
@@ -363,19 +388,101 @@ class TestInstrumentModel:
             assert offset.unit == instrument_model.unit
             assert offset.value == instrument_model.energy_offset.value
 
-    def test_on_Q_change(self, instrument_model):
+    def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
-        instrument_model._generate_energy_offsets = MagicMock()
-        new_Q = np.array([1.0, 2.0, 3.0, 4.0])
+        instrument_model_without_Q._generate_energy_offsets = MagicMock()
+        first_new_Q = np.array([1.0, 2.0, 3.0])
 
         # THEN
-        instrument_model._Q = new_Q
-        instrument_model._on_Q_change()
+        instrument_model_without_Q.Q = first_new_Q
 
         # EXPECT
-        instrument_model._generate_energy_offsets.assert_called_once()
-        instrument_model._background_model.Q = new_Q
-        instrument_model._resolution_model.Q = new_Q
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+
+        # THEN
+        new_Q = np.array([4.0, 5.0, 6.0])
+
+        # EXPECT
+        with pytest.raises(ValueError, match='New Q values are not similar to the old ones'):
+            instrument_model_without_Q.Q = new_Q
+
+        # THEN
+        new_Q = None
+        instrument_model_without_Q.Q = new_Q
+
+        # EXPECT
+        # No new calls to _generate_energy_offsets, and Q values remain unchanged
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+
+        # THEN
+        new_Q = sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom')
+
+        # EXPECT
+        # No new calls to _generate_energy_offsets, and Q values remain unchanged
+        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
+        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+
+    def test_fix_and_free_offset(self, instrument_model):
+        # WHEN
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is False
+
+        # THEN
+        instrument_model.fix_energy_offset()
+
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is True
+        # THEN
+        instrument_model.free_energy_offset()
+
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is False
+
+        # THEN
+        instrument_model.fix_energy_offset(Q_index=1)
+
+        # EXPECT
+        for i, offset in enumerate(instrument_model._energy_offsets):
+            if i == 1:
+                assert offset.fixed is True
+            else:
+                assert offset.fixed is False
+
+    def test_fix_or_free_energy_offset_invalid_Q_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds',
+        ):
+            instrument_model.fix_energy_offset(Q_index=5)
+
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds',
+        ):
+            instrument_model.free_energy_offset(Q_index=5)
+
+    def test_fix_or_free_energy_offset_nonint_Q_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.fix_energy_offset(Q_index='invalid_index')
+
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.free_energy_offset(Q_index='invalid_index')
 
     def test_on_energy_offset_change(self, instrument_model):
         # WHEN

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import scipp as sc
@@ -131,8 +131,7 @@ class Polynomial(ModelComponent):
         Returns:
             list[float]: The coefficient values of the polynomial.
         """
-        coefficient_list = [param.value for param in self._coefficients]
-        return coefficient_list
+        return [param.value for param in self._coefficients]
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         r"""Evaluate the Polynomial at the given x values.
@@ -163,6 +162,7 @@ class Polynomial(ModelComponent):
                 f'The Polynomial with unique_name {self.unique_name} has negative values, '
                 'which may not be physically meaningful.',
                 UserWarning,
+                stacklevel=2,
             )
         return result
 
@@ -176,20 +176,20 @@ class Polynomial(ModelComponent):
         return len(self._coefficients) - 1
 
     @degree.setter
-    def degree(self, value: int) -> None:
+    def degree(self, _value: int) -> None:
         """The degree is determined by the number of coefficients and
         cannot be set directly.
 
         Args:
-            value (int): The new degree of the polynomial.
+            _value (int): The new degree of the polynomial.
 
         Raises:
             AttributeError: Always raised since degree cannot be set
                 directly.
         """
         raise AttributeError(
-            'The degree of the polynomial is determined by the number of coefficients \
-                and cannot be set directly.'
+            'The degree of the polynomial is determined by the number of coefficients '
+            'and cannot be set directly.'
         )
 
     def get_all_variables(self) -> list[DescriptorBase]:
@@ -233,8 +233,10 @@ class Polynomial(ModelComponent):
         """
 
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
-        return f'Polynomial(unique_name = {self.unique_name}, \
-            unit = {self._unit},\n coefficients = [{coeffs_str}])'
+        return (
+            f'Polynomial(unique_name = {self.unique_name}, '
+            f'unit = {self._unit},\n coefficients = [{coeffs_str}])'
+        )
 
 
 # from typing import Callable, Dict

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import warnings
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -109,12 +108,12 @@ class ComponentCollection(ModelBase):
         return not self._components
 
     @is_empty.setter
-    def is_empty(self, value: bool) -> None:
+    def is_empty(self, _value: bool) -> None:
         """is_empty is a read-only property that indicates whether the
         collection has components.
 
         Args:
-            value (bool): The value to set (ignored).
+            _value (bool): The value to set (ignored).
 
         Raises:
             AttributeError: Always raised since is_empty is read-only.
@@ -135,21 +134,19 @@ class ComponentCollection(ModelBase):
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """Unit is read-only and cannot be set directly.
 
         Args:
-            unit_str (str): The unit to set (ignored).
+            _unit_str (str): The unit to set (ignored).
 
         Raises:
             AttributeError: Always raised since unit is read-only.
         """
 
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
@@ -187,7 +184,7 @@ class ComponentCollection(ModelBase):
     # Component management
     # ------------------------------------------------------------------
 
-    def append_component(self, component: ModelComponent | 'ComponentCollection') -> None:
+    def append_component(self, component: ModelComponent | ComponentCollection) -> None:
         """Append a model component or the components from another
         ComponentCollection to this ComponentCollection.
 
@@ -288,11 +285,11 @@ class ComponentCollection(ModelBase):
         return not self._components
 
     @is_empty.setter
-    def is_empty(self, value: bool) -> None:
+    def is_empty(self, _value: bool) -> None:
         """is_empty is read-only.
 
         Args:
-            value (bool): ignored.
+            _value (bool): ignored.
 
         Raises:
             AttributeError: Always raised since is_empty is read-only
@@ -302,11 +299,11 @@ class ComponentCollection(ModelBase):
             'whether the collection has components.'
         )
 
-    def list_component_names(self) -> List[str]:
+    def list_component_names(self) -> list[str]:
         """List the names of all components in the model.
 
         Returns:
-            List[str]: List of unique names of the components in the
+            list[str]: List of unique names of the components in the
                 collection.
         """
 
@@ -340,6 +337,7 @@ class ComponentCollection(ModelBase):
                     f"Component '{component.unique_name}' does not have an 'area' attribute "
                     f'and will be skipped in normalization.',
                     UserWarning,
+                    stacklevel=2,
                 )
 
         if total_area.value == 0:
@@ -404,7 +402,7 @@ class ComponentCollection(ModelBase):
 
         if not isinstance(unique_name, str):
             raise TypeError(
-                (f'Component unique name must be a string, got {type(unique_name)} instead.')
+                f'Component unique name must be a string, got {type(unique_name)} instead.'
             )
 
         matches = [comp for comp in self.components if comp.unique_name == unique_name]
@@ -413,9 +411,7 @@ class ComponentCollection(ModelBase):
 
         component = matches[0]
 
-        result = component.evaluate(x)
-
-        return result
+        return component.evaluate(x)
 
     def fix_all_parameters(self) -> None:
         """Fix all free parameters in the model."""
@@ -446,11 +442,10 @@ class ComponentCollection(ModelBase):
         if isinstance(item, str):
             # Check by component unique name
             return any(comp.unique_name == item for comp in self.components)
-        elif isinstance(item, ModelComponent):
+        if isinstance(item, ModelComponent):
             # Check by component instance
             return any(comp is item for comp in self.components)
-        else:
-            return False
+        return False
 
     def __repr__(self) -> str:
         """Return a string representation of the ComponentCollection.

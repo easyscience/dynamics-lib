@@ -99,14 +99,14 @@ class Analysis(AnalysisBase):
         return self._analysis_list
 
     @analysis_list.setter
-    def analysis_list(self, value: list[Analysis1d]) -> None:
+    def analysis_list(self, _value: list[Analysis1d]) -> None:
         """analysis_list is read-only.
 
         To change the analysis list, modify the experiment, sample
         model, or instrument model.
 
         Args:
-            value (list[Analysis1d]): The new list of Analysis1d objects. This
+            _value (list[Analysis1d]): The new list of Analysis1d objects. This
                 argument is ignored, as analysis_list is read-only.
 
         Raises:
@@ -189,12 +189,10 @@ class Analysis(AnalysisBase):
         if fit_method == 'independent':
             if Q_index is not None:
                 return self._fit_single_Q(Q_index)
-            else:
-                return self._fit_all_Q_independently()
-        elif fit_method == 'simultaneous':
+            return self._fit_all_Q_independently()
+        if fit_method == 'simultaneous':
             return self._fit_all_Q_simultaneously()
-        else:
-            raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
+        raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
 
     def plot_data_and_model(
         self,
@@ -284,7 +282,7 @@ class Analysis(AnalysisBase):
             components = self._create_components_dataset(
                 add_background=add_background, energy=energy
             )
-            for key in components.keys():
+            for key in components:
                 data_and_model[key] = components[key]
                 plot_kwargs_defaults['linestyle'][key] = '--'
                 plot_kwargs_defaults['marker'][key] = None
@@ -362,7 +360,7 @@ class Analysis(AnalysisBase):
                 dims=['Q'],
                 values=np.asarray(values[name], dtype=float),
                 variances=np.asarray(variances[name], dtype=float),
-                unit=units.get(name, None),
+                unit=units.get(name),
             )
 
         return ds
@@ -407,20 +405,51 @@ class Analysis(AnalysisBase):
 
         data_to_plot = {name: ds[name] for name in names}
         plot_kwargs_defaults = {
-            'linestyle': {name: 'none' for name in names},
-            'marker': {name: 'o' for name in names},
-            'markerfacecolor': {name: 'none' for name in names},
+            'linestyle': dict.fromkeys(names, 'none'),
+            'marker': dict.fromkeys(names, 'o'),
+            'markerfacecolor': dict.fromkeys(names, 'none'),
         }
 
         plot_kwargs_defaults.update(kwargs)
 
         import plopp as pp
 
-        fig = pp.plot(
+        return pp.plot(
             data_to_plot,
             **plot_kwargs_defaults,
         )
-        return fig
+
+    def fix_energy_offset(self, Q_index: int | None = None) -> None:
+        """Fix the energy offset parameter(s) for a specific Q index, or
+        for all Q indices if Q_index is None.
+
+        Args:
+            Q_index (int | None, default=None): Index of the Q value to
+                fix the energy offset for. If None, fixes the energy
+                offset for all Q values. Default is None.
+        """
+        if Q_index is not None:
+            Q_index = self._verify_Q_index(Q_index)
+            self.analysis_list[Q_index].fix_energy_offset()
+        else:
+            for analysis in self.analysis_list:
+                analysis.fix_energy_offset()
+
+    def free_energy_offset(self, Q_index: int | None = None) -> None:
+        """Free the energy offset parameter(s) for a specific Q index,
+        or for all Q indices if Q_index is None.
+
+        Args:
+            Q_index (int | None, default=None): Index of the Q value to
+                free the energy offset for. If None, frees the energy
+                offset for all Q values. Default is None.
+        """
+        if Q_index is not None:
+            Q_index = self._verify_Q_index(Q_index)
+            self.analysis_list[Q_index].free_energy_offset()
+        else:
+            for analysis in self.analysis_list:
+                analysis.free_energy_offset()
 
     #############
     # Private methods - updating models when things change
@@ -430,7 +459,7 @@ class Analysis(AnalysisBase):
         """Update the Q values in the sample and instrument models when
         the experiment changes.
 
-        Also update all the Analysi1d objects with the new experiment.
+        Also update all the Analysis1d objects with the new experiment.
         """
         if self._call_updaters:
             super()._on_experiment_changed()
@@ -441,7 +470,8 @@ class Analysis(AnalysisBase):
         """Update the Q values in the sample model when the sample model
         changes.
 
-        Also update all the Analysi1d objects with the new sample model.
+        Also update all the Analysis1d objects with the new sample
+        model.
         """
         if self._call_updaters:
             super()._on_sample_model_changed()
@@ -452,7 +482,7 @@ class Analysis(AnalysisBase):
         """Update the Q values in the instrument model when the
         instrument model changes.
 
-        Also update all the Analysi1d objects with the new instrument
+        Also update all the Analysis1d objects with the new instrument
         model.
         """
         if self._call_updaters:
@@ -514,12 +544,11 @@ class Analysis(AnalysisBase):
             fit_functions=self.get_fit_functions(),
         )
 
-        results = mf.fit(
+        return mf.fit(
             x=xs,
             y=ys,
             weights=ws,
         )
-        return results
 
     def get_fit_functions(self) -> list[callable]:
         """Get fit functions for all Q indices, which can be used for
@@ -546,11 +575,10 @@ class Analysis(AnalysisBase):
         if energy is None:
             energy = self.energy
         model = sc.array(dims=['Q', 'energy'], values=self.calculate(energy=energy))
-        model_data_array = sc.DataArray(
+        return sc.DataArray(
             data=model,
             coords={'Q': self.Q, 'energy': energy},
         )
-        return model_data_array
 
     def _create_components_dataset(
         self,

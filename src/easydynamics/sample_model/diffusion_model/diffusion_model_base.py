@@ -69,22 +69,20 @@ class DiffusionModelBase(ModelBase):
         return str(self._unit)
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
+    def unit(self, _unit_str: str) -> None:
         """The unit of the energy axis is read-only. To change the unit,
         use convert_unit or create a new DiffusionModel with the desired
         unit.
 
         Args:
-            unit_str (str): The new unit to set (ignored)
+            _unit_str (str): The new unit to set (ignored)
 
         Raises:
             AttributeError: Always, since the unit is read-only.
         """
         raise AttributeError(
-            (
-                f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-                f'or create a new {self.__class__.__name__} with the desired unit.'
-            )
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )  # noqa: E501
 
     @property

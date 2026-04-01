@@ -114,7 +114,7 @@ class TestAnalyticalConvolution:
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair
-        def mock_convolute_analytic_pair(sample_component, resolution_component):
+        def mock_convolute_analytic_pair(sample_component, resolution_component):  # noqa: ARG001
             return np.full_like(default_analytical_convolution.energy.values, fill_value=1.0)
 
         with patch.object(
@@ -166,7 +166,7 @@ class TestAnalyticalConvolution:
 
         # THEN
         # Mock _convolute_analytic_pair to return 1.0 for any input pair
-        def mock_convolute_analytic_pair(sample_component, resolution_component):
+        def mock_convolute_analytic_pair(sample_component, resolution_component):  # noqa: ARG001
             return np.full_like(default_analytical_convolution.energy.values, fill_value=1.0)
 
         with patch.object(
@@ -271,10 +271,7 @@ class TestAnalyticalConvolution:
             return_value='mocked_result',
         ) as mocked_func:
             result = default_analytical_convolution._convolute_analytic_pair(function1, function2)
-            if swapped:
-                expected_args = (function2, function1)
-            else:
-                expected_args = (function1, function2)
+            expected_args = (function2, function1) if swapped else (function1, function2)
 
             mocked_func.assert_called_once_with(*expected_args)
             assert result == 'mocked_result'

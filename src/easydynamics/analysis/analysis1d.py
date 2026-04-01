@@ -146,9 +146,7 @@ class Analysis1d(AnalysisBase):
 
         background_intensity = self._evaluate_background(energy=energy)
 
-        sample_plus_background = sample_intensity + background_intensity
-
-        return sample_plus_background
+        return sample_intensity + background_intensity
 
     def fit(self) -> FitResults:
         """Fit the model to the experimental data for the chosen Q
@@ -186,7 +184,9 @@ class Analysis1d(AnalysisBase):
         return fit_result
 
     def as_fit_function(
-        self, x: np.ndarray | sc.Variable | None = None, **kwargs: dict[str, Any]
+        self,
+        _x: np.ndarray | sc.Variable | None = None,
+        **kwargs: dict[str, Any],  # noqa: ARG002
     ) -> callable:
         """Return self._calculate as a fit function.
 
@@ -196,7 +196,7 @@ class Analysis1d(AnalysisBase):
         calculated model.
 
         Args:
-            x (np.ndarray | sc.Variable | None, default=None): Ignored.
+            _x (np.ndarray | sc.Variable | None, default=None): Ignored.
                 The energy grid is taken from the experiment.
             **kwargs (dict[str, Any]): Ignored. Included for compatibility with the
                 EasyScience fitter.
@@ -207,8 +207,8 @@ class Analysis1d(AnalysisBase):
         """
 
         def fit_function(
-            x: np.ndarray | sc.Variable | None = None,
-            **kwargs: dict[str, Any],
+            _x: np.ndarray | sc.Variable | None = None,
+            **kwargs: dict[str, Any],  # noqa: ARG001
         ) -> np.ndarray:
             return self._calculate()
 
@@ -292,18 +292,25 @@ class Analysis1d(AnalysisBase):
         }
 
         if plot_components:
-            for comp_name in component_dataset.keys():
+            for comp_name in component_dataset:
                 plot_kwargs_defaults['linestyle'][comp_name] = '--'
                 plot_kwargs_defaults['marker'][comp_name] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
 
-        fig = pp.plot(
+        return pp.plot(
             data_and_model,
             **plot_kwargs_defaults,
         )
-        return fig
+
+    def fix_energy_offset(self) -> None:
+        """Fix the energy offset parameter for the current Q index."""
+        self.instrument_model.fix_energy_offset(Q_index=self._require_Q_index())
+
+    def free_energy_offset(self) -> None:
+        """Free the energy offset parameter for the current Q index."""
+        self.instrument_model.free_energy_offset(Q_index=self._require_Q_index())
 
     #############
     # Private methods: small utilities
@@ -428,7 +435,7 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
 
-        energy_offset = self.instrument_model.get_energy_offset_at_Q(Q_index)
+        energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(
             energy=energy,
             energy_offset=energy_offset,
@@ -596,14 +603,13 @@ class Analysis1d(AnalysisBase):
             return None
 
         # TODO: allow convolution options to be set.
-        convolver = Convolution(
+        return Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy=energy,
             temperature=self.temperature,
-            energy_offset=self.instrument_model.get_energy_offset_at_Q(Q_index),
+            energy_offset=self.instrument_model.get_energy_offset(Q_index),
         )
-        return convolver
 
     #############
     # Private methods: create scipp arrays for plotting

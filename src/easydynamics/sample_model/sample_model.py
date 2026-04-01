@@ -1,13 +1,15 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from contextlib import suppress
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.sample_model.model_base import ModelBase
-from easydynamics.utils import _detailed_balance_factor
+from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 
@@ -259,11 +261,11 @@ class SampleModel(ModelBase):
         return self._temperature_unit
 
     @temperature_unit.setter
-    def temperature_unit(self, value: str | sc.Unit) -> None:
+    def temperature_unit(self, _value: str | sc.Unit) -> None:
         """The temperature unit of the SampleModel is read-only.
 
         Args:
-            value (str | sc.Unit): The unit to set for the temperature
+            _value (str | sc.Unit): The unit to set for the temperature
                 Parameter.
 
         Raises:
@@ -295,13 +297,11 @@ class SampleModel(ModelBase):
         try:
             self._temperature.convert_unit(unit)
             self._temperature_unit = unit
-        except Exception as e:
+        except Exception:
             # Attempt to rollback on failure
-            try:
+            with suppress(Exception):
                 self._temperature.convert_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
+            raise
 
     @property
     def divide_by_temperature(self) -> bool:
@@ -351,7 +351,7 @@ class SampleModel(ModelBase):
         y = super().evaluate(x)
 
         if self._temperature is not None:
-            DBF = _detailed_balance_factor(
+            DBF = detailed_balance_factor(
                 energy=x,
                 temperature=self._temperature,
                 divide_by_temperature=self._divide_by_temperature,
@@ -407,7 +407,9 @@ class SampleModel(ModelBase):
         # and add to component collections
         for diffusion_model in self._diffusion_models:
             diffusion_collections = diffusion_model.create_component_collections(Q=self._Q)
-            for target, source in zip(self._component_collections, diffusion_collections):
+            for target, source in zip(
+                self._component_collections, diffusion_collections, strict=True
+            ):
                 for component in source.components:
                     target.append_component(component)
 

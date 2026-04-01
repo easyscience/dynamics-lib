@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Dict
-from typing import List
 
 import numpy as np
 import scipp as sc
@@ -141,9 +139,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         unit_conversion_factor.convert_unit(self.unit)
-        width = Q**2 * unit_conversion_factor.value
-
-        return width
+        return Q**2 * unit_conversion_factor.value
 
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Elastic Incoherent Structure Factor (EISF) for
@@ -157,8 +153,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             np.ndarray: EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
-        EISF = np.zeros_like(Q)
-        return EISF
+        return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Quasi-Elastic Incoherent Structure Factor
@@ -172,14 +167,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
 
         Q = _validate_and_convert_Q(Q)
-        QISF = np.ones_like(Q)
-        return QISF
+        return np.ones_like(Q)
 
     def create_component_collections(
         self,
         Q: Q_type,
         component_display_name: str = 'Brownian diffusion',
-    ) -> List[ComponentCollection]:
+    ) -> list[ComponentCollection]:
         r"""Create ComponentCollection components for the Brownian
         translational diffusion model at given Q values.
 
@@ -189,7 +183,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
                 Name of the Lorentzian component.
 
         Returns:
-            List[ComponentCollection]: List of ComponentCollections with
+            list[ComponentCollection]: List of ComponentCollections with
                 Lorentzian components for each Q value. Each Lorentzian
                 has a width given by $D*Q^2$ and an area given by the
                 scale parameter multiplied by the QISF (which is 1 for
@@ -265,12 +259,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         # Q is given as a float, so we need to add the units
         return f'hbar * D* {Q} **2*1/(angstrom**2)'
 
-    def _write_width_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the width.
+            dict[str, DescriptorNumber]: Dependency map for the width.
         """
         return {
             'D': self.diffusion_coefficient,
@@ -296,12 +290,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         return f'{QISF} * scale'
 
-    def _write_area_dependency_map_expression(self) -> Dict[str, DescriptorNumber]:
+    def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """Write the dependency map expression to make dependent
         Parameters.
 
         Returns:
-            Dict[str, DescriptorNumber]: Dependency map for the area.
+            dict[str, DescriptorNumber]: Dependency map for the area.
         """
         return {
             'scale': self.scale,
