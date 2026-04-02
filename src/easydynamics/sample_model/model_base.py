@@ -50,7 +50,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If components is not a ModelComponent or ComponentCollection.
         """
         super().__init__(
@@ -89,7 +89,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If there are no components in the model to evaluate.
 
         Returns
@@ -167,7 +167,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
@@ -186,9 +186,9 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the provided unit is not a string or sc.Unit.
-        Exception :
+        Exception
             If the provided unit is not compatible with the current unit.
         """
 
@@ -234,7 +234,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a ModelComponent, ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
@@ -271,7 +271,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If the new Q values are not similar to the old ones when Q is already set.
         """
         if value is None:
@@ -302,7 +302,7 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If confirm is not True.
         """
         if not confirm:
@@ -339,9 +339,9 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q_index is not an int or None.
-        IndexError :
+        IndexError
             If Q_index is out of bounds for the number of ComponentCollections.
 
         Returns
@@ -379,9 +379,9 @@ class ModelBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q_index is not an int.
-        IndexError :
+        IndexError
             If Q_index is out of bounds for the number of ComponentCollections.
 
         Returns

@@ -48,9 +48,9 @@ class CreateParametersMixin:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If area is not a number or a Parameter.
-        ValueError :
+        ValueError
             If area is not a finite number or if the area Parameter has a non-finite value.
 
         Returns
@@ -105,9 +105,9 @@ class CreateParametersMixin:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If center is not None, a number, or a Parameter.
-        ValueError :
+        ValueError
             If center is a number but not finite, or if center is a Parameter but has a non-finite
             value.
 
@@ -161,9 +161,9 @@ class CreateParametersMixin:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If width is not a number or a Parameter.
-        ValueError :
+        ValueError
             If width is non-positive.
 
         Returns

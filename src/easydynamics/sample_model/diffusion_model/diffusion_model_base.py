@@ -37,9 +37,9 @@ class DiffusionModelBase(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If scale is not a number.
-        UnitError :
+        UnitError
             If unit is not a string or scipp Unit, or if it cannot be converted to meV.
         """
 
@@ -90,7 +90,7 @@ class DiffusionModelBase(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, since the unit is read-only.
         """
         raise AttributeError(
@@ -122,9 +122,9 @@ class DiffusionModelBase(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If scale is not a number.
-        ValueError :
+        ValueError
             If scale is negative.
         """
         if not isinstance(scale, Numeric):

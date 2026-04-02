@@ -43,7 +43,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If data is not a sc.DataArray, a string, or None.
         """
         super().__init__(
@@ -95,7 +95,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a sc.DataArray.
         """
         if not isinstance(value, sc.DataArray):
@@ -132,7 +132,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, since binned_data is read-only.
         """
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
@@ -165,7 +165,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, since Q is read-only.
         """
         raise AttributeError('Q is a read-only property derived from the data.')
@@ -198,7 +198,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, since energy is read-only.
         """
         raise AttributeError('energy is a read-only property derived from the data.')
@@ -215,7 +215,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        IndexError :
+        IndexError
             If Q_index is not a valid index for the Q values.
 
         Returns
@@ -256,7 +256,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If filename is not a string or if display_name is not a string or None or if the loaded
             data is not a sc.DataArray.
         """
@@ -290,9 +290,9 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If filename is not a string or None.
-        ValueError :
+        ValueError
             If there is no data to save.
         """
 
@@ -326,11 +326,11 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If dimensions is not a dictionary or if keys/values are of incorrect types.
-        ValueError :
+        ValueError
             If there is no data to rebin.
-        KeyError :
+        KeyError
             If a specified dimension is not in the dataset.
         """
 
@@ -386,9 +386,9 @@ class Experiment(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If there is no data to plot.
-        RuntimeError :
+        RuntimeError
             If not in a Jupyter notebook environment.
         """
 
@@ -438,9 +438,9 @@ class Experiment(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If data is not a sc.DataArray.
-        ValueError :
+        ValueError
             If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
@@ -506,7 +506,7 @@ class Experiment(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If any variances are zero after removing NaNs and Infs, since this would lead to
             infinite weights.
 

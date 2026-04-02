@@ -66,7 +66,7 @@ class ModelComponent(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since unit is read-only.
         """
         raise AttributeError(
@@ -99,10 +99,10 @@ class ModelComponent(ModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If x contains NaN or infinite values, or if a sc.DataArray has more than one
             coordinate.
-        UnitError :
+        UnitError
             If x has incompatible units that cannot be converted to the component's unit.
 
         Returns
@@ -175,7 +175,7 @@ class ModelComponent(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If unit is not a string or scipp Unit.
         """
         if unit is not None and not isinstance(unit, (str, sc.Unit)):
@@ -194,9 +194,9 @@ class ModelComponent(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the provided unit is not a str or sc.Unit.
-        Exception :
+        Exception
             If the provided unit is invalid or incompatible with the component's parameters.
         """
         if not isinstance(unit, (str, sc.Unit)):

@@ -66,7 +66,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If scale, diffusion_coefficient, or relaxation_time  are not numbers.
         """
         super().__init__(
@@ -129,9 +129,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If diffusion_coefficient is not a number.
-        ValueError :
+        ValueError
             If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
@@ -164,9 +164,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If relaxation_time is not a number.
-        ValueError :
+        ValueError
             If relaxation_time is negative.
         """
         if not isinstance(relaxation_time, Numeric):
@@ -266,7 +266,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If component_display_name is not a string.
 
         Returns
@@ -334,7 +334,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q is not a float.
 
         Returns
@@ -375,7 +375,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If QISF is not a float.
 
         Returns

@@ -73,7 +73,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
             string or sc.Unit, or if upsample_factor is not a number or None, or if
             extension_factor is not a number, or if normalize_detailed_balance is not a bool.
@@ -144,9 +144,9 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If factor is not a number or None.
-        ValueError :
+        ValueError
             If factor is not greater than 1.
         """
         if factor is None:
@@ -196,9 +196,9 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If factor is not a number.
-        ValueError :
+        ValueError
             If factor is negative.
         """
 
@@ -239,7 +239,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If temp is not a Numeric, Parameter, or None.
         """
 
@@ -289,7 +289,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If normalize is not a bool.
         """
 
@@ -309,7 +309,7 @@ class NumericalConvolutionBase(ConvolutionBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If energy array is not uniformly spaced when upsample_factor is None, or if energy
             array has less than 2 points.
 

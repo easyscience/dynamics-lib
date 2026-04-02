@@ -99,7 +99,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
 
@@ -132,7 +132,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number or None.
         """
 
@@ -167,9 +167,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number or None.
-        ValueError :
+        ValueError
             If the value is not positive.
         """
         if not isinstance(value, Numeric):

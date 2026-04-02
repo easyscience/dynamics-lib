@@ -49,10 +49,10 @@ class Polynomial(ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If coefficients is not a sequence of numbers or Parameters or if any item in
             coefficients is not a number or Parameter.
-        ValueError :
+        ValueError
             If coefficients is an empty sequence.
         """
 
@@ -110,10 +110,10 @@ class Polynomial(ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If coeffs is not a sequence of numbers or Parameters or if any item in coeffs is not a
             number or Parameter.
-        ValueError :
+        ValueError
             If the length of coeffs does not match the existing number of coefficients.
         """
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
@@ -201,7 +201,7 @@ class Polynomial(ModelComponent):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since degree cannot be set directly.
         """
         raise AttributeError(
@@ -231,7 +231,7 @@ class Polynomial(ModelComponent):
 
         Raises
         ------
-        UnitError :
+        UnitError
             If the provided unit is not a string or sc.Unit.
         """
 

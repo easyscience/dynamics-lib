@@ -90,7 +90,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
 
@@ -123,7 +123,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number or None.
         """
 

@@ -55,9 +55,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If amplitude, center, or rate are not numbers or Parameters.
-        ValueError :
+        ValueError
             If amplitude, center or rate are not finite numbers.
         """
         # Validate inputs and create Parameters if not given
@@ -120,7 +120,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
 
@@ -153,7 +153,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
 
@@ -189,7 +189,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
         if not isinstance(value, Numeric):
@@ -236,9 +236,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If unit is not a string or sc.Unit.
-        Exception :
+        Exception
             If conversion fails for any parameter.
         """
 

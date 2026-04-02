@@ -109,7 +109,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
         if not isinstance(value, Numeric):
@@ -140,7 +140,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
         if value is None:
@@ -174,9 +174,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
-        ValueError :
+        ValueError
             If the value is not positive.
         """
         if not isinstance(value, Numeric):
@@ -209,9 +209,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
-        ValueError :
+        ValueError
             If the value is not positive.
         """
         if not isinstance(value, Numeric):

@@ -176,7 +176,7 @@ class Convolution(NumericalConvolutionBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If either component is not a ModelComponent, or if the resolution component is a
             DeltaFunction.
 

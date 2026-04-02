@@ -92,9 +92,9 @@ class ExpressionComponent(ModelComponent):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If the expression is invalid or does not contain 'x'.
-        TypeError :
+        TypeError
             If any parameter value is not numeric.
         """
         super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
@@ -201,7 +201,7 @@ class ExpressionComponent(ModelComponent):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised to prevent changing the expression.
         """
         raise AttributeError('Expression cannot be changed after initialization')
@@ -258,7 +258,7 @@ class ExpressionComponent(ModelComponent):
 
         Raises
         ------
-        NotImplementedError :
+        NotImplementedError
             Always raised to indicate unit conversion is not supported.
         """
 
@@ -279,7 +279,7 @@ class ExpressionComponent(ModelComponent):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             If the parameter does not exist.
 
         Returns
@@ -304,7 +304,7 @@ class ExpressionComponent(ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not numeric.
         """
         if '_parameters' in self.__dict__ and name in self._parameters:

@@ -118,7 +118,7 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised, since analysis_list is read-only.
         """
 
@@ -185,7 +185,7 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If fit_method is not "independent" or "simultaneous" or if there are no Q values
             available for fitting.
 
@@ -243,12 +243,12 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If Q_index is out of bounds, or if there is no data to plot, or if there are no Q
             values available for plotting.
-        RuntimeError :
+        RuntimeError
             If not in a Jupyter notebook environment.
-        TypeError :
+        TypeError
             If plot_components or add_background is not True or False.
 
         Returns
@@ -330,7 +330,7 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        UnitError :
+        UnitError
             If there are inconsistent units for the same parameter across different Q values.
 
         Returns
@@ -408,9 +408,9 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If names is not a string, list of strings, or None.
-        ValueError :
+        ValueError
             If any of the specified parameter names are not found in the dataset.
 
         Returns
@@ -644,7 +644,7 @@ class Analysis(AnalysisBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If add_background is not True or False.
 
         Returns

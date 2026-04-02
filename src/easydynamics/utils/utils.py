@@ -29,9 +29,9 @@ def _validate_and_convert_Q(
 
     Raises
     ------
-    TypeError :
+    TypeError
         If Q is not a number, list, numpy array, or scipp Variable.
-    ValueError :
+    ValueError
         If Q is a numpy array with more than 1 dimension, or if Q is a scipp Variable that does not
         have a single dimension named 'Q'.
 
@@ -73,7 +73,7 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
 
     Raises
     ------
-    TypeError :
+    TypeError
         If unit is not None, a string, or a scipp Unit.
 
     Returns

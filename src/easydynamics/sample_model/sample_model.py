@@ -67,10 +67,10 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If diffusion_models is not a DiffusionModelBase, a list of DiffusionModelBase, or None,
             or if temperature is not a number or None, or if divide_by_temperature is not a bool.
-        ValueError :
+        ValueError
             If temperature is negative.
         """
         if diffusion_models is None:
@@ -131,7 +131,7 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the diffusion_model is not a DiffusionModelBase.
         """
 
@@ -154,7 +154,7 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If no DiffusionModel with the given unique name is found.
         """
         for i, dm in enumerate(self._diffusion_models):
@@ -203,7 +203,7 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a DiffusionModelBase, a list of DiffusionModelBase, or None.
         """
 
@@ -247,9 +247,9 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a number or None.
-        ValueError :
+        ValueError
             If value is negative.
         """
         if value is None:
@@ -297,7 +297,7 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, as temperature_unit is read-only.
         """
 
@@ -317,9 +317,9 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If temperature is not set or conversion fails.
-        Exception :
+        Exception
             If the provided unit is invalid or cannot be converted.
         """
 
@@ -361,7 +361,7 @@ class SampleModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a bool.
         """
         if not isinstance(value, bool):

@@ -97,7 +97,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
         """
         if not isinstance(value, Numeric):
@@ -128,9 +128,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
-        ValueError :
+        ValueError
             If the value is not positive.
         """
         if not isinstance(value, Numeric):
@@ -164,9 +164,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the value is not a number.
-        ValueError :
+        ValueError
             If the value is not positive.
         """
         if not isinstance(value, Numeric):

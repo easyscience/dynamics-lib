@@ -60,7 +60,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If resolution_model is not a ResolutionModel or None, or if background_model is not a
             BackgroundModel or None, or if energy_offset is not a number or None.
         """
@@ -134,7 +134,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a ResolutionModel.
         """
         if not isinstance(value, ResolutionModel):
@@ -169,7 +169,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a BackgroundModel.
         """
 
@@ -208,7 +208,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If the new Q values are not similar to the old ones when Q is not None.
         """
         if value is None:
@@ -254,7 +254,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always, as the unit is read-only.
         """
         raise AttributeError(
@@ -286,7 +286,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a number.
         """
         if not isinstance(value, Numeric):
@@ -311,7 +311,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If confirm is not True.
         """
         if not confirm:
@@ -334,7 +334,7 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If unit_str is not a valid unit string or scipp Unit.
         """
         unit = _validate_unit(unit_str)
@@ -361,9 +361,9 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q_index is not an int or None.
-        IndexError :
+        IndexError
             If Q_index is out of bounds for the Q values in the InstrumentModel.
 
         Returns
@@ -419,11 +419,11 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If no Q values are set in the InstrumentModel.
-        IndexError :
+        IndexError
             If Q_index is out of bounds.
-        TypeError :
+        TypeError
             If Q_index is not an int or None.
 
         Returns
@@ -496,9 +496,9 @@ class InstrumentModel(NewBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q_index is not an int or None.
-        IndexError :
+        IndexError
             If Q_index is out of bounds for the Q values in the InstrumentModel.
         """
 

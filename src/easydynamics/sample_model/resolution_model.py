@@ -65,7 +65,7 @@ class ResolutionModel(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If the component is a DeltaFunction or Polynomial.
         """
         if isinstance(component, ComponentCollection):

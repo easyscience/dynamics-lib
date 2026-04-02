@@ -140,7 +140,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If the component pair cannot be handled analytically.
 
         Returns

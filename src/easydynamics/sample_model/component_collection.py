@@ -44,7 +44,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If unit is not a string or sc.Unit, or if components is not a list of ModelComponent.
         """
 
@@ -93,7 +93,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If components is not a list of ModelComponent.
         """
 
@@ -132,7 +132,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since is_empty is read-only.
         """
         raise AttributeError(
@@ -164,7 +164,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since unit is read-only.
         """
 
@@ -184,9 +184,9 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If unit is not a string or sc.Unit.
-        Exception :
+        Exception
             If any component cannot be converted to the specified unit.
         """
 
@@ -225,9 +225,9 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If component is not a ModelComponent or ComponentCollection.
-        ValueError :
+        ValueError
             If a component with the same unique name already exists in the collection.
         """
         if not isinstance(component, (ModelComponent, ComponentCollection)):
@@ -260,9 +260,9 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If unique_name is not a string.
-        KeyError :
+        KeyError
             If no component with the given unique name exists in the collection.
         """
 
@@ -304,7 +304,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If components is not a list of ModelComponent.
         """
         if not isinstance(components, list):
@@ -342,7 +342,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since is_empty is read-only.
         """
         raise AttributeError(
@@ -374,7 +374,7 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If there are no components in the model or if the total area is zero or not finite,
             which would prevent normalization.
         """
@@ -457,11 +457,11 @@ class ComponentCollection(ModelBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If there are no components in the model.
-        TypeError :
+        TypeError
             If unique_name is not a string.
-        KeyError :
+        KeyError
             If no component with the given unique name exists in the collection.
 
         Returns

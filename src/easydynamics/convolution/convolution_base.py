@@ -43,7 +43,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If energy is not a numpy ndarray or a scipp Variable or if energy_unit is not a string
             or scipp unit, or if energy_offset is not a number or a Parameter, or if
             sample_components is not a ComponentCollection or ModelComponent, or if
@@ -117,7 +117,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If energy_offset is not a number or a Parameter.
         """
         if not isinstance(energy_offset, Parameter | Numeric):
@@ -155,7 +155,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             Always raised since energy_with_offset is read-only.
         """
         raise AttributeError(
@@ -187,7 +187,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If energy is not a numpy ndarray or a scipp Variable.
         """
 
@@ -235,9 +235,9 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If energy_unit is not a string or scipp unit.
-        Exception :
+        Exception
             If energy cannot be converted to the specified unit.
         """
         if not isinstance(energy_unit, (str, sc.Unit)):
@@ -283,7 +283,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If sample_components is not a ComponentCollection or ModelComponent.
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
@@ -322,7 +322,7 @@ class ConvolutionBase:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If resolution_components is not a ComponentCollection or ModelComponent.
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):

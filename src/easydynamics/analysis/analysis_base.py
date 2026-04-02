@@ -56,7 +56,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If experiment is not an Experiment or None or if sample_model is not a SampleModel or
             None or if instrument_model is not an InstrumentModel or None or if extra_parameters is
             not a Parameter, a list of Parameters, or None.
@@ -128,7 +128,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not an Experiment.
         """
 
@@ -162,7 +162,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a SampleModel.
         """
         if not isinstance(value, SampleModel):
@@ -194,7 +194,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not an InstrumentModel.
         """
         if not isinstance(value, InstrumentModel):
@@ -226,7 +226,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             If trying to set Q.
         """
         raise AttributeError('Q is a read-only property derived from the Experiment.')
@@ -257,7 +257,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             If trying to set energy.
         """
 
@@ -289,7 +289,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        AttributeError :
+        AttributeError
             If trying to set temperature.
         """
 
@@ -319,7 +319,7 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If value is not a Parameter, a list of Parameters, or None.
         """
         if isinstance(value, Parameter):
@@ -377,9 +377,9 @@ class AnalysisBase(EasyScienceModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q_index is not an integer or None.
-        IndexError :
+        IndexError
             If the Q index is not valid.
 
         Returns

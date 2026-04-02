@@ -176,7 +176,7 @@ class Analysis1d(AnalysisBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If no experiment is associated with this Analysis.
 
         Returns
@@ -284,7 +284,7 @@ class Analysis1d(AnalysisBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If no data is available to plot.
 
         Returns
@@ -357,7 +357,7 @@ class Analysis1d(AnalysisBase):
 
         Raises
         ------
-        ValueError :
+        ValueError
             If the Q index is not set.
 
         Returns
@@ -391,7 +391,7 @@ class Analysis1d(AnalysisBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If energy is not a sc.Variable or None.
 
         Returns
@@ -421,7 +421,7 @@ class Analysis1d(AnalysisBase):
 
         Raises
         ------
-        sc.UnitError :
+        sc.UnitError
             If the energy and energy offset have incompatible units.
 
         Returns

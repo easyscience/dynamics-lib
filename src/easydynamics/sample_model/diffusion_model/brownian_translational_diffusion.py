@@ -61,7 +61,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If scale or diffusion_coefficient is not a number.
         """
         if not isinstance(scale, Numeric):
@@ -115,9 +115,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If diffusion_coefficient is not a number.
-        ValueError :
+        ValueError
             If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
@@ -206,7 +206,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If component_display_name is not a string.
 
         Returns
@@ -276,7 +276,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If Q is not a float.
 
         Returns
@@ -316,7 +316,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
         Raises
         ------
-        TypeError :
+        TypeError
             If QISF is not a float.
 
         Returns
