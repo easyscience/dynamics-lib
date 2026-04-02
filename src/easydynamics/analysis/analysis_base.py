@@ -240,7 +240,6 @@ class AnalysisBase(EasyScienceModelBase):
         -------
         sc.Variable | None
             The energy values from the associated.
-        sc.Variable | None
         """
 
         return self.experiment.energy

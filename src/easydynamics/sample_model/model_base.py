@@ -388,7 +388,6 @@ class ModelBase(EasyScienceModelBase):
         -------
         ComponentCollection
             The ComponentCollection at the.
-        ComponentCollection
         """
         if not isinstance(Q_index, int):
             raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
