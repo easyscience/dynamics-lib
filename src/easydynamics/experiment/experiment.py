@@ -15,11 +15,10 @@ from easydynamics.utils.utils import _in_notebook
 
 
 class Experiment(NewBase):
-    """Holds data from an experiment as a sc.DataArray along with
-    metadata.
+    """
+    Holds data from an experiment as a sc.DataArray along with metadata.
 
-    This is a minimal implementation that will be extended in the
-    future.
+    This is a minimal implementation that will be extended in the future.
     """
 
     def __init__(
@@ -28,19 +27,19 @@ class Experiment(NewBase):
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
     ) -> None:
-        """Initialize the Experiment object.
+        """
+        Initialize the Experiment object.
 
         Parameters
         ----------
-        display_name : str | None, optional
+        display_name : str | None, default='MyExperiment'
             Display name of the experiment. By default, 'MyExperiment'.
-        unique_name : str | None, optional
-            Unique name of the experiment. If
-            None, a unique name will be generated. By default, None.
-        data : sc.DataArray | str | None, optional
-            Dataset associated with
-            the experiment. Can be a sc.DataArray or a filename
-            string to load from. If None, no data is loaded. By default, None.
+        unique_name : str | None, default=None
+            Unique name of the experiment. If None, a unique name will be generated. By default,
+            None.
+        data : sc.DataArray | str | None, default=None
+            Dataset associated with the experiment. Can be a sc.DataArray or a filename string to
+            load from. If None, no data is loaded. By default, None.
 
         Raises
         ------
@@ -74,25 +73,25 @@ class Experiment(NewBase):
 
     @property
     def data(self) -> sc.DataArray | None:
-        """Get the dataset associated with this experiment.
+        """
+        Get the dataset associated with this experiment.
 
         Returns
         -------
         sc.DataArray | None
-            The dataset associated with this
-            experiment, or None if no data is loaded.
+            The dataset associated with this experiment, or None if no data is loaded.
         """
         return self._data
 
     @data.setter
     def data(self, value: sc.DataArray) -> None:
-        """Set the dataset associated with this experiment.
+        """
+        Set the dataset associated with this experiment.
 
         Parameters
         ----------
         value : sc.DataArray
-            The new dataset to associate with this
-            experiment.
+            The new dataset to associate with this experiment.
 
         Raises
         ------
@@ -109,28 +108,27 @@ class Experiment(NewBase):
 
     @property
     def binned_data(self) -> sc.DataArray | None:
-        """Get the binned dataset associated with this experiment.
+        """
+        Get the binned dataset associated with this experiment.
 
         Returns
         -------
         sc.DataArray | None
-            The binned dataset associated with this
-            experiment, or None if no data is loaded.
+            The binned dataset associated with this experiment, or None if no data is loaded.
         """
         return self._binned_data
 
     @binned_data.setter
     def binned_data(self, _value: sc.DataArray) -> None:
-        """Set the binned dataset associated with this experiment.
+        """
+        Set the binned dataset associated with this experiment.
 
-        Read-
-only property. Use rebin() to rebin the data instead.
+        Read- only property. Use rebin() to rebin the data instead.
 
         Parameters
         ----------
         _value : sc.DataArray
-            The new binned dataset to associate
-            with this experiment (ignored).
+            The new binned dataset to associate with this experiment (ignored).
 
         Raises
         ------
@@ -141,13 +139,13 @@ only property. Use rebin() to rebin the data instead.
 
     @property
     def Q(self) -> sc.Variable | None:
-        """Get the Q values from the dataset.
+        """
+        Get the Q values from the dataset.
 
         Returns
         -------
         sc.Variable | None
-            The Q values from the dataset, or None
-            if no data is loaded.
+            The Q values from the dataset, or None if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -155,10 +153,10 @@ only property. Use rebin() to rebin the data instead.
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
-        """Set the Q values for the dataset.
+        """
+        Set the Q values for the dataset.
 
-        Q is a read-only property
-derived from the data, so this setter raises an error.
+        Q is a read-only property derived from the data, so this setter raises an error.
 
         Parameters
         ----------
@@ -174,13 +172,13 @@ derived from the data, so this setter raises an error.
 
     @property
     def energy(self) -> sc.Variable | None:
-        """Get the energy values from the dataset.
+        """
+        Get the energy values from the dataset.
 
         Returns
         -------
         sc.Variable | None
-            The energy values from the dataset, or
-            None if no data is loaded.
+            The energy values from the dataset, or None if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -188,10 +186,10 @@ derived from the data, so this setter raises an error.
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
-        """Set the energy values for the dataset.
+        """
+        Set the energy values for the dataset.
 
-        Energy is a read-only
-property derived from the data, so this setter raises an error.
+        Energy is a read-only property derived from the data, so this setter raises an error.
 
         Parameters
         ----------
@@ -206,14 +204,14 @@ property derived from the data, so this setter raises an error.
         raise AttributeError('energy is a read-only property derived from the data.')
 
     def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
-        """Get the energy values from the dataset, removing points where
-        the y values or variances are NaN or Inf for the given Q index.
+        """
+        Get the energy values from the dataset, removing points where the y values or variances are
+        NaN or Inf for the given Q index.
 
         Parameters
         ----------
         Q_index : int
-            The Q index to get the masked energy values
-            for.
+            The Q index to get the masked energy values for.
 
         Raises
         ------
@@ -223,8 +221,7 @@ property derived from the data, so this setter raises an error.
         Returns
         -------
         sc.Variable | None
-            The masked energy values from the
-            dataset, or None if no data is loaded.
+            The masked energy values from the dataset, or None if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -247,21 +244,21 @@ property derived from the data, so this setter raises an error.
     ###########
 
     def load_hdf5(self, filename: str, display_name: str | None = None) -> None:
-        """Load data from an HDF5 file.
+        """
+        Load data from an HDF5 file.
 
         Parameters
         ----------
         filename : str
             Path to the HDF5 file.
-        display_name : str | None, optional
-            Optional display name for the
-            experiment. By default, None.
+        display_name : str | None, default=None
+            Optional display name for the experiment. By default, None.
 
         Raises
         ------
         TypeError :
-            If filename is not a string or if display_name is
-            not a string or None or if the loaded data is not a sc.DataArray.
+            If filename is not a string or if display_name is not a string or None or if the loaded
+            data is not a sc.DataArray.
         """
         if not isinstance(filename, str):
             raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
@@ -282,13 +279,13 @@ property derived from the data, so this setter raises an error.
         self.data = loaded_data
 
     def save_hdf5(self, filename: str | None = None) -> None:
-        """Save the dataset to HDF5.
+        """
+        Save the dataset to HDF5.
 
         Parameters
         ----------
-        filename : str | None, optional
-            Path to the output HDF5 file.
-            If None, the file will be named after the unique_name of
+        filename : str | None, default=None
+            Path to the output HDF5 file. If None, the file will be named after the unique_name of
             the experiment with a .h5 extension. By default, None.
 
         Raises
@@ -318,20 +315,19 @@ property derived from the data, so this setter raises an error.
         self._binned_data = None
 
     def rebin(self, dimensions: dict[str, int | sc.Variable]) -> None:
-        """Rebin the dataset along specified dimensions.
+        """
+        Rebin the dataset along specified dimensions.
 
         Parameters
         ----------
         dimensions : dict[str, int | sc.Variable]
-            A dictionary
-            mapping dimension names to number of bins (int) or bin
-            edges (sc.Variable).
+            A dictionary mapping dimension names to number of bins (int) or bin edges
+            (sc.Variable).
 
         Raises
         ------
         TypeError :
-            If dimensions is not a dictionary or if
-            keys/values are of incorrect types.
+            If dimensions is not a dictionary or if keys/values are of incorrect types.
         ValueError :
             If there is no data to rebin.
         KeyError :
@@ -378,11 +374,12 @@ property derived from the data, so this setter raises an error.
     ###########
 
     def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
-        """Plot the dataset using plopp: https://scipp.github.io/plopp/.
+        """
+        Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
         Parameters
         ----------
-        slicer : bool, optional
+        slicer : bool, default=False
             If True, use plopp's slicer instead of plot. By default, False.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
@@ -431,7 +428,8 @@ property derived from the data, so this setter raises an error.
 
     @staticmethod
     def _validate_coordinates(data: sc.DataArray) -> None:
-        """Validate that required coordinates are present in the data.
+        """
+        Validate that required coordinates are present in the data.
 
         Parameters
         ----------
@@ -454,7 +452,8 @@ property derived from the data, so this setter raises an error.
                 raise ValueError(f"Data is missing required coordinate: '{coord}'")
 
     def _convert_to_bin_centers(self, data: sc.DataArray) -> sc.DataArray:
-        """Convert the coordinates of the data to bin centers.
+        """
+        Convert the coordinates of the data to bin centers.
 
         Parameters
         ----------
@@ -474,8 +473,8 @@ property derived from the data, so this setter raises an error.
         return data
 
     def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Extract the x, y, and weights arrays from the experiment for
-        the given Q index.
+        """
+        Extract the x, y, and weights arrays from the experiment for the given Q index.
 
         Parameters
         ----------
@@ -485,9 +484,7 @@ property derived from the data, so this setter raises an error.
         Returns
         -------
         tuple[np.ndarray, np.ndarray, np.ndarray]
-            The x, y, and
-            variances arrays extracted from the experiment for the
-            given Q index.
+            The x, y, and variances arrays extracted from the experiment for the given Q index.
         """
         data = self.binned_data['Q', Q_index]
         x = data.coords['energy'].values
@@ -498,8 +495,9 @@ property derived from the data, so this setter raises an error.
     def _extract_x_y_weights_only_finite(
         self, Q_index: int
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Extract the x, y, and weights arrays from the experiment for
-        the given Q index, removing any NaN and Inf values.
+        """
+        Extract the x, y, and weights arrays from the experiment for the given Q index, removing
+        any NaN and Inf values.
 
         Parameters
         ----------
@@ -509,16 +507,14 @@ property derived from the data, so this setter raises an error.
         Raises
         ------
         ValueError :
-            If any variances are zero after removing NaNs
-            and Infs, since this would lead to infinite weights.
+            If any variances are zero after removing NaNs and Infs, since this would lead to
+            infinite weights.
 
         Returns
         -------
         tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
-            The
-            x, y, weights, and mask arrays extracted from the
-            experiment for the given Q index, with NaNs and Infs
-            removed.
+            The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
+            with NaNs and Infs removed.
         """
         x, y, var = self._extract_x_y_var(Q_index)
 
@@ -546,7 +542,8 @@ property derived from the data, so this setter raises an error.
     ###########
 
     def __repr__(self) -> str:
-        """Return a string representation of the Experiment object.
+        """
+        Return a string representation of the Experiment object.
 
         Returns
         -------
@@ -557,11 +554,12 @@ property derived from the data, so this setter raises an error.
         return f'Experiment `{self.unique_name}` with data: {self._data}'
 
     def __copy__(self) -> 'Experiment':
-        """Return a copy of the object.
+        """
+        Return a copy of the object.
 
         Returns
         -------
-        Experiment
+        'Experiment'
             A copy of the Experiment object.
         """
         temp = self.to_dict(skip=['unique_name'])

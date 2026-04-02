@@ -187,7 +187,7 @@ preview = true # Enable new rules that are not yet stable, like DOC
 
 [tool.ruff.format]
 docstring-code-format = true    # Whether to format code snippets in docstrings
-docstring-code-line-length = 72 # Line length for code snippets in docstrings
+docstring-code-line-length = 99 # Line length for code snippets in docstrings
 indent-style = 'space'          # PEP 8 recommends using spaces over tabs
 line-ending = 'lf'              # Line endings will be converted to \n
 quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 257)
@@ -303,9 +303,9 @@ max-complexity = 10
 # PEP 8 line length guidance:
 # https://peps.python.org/pep-0008/#maximum-line-length
 # Use 99 characters as the project-wide maximum for regular code lines.
-# Use 72 characters for docstrings.
+# Use 99 characters for docstrings.
 max-line-length = 99 # See also `line-length` in [tool.ruff]
-max-doc-length = 72
+max-doc-length = 99
 
 [tool.ruff.lint.pydocstyle]
 convention = 'numpy'
@@ -325,7 +325,7 @@ convention = 'numpy'
 # the parameter declarations in the code (in function's signature).
 
 [tool.pydoclint]
-exclude = '\.' # Temporarily disable pydoclint until we are ready
+#exclude = '\.' # Temporarily disable pydoclint until we are ready
 style = 'numpy'
 check-style-mismatch = true
 check-arg-defaults = true
@@ -339,8 +339,8 @@ allow-init-docstring = true
 # https://github.com/jsh9/format-docstring
 
 [tool.format_docstring]
-exclude = '\.' # Temporarily disable format-docstring until we are ready
+#exclude = '\.' # Temporarily disable format-docstring until we are ready
 docstring_style = 'numpy'
-line_length = 72
+line_length = 99
 fix_rst_backticks = true
 verbose = 'default'

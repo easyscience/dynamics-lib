@@ -14,23 +14,18 @@ from .model_component import ModelComponent
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
-    r"""Model of a Gaussian function.
+    r"""
+    Model of a Gaussian function.
 
      The intensity is given by
 
-     $$
-     I(x) = \frac{A}{\sigma \sqrt{2\pi}}
-     \exp\left(
-         -\frac{1}{2}
-         \left(\frac{x - x_0}{\sigma}\right)^2
-     \right)
-     $$
+     $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+     x_0}{\sigma}\right)^2 \right) $$
 
-     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the
-     width.
+     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
 
-    If the center is not provided, it will be centered at 0 and
-    fixed, which is typically what you want in QENS.
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
     """
 
     def __init__(
@@ -42,24 +37,24 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'Gaussian',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the Gaussian component.
+        """
+        Initialize the Gaussian component.
 
         Parameters
         ----------
-        area : Numeric | Parameter, optional
+        area : Numeric | Parameter, default=1.0
             Area of the Gaussian. By default, 1.0.
-        center : Numeric | Parameter | None, optional
-            Center of the
-            Gaussian. If None. By default, None.
-        width : Numeric | Parameter, optional
+        center : Numeric | Parameter | None, default=None
+            Center of the Gaussian. If None. By default, None.
+        width : Numeric | Parameter, default=1.0
             Standard deviation. By default, 1.0.
-        unit : str | sc.Unit, optional
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters. By default, 'meV'.
-        display_name : str | None, optional
+        display_name : str | None, default='Gaussian'
             Name of the component. By default, 'Gaussian'.
-        unique_name : str | None, optional
-            Unique name of the component.
-            if None, a unique_name is automatically generated. By default, None.
+        unique_name : str | None, default=None
+            Unique name of the component. if None, a unique_name is automatically generated. By
+            default, None.
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
@@ -81,7 +76,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @property
     def area(self) -> Parameter:
-        """Get the area parameter.
+        """
+        Get the area parameter.
 
         Returns
         -------
@@ -93,7 +89,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """Set the value of the area parameter.
+        """
+        Set the value of the area parameter.
 
         Parameters
         ----------
@@ -112,7 +109,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @property
     def center(self) -> Parameter:
-        """Get the center parameter.
+        """
+        Get the center parameter.
 
         Returns
         -------
@@ -124,13 +122,13 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
-        """Set the center parameter value.
+        """
+        Set the center parameter value.
 
         Parameters
         ----------
-        value : Numeric | None, optional
-            The new value for the center
-            parameter. If None. By default, 0 and is fixed.
+        value : Numeric | None
+            The new value for the center parameter. If None. By default, 0 and is fixed.
 
         Raises
         ------
@@ -147,7 +145,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @property
     def width(self) -> Parameter:
-        """Get the width parameter (standard deviation).
+        """
+        Get the width parameter (standard deviation).
 
         Returns
         -------
@@ -158,13 +157,13 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     @width.setter
     def width(self, value: Numeric) -> None:
-        """Set the width parameter value.
+        """
+        Set the width parameter value.
 
         Parameters
         ----------
         value : Numeric
-            The new value for the width
-            parameter.
+            The new value for the width parameter.
 
         Raises
         ------
@@ -185,21 +184,14 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
     ) -> np.ndarray:
-        r"""Evaluate the Gaussian at the given x values.
+        r"""
+        Evaluate the Gaussian at the given x values.
 
-        If x is a scipp Variable, the unit of the Gaussian will be
-        converted to match x.
-        The intensity is given by
-        $$
-        I(x) = \frac{A}{\sigma \sqrt{2\pi}}
-        \exp\left(
-            -\frac{1}{2}
-            \left(\frac{x - x_0}{\sigma}\right)^2
-        \right)
-        $$
+        If x is a scipp Variable, the unit of the Gaussian will be converted to match x. The
+        intensity is given by $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2}
+        \left(\frac{x - x_0}{\sigma}\right)^2 \right) $$
 
-        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the
-        width.
+        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
 
         Parameters
         ----------
@@ -209,8 +201,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         np.ndarray
-            The intensity of the Gaussian at the given x
-            values.
+            The intensity of the Gaussian at the given x values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -221,7 +212,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization * np.exp(exponent)
 
     def __repr__(self) -> str:
-        """Return a string representation of the Gaussian.
+        """
+        Return a string representation of the Gaussian.
 
         Returns
         -------

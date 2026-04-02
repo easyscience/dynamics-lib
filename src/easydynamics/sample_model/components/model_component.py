@@ -23,18 +23,17 @@ class ModelComponent(ModelBase):
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the ModelComponent.
+        """
+        Initialize the ModelComponent.
 
         Parameters
         ----------
-        unit : str | sc.Unit, optional
+        unit : str | sc.Unit, default='meV'
             The unit of the model component. By default, 'meV'.
-        display_name : str | None, optional
-            A human-readable name for the
-            component. By default, None.
-        unique_name : str | None, optional
-            A unique identifier for the
-            component. By default, None.
+        display_name : str | None, default=None
+            A human-readable name for the component. By default, None.
+        unique_name : str | None, default=None
+            A unique identifier for the component. By default, None.
         """
         self.validate_unit(unit)
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -42,7 +41,8 @@ class ModelComponent(ModelBase):
 
     @property
     def unit(self) -> str:
-        """Get the unit.
+        """
+        Get the unit.
 
         Returns
         -------
@@ -53,11 +53,11 @@ class ModelComponent(ModelBase):
 
     @unit.setter
     def unit(self, _unit_str: str) -> None:
-        """Unit is read-only.
+        """
+        Unit is read-only.
 
-        Use convert_unit to change the unit
-between allowed types or create a new ModelComponent with the
-        desired unit.
+        Use convert_unit to change the unit between allowed types or create a new ModelComponent
+        with the desired unit.
 
         Parameters
         ----------
@@ -89,8 +89,8 @@ between allowed types or create a new ModelComponent with the
     def _prepare_x_for_evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
-        """Prepare the input x for evaluation by handling units and
-        converting to a numpy array.
+        """
+        Prepare the input x for evaluation by handling units and converting to a numpy array.
 
         Parameters
         ----------
@@ -100,11 +100,10 @@ between allowed types or create a new ModelComponent with the
         Raises
         ------
         ValueError :
-            If x contains NaN or infinite values, or if a
-            sc.DataArray has more than one coordinate.
+            If x contains NaN or infinite values, or if a sc.DataArray has more than one
+            coordinate.
         UnitError :
-            If x has incompatible units that cannot be
-            converted to the component's unit.
+            If x has incompatible units that cannot be converted to the component's unit.
 
         Returns
         -------
@@ -166,7 +165,8 @@ between allowed types or create a new ModelComponent with the
 
     @staticmethod
     def validate_unit(unit: str | sc.Unit | None) -> None:
-        """Validate that the unit is either a string or a scipp Unit.
+        """
+        Validate that the unit is either a string or a scipp Unit.
 
         Parameters
         ----------
@@ -184,7 +184,8 @@ between allowed types or create a new ModelComponent with the
             )
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the Parameters in the component.
+        """
+        Convert the unit of the Parameters in the component.
 
         Parameters
         ----------
@@ -196,8 +197,7 @@ between allowed types or create a new ModelComponent with the
         TypeError :
             If the provided unit is not a str or sc.Unit.
         Exception :
-            If the provided unit is invalid or incompatible
-            with the component's parameters.
+            If the provided unit is invalid or incompatible with the component's parameters.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
@@ -220,7 +220,8 @@ between allowed types or create a new ModelComponent with the
 
     @abstractmethod
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Abstract method to evaluate the model component at input x.
+        """
+        Abstract method to evaluate the model component at input x.
 
         Must be implemented by subclasses.
 
@@ -237,7 +238,8 @@ between allowed types or create a new ModelComponent with the
         pass
 
     def __repr__(self) -> str:
-        """Return a string representation of the ModelComponent.
+        """
+        Return a string representation of the ModelComponent.
 
         Returns
         -------

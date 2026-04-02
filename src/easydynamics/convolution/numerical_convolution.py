@@ -14,13 +14,12 @@ from easydynamics.utils.utils import Numeric
 
 
 class NumericalConvolution(NumericalConvolutionBase):
-    """Numerical convolution of a ComponentCollection with a
-    ComponentCollection using FFT.
+    """
+    Numerical convolution of a ComponentCollection with a ComponentCollection using FFT.
 
-    Includes optional upsampling and extended range to improve accuracy.
-    Warns about very wide or very narrow peaks in the models. If
-    temperature is provided, detailed balance correction is applied to
-    the sample model.
+    Includes optional upsampling and extended range to improve accuracy. Warns about very wide or
+    very narrow peaks in the models. If temperature is provided, detailed balance correction is
+    applied to the sample model.
     """
 
     def __init__(
@@ -36,39 +35,32 @@ class NumericalConvolution(NumericalConvolutionBase):
         energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
     ) -> None:
-        """Initialize the NumericalConvolution object.
+        """
+        Initialize the NumericalConvolution object.
 
         Parameters
         ----------
         energy : np.ndarray | sc.Variable
-            1D array of energy values
-            where the convolution is evaluated.
+            1D array of energy values where the convolution is evaluated.
         sample_components : ComponentCollection | ModelComponent
             The sample model to be convolved.
         resolution_components : ComponentCollection | ModelComponent
             The resolution model to convolve with.
-        energy_offset : Numeric | Parameter, optional
-            An energy
-            offset to apply to the energy values before convolution. By default, 0.0.
-        upsample_factor : Numeric | None, optional
-            The factor by which to
-            upsample the input data before convolution. By default, 5.
-        extension_factor : Numeric | None, optional
-            The factor by which to
-            extend the input data range before convolution. By default, 0.2.
-        temperature : Parameter | Numeric | None, optional
-            The
-            temperature to use for detailed balance correction. By default, None.
-        temperature_unit : str | sc.Unit, optional
-            The unit of the
-            temperature parameter. By default, 'K'.
-        energy_unit : str | sc.Unit, optional
-            The unit of the
-            energy. By default, 'meV'.
-        normalize_detailed_balance : bool, optional
-            Whether to
-            normalize the detailed balance correction. Default is
-            True. By default, True.
+        energy_offset : Numeric | Parameter, default=0.0
+            An energy offset to apply to the energy values before convolution. By default, 0.0.
+        upsample_factor : Numeric | None, default=5
+            The factor by which to upsample the input data before convolution. By default, 5.
+        extension_factor : Numeric | None, default=0.2
+            The factor by which to extend the input data range before convolution. By default, 0.2.
+        temperature : Parameter | Numeric | None, default=None
+            The temperature to use for detailed balance correction. By default, None.
+        temperature_unit : str | sc.Unit, default='K'
+            The unit of the temperature parameter. By default, 'K'.
+        energy_unit : str | sc.Unit, default='meV'
+            The unit of the energy. By default, 'meV'.
+        normalize_detailed_balance : bool, default=True
+            Whether to normalize the detailed balance correction. Default is True. By default,
+            True.
         """
         super().__init__(
             energy=energy,
@@ -86,9 +78,9 @@ class NumericalConvolution(NumericalConvolutionBase):
     def convolution(
         self,
     ) -> np.ndarray:
-        """Calculate the convolution of the sample and resolution models
-        at the values given in energy. Includes detailed balance
-        correction if temperature is provided.
+        """
+        Calculate the convolution of the sample and resolution models at the values given in
+        energy. Includes detailed balance correction if temperature is provided.
 
         Returns
         -------

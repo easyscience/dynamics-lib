@@ -14,14 +14,14 @@ from .model_component import ModelComponent
 
 
 class Exponential(CreateParametersMixin, ModelComponent):
-    r"""Model of an exponential function.
+    r"""
+    Model of an exponential function.
 
     The intensity is given by
 
     $$ I(x) = A e^{B (x-x_0)}, $$
 
-    where $A$ is the amplitude, $x_0$ is the center, and $B$ describes
-    the rate of decay or growth.
+    where $A$ is the amplitude, $x_0$ is the center, and $B$ describes the rate of decay or growth.
     """
 
     def __init__(
@@ -33,32 +33,30 @@ class Exponential(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'Exponential',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the Exponential component.
+        """
+        Initialize the Exponential component.
 
         Parameters
         ----------
-        amplitude : Numeric | Parameter, optional
-            Amplitude of the
-            Exponential. By default, 1.0.
-        center : Numeric | Parameter | None, optional
-            Center of the Exponential.
-            If None, the center is fixed at 0. By default, None.
-        rate : Numeric | Parameter, optional
-            Decay or growth
-            constant of the Exponential. By default, 1.0.
-        unit : str | sc.Unit, optional
+        amplitude : Numeric | Parameter, default=1.0
+            Amplitude of the Exponential. By default, 1.0.
+        center : Numeric | Parameter | None, default=None
+            Center of the Exponential. If None, the center is fixed at
+            0. By default, None.
+        rate : Numeric | Parameter, default=1.0
+            Decay or growth constant of the Exponential. By default, 1.0.
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters. By default, 'meV'.
-        display_name : str | None, optional
+        display_name : str | None, default='Exponential'
             Name of the component. By default, 'Exponential'.
-        unique_name : str | None, optional
-            Unique name of the component. if
-            None, a unique_name is automatically generated. By default, None.
+        unique_name : str | None, default=None
+            Unique name of the component. if None, a unique_name is automatically generated. By
+            default, None.
 
         Raises
         ------
         TypeError :
-            If amplitude, center, or rate are not numbers or
-            Parameters.
+            If amplitude, center, or rate are not numbers or Parameters.
         ValueError :
             If amplitude, center or rate are not finite numbers.
         """
@@ -99,7 +97,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @property
     def amplitude(self) -> Parameter:
-        """Get the amplitude parameter.
+        """
+        Get the amplitude parameter.
 
         Returns
         -------
@@ -111,7 +110,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @amplitude.setter
     def amplitude(self, value: Numeric) -> None:
-        """Set the value of the amplitude parameter.
+        """
+        Set the value of the amplitude parameter.
 
         Parameters
         ----------
@@ -130,7 +130,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @property
     def center(self) -> Parameter:
-        """Get the center parameter.
+        """
+        Get the center parameter.
 
         Returns
         -------
@@ -142,13 +143,13 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
-        """Set the center parameter value.
+        """
+        Set the center parameter value.
 
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center
-            parameter.
+            The new value for the center parameter.
 
         Raises
         ------
@@ -166,7 +167,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @property
     def rate(self) -> Parameter:
-        """Get the rate parameter.
+        """
+        Get the rate parameter.
 
         Returns
         -------
@@ -177,13 +179,13 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     @rate.setter
     def rate(self, value: Numeric) -> None:
-        """Set the rate parameter value.
+        """
+        Set the rate parameter value.
 
         Parameters
         ----------
         value : Numeric
-            The new value for the rate
-            parameter.
+            The new value for the rate parameter.
 
         Raises
         ------
@@ -199,17 +201,13 @@ class Exponential(CreateParametersMixin, ModelComponent):
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
     ) -> np.ndarray:
-        r"""Evaluate the Exponential at the given x values.
+        r"""
+        Evaluate the Exponential at the given x values.
 
-        If x is a scipp Variable, the unit of the Exponential will be
-        converted to match x.
-        The intensity is given by
-        $$
-        I(x) = A \exp\left( r (x - x_0) \right)
-        $$
+        If x is a scipp Variable, the unit of the Exponential will be converted to match x. The
+        intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$
 
-        where $A$ is the amplitude, $x_0$ is the center, and $r$ is the
-        rate.
+        where $A$ is the amplitude, $x_0$ is the center, and $r$ is the rate.
 
         Parameters
         ----------
@@ -219,8 +217,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Returns
         -------
         np.ndarray
-            The intensity of the Exponential at the given x
-            values.
+            The intensity of the Exponential at the given x values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -229,7 +226,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
         return self.amplitude.value * np.exp(exponent)
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the Parameters in the component.
+        """
+        Convert the unit of the Parameters in the component.
 
         Parameters
         ----------
@@ -265,7 +263,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
             raise e
 
     def __repr__(self) -> str:
-        """Return a string representation of the Exponential.
+        """
+        Return a string representation of the Exponential.
 
         Returns
         -------

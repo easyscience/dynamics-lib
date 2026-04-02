@@ -17,10 +17,10 @@ from easydynamics.utils.utils import _validate_unit
 
 
 class ModelBase(EasyScienceModelBase):
-    """Base class for Sample Models.
+    """
+    Base class for Sample Models.
 
-    Contains common functionality for models with components and Q
-    dependence.
+    Contains common functionality for models with components and Q dependence.
     """
 
     def __init__(
@@ -31,24 +31,22 @@ class ModelBase(EasyScienceModelBase):
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
-        """Initialize the ModelBase.
+        """
+        Initialize the ModelBase.
 
         Parameters
         ----------
-        display_name : str, optional
+        display_name : str, default='MyModelBase'
             Display name of the model. By default, 'MyModelBase'.
-        unique_name : str | None, optional
-            Unique name of the model. If None,
-            a unique name will be generated. By default, None.
-        unit : str | sc.Unit | None, optional
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated. By default, None.
+        unit : str | sc.Unit | None, default='meV'
             Unit of the model. By default, 'meV'.
-        components : ModelComponent | ComponentCollection | None, optional
-            Template components of the model. If None, no components
-            are added. These components are copied into
-            ComponentCollections for each Q value. By default, None.
-        Q : Q_type | None, optional
-            Q values for the model.
-            If None, Q is not set. By default, None.
+        components : ModelComponent | ComponentCollection | None, default=None
+            Template components of the model. If None, no components are added. These components
+            are copied into ComponentCollections for each Q value. By default, None.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set. By default, None.
 
         Raises
         ------
@@ -79,28 +77,26 @@ class ModelBase(EasyScienceModelBase):
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> list[np.ndarray]:
-        """Evaluate the sample model at all Q for the given x values.
+        """
+        Evaluate the sample model at all Q for the given x values.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Energy axis values to evaluate the model at. If a scipp
-            Variable or DataArray is provided, the unit of the model
-            will be converted to match the unit of x for evaluation, and
-            the result will be returned in the same unit as x.
+            Energy axis values to evaluate the model at. If a scipp Variable or DataArray is
+            provided, the unit of the model will be converted to match the unit of x for
+            evaluation, and the result will be returned in the same unit as x.
 
         Raises
         ------
         ValueError :
-            If there are no components in the model to
-            evaluate.
+            If there are no components in the model to evaluate.
 
         Returns
         -------
         list[np.ndarray]
-            A list of numpy arrays containing the
-            evaluated model values for each Q. The length of the
-            list will match the number of Q values in the model.
+            A list of numpy arrays containing the evaluated model values for each Q. The length of
+            the list will match the number of Q values in the model.
         """
 
         if not self._component_collections:
@@ -114,27 +110,25 @@ class ModelBase(EasyScienceModelBase):
     # Component management
     # ------------------------------------------------------------------
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
-        """Append a ModelComponent or ComponentCollection to the
-        SampleModel.
+        """
+        Append a ModelComponent or ComponentCollection to the SampleModel.
 
         Parameters
         ----------
         component : ModelComponent | ComponentCollection
-            The
-            ModelComponent or ComponentCollection to append.
+            The ModelComponent or ComponentCollection to append.
         """
         self._components.append_component(component)
         self._on_components_change()
 
     def remove_component(self, unique_name: str) -> None:
-        """Remove a ModelComponent from the SampleModel by its unique
-        name.
+        """
+        Remove a ModelComponent from the SampleModel by its unique name.
 
         Parameters
         ----------
         unique_name : str
-            The unique name of the ModelComponent
-            to remove.
+            The unique name of the ModelComponent to remove.
         """
         self._components.remove_component(unique_name)
         self._on_components_change()
@@ -150,7 +144,8 @@ class ModelBase(EasyScienceModelBase):
 
     @property
     def unit(self) -> str | sc.Unit | None:
-        """Get the unit of the ComponentCollection.
+        """
+        Get the unit of the ComponentCollection.
 
         Returns
         -------
@@ -162,7 +157,8 @@ class ModelBase(EasyScienceModelBase):
 
     @unit.setter
     def unit(self, _unit_str: str) -> None:
-        """Unit is read-only and cannot be set directly.
+        """
+        Unit is read-only and cannot be set directly.
 
         Parameters
         ----------
@@ -172,8 +168,7 @@ class ModelBase(EasyScienceModelBase):
         Raises
         ------
         AttributeError :
-            Always raised to indicate that the unit is
-            read-only.
+            Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -181,8 +176,8 @@ class ModelBase(EasyScienceModelBase):
         )  # noqa: E501
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the ComponentCollection and all its
-        components.
+        """
+        Convert the unit of the ComponentCollection and all its components.
 
         Parameters
         ----------
@@ -194,8 +189,7 @@ class ModelBase(EasyScienceModelBase):
         TypeError :
             If the provided unit is not a string or sc.Unit.
         Exception :
-            If the provided unit is not compatible with the
-            current unit.
+            If the provided unit is not compatible with the current unit.
         """
 
         old_unit = self._unit
@@ -218,7 +212,8 @@ class ModelBase(EasyScienceModelBase):
 
     @property
     def components(self) -> list[ModelComponent]:
-        """Get the components of the SampleModel.
+        """
+        Get the components of the SampleModel.
 
         Returns
         -------
@@ -229,19 +224,18 @@ class ModelBase(EasyScienceModelBase):
 
     @components.setter
     def components(self, value: ModelComponent | ComponentCollection | None) -> None:
-        """Set the components of the SampleModel.
+        """
+        Set the components of the SampleModel.
 
         Parameters
         ----------
         value : ModelComponent | ComponentCollection | None
-            The new
-            components to set. If None, all components will be cleared.
+            The new components to set. If None, all components will be cleared.
 
         Raises
         ------
         TypeError :
-            If value is not a ModelComponent,
-            ComponentCollection, or None.
+            If value is not a ModelComponent, ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
             raise TypeError('Components must be a ModelComponent or a ComponentCollection')
@@ -252,35 +246,33 @@ class ModelBase(EasyScienceModelBase):
 
     @property
     def Q(self) -> np.ndarray | None:
-        """Get the Q values of the SampleModel.
+        """
+        Get the Q values of the SampleModel.
 
         Returns
         -------
         np.ndarray | None
-            The Q values of the SampleModel, or None
-            if not set.
+            The Q values of the SampleModel, or None if not set.
         """
         return self._Q
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
-        """Set the Q values of the SampleModel.
+        """
+        Set the Q values of the SampleModel.
 
-        If Q is already set, it
-throws an error if the new Q values are not similar to the old
+        If Q is already set, it throws an error if the new Q values are not similar to the old
         ones. To change Q values, first run clear_Q().
 
         Parameters
         ----------
         value : Q_type | None
-            The new Q values to set.
-            If None, Q values are not changed.
+            The new Q values to set. If None, Q values are not changed.
 
         Raises
         ------
         ValueError :
-            If the new Q values are not similar to the old
-            ones when Q is already set.
+            If the new Q values are not similar to the old ones when Q is already set.
         """
         if value is None:
             return
@@ -299,12 +291,13 @@ throws an error if the new Q values are not similar to the old
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
-        """Clear the Q values of the SampleModel, removing all component
-        collections and their associated Parameters.
+        """
+        Clear the Q values of the SampleModel, removing all component collections and their
+        associated Parameters.
 
         Parameters
         ----------
-        confirm : bool, optional
+        confirm : bool, default=False
             Confirmation to clear Q values. By default, False.
 
         Raises
@@ -333,16 +326,15 @@ throws an error if the new Q values are not similar to the old
             par.fixed = False
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
-        """Get all Parameters and Descriptors from all
-        ComponentCollections in the ModelBase. Parameters Ignores the
-        Parameters and Descriptors in self._components as these are just
+        """
+        Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
+        Parameters Ignores the Parameters and Descriptors in self._components as these are just
         templates.
 
         Parameters
         ----------
-        Q_index : int | None, optional
-            If None, get variables for all
-            ComponentCollections. If int, get variables for the
+        Q_index : int | None, default=None
+            If None, get variables for all ComponentCollections. If int, get variables for the
             ComponentCollection at this index. By default, None.
 
         Raises
@@ -350,14 +342,13 @@ throws an error if the new Q values are not similar to the old
         TypeError :
             If Q_index is not an int or None.
         IndexError :
-            If Q_index is out of bounds for the number of
-            ComponentCollections.
+            If Q_index is out of bounds for the number of ComponentCollections.
 
         Returns
         -------
         list[Parameter]
-            A list of all Parameters and Descriptors
-            from the ComponentCollections in the ModelBase.
+            A list of all Parameters and Descriptors from the ComponentCollections in the
+            ModelBase.
         """
 
         if Q_index is None:
@@ -378,7 +369,8 @@ throws an error if the new Q values are not similar to the old
         return all_vars
 
     def get_component_collection(self, Q_index: int) -> ComponentCollection:
-        """Get the ComponentCollection at the given Q index.
+        """
+        Get the ComponentCollection at the given Q index.
 
         Parameters
         ----------
@@ -390,14 +382,13 @@ throws an error if the new Q values are not similar to the old
         TypeError :
             If Q_index is not an int.
         IndexError :
-            If Q_index is out of bounds for the number of
-            ComponentCollections.
+            If Q_index is out of bounds for the number of ComponentCollections.
 
         Returns
         -------
         ComponentCollection
             The ComponentCollection at the.
-        specified Q index.
+        ComponentCollection
         """
         if not isinstance(Q_index, int):
             raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
@@ -441,7 +432,8 @@ throws an error if the new Q values are not similar to the old
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        """Return a string representation of the ModelBase.
+        """
+        Return a string representation of the ModelBase.
 
         Returns
         -------

@@ -14,17 +14,15 @@ from .model_component import ModelComponent
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
-    r"""Model of a Lorentzian function.
+    r"""
+    Model of a Lorentzian function.
 
-    The intensity is given by
-    $$
-    I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2},
-    $$
-    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the
-    half width at half maximum (HWHM).
+    The intensity is given by $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2}, $$
+    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half maximum
+    (HWHM).
 
-    If the center is not provided, it will be centered at 0
-    and fixed, which is typically what you want in QENS.
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
     """
 
     def __init__(
@@ -36,25 +34,24 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'Lorentzian',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the Lorentzian component.
+        """
+        Initialize the Lorentzian component.
 
         Parameters
         ----------
-        area : Numeric | Parameter, optional
+        area : Numeric | Parameter, default=1.0
             Area of the Lorentzian. By default, 1.0.
-        center : Numeric | Parameter | None, optional
-            Center of the
-            Lorentzian. If None. By default, None.
-        width : Numeric | Parameter, optional
-            Half width at half maximum
-            (HWHM). By default, 1.0.
-        unit : str | sc.Unit, optional
+        center : Numeric | Parameter | None, default=None
+            Center of the Lorentzian. If None. By default, None.
+        width : Numeric | Parameter, default=1.0
+            Half width at half maximum (HWHM). By default, 1.0.
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters. By default, 'meV'.
-        display_name : str | None, optional
+        display_name : str | None, default='Lorentzian'
             Name of the component. By default, 'Lorentzian'.
-        unique_name : str | None, optional
-            Unique name of the component. If
-            None, a unique_name is automatically generated. By default, None.
+        unique_name : str | None, default=None
+            Unique name of the component. If None, a unique_name is automatically generated. By
+            default, None.
         """
 
         super().__init__(
@@ -76,7 +73,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @property
     def area(self) -> Parameter:
-        """Get the area parameter.
+        """
+        Get the area parameter.
 
         Returns
         -------
@@ -87,7 +85,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """Set the value of the area parameter.
+        """
+        Set the value of the area parameter.
 
         Parameters
         ----------
@@ -105,7 +104,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @property
     def center(self) -> Parameter:
-        """Get the center parameter.
+        """
+        Get the center parameter.
 
         Returns
         -------
@@ -116,13 +116,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
-        """Set the value of the center parameter.
+        """
+        Set the value of the center parameter.
 
         Parameters
         ----------
-        value : Numeric | None, optional
-            The new value for the center
-            parameter. If None. By default, 0 and is fixed.
+        value : Numeric | None
+            The new value for the center parameter. If None. By default, 0 and is fixed.
 
         Raises
         ------
@@ -139,7 +139,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @property
     def width(self) -> Parameter:
-        """Get the width parameter (HWHM).
+        """
+        Get the width parameter (HWHM).
 
         Returns
         -------
@@ -150,13 +151,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     @width.setter
     def width(self, value: Numeric) -> None:
-        """Set the width parameter value (HWHM).
+        """
+        Set the width parameter value (HWHM).
 
         Parameters
         ----------
         value : Numeric
-            The new value for the width
-            parameter.
+            The new value for the width parameter.
 
         Raises
         ------
@@ -173,18 +174,16 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        r"""Evaluate the Lorentzian at the given x values.
+        r"""
+        Evaluate the Lorentzian at the given x values.
 
-        If x is a scipp Variable, the unit of the Lorentzian will be
-        converted to match x. The intensity is given by
+        If x is a scipp Variable, the unit of the Lorentzian will be converted to match x. The
+        intensity is given by
 
-        $$
-        I(x) = \frac{A}{\pi} \frac{\Gamma}{(x -
-        x_0)^2 + \Gamma^2},
-        $$
+        $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2}, $$
 
-        where $A$ is the area, $x_0$ is the center, and $\Gamma$ is
-        the half width at half maximum (HWHM).
+        where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half maximum
+        (HWHM).
 
         Parameters
         ----------
@@ -194,8 +193,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         np.ndarray
-            The intensity of the Lorentzian at the given x
-            values.
+            The intensity of the Lorentzian at the given x values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -206,7 +204,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization / denominator
 
     def __repr__(self) -> str:
-        """Return a string representation of the Lorentzian.
+        """
+        Return a string representation of the Lorentzian.
 
         Returns
         -------

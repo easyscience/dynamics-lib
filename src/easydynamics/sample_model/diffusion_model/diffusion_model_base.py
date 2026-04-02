@@ -20,29 +20,27 @@ class DiffusionModelBase(ModelBase):
         scale: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
     ) -> None:
-        """Initialize a new DiffusionModel.
+        """
+        Initialize a new DiffusionModel.
 
         Parameters
         ----------
-        display_name : str | None, optional
+        display_name : str | None, default='MyDiffusionModel'
             Display name of the diffusion model. By default, 'MyDiffusionModel'.
-        unique_name : str | None, optional
-            Unique name of the diffusion
-            model. If None, a unique name will be generated. By default, None.
-        scale : Numeric, optional
-            Scale factor for the diffusion model. Must
-            be a non-negative number. By default, 1.0.
-        unit : str | sc.Unit, optional
-            Unit of the diffusion model. Must be
-            convertible to meV. By default, 'meV'.
+        unique_name : str | None, default=None
+            Unique name of the diffusion model. If None, a unique name will be generated. By
+            default, None.
+        scale : Numeric, default=1.0
+            Scale factor for the diffusion model. Must be a non-negative number. By default, 1.0.
+        unit : str | sc.Unit, default='meV'
+            Unit of the diffusion model. Must be convertible to meV. By default, 'meV'.
 
         Raises
         ------
         TypeError :
             If scale is not a number.
         UnitError :
-            If unit is not a string or scipp Unit, or if it
-            cannot be converted to meV.
+            If unit is not a string or scipp Unit, or if it cannot be converted to meV.
         """
 
         try:
@@ -68,7 +66,8 @@ class DiffusionModelBase(ModelBase):
 
     @property
     def unit(self) -> str | sc.Unit | None:
-        """Get the unit of the energy axis of the DiffusionModel.
+        """
+        Get the unit of the energy axis of the DiffusionModel.
 
         Returns
         -------
@@ -79,11 +78,10 @@ class DiffusionModelBase(ModelBase):
 
     @unit.setter
     def unit(self, _unit_str: str) -> None:
-        """The unit of the energy axis is read-only.
+        """
+        The unit of the energy axis is read-only.
 
-        To change the unit,
-use convert_unit or create a new DiffusionModel with the desired
-        unit.
+        To change the unit, use convert_unit or create a new DiffusionModel with the desired unit.
 
         Parameters
         ----------
@@ -102,7 +100,8 @@ use convert_unit or create a new DiffusionModel with the desired
 
     @property
     def scale(self) -> Parameter:
-        """Get the scale parameter of the diffusion model.
+        """
+        Get the scale parameter of the diffusion model.
 
         Returns
         -------
@@ -113,13 +112,13 @@ use convert_unit or create a new DiffusionModel with the desired
 
     @scale.setter
     def scale(self, scale: Numeric) -> None:
-        """Set the scale parameter of the diffusion model.
+        """
+        Set the scale parameter of the diffusion model.
 
         Parameters
         ----------
         scale : Numeric
-            The new value for the scale parameter. Must
-            be a non-negative number.
+            The new value for the scale parameter. Must be a non-negative number.
 
         Raises
         ------
@@ -140,7 +139,8 @@ use convert_unit or create a new DiffusionModel with the desired
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        """String representation of the Diffusion model.
+        """
+        String representation of the Diffusion model.
 
         Returns
         -------

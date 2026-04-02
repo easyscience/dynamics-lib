@@ -17,11 +17,11 @@ from easydynamics.utils.utils import Numeric
 
 
 class AnalyticalConvolution(ConvolutionBase):
-    """Analytical convolution of a ModelComponent or ComponentCollection
-    with a ResolutionModel.
+    """
+    Analytical convolution of a ModelComponent or ComponentCollection with a ResolutionModel.
 
-    Possible analytical convolutions are any combination of delta
-    functions, Gaussians, Lorentzians and Voigt profiles.
+    Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians
+    and Voigt profiles.
     """
 
     # Mapping of supported component type pairs to convolution methods.
@@ -43,23 +43,21 @@ class AnalyticalConvolution(ConvolutionBase):
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
     ) -> None:
-        """Initialize an AnalyticalConvolution.
+        """
+        Initialize an AnalyticalConvolution.
 
         Parameters
         ----------
         energy : np.ndarray | sc.Variable
-            1D array of energy values
-            where the convolution is evaluated.
-        energy_unit : str | sc.Unit, optional
-            The unit of the
-            energy. By default, 'meV'.
-        sample_components : ComponentCollection | ModelComponent | None, optional
+            1D array of energy values where the convolution is evaluated.
+        energy_unit : str | sc.Unit, default='meV'
+            The unit of the energy. By default, 'meV'.
+        sample_components : ComponentCollection | ModelComponent | None, default=None
             The sample model to be convolved. By default, None.
-        resolution_components : ComponentCollection | ModelComponent | None, optional
+        resolution_components : ComponentCollection | ModelComponent | None, default=None
             The resolution model to convolve with. By default, None.
-        energy_offset : Numeric | Parameter, optional
-            An offset to
-            shift the energy values by. By default, 0.0.
+        energy_offset : Numeric | Parameter, default=0.0
+            An offset to shift the energy values by. By default, 0.0.
         """
         super().__init__(
             energy=energy,
@@ -72,17 +70,18 @@ class AnalyticalConvolution(ConvolutionBase):
     def convolution(
         self,
     ) -> np.ndarray:
-        """Convolve sample with resolution analytically if possible.
+        """
+        Convolve sample with resolution analytically if possible.
 
-        Accepts ComponentCollection or single ModelComponent for each.
-        Possible analytical convolutions are any combination of delta
-        functions, Gaussians, Lorentzians and Voigt profiles.
+        Accepts ComponentCollection or single ModelComponent for each. Possible analytical
+        convolutions are any combination of delta functions, Gaussians, Lorentzians and Voigt
+        profiles.
 
         Returns
         -------
         np.ndarray
-            The convolution of the sample_components and
-            resolution_components values evaluated at self.energy.
+            The convolution of the sample_components and resolution_components values evaluated at
+            self.energy.
         """
 
         sample_components = self.sample_components.components
@@ -107,50 +106,42 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: ModelComponent,
         resolution_component: ModelComponent,
     ) -> np.ndarray:
-        r"""Analytic convolution for component pair (sample_component,
-        resolution_component).
+        r"""
+        Analytic convolution for component pair (sample_component, resolution_component).
 
-        The convolution of two Gaussian components results in another
-        Gaussian component with width $\sqrt{w_1^2 + w_2^2}$.
+        The convolution of two Gaussian components results in another Gaussian component with width
+        $\sqrt{w_1^2 + w_2^2}$.
 
-        The convolution of two Lorentzian components results in another
-        Lorentzian component with width $w_1 + w_2$.
+        The convolution of two Lorentzian components results in another Lorentzian component with
+        width $w_1 + w_2$.
 
-        The convolution of a Gaussian and a Lorentzian results in a
-        Voigt profile.
+        The convolution of a Gaussian and a Lorentzian results in a Voigt profile.
 
-        The convolution of a Gaussian and a Voigt profile results in
-        another Voigt profile, with the Lorentzian width unchanged and
-        the Gaussian widths summed in quadrature.
+        The convolution of a Gaussian and a Voigt profile results in another Voigt profile, with
+        the Lorentzian width unchanged and the Gaussian widths summed in quadrature.
 
-        The convolution of a Lorentzian and a Voigt profile results in
-        another Voigt profile, with the Gaussian width unchanged and the
-        Lorentzian widths summed.
+        The convolution of a Lorentzian and a Voigt profile results in another Voigt profile, with
+        the Gaussian width unchanged and the Lorentzian widths summed.
 
-        The convolution of two Voigt profiles results in another Voigt
-        profile, with the Gaussian widths summed in quadrature and the
-        Lorentzian widths summed.
+        The convolution of two Voigt profiles results in another Voigt profile, with the Gaussian
+        widths summed in quadrature and the Lorentzian widths summed.
 
-        The convolution of a delta function with any component or
-        ComponentCollection results in the same component or
-        ComponentCollection shifted by the delta center.
+        The convolution of a delta function with any component or ComponentCollection results in
+        the same component or ComponentCollection shifted by the delta center.
 
         All areas are multiplied in the convolution.
 
         Parameters
         ----------
         sample_component : ModelComponent
-            The sample component to
-            be convolved.
+            The sample component to be convolved.
         resolution_component : ModelComponent
-            The resolution
-            component to convolve with.
+            The resolution component to convolve with.
 
         Raises
         ------
         ValueError :
-            If the component pair cannot be handled
-            analytically.
+            If the component pair cannot be handled analytically.
 
         Returns
         -------
@@ -201,16 +192,15 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: DeltaFunction,
         resolution_components: ComponentCollection | ModelComponent,
     ) -> np.ndarray:
-        """Convolution of delta function with any ModelComponent or
-        ComponentCollection results in the same component or
-        ComponentCollection shifted by the delta center. The areas are
+        """
+        Convolution of delta function with any ModelComponent or ComponentCollection results in the
+        same component or ComponentCollection shifted by the delta center. The areas are
         multiplied.
 
         Parameters
         ----------
         sample_component : DeltaFunction
-            The sample component to
-            be convolved.
+            The sample component to be convolved.
         resolution_components : ComponentCollection | ModelComponent
             : The resolution model to convolve with.
 
@@ -228,18 +218,16 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Gaussian,
         resolution_component: Gaussian,
     ) -> np.ndarray:
-        r"""Convolution of two Gaussian components results in another
-        Gaussian component with width $\sqrt{w_1^2 + w_2^2}$. The areas
-        are multiplied.
+        r"""
+        Convolution of two Gaussian components results in another Gaussian component with width
+        $\sqrt{w_1^2 + w_2^2}$. The areas are multiplied.
 
         Parameters
         ----------
         sample_component : Gaussian
-            The sample Gaussian component
-            to be convolved.
+            The sample Gaussian component to be convolved.
         resolution_component : Gaussian
-            The resolution Gaussian
-            component to convolve with.
+            The resolution Gaussian component to convolve with.
 
         Returns
         -------
@@ -260,17 +248,16 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Gaussian,
         resolution_component: Lorentzian,
     ) -> np.ndarray:
-        """Convolution of a Gaussian and a Lorentzian results in a Voigt
-        profile. The areas are multiplied.
+        """
+        Convolution of a Gaussian and a Lorentzian results in a Voigt profile. The areas are
+        multiplied.
 
         Parameters
         ----------
         sample_component : Gaussian
-            The sample Gaussian component
-            to be convolved.
+            The sample Gaussian component to be convolved.
         resolution_component : Lorentzian
-            The resolution Lorentzian
-            component to convolve with.
+            The resolution Lorentzian component to convolve with.
 
         Returns
         -------
@@ -292,19 +279,17 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Gaussian,
         resolution_component: Voigt,
     ) -> np.ndarray:
-        """Convolution of a Gaussian and a Voigt profile results in
-        another Voigt profile. The Lorentzian width remains unchanged,
-        while the Gaussian widths are summed in quadrature. The areas
-        are multiplied.
+        """
+        Convolution of a Gaussian and a Voigt profile results in another Voigt profile. The
+        Lorentzian width remains unchanged, while the Gaussian widths are summed in quadrature. The
+        areas are multiplied.
 
         Parameters
         ----------
         sample_component : Gaussian
-            The sample Gaussian component
-            to be convolved.
+            The sample Gaussian component to be convolved.
         resolution_component : Voigt
-            The resolution Voigt component
-            to convolve with.
+            The resolution Voigt component to convolve with.
 
         Returns
         -------
@@ -333,18 +318,16 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Lorentzian,
         resolution_component: Lorentzian,
     ) -> np.ndarray:
-        r"""Convolution of two Lorentzian components results in another
-        Lorentzian component with width $w_1 + w_2$. The areas are
-        multiplied.
+        r"""
+        Convolution of two Lorentzian components results in another Lorentzian component with width
+        $w_1 + w_2$. The areas are multiplied.
 
         Parameters
         ----------
         sample_component : Lorentzian
-            The sample Lorentzian
-            component to be convolved.
+            The sample Lorentzian component to be convolved.
         resolution_component : Lorentzian
-            The resolution Lorentzian
-            component to convolve with.
+            The resolution Lorentzian component to convolve with.
 
         Returns
         -------
@@ -364,22 +347,19 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Lorentzian,
         resolution_component: Voigt,
     ) -> np.ndarray:
-        """Convolution of a Lorentzian and a Voigt profile results in
-        another Voigt profile.
+        """
+        Convolution of a Lorentzian and a Voigt profile results in another Voigt profile.
 
-        The Gaussian width remains unchanged, while the Lorentzian
-        widths are summed.
+        The Gaussian width remains unchanged, while the Lorentzian widths are summed.
 
         The areas are multiplied.
 
         Parameters
         ----------
         sample_component : Lorentzian
-            The sample Lorentzian
-            component to be convolved.
+            The sample Lorentzian component to be convolved.
         resolution_component : Voigt
-            The resolution Voigt component
-            to convolve with.
+            The resolution Voigt component to convolve with.
 
         Returns
         -------
@@ -408,21 +388,18 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component: Voigt,
         resolution_component: Voigt,
     ) -> np.ndarray:
-        """Convolution of two Voigt profiles results in another Voigt
-        profile.
+        """
+        Convolution of two Voigt profiles results in another Voigt profile.
 
-        The Gaussian widths are summed in quadrature,
-        while the Lorentzian widths are summed.
-        The areas are multiplied.
+        The Gaussian widths are summed in quadrature, while the Lorentzian widths are summed. The
+        areas are multiplied.
 
         Parameters
         ----------
         sample_component : Voigt
-            The sample Voigt component to be
-            convolved.
+            The sample Voigt component to be convolved.
         resolution_component : Voigt
-            The resolution Voigt component
-            to convolve with.
+            The resolution Voigt component to convolve with.
 
         Returns
         -------
@@ -453,18 +430,13 @@ class AnalyticalConvolution(ConvolutionBase):
         center: float,
         width: float,
     ) -> np.ndarray:
-        r"""Evaluate a Gaussian function.
+        r"""
+        Evaluate a Gaussian function.
 
-        $$
-        I(x) = \frac{A}{\sigma \sqrt{2\pi}}
-        \exp\left(
-            -\frac{1}{2}
-            \left(\frac{x - x_0}{\sigma}\right)^2
-        \right)
-        $$
+        $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+        x_0}{\sigma}\right)^2 \right) $$
 
-        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the
-        width.
+        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
 
         All checks are handled in the calling function.
 
@@ -489,14 +461,13 @@ class AnalyticalConvolution(ConvolutionBase):
         return area * normalization * np.exp(exponent)
 
     def _lorentzian_eval(self, area: float, center: float, width: float) -> np.ndarray:
-        r"""Evaluate a Lorentzian function.
+        r"""
+        Evaluate a Lorentzian function.
 
-        $$
-        I(x) = \frac{A}{\\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2},
-        $$
+        $$ I(x) = \frac{A}{\\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2}, $$
 
-        where $A$ is the area, $x_0$ is the center, and $\\Gamma$ is
-        the half width at half maximum (HWHM).
+        where $A$ is the area, $x_0$ is the center, and $\\Gamma$ is the half width at half maximum
+        (HWHM).
 
         All checks are handled in the calling function.
 
@@ -527,8 +498,8 @@ class AnalyticalConvolution(ConvolutionBase):
         gaussian_width: float,
         lorentzian_width: float,
     ) -> np.ndarray:
-        """Evaluate a Voigt profile function using scipy's
-        voigt_profile.
+        """
+        Evaluate a Voigt profile function using scipy's voigt_profile.
 
         Parameters
         ----------
@@ -537,17 +508,14 @@ class AnalyticalConvolution(ConvolutionBase):
         center : float
             The center of the Voigt profile.
         gaussian_width : float
-            The Gaussian width (sigma) of the
-            Voigt profile.
+            The Gaussian width (sigma) of the Voigt profile.
         lorentzian_width : float
-            The Lorentzian width (HWHM) of the
-            Voigt profile.
+            The Lorentzian width (HWHM) of the Voigt profile.
 
         Returns
         -------
         np.ndarray
-            The evaluated Voigt profile values at
-            self.energy.
+            The evaluated Voigt profile values at self.energy.
         """
 
         return area * voigt_profile(

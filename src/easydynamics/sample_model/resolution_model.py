@@ -13,8 +13,8 @@ from .components.model_component import ModelComponent
 
 
 class ResolutionModel(ModelBase):
-    """ResolutionModel represents a model of the instrment resolution in
-    an experiment at various Q.
+    """
+    ResolutionModel represents a model of the instrment resolution in an experiment at various Q.
     """
 
     def __init__(
@@ -25,24 +25,22 @@ class ResolutionModel(ModelBase):
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
-        """Initialize a ResolutionModel.
+        """
+        Initialize a ResolutionModel.
 
         Parameters
         ----------
-        display_name : str, optional
+        display_name : str, default='MyResolutionModel'
             Display name of the model. By default, 'MyResolutionModel'.
-        unique_name : str | None, optional
-            Unique name of the model. If None,
-            a unique name will be generated. By default, None.
-        unit : str | sc.Unit, optional
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated. By default, None.
+        unit : str | sc.Unit, default='meV'
             Unit of the model. By default, 'meV'.
-        components : ModelComponent | ComponentCollection | None, optional
-            Template components of the model. If None, no components
-            are added. These components are copied into
-            ComponentCollections for each Q value. By default, None.
-        Q : Q_type | None, optional
-            Q values for the model. If None, Q is not
-            set. By default, None.
+        components : ModelComponent | ComponentCollection | None, default=None
+            Template components of the model. If None, no components are added. These components
+            are copied into ComponentCollections for each Q value. By default, None.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set. By default, None.
         """
 
         super().__init__(
@@ -54,10 +52,11 @@ class ResolutionModel(ModelBase):
         )
 
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
-        """Append a component to the ResolutionModel.
+        """
+        Append a component to the ResolutionModel.
 
-        Does not allow DeltaFunction or Polynomial components, as these
-        are not physical resolution components.
+        Does not allow DeltaFunction or Polynomial components, as these are not physical resolution
+        components.
 
         Parameters
         ----------

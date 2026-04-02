@@ -18,24 +18,20 @@ from easydynamics.utils.utils import hbar
 
 
 class BrownianTranslationalDiffusion(DiffusionModelBase):
-    r"""Model of Brownian translational diffusion, consisting of a
-    Lorentzian function for each Q-value, where the width is given by $D
-    Q^2$, where $D$ is the diffusion coefficient. The area of the
-    Lorentzians is given by the scale parameter multiplied by the QISF,
-    which is 1 for this model. The EISF is 0 for this model, so there is
-    no delta function component. Q is assumed to have units of
-    1/angstrom. Creates ComponentCollections with Lorentzian components
-    for given Q-values.
+    r"""
+    Model of Brownian translational diffusion, consisting of a Lorentzian function for each
+    Q-value, where the width is given by $D Q^2$, where $D$ is the diffusion coefficient. The area
+    of the Lorentzians is given by the scale parameter multiplied by the QISF, which is 1 for this
+    model. The EISF is 0 for this model, so there is no delta function component. Q is assumed to
+    have units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
+    Q-values.
 
-    Example:
-    >>>Q=np.linspace(0.5,2,7)
-    >>>energy=np.linspace(-2, 2, 501)
-    >>>scale=1.0
+    Example: >>>Q=np.linspace(0.5,2,7) >>>energy=np.linspace(-2, 2, 501) >>>scale=1.0
     >>>diffusion_coefficient = 2.4e-9  # m^2/s
     >>>diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel",
     >>>scale=scale, diffusion_coefficient= diffusion_coefficient)
-    >>>component_collections=diffusion_model.create_component_collections(Q)
-    See also the tutorials.
+    >>>component_collections=diffusion_model.create_component_collections(Q) See also the
+    tutorials.
     """
 
     def __init__(
@@ -46,30 +42,27 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
     ) -> None:
-        """Initialize a new BrownianTranslationalDiffusion model.
+        """
+        Initialize a new BrownianTranslationalDiffusion model.
 
         Parameters
         ----------
-        display_name : str | None, optional
+        display_name : str | None, default='BrownianTranslationalDiffusion'
             Display name of the diffusion model. By default, 'BrownianTranslationalDiffusion'.
-        unique_name : str | None, optional
-            Unique name of the diffusion
-            model. If None, a unique name will be generated. By default, None.
-        unit : str | sc.Unit, optional
-            Unit of the diffusion model. Must be
-            convertible to meV. By default, 'meV'.
-        scale : Numeric, optional
-            Scale factor for the diffusion model. Must
-            be a non-negative number. By default, 1.0.
-        diffusion_coefficient : Numeric, optional
-            Diffusion coefficient D in
-            m^2/s. By default, 1.0.
+        unique_name : str | None, default=None
+            Unique name of the diffusion model. If None, a unique name will be generated. By
+            default, None.
+        unit : str | sc.Unit, default='meV'
+            Unit of the diffusion model. Must be convertible to meV. By default, 'meV'.
+        scale : Numeric, default=1.0
+            Scale factor for the diffusion model. Must be a non-negative number. By default, 1.0.
+        diffusion_coefficient : Numeric, default=1.0
+            Diffusion coefficient D in m^2/s. By default, 1.0.
 
         Raises
         ------
         TypeError :
-            If scale or diffusion_coefficient is not a
-            number.
+            If scale or diffusion_coefficient is not a number.
         """
         if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
@@ -100,7 +93,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     @property
     def diffusion_coefficient(self) -> Parameter:
-        """Get the diffusion coefficient parameter D.
+        """
+        Get the diffusion coefficient parameter D.
 
         Returns
         -------
@@ -111,13 +105,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     @diffusion_coefficient.setter
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
-        """Set the diffusion coefficient parameter D.
+        """
+        Set the diffusion coefficient parameter D.
 
         Parameters
         ----------
         diffusion_coefficient : Numeric
-            The new value for the
-            diffusion coefficient D in m^2/s.
+            The new value for the diffusion coefficient D in m^2/s.
 
         Raises
         ------
@@ -138,7 +132,29 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # ------------------------------------------------------------------
 
     def calculate_width(self, Q: Q_type) -> np.ndarray:
-        """Calculate the half-width at half-maximum (HWHM) for the
+        """
+        Calculate the half-width at half-maximum (HWHM) for the diffusion model.
+
+        Parameters
+        ----------
+        Q : Q_type
+            Scattering vector in 1/angstrom.
+
+        Returns
+        -------
+        np.ndarray
+            HWHM values in the unit of the model (e.g., meV).
+        """
+
+        Q = _validate_and_convert_Q(Q)
+
+        unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
+        unit_conversion_factor.convert_unit(self.unit)
+        return Q**2 * unit_conversion_factor.value
+
+    def calculate_EISF(self, Q: Q_type) -> np.ndarray:
+        """
+        Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational
         diffusion model.
 
         Parameters
@@ -149,37 +165,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Returns
         -------
         np.ndarray
-            HWHM values in the unit of the model
-            (e.g., meV).
-        """
-
-        Q = _validate_and_convert_Q(Q)
-
-        unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
-        unit_conversion_factor.convert_unit(self.unit)
-        return Q**2 * unit_conversion_factor.value
-
-    def calculate_EISF(self, Q: Q_type) -> np.ndarray:
-        """Calculate the Elastic Incoherent Structure Factor (EISF) for
-        the Brownian translational diffusion model.
-
-        Parameters
-        ----------
-        Q : Q_type
-            Scattering
-            vector in 1/angstrom.
-
-        Returns
-        -------
-        np.ndarray
             EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
         return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
-        """Calculate the Quasi-Elastic Incoherent Structure Factor
-        (QISF).
+        """
+        Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).
 
         Parameters
         ----------
@@ -200,14 +193,15 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q: Q_type,
         component_display_name: str = 'Brownian diffusion',
     ) -> list[ComponentCollection]:
-        r"""Create ComponentCollection components for the Brownian
-        translational diffusion model at given Q values.
+        r"""
+        Create ComponentCollection components for the Brownian translational diffusion model at
+        given Q values.
 
         Parameters
         ----------
         Q : Q_type
             Scattering vector values.
-        component_display_name : str, optional
+        component_display_name : str, default='Brownian diffusion'
             Name of the Lorentzian component. By default, 'Brownian diffusion'.
 
         Raises
@@ -218,11 +212,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Returns
         -------
         list[ComponentCollection]
-            List of ComponentCollections with
-            Lorentzian components for each Q value. Each Lorentzian
-            has a width given by $D*Q^2$ and an area given by the
-            scale parameter multiplied by the QISF (which is 1 for
-            this model).
+            List of ComponentCollections with Lorentzian components for each Q value. Each
+            Lorentzian has a width given by $D*Q^2$ and an area given by the scale parameter
+            multiplied by the QISF (which is 1 for this model).
         """
         Q = _validate_and_convert_Q(Q)
 
@@ -273,8 +265,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # ------------------------------------------------------------------
 
     def _write_width_dependency_expression(self, Q: float) -> str:
-        """Write the dependency expression for the width as a function
-        of Q to make dependent Parameters.
+        """
+        Write the dependency expression for the width as a function of Q to make dependent
+        Parameters.
 
         Parameters
         ----------
@@ -298,8 +291,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         return f'hbar * D* {Q} **2*1/(angstrom**2)'
 
     def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
-        """Write the dependency map expression to make dependent
-        Parameters.
+        """
+        Write the dependency map expression to make dependent Parameters.
 
         Returns
         -------
@@ -313,8 +306,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         }
 
     def _write_area_dependency_expression(self, QISF: float) -> str:
-        """Write the dependency expression for the area to make
-        dependent Parameters.
+        """
+        Write the dependency expression for the area to make dependent Parameters.
 
         Parameters
         ----------
@@ -337,8 +330,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         return f'{QISF} * scale'
 
     def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
-        """Write the dependency map expression to make dependent
-        Parameters.
+        """
+        Write the dependency map expression to make dependent Parameters.
 
         Returns
         -------
@@ -354,14 +347,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        """String representation of the BrownianTranslationalDiffusion
-        model.
+        """
+        String representation of the BrownianTranslationalDiffusion model.
 
         Returns
         -------
         str
-            String representation of the
-            BrownianTranslationalDiffusion model.
+            String representation of the BrownianTranslationalDiffusion model.
         """
         return (
             f'BrownianTranslationalDiffusion(display_name={self.display_name},'

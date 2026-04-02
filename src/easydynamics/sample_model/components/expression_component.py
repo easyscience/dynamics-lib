@@ -14,16 +14,13 @@ from .model_component import ModelComponent
 
 
 class ExpressionComponent(ModelComponent):
-    """Model component defined by a symbolic expression.
+    """
+    Model component defined by a symbolic expression.
 
-    Example:
-        expr = ExpressionComponent(
-            "A * exp(-(x - x0)**2 / (2*sigma**2))",
-            parameters={"A": 10, "x0": 0, "sigma": 1},
-        )
+    Example: expr = ExpressionComponent( "A * exp(-(x - x0)**2 / (2*sigma**2))", parameters={"A":
+    10, "x0": 0, "sigma": 1}, )
 
-        expr.A = 5
-        y = expr.evaluate(x)
+        expr.A = 5 y = expr.evaluate(x)
     """
 
     # -------------------------
@@ -77,20 +74,20 @@ class ExpressionComponent(ModelComponent):
         display_name: str | None = 'Expression',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the ExpressionComponent.
+        """
+        Initialize the ExpressionComponent.
 
         Parameters
         ----------
         expression : str
-            The symbolic expression as a string.
-            Must contain 'x' as the independent variable.
-        parameters : dict[str, Numeric] | None, optional
+            The symbolic expression as a string. Must contain 'x' as the independent variable.
+        parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values. By default, None.
-        unit : str | sc.Unit, optional
+        unit : str | sc.Unit, default='meV'
             Unit of the output. By default, 'meV'.
-        display_name : str | None, optional
+        display_name : str | None, default='Expression'
             Display name for the component. By default, 'Expression'.
-        unique_name : str | None, optional
+        unique_name : str | None, default=None
             Unique name for the component. By default, None.
 
         Raises
@@ -194,7 +191,8 @@ class ExpressionComponent(ModelComponent):
 
     @expression.setter
     def expression(self, _new_expr: str) -> None:
-        """Prevent changing the expression after initialization.
+        """
+        Prevent changing the expression after initialization.
 
         Parameters
         ----------
@@ -212,7 +210,8 @@ class ExpressionComponent(ModelComponent):
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
     ) -> np.ndarray:
-        """Evaluate the expression for given x values.
+        """
+        Evaluate the expression for given x values.
 
         Parameters
         ----------
@@ -236,7 +235,8 @@ class ExpressionComponent(ModelComponent):
         return self._func(*args)
 
     def get_all_variables(self) -> list[Parameter]:
-        """Return all parameters.
+        """
+        Return all parameters.
 
         Returns
         -------
@@ -246,7 +246,8 @@ class ExpressionComponent(ModelComponent):
         return list(self._parameters.values())
 
     def convert_unit(self, _new_unit: str | sc.Unit) -> None:
-        """Convert the unit of the expression.
+        """
+        Convert the unit of the expression.
 
         Unit conversion is not implemented for ExpressionComponent.
 
@@ -268,7 +269,8 @@ class ExpressionComponent(ModelComponent):
     # -------------------------
 
     def __getattr__(self, name: str) -> Parameter:
-        """Allow access to parameters as attributes.
+        """
+        Allow access to parameters as attributes.
 
         Parameters
         ----------
@@ -290,7 +292,8 @@ class ExpressionComponent(ModelComponent):
         raise AttributeError(f"{self.__class__.__name__} has no attribute '{name}'")
 
     def __setattr__(self, name: str, value: Numeric) -> None:
-        """Allow setting parameter values as attributes.
+        """
+        Allow setting parameter values as attributes.
 
         Parameters
         ----------
@@ -316,8 +319,8 @@ class ExpressionComponent(ModelComponent):
             super().__setattr__(name, value)
 
     def __dir__(self) -> list[str]:
-        """Include parameter names in dir() output for better IDE
-        support.
+        """
+        Include parameter names in dir() output for better IDE support.
 
         Returns
         -------

@@ -18,9 +18,9 @@ from .components.model_component import ModelComponent
 
 
 class SampleModel(ModelBase):
-    """SampleModel represents a model of a sample with components and
-    diffusion models, parameterized by Q and optionally temperature.
-    Generates ComponentCollections for each Q value, combining
+    """
+    SampleModel represents a model of a sample with components and diffusion models, parameterized
+    by Q and optionally temperature. Generates ComponentCollections for each Q value, combining
     components from the base model and diffusion models.
 
     Applies detailed balancing based on temperature if provided.
@@ -38,42 +38,38 @@ class SampleModel(ModelBase):
         temperature_unit: str | sc.Unit = 'K',
         divide_by_temperature: bool = True,
     ) -> None:
-        """Initialize the SampleModel.
+        """
+        Initialize the SampleModel.
 
         Parameters
         ----------
-        display_name : str, optional
+        display_name : str, default='MySampleModel'
             Display name of the model. By default, 'MySampleModel'.
-        unique_name : str | None, optional
-            Unique name of the model. If None,
-            a unique name will be generated. By default, None.
-        unit : str | sc.Unit, optional
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated. By default, None.
+        unit : str | sc.Unit, default='meV'
             Unit of the model. If None,. By default, 'meV'.
-        components : ModelComponent | ComponentCollection | None, optional
-            Template components of the model. If None, no components
-            are added. These components are copied into
-            ComponentCollections for each Q value. By default, None.
-        Q : Q_type | None, optional
+        components : ModelComponent | ComponentCollection | None, default=None
+            Template components of the model. If None, no components are added. These components
+            are copied into ComponentCollections for each Q value. By default, None.
+        Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set. By default, None.
-        diffusion_models : DiffusionModelBase | list[DiffusionModelBase] | None, optional
-            Diffusion models to include in the SampleModel. If None,
-            no diffusion models are added. By default, None.
-        temperature : float | None, optional
-            Temperature for detailed
-            balancing. If None, no detailed balancing is applied. By default, None.
-        temperature_unit : str | sc.Unit, optional
+        diffusion_models : DiffusionModelBase | list[DiffusionModelBase] | None, default=None
+            Diffusion models to include in the SampleModel. If None, no diffusion models are added.
+            By default, None.
+        temperature : float | None, default=None
+            Temperature for detailed balancing. If None, no detailed balancing is applied. By
+            default, None.
+        temperature_unit : str | sc.Unit, default='K'
             Unit of the temperature. By default, 'K'.
-        divide_by_temperature : bool, optional
-            Whether to divide the detailed
-            balance factor by temperature. By default, True.
+        divide_by_temperature : bool, default=True
+            Whether to divide the detailed balance factor by temperature. By default, True.
 
         Raises
         ------
         TypeError :
-            If diffusion_models is not a DiffusionModelBase,
-            a list of DiffusionModelBase, or None, or if temperature
-            is not a number or None, or if divide_by_temperature is
-            not a bool.
+            If diffusion_models is not a DiffusionModelBase, a list of DiffusionModelBase, or None,
+            or if temperature is not a number or None, or if divide_by_temperature is not a bool.
         ValueError :
             If temperature is negative.
         """
@@ -125,19 +121,18 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def append_diffusion_model(self, diffusion_model: DiffusionModelBase) -> None:
-        """Append a DiffusionModel to the SampleModel.
+        """
+        Append a DiffusionModel to the SampleModel.
 
         Parameters
         ----------
         diffusion_model : DiffusionModelBase
-            The DiffusionModel
-            to append.
+            The DiffusionModel to append.
 
         Raises
         ------
         TypeError :
-            If the diffusion_model is not a
-            DiffusionModelBase.
+            If the diffusion_model is not a DiffusionModelBase.
         """
 
         if not isinstance(diffusion_model, DiffusionModelBase):
@@ -149,7 +144,8 @@ class SampleModel(ModelBase):
         self._generate_component_collections()
 
     def remove_diffusion_model(self, name: 'str') -> None:
-        """Remove a DiffusionModel from the SampleModel by unique name.
+        """
+        Remove a DiffusionModel from the SampleModel by unique name.
 
         Parameters
         ----------
@@ -159,8 +155,7 @@ class SampleModel(ModelBase):
         Raises
         ------
         ValueError :
-            If no DiffusionModel with the given unique name
-            is found.
+            If no DiffusionModel with the given unique name is found.
         """
         for i, dm in enumerate(self._diffusion_models):
             if dm.unique_name == name:
@@ -183,13 +178,13 @@ class SampleModel(ModelBase):
 
     @property
     def diffusion_models(self) -> list[DiffusionModelBase]:
-        """Get the diffusion models of the SampleModel.
+        """
+        Get the diffusion models of the SampleModel.
 
         Returns
         -------
         list[DiffusionModelBase]
-            The diffusion models of the
-            SampleModel.
+            The diffusion models of the SampleModel.
         """
         return self._diffusion_models
 
@@ -197,20 +192,19 @@ class SampleModel(ModelBase):
     def diffusion_models(
         self, value: DiffusionModelBase | list[DiffusionModelBase] | None
     ) -> None:
-        """Set the diffusion models of the SampleModel.
+        """
+        Set the diffusion models of the SampleModel.
 
         Parameters
         ----------
         value : DiffusionModelBase | list[DiffusionModelBase] | None
-            The diffusion model(s) to set. Can be a single
-            DiffusionModelBase, a list of DiffusionModelBase, or
-            None to clear all diffusion models.
+            The diffusion model(s) to set. Can be a single DiffusionModelBase, a list of
+            DiffusionModelBase, or None to clear all diffusion models.
 
         Raises
         ------
         TypeError :
-            If value is not a DiffusionModelBase, a list of
-            DiffusionModelBase, or None.
+            If value is not a DiffusionModelBase, a list of DiffusionModelBase, or None.
         """
 
         if value is None:
@@ -231,25 +225,25 @@ class SampleModel(ModelBase):
 
     @property
     def temperature(self) -> Parameter | None:
-        """Get the temperature of the SampleModel.
+        """
+        Get the temperature of the SampleModel.
 
         Returns
         -------
         Parameter | None
-            The temperature Parameter of the
-            SampleModel, or None if not set.
+            The temperature Parameter of the SampleModel, or None if not set.
         """
         return self._temperature
 
     @temperature.setter
     def temperature(self, value: Numeric | None) -> None:
-        """Set the temperature of the SampleModel.
+        """
+        Set the temperature of the SampleModel.
 
         Parameters
         ----------
         value : Numeric | None
-            The temperature value to set. Can be
-            a number or None to unset the temperature.
+            The temperature value to set. Can be a number or None to unset the temperature.
 
         Raises
         ------
@@ -281,7 +275,8 @@ class SampleModel(ModelBase):
 
     @property
     def temperature_unit(self) -> str | sc.Unit:
-        """Get the temperature unit of the SampleModel.
+        """
+        Get the temperature unit of the SampleModel.
 
         Returns
         -------
@@ -292,13 +287,13 @@ class SampleModel(ModelBase):
 
     @temperature_unit.setter
     def temperature_unit(self, _value: str | sc.Unit) -> None:
-        """The temperature unit of the SampleModel is read-only.
+        """
+        The temperature unit of the SampleModel is read-only.
 
         Parameters
         ----------
         _value : str | sc.Unit
-            The unit to set for the temperature
-            Parameter.
+            The unit to set for the temperature Parameter.
 
         Raises
         ------
@@ -312,13 +307,13 @@ class SampleModel(ModelBase):
         )  # noqa: E501
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the temperature Parameter.
+        """
+        Convert the unit of the temperature Parameter.
 
         Parameters
         ----------
         unit : str | sc.Unit
-            The unit to convert the temperature
-            Parameter to.
+            The unit to convert the temperature Parameter to.
 
         Raises
         ------
@@ -344,27 +339,25 @@ class SampleModel(ModelBase):
 
     @property
     def divide_by_temperature(self) -> bool:
-        """Get whether to divide the detailed balance factor by
-        temperature.
+        """
+        Get whether to divide the detailed balance factor by temperature.
 
         Returns
         -------
         bool
-            True if the detailed balance factor is divided by
-            temperature, False otherwise.
+            True if the detailed balance factor is divided by temperature, False otherwise.
         """
         return self._divide_by_temperature
 
     @divide_by_temperature.setter
     def divide_by_temperature(self, value: bool) -> None:
-        """Set whether to divide the detailed balance factor by
-        temperature.
+        """
+        Set whether to divide the detailed balance factor by temperature.
 
         Parameters
         ----------
         value : bool
-            True to divide the detailed balance factor by
-            temperature, False otherwise.
+            True to divide the detailed balance factor by temperature, False otherwise.
 
         Raises
         ------
@@ -382,13 +375,14 @@ class SampleModel(ModelBase):
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> list[np.ndarray]:
-        """Evaluate the sample model at all Q for the given x values.
+        """
+        Evaluate the sample model at all Q for the given x values.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values to evaluate the model at. Can be a number,
-            list, numpy array, scipp Variable, or scipp DataArray.
+            The x values to evaluate the model at. Can be a number, list, numpy array, scipp
+            Variable, or scipp DataArray.
 
         Returns
         -------
@@ -410,26 +404,23 @@ class SampleModel(ModelBase):
         return y
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
-        """Get all Parameters and Descriptors from all
-        ComponentCollections in the SampleModel.
+        """
+        Get all Parameters and Descriptors from all ComponentCollections in the SampleModel.
 
-        Also includes temperature if set and all variables from
-        diffusion models. Ignores the Parameters and Descriptors in
-        self._components as these are just templates.
+        Also includes temperature if set and all variables from diffusion models. Ignores the
+        Parameters and Descriptors in self._components as these are just templates.
 
         Parameters
         ----------
-        Q_index : int | None, optional
-            If specified, only get variables from
-            the ComponentCollection at the given Q index. If None,
-            get variables from all ComponentCollections. By default, None.
+        Q_index : int | None, default=None
+            If specified, only get variables from the ComponentCollection at the given Q index. If
+            None, get variables from all ComponentCollections. By default, None.
 
         Returns
         -------
         list[Parameter]
-            List of all Parameters and Descriptors,
-            including temperature if set and all variables from
-            diffusion models.
+            List of all Parameters and Descriptors, including temperature if set and all variables
+            from diffusion models.
         """
 
         all_vars = super().get_all_variables(Q_index=Q_index)
@@ -446,8 +437,9 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def _generate_component_collections(self) -> None:
-        """Generate ComponentCollections from the DiffusionModels for
-        each Q and add the components from self._components.
+        """
+        Generate ComponentCollections from the DiffusionModels for each Q and add the components
+        from self._components.
         """
         # TODO regenerate automatically if Q, diffusion models
         # or components have changed
@@ -474,7 +466,8 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        """Return a string representation of the SampleModel.
+        """
+        Return a string representation of the SampleModel.
 
         Returns
         -------

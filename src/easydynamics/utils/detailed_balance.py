@@ -29,61 +29,46 @@ def detailed_balance_factor(
     temperature_unit: str | sc.Unit = 'K',
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
-    r"""Compute the detailed balance factor (DBF):
-    $$
-    DBF(E, T) = E(n(E)+1)=\frac{E}{(1 - e^{-E / (k_B*T)})}},
-    $$
-    where $n(E)$ is the Bose-Einstein distribution, $E$ is the energy
-    transfer, and $T$ is the temperature. $k_B$ is the Boltzmann
-    constant.
-    If divide_by_temperature is True, the result is normalized by
-    $k_B*T$ to have value 1 at $E=0$.
+    r"""
+    Compute the detailed balance factor (DBF): $$ DBF(E, T) = E(n(E)+1)=\frac{E}{(1 - e^{-E /
+    (k_B*T)})}}, $$ where $n(E)$ is the Bose-Einstein distribution, $E$ is the energy transfer, and
+    $T$ is the temperature. $k_B$ is the Boltzmann constant. If divide_by_temperature is True, the
+    result is normalized by $k_B*T$ to have value 1 at $E=0$.
 
     Parameters
     ----------
     energy : int | float | list | np.ndarray | sc.Variable
-        The energy
-        transfer. If number, assumed to be in meV unless energy_unit
-        is set.
+        The energy transfer. If number, assumed to be in meV unless energy_unit is set.
     temperature : int | float | sc.Variable | Parameter
-        The
-        temperature. If number, assumed to be in K unless
-        temperature_unit is set.
-    energy_unit : str | sc.Unit, optional
-        Unit for energy if energy is
-        given as a number or list. By default, 'meV'.
-    temperature_unit : str | sc.Unit, optional
-        Unit for temperature if
-        temperature is given as a number. By default, 'K'.
-    divide_by_temperature : bool, optional
-        If True, divide the result
-        by $k_B*T$ to make it dimensionless and have value 1 at E=0. By default, True.
+        The temperature. If number, assumed to be in K unless temperature_unit is set.
+    energy_unit : str | sc.Unit, default='meV'
+        Unit for energy if energy is given as a number or list. By default, 'meV'.
+    temperature_unit : str | sc.Unit, default='K'
+        Unit for temperature if temperature is given as a number. By default, 'K'.
+    divide_by_temperature : bool, default=True
+        If True, divide the result by $k_B*T$ to make it dimensionless and have value 1 at E=0. By
+        default, True.
 
     Raises
     ------
     TypeError :
-        If energy or temperature is not a number, list,
-        numpy array, or scipp Variable, or if energy_unit or
-        temperature_unit is not a string or scipp Unit,
-        or if divide_by_temperature is not a boolean.
+        If energy or temperature is not a number, list, numpy array, or scipp Variable, or if
+        energy_unit or temperature_unit is not a string or scipp Unit, or if divide_by_temperature
+        is not a boolean.
     ValueError :
-        If temperature is negative, or if energy is a numpy
-        array with more than 1 dimension, or if temperature is a
-        scipp Variable that does not have a single dimension named
-        'temperature', or if energy is a scipp Variable that does
-        not have a single dimension named 'energy'.
+        If temperature is negative, or if energy is a numpy array with more than 1 dimension, or if
+        temperature is a scipp Variable that does not have a single dimension named 'temperature',
+        or if energy is a scipp Variable that does not have a single dimension named 'energy'.
     UnitError :
-        If the provided energy_unit or temperature_unit is
-        invalid, or if the units of energy or temperature cannot be
-        converted to the expected units.
+        If the provided energy_unit or temperature_unit is invalid, or if the units of energy or
+        temperature cannot be converted to the expected units.
     ZeroDivisionError :
         If divide_by_temperature is True and temperature is zero.
 
     Returns
     -------
     np.ndarray
-        Detailed balance factor evaluated at the
-        given energy and temperature.
+        Detailed balance factor evaluated at the given energy and temperature.
 
     Examples
     --------
@@ -198,36 +183,32 @@ def _convert_to_scipp_variable(
     name: str,
     unit: str | None = None,
 ) -> sc.Variable:
-    """Convert various input types to a scipp Variable with proper
-    units.
+    """
+    Convert various input types to a scipp Variable with proper units.
 
     Parameters
     ----------
     value : int | float | list | np.ndarray | Parameter | sc.Variable
-        The value to convert. Can be a number, list, numpy array,
-        Parameter, or scipp Variable. If a number or list, the unit
-        must be specified in the unit argument.
+        The value to convert. Can be a number, list, numpy array, Parameter, or scipp Variable. If
+        a number or list, the unit must be specified in the unit argument.
     name : str
         The name of the variable, used for error messages.
-    unit : str | None, optional
-        The unit to use if value is a number or list.
-        Must be specified if value is a number or list. Ignored if
-        value is a Parameter or sc.Variable, which have their own
-        units. By default, None.
+    unit : str | None, default=None
+        The unit to use if value is a number or list. Must be specified if value is a number or
+        list. Ignored if value is a Parameter or sc.Variable, which have their own units. By
+        default, None.
 
     Raises
     ------
     TypeError :
-        If value is not one of the accepted types, or if unit
-        is not a string when needed.
+        If value is not one of the accepted types, or if unit is not a string when needed.
     UnitError :
         If the provided unit is invalid.
 
     Returns
     -------
     sc.Variable
-        The input value converted to a scipp Variable with
-        appropriate units.
+        The input value converted to a scipp Variable with appropriate units.
     """
     if isinstance(value, sc.Variable):
         return value

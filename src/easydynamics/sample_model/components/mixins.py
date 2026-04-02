@@ -15,12 +15,11 @@ DHO_MINIMUM_CENTER = 1e-10  # To avoid zero center in DHO
 
 
 class CreateParametersMixin:
-    """Provides parameter creation and validation methods for model
-    components.
+    """
+    Provides parameter creation and validation methods for model components.
 
-    This mixin provides methods to create and validate common physics
-    parameters (area, center, width) with appropriate bounds and type
-    checking.
+    This mixin provides methods to create and validate common physics parameters (area, center,
+    width) with appropriate bounds and type checking.
     """
 
     def _create_area_parameter(
@@ -30,12 +29,11 @@ class CreateParametersMixin:
         unit: str | sc.Unit = 'meV',
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
-        """Validate and convert a number to a Parameter describing the
-        area of a function.
+        """
+        Validate and convert a number to a Parameter describing the area of a function.
 
-        If the area is negative, a warning is raised.
-        If the area is non-negative, its minimum is set to 0 to avoid it
-        accidentally becoming negative during fitting.
+        If the area is negative, a warning is raised. If the area is non-negative, its minimum is
+        set to 0 to avoid it accidentally becoming negative during fitting.
 
         Parameters
         ----------
@@ -43,9 +41,9 @@ class CreateParametersMixin:
             The area value or Parameter.
         name : str
             The name of the model component.
-        unit : str | sc.Unit, optional
+        unit : str | sc.Unit, default='meV'
             The unit of the area Parameter. By default, 'meV'.
-        minimum_area : float, optional
+        minimum_area : float, default=MINIMUM_AREA
             The minimum allowed area. By default, MINIMUM_AREA.
 
         Raises
@@ -53,8 +51,7 @@ class CreateParametersMixin:
         TypeError :
             If area is not a number or a Parameter.
         ValueError :
-            If area is not a finite number or if the area
-            Parameter has a non-finite value.
+            If area is not a finite number or if the area Parameter has a non-finite value.
 
         Returns
         -------
@@ -89,34 +86,30 @@ class CreateParametersMixin:
         unit: str | sc.Unit = 'meV',
         enforce_minimum_center: bool = False,
     ) -> Parameter:
-        """Validate and convert a number to a Parameter describing the
-        center of a function.
+        """
+        Validate and convert a number to a Parameter describing the center of a function.
 
         Parameters
         ----------
         center : Numeric | Parameter | None
-            The center value or
-            Parameter.
+            The center value or Parameter.
         name : str
             The name of the model component.
         fix_if_none : bool
-            Whether to fix the center Parameter
-            if center is None.
-        unit : str | sc.Unit, optional
-            The unit of the center
-            Parameter. By default, 'meV'.
-        enforce_minimum_center : bool, optional
-            Whether to
-            enforce a minimum center value to avoid zero center in
-            DHO. By default, False.
+            Whether to fix the center Parameter if center is None.
+        unit : str | sc.Unit, default='meV'
+            The unit of the center Parameter. By default, 'meV'.
+        enforce_minimum_center : bool, default=False
+            Whether to enforce a minimum center value to avoid zero center in DHO. By default,
+            False.
 
         Raises
         ------
         TypeError :
             If center is not None, a number, or a Parameter.
         ValueError :
-            If center is a number but not finite, or if
-            center is a Parameter but has a non-finite value.
+            If center is a number but not finite, or if center is a Parameter but has a non-finite
+            value.
 
         Returns
         -------
@@ -150,8 +143,8 @@ class CreateParametersMixin:
         unit: str | sc.Unit = 'meV',
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
-        """Validate and convert a number to a Parameter describing the
-        width of a function.
+        """
+        Validate and convert a number to a Parameter describing the width of a function.
 
         Parameters
         ----------
@@ -159,13 +152,12 @@ class CreateParametersMixin:
             The width value or Parameter.
         name : str
             The name of the model component.
-        param_name : str, optional
+        param_name : str, default='width'
             The name of the width parameter. By default, 'width'.
-        unit : str | sc.Unit, optional
+        unit : str | sc.Unit, default='meV'
             The unit of the width Parameter. By default, 'meV'.
-        minimum_width : float, optional
-            The minimum
-            allowed width. By default, MINIMUM_WIDTH.
+        minimum_width : float, default=MINIMUM_WIDTH
+            The minimum allowed width. By default, MINIMUM_WIDTH.
 
         Raises
         ------

@@ -12,16 +12,14 @@ from easydynamics.sample_model import SampleModel
 
 
 class AnalysisBase(EasyScienceModelBase):
-    """Base class for analysis in EasyDynamics.
+    """
+    Base class for analysis in EasyDynamics.
 
-    This class is not meant
-to be used directly.
+    This class is not meant to be used directly.
 
-    An Analysis consists of an Experiment, a SampleModel, and an
-    InstrumentModel. The Experiment contains the data to be fitted, the
-    SampleModel contains the model for the sample, and the
-    InstrumentModel contains the model for the instrument, including
-    background and resolution
+    An Analysis consists of an Experiment, a SampleModel, and an InstrumentModel. The Experiment
+    contains the data to be fitted, the SampleModel contains the model for the sample, and the
+    InstrumentModel contains the model for the instrument, including background and resolution
     """
 
     def __init__(
@@ -33,40 +31,35 @@ to be used directly.
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
-        """Initialize the AnalysisBase.
+        """
+        Initialize the AnalysisBase.
 
         Parameters
         ----------
-        display_name : str | None, optional
+        display_name : str | None, default='MyAnalysis'
             Display name of the analysis. By default, 'MyAnalysis'.
-        unique_name : str | None, optional
-            Unique name of the analysis. If
-            None, a unique name is automatically generated. By default, None.
-        experiment : Experiment | None, optional
-            The Experiment associated
-            with this Analysis. If None, a default Experiment is
+        unique_name : str | None, default=None
+            Unique name of the analysis. If None, a unique name is automatically generated. By
+            default, None.
+        experiment : Experiment | None, default=None
+            The Experiment associated with this Analysis. If None, a default Experiment is created.
+            By default, None.
+        sample_model : SampleModel | None, default=None
+            The SampleModel associated with this Analysis. If None, a default SampleModel is
             created. By default, None.
-        sample_model : SampleModel | None, optional
-            The SampleModel
-            associated with this Analysis. If None, a default
-            SampleModel is created. By default, None.
-        instrument_model : InstrumentModel | None, optional
-            The
-            InstrumentModel associated with this Analysis. If None,
-            a default InstrumentModel is created. By default, None.
-        extra_parameters : Parameter | list[Parameter] | None, optional
-            Extra
-            parameters to be included in the analysis for advanced
-            users. If None, no extra parameters are added. By default, None.
+        instrument_model : InstrumentModel | None, default=None
+            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
+            is created. By default, None.
+        extra_parameters : Parameter | list[Parameter] | None, default=None
+            Extra parameters to be included in the analysis for advanced users. If None, no extra
+            parameters are added. By default, None.
 
         Raises
         ------
         TypeError :
-            If experiment is not an Experiment or None or
-            if sample_model is not a SampleModel or None or if
-            instrument_model is not an InstrumentModel or None or if
-            extra_parameters is not a Parameter, a list of Parameters,
-            or None.
+            If experiment is not an Experiment or None or if sample_model is not a SampleModel or
+            None or if instrument_model is not an InstrumentModel or None or if extra_parameters is
+            not a Parameter, a list of Parameters, or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -112,7 +105,8 @@ to be used directly.
 
     @property
     def experiment(self) -> Experiment:
-        """Get the Experiment associated with this Analysis.
+        """
+        Get the Experiment associated with this Analysis.
 
         Returns
         -------
@@ -124,7 +118,8 @@ to be used directly.
 
     @experiment.setter
     def experiment(self, value: Experiment) -> None:
-        """Set the Experiment for this Analysis.
+        """
+        Set the Experiment for this Analysis.
 
         Parameters
         ----------
@@ -144,7 +139,8 @@ to be used directly.
 
     @property
     def sample_model(self) -> SampleModel:
-        """Get the SampleModel associated with this Analysis.
+        """
+        Get the SampleModel associated with this Analysis.
 
         Returns
         -------
@@ -156,7 +152,8 @@ to be used directly.
 
     @sample_model.setter
     def sample_model(self, value: SampleModel) -> None:
-        """Set the SampleModel for this Analysis.
+        """
+        Set the SampleModel for this Analysis.
 
         Parameters
         ----------
@@ -175,25 +172,25 @@ to be used directly.
 
     @property
     def instrument_model(self) -> InstrumentModel:
-        """Get the InstrumentModel associated with this Analysis.
+        """
+        Get the InstrumentModel associated with this Analysis.
 
         Returns
         -------
         InstrumentModel
-            The InstrumentModel associated with this
-            Analysis.
+            The InstrumentModel associated with this Analysis.
         """
         return self._instrument_model
 
     @instrument_model.setter
     def instrument_model(self, value: InstrumentModel) -> None:
-        """Set the InstrumentModel for this Analysis.
+        """
+        Set the InstrumentModel for this Analysis.
 
         Parameters
         ----------
         value : InstrumentModel
-            The InstrumentModel to set for this
-            Analysis.
+            The InstrumentModel to set for this Analysis.
 
         Raises
         ------
@@ -207,27 +204,25 @@ to be used directly.
 
     @property
     def Q(self) -> sc.Variable | None:
-        """Get the Q values from the associated Experiment, if
-        available.
+        """
+        Get the Q values from the associated Experiment, if available.
 
         Returns
         -------
         sc.Variable | None
-            The Q values from the associated Experiment,
-            if available, and None if not.
+            The Q values from the associated Experiment, if available, and None if not.
         """
         return self.experiment.Q
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
-        """Q cannot be set, as it is a read-only property derived from
-        the Experiment.
+        """
+        Q cannot be set, as it is a read-only property derived from the Experiment.
 
         Parameters
         ----------
         _value : sc.Variable
-            The Q values to set. This argument is
-            ignored, as Q is a read-only property.
+            The Q values to set. This argument is ignored, as Q is a read-only property.
 
         Raises
         ------
@@ -238,28 +233,27 @@ to be used directly.
 
     @property
     def energy(self) -> sc.Variable | None:
-        """Get the energy values from the associated Experiment, if
-        available.
+        """
+        Get the energy values from the associated Experiment, if available.
 
         Returns
         -------
         sc.Variable | None
             The energy values from the associated.
-        Experiment, if available, and None if not.
+        sc.Variable | None
         """
 
         return self.experiment.energy
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
-        """Energy cannot be set, as it is a read-only property derived
-        from the Experiment.
+        """
+        Energy cannot be set, as it is a read-only property derived from the Experiment.
 
         Parameters
         ----------
         _value : sc.Variable
-            The energy values to set. This argument is
-            ignored, as energy is a read-only property.
+            The energy values to set. This argument is ignored, as energy is a read-only property.
 
         Raises
         ------
@@ -271,28 +265,26 @@ to be used directly.
 
     @property
     def temperature(self) -> Parameter | None:
-        """Get the temperature from the associated SampleModel, if
-        available.
+        """
+        Get the temperature from the associated SampleModel, if available.
 
         Returns
         -------
         Parameter | None
-            The temperature from the associated SampleModel,
-            if available, and None if not.
+            The temperature from the associated SampleModel, if available, and None if not.
         """
 
         return self.sample_model.temperature
 
     @temperature.setter
     def temperature(self, _value: np.ndarray | Parameter) -> None:
-        """Temperature cannot be set, as it is a read-only property
-        derived from the SampleModel.
+        """
+        Temperature cannot be set, as it is a read-only property derived from the SampleModel.
 
         Parameters
         ----------
         _value : np.ndarray | Parameter
-            The temperature to set.
-            This argument is ignored, as temperature is a read-only
+            The temperature to set. This argument is ignored, as temperature is a read-only
             property.
 
         Raises
@@ -305,31 +297,30 @@ to be used directly.
 
     @property
     def extra_parameters(self) -> list[Parameter]:
-        """Get the extra parameters included in this Analysis.
+        """
+        Get the extra parameters included in this Analysis.
 
         Returns
         -------
         list[Parameter]
-            The extra parameters included in this
-            Analysis.
+            The extra parameters included in this Analysis.
         """
         return self._extra_parameters
 
     @extra_parameters.setter
     def extra_parameters(self, value: Parameter | list[Parameter]) -> None:
-        """Set the extra parameters for this Analysis.
+        """
+        Set the extra parameters for this Analysis.
 
         Parameters
         ----------
         value : Parameter | list[Parameter]
-            The extra parameters to
-            include in this Analysis.
+            The extra parameters to include in this Analysis.
 
         Raises
         ------
         TypeError :
-            If value is not a Parameter, a list of
-            Parameters, or None.
+            If value is not a Parameter, a list of Parameters, or None.
         """
         if isinstance(value, Parameter):
             self._extra_parameters = [value]
@@ -345,11 +336,10 @@ to be used directly.
     #############
 
     def normalize_resolution(self) -> None:
-        """Normalize the resolution in the InstrumentModel to ensure
-        that it integrates to 1.
+        """
+        Normalize the resolution in the InstrumentModel to ensure that it integrates to 1.
 
-        This is important for accurate fitting and interpretation of the
-        results.
+        This is important for accurate fitting and interpretation of the results.
         """
         self.instrument_model.normalize_resolution()
 
@@ -358,26 +348,27 @@ to be used directly.
     #############
 
     def _on_experiment_changed(self) -> None:
-        """Update the Q values in the sample and instrument models when
-        the experiment changes.
+        """
+        Update the Q values in the sample and instrument models when the experiment changes.
         """
         self.sample_model.Q = self.Q
         self.instrument_model.Q = self.Q
 
     def _on_sample_model_changed(self) -> None:
-        """Update the Q values in the sample model when the sample model
-        changes.
+        """
+        Update the Q values in the sample model when the sample model changes.
         """
         self.sample_model.Q = self.Q
 
     def _on_instrument_model_changed(self) -> None:
-        """Update the Q values in the instrument model when the
-        instrument model changes.
+        """
+        Update the Q values in the instrument model when the instrument model changes.
         """
         self.instrument_model.Q = self.Q
 
     def _verify_Q_index(self, Q_index: int | None) -> int | None:
-        """Verify that the Q index is valid.
+        """
+        Verify that the Q index is valid.
 
         Parameters
         ----------
@@ -411,7 +402,8 @@ to be used directly.
     #############
 
     def __repr__(self) -> str:
-        """Return a string representation of the Analysis.
+        """
+        Return a string representation of the Analysis.
 
         Returns
         -------
