@@ -45,17 +45,21 @@ class AnalyticalConvolution(ConvolutionBase):
     ) -> None:
         """Initialize an AnalyticalConvolution.
 
-        Args:
-            energy (np.ndarray | sc.Variable): 1D array of energy values
-                where the convolution is evaluated.
-            energy_unit (str | sc.Unit, default='meV'): The unit of the
-                energy.
-            sample_components (ComponentCollection | ModelComponent | None, default=None):
-                The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent | None, default=None):
-                The resolution model to convolve with.
-            energy_offset (Numeric | Parameter, default=0.0): An offset to
-                shift the energy values by.
+        Parameters
+        ----------
+        energy : np.ndarray | sc.Variable
+            1D array of energy values
+            where the convolution is evaluated.
+        energy_unit : str | sc.Unit, optional
+            The unit of the
+            energy. By default, 'meV'.
+        sample_components : ComponentCollection | ModelComponent | None, optional
+            The sample model to be convolved. By default, None.
+        resolution_components : ComponentCollection | ModelComponent | None, optional
+            The resolution model to convolve with. By default, None.
+        energy_offset : Numeric | Parameter, optional
+            An offset to
+            shift the energy values by. By default, 0.0.
         """
         super().__init__(
             energy=energy,
@@ -69,13 +73,16 @@ class AnalyticalConvolution(ConvolutionBase):
         self,
     ) -> np.ndarray:
         """Convolve sample with resolution analytically if possible.
+
         Accepts ComponentCollection or single ModelComponent for each.
         Possible analytical convolutions are any combination of delta
         functions, Gaussians, Lorentzians and Voigt profiles.
 
-        Returns:
-            np.ndarray: The convolution of the sample_components and
-                resolution_components values evaluated at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The convolution of the sample_components and
+            resolution_components values evaluated at self.energy.
         """
 
         sample_components = self.sample_components.components
@@ -130,18 +137,25 @@ class AnalyticalConvolution(ConvolutionBase):
 
         All areas are multiplied in the convolution.
 
-        Args:
-            sample_component (ModelComponent): The sample component to
-                be convolved.
-            resolution_component (ModelComponent): The resolution
-                component to convolve with.
+        Parameters
+        ----------
+        sample_component : ModelComponent
+            The sample component to
+            be convolved.
+        resolution_component : ModelComponent
+            The resolution
+            component to convolve with.
 
-        Returns:
-            np.ndarray: The convolution result
+        Raises
+        ------
+        ValueError :
+            If the component pair cannot be handled
+            analytically.
 
-        Raises:
-            ValueError: If the component pair cannot be handled
-                analytically.
+        Returns
+        -------
+        np.ndarray
+            The convolution result.
         """
 
         if isinstance(resolution_component, DeltaFunction):
@@ -192,14 +206,18 @@ class AnalyticalConvolution(ConvolutionBase):
         ComponentCollection shifted by the delta center. The areas are
         multiplied.
 
-        Args:
-            sample_component (DeltaFunction): The sample component to
-                be convolved.
-            resolution_components (ComponentCollection | ModelComponent)
-                : The resolution model to convolve with.
+        Parameters
+        ----------
+        sample_component : DeltaFunction
+            The sample component to
+            be convolved.
+        resolution_components : ComponentCollection | ModelComponent
+            : The resolution model to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         return sample_component.area.value * resolution_components.evaluate(
             self.energy_with_offset.values - sample_component.center.value
@@ -214,14 +232,19 @@ class AnalyticalConvolution(ConvolutionBase):
         Gaussian component with width $\sqrt{w_1^2 + w_2^2}$. The areas
         are multiplied.
 
-        Args:
-            sample_component (Gaussian): The sample Gaussian component
-                to be convolved.
-            resolution_component (Gaussian): The resolution Gaussian
-                component to convolve with.
+        Parameters
+        ----------
+        sample_component : Gaussian
+            The sample Gaussian component
+            to be convolved.
+        resolution_component : Gaussian
+            The resolution Gaussian
+            component to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
 
         width = np.sqrt(sample_component.width.value**2 + resolution_component.width.value**2)
@@ -240,14 +263,19 @@ class AnalyticalConvolution(ConvolutionBase):
         """Convolution of a Gaussian and a Lorentzian results in a Voigt
         profile. The areas are multiplied.
 
-        Args:
-            sample_component (Gaussian): The sample Gaussian component
-                to be convolved.
-            resolution_component (Lorentzian): The resolution Lorentzian
-                component to convolve with.
+        Parameters
+        ----------
+        sample_component : Gaussian
+            The sample Gaussian component
+            to be convolved.
+        resolution_component : Lorentzian
+            The resolution Lorentzian
+            component to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         center = sample_component.center.value + resolution_component.center.value
         area = sample_component.area.value * resolution_component.area.value
@@ -269,14 +297,19 @@ class AnalyticalConvolution(ConvolutionBase):
         while the Gaussian widths are summed in quadrature. The areas
         are multiplied.
 
-        Args:
-            sample_component (Gaussian): The sample Gaussian component
-                to be convolved.
-            resolution_component (Voigt): The resolution Voigt component
-                to convolve with.
+        Parameters
+        ----------
+        sample_component : Gaussian
+            The sample Gaussian component
+            to be convolved.
+        resolution_component : Voigt
+            The resolution Voigt component
+            to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         area = sample_component.area.value * resolution_component.area.value
 
@@ -304,14 +337,19 @@ class AnalyticalConvolution(ConvolutionBase):
         Lorentzian component with width $w_1 + w_2$. The areas are
         multiplied.
 
-        Args:
-            sample_component (Lorentzian): The sample Lorentzian
-                component to be convolved.
-            resolution_component (Lorentzian): The resolution Lorentzian
-                component to convolve with.
+        Parameters
+        ----------
+        sample_component : Lorentzian
+            The sample Lorentzian
+            component to be convolved.
+        resolution_component : Lorentzian
+            The resolution Lorentzian
+            component to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         area = sample_component.area.value * resolution_component.area.value
 
@@ -334,13 +372,19 @@ class AnalyticalConvolution(ConvolutionBase):
 
         The areas are multiplied.
 
-        Args:
-            sample_component (Lorentzian): The sample Lorentzian
-                component to be convolved.
-            resolution_component (Voigt): The resolution Voigt component
-                to convolve with.
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Parameters
+        ----------
+        sample_component : Lorentzian
+            The sample Lorentzian
+            component to be convolved.
+        resolution_component : Voigt
+            The resolution Voigt component
+            to convolve with.
+
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         area = sample_component.area.value * resolution_component.area.value
 
@@ -371,14 +415,19 @@ class AnalyticalConvolution(ConvolutionBase):
         while the Lorentzian widths are summed.
         The areas are multiplied.
 
-        Args:
-            sample_component (Voigt): The sample Voigt component to be
-                convolved.
-            resolution_component (Voigt): The resolution Voigt component
-                to convolve with.
+        Parameters
+        ----------
+        sample_component : Voigt
+            The sample Voigt component to be
+            convolved.
+        resolution_component : Voigt
+            The resolution Voigt component
+            to convolve with.
 
-        Returns:
-            np.ndarray: The evaluated convolution values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated convolution values at self.energy.
         """
         area = sample_component.area.value * resolution_component.area.value
 
@@ -419,13 +468,19 @@ class AnalyticalConvolution(ConvolutionBase):
 
         All checks are handled in the calling function.
 
-        Args:
-            area (float): The area under the Gaussian curve.
-            center (float): The center of the Gaussian.
-            width (float): The width (sigma) of the Gaussian.
+        Parameters
+        ----------
+        area : float
+            The area under the Gaussian curve.
+        center : float
+            The center of the Gaussian.
+        width : float
+            The width (sigma) of the Gaussian.
 
-        Returns:
-            np.ndarray: The evaluated Gaussian values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated Gaussian values at self.energy.
         """
 
         normalization = 1 / (np.sqrt(2 * np.pi) * width)
@@ -434,8 +489,7 @@ class AnalyticalConvolution(ConvolutionBase):
         return area * normalization * np.exp(exponent)
 
     def _lorentzian_eval(self, area: float, center: float, width: float) -> np.ndarray:
-        r"""
-        Evaluate a Lorentzian function.
+        r"""Evaluate a Lorentzian function.
 
         $$
         I(x) = \frac{A}{\\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2},
@@ -446,13 +500,19 @@ class AnalyticalConvolution(ConvolutionBase):
 
         All checks are handled in the calling function.
 
-        Args:
-            area (float): The area under the Lorentzian.
-            center (float): The center of the Lorentzian.
-            width (float): The width (HWHM) of the Lorentzian.
+        Parameters
+        ----------
+        area : float
+            The area under the Lorentzian.
+        center : float
+            The center of the Lorentzian.
+        width : float
+            The width (HWHM) of the Lorentzian.
 
-        Returns:
-            np.ndarray: The evaluated Lorentzian values at self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated Lorentzian values at self.energy.
         """
 
         normalization = width / np.pi
@@ -470,17 +530,24 @@ class AnalyticalConvolution(ConvolutionBase):
         """Evaluate a Voigt profile function using scipy's
         voigt_profile.
 
-        Args:
-            area (float): The area under the Voigt profile.
-            center (float): The center of the Voigt profile.
-            gaussian_width (float): The Gaussian width (sigma) of the
-                Voigt profile.
-            lorentzian_width (float): The Lorentzian width (HWHM) of the
-                Voigt profile.
+        Parameters
+        ----------
+        area : float
+            The area under the Voigt profile.
+        center : float
+            The center of the Voigt profile.
+        gaussian_width : float
+            The Gaussian width (sigma) of the
+            Voigt profile.
+        lorentzian_width : float
+            The Lorentzian width (HWHM) of the
+            Voigt profile.
 
-        Returns:
-            np.ndarray: The evaluated Voigt profile values at
-                self.energy.
+        Returns
+        -------
+        np.ndarray
+            The evaluated Voigt profile values at
+            self.energy.
         """
 
         return area * voigt_profile(

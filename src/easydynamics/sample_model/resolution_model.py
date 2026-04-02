@@ -27,17 +27,22 @@ class ResolutionModel(ModelBase):
     ) -> None:
         """Initialize a ResolutionModel.
 
-        Args:
-            display_name (str, default="MyResolutionModel"): Display name of the model.
-            unique_name (str | None, default=None): Unique name of the model. If None,
-                a unique name will be generated.
-            unit (str | sc.Unit, default="meV"): Unit of the model.
-            components (ModelComponent | ComponentCollection | None, default=None):
-                Template components of the model. If None, no components
-                are added. These components are copied into
-                ComponentCollections for each Q value.
-            Q (Q_type | None, default=None): Q values for the model. If None, Q is not
-                set.
+        Parameters
+        ----------
+        display_name : str, optional
+            Display name of the model. By default, 'MyResolutionModel'.
+        unique_name : str | None, optional
+            Unique name of the model. If None,
+            a unique name will be generated. By default, None.
+        unit : str | sc.Unit, optional
+            Unit of the model. By default, 'meV'.
+        components : ModelComponent | ComponentCollection | None, optional
+            Template components of the model. If None, no components
+            are added. These components are copied into
+            ComponentCollections for each Q value. By default, None.
+        Q : Q_type | None, optional
+            Q values for the model. If None, Q is not
+            set. By default, None.
         """
 
         super().__init__(
@@ -54,12 +59,15 @@ class ResolutionModel(ModelBase):
         Does not allow DeltaFunction or Polynomial components, as these
         are not physical resolution components.
 
-        Args:
-            component (ModelComponent | ComponentCollection):
-                Component(s) to append.
+        Parameters
+        ----------
+        component : ModelComponent | ComponentCollection
+            Component(s) to append.
 
-        Raises:
-            TypeError: If the component is a DeltaFunction or Polynomial
+        Raises
+        ------
+        TypeError :
+            If the component is a DeltaFunction or Polynomial.
         """
         if isinstance(component, ComponentCollection):
             components = component.components

@@ -36,22 +36,29 @@ class Polynomial(ModelComponent):
     ) -> None:
         """Initialize the Polynomial component.
 
-        Args:
-            coefficients (Sequence[Numeric | Parameter], default=(0.0,)):
-                Coefficients c0, c1, ..., cN
-            unit (str | sc.Unit, default='meV'): Unit of the Polynomial
-                component.
-            display_name (str | None, default='Polynomial'): Display
-                name of the Polynomial component.
-            unique_name (str | None, default=None): Unique name of the
-                component. If None, a unique_name is automatically
-                generated.
+        Parameters
+        ----------
+        coefficients : Sequence[Numeric | Parameter], optional
+            Coefficients c0, c1, ..., cN. By default, (0.0,).
+        unit : str | sc.Unit, optional
+            Unit of the Polynomial
+            component. By default, 'meV'.
+        display_name : str | None, optional
+            Display
+            name of the Polynomial component. By default, 'Polynomial'.
+        unique_name : str | None, optional
+            Unique name of the
+            component. If None, a unique_name is automatically
+            generated. By default, None.
 
-        Raises:
-            TypeError: If coefficients is not a sequence of numbers or
-                Parameters or if any item in coefficients is not a
-                number or Parameter.
-            ValueError: If coefficients is an empty sequence.
+        Raises
+        ------
+        TypeError :
+            If coefficients is not a sequence of numbers or
+            Parameters or if any item in coefficients is not a
+            number or Parameter.
+        ValueError :
+            If coefficients is an empty sequence.
         """
 
         super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
@@ -87,8 +94,10 @@ class Polynomial(ModelComponent):
         """Get the coefficients of the polynomial as a list of
         Parameters.
 
-        Returns:
-            list[Parameter]: The coefficients of the polynomial.
+        Returns
+        -------
+        list[Parameter]
+            The coefficients of the polynomial.
         """
         return list(self._coefficients)
 
@@ -98,15 +107,20 @@ class Polynomial(ModelComponent):
 
         Length must match current number of coefficients.
 
-        Args:
-            coeffs (Sequence[Numeric | Parameter]): New coefficients as
-                a sequence of numbers or Parameters.
+        Parameters
+        ----------
+        coeffs : Sequence[Numeric | Parameter]
+            New coefficients as
+            a sequence of numbers or Parameters.
 
-        Raises:
-            TypeError: If coeffs is not a sequence of numbers or
-                Parameters or if any item in coeffs is not a number or Parameter.
-            ValueError: If the length of coeffs does not match the
-                existing number of coefficients.
+        Raises
+        ------
+        TypeError :
+            If coeffs is not a sequence of numbers or
+            Parameters or if any item in coeffs is not a number or Parameter.
+        ValueError :
+            If the length of coeffs does not match the
+            existing number of coefficients.
         """
         if not isinstance(coeffs, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -128,8 +142,10 @@ class Polynomial(ModelComponent):
     def coefficient_values(self) -> list[float]:
         """Get the coefficients of the polynomial as a list.
 
-        Returns:
-            list[float]: The coefficient values of the polynomial.
+        Returns
+        -------
+        list[float]
+            The coefficient values of the polynomial.
         """
         return [param.value for param in self._coefficients]
 
@@ -142,13 +158,16 @@ class Polynomial(ModelComponent):
         $$
         where $C_i$ are the coefficients.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The x values at which to evaluate the Polynomial.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values at which to evaluate the Polynomial.
 
-        Returns:
-            np.ndarray: The evaluated Polynomial at the given x
-                values.
+        Returns
+        -------
+        np.ndarray
+            The evaluated Polynomial at the given x
+            values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -170,8 +189,10 @@ class Polynomial(ModelComponent):
     def degree(self) -> int:
         """Get the degree of the polynomial.
 
-        Returns:
-            int: The degree of the polynomial.
+        Returns
+        -------
+        int
+            The degree of the polynomial.
         """
         return len(self._coefficients) - 1
 
@@ -180,12 +201,16 @@ class Polynomial(ModelComponent):
         """The degree is determined by the number of coefficients and
         cannot be set directly.
 
-        Args:
-            _value (int): The new degree of the polynomial.
+        Parameters
+        ----------
+        _value : int
+            The new degree of the polynomial.
 
-        Raises:
-            AttributeError: Always raised since degree cannot be set
-                directly.
+        Raises
+        ------
+        AttributeError :
+            Always raised since degree cannot be set
+            directly.
         """
         raise AttributeError(
             'The degree of the polynomial is determined by the number of coefficients '
@@ -195,19 +220,25 @@ class Polynomial(ModelComponent):
     def get_all_variables(self) -> list[DescriptorBase]:
         """Get all variables from the model component.
 
-        Returns:
-            list[DescriptorBase]: List of variables in the component.
+        Returns
+        -------
+        list[DescriptorBase]
+            List of variables in the component.
         """
         return list(self._coefficients)
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
         """Convert the unit of the polynomial.
 
-        Args:
-            unit (str | sc.Unit): The target unit to convert to.
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The target unit to convert to.
 
-        Raises:
-            UnitError: If the provided unit is not a string or sc.Unit.
+        Raises
+        ------
+        UnitError :
+            If the provided unit is not a string or sc.Unit.
         """
 
         if not isinstance(unit, (str, sc.Unit)):
@@ -228,8 +259,10 @@ class Polynomial(ModelComponent):
     def __repr__(self) -> str:
         """Return a string representation of the Polynomial.
 
-        Returns:
-            str: A string representation of the Polynomial.
+        Returns
+        -------
+        str
+            A string representation of the Polynomial.
         """
 
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)

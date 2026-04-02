@@ -38,29 +38,37 @@ class NumericalConvolution(NumericalConvolutionBase):
     ) -> None:
         """Initialize the NumericalConvolution object.
 
-        Args:
-            energy (np.ndarray | sc.Variable): 1D array of energy values
-                where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
-                The sample model to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
-                The resolution model to convolve with.
-            energy_offset (Numeric | Parameter, default=0.0): An energy
-                offset to apply to the energy values before convolution.
-            upsample_factor (Numeric | None, default=5): The factor by which to
-                upsample the input data before convolution.
-            extension_factor (Numeric | None, default=0.2): The factor by which to
-                extend the input data range before convolution.
-            temperature (Parameter | Numeric | None, default=None): The
-                temperature to use for detailed balance correction.
-                Default is None.
-            temperature_unit (str | sc.Unit, default='K'): The unit of the
-                temperature parameter.
-            energy_unit (str | sc.Unit, default='meV'): The unit of the
-                energy. Default is 'meV'.
-            normalize_detailed_balance (bool, default=True): Whether to
-                normalize the detailed balance correction. Default is
-                True.
+        Parameters
+        ----------
+        energy : np.ndarray | sc.Variable
+            1D array of energy values
+            where the convolution is evaluated.
+        sample_components : ComponentCollection | ModelComponent
+            The sample model to be convolved.
+        resolution_components : ComponentCollection | ModelComponent
+            The resolution model to convolve with.
+        energy_offset : Numeric | Parameter, optional
+            An energy
+            offset to apply to the energy values before convolution. By default, 0.0.
+        upsample_factor : Numeric | None, optional
+            The factor by which to
+            upsample the input data before convolution. By default, 5.
+        extension_factor : Numeric | None, optional
+            The factor by which to
+            extend the input data range before convolution. By default, 0.2.
+        temperature : Parameter | Numeric | None, optional
+            The
+            temperature to use for detailed balance correction. By default, None.
+        temperature_unit : str | sc.Unit, optional
+            The unit of the
+            temperature parameter. By default, 'K'.
+        energy_unit : str | sc.Unit, optional
+            The unit of the
+            energy. By default, 'meV'.
+        normalize_detailed_balance : bool, optional
+            Whether to
+            normalize the detailed balance correction. Default is
+            True. By default, True.
         """
         super().__init__(
             energy=energy,
@@ -82,8 +90,10 @@ class NumericalConvolution(NumericalConvolutionBase):
         at the values given in energy. Includes detailed balance
         correction if temperature is provided.
 
-        Returns:
-            np.ndarray: The convolved values evaluated at energy.
+        Returns
+        -------
+        np.ndarray
+            The convolved values evaluated at energy.
         """
 
         # Give warnings if peaks are very wide or very narrow

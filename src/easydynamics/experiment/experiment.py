@@ -30,16 +30,22 @@ class Experiment(NewBase):
     ) -> None:
         """Initialize the Experiment object.
 
-        Args:
-            display_name (str | None, default="MyExperiment"): Display name of the experiment.
-            unique_name (str | None, default=None): Unique name of the experiment. If
-                None, a unique name will be generated.
-            data (sc.DataArray | str | None, default=None): Dataset associated with
-                the experiment. Can be a sc.DataArray or a filename
-                string to load from. If None, no data is loaded.
+        Parameters
+        ----------
+        display_name : str | None, optional
+            Display name of the experiment. By default, 'MyExperiment'.
+        unique_name : str | None, optional
+            Unique name of the experiment. If
+            None, a unique name will be generated. By default, None.
+        data : sc.DataArray | str | None, optional
+            Dataset associated with
+            the experiment. Can be a sc.DataArray or a filename
+            string to load from. If None, no data is loaded. By default, None.
 
-        Raises:
-            TypeError: If data is not a sc.DataArray, a string, or None.
+        Raises
+        ------
+        TypeError :
+            If data is not a sc.DataArray, a string, or None.
         """
         super().__init__(
             display_name=display_name,
@@ -70,9 +76,11 @@ class Experiment(NewBase):
     def data(self) -> sc.DataArray | None:
         """Get the dataset associated with this experiment.
 
-        Returns:
-            sc.DataArray | None: The dataset associated with this
-                experiment, or None if no data is loaded.
+        Returns
+        -------
+        sc.DataArray | None
+            The dataset associated with this
+            experiment, or None if no data is loaded.
         """
         return self._data
 
@@ -80,12 +88,16 @@ class Experiment(NewBase):
     def data(self, value: sc.DataArray) -> None:
         """Set the dataset associated with this experiment.
 
-        Args:
-            value (sc.DataArray): The new dataset to associate with this
-                experiment.
+        Parameters
+        ----------
+        value : sc.DataArray
+            The new dataset to associate with this
+            experiment.
 
-        Raises:
-            TypeError: If the value is not a sc.DataArray.
+        Raises
+        ------
+        TypeError :
+            If the value is not a sc.DataArray.
         """
         if not isinstance(value, sc.DataArray):
             raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
@@ -99,23 +111,31 @@ class Experiment(NewBase):
     def binned_data(self) -> sc.DataArray | None:
         """Get the binned dataset associated with this experiment.
 
-        Returns:
-            sc.DataArray | None: The binned dataset associated with this
-                experiment, or None if no data is loaded.
+        Returns
+        -------
+        sc.DataArray | None
+            The binned dataset associated with this
+            experiment, or None if no data is loaded.
         """
         return self._binned_data
 
     @binned_data.setter
     def binned_data(self, _value: sc.DataArray) -> None:
-        """Set the binned dataset associated with this experiment. Read-
-        only property. Use rebin() to rebin the data instead.
+        """Set the binned dataset associated with this experiment.
 
-        Args:
-            _value (sc.DataArray): The new binned dataset to associate
-                with this experiment (ignored)
+        Read-
+only property. Use rebin() to rebin the data instead.
 
-        Raises:
-            AttributeError: Always, since binned_data is read-only.
+        Parameters
+        ----------
+        _value : sc.DataArray
+            The new binned dataset to associate
+            with this experiment (ignored).
+
+        Raises
+        ------
+        AttributeError :
+            Always, since binned_data is read-only.
         """
         raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
 
@@ -123,9 +143,11 @@ class Experiment(NewBase):
     def Q(self) -> sc.Variable | None:
         """Get the Q values from the dataset.
 
-        Returns:
-            sc.Variable | None: The Q values from the dataset, or None
-                if no data is loaded.
+        Returns
+        -------
+        sc.Variable | None
+            The Q values from the dataset, or None
+            if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -133,14 +155,20 @@ class Experiment(NewBase):
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
-        """Set the Q values for the dataset. Q is a read-only property
-        derived from the data, so this setter raises an error.
+        """Set the Q values for the dataset.
 
-        Args:
-            _value (sc.Variable): The new Q values to set (ignored)
+        Q is a read-only property
+derived from the data, so this setter raises an error.
 
-        Raises:
-            AttributeError: Always, since Q is read-only.
+        Parameters
+        ----------
+        _value : sc.Variable
+            The new Q values to set (ignored).
+
+        Raises
+        ------
+        AttributeError :
+            Always, since Q is read-only.
         """
         raise AttributeError('Q is a read-only property derived from the data.')
 
@@ -148,9 +176,11 @@ class Experiment(NewBase):
     def energy(self) -> sc.Variable | None:
         """Get the energy values from the dataset.
 
-        Returns:
-            sc.Variable | None: The energy values from the dataset, or
-                None if no data is loaded.
+        Returns
+        -------
+        sc.Variable | None
+            The energy values from the dataset, or
+            None if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -158,14 +188,20 @@ class Experiment(NewBase):
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
-        """Set the energy values for the dataset. Energy is a read-only
-        property derived from the data, so this setter raises an error.
+        """Set the energy values for the dataset.
 
-        Args:
-            _value (sc.Variable): The new energy values to set (ignored)
+        Energy is a read-only
+property derived from the data, so this setter raises an error.
 
-        Raises:
-            AttributeError: Always, since energy is read-only.
+        Parameters
+        ----------
+        _value : sc.Variable
+            The new energy values to set (ignored).
+
+        Raises
+        ------
+        AttributeError :
+            Always, since energy is read-only.
         """
         raise AttributeError('energy is a read-only property derived from the data.')
 
@@ -173,16 +209,22 @@ class Experiment(NewBase):
         """Get the energy values from the dataset, removing points where
         the y values or variances are NaN or Inf for the given Q index.
 
-        Args:
-            Q_index (int): The Q index to get the masked energy values
-                for.
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to get the masked energy values
+            for.
 
-        Returns:
-            sc.Variable | None: The masked energy values from the
-                dataset, or None if no data is loaded.
+        Raises
+        ------
+        IndexError :
+            If Q_index is not a valid index for the Q values.
 
-        Raises:
-            IndexError: If Q_index is not a valid index for the Q values.
+        Returns
+        -------
+        sc.Variable | None
+            The masked energy values from the
+            dataset, or None if no data is loaded.
         """
         if self._binned_data is None:
             return None
@@ -207,14 +249,19 @@ class Experiment(NewBase):
     def load_hdf5(self, filename: str, display_name: str | None = None) -> None:
         """Load data from an HDF5 file.
 
-        Args:
-            filename (str ): Path to the HDF5 file.
-            display_name (str | None, default=None): Optional display name for the
-                experiment.
+        Parameters
+        ----------
+        filename : str
+            Path to the HDF5 file.
+        display_name : str | None, optional
+            Optional display name for the
+            experiment. By default, None.
 
-        Raises:
-            TypeError: If filename is not a string or if display_name is
-                not a string or None or if the loaded data is not a sc.DataArray.
+        Raises
+        ------
+        TypeError :
+            If filename is not a string or if display_name is
+            not a string or None or if the loaded data is not a sc.DataArray.
         """
         if not isinstance(filename, str):
             raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
@@ -237,14 +284,19 @@ class Experiment(NewBase):
     def save_hdf5(self, filename: str | None = None) -> None:
         """Save the dataset to HDF5.
 
-        Args:
-            filename (str | None, default=None): Path to the output HDF5 file.
-                If None, the file will be named after the unique_name of
-                the experiment with a .h5 extension.
+        Parameters
+        ----------
+        filename : str | None, optional
+            Path to the output HDF5 file.
+            If None, the file will be named after the unique_name of
+            the experiment with a .h5 extension. By default, None.
 
-        Raises:
-            TypeError: If filename is not a string or None.
-            ValueError: If there is no data to save.
+        Raises
+        ------
+        TypeError :
+            If filename is not a string or None.
+        ValueError :
+            If there is no data to save.
         """
 
         if filename is None:
@@ -268,16 +320,22 @@ class Experiment(NewBase):
     def rebin(self, dimensions: dict[str, int | sc.Variable]) -> None:
         """Rebin the dataset along specified dimensions.
 
-        Args:
-            dimensions (dict[str, int | sc.Variable]): A dictionary
-                mapping dimension names to number of bins (int) or bin
-                edges (sc.Variable).
+        Parameters
+        ----------
+        dimensions : dict[str, int | sc.Variable]
+            A dictionary
+            mapping dimension names to number of bins (int) or bin
+            edges (sc.Variable).
 
-        Raises:
-            TypeError: If dimensions is not a dictionary or if
-                keys/values are of incorrect types.
-            ValueError: If there is no data to rebin.
-            KeyError: If a specified dimension is not in the dataset.
+        Raises
+        ------
+        TypeError :
+            If dimensions is not a dictionary or if
+            keys/values are of incorrect types.
+        ValueError :
+            If there is no data to rebin.
+        KeyError :
+            If a specified dimension is not in the dataset.
         """
 
         if not isinstance(dimensions, dict):
@@ -320,15 +378,21 @@ class Experiment(NewBase):
     ###########
 
     def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
-        """Plot the dataset using plopp: https://scipp.github.io/plopp/
+        """Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
-        Args:
-            slicer (bool, default=False): If True, use plopp's slicer instead of plot.
-            **kwargs (dict): Additional keyword arguments to pass to plopp.
+        Parameters
+        ----------
+        slicer : bool, optional
+            If True, use plopp's slicer instead of plot. By default, False.
+        **kwargs : dict
+            Additional keyword arguments to pass to plopp.
 
-        Raises:
-            ValueError: If there is no data to plot.
-            RuntimeError: If not in a Jupyter notebook environment.
+        Raises
+        ------
+        ValueError :
+            If there is no data to plot.
+        RuntimeError :
+            If not in a Jupyter notebook environment.
         """
 
         if self._binned_data is None:
@@ -369,12 +433,17 @@ class Experiment(NewBase):
     def _validate_coordinates(data: sc.DataArray) -> None:
         """Validate that required coordinates are present in the data.
 
-        Args:
-            data (sc.DataArray): The data to validate.
+        Parameters
+        ----------
+        data : sc.DataArray
+            The data to validate.
 
-        Raises:
-            TypeError: If data is not a sc.DataArray.
-            ValueError: If required coordinates are missing.
+        Raises
+        ------
+        TypeError :
+            If data is not a sc.DataArray.
+        ValueError :
+            If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
             raise TypeError('Data must be a sc.DataArray.')
@@ -387,11 +456,15 @@ class Experiment(NewBase):
     def _convert_to_bin_centers(self, data: sc.DataArray) -> sc.DataArray:
         """Convert the coordinates of the data to bin centers.
 
-        Args:
-            data (sc.DataArray): The data to convert.
+        Parameters
+        ----------
+        data : sc.DataArray
+            The data to convert.
 
-        Returns:
-            sc.DataArray: The data with coordinates at bin centers.
+        Returns
+        -------
+        sc.DataArray
+            The data with coordinates at bin centers.
         """
         for dim in data.dims:
             coord = data.coords[dim]
@@ -404,13 +477,17 @@ class Experiment(NewBase):
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index.
 
-        Args:
-            Q_index (int): The Q index to extract the data for.
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to extract the data for.
 
-        Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: The x, y, and
-                variances arrays extracted from the experiment for the
-                given Q index.
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, np.ndarray]
+            The x, y, and
+            variances arrays extracted from the experiment for the
+            given Q index.
         """
         data = self.binned_data['Q', Q_index]
         x = data.coords['energy'].values
@@ -424,18 +501,24 @@ class Experiment(NewBase):
         """Extract the x, y, and weights arrays from the experiment for
         the given Q index, removing any NaN and Inf values.
 
-        Args:
-            Q_index (int): The Q index to extract the data for.
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to extract the data for.
 
-        Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: The
-                x, y, weights, and mask arrays extracted from the
-                experiment for the given Q index, with NaNs and Infs
-                removed.
+        Raises
+        ------
+        ValueError :
+            If any variances are zero after removing NaNs
+            and Infs, since this would lead to infinite weights.
 
-        Raises:
-            ValueError: If any variances are zero after removing NaNs
-                and Infs, since this would lead to infinite weights.
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+            The
+            x, y, weights, and mask arrays extracted from the
+            experiment for the given Q index, with NaNs and Infs
+            removed.
         """
         x, y, var = self._extract_x_y_var(Q_index)
 
@@ -465,8 +548,10 @@ class Experiment(NewBase):
     def __repr__(self) -> str:
         """Return a string representation of the Experiment object.
 
-        Returns:
-            str: A string representation of the Experiment object.
+        Returns
+        -------
+        str
+            A string representation of the Experiment object.
         """
 
         return f'Experiment `{self.unique_name}` with data: {self._data}'
@@ -474,8 +559,10 @@ class Experiment(NewBase):
     def __copy__(self) -> 'Experiment':
         """Return a copy of the object.
 
-        Returns:
-            Experiment: A copy of the Experiment object.
+        Returns
+        -------
+        Experiment
+            A copy of the Experiment object.
         """
         temp = self.to_dict(skip=['unique_name'])
         new_obj = self.__class__.from_dict(temp)

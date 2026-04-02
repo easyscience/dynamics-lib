@@ -18,8 +18,10 @@ from easydynamics.utils.utils import hbar
 
 
 class JumpTranslationalDiffusion(DiffusionModelBase):
-    r"""Model of Jump translational diffusion. The model consists of a
-    Lorentzian function for each Q-value, where the width is given by
+    r"""Model of Jump translational diffusion.
+
+    The model consists of a
+Lorentzian function for each Q-value, where the width is given by
 
     $$
     \Gamma(Q) = \frac{Q^2}{1+D t Q^2}.
@@ -54,22 +56,30 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     ) -> None:
         """Initialize a new JumpTranslationalDiffusion model.
 
-        Args:
-            display_name (str | None, default="JumpTranslationalDiffusion"):
-                Display name of the diffusion model.
-            unique_name (str | None, default=None): Unique name of the diffusion
-                model. If None, a unique name will be generated.
-            unit (str | sc.Unit, default="meV"): Unit of the diffusion model. Must be
-                convertible to meV.
-            scale (Numeric, default=1.0): Scale factor for the diffusion model. Must
-                be a non-negative number.
-            diffusion_coefficient (Numeric, default=1.0): Diffusion coefficient D in
-                m^2/s.
-            relaxation_time (Numeric, default=1.0): Relaxation time t in ps.
+        Parameters
+        ----------
+        display_name : str | None, optional
+            Display name of the diffusion model. By default, 'JumpTranslationalDiffusion'.
+        unique_name : str | None, optional
+            Unique name of the diffusion
+            model. If None, a unique name will be generated. By default, None.
+        unit : str | sc.Unit, optional
+            Unit of the diffusion model. Must be
+            convertible to meV. By default, 'meV'.
+        scale : Numeric, optional
+            Scale factor for the diffusion model. Must
+            be a non-negative number. By default, 1.0.
+        diffusion_coefficient : Numeric, optional
+            Diffusion coefficient D in
+            m^2/s. By default, 1.0.
+        relaxation_time : Numeric, optional
+            Relaxation time t in ps. By default, 1.0.
 
-        Raises:
-            TypeError: If scale, diffusion_coefficient, or
-                relaxation_time  are not numbers.
+        Raises
+        ------
+        TypeError :
+            If scale, diffusion_coefficient, or
+            relaxation_time  are not numbers.
         """
         super().__init__(
             display_name=display_name,
@@ -111,8 +121,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def diffusion_coefficient(self) -> Parameter:
         """Get the diffusion coefficient parameter D.
 
-        Returns:
-            Parameter: Diffusion coefficient D.
+        Returns
+        -------
+        Parameter
+            Diffusion coefficient D.
         """
         return self._diffusion_coefficient
 
@@ -120,13 +132,18 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def diffusion_coefficient(self, diffusion_coefficient: Numeric) -> None:
         """Set the diffusion coefficient parameter D.
 
-        Args:
-            diffusion_coefficient (Numeric): Diffusion coefficient D in
-                m^2/s.
+        Parameters
+        ----------
+        diffusion_coefficient : Numeric
+            Diffusion coefficient D in
+            m^2/s.
 
-        Raises:
-            TypeError: If diffusion_coefficient is not a number.
-            ValueError: If diffusion_coefficient is negative.
+        Raises
+        ------
+        TypeError :
+            If diffusion_coefficient is not a number.
+        ValueError :
+            If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
@@ -138,8 +155,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def relaxation_time(self) -> Parameter:
         """Get the relaxation time parameter t.
 
-        Returns:
-            Parameter: Relaxation time t in ps.
+        Returns
+        -------
+        Parameter
+            Relaxation time t in ps.
         """
         return self._relaxation_time
 
@@ -147,12 +166,17 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def relaxation_time(self, relaxation_time: Numeric) -> None:
         """Set the relaxation time parameter t.
 
-        Args:
-            relaxation_time (Numeric): Relaxation time t in ps.
+        Parameters
+        ----------
+        relaxation_time : Numeric
+            Relaxation time t in ps.
 
-        Raises:
-            TypeError: If relaxation_time is not a number.
-            ValueError: If relaxation_time is negative.
+        Raises
+        ------
+        TypeError :
+            If relaxation_time is not a number.
+        ValueError :
+            If relaxation_time is negative.
         """
         if not isinstance(relaxation_time, Numeric):
             raise TypeError('relaxation_time must be a number.')
@@ -170,13 +194,17 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         diffusion model. $\Gamma(Q) = Q^2/(1+D t Q^2)$, where $D$ is the
         diffusion coefficient and $t$ is the relaxation time.
 
-        Args:
-            Q (Q_type): Scattering vector in 1/angstrom. Can be a single
-                value or an array of values.
+        Parameters
+        ----------
+        Q : Q_type
+            Scattering vector in 1/angstrom. Can be a single
+            value or an array of values.
 
-        Returns:
-            np.ndarray: HWHM values in the unit of the model (e.g.,
-                meV).
+        Returns
+        -------
+        np.ndarray
+            HWHM values in the unit of the model (e.g.,
+            meV).
         """
 
         Q = _validate_and_convert_Q(Q)
@@ -200,12 +228,16 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def calculate_EISF(self, Q: Q_type) -> np.ndarray:
         """Calculate the Elastic Incoherent Structure Factor (EISF).
 
-        Args:
-            Q (Q_type): Scattering vector in 1/angstrom. Can be a single
-                value or an array of values.
+        Parameters
+        ----------
+        Q : Q_type
+            Scattering vector in 1/angstrom. Can be a single
+            value or an array of values.
 
-        Returns:
-            np.ndarray: EISF values (dimensionless).
+        Returns
+        -------
+        np.ndarray
+            EISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
         return np.zeros_like(Q)
@@ -214,11 +246,16 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Calculate the Quasi-Elastic Incoherent Structure Factor
         (QISF).
 
-        Args:
-            Q (Q_type): Scattering vector in 1/angstrom. Can be a single
-                value or an array of values.
-        Returns:
-            np.ndarray: QISF values (dimensionless).
+        Parameters
+        ----------
+        Q : Q_type
+            Scattering vector in 1/angstrom. Can be a single
+            value or an array of values.
+
+        Returns
+        -------
+        np.ndarray
+            QISF values (dimensionless).
         """
         Q = _validate_and_convert_Q(Q)
         return np.ones_like(Q)
@@ -231,18 +268,24 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Create ComponentCollection components for the diffusion model
         at given Q values.
 
-        Args:
-            Q (Q_type): Scattering vector in 1/angstrom. Can be a single
-                value or an array of values.
-            component_display_name (str, default="Jump translational diffusion"):
-                Name of the Jump Diffusion Lorentzian component.
+        Parameters
+        ----------
+        Q : Q_type
+            Scattering vector in 1/angstrom. Can be a single
+            value or an array of values.
+        component_display_name : str, optional
+            Name of the Jump Diffusion Lorentzian component. By default, 'Jump translational diffusion'.
 
-        Returns:
-            list[ComponentCollection]: List of ComponentCollections with
-                Jump Diffusion Lorentzian components.
+        Raises
+        ------
+        TypeError :
+            If component_display_name is not a string.
 
-        Raises:
-            TypeError: If component_display_name is not a string.
+        Returns
+        -------
+        list[ComponentCollection]
+            List of ComponentCollections with
+            Jump Diffusion Lorentzian components.
         """
         Q = _validate_and_convert_Q(Q)
 
@@ -296,14 +339,20 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Write the dependency expression for the width as a function
         of Q to make dependent Parameters.
 
-        Args:
-            Q (float): Scattering vector in 1/angstrom
+        Parameters
+        ----------
+        Q : float
+            Scattering vector in 1/angstrom.
 
-        Returns:
-            str: Dependency expression for the width.
+        Raises
+        ------
+        TypeError :
+            If Q is not a float.
 
-        Raises:
-            TypeError: If Q is not a float.
+        Returns
+        -------
+        str
+            Dependency expression for the width.
         """
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
@@ -315,8 +364,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Write the dependency map expression to make dependent
         Parameters.
 
-        Returns:
-            dict[str, DescriptorNumber]: Dependency map for the width.
+        Returns
+        -------
+        dict[str, DescriptorNumber]
+            Dependency map for the width.
         """
         return {
             'D': self._diffusion_coefficient,
@@ -329,14 +380,20 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Write the dependency expression for the area to make
         dependent Parameters.
 
-        Args:
-            QISF (float): Q-dependent intermediate scattering function.
+        Parameters
+        ----------
+        QISF : float
+            Q-dependent intermediate scattering function.
 
-        Returns:
-            str: Dependency expression for the area.
+        Raises
+        ------
+        TypeError :
+            If QISF is not a float.
 
-        Raises:
-            TypeError: If QISF is not a float.
+        Returns
+        -------
+        str
+            Dependency expression for the area.
         """
 
         if not isinstance(QISF, (float)):
@@ -348,8 +405,10 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """Write the dependency map expression to make dependent
         Parameters.
 
-        Returns:
-            dict[str, DescriptorNumber]: Dependency map for the area.
+        Returns
+        -------
+        dict[str, DescriptorNumber]
+            Dependency map for the area.
         """
         return {
             'scale': self._scale,
@@ -363,9 +422,11 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """String representation of the JumpTranslationalDiffusion
         model.
 
-        Returns:
-            str: String representation of the JumpTranslationalDiffusion
-                model.
+        Returns
+        -------
+        str
+            String representation of the JumpTranslationalDiffusion
+            model.
         """
         return (
             f'JumpTranslationalDiffusion(display_name={self.display_name}, '

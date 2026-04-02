@@ -15,8 +15,10 @@ from .model_component import ModelComponent
 
 
 class Voigt(CreateParametersMixin, ModelComponent):
-    r"""Voigt profile, a convolution of Gaussian and Lorentzian. If the
-    center is not provided, it will be centered at 0 and fixed, which is
+    r"""Voigt profile, a convolution of Gaussian and Lorentzian.
+
+    If the
+center is not provided, it will be centered at 0 and fixed, which is
     typically what you want in QENS.
 
     Use scipy.special.voigt_profile to evaluate the Voigt profile.
@@ -34,17 +36,25 @@ class Voigt(CreateParametersMixin, ModelComponent):
     ) -> None:
         """Initialize a Voigt component.
 
-        Args:
-            area (Numeric | Parameter, default=1.0): Total area under the curve.
-            center (Numeric | Parameter | None, default=None): Center of the Voigt profile.
-            gaussian_width (Numeric | Parameter, default=1.0): Standard deviation of the
-                Gaussian part.
-            lorentzian_width (Numeric | Parameter, default=1.0): Half width at half max
-                (HWHM) of the Lorentzian part.
-            unit (str | sc.Unit, default='meV'): Unit of the parameters.
-            display_name (str | None, default='Voigt'): Display name of the component.
-            unique_name (str | None, default=None): Unique name of the component.
-                If None, a unique_name is automatically generated.
+        Parameters
+        ----------
+        area : Numeric | Parameter, optional
+            Total area under the curve. By default, 1.0.
+        center : Numeric | Parameter | None, optional
+            Center of the Voigt profile. By default, None.
+        gaussian_width : Numeric | Parameter, optional
+            Standard deviation of the
+            Gaussian part. By default, 1.0.
+        lorentzian_width : Numeric | Parameter, optional
+            Half width at half max
+            (HWHM) of the Lorentzian part. By default, 1.0.
+        unit : str | sc.Unit, optional
+            Unit of the parameters. By default, 'meV'.
+        display_name : str | None, optional
+            Display name of the component. By default, 'Voigt'.
+        unique_name : str | None, optional
+            Unique name of the component.
+            If None, a unique_name is automatically generated. By default, None.
         """
 
         super().__init__(
@@ -80,8 +90,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def area(self) -> Parameter:
         """Get the area parameter.
 
-        Returns:
-            Parameter: The area parameter.
+        Returns
+        -------
+        Parameter
+            The area parameter.
         """
         return self._area
 
@@ -89,11 +101,15 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def area(self, value: Numeric) -> None:
         """Set the value of the area parameter.
 
-        Args:
-            value (Numeric): The new value for the area parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the area parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
+        Raises
+        ------
+        TypeError :
+            If the value is not a number.
         """
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
@@ -103,8 +119,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def center(self) -> Parameter:
         """Get the center parameter.
 
-        Returns:
-            Parameter: The center parameter.
+        Returns
+        -------
+        Parameter
+            The center parameter.
         """
         return self._center
 
@@ -112,12 +130,16 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def center(self, value: Numeric | None) -> None:
         """Set the value of the center parameter.
 
-        Args:
-            value (Numeric | None): The new value for the center
-                parameter. If None, defaults to 0 and is fixed.
+        Parameters
+        ----------
+        value : Numeric | None, optional
+            The new value for the center
+            parameter. If None. By default, 0 and is fixed.
 
-        Raises:
-            TypeError: If the value is not a number.
+        Raises
+        ------
+        TypeError :
+            If the value is not a number.
         """
         if value is None:
             value = 0.0
@@ -130,8 +152,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def gaussian_width(self) -> Parameter:
         """Get the Gaussian width parameter.
 
-        Returns:
-            Parameter: The Gaussian width parameter.
+        Returns
+        -------
+        Parameter
+            The Gaussian width parameter.
         """
         return self._gaussian_width
 
@@ -139,13 +163,18 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def gaussian_width(self, value: Numeric) -> None:
         """Set the width parameter value.
 
-        Args:
-            value (Numeric): The new value for the width
-                parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the width
+            parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
-            ValueError: If the value is not positive.
+        Raises
+        ------
+        TypeError :
+            If the value is not a number.
+        ValueError :
+            If the value is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('gaussian_width must be a number')
@@ -157,8 +186,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def lorentzian_width(self) -> Parameter:
         """Get the Lorentzian width parameter (HWHM).
 
-        Returns:
-            Parameter: The Lorentzian width parameter.
+        Returns
+        -------
+        Parameter
+            The Lorentzian width parameter.
         """
         return self._lorentzian_width
 
@@ -166,13 +197,18 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def lorentzian_width(self, value: Numeric) -> None:
         """Set the value of the Lorentzian width parameter.
 
-        Args:
-            value (Numeric): The new value for the Lorentzian width
-                parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the Lorentzian width
+            parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
-            ValueError: If the value is not positive.
+        Raises
+        ------
+        TypeError :
+            If the value is not a number.
+        ValueError :
+            If the value is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('lorentzian_width must be a number')
@@ -189,14 +225,16 @@ class Voigt(CreateParametersMixin, ModelComponent):
         width at half max lorentzian_width, centered at center, with
         area equal to area.
 
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values at which to evaluate the Voigt.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The x values at which to evaluate the Voigt.
-
-        Returns:
-            np.ndarray: The intensity of the Voigt at the given x
-                values.
+        Returns
+        -------
+        np.ndarray
+            The intensity of the Voigt at the given x
+            values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -210,8 +248,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
     def __repr__(self) -> str:
         """Return a string representation of the Voigt.
 
-        Returns:
-            str: A string representation of the Voigt.
+        Returns
+        -------
+        str
+            A string representation of the Voigt.
         """
 
         return f'Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n \

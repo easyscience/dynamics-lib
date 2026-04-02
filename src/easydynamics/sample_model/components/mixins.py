@@ -37,19 +37,29 @@ class CreateParametersMixin:
         If the area is non-negative, its minimum is set to 0 to avoid it
         accidentally becoming negative during fitting.
 
-        Args:
-            area (Numeric | Parameter): The area value or Parameter.
-            name (str): The name of the model component.
-            unit (str | sc.Unit, default='meV'): The unit of the area Parameter.
-            minimum_area (float, default=MINIMUM_AREA): The minimum allowed area.
+        Parameters
+        ----------
+        area : Numeric | Parameter
+            The area value or Parameter.
+        name : str
+            The name of the model component.
+        unit : str | sc.Unit, optional
+            The unit of the area Parameter. By default, 'meV'.
+        minimum_area : float, optional
+            The minimum allowed area. By default, MINIMUM_AREA.
 
-        Returns:
-            Parameter: The validated area Parameter.
+        Raises
+        ------
+        TypeError :
+            If area is not a number or a Parameter.
+        ValueError :
+            If area is not a finite number or if the area
+            Parameter has a non-finite value.
 
-        Raises:
-            TypeError: If area is not a number or a Parameter.
-            ValueError: If area is not a finite number or if the area
-                Parameter has a non-finite value.
+        Returns
+        -------
+        Parameter
+            The validated area Parameter.
         """
         if not isinstance(area, (Parameter, Numeric)):
             raise TypeError('area must be a number or a Parameter.')
@@ -82,25 +92,36 @@ class CreateParametersMixin:
         """Validate and convert a number to a Parameter describing the
         center of a function.
 
-        Args:
-            center (Numeric | Parameter | None): The center value or
-                Parameter.
-            name (str): The name of the model component.
-            fix_if_none (bool): Whether to fix the center Parameter
-                if center is None.
-            unit (str | sc.Unit, default='meV'): The unit of the center
-                Parameter.
-            enforce_minimum_center (bool, default=False): Whether to
-                enforce a minimum center value to avoid zero center in
-                DHO.
+        Parameters
+        ----------
+        center : Numeric | Parameter | None
+            The center value or
+            Parameter.
+        name : str
+            The name of the model component.
+        fix_if_none : bool
+            Whether to fix the center Parameter
+            if center is None.
+        unit : str | sc.Unit, optional
+            The unit of the center
+            Parameter. By default, 'meV'.
+        enforce_minimum_center : bool, optional
+            Whether to
+            enforce a minimum center value to avoid zero center in
+            DHO. By default, False.
 
-        Returns:
-            Parameter: The validated center Parameter.
+        Raises
+        ------
+        TypeError :
+            If center is not None, a number, or a Parameter.
+        ValueError :
+            If center is a number but not finite, or if
+            center is a Parameter but has a non-finite value.
 
-        Raises:
-            TypeError: If center is not None, a number, or a Parameter.
-            ValueError: If center is a number but not finite, or if
-                center is a Parameter but has a non-finite value.
+        Returns
+        -------
+        Parameter
+            The validated center Parameter.
         """
         if center is not None and not isinstance(center, (Numeric, Parameter)):
             raise TypeError('center must be None, a number, or a Parameter.')
@@ -132,20 +153,31 @@ class CreateParametersMixin:
         """Validate and convert a number to a Parameter describing the
         width of a function.
 
-        Args:
-            width (Numeric | Parameter): The width value or Parameter.
-            name (str): The name of the model component.
-            param_name (str, default='width'): The name of the width parameter.
-            unit (str | sc.Unit, default='meV'): The unit of the width Parameter.
-            minimum_width (float, default=MINIMUM_WIDTH): The minimum
-                allowed width.
+        Parameters
+        ----------
+        width : Numeric | Parameter
+            The width value or Parameter.
+        name : str
+            The name of the model component.
+        param_name : str, optional
+            The name of the width parameter. By default, 'width'.
+        unit : str | sc.Unit, optional
+            The unit of the width Parameter. By default, 'meV'.
+        minimum_width : float, optional
+            The minimum
+            allowed width. By default, MINIMUM_WIDTH.
 
-        Returns:
-            Parameter: The validated width Parameter.
+        Raises
+        ------
+        TypeError :
+            If width is not a number or a Parameter.
+        ValueError :
+            If width is non-positive.
 
-        Raises:
-            TypeError: If width is not a number or a Parameter.
-            ValueError: If width is non-positive.
+        Returns
+        -------
+        Parameter
+            The validated width Parameter.
         """
         if not isinstance(width, (Numeric, Parameter)):
             raise TypeError(f'{param_name} must be a number or a Parameter.')

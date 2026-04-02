@@ -25,17 +25,22 @@ class BackgroundModel(ModelBase):
     ) -> None:
         """Initialize the BackgroundModel.
 
-        Args:
-            display_name (str | None, default='MyBackgroundModel'): Display name of the model.
-            unique_name (str | None, default=None): Unique name of the model. If None,
-                a unique name will be generated.
-            unit (str | sc.Unit, default='meV'): Unit of the model.
-            components (ModelComponent | ComponentCollection | None, default=None):
-                Template components of the model. If None, no components
-                are added. These components are copied into
-                ComponentCollections for each Q value.
-            Q (Q_type | None, default=None): Q values for the model. If None, Q is not
-                set.
+        Parameters
+        ----------
+        display_name : str | None, optional
+            Display name of the model. By default, 'MyBackgroundModel'.
+        unique_name : str | None, optional
+            Unique name of the model. If None,
+            a unique name will be generated. By default, None.
+        unit : str | sc.Unit, optional
+            Unit of the model. By default, 'meV'.
+        components : ModelComponent | ComponentCollection | None, optional
+            Template components of the model. If None, no components
+            are added. These components are copied into
+            ComponentCollections for each Q value. By default, None.
+        Q : Q_type | None, optional
+            Q values for the model. If None, Q is not
+            set. By default, None.
         """
         super().__init__(
             display_name=display_name,

@@ -12,8 +12,10 @@ from easydynamics.sample_model import SampleModel
 
 
 class AnalysisBase(EasyScienceModelBase):
-    """Base class for analysis in EasyDynamics. This class is not meant
-    to be used directly.
+    """Base class for analysis in EasyDynamics.
+
+    This class is not meant
+to be used directly.
 
     An Analysis consists of an Experiment, a SampleModel, and an
     InstrumentModel. The Experiment contains the data to be fitted, the
@@ -33,29 +35,38 @@ class AnalysisBase(EasyScienceModelBase):
     ) -> None:
         """Initialize the AnalysisBase.
 
-        Args:
-            display_name (str | None, default='MyAnalysis'): Display name of the analysis.
-            unique_name (str | None, default=None): Unique name of the analysis. If
-                None, a unique name is automatically generated.
-            experiment (Experiment | None, default=None): The Experiment associated
-                with this Analysis. If None, a default Experiment is
-                created.
-            sample_model (SampleModel | None, default=None): The SampleModel
-                associated with this Analysis. If None, a default
-                SampleModel is created.
-            instrument_model (InstrumentModel | None, default=None): The
-                InstrumentModel associated with this Analysis. If None,
-                a default InstrumentModel is created.
-            extra_parameters (Parameter | list[Parameter] | None, default=None): Extra
-                parameters to be included in the analysis for advanced
-                users. If None, no extra parameters are added.
+        Parameters
+        ----------
+        display_name : str | None, optional
+            Display name of the analysis. By default, 'MyAnalysis'.
+        unique_name : str | None, optional
+            Unique name of the analysis. If
+            None, a unique name is automatically generated. By default, None.
+        experiment : Experiment | None, optional
+            The Experiment associated
+            with this Analysis. If None, a default Experiment is
+            created. By default, None.
+        sample_model : SampleModel | None, optional
+            The SampleModel
+            associated with this Analysis. If None, a default
+            SampleModel is created. By default, None.
+        instrument_model : InstrumentModel | None, optional
+            The
+            InstrumentModel associated with this Analysis. If None,
+            a default InstrumentModel is created. By default, None.
+        extra_parameters : Parameter | list[Parameter] | None, optional
+            Extra
+            parameters to be included in the analysis for advanced
+            users. If None, no extra parameters are added. By default, None.
 
-        Raises:
-            TypeError: If experiment is not an Experiment or None or
-                if sample_model is not a SampleModel or None or if
-                instrument_model is not an InstrumentModel or None or if
-                extra_parameters is not a Parameter, a list of Parameters,
-                or None.
+        Raises
+        ------
+        TypeError :
+            If experiment is not an Experiment or None or
+            if sample_model is not a SampleModel or None or if
+            instrument_model is not an InstrumentModel or None or if
+            extra_parameters is not a Parameter, a list of Parameters,
+            or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -103,8 +114,10 @@ class AnalysisBase(EasyScienceModelBase):
     def experiment(self) -> Experiment:
         """Get the Experiment associated with this Analysis.
 
-        Returns:
-            Experiment: The Experiment associated with this Analysis.
+        Returns
+        -------
+        Experiment
+            The Experiment associated with this Analysis.
         """
 
         return self._experiment
@@ -113,11 +126,15 @@ class AnalysisBase(EasyScienceModelBase):
     def experiment(self, value: Experiment) -> None:
         """Set the Experiment for this Analysis.
 
-        Args:
-            value (Experiment): The Experiment to set for this Analysis.
+        Parameters
+        ----------
+        value : Experiment
+            The Experiment to set for this Analysis.
 
-        Raises:
-            TypeError: if value is not an Experiment.
+        Raises
+        ------
+        TypeError :
+            If value is not an Experiment.
         """
 
         if not isinstance(value, Experiment):
@@ -129,8 +146,10 @@ class AnalysisBase(EasyScienceModelBase):
     def sample_model(self) -> SampleModel:
         """Get the SampleModel associated with this Analysis.
 
-        Returns:
-            SampleModel: The SampleModel associated with this Analysis.
+        Returns
+        -------
+        SampleModel
+            The SampleModel associated with this Analysis.
         """
 
         return self._sample_model
@@ -139,11 +158,15 @@ class AnalysisBase(EasyScienceModelBase):
     def sample_model(self, value: SampleModel) -> None:
         """Set the SampleModel for this Analysis.
 
-        Args:
-            value (SampleModel): The SampleModel to set for this Analysis.
+        Parameters
+        ----------
+        value : SampleModel
+            The SampleModel to set for this Analysis.
 
-        Raises:
-            TypeError: if value is not a SampleModel.
+        Raises
+        ------
+        TypeError :
+            If value is not a SampleModel.
         """
         if not isinstance(value, SampleModel):
             raise TypeError('sample_model must be an instance of SampleModel')
@@ -154,9 +177,11 @@ class AnalysisBase(EasyScienceModelBase):
     def instrument_model(self) -> InstrumentModel:
         """Get the InstrumentModel associated with this Analysis.
 
-        Returns:
-            InstrumentModel: The InstrumentModel associated with this
-                Analysis.
+        Returns
+        -------
+        InstrumentModel
+            The InstrumentModel associated with this
+            Analysis.
         """
         return self._instrument_model
 
@@ -164,12 +189,16 @@ class AnalysisBase(EasyScienceModelBase):
     def instrument_model(self, value: InstrumentModel) -> None:
         """Set the InstrumentModel for this Analysis.
 
-        Args:
-            value (InstrumentModel): The InstrumentModel to set for this
-                Analysis.
+        Parameters
+        ----------
+        value : InstrumentModel
+            The InstrumentModel to set for this
+            Analysis.
 
-        Raises:
-            TypeError: if value is not an InstrumentModel.
+        Raises
+        ------
+        TypeError :
+            If value is not an InstrumentModel.
         """
         if not isinstance(value, InstrumentModel):
             raise TypeError('instrument_model must be an instance of InstrumentModel')
@@ -181,9 +210,11 @@ class AnalysisBase(EasyScienceModelBase):
         """Get the Q values from the associated Experiment, if
         available.
 
-        Returns:
-            sc.Variable | None: The Q values from the associated Experiment,
-                if available, and None if not.
+        Returns
+        -------
+        sc.Variable | None
+            The Q values from the associated Experiment,
+            if available, and None if not.
         """
         return self.experiment.Q
 
@@ -192,12 +223,16 @@ class AnalysisBase(EasyScienceModelBase):
         """Q cannot be set, as it is a read-only property derived from
         the Experiment.
 
-        Args:
-            _value (sc.Variable): The Q values to set. This argument is
-                ignored, as Q is a read-only property.
+        Parameters
+        ----------
+        _value : sc.Variable
+            The Q values to set. This argument is
+            ignored, as Q is a read-only property.
 
-        Raises:
-            AttributeError: If trying to set Q.
+        Raises
+        ------
+        AttributeError :
+            If trying to set Q.
         """
         raise AttributeError('Q is a read-only property derived from the Experiment.')
 
@@ -206,9 +241,11 @@ class AnalysisBase(EasyScienceModelBase):
         """Get the energy values from the associated Experiment, if
         available.
 
-        Returns:
-            sc.Variable | None: The energy values from the associated
-            Experiment, if available, and None if not.
+        Returns
+        -------
+        sc.Variable | None
+            The energy values from the associated.
+        Experiment, if available, and None if not.
         """
 
         return self.experiment.energy
@@ -218,12 +255,16 @@ class AnalysisBase(EasyScienceModelBase):
         """Energy cannot be set, as it is a read-only property derived
         from the Experiment.
 
-        Args:
-            _value (sc.Variable): The energy values to set. This argument is
-                ignored, as energy is a read-only property.
+        Parameters
+        ----------
+        _value : sc.Variable
+            The energy values to set. This argument is
+            ignored, as energy is a read-only property.
 
-        Raises:
-            AttributeError: If trying to set energy.
+        Raises
+        ------
+        AttributeError :
+            If trying to set energy.
         """
 
         raise AttributeError('energy is a read-only property derived from the Experiment.')
@@ -233,9 +274,11 @@ class AnalysisBase(EasyScienceModelBase):
         """Get the temperature from the associated SampleModel, if
         available.
 
-        Returns:
-            Parameter | None: The temperature from the associated SampleModel,
-                if available, and None if not.
+        Returns
+        -------
+        Parameter | None
+            The temperature from the associated SampleModel,
+            if available, and None if not.
         """
 
         return self.sample_model.temperature
@@ -245,13 +288,17 @@ class AnalysisBase(EasyScienceModelBase):
         """Temperature cannot be set, as it is a read-only property
         derived from the SampleModel.
 
-        Args:
-            _value (np.ndarray | Parameter): The temperature to set.
-                This argument is ignored, as temperature is a read-only
-                property.
+        Parameters
+        ----------
+        _value : np.ndarray | Parameter
+            The temperature to set.
+            This argument is ignored, as temperature is a read-only
+            property.
 
-        Raises:
-            AttributeError: If trying to set temperature.
+        Raises
+        ------
+        AttributeError :
+            If trying to set temperature.
         """
 
         raise AttributeError('temperature is a read-only property derived from the SampleModel.')
@@ -260,9 +307,11 @@ class AnalysisBase(EasyScienceModelBase):
     def extra_parameters(self) -> list[Parameter]:
         """Get the extra parameters included in this Analysis.
 
-        Returns:
-            list[Parameter]: The extra parameters included in this
-                Analysis.
+        Returns
+        -------
+        list[Parameter]
+            The extra parameters included in this
+            Analysis.
         """
         return self._extra_parameters
 
@@ -270,13 +319,17 @@ class AnalysisBase(EasyScienceModelBase):
     def extra_parameters(self, value: Parameter | list[Parameter]) -> None:
         """Set the extra parameters for this Analysis.
 
-        Args:
-            value (Parameter | list[Parameter]): The extra parameters to
-                include in this Analysis.
+        Parameters
+        ----------
+        value : Parameter | list[Parameter]
+            The extra parameters to
+            include in this Analysis.
 
-        Raises:
-            TypeError: If value is not a Parameter, a list of
-                Parameters, or None.
+        Raises
+        ------
+        TypeError :
+            If value is not a Parameter, a list of
+            Parameters, or None.
         """
         if isinstance(value, Parameter):
             self._extra_parameters = [value]
@@ -326,15 +379,22 @@ class AnalysisBase(EasyScienceModelBase):
     def _verify_Q_index(self, Q_index: int | None) -> int | None:
         """Verify that the Q index is valid.
 
-        Args:
-            Q_index (int | None): The Q index to verify.
+        Parameters
+        ----------
+        Q_index : int | None
+            The Q index to verify.
 
-        Returns:
-            int | None: The verified Q index.
+        Raises
+        ------
+        TypeError :
+            If Q_index is not an integer or None.
+        IndexError :
+            If the Q index is not valid.
 
-        Raises:
-            TypeError: If Q_index is not an integer or None.
-            IndexError: If the Q index is not valid.
+        Returns
+        -------
+        int | None
+            The verified Q index.
         """
         if Q_index is None:
             return None
@@ -353,8 +413,10 @@ class AnalysisBase(EasyScienceModelBase):
     def __repr__(self) -> str:
         """Return a string representation of the Analysis.
 
-        Returns:
-            str: A string representation of the Analysis.
+        Returns
+        -------
+        str
+            A string representation of the Analysis.
         """
         return f' {self.__class__.__name__}  (display_name={self.display_name}, \
         unique_name={self.unique_name})'
