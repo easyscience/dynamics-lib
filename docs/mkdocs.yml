@@ -182,6 +182,7 @@ nav:
       - Tutorials: tutorials/index.md
       - Getting Started:
           - Tutorial 1. Brownian Diffusion: tutorials/tutorial1_brownian.ipynb
+          - Tutorial 2. Magnetic nanoparticles: tutorials/tutorial2_nanoparticles.ipynb
       - Classes and Methods:
           - Components: tutorials/components.ipynb
           - Component collection: tutorials/component_collection.ipynb
