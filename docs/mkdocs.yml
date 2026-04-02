@@ -148,8 +148,7 @@ plugins:
         python:
           paths: ['src'] # Change 'src' to your actual sources directory
           options:
-            docstring_style: google
-            render_markdown: true
+            docstring_style: numpy
             group_by_category: false
             heading_level: 1
             show_root_heading: true

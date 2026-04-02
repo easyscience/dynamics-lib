@@ -55,7 +55,7 @@ dev = [
   'jupytext',                        # Jupyter notebook text format support
   'jupyterquiz',                     # Quizzes in Jupyter notebooks
   'pydoclint',                       # Docstring linter
-  'docformatter',                    # Docstring formatter
+  'format-docstring',                # Docstring formatter
   'interrogate',                     # Docstring coverage checker
   'copier',                          # Template management
   'mike',                            # MkDocs: Versioned documentation support
@@ -175,10 +175,12 @@ testpaths = ['tests']
 # https://docs.astral.sh/ruff/rules/
 
 [tool.ruff]
-exclude = ['tmp']
+exclude = [
+  'tmp',
+]
 indent-width = 4
-line-length = 99
-preview = true    # Enable new rules that are not yet stable, like DOC
+line-length = 99 # See also `max-line-length` in [tool.ruff.lint.pycodestyle]
+preview = true # Enable new rules that are not yet stable, like DOC
 
 # Formatting options for Ruff
 
@@ -195,7 +197,8 @@ quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 25
 select = [
   # Various rules
   #'C90',  # https://docs.astral.sh/ruff/rules/#mccabe-c90
-  'F', # https://docs.astral.sh/ruff/rules/#pyflakes-f
+  #'D',   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  'F',   # https://docs.astral.sh/ruff/rules/#pyflakes-f
   #'FLY',  # https://docs.astral.sh/ruff/rules/#flynt-fly
   #'FURB', # https://docs.astral.sh/ruff/rules/#refurb-furb
   'I', # https://docs.astral.sh/ruff/rules/#isort-i
@@ -254,15 +257,24 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following covered by [tool.pydoclint] section below
-  'D',   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
   'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
+  'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
+  # Temporary:
+  'D100',   # https://docs.astral.sh/ruff/rules/undocumented-public-module/#undocumented-publi-module-d100
+  'D104',   # https://docs.astral.sh/ruff/rules/undocumented-public-package/#undocumented-public-package-d104
+  'DTZ005', # https://docs.astral.sh/ruff/rules/call-datetime-now-without-tzinfo/#call-datetime-now-without-tzinfo-dtz005
 ]
 
 # Ignore specific rules in certain files or directories
 [tool.ruff.lint.per-file-ignores]
+'*/__init__.py' = [
+  'F401', # re-exports are intentional in __init__.py
+]
 'tests/**' = [
   'ANN',    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'D',      # https://docs.astral.sh/ruff/rules/#pydocstyle-d
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
@@ -290,17 +302,12 @@ max-complexity = 10
 # PEP 8 line length guidance:
 # https://peps.python.org/pep-0008/#maximum-line-length
 # Use 99 characters as the project-wide maximum for regular code lines.
-max-line-length = 99
-# allow longer lines so that parameter declarations such as
-# `name (Type | Type | None):` remain on a single line. Splitting these
-# lines can prevent tools such as MkDocs and IDEs from correctly
-# parsing and rendering parameter documentation.
-# The descriptive text itself is wrapped more strictly by
-# `docformatter` (see the configuration in [tool.docformatter] below)
-# whenever it is treated as normal paragraph text.
-# The line length for code snippets in docstrings is also more strict,
-# as defined in the [tool.ruff.format] section above.
-max-doc-length = 99
+# Use 72 characters for docstrings.
+max-line-length = 99 # See also `line-length` in [tool.ruff]
+max-doc-length = 72
+
+[tool.ruff.lint.pydocstyle]
+convention = 'numpy'
 
 #############################
 # Configuration for pydoclint
@@ -317,20 +324,22 @@ max-doc-length = 99
 # the parameter declarations in the code (in function's signature).
 
 [tool.pydoclint]
-style = "google"
+exclude = '\.' # Temporarily disable pydoclint until we are ready
+style = 'numpy'
 check-style-mismatch = true
 check-arg-defaults = true
 allow-init-docstring = true
 
-################################
-# Configuration for docformatter
-################################
+####################################
+# Configuration for format-docstring
+####################################
 
-# 'docformatter' -- Code formatter for docstrings
-# https://docformatter.readthedocs.io/en/latest/
+# 'format-docstring' -- Code formatter for docstrings
+# https://github.com/jsh9/format-docstring
 
-[tool.docformatter]
-recursive = true
-wrap-summaries = 72
-wrap-descriptions = 72
-close-quotes-on-newline = true
+[tool.format_docstring]
+exclude = '\.' # Temporarily disable format-docstring until we are ready
+docstring_style = 'numpy'
+line_length = 72
+fix_rst_backticks = true
+verbose = 'default'
