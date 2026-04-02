@@ -176,12 +176,10 @@ testpaths = ['tests']
 # https://docs.astral.sh/ruff/rules/
 
 [tool.ruff]
-exclude = [
-  'tmp',
-]
+exclude = ['tmp']
 indent-width = 4
-line-length = 99 # See also `max-line-length` in [tool.ruff.lint.pycodestyle]
-preview = true # Enable new rules that are not yet stable, like DOC
+line-length = 99  # See also `max-line-length` in [tool.ruff.lint.pycodestyle]
+preview = true    # Enable new rules that are not yet stable, like DOC
 
 # Formatting options for Ruff
 
@@ -199,7 +197,7 @@ select = [
   # Various rules
   #'C90',  # https://docs.astral.sh/ruff/rules/#mccabe-c90
   #'D',   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
-  'F',   # https://docs.astral.sh/ruff/rules/#pyflakes-f
+  'F', # https://docs.astral.sh/ruff/rules/#pyflakes-f
   #'FLY',  # https://docs.astral.sh/ruff/rules/#flynt-fly
   #'FURB', # https://docs.astral.sh/ruff/rules/#refurb-furb
   'I', # https://docs.astral.sh/ruff/rules/#isort-i
