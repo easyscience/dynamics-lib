@@ -260,10 +260,6 @@ ignore = [
   'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
-  # Temporary:
-  'D100',   # https://docs.astral.sh/ruff/rules/undocumented-public-module/#undocumented-publi-module-d100
-  'D104',   # https://docs.astral.sh/ruff/rules/undocumented-public-package/#undocumented-public-package-d104
-  'DTZ005', # https://docs.astral.sh/ruff/rules/call-datetime-now-without-tzinfo/#call-datetime-now-without-tzinfo-dtz005
 ]
 
 # Ignore specific rules in certain files or directories
