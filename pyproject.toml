@@ -56,6 +56,7 @@ dev = [
   'jupyterquiz',                     # Quizzes in Jupyter notebooks
   'pydoclint',                       # Docstring linter
   'format-docstring',                # Docstring formatter
+  'docstripy',                       # Convert docstrings to other formats
   'interrogate',                     # Docstring coverage checker
   'copier',                          # Template management
   'mike',                            # MkDocs: Versioned documentation support
