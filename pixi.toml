@@ -118,10 +118,11 @@ check = 'pre-commit run --hook-stage manual --all-files'
 
 param-docstring-fix = 'python tools/param_consistency.py src/ --fix'
 docstring-format-fix = 'format-docstring src/'
+docstring-transform = 'pixi run docstripy src/ -s=numpy -w'
 notebook-lint-fix = 'nbqa ruff --fix docs/docs/tutorials/'
 py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
 py-lint-fix-unsafe = 'ruff check --fix --unsafe-fixes src/ tests/ docs/docs/tutorials/'
-py-format-fix = "ruff format src/ tests/ docs/docs/tutorials/"
+py-format-fix = 'ruff format src/ tests/ docs/docs/tutorials/'
 nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
 nonpy-format-fix-modified = 'python tools/nonpy_prettier_modified.py --write'
 success-message = 'echo "✅ All auto-formatting steps completed successfully!"'
