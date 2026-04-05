@@ -42,9 +42,9 @@ class CreateParametersMixin:
         name : str
             The name of the model component.
         unit : str | sc.Unit, default='meV'
-            The unit of the area Parameter. By default, 'meV'.
+            The unit of the area Parameter.
         minimum_area : float, default=MINIMUM_AREA
-            The minimum allowed area. By default, MINIMUM_AREA.
+            The minimum allowed area.
 
         Raises
         ------
@@ -98,10 +98,9 @@ class CreateParametersMixin:
         fix_if_none : bool
             Whether to fix the center Parameter if center is None.
         unit : str | sc.Unit, default='meV'
-            The unit of the center Parameter. By default, 'meV'.
+            The unit of the center Parameter.
         enforce_minimum_center : bool, default=False
-            Whether to enforce a minimum center value to avoid zero center in DHO. By default,
-            False.
+            Whether to enforce a minimum center value to avoid zero center in DHO.
 
         Raises
         ------
@@ -153,11 +152,11 @@ class CreateParametersMixin:
         name : str
             The name of the model component.
         param_name : str, default='width'
-            The name of the width parameter. By default, 'width'.
+            The name of the width parameter.
         unit : str | sc.Unit, default='meV'
-            The unit of the width Parameter. By default, 'meV'.
+            The unit of the width Parameter.
         minimum_width : float, default=MINIMUM_WIDTH
-            The minimum allowed width. By default, MINIMUM_WIDTH.
+            The minimum allowed width.
 
         Raises
         ------

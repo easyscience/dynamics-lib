@@ -39,16 +39,15 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         amplitude : Numeric | Parameter, default=1.0
-            Amplitude of the Exponential. By default, 1.0.
+            Amplitude of the Exponential.
         center : Numeric | Parameter | None, default=None
-            Center of the Exponential. If None, the center is fixed at
-            0. By default, None.
+            Center of the Exponential. If None, the center is fixed at 0.
         rate : Numeric | Parameter, default=1.0
-            Decay or growth constant of the Exponential. By default, 1.0.
+            Decay or growth constant of the Exponential.
         unit : str | sc.Unit, default='meV'
-            Unit of the parameters. By default, 'meV'.
+            Unit of the parameters.
         display_name : str | None, default='Exponential'
-            Name of the component. By default, 'Exponential'.
+            Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. if None, a unique_name is automatically generated. By
             default, None.

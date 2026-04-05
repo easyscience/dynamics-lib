@@ -29,11 +29,11 @@ class ModelComponent(ModelBase):
         Parameters
         ----------
         unit : str | sc.Unit, default='meV'
-            The unit of the model component. By default, 'meV'.
+            The unit of the model component.
         display_name : str | None, default=None
-            A human-readable name for the component. By default, None.
+            A human-readable name for the component.
         unique_name : str | None, default=None
-            A unique identifier for the component. By default, None.
+            A unique identifier for the component.
         """
         self.validate_unit(unit)
         super().__init__(display_name=display_name, unique_name=unique_name)

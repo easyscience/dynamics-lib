@@ -38,13 +38,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         center : Numeric | Parameter | None, default=None
-            Center of the delta function. If None. By default, None.
+            Center of the delta function. If None.
         area : Numeric | Parameter, default=1.0
-            Total area under the curve. By default, 1.0.
+            Total area under the curve.
         unit : str | sc.Unit, default='meV'
-            Unit of the parameters. By default, 'meV'.
+            Unit of the parameters.
         display_name : str | None, default='DeltaFunction'
-            Name of the component. By default, 'DeltaFunction'.
+            Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.
@@ -119,7 +119,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None. By default, 0 and is fixed.
+            The new value for the center parameter. If None, defaults to 0 and is fixed.
 
         Raises
         ------

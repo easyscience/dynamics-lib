@@ -29,16 +29,16 @@ class BackgroundModel(ModelBase):
         Parameters
         ----------
         display_name : str | None, default='MyBackgroundModel'
-            Display name of the model. By default, 'MyBackgroundModel'.
+            Display name of the model.
         unique_name : str | None, default=None
-            Unique name of the model. If None, a unique name will be generated. By default, None.
+            Unique name of the model. If None, a unique name will be generated.
         unit : str | sc.Unit, default='meV'
-            Unit of the model. By default, 'meV'.
+            Unit of the model.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
-            are copied into ComponentCollections for each Q value. By default, None.
+            are copied into ComponentCollections for each Q value.
         Q : Q_type | None, default=None
-            Q values for the model. If None, Q is not set. By default, None.
+            Q values for the model. If None, Q is not set.
         """
         super().__init__(
             display_name=display_name,

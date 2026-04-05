@@ -40,15 +40,15 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         area : Numeric | Parameter, default=1.0
-            Area of the Lorentzian. By default, 1.0.
+            Area of the Lorentzian.
         center : Numeric | Parameter | None, default=None
-            Center of the Lorentzian. If None. By default, None.
+            Center of the Lorentzian. If None.
         width : Numeric | Parameter, default=1.0
-            Half width at half maximum (HWHM). By default, 1.0.
+            Half width at half maximum (HWHM).
         unit : str | sc.Unit, default='meV'
-            Unit of the parameters. By default, 'meV'.
+            Unit of the parameters.
         display_name : str | None, default='Lorentzian'
-            Name of the component. By default, 'Lorentzian'.
+            Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.
@@ -122,7 +122,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None. By default, 0 and is fixed.
+            The new value for the center parameter. If None, defaults to 0 and is fixed.
 
         Raises
         ------

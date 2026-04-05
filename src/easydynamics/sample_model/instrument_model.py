@@ -40,23 +40,22 @@ class InstrumentModel(NewBase):
         Parameters
         ----------
         display_name : str, default='MyInstrumentModel'
-            The display name of the InstrumentModel. By default, 'MyInstrumentModel'.
+            The display name of the InstrumentModel.
         unique_name : str | None, default=None
-            The unique name of the InstrumentModel. By default, None.
+            The unique name of the InstrumentModel.
         Q : Q_type | None, default=None
-            The Q values where the instrument is modelled. By default, None.
+            The Q values where the instrument is modelled.
         resolution_model : ResolutionModel | None, default=None
             The resolution model of the instrument. If None, an empty resolution model is created
-            and no resolution convolution is carried out. By default, None.
+            and no resolution convolution is carried out.
         background_model : BackgroundModel | None, default=None
             The background model of the instrument. If None, an empty background model is created,
-            and the background evaluates to
-            0. By default, None.
+            and the background evaluates to 0.
         energy_offset : Numeric | None, default=None
             Template energy offset of the instrument. Will be copied to each Q value. If None, the
-            energy offset will be 0. By default, None.
+            energy offset will be 0.
         unit : str | sc.Unit, default='meV'
-            The unit of the energy axis. By default, 'meV'.
+            The unit of the energy axis.
 
         Raises
         ------
@@ -307,7 +306,7 @@ class InstrumentModel(NewBase):
         Parameters
         ----------
         confirm : bool, default=False
-            Confirmation to clear Q values. By default, False.
+            Confirmation to clear Q values.
 
         Raises
         ------
@@ -357,7 +356,7 @@ class InstrumentModel(NewBase):
         ----------
         Q_index : int | None, default=None
             The index of the Q value to get variables for. If None, get variables for all Q values.
-            By default, None.
+
 
         Raises
         ------
@@ -415,7 +414,7 @@ class InstrumentModel(NewBase):
         ----------
         Q_index : int | None, default=None
             The index of the Q value to get the energy offset for. If None, get the energy offset
-            for all Q values. By default, None.
+            for all Q values.
 
         Raises
         ------
@@ -457,7 +456,7 @@ class InstrumentModel(NewBase):
         ----------
         Q_index : int | None, default=None
             The index of the Q value to fix the energy offset for. If None, fix energy offsets for
-            all Q values. By default, None.
+            all Q values.
         """
         self._fix_or_free_energy_offset(Q_index, fixed=True)
 
@@ -472,7 +471,7 @@ class InstrumentModel(NewBase):
         ----------
         Q_index : int | None, default=None
             The index of the Q value to free the energy offset for. If None, free energy offsets
-            for all Q values. By default, None.
+            for all Q values.
         """
         self._fix_or_free_energy_offset(Q_index, fixed=False)
 
@@ -490,9 +489,9 @@ class InstrumentModel(NewBase):
         ----------
         Q_index : int | None, default=None
             The index of the Q value to fix or free the energy offset for. If None, fix or free
-            energy offsets for all Q values. By default, None.
+            energy offsets for all Q values.
         fixed : bool, default=True
-            Whether to fix (True) or free (False) the energy offset. By default, True.
+            Whether to fix (True) or free (False) the energy offset.
 
         Raises
         ------

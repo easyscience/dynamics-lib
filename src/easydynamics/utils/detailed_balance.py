@@ -42,9 +42,9 @@ def detailed_balance_factor(
     temperature : int | float | sc.Variable | Parameter
         The temperature. If number, assumed to be in K unless temperature_unit is set.
     energy_unit : str | sc.Unit, default='meV'
-        Unit for energy if energy is given as a number or list. By default, 'meV'.
+        Unit for energy if energy is given as a number or list.
     temperature_unit : str | sc.Unit, default='K'
-        Unit for temperature if temperature is given as a number. By default, 'K'.
+        Unit for temperature if temperature is given as a number.
     divide_by_temperature : bool, default=True
         If True, divide the result by $k_B*T$ to make it dimensionless and have value 1 at E=0. By
         default, True.

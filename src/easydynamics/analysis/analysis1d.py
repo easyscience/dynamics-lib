@@ -43,25 +43,25 @@ class Analysis1d(AnalysisBase):
         Parameters
         ----------
         display_name : str | None, default='MyAnalysis'
-            Display name of the analysis. By default, 'MyAnalysis'.
+            Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
             default, None.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-            By default, None.
+
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
-            created. By default, None.
+            created.
         instrument_model : InstrumentModel | None, default=None
             The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-            is created. By default, None.
+            is created.
         Q_index : int | None, default=None
             The Q index to analyze. If None, the analysis will not be able to calculate or fit
-            until a Q index is set. By default, None.
+            until a Q index is set.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
-            parameters are added. By default, None.
+            parameters are added.
         """
         super().__init__(
             display_name=display_name,
@@ -131,7 +131,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for calculation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -153,7 +153,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for calculation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -218,7 +218,7 @@ class Analysis1d(AnalysisBase):
         Parameters
         ----------
         _x : np.ndarray | sc.Variable | None, default=None
-            Ignored. The energy grid is taken from the experiment. By default, None.
+            Ignored. The energy grid is taken from the experiment.
         **kwargs : dict[str, Any]
             Ignored. Included for compatibility with the EasyScience fitter.
 
@@ -272,13 +272,13 @@ class Analysis1d(AnalysisBase):
         Parameters
         ----------
         plot_components : bool, default=True
-            Whether to plot the individual components of the model. By default, True.
+            Whether to plot the individual components of the model.
         add_background : bool, default=True
             Whether to add the background to the model prediction when plotting individual
-            components. By default, True.
+            components.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for plotting. If None, the energy grid from the experiment
-            is used. By default, None.
+            is used.
         **kwargs : dict[str, Any]
             Keyword arguments to pass to the plotting function.
 
@@ -470,12 +470,12 @@ class Analysis1d(AnalysisBase):
             The components to evaluate.
         convolver : Convolution | None, default=None
             An optional Convolution object to use for convolution. If None, a new Convolution
-            object will be created if convolve is True. By default, None.
+            object will be created if convolve is True.
         convolve : bool, default=True
-            Whether to perform convolution with the resolution. By default, True.
+            Whether to perform convolution with the resolution.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -538,7 +538,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -568,7 +568,7 @@ class Analysis1d(AnalysisBase):
             The sample component to evaluate.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -590,7 +590,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -622,7 +622,7 @@ class Analysis1d(AnalysisBase):
             The background component to evaluate.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -649,7 +649,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for convolution. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -700,10 +700,10 @@ class Analysis1d(AnalysisBase):
         component : ModelComponent
             The component to evaluate.
         background : np.ndarray | None, default=None
-            Optional background to add to the component. By default, None.
+            Optional background to add to the component.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -730,7 +730,7 @@ class Analysis1d(AnalysisBase):
             The component to evaluate.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -752,7 +752,7 @@ class Analysis1d(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -773,10 +773,10 @@ class Analysis1d(AnalysisBase):
         Parameters
         ----------
         add_background : bool, default=True
-            Whether to add background components. By default, True.
+            Whether to add background components.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used. By default, None.
+            experiment is used.
 
         Returns
         -------
@@ -822,7 +822,7 @@ class Analysis1d(AnalysisBase):
             The values to convert.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for the energy coordinate. If None, the energy grid from
-            the experiment is used. By default, None.
+            the experiment is used.
 
         Returns
         -------

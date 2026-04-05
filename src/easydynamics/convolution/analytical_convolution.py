@@ -51,13 +51,13 @@ class AnalyticalConvolution(ConvolutionBase):
         energy : np.ndarray | sc.Variable
             1D array of energy values where the convolution is evaluated.
         energy_unit : str | sc.Unit, default='meV'
-            The unit of the energy. By default, 'meV'.
+            The unit of the energy.
         sample_components : ComponentCollection | ModelComponent | None, default=None
-            The sample model to be convolved. By default, None.
+            The sample model to be convolved.
         resolution_components : ComponentCollection | ModelComponent | None, default=None
-            The resolution model to convolve with. By default, None.
+            The resolution model to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
-            An offset to shift the energy values by. By default, 0.0.
+            An offset to shift the energy values by.
         """
         super().__init__(
             energy=energy,

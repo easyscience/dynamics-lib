@@ -48,16 +48,16 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Parameters
         ----------
         display_name : str | None, default='BrownianTranslationalDiffusion'
-            Display name of the diffusion model. By default, 'BrownianTranslationalDiffusion'.
+            Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
         unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV. By default, 'meV'.
+            Unit of the diffusion model. Must be convertible to meV.
         scale : Numeric, default=1.0
-            Scale factor for the diffusion model. Must be a non-negative number. By default, 1.0.
+            Scale factor for the diffusion model. Must be a non-negative number.
         diffusion_coefficient : Numeric, default=1.0
-            Diffusion coefficient D in m^2/s. By default, 1.0.
+            Diffusion coefficient D in m^2/s.
 
         Raises
         ------
@@ -202,7 +202,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q : Q_type
             Scattering vector values.
         component_display_name : str, default='Brownian diffusion'
-            Name of the Lorentzian component. By default, 'Brownian diffusion'.
+            Name of the Lorentzian component.
 
         Raises
         ------

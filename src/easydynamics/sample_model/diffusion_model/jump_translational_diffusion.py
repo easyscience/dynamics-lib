@@ -51,18 +51,18 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Parameters
         ----------
         display_name : str | None, default='JumpTranslationalDiffusion'
-            Display name of the diffusion model. By default, 'JumpTranslationalDiffusion'.
+            Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
         unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV. By default, 'meV'.
+            Unit of the diffusion model. Must be convertible to meV.
         scale : Numeric, default=1.0
-            Scale factor for the diffusion model. Must be a non-negative number. By default, 1.0.
+            Scale factor for the diffusion model. Must be a non-negative number.
         diffusion_coefficient : Numeric, default=1.0
-            Diffusion coefficient D in m^2/s. By default, 1.0.
+            Diffusion coefficient D in m^2/s.
         relaxation_time : Numeric, default=1.0
-            Relaxation time t in ps. By default, 1.0.
+            Relaxation time t in ps.
 
         Raises
         ------
@@ -261,8 +261,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Q : Q_type
             Scattering vector in 1/angstrom. Can be a single value or an array of values.
         component_display_name : str, default='Jump translational diffusion'
-            Name of the Jump Diffusion Lorentzian component. By default, 'Jump translational
-            diffusion'.
+            Name of the Jump Diffusion Lorentzian component.
 
         Raises
         ------

@@ -44,26 +44,25 @@ class SampleModel(ModelBase):
         Parameters
         ----------
         display_name : str, default='MySampleModel'
-            Display name of the model. By default, 'MySampleModel'.
+            Display name of the model.
         unique_name : str | None, default=None
-            Unique name of the model. If None, a unique name will be generated. By default, None.
+            Unique name of the model. If None, a unique name will be generated.
         unit : str | sc.Unit, default='meV'
-            Unit of the model. If None,. By default, 'meV'.
+            Unit of the model. If None,.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
-            are copied into ComponentCollections for each Q value. By default, None.
+            are copied into ComponentCollections for each Q value.
         Q : Q_type | None, default=None
-            Q values for the model. If None, Q is not set. By default, None.
+            Q values for the model. If None, Q is not set.
         diffusion_models : DiffusionModelBase | list[DiffusionModelBase] | None, default=None
             Diffusion models to include in the SampleModel. If None, no diffusion models are added.
-            By default, None.
         temperature : float | None, default=None
             Temperature for detailed balancing. If None, no detailed balancing is applied. By
             default, None.
         temperature_unit : str | sc.Unit, default='K'
-            Unit of the temperature. By default, 'K'.
+            Unit of the temperature.
         divide_by_temperature : bool, default=True
-            Whether to divide the detailed balance factor by temperature. By default, True.
+            Whether to divide the detailed balance factor by temperature.
 
         Raises
         ------
@@ -414,7 +413,7 @@ class SampleModel(ModelBase):
         ----------
         Q_index : int | None, default=None
             If specified, only get variables from the ComponentCollection at the given Q index. If
-            None, get variables from all ComponentCollections. By default, None.
+            None, get variables from all ComponentCollections.
 
         Returns
         -------

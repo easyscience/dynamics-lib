@@ -43,15 +43,15 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         area : Numeric | Parameter, default=1.0
-            Area of the Gaussian. By default, 1.0.
+            Area of the Gaussian.
         center : Numeric | Parameter | None, default=None
-            Center of the Gaussian. If None. By default, None.
+            Center of the Gaussian. If None.
         width : Numeric | Parameter, default=1.0
-            Standard deviation. By default, 1.0.
+            Standard deviation.
         unit : str | sc.Unit, default='meV'
-            Unit of the parameters. By default, 'meV'.
+            Unit of the parameters.
         display_name : str | None, default='Gaussian'
-            Name of the component. By default, 'Gaussian'.
+            Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. if None, a unique_name is automatically generated. By
             default, None.
@@ -128,7 +128,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None. By default, 0 and is fixed.
+            The new value for the center parameter. If None, defaults to 0 and is fixed.
 
         Raises
         ------

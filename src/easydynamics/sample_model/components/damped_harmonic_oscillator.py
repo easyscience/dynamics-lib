@@ -36,16 +36,16 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         area : Numeric | Parameter, default=1.0
-            Area under the curve. By default, 1.0.
+            Area under the curve.
         center : Numeric | Parameter, default=1.0
-            Resonance frequency, approximately the peak position. By default, 1.0.
+            Resonance frequency, approximately the peak position.
         width : Numeric | Parameter, default=1.0
             Damping constant, approximately the half width at half max (HWHM) of the peaks. By
             default, 1.0.
         unit : str | sc.Unit, default='meV'
-            Unit of the parameters. By default, 'meV'.
+            Unit of the parameters.
         display_name : str | None, default='DampedHarmonicOscillator'
-            Display name of the component. By default, 'DampedHarmonicOscillator'.
+            Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.

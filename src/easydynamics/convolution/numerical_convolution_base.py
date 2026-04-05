@@ -57,19 +57,19 @@ class NumericalConvolutionBase(ConvolutionBase):
         resolution_components : ComponentCollection | ModelComponent
             The resolution components to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
-            An energy offset to apply to the energy values before convolution. By default, 0.0.
+            An energy offset to apply to the energy values before convolution.
         upsample_factor : Numeric | None, default=5
-            The factor by which to upsample the input data before convolution. By default, 5.
+            The factor by which to upsample the input data before convolution.
         extension_factor : Numeric | None, default=0.2
-            The factor by which to extend the input data range before convolution. By default, 0.2.
+            The factor by which to extend the input data range before convolution.
         temperature : Parameter | Numeric | None, default=None
-            The temperature to use for detailed balance correction. By default, None.
+            The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
-            The unit of the temperature parameter. By default, 'K'.
+            The unit of the temperature parameter.
         energy_unit : str | sc.Unit, default='meV'
-            The unit of the energy. By default, 'meV'.
+            The unit of the energy.
         normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance correction. By default, True.
+            Whether to normalize the detailed balance correction.
 
         Raises
         ------

@@ -41,22 +41,20 @@ class Analysis(AnalysisBase):
         Parameters
         ----------
         display_name : str | None, default='MyAnalysis'
-            Display name of the analysis. By default, 'MyAnalysis'.
+            Display name of the analysis.
         unique_name : str | None, default=None
-            Unique name of the analysis. If None, a unique name is automatically generated. By
-            default, None.
+            Unique name of the analysis. If None, a unique name is automatically generated.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-            By default, None.
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
-            created. By default, None.
+            created.
         instrument_model : InstrumentModel | None, default=None
             The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-            is created. By default, None.
+            is created.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
-            parameters are added. By default, None.
+            parameters are added.
         """
 
         # Avoid triggering updates before the object is fully
@@ -144,11 +142,10 @@ class Analysis(AnalysisBase):
         Parameters
         ----------
         Q_index : int | None, default=None
-            Index of the Q value to calculate for. If None, calculate for all Q values. By default,
-            None.
+            Index of the Q value to calculate for. If None, calculate for all Q values.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
-            experiment. By default, None.
+            experiment.
 
         Returns
         -------
@@ -177,11 +174,10 @@ class Analysis(AnalysisBase):
         ----------
         fit_method : str, default='independent'
             Method to use for fitting. Options are "independent" (fit each Q index independently,
-            one after the other) or "simultaneous" (fit all Q indices simultaneously). By default,
-            'independent'.
+            one after the other) or "simultaneous" (fit all Q indices simultaneously).
         Q_index : int | None, default=None
             If fit_method is "independent", specify which Q index to fit. If None, fit all Q
-            indices independently. Ignored if fit_method is "simultaneous". By default, None.
+            indices independently. Ignored if fit_method is "simultaneous".
 
         Raises
         ------
@@ -229,15 +225,15 @@ class Analysis(AnalysisBase):
         Parameters
         ----------
         Q_index : int | None, default=None
-            Index of the Q value to plot. If None, plot all Q values. By default, None.
+            Index of the Q value to plot. If None, plot all Q values.
         plot_components : bool, default=True
-            Whether to plot the individual components. By default, True.
+            Whether to plot the individual components.
         add_background : bool, default=True
             Whether to add background components to the sample model components when plotting.
-            Default is True. By default, True.
+            Default is True.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
-            experiment. By default, None.
+            experiment.
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp for customizing the plot.
 
@@ -401,7 +397,7 @@ class Analysis(AnalysisBase):
         Parameters
         ----------
         names : str | list[str] | None, default=None
-            Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.
+            Name(s) of the parameter(s) to plot. If None, plots all parameters.
         **kwargs : dict[str, Any]
             Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,
             title, linestyle, marker, color).
@@ -459,7 +455,7 @@ class Analysis(AnalysisBase):
         ----------
         Q_index : int | None, default=None
             Index of the Q value to fix the energy offset for. If None, fixes the energy offset for
-            all Q values. By default, None.
+            all Q values.
         """
         if Q_index is not None:
             Q_index = self._verify_Q_index(Q_index)
@@ -477,7 +473,7 @@ class Analysis(AnalysisBase):
         ----------
         Q_index : int | None, default=None
             Index of the Q value to free the energy offset for. If None, frees the energy offset
-            for all Q values. By default, None.
+            for all Q values.
         """
         if Q_index is not None:
             Q_index = self._verify_Q_index(Q_index)
@@ -610,7 +606,7 @@ class Analysis(AnalysisBase):
         ----------
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
-            experiment. By default, None.
+            experiment.
 
         Returns
         -------
@@ -637,10 +633,10 @@ class Analysis(AnalysisBase):
         ----------
         add_background : bool, default=True
             Whether to add background components to the sample model components when creating the
-            dataset. By default, True.
+            dataset.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the components. If None, uses the energy from
-            the experiment. By default, None.
+            the experiment.
 
         Raises
         ------

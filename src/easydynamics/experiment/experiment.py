@@ -33,13 +33,12 @@ class Experiment(NewBase):
         Parameters
         ----------
         display_name : str | None, default='MyExperiment'
-            Display name of the experiment. By default, 'MyExperiment'.
+            Display name of the experiment.
         unique_name : str | None, default=None
-            Unique name of the experiment. If None, a unique name will be generated. By default,
-            None.
+            Unique name of the experiment. If None, a unique name will be generated. None.
         data : sc.DataArray | str | None, default=None
             Dataset associated with the experiment. Can be a sc.DataArray or a filename string to
-            load from. If None, no data is loaded. By default, None.
+            load from. If None, no data is loaded.
 
         Raises
         ------
@@ -252,7 +251,7 @@ class Experiment(NewBase):
         filename : str
             Path to the HDF5 file.
         display_name : str | None, default=None
-            Optional display name for the experiment. By default, None.
+            Optional display name for the experiment.
 
         Raises
         ------
@@ -286,7 +285,7 @@ class Experiment(NewBase):
         ----------
         filename : str | None, default=None
             Path to the output HDF5 file. If None, the file will be named after the unique_name of
-            the experiment with a .h5 extension. By default, None.
+            the experiment with a .h5 extension.
 
         Raises
         ------
@@ -380,7 +379,7 @@ class Experiment(NewBase):
         Parameters
         ----------
         slicer : bool, default=False
-            If True, use plopp's slicer instead of plot. By default, False.
+            If True, use plopp's slicer instead of plot.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
 

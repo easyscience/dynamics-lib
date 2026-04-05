@@ -34,13 +34,13 @@ class ComponentCollection(ModelBase):
         Parameters
         ----------
         unit : str | sc.Unit, default='meV'
-            Unit of the collection. By default, 'meV'.
+            Unit of the collection.
         display_name : str | None, default='MyComponentCollection'
-            Display name of the collection. By default, 'MyComponentCollection'.
+            Display name of the collection.
         unique_name : str | None, default=None
-            Unique name of the collection. By default, None.
+            Unique name of the collection.
         components : list[ModelComponent] | None, default=None
-            Initial model components to add to the ComponentCollection. By default, None.
+            Initial model components to add to the ComponentCollection.
 
         Raises
         ------

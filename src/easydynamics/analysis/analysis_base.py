@@ -37,22 +37,22 @@ class AnalysisBase(EasyScienceModelBase):
         Parameters
         ----------
         display_name : str | None, default='MyAnalysis'
-            Display name of the analysis. By default, 'MyAnalysis'.
+            Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
             default, None.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-            By default, None.
+
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
-            created. By default, None.
+            created.
         instrument_model : InstrumentModel | None, default=None
             The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-            is created. By default, None.
+            is created.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
-            parameters are added. By default, None.
+            parameters are added.
 
         Raises
         ------
