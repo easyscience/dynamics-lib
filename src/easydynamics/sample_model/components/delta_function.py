@@ -16,12 +16,12 @@ EPSILON = 1e-8  # small number to avoid floating point issues
 
 
 class DeltaFunction(CreateParametersMixin, ModelComponent):
-    """Delta function.
+    """
+    Delta function.
 
-    Evaluates to zero everywhere, except in convolutions, where it acts
-    as an identity. This is handled by the Convolution method. If the
-    center is not provided, it will be centered at 0 and fixed, which is
-    typically what you want in QENS.
+    Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is
+    handled by the Convolution method. If the center is not provided, it will be centered at 0 and
+    fixed, which is typically what you want in QENS.
     """
 
     def __init__(
@@ -32,16 +32,22 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'DeltaFunction',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the Delta function.
+        """
+        Initialize the Delta function.
 
-        Args:
-            center (Numeric | Parameter | None, default=None): Center of the delta function.
-                If None, defaults to 0 and is fixed.
-            area (Numeric | Parameter, default=1.0): Total area under the curve.
-            unit (str | sc.Unit, default='meV'): Unit of the parameters.
-            display_name (str | None, default='DeltaFunction'): Name of the component.
-            unique_name (str | None, default=None): Unique name of the component.
-                If None, a unique_name is automatically generated.
+        Parameters
+        ----------
+        center : Numeric | Parameter | None, default=None
+            Center of the delta function. If None.
+        area : Numeric | Parameter, default=1.0
+            Total area under the curve.
+        unit : str | sc.Unit, default='meV'
+            Unit of the parameters.
+        display_name : str | None, default='DeltaFunction'
+            Name of the component.
+        unique_name : str | None, default=None
+            Unique name of the component. If None, a unique_name is automatically generated. By
+            default, None.
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
@@ -61,23 +67,31 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     @property
     def area(self) -> Parameter:
-        """Get the area parameter.
+        """
+        Get the area parameter.
 
-        Returns:
-            Parameter: The area parameter.
+        Returns
+        -------
+        Parameter
+            The area parameter.
         """
 
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """Set the value of the area parameter.
+        """
+        Set the value of the area parameter.
 
-        Args:
-            value (Numeric): The new value for the area parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the area parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
+        Raises
+        ------
+        TypeError
+            If the value is not a number.
         """
 
         if not isinstance(value, Numeric):
@@ -86,24 +100,31 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     @property
     def center(self) -> Parameter:
-        """Get the center parameter.
+        """
+        Get the center parameter.
 
-        Returns:
-            Parameter: The center parameter.
+        Returns
+        -------
+        Parameter
+            The center parameter.
         """
 
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
-        """Set the center parameter value.
+        """
+        Set the center parameter value.
 
-        Args:
-            value (Numeric | None): The new value for the center
-                parameter. If None, defaults to 0 and is fixed.
+        Parameters
+        ----------
+        value : Numeric | None
+            The new value for the center parameter. If None, defaults to 0 and is fixed.
 
-        Raises:
-            TypeError: If the value is not a number or None.
+        Raises
+        ------
+        TypeError
+            If the value is not a number or None.
         """
 
         if value is None:
@@ -114,19 +135,21 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self._center.value = value
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Evaluate the Delta function at the given x values.
+        """
+        Evaluate the Delta function at the given x values.
 
-        The Delta function evaluates to zero everywhere, except at the
-        center. Its numerical integral is equal to the area. It acts as
-        an identity in convolutions.
+        The Delta function evaluates to zero everywhere, except at the center. Its numerical
+        integral is equal to the area. It acts as an identity in convolutions.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The x values at which to evaluate the Delta function.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values at which to evaluate the Delta function.
 
-        Returns:
-            np.ndarray: The evaluated Delta function at the given x
-                values.
+        Returns
+        -------
+        np.ndarray
+            The evaluated Delta function at the given x values.
         """
 
         # x assumed sorted, 1D numpy array
@@ -159,10 +182,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         return model
 
     def __repr__(self) -> str:
-        """Return a string representation of the Delta function.
+        """
+        Return a string representation of the Delta function.
 
-        Returns:
-            str: A string representation of the Delta function.
+        Returns
+        -------
+        str
+            A string representation of the Delta function.
         """
 
         return f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \

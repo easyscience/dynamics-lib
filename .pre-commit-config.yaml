@@ -39,13 +39,6 @@ repos:
         pass_filenames: false
         stages: [manual]
 
-      - id: pixi-docstring-format-check
-        name: pixi run docstring-format-check
-        entry: pixi run docstring-format-check
-        language: system
-        pass_filenames: false
-        stages: [manual]
-
       - id: pixi-nonpy-format-check
         name: pixi run nonpy-format-check
         entry: pixi run nonpy-format-check

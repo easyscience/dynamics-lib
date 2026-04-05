@@ -17,8 +17,8 @@ from .components.model_component import ModelComponent
 
 
 class ComponentCollection(ModelBase):
-    """Collection of model components representing a sample, background
-    or resolution model.
+    """
+    Collection of model components representing a sample, background or resolution model.
     """
 
     def __init__(
@@ -28,20 +28,24 @@ class ComponentCollection(ModelBase):
         unique_name: str | None = None,
         components: list[ModelComponent] | None = None,
     ) -> None:
-        """Initialize a new ComponentCollection.
+        """
+        Initialize a new ComponentCollection.
 
-        Args:
-            unit (str | sc.Unit, default='meV'): Unit of the collection.
-            display_name (str | None, default="MyComponentCollection"): Display
-                name of the collection
-            unique_name (str | None, default=None): Unique name of the collection
-                Defaults to None.
-            components (list[ModelComponent] | None, default=None): Initial model
-                components to add to the ComponentCollection.
+        Parameters
+        ----------
+        unit : str | sc.Unit, default='meV'
+            Unit of the collection.
+        display_name : str | None, default='MyComponentCollection'
+            Display name of the collection.
+        unique_name : str | None, default=None
+            Unique name of the collection.
+        components : list[ModelComponent] | None, default=None
+            Initial model components to add to the ComponentCollection.
 
-        Raises:
-            TypeError: If unit is not a string or sc.Unit,
-                or if components is not a list of ModelComponent.
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit, or if components is not a list of ModelComponent.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -66,24 +70,31 @@ class ComponentCollection(ModelBase):
 
     @property
     def components(self) -> list[ModelComponent]:
-        """Get the list of components in the collection.
+        """
+        Get the list of components in the collection.
 
-        Returns:
-            list[ModelComponent]: The components in the collection.
+        Returns
+        -------
+        list[ModelComponent]
+            The components in the collection.
         """
 
         return list(self._components)
 
     @components.setter
     def components(self, components: list[ModelComponent]) -> None:
-        """Set the list of components in the collection.
+        """
+        Set the list of components in the collection.
 
-        Args:
-            components (list[ModelComponent]): The new list of
-                components.
+        Parameters
+        ----------
+        components : list[ModelComponent]
+            The new list of components.
 
-        Raises:
-            TypeError: If components is not a list of ModelComponent.
+        Raises
+        ------
+        TypeError
+            If components is not a list of ModelComponent.
         """
 
         if not isinstance(components, list):
@@ -99,24 +110,30 @@ class ComponentCollection(ModelBase):
 
     @property
     def is_empty(self) -> bool:
-        """Check if the ComponentCollection has no components.
+        """
+        Check if the ComponentCollection has no components.
 
-        Returns:
-            bool: True if the collection has no components,
-                False otherwise.
+        Returns
+        -------
+        bool
+            True if the collection has no components, False otherwise.
         """
         return not self._components
 
     @is_empty.setter
     def is_empty(self, _value: bool) -> None:
-        """is_empty is a read-only property that indicates whether the
-        collection has components.
+        """
+        Is_empty is a read-only property that indicates whether the collection has components.
 
-        Args:
-            _value (bool): The value to set (ignored).
+        Parameters
+        ----------
+        _value : bool
+            The value to set (ignored).
 
-        Raises:
-            AttributeError: Always raised since is_empty is read-only.
+        Raises
+        ------
+        AttributeError
+            Always raised since is_empty is read-only.
         """
         raise AttributeError(
             'is_empty is a read-only property that indicates '
@@ -125,23 +142,30 @@ class ComponentCollection(ModelBase):
 
     @property
     def unit(self) -> str | sc.Unit | None:
-        """Get the unit of the ComponentCollection.
+        """
+        Get the unit of the ComponentCollection.
 
-        Returns:
-            str | sc.Unit | None: The unit of the ComponentCollection,
-                which is the same as the unit of its components.
+        Returns
+        -------
+        str | sc.Unit | None
+            The unit of the ComponentCollection, which is the same as the unit of its components.
         """
         return self._unit
 
     @unit.setter
     def unit(self, _unit_str: str) -> None:
-        """Unit is read-only and cannot be set directly.
+        """
+        Unit is read-only and cannot be set directly.
 
-        Args:
-            _unit_str (str): The unit to set (ignored).
+        Parameters
+        ----------
+        _unit_str : str
+            The unit to set (ignored).
 
-        Raises:
-            AttributeError: Always raised since unit is read-only.
+        Raises
+        ------
+        AttributeError
+            Always raised since unit is read-only.
         """
 
         raise AttributeError(
@@ -150,16 +174,20 @@ class ComponentCollection(ModelBase):
         )  # noqa: E501
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the ComponentCollection and all its
-        components.
+        """
+        Convert the unit of the ComponentCollection and all its components.
 
-        Args:
-            unit (str | sc.Unit): The target unit to convert to.
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The target unit to convert to.
 
-        Raises:
-            TypeError: If unit is not a string or sc.Unit.
-            Exception: If any component cannot be converted to the
-                specified unit.
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit.
+        Exception
+            If any component cannot be converted to the specified unit.
         """
 
         if not isinstance(unit, (str, sc.Unit)):
@@ -185,19 +213,22 @@ class ComponentCollection(ModelBase):
     # ------------------------------------------------------------------
 
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
-        """Append a model component or the components from another
-        ComponentCollection to this ComponentCollection.
+        """
+        Append a model component or the components from another ComponentCollection to this
+        ComponentCollection.
 
-        Args:
-            component (ModelComponent | "ComponentCollection"): The component
-                to append. If a ComponentCollection is provided, all of its
-                components will be appended.
+        Parameters
+        ----------
+        component : ModelComponent | ComponentCollection
+            The component to append. If a ComponentCollection is provided, all of its components
+            will be appended.
 
-        Raises:
-            TypeError: If component is not a ModelComponent or
-                ComponentCollection.
-            ValueError: If a component with the same unique name already
-                exists in the collection.
+        Raises
+        ------
+        TypeError
+            If component is not a ModelComponent or ComponentCollection.
+        ValueError
+            If a component with the same unique name already exists in the collection.
         """
         if not isinstance(component, (ModelComponent, ComponentCollection)):
             raise TypeError(
@@ -219,15 +250,20 @@ class ComponentCollection(ModelBase):
             self._components.append(comp)
 
     def remove_component(self, unique_name: str) -> None:
-        """Remove a component from the collection by its unique name.
+        """
+        Remove a component from the collection by its unique name.
 
-        Args:
-            unique_name (str): Unique name of the component to remove.
+        Parameters
+        ----------
+        unique_name : str
+            Unique name of the component to remove.
 
-        Raises:
-            TypeError: If unique_name is not a string.
-            KeyError: If no component with the given unique name exists
-                in the collection.
+        Raises
+        ------
+        TypeError
+            If unique_name is not a string.
+        KeyError
+            If no component with the given unique name exists in the collection.
         """
 
         if not isinstance(unique_name, str):
@@ -246,22 +282,30 @@ class ComponentCollection(ModelBase):
 
     @property
     def components(self) -> list[ModelComponent]:
-        """Get the list of components in the collection.
+        """
+        Get the list of components in the collection.
 
-        Returns:
-            list[ModelComponent]: The components in the collection.
+        Returns
+        -------
+        list[ModelComponent]
+            The components in the collection.
         """
         return list(self._components)
 
     @components.setter
     def components(self, components: list[ModelComponent]) -> None:
-        """Set the components in the collection.
+        """
+        Set the components in the collection.
 
-        Args:
-            components (list[ModelComponent]): The new components in the collection
+        Parameters
+        ----------
+        components : list[ModelComponent]
+            The new components in the collection.
 
-        Raises:
-            TypeError: If components is not a list of ModelComponent
+        Raises
+        ------
+        TypeError
+            If components is not a list of ModelComponent.
         """
         if not isinstance(components, list):
             raise TypeError('components must be a list of ModelComponent instances.')
@@ -276,23 +320,30 @@ class ComponentCollection(ModelBase):
 
     @property
     def is_empty(self) -> bool:
-        """Returns True if the collection has no components, otherwise
-        False.
+        """
+        Returns True if the collection has no components, otherwise False.
 
-        Returns:
-            bool: True if the collection has no components, otherwise False
+        Returns
+        -------
+        bool
+            True if the collection has no components, otherwise False.
         """
         return not self._components
 
     @is_empty.setter
     def is_empty(self, _value: bool) -> None:
-        """is_empty is read-only.
+        """
+        Is_empty is read-only.
 
-        Args:
-            _value (bool): ignored.
+        Parameters
+        ----------
+        _value : bool
+            Ignored.
 
-        Raises:
-            AttributeError: Always raised since is_empty is read-only
+        Raises
+        ------
+        AttributeError
+            Always raised since is_empty is read-only.
         """
         raise AttributeError(
             'is_empty is a read-only property that indicates '
@@ -300,11 +351,13 @@ class ComponentCollection(ModelBase):
         )
 
     def list_component_names(self) -> list[str]:
-        """List the names of all components in the model.
+        """
+        List the names of all components in the model.
 
-        Returns:
-            list[str]: List of unique names of the components in the
-                collection.
+        Returns
+        -------
+        list[str]
+            List of unique names of the components in the collection.
         """
 
         return [component.unique_name for component in self._components]
@@ -314,13 +367,16 @@ class ComponentCollection(ModelBase):
         self._components.clear()
 
     def normalize_area(self) -> None:
-        """Normalize the areas of all components so they sum to 1. This
-        is useful for convolutions.
+        """
+        Normalize the areas of all components so they sum to 1.
 
-        Raises:
-            ValueError: If there are no components in the model or
-                if the total area is zero or not finite, which
-                would prevent normalization.
+        This is useful for convolutions.
+
+        Raises
+        ------
+        ValueError
+            If there are no components in the model or if the total area is zero or not finite,
+            which would prevent normalization.
         """
         if not self.components:
             raise ValueError('No components in the model to normalize.')
@@ -354,23 +410,30 @@ class ComponentCollection(ModelBase):
     # ------------------------------------------------------------------
 
     def get_all_variables(self) -> list[DescriptorBase]:
-        """Get all parameters from the model component.
+        """
+        Get all parameters from the model component.
 
-        Returns:
-            list[DescriptorBase]: List of parameters in the component.
+        Returns
+        -------
+        list[DescriptorBase]
+            List of parameters in the component.
         """
 
         return [var for component in self.components for var in component.get_all_variables()]
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Evaluate the sum of all components.
+        """
+        Evaluate the sum of all components.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                Energy axis.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Energy axis.
 
-        Returns:
-            np.ndarray: Evaluated model values.
+        Returns
+        -------
+        np.ndarray
+            Evaluated model values.
         """
 
         if not self.components:
@@ -382,20 +445,29 @@ class ComponentCollection(ModelBase):
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
         unique_name: str,
     ) -> np.ndarray:
-        """Evaluate a single component by name.
+        """
+        Evaluate a single component by name.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                Energy axis.
-            unique_name (str): Component unique name.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Energy axis.
+        unique_name : str
+            Component unique name.
 
-        Returns:
-            np.ndarray: Evaluated values for the specified component.
-        Raises:
-            ValueError: If there are no components in the model.
-            TypeError: If unique_name is not a string.
-            KeyError: If no component with the given unique name exists
-                in the collection.
+        Raises
+        ------
+        ValueError
+            If there are no components in the model.
+        TypeError
+            If unique_name is not a string.
+        KeyError
+            If no component with the given unique name exists in the collection.
+
+        Returns
+        -------
+        np.ndarray
+            Evaluated values for the specified component.
         """
         if not self.components:
             raise ValueError('No components in the model to evaluate.')
@@ -428,15 +500,18 @@ class ComponentCollection(ModelBase):
     # ------------------------------------------------------------------
 
     def __contains__(self, item: str | ModelComponent) -> bool:
-        """Check if a component with the given name or instance exists
-        in the ComponentCollection.
+        """
+        Check if a component with the given name or instance exists in the ComponentCollection.
 
-        Args:
-            item (str | ModelComponent): The component name or instance
-                to check for.
+        Parameters
+        ----------
+        item : str | ModelComponent
+            The component name or instance to check for.
 
-        Returns:
-            bool: True if the component exists, False otherwise.
+        Returns
+        -------
+        bool
+            True if the component exists, False otherwise.
         """
 
         if isinstance(item, str):
@@ -448,10 +523,13 @@ class ComponentCollection(ModelBase):
         return False
 
     def __repr__(self) -> str:
-        """Return a string representation of the ComponentCollection.
+        """
+        Return a string representation of the ComponentCollection.
 
-        Returns:
-            str: String representation of the ComponentCollection.
+        Returns
+        -------
+        str
+            String representation of the ComponentCollection.
         """
         comp_names = ', '.join(c.unique_name for c in self.components) or 'No components'
 

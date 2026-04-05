@@ -20,11 +20,10 @@ from easydynamics.utils.utils import _in_notebook
 
 
 class Analysis(AnalysisBase):
-    """For analysing two-dimensional data, i.e. intensity as function of
-    energy and Q.
+    """
+    For analysing two-dimensional data, i.e. intensity as function of energy and Q.
 
-    Supports independent fits of each Q value and simultaneous fits of
-    all Q.
+    Supports independent fits of each Q value and simultaneous fits of all Q.
     """
 
     def __init__(
@@ -36,24 +35,26 @@ class Analysis(AnalysisBase):
         instrument_model: InstrumentModel | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
-        """Initialize an Analysis object.
+        """
+        Initialize an Analysis object.
 
-        Args:
-            display_name (str | None, default='MyAnalysis'): Display name of the analysis.
-            unique_name (str | None, default=None): Unique name of the analysis. If
-                None, a unique name is automatically generated.
-            experiment (Experiment | None, default=None): The Experiment associated
-                with this Analysis. If None, a default Experiment is
-                created.
-            sample_model (SampleModel | None, default=None): The SampleModel
-                associated with this Analysis. If None, a default
-                SampleModel is created.
-            instrument_model (InstrumentModel | None, default=None): The
-                InstrumentModel associated with this Analysis. If None,
-                a default InstrumentModel is created.
-            extra_parameters (Parameter | list[Parameter] | None, default=None): Extra
-                parameters to be included in the analysis for advanced
-                users. If None, no extra parameters are added.
+        Parameters
+        ----------
+        display_name : str | None, default='MyAnalysis'
+            Display name of the analysis.
+        unique_name : str | None, default=None
+            Unique name of the analysis. If None, a unique name is automatically generated.
+        experiment : Experiment | None, default=None
+            The Experiment associated with this Analysis. If None, a default Experiment is created.
+        sample_model : SampleModel | None, default=None
+            The SampleModel associated with this Analysis. If None, a default SampleModel is
+            created.
+        instrument_model : InstrumentModel | None, default=None
+            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
+            is created.
+        extra_parameters : Parameter | list[Parameter] | None, default=None
+            Extra parameters to be included in the analysis for advanced users. If None, no extra
+            parameters are added.
         """
 
         # Avoid triggering updates before the object is fully
@@ -90,28 +91,33 @@ class Analysis(AnalysisBase):
 
     @property
     def analysis_list(self) -> list[Analysis1d]:
-        """Get the Analysis1d objects associated with this Analysis.
+        """
+        Get the Analysis1d objects associated with this Analysis.
 
-        Returns:
-            list[Analysis1d]: A list of Analysis1d objects, one for
-                each Q index.
+        Returns
+        -------
+        list[Analysis1d]
+            A list of Analysis1d objects, one for each Q index.
         """
         return self._analysis_list
 
     @analysis_list.setter
     def analysis_list(self, _value: list[Analysis1d]) -> None:
-        """analysis_list is read-only.
+        """
+        Analysis_list is read-only.
 
-        To change the analysis list, modify the experiment, sample
-        model, or instrument model.
+        To change the analysis list, modify the experiment, sample model, or instrument model.
 
-        Args:
-            _value (list[Analysis1d]): The new list of Analysis1d objects. This
-                argument is ignored, as analysis_list is read-only.
+        Parameters
+        ----------
+        _value : list[Analysis1d]
+            The new list of Analysis1d objects. This argument is ignored, as analysis_list is
+            read-only.
 
-        Raises:
-            AttributeError: Always raised, since analysis_list is
-                read-only.
+        Raises
+        ------
+        AttributeError
+            Always raised, since analysis_list is read-only.
         """
 
         raise AttributeError(
@@ -128,21 +134,24 @@ class Analysis(AnalysisBase):
         Q_index: int | None = None,
         energy: sc.Variable | None = None,
     ) -> list[np.ndarray] | np.ndarray:
-        """Calculate model data for a specific Q index. If Q_index is
-        None, calculate for all Q indices and return a list of arrays.
+        """
+        Calculate model data for a specific Q index.
 
-        Args:
-            Q_index (int | None, default=None): Index of the Q value to calculate
-                for. If None, calculate for all Q values.
-            energy (sc.Variable | None, default=None): The energy values to use for
-                calculating the model. If None, uses the energy from the
-                experiment.
+        If Q_index is None, calculate for all Q indices and return a list of arrays.
 
-        Returns:
-            list[np.ndarray] | np.ndarray: If Q_index is None, returns
-                a list of numpy arrays, one for each Q index.
-                If Q_index is an integer, returns a single numpy array
-                for that Q index.
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Index of the Q value to calculate for. If None, calculate for all Q values.
+        energy : sc.Variable | None, default=None
+            The energy values to use for calculating the model. If None, uses the energy from the
+            experiment.
+
+        Returns
+        -------
+        list[np.ndarray] | np.ndarray
+            If Q_index is None, returns a list of numpy arrays, one for each Q index. If Q_index is
+            an integer, returns a single numpy array for that Q index.
         """
         if energy is None:
             energy = self.energy
@@ -158,25 +167,29 @@ class Analysis(AnalysisBase):
         fit_method: str = 'independent',
         Q_index: int | None = None,
     ) -> FitResults | list[FitResults]:
-        """Fit the model to the experimental data.
+        """
+        Fit the model to the experimental data.
 
-        Args:
-            fit_method (str, default="independent"): Method to use for fitting. Options are
-                "independent" (fit each Q index independently, one after
-                the other) or "simultaneous" (fit all Q indices
-                simultaneously). Default is "independent".
-            Q_index (int | None, default=None): If fit_method is "independent",
-                specify which Q index to fit. If None, fit all Q indices
-                independently. Ignored if fit_method is "simultaneous".
-                Default is None.
+        Parameters
+        ----------
+        fit_method : str, default='independent'
+            Method to use for fitting. Options are "independent" (fit each Q index independently,
+            one after the other) or "simultaneous" (fit all Q indices simultaneously).
+        Q_index : int | None, default=None
+            If fit_method is "independent", specify which Q index to fit. If None, fit all Q
+            indices independently. Ignored if fit_method is "simultaneous".
 
-        Returns:
-            FitResults | list[FitResults]: a list of FitResults if fitting independently,
-                or a single FitResults object if fitting simultaneously.
+        Raises
+        ------
+        ValueError
+            If fit_method is not "independent" or "simultaneous" or if there are no Q values
+            available for fitting.
 
-        Raises:
-            ValueError: If fit_method is not "independent" or
-                "simultaneous" or if there are no Q values available for fitting.
+        Returns
+        -------
+        FitResults | list[FitResults]
+            A list of FitResults if fitting independently, or a single FitResults object if fitting
+            simultaneously.
         """
 
         if self.Q is None:
@@ -202,36 +215,42 @@ class Analysis(AnalysisBase):
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
-        """Plot the experimental data and the model prediction.
+        """
+        Plot the experimental data and the model prediction.
+
         Optionally also plot the individual components of the model.
 
         Uses Plopp for plotting: https://scipp.github.io/plopp/
 
-        Args:
-            Q_index (int | None, default=None): Index of the Q value to plot. If
-                None, plot all Q values. Default is None.
-            plot_components (bool, default=True): Whether to plot the individual
-                components. Default is True.
-            add_background (bool, default=True): Whether to add background components
-                to the sample model components when plotting. Default is
-                True.
-            energy (sc.Variable | None, default=None): The energy values to use for
-                calculating the model. If None, uses the energy from the
-                experiment.
-            **kwargs (dict[str, Any]): Additional keyword arguments passed to plopp
-                for customizing the plot.
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Index of the Q value to plot. If None, plot all Q values.
+        plot_components : bool, default=True
+            Whether to plot the individual components.
+        add_background : bool, default=True
+            Whether to add background components to the sample model components when plotting.
+            Default is True.
+        energy : sc.Variable | None, default=None
+            The energy values to use for calculating the model. If None, uses the energy from the
+            experiment.
+        **kwargs : dict[str, Any]
+            Additional keyword arguments passed to plopp for customizing the plot.
 
-        Raises:
-            ValueError: If Q_index is out of bounds, or if there is no
-                data to plot, or if there are no Q values available for
-                plotting.
-            RuntimeError: If not in a Jupyter notebook environment.
-            TypeError: If plot_components or add_background is not True
-                or False.
+        Raises
+        ------
+        ValueError
+            If Q_index is out of bounds, or if there is no data to plot, or if there are no Q
+            values available for plotting.
+        RuntimeError
+            If not in a Jupyter notebook environment.
+        TypeError
+            If plot_components or add_background is not True or False.
 
-        Returns:
-            InteractiveFigure: A Plopp InteractiveFigure containing the
-                plot of the data and model.
+        Returns
+        -------
+        InteractiveFigure
+            A Plopp InteractiveFigure containing the plot of the data and model.
         """
 
         if Q_index is not None:
@@ -300,19 +319,21 @@ class Analysis(AnalysisBase):
         return fig
 
     def parameters_to_dataset(self) -> sc.Dataset:
-        """Creates a scipp dataset with copies of the Parameters in the
-        model.
+        """
+        Creates a scipp dataset with copies of the Parameters in the model.
 
         Ensures unit consistency across Q.
 
-        Returns:
-            sc.Dataset: A dataset where each entry is a parameter, with
-                dimensions "Q" and values corresponding to the parameter
-                values.
+        Raises
+        ------
+        UnitError
+            If there are inconsistent units for the same parameter across different Q values.
 
-        Raises:
-            UnitError: If there are inconsistent units for the same
-                parameter across different Q values.
+        Returns
+        -------
+        sc.Dataset
+            A dataset where each entry is a parameter, with dimensions "Q" and values corresponding
+            to the parameter values.
         """
 
         ds = sc.Dataset(coords={'Q': self.Q})
@@ -370,22 +391,28 @@ class Analysis(AnalysisBase):
         names: str | list[str] | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
-        """Plot fitted parameters as a function of Q.
+        """
+        Plot fitted parameters as a function of Q.
 
-        Args:
-            names (str | list[str] | None, default=None): Name(s) of the parameter(s)
-                to plot. If None, plots all parameters.
-            **kwargs (dict[str, Any]): Additional keyword arguments passed to
-                plopp.slicer for customizing the plot (e.g., title,
-                linestyle, marker, color).
+        Parameters
+        ----------
+        names : str | list[str] | None, default=None
+            Name(s) of the parameter(s) to plot. If None, plots all parameters.
+        **kwargs : dict[str, Any]
+            Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,
+            title, linestyle, marker, color).
 
-        Returns:
-            InteractiveFigure: A Plopp InteractiveFigure containing the
-                plot of the parameters.
+        Raises
+        ------
+        TypeError
+            If names is not a string, list of strings, or None.
+        ValueError
+            If any of the specified parameter names are not found in the dataset.
 
-        Raises:
-            TypeError: If names is not a string, list of strings, or None.
-            ValueError: If any of the specified parameter names are not found in the dataset.
+        Returns
+        -------
+        InteractiveFigure
+            A Plopp InteractiveFigure containing the plot of the parameters.
         """
 
         ds = self.parameters_to_dataset()
@@ -420,13 +447,15 @@ class Analysis(AnalysisBase):
         )
 
     def fix_energy_offset(self, Q_index: int | None = None) -> None:
-        """Fix the energy offset parameter(s) for a specific Q index, or
-        for all Q indices if Q_index is None.
+        """
+        Fix the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index
+        is None.
 
-        Args:
-            Q_index (int | None, default=None): Index of the Q value to
-                fix the energy offset for. If None, fixes the energy
-                offset for all Q values. Default is None.
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Index of the Q value to fix the energy offset for. If None, fixes the energy offset for
+            all Q values.
         """
         if Q_index is not None:
             Q_index = self._verify_Q_index(Q_index)
@@ -436,13 +465,15 @@ class Analysis(AnalysisBase):
                 analysis.fix_energy_offset()
 
     def free_energy_offset(self, Q_index: int | None = None) -> None:
-        """Free the energy offset parameter(s) for a specific Q index,
-        or for all Q indices if Q_index is None.
+        """
+        Free the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index
+        is None.
 
-        Args:
-            Q_index (int | None, default=None): Index of the Q value to
-                free the energy offset for. If None, frees the energy
-                offset for all Q values. Default is None.
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Index of the Q value to free the energy offset for. If None, frees the energy offset
+            for all Q values.
         """
         if Q_index is not None:
             Q_index = self._verify_Q_index(Q_index)
@@ -456,8 +487,8 @@ class Analysis(AnalysisBase):
     #############
 
     def _on_experiment_changed(self) -> None:
-        """Update the Q values in the sample and instrument models when
-        the experiment changes.
+        """
+        Update the Q values in the sample and instrument models when the experiment changes.
 
         Also update all the Analysis1d objects with the new experiment.
         """
@@ -467,11 +498,10 @@ class Analysis(AnalysisBase):
                 analysis.experiment = self.experiment
 
     def _on_sample_model_changed(self) -> None:
-        """Update the Q values in the sample model when the sample model
-        changes.
+        """
+        Update the Q values in the sample model when the sample model changes.
 
-        Also update all the Analysis1d objects with the new sample
-        model.
+        Also update all the Analysis1d objects with the new sample model.
         """
         if self._call_updaters:
             super()._on_sample_model_changed()
@@ -479,11 +509,10 @@ class Analysis(AnalysisBase):
                 analysis.sample_model = self.sample_model
 
     def _on_instrument_model_changed(self) -> None:
-        """Update the Q values in the instrument model when the
-        instrument model changes.
+        """
+        Update the Q values in the instrument model when the instrument model changes.
 
-        Also update all the Analysis1d objects with the new instrument
-        model.
+        Also update all the Analysis1d objects with the new instrument model.
         """
         if self._call_updaters:
             super()._on_instrument_model_changed()
@@ -495,14 +524,18 @@ class Analysis(AnalysisBase):
     #############
 
     def _fit_single_Q(self, Q_index: int) -> FitResults:
-        """Fit data for a single Q index.
+        """
+        Fit data for a single Q index.
 
-        Args:
-            Q_index (int): Index of the Q value to fit.
+        Parameters
+        ----------
+        Q_index : int
+            Index of the Q value to fit.
 
-        Returns:
-            FitResults: The results of the fit for the specified
-                Q index.
+        Returns
+        -------
+        FitResults
+            The results of the fit for the specified Q index.
         """
 
         Q_index = self._verify_Q_index(Q_index)
@@ -510,20 +543,24 @@ class Analysis(AnalysisBase):
         return self.analysis_list[Q_index].fit()
 
     def _fit_all_Q_independently(self) -> list[FitResults]:
-        """Fit data for all Q indices independently.
+        """
+        Fit data for all Q indices independently.
 
-        Returns:
-            list[FitResults]: A list of FitResults, one for each Q
-                index.
+        Returns
+        -------
+        list[FitResults]
+            A list of FitResults, one for each Q index.
         """
         return [analysis.fit() for analysis in self.analysis_list]
 
     def _fit_all_Q_simultaneously(self) -> FitResults:
-        """Fit data for all Q indices simultaneously.
+        """
+        Fit data for all Q indices simultaneously.
 
-        Returns:
-            FitResults: The results of the simultaneous fit across all
-                Q indices.
+        Returns
+        -------
+        FitResults
+            The results of the simultaneous fit across all Q indices.
         """
 
         xs = []
@@ -551,26 +588,30 @@ class Analysis(AnalysisBase):
         )
 
     def get_fit_functions(self) -> list[callable]:
-        """Get fit functions for all Q indices, which can be used for
-        simultaneous fitting.
+        """
+        Get fit functions for all Q indices, which can be used for simultaneous fitting.
 
-        Returns:
-            list[callable]: A list of fit functions, one for each
-                Q index.
+        Returns
+        -------
+        list[callable]
+            A list of fit functions, one for each Q index.
         """
         return [analysis.as_fit_function() for analysis in self.analysis_list]
 
     def _create_model_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
-        """Create a scipp array for the model.
+        """
+        Create a scipp array for the model.
 
-        Args:
-            energy (sc.Variable | None, default=None): The energy values to use for
-                calculating the model. If None, uses the energy from the
-                experiment.
+        Parameters
+        ----------
+        energy : sc.Variable | None, default=None
+            The energy values to use for calculating the model. If None, uses the energy from the
+            experiment.
 
-        Returns:
-            sc.DataArray: A DataArray containing the model values, with
-                dimensions "Q" and "energy".
+        Returns
+        -------
+        sc.DataArray
+            A DataArray containing the model values, with dimensions "Q" and "energy".
         """
         if energy is None:
             energy = self.energy
@@ -585,23 +626,27 @@ class Analysis(AnalysisBase):
         add_background: bool = True,
         energy: sc.Variable | None = None,
     ) -> sc.Dataset:
-        """Create a scipp dataset containing the individual components
-        of the model for plotting.
+        """
+        Create a scipp dataset containing the individual components of the model for plotting.
 
-        Args:
-            add_background (bool, default=True): Whether to add background components
-                to the sample model components when creating the
-                dataset.
-            energy (sc.Variable | None, default=None): The energy values to use for
-                calculating the components. If None, uses the energy from
-                the experiment.
+        Parameters
+        ----------
+        add_background : bool, default=True
+            Whether to add background components to the sample model components when creating the
+            dataset.
+        energy : sc.Variable | None, default=None
+            The energy values to use for calculating the components. If None, uses the energy from
+            the experiment.
 
-        Raises:
-            TypeError: If add_background is not True or False.
+        Raises
+        ------
+        TypeError
+            If add_background is not True or False.
 
-        Returns:
-            sc.Dataset: A scipp Dataset where each entry is a component
-                of the model, with dimensions "Q".
+        Returns
+        -------
+        sc.Dataset
+            A scipp Dataset where each entry is a component of the model, with dimensions "Q".
         """
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')

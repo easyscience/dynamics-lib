@@ -1,8 +1,10 @@
 name: Coverage checks
 
 on:
-  # Trigger the workflow on push
+  # Trigger the workflow on push to develop
   push:
+    branches:
+      - develop
     # Do not run on version tags (those are handled by other workflows)
     tags-ignore: ['v*']
   # Trigger the workflow on pull request
@@ -15,11 +17,11 @@ permissions:
   actions: write
   contents: read
 
-# Allow only one concurrent workflow, skipping runs queued between the run
-# in-progress and latest queued. And cancel in-progress runs.
+# Allow only one concurrent workflow per PR or branch ref.
+# Cancel in-progress runs only for pull requests, but let branch push runs finish.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Set the environment variables to be used in all jobs defined in this workflow
 env:

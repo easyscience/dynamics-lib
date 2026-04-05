@@ -25,12 +25,11 @@ SMALL_WIDTH_THRESHOLD = (
 
 
 class NumericalConvolutionBase(ConvolutionBase):
-    """Base class for numerical convolutions of sample and resolution
-    models.
+    """
+    Base class for numerical convolutions of sample and resolution models.
 
-    Provides methods to handle upsampling, extension, and detailed
-    balance correction. This base class has no convolution
-    functionality.
+    Provides methods to handle upsampling, extension, and detailed balance correction. This base
+    class has no convolution functionality.
     """
 
     def __init__(
@@ -46,34 +45,38 @@ class NumericalConvolutionBase(ConvolutionBase):
         energy_unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
     ) -> None:
-        """Initialize the NumericalConvolutionBase.
+        """
+        Initialize the NumericalConvolutionBase.
 
-        Args:
-            energy (np.ndarray | sc.Variable): 1D array of energy values
-                where the convolution is evaluated.
-            sample_components (ComponentCollection | ModelComponent):
-                The components to be convolved.
-            resolution_components (ComponentCollection | ModelComponent):
-                The resolution components to convolve with.
-            energy_offset (Numeric | Parameter, default=0.0): An energy
-                offset to apply to the energy values before convolution.
-            upsample_factor (Numeric | None, default=5): The factor by which to
-                upsample the input data before convolution.
-            extension_factor (Numeric | None, default=0.2): The factor by which to
-                extend the input data range before convolution.
-            temperature (Parameter | Numeric | None, default=None): The temperature to
-                use for detailed balance correction.
-            temperature_unit (str | sc.Unit, default='K'): The unit of the
-                temperature parameter.
-            energy_unit (str | sc.Unit, default='meV'): The unit of the energy.
-            normalize_detailed_balance (bool, default=True): Whether to normalize the
-                detailed balance correction.
+        Parameters
+        ----------
+        energy : np.ndarray | sc.Variable
+            1D array of energy values where the convolution is evaluated.
+        sample_components : ComponentCollection | ModelComponent
+            The components to be convolved.
+        resolution_components : ComponentCollection | ModelComponent
+            The resolution components to convolve with.
+        energy_offset : Numeric | Parameter, default=0.0
+            An energy offset to apply to the energy values before convolution.
+        upsample_factor : Numeric | None, default=5
+            The factor by which to upsample the input data before convolution.
+        extension_factor : Numeric | None, default=0.2
+            The factor by which to extend the input data range before convolution.
+        temperature : Parameter | Numeric | None, default=None
+            The temperature to use for detailed balance correction.
+        temperature_unit : str | sc.Unit, default='K'
+            The unit of the temperature parameter.
+        energy_unit : str | sc.Unit, default='meV'
+            The unit of the energy.
+        normalize_detailed_balance : bool, default=True
+            Whether to normalize the detailed balance correction.
 
-        Raises:
-            TypeError: If temperature is not None, a number, or a
-                Parameter, or if temperature_unit is not a string or sc.Unit, or if
-                upsample_factor is not a number or None, or if extension_factor
-                is not a number, or if normalize_detailed_balance is not a bool.
+        Raises
+        ------
+        TypeError
+            If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
+            string or sc.Unit, or if upsample_factor is not a number or None, or if
+            extension_factor is not a number, or if normalize_detailed_balance is not a bool.
         """
         super().__init__(
             energy=energy,
@@ -104,10 +107,13 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
-        """Set the energy array and recreate the dense grid.
+        """
+        Set the energy array and recreate the dense grid.
 
-        Args:
-            energy (np.ndarray): The new energy array.
+        Parameters
+        ----------
+        energy : np.ndarray
+            The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
         # Recreate dense grid when energy is updated
@@ -115,24 +121,33 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @property
     def upsample_factor(self) -> Numeric | None:
-        """Get the upsample factor.
+        """
+        Get the upsample factor.
 
-        Returns:
-            Numeric | None: The upsample factor.
+        Returns
+        -------
+        Numeric | None
+            The upsample factor.
         """
 
         return self._upsample_factor
 
     @upsample_factor.setter
     def upsample_factor(self, factor: Numeric | None) -> None:
-        """Set the upsample factor and recreate the dense grid.
+        """
+        Set the upsample factor and recreate the dense grid.
 
-        Args:
-            factor (Numeric | None): The new upsample factor.
+        Parameters
+        ----------
+        factor : Numeric | None
+            The new upsample factor.
 
-        Raises:
-            TypeError: If factor is not a number or None.
-            ValueError: If factor is not greater than 1.
+        Raises
+        ------
+        TypeError
+            If factor is not a number or None.
+        ValueError
+            If factor is not greater than 1.
         """
         if factor is None:
             self._upsample_factor = factor
@@ -152,15 +167,16 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @property
     def extension_factor(self) -> float:
-        """Get the extension factor.
+        """
+        Get the extension factor.
 
-        The extension factor determines how much the energy range is
-        extended on both sides before convolution.
-        0.2 means extending by 20% of the original energy span
-        on each side
+        The extension factor determines how much the energy range is extended on both sides before
+        convolution. 0.2 means extending by 20% of the original energy span on each side
 
-        Returns:
-            float: The extension factor.
+        Returns
+        -------
+        float
+            The extension factor.
         """
 
         return self._extension_factor
@@ -169,17 +185,21 @@ class NumericalConvolutionBase(ConvolutionBase):
     def extension_factor(self, factor: Numeric) -> None:
         """
         Set the extension factor and recreate the dense grid.
-        The extension factor determines how much the energy range is
-        extended on both sides before convolution.
-        0.2 means extending by 20% of the original energy span
-        on each side.
 
-        Args:
-            factor (Numeric): The new extension factor.
+        The extension factor determines how much the energy range is extended on both sides before
+        convolution. 0.2 means extending by 20% of the original energy span on each side.
 
-        Raises:
-            TypeError: If factor is not a number.
-            ValueError: If factor is negative.
+        Parameters
+        ----------
+        factor : Numeric
+            The new extension factor.
+
+        Raises
+        ------
+        TypeError
+            If factor is not a number.
+        ValueError
+            If factor is negative.
         """
 
         if not isinstance(factor, Numeric):
@@ -193,29 +213,34 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @property
     def temperature(self) -> Parameter | None:
-        """Get the temperature.
+        """
+        Get the temperature.
 
-        Returns:
-            Parameter | None: The temperature parameter, or None if
-                detailed balance correction is disabled.
+        Returns
+        -------
+        Parameter | None
+            The temperature parameter, or None if detailed balance correction is disabled.
         """
 
         return self._temperature
 
     @temperature.setter
     def temperature(self, temp: Parameter | Numeric | None) -> None:
-        """Set the temperature.
+        """
+        Set the temperature.
 
-        If None, disables detailed balance
-        correction and removes the temperature parameter.
+        If None, disables detailed balance correction and removes the temperature parameter.
 
-        Args:
-            temp  (Parameter | Numeric | None): The temperature to set.
-                The unit will be the same as the existing temperature
-                parameter if it exists, otherwise 'K'.
+        Parameters
+        ----------
+        temp : Parameter | Numeric | None
+            The temperature to set. The unit will be the same as the existing temperature parameter
+            if it exists, otherwise 'K'.
 
-        Raises:
-            TypeError: If temp is not a Numeric, Parameter, or None.
+        Raises
+        ------
+        TypeError
+            If temp is not a Numeric, Parameter, or None.
         """
 
         if temp is None:
@@ -237,28 +262,35 @@ class NumericalConvolutionBase(ConvolutionBase):
 
     @property
     def normalize_detailed_balance(self) -> bool:
-        """Get whether to normalize the detailed balance factor.
+        """
+        Get whether to normalize the detailed balance factor.
 
         If True, the detailed balance factor is divided by temperature.
 
-        Returns:
-            bool: Whether to normalize the detailed balance factor.
+        Returns
+        -------
+        bool
+            Whether to normalize the detailed balance factor.
         """
 
         return self._normalize_detailed_balance
 
     @normalize_detailed_balance.setter
     def normalize_detailed_balance(self, normalize: bool) -> None:
-        """Set whether to normalize the detailed balance factor.
+        """
+        Set whether to normalize the detailed balance factor.
 
         If True, the detailed balance factor is divided by temperature.
 
-        Args:
-            normalize (bool): Whether to normalize the detailed balance
-                factor.
+        Parameters
+        ----------
+        normalize : bool
+            Whether to normalize the detailed balance factor.
 
-        Raises:
-            TypeError: If normalize is not a bool.
+        Raises
+        ------
+        TypeError
+            If normalize is not a bool.
         """
 
         if not isinstance(normalize, bool):
@@ -269,20 +301,22 @@ class NumericalConvolutionBase(ConvolutionBase):
     def _create_energy_grid(
         self,
     ) -> EnergyGrid:
-        """Create a dense grid by upsampling and extending the energy
-        array.
+        """
+        Create a dense grid by upsampling and extending the energy array.
 
-        If upsample_factor is None, no upsampling or extension is
-        performed.
-        This dense grid is used for convolution to improve accuracy.
+        If upsample_factor is None, no upsampling or extension is performed. This dense grid is
+        used for convolution to improve accuracy.
 
-        Returns:
-            EnergyGrid: The dense grid created by upsampling and
-                extending energy.
+        Raises
+        ------
+        ValueError
+            If energy array is not uniformly spaced when upsample_factor is None, or if energy
+            array has less than 2 points.
 
-        Raises:
-            ValueError: If energy array is not uniformly spaced when
-                upsample_factor is None, or if energy array has less than 2 points.
+        Returns
+        -------
+        EnergyGrid
+            The dense grid created by upsampling and extending energy.
         """
         if self.upsample_factor is None:
             # Check if the array is uniformly spaced.
@@ -345,18 +379,19 @@ class NumericalConvolutionBase(ConvolutionBase):
         model: ComponentCollection | ModelComponent,
         model_name: str,
     ) -> None:
-        """Helper function to check and warn if components are wide
-        compared to the span of the data, or narrow compared to the
-        spacing.
+        """
+        Helper function to check and warn if components are wide compared to the span of the data,
+        or narrow compared to the spacing.
 
         In both cases, the convolution accuracy may be compromised.
 
-        Args:
-            model (ComponentCollection | ModelComponent): The model to
-                check
-            model_name (str): A string indicating whether the model is a
-                'sample model' or 'resolution model' for warning
-                messages.
+        Parameters
+        ----------
+        model : ComponentCollection | ModelComponent
+            The model to check.
+        model_name : str
+            A string indicating whether the model is a 'sample model' or 'resolution model' for
+            warning messages.
         """
 
         # Handle ComponentCollection or ModelComponent
@@ -386,12 +421,13 @@ class NumericalConvolutionBase(ConvolutionBase):
                     )
 
     def __repr__(self) -> str:
-        """Return a string representation of the
-        NumericalConvolutionBase.
+        """
+        Return a string representation of the NumericalConvolutionBase.
 
-        Returns:
-            str: A string representation of the
-                NumericalConvolutionBase.
+        Returns
+        -------
+        str
+            A string representation of the NumericalConvolutionBase.
         """
         return (
             f'{self.__class__.__name__}('
