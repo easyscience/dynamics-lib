@@ -2569,11 +2569,7 @@
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -2595,22 +2591,20 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">            Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
-<span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
-<span class="sd">            default, None.</span>
+<span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
 <span class="sd">        experiment : Experiment | None, default=None</span>
 <span class="sd">            The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">            By default, None.</span>
 <span class="sd">        sample_model : SampleModel | None, default=None</span>
 <span class="sd">            The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">            created. By default, None.</span>
+<span class="sd">            created.</span>
 <span class="sd">        instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">            is created. By default, None.</span>
+<span class="sd">            is created.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">            parameters are added. By default, None.</span>
+<span class="sd">            parameters are added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Avoid triggering updates before the object is fully</span>
@@ -2698,11 +2692,10 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
-<span class="sd">            Index of the Q value to calculate for. If None, calculate for all Q values. By default,</span>
-<span class="sd">            None.</span>
+<span class="sd">            Index of the Q value to calculate for. If None, calculate for all Q values.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2731,11 +2724,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        fit_method : str, default=&#39;independent&#39;</span>
 <span class="sd">            Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
-<span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously). By default,</span>
-<span class="sd">            &#39;independent&#39;.</span>
+<span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            If fit_method is &quot;independent&quot;, specify which Q index to fit. If None, fit all Q</span>
-<span class="sd">            indices independently. Ignored if fit_method is &quot;simultaneous&quot;. By default, None.</span>
+<span class="sd">            indices independently. Ignored if fit_method is &quot;simultaneous&quot;.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -2783,15 +2775,15 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
-<span class="sd">            Index of the Q value to plot. If None, plot all Q values. By default, None.</span>
+<span class="sd">            Index of the Q value to plot. If None, plot all Q values.</span>
 <span class="sd">        plot_components : bool, default=True</span>
-<span class="sd">            Whether to plot the individual components. By default, True.</span>
+<span class="sd">            Whether to plot the individual components.</span>
 <span class="sd">        add_background : bool, default=True</span>
 <span class="sd">            Whether to add background components to the sample model components when plotting.</span>
-<span class="sd">            Default is True. By default, True.</span>
+<span class="sd">            Default is True.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments passed to plopp for customizing the plot.</span>
 
@@ -2955,7 +2947,7 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        names : str | list[str] | None, default=None</span>
-<span class="sd">            Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</span>
+<span class="sd">            Name(s) of the parameter(s) to plot. If None, plots all parameters.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,</span>
 <span class="sd">            title, linestyle, marker, color).</span>
@@ -3013,7 +3005,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            Index of the Q value to fix the energy offset for. If None, fixes the energy offset for</span>
-<span class="sd">            all Q values. By default, None.</span>
+<span class="sd">            all Q values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -3031,7 +3023,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            Index of the Q value to free the energy offset for. If None, frees the energy offset</span>
-<span class="sd">            for all Q values. By default, None.</span>
+<span class="sd">            for all Q values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -3164,7 +3156,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -3191,10 +3183,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        add_background : bool, default=True</span>
 <span class="sd">            Whether to add background components to the sample model components when creating the</span>
-<span class="sd">            dataset. By default, True.</span>
+<span class="sd">            dataset.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the components. If None, uses the energy from</span>
-<span class="sd">            the experiment. By default, None.</span>
+<span class="sd">            the experiment.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -3270,7 +3262,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the analysis. By default, 'MyAnalysis'.</p>
+                <p>Display name of the analysis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3289,8 +3281,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unique name of the analysis. If None, a unique name is automatically generated. By
-default, None.</p>
+                <p>Unique name of the analysis. If None, a unique name is automatically generated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3309,8 +3300,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.
-By default, None.</p>
+                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3330,7 +3320,7 @@ By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The SampleModel associated with this Analysis. If None, a default SampleModel is
-created. By default, None.</p>
+created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3350,7 +3340,7 @@ created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-is created. By default, None.</p>
+is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3370,7 +3360,7 @@ is created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Extra parameters to be included in the analysis for advanced users. If None, no extra
-parameters are added. By default, None.</p>
+parameters are added.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3443,9 +3433,7 @@ parameters are added. By default, None.</p>
 <span class="normal">83</span>
 <span class="normal">84</span>
 <span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3460,22 +3448,20 @@ parameters are added. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">        Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
-<span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
-<span class="sd">        default, None.</span>
+<span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
 <span class="sd">    experiment : Experiment | None, default=None</span>
 <span class="sd">        The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">        By default, None.</span>
 <span class="sd">    sample_model : SampleModel | None, default=None</span>
 <span class="sd">        The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">        created. By default, None.</span>
+<span class="sd">        created.</span>
 <span class="sd">    instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">        The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">        is created. By default, None.</span>
+<span class="sd">        is created.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">        parameters are added. By default, None.</span>
+<span class="sd">        parameters are added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Avoid triggering updates before the object is fully</span>
@@ -3611,8 +3597,7 @@ parameters are added. By default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Index of the Q value to calculate for. If None, calculate for all Q values. By default,
-None.</p>
+                <p>Index of the Q value to calculate for. If None, calculate for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3632,7 +3617,7 @@ None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The energy values to use for calculating the model. If None, uses the energy from the
-experiment. By default, None.</p>
+experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3675,7 +3660,9 @@ an integer, returns a single numpy array for that Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
@@ -3704,10 +3691,7 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3720,11 +3704,10 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
-<span class="sd">        Index of the Q value to calculate for. If None, calculate for all Q values. By default,</span>
-<span class="sd">        None.</span>
+<span class="sd">        Index of the Q value to calculate for. If None, calculate for all Q values.</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">        experiment. By default, None.</span>
+<span class="sd">        experiment.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -3789,8 +3772,7 @@ an integer, returns a single numpy array for that Q index.</p>
             <td>
               <div class="doc-md-description">
                 <p>Method to use for fitting. Options are "independent" (fit each Q index independently,
-one after the other) or "simultaneous" (fit all Q indices simultaneously). By default,
-'independent'.</p>
+one after the other) or "simultaneous" (fit all Q indices simultaneously).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3810,7 +3792,7 @@ one after the other) or "simultaneous" (fit all Q indices simultaneously). By de
             <td>
               <div class="doc-md-description">
                 <p>If fit_method is "independent", specify which Q index to fit. If None, fit all Q
-indices independently. Ignored if fit_method is "simultaneous". By default, None.</p>
+indices independently. Ignored if fit_method is "simultaneous".</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3880,7 +3862,10 @@ simultaneously.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -3920,11 +3905,7 @@ simultaneously.</p>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fit_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;independent&#39;</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3936,11 +3917,10 @@ simultaneously.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    fit_method : str, default=&#39;independent&#39;</span>
 <span class="sd">        Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
-<span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously). By default,</span>
-<span class="sd">        &#39;independent&#39;.</span>
+<span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        If fit_method is &quot;independent&quot;, specify which Q index to fit. If None, fit all Q</span>
-<span class="sd">        indices independently. Ignored if fit_method is &quot;simultaneous&quot;. By default, None.</span>
+<span class="sd">        indices independently. Ignored if fit_method is &quot;simultaneous&quot;.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -4019,7 +3999,7 @@ is None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Index of the Q value to fix the energy offset for. If None, fixes the energy offset for
-all Q values. By default, None.</p>
+all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4035,7 +4015,11 @@ all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">453</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
@@ -4047,11 +4031,7 @@ all Q values. By default, None.</p>
 <span class="normal">462</span>
 <span class="normal">463</span>
 <span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">465</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fix the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -4060,7 +4040,7 @@ all Q values. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        Index of the Q value to fix the energy offset for. If None, fixes the energy offset for</span>
-<span class="sd">        all Q values. By default, None.</span>
+<span class="sd">        all Q values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -4118,7 +4098,7 @@ is None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Index of the Q value to free the energy offset for. If None, frees the energy offset
-for all Q values. By default, None.</p>
+for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4134,7 +4114,11 @@ for all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">471</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
 <span class="normal">472</span>
 <span class="normal">473</span>
 <span class="normal">474</span>
@@ -4146,11 +4130,7 @@ for all Q values. By default, None.</p>
 <span class="normal">480</span>
 <span class="normal">481</span>
 <span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">483</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Free the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -4159,7 +4139,7 @@ for all Q values. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        Index of the Q value to free the energy offset for. If None, frees the energy offset</span>
-<span class="sd">        for all Q values. By default, None.</span>
+<span class="sd">        for all Q values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -4223,16 +4203,16 @@ for all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -4326,7 +4306,11 @@ to the parameter values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -4388,11 +4372,7 @@ to the parameter values.</p>
 <span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a scipp dataset with copies of the Parameters in the model.</span>
 
@@ -4509,7 +4489,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Index of the Q value to plot. If None, plot all Q values. By default, None.</p>
+                <p>Index of the Q value to plot. If None, plot all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4528,7 +4508,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to plot the individual components. By default, True.</p>
+                <p>Whether to plot the individual components.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4548,7 +4528,7 @@ to the parameter values.</p>
             <td>
               <div class="doc-md-description">
                 <p>Whether to add background components to the sample model components when plotting.
-Default is True. By default, True.</p>
+Default is True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4568,7 +4548,7 @@ Default is True. By default, True.</p>
             <td>
               <div class="doc-md-description">
                 <p>The energy values to use for calculating the model. If None, uses the energy from the
-experiment. By default, None.</p>
+experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4682,7 +4662,11 @@ values available for plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
@@ -4787,11 +4771,7 @@ values available for plotting.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -4809,15 +4789,15 @@ values available for plotting.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
-<span class="sd">        Index of the Q value to plot. If None, plot all Q values. By default, None.</span>
+<span class="sd">        Index of the Q value to plot. If None, plot all Q values.</span>
 <span class="sd">    plot_components : bool, default=True</span>
-<span class="sd">        Whether to plot the individual components. By default, True.</span>
+<span class="sd">        Whether to plot the individual components.</span>
 <span class="sd">    add_background : bool, default=True</span>
 <span class="sd">        Whether to add background components to the sample model components when plotting.</span>
-<span class="sd">        Default is True. By default, True.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">        experiment. By default, None.</span>
+<span class="sd">        experiment.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments passed to plopp for customizing the plot.</span>
 
@@ -4949,7 +4929,7 @@ values available for plotting.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</p>
+                <p>Name(s) of the parameter(s) to plot. If None, plots all parameters.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5050,7 +5030,11 @@ title, linestyle, marker, color).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">393</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
 <span class="normal">394</span>
 <span class="normal">395</span>
 <span class="normal">396</span>
@@ -5104,11 +5088,7 @@ title, linestyle, marker, color).</p>
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
+<span class="normal">447</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -5119,7 +5099,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    names : str | list[str] | None, default=None</span>
-<span class="sd">        Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</span>
+<span class="sd">        Name(s) of the parameter(s) to plot. If None, plots all parameters.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,</span>
 <span class="sd">        title, linestyle, marker, color).</span>
@@ -5890,11 +5870,7 @@ title, linestyle, marker, color).</p>
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -5916,22 +5892,20 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">            Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
-<span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
-<span class="sd">            default, None.</span>
+<span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
 <span class="sd">        experiment : Experiment | None, default=None</span>
 <span class="sd">            The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">            By default, None.</span>
 <span class="sd">        sample_model : SampleModel | None, default=None</span>
 <span class="sd">            The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">            created. By default, None.</span>
+<span class="sd">            created.</span>
 <span class="sd">        instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">            is created. By default, None.</span>
+<span class="sd">            is created.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">            parameters are added. By default, None.</span>
+<span class="sd">            parameters are added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Avoid triggering updates before the object is fully</span>
@@ -6019,11 +5993,10 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
-<span class="sd">            Index of the Q value to calculate for. If None, calculate for all Q values. By default,</span>
-<span class="sd">            None.</span>
+<span class="sd">            Index of the Q value to calculate for. If None, calculate for all Q values.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -6052,11 +6025,10 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        fit_method : str, default=&#39;independent&#39;</span>
 <span class="sd">            Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
-<span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously). By default,</span>
-<span class="sd">            &#39;independent&#39;.</span>
+<span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            If fit_method is &quot;independent&quot;, specify which Q index to fit. If None, fit all Q</span>
-<span class="sd">            indices independently. Ignored if fit_method is &quot;simultaneous&quot;. By default, None.</span>
+<span class="sd">            indices independently. Ignored if fit_method is &quot;simultaneous&quot;.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -6104,15 +6076,15 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
-<span class="sd">            Index of the Q value to plot. If None, plot all Q values. By default, None.</span>
+<span class="sd">            Index of the Q value to plot. If None, plot all Q values.</span>
 <span class="sd">        plot_components : bool, default=True</span>
-<span class="sd">            Whether to plot the individual components. By default, True.</span>
+<span class="sd">            Whether to plot the individual components.</span>
 <span class="sd">        add_background : bool, default=True</span>
 <span class="sd">            Whether to add background components to the sample model components when plotting.</span>
-<span class="sd">            Default is True. By default, True.</span>
+<span class="sd">            Default is True.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments passed to plopp for customizing the plot.</span>
 
@@ -6276,7 +6248,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        names : str | list[str] | None, default=None</span>
-<span class="sd">            Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</span>
+<span class="sd">            Name(s) of the parameter(s) to plot. If None, plots all parameters.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,</span>
 <span class="sd">            title, linestyle, marker, color).</span>
@@ -6334,7 +6306,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            Index of the Q value to fix the energy offset for. If None, fixes the energy offset for</span>
-<span class="sd">            all Q values. By default, None.</span>
+<span class="sd">            all Q values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -6352,7 +6324,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            Index of the Q value to free the energy offset for. If None, frees the energy offset</span>
-<span class="sd">            for all Q values. By default, None.</span>
+<span class="sd">            for all Q values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -6485,7 +6457,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">            experiment. By default, None.</span>
+<span class="sd">            experiment.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -6512,10 +6484,10 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        add_background : bool, default=True</span>
 <span class="sd">            Whether to add background components to the sample model components when creating the</span>
-<span class="sd">            dataset. By default, True.</span>
+<span class="sd">            dataset.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            The energy values to use for calculating the components. If None, uses the energy from</span>
-<span class="sd">            the experiment. By default, None.</span>
+<span class="sd">            the experiment.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -6591,7 +6563,7 @@ title, linestyle, marker, color).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the analysis. By default, 'MyAnalysis'.</p>
+                <p>Display name of the analysis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6610,8 +6582,7 @@ title, linestyle, marker, color).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unique name of the analysis. If None, a unique name is automatically generated. By
-default, None.</p>
+                <p>Unique name of the analysis. If None, a unique name is automatically generated.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6630,8 +6601,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.
-By default, None.</p>
+                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6651,7 +6621,7 @@ By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The SampleModel associated with this Analysis. If None, a default SampleModel is
-created. By default, None.</p>
+created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6671,7 +6641,7 @@ created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-is created. By default, None.</p>
+is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6691,7 +6661,7 @@ is created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Extra parameters to be included in the analysis for advanced users. If None, no extra
-parameters are added. By default, None.</p>
+parameters are added.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6764,9 +6734,7 @@ parameters are added. By default, None.</p>
 <span class="normal">83</span>
 <span class="normal">84</span>
 <span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6781,22 +6749,20 @@ parameters are added. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">        Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
-<span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
-<span class="sd">        default, None.</span>
+<span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
 <span class="sd">    experiment : Experiment | None, default=None</span>
 <span class="sd">        The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">        By default, None.</span>
 <span class="sd">    sample_model : SampleModel | None, default=None</span>
 <span class="sd">        The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">        created. By default, None.</span>
+<span class="sd">        created.</span>
 <span class="sd">    instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">        The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">        is created. By default, None.</span>
+<span class="sd">        is created.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">        parameters are added. By default, None.</span>
+<span class="sd">        parameters are added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Avoid triggering updates before the object is fully</span>
@@ -6932,8 +6898,7 @@ parameters are added. By default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Index of the Q value to calculate for. If None, calculate for all Q values. By default,
-None.</p>
+                <p>Index of the Q value to calculate for. If None, calculate for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6953,7 +6918,7 @@ None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The energy values to use for calculating the model. If None, uses the energy from the
-experiment. By default, None.</p>
+experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6996,7 +6961,9 @@ an integer, returns a single numpy array for that Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
@@ -7025,10 +6992,7 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7041,11 +7005,10 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
-<span class="sd">        Index of the Q value to calculate for. If None, calculate for all Q values. By default,</span>
-<span class="sd">        None.</span>
+<span class="sd">        Index of the Q value to calculate for. If None, calculate for all Q values.</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">        experiment. By default, None.</span>
+<span class="sd">        experiment.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -7110,8 +7073,7 @@ an integer, returns a single numpy array for that Q index.</p>
             <td>
               <div class="doc-md-description">
                 <p>Method to use for fitting. Options are "independent" (fit each Q index independently,
-one after the other) or "simultaneous" (fit all Q indices simultaneously). By default,
-'independent'.</p>
+one after the other) or "simultaneous" (fit all Q indices simultaneously).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7131,7 +7093,7 @@ one after the other) or "simultaneous" (fit all Q indices simultaneously). By de
             <td>
               <div class="doc-md-description">
                 <p>If fit_method is "independent", specify which Q index to fit. If None, fit all Q
-indices independently. Ignored if fit_method is "simultaneous". By default, None.</p>
+indices independently. Ignored if fit_method is "simultaneous".</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7201,7 +7163,10 @@ simultaneously.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -7241,11 +7206,7 @@ simultaneously.</p>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fit_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;independent&#39;</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7257,11 +7218,10 @@ simultaneously.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    fit_method : str, default=&#39;independent&#39;</span>
 <span class="sd">        Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
-<span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously). By default,</span>
-<span class="sd">        &#39;independent&#39;.</span>
+<span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        If fit_method is &quot;independent&quot;, specify which Q index to fit. If None, fit all Q</span>
-<span class="sd">        indices independently. Ignored if fit_method is &quot;simultaneous&quot;. By default, None.</span>
+<span class="sd">        indices independently. Ignored if fit_method is &quot;simultaneous&quot;.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -7340,7 +7300,7 @@ is None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Index of the Q value to fix the energy offset for. If None, fixes the energy offset for
-all Q values. By default, None.</p>
+all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7356,7 +7316,11 @@ all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">453</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
@@ -7368,11 +7332,7 @@ all Q values. By default, None.</p>
 <span class="normal">462</span>
 <span class="normal">463</span>
 <span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">465</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fix the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -7381,7 +7341,7 @@ all Q values. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        Index of the Q value to fix the energy offset for. If None, fixes the energy offset for</span>
-<span class="sd">        all Q values. By default, None.</span>
+<span class="sd">        all Q values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -7439,7 +7399,7 @@ is None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Index of the Q value to free the energy offset for. If None, frees the energy offset
-for all Q values. By default, None.</p>
+for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7455,7 +7415,11 @@ for all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">471</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
 <span class="normal">472</span>
 <span class="normal">473</span>
 <span class="normal">474</span>
@@ -7467,11 +7431,7 @@ for all Q values. By default, None.</p>
 <span class="normal">480</span>
 <span class="normal">481</span>
 <span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">483</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Free the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -7480,7 +7440,7 @@ for all Q values. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        Index of the Q value to free the energy offset for. If None, frees the energy offset</span>
-<span class="sd">        for all Q values. By default, None.</span>
+<span class="sd">        for all Q values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">Q_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Q_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_Q_index</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
@@ -7544,16 +7504,16 @@ for all Q values. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -7647,7 +7607,11 @@ to the parameter values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -7709,11 +7673,7 @@ to the parameter values.</p>
 <span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a scipp dataset with copies of the Parameters in the model.</span>
 
@@ -7830,7 +7790,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Index of the Q value to plot. If None, plot all Q values. By default, None.</p>
+                <p>Index of the Q value to plot. If None, plot all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7849,7 +7809,7 @@ to the parameter values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to plot the individual components. By default, True.</p>
+                <p>Whether to plot the individual components.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7869,7 +7829,7 @@ to the parameter values.</p>
             <td>
               <div class="doc-md-description">
                 <p>Whether to add background components to the sample model components when plotting.
-Default is True. By default, True.</p>
+Default is True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7889,7 +7849,7 @@ Default is True. By default, True.</p>
             <td>
               <div class="doc-md-description">
                 <p>The energy values to use for calculating the model. If None, uses the energy from the
-experiment. By default, None.</p>
+experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8003,7 +7963,11 @@ values available for plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
@@ -8108,11 +8072,7 @@ values available for plotting.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -8130,15 +8090,15 @@ values available for plotting.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Q_index : int | None, default=None</span>
-<span class="sd">        Index of the Q value to plot. If None, plot all Q values. By default, None.</span>
+<span class="sd">        Index of the Q value to plot. If None, plot all Q values.</span>
 <span class="sd">    plot_components : bool, default=True</span>
-<span class="sd">        Whether to plot the individual components. By default, True.</span>
+<span class="sd">        Whether to plot the individual components.</span>
 <span class="sd">    add_background : bool, default=True</span>
 <span class="sd">        Whether to add background components to the sample model components when plotting.</span>
-<span class="sd">        Default is True. By default, True.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        The energy values to use for calculating the model. If None, uses the energy from the</span>
-<span class="sd">        experiment. By default, None.</span>
+<span class="sd">        experiment.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments passed to plopp for customizing the plot.</span>
 
@@ -8270,7 +8230,7 @@ values available for plotting.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</p>
+                <p>Name(s) of the parameter(s) to plot. If None, plots all parameters.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8371,7 +8331,11 @@ title, linestyle, marker, color).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">393</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
 <span class="normal">394</span>
 <span class="normal">395</span>
 <span class="normal">396</span>
@@ -8425,11 +8389,7 @@ title, linestyle, marker, color).</p>
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
+<span class="normal">447</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -8440,7 +8400,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    names : str | list[str] | None, default=None</span>
-<span class="sd">        Name(s) of the parameter(s) to plot. If None, plots all parameters. By default, None.</span>
+<span class="sd">        Name(s) of the parameter(s) to plot. If None, plots all parameters.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments passed to plopp.slicer for customizing the plot (e.g.,</span>
 <span class="sd">        title, linestyle, marker, color).</span>
@@ -9439,25 +9399,25 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">            Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
 <span class="sd">            default, None.</span>
 <span class="sd">        experiment : Experiment | None, default=None</span>
 <span class="sd">            The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">            By default, None.</span>
+
 <span class="sd">        sample_model : SampleModel | None, default=None</span>
 <span class="sd">            The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">            created. By default, None.</span>
+<span class="sd">            created.</span>
 <span class="sd">        instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">            is created. By default, None.</span>
+<span class="sd">            is created.</span>
 <span class="sd">        Q_index : int | None, default=None</span>
 <span class="sd">            The Q index to analyze. If None, the analysis will not be able to calculate or fit</span>
-<span class="sd">            until a Q index is set. By default, None.</span>
+<span class="sd">            until a Q index is set.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">            parameters are added. By default, None.</span>
+<span class="sd">            parameters are added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
@@ -9527,7 +9487,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for calculation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -9549,7 +9509,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for calculation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -9614,7 +9574,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        _x : np.ndarray | sc.Variable | None, default=None</span>
-<span class="sd">            Ignored. The energy grid is taken from the experiment. By default, None.</span>
+<span class="sd">            Ignored. The energy grid is taken from the experiment.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Ignored. Included for compatibility with the EasyScience fitter.</span>
 
@@ -9668,13 +9628,13 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        plot_components : bool, default=True</span>
-<span class="sd">            Whether to plot the individual components of the model. By default, True.</span>
+<span class="sd">            Whether to plot the individual components of the model.</span>
 <span class="sd">        add_background : bool, default=True</span>
 <span class="sd">            Whether to add the background to the model prediction when plotting individual</span>
-<span class="sd">            components. By default, True.</span>
+<span class="sd">            components.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for plotting. If None, the energy grid from the experiment</span>
-<span class="sd">            is used. By default, None.</span>
+<span class="sd">            is used.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Keyword arguments to pass to the plotting function.</span>
 
@@ -9866,12 +9826,12 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The components to evaluate.</span>
 <span class="sd">        convolver : Convolution | None, default=None</span>
 <span class="sd">            An optional Convolution object to use for convolution. If None, a new Convolution</span>
-<span class="sd">            object will be created if convolve is True. By default, None.</span>
+<span class="sd">            object will be created if convolve is True.</span>
 <span class="sd">        convolve : bool, default=True</span>
-<span class="sd">            Whether to perform convolution with the resolution. By default, True.</span>
+<span class="sd">            Whether to perform convolution with the resolution.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -9934,7 +9894,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -9964,7 +9924,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The sample component to evaluate.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -9986,7 +9946,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10018,7 +9978,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The background component to evaluate.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10045,7 +10005,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for convolution. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10096,10 +10056,10 @@ title, linestyle, marker, color).</p>
 <span class="sd">        component : ModelComponent</span>
 <span class="sd">            The component to evaluate.</span>
 <span class="sd">        background : np.ndarray | None, default=None</span>
-<span class="sd">            Optional background to add to the component. By default, None.</span>
+<span class="sd">            Optional background to add to the component.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10126,7 +10086,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The component to evaluate.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10148,7 +10108,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ----------</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10169,10 +10129,10 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        add_background : bool, default=True</span>
-<span class="sd">            Whether to add background components. By default, True.</span>
+<span class="sd">            Whether to add background components.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
-<span class="sd">            experiment is used. By default, None.</span>
+<span class="sd">            experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10218,7 +10178,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The values to convert.</span>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for the energy coordinate. If None, the energy grid from</span>
-<span class="sd">            the experiment is used. By default, None.</span>
+<span class="sd">            the experiment is used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10342,7 +10302,7 @@ title, linestyle, marker, color).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the analysis. By default, 'MyAnalysis'.</p>
+                <p>Display name of the analysis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10381,8 +10341,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.
-By default, None.</p>
+                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10402,7 +10361,7 @@ By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The SampleModel associated with this Analysis. If None, a default SampleModel is
-created. By default, None.</p>
+created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10422,7 +10381,7 @@ created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-is created. By default, None.</p>
+is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10442,7 +10401,7 @@ is created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The Q index to analyze. If None, the analysis will not be able to calculate or fit
-until a Q index is set. By default, None.</p>
+until a Q index is set.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10462,7 +10421,7 @@ until a Q index is set. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Extra parameters to be included in the analysis for advanced users. If None, no extra
-parameters are added. By default, None.</p>
+parameters are added.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10551,25 +10510,25 @@ parameters are added. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">        Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
 <span class="sd">        default, None.</span>
 <span class="sd">    experiment : Experiment | None, default=None</span>
 <span class="sd">        The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">        By default, None.</span>
+
 <span class="sd">    sample_model : SampleModel | None, default=None</span>
 <span class="sd">        The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">        created. By default, None.</span>
+<span class="sd">        created.</span>
 <span class="sd">    instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">        The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">        is created. By default, None.</span>
+<span class="sd">        is created.</span>
 <span class="sd">    Q_index : int | None, default=None</span>
 <span class="sd">        The Q index to analyze. If None, the analysis will not be able to calculate or fit</span>
-<span class="sd">        until a Q index is set. By default, None.</span>
+<span class="sd">        until a Q index is set.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">        parameters are added. By default, None.</span>
+<span class="sd">        parameters are added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
@@ -10643,7 +10602,7 @@ energy from the experiment. So we ignore the x input and just return the calcula
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Ignored. The energy grid is taken from the experiment. By default, None.</p>
+                <p>Ignored. The energy grid is taken from the experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10751,7 +10710,7 @@ the calculated model.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    _x : np.ndarray | sc.Variable | None, default=None</span>
-<span class="sd">        Ignored. The energy grid is taken from the experiment. By default, None.</span>
+<span class="sd">        Ignored. The energy grid is taken from the experiment.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Ignored. Included for compatibility with the EasyScience fitter.</span>
 
@@ -10820,7 +10779,7 @@ the calculated model.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional energy grid to use for calculation. If None, the energy grid from the
-experiment is used. By default, None.</p>
+experiment is used.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10892,7 +10851,7 @@ experiment is used. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        Optional energy grid to use for calculation. If None, the energy grid from the</span>
-<span class="sd">        experiment is used. By default, None.</span>
+<span class="sd">        experiment is used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -11267,7 +11226,7 @@ plot the individual components of the model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to plot the individual components of the model. By default, True.</p>
+                <p>Whether to plot the individual components of the model.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11287,7 +11246,7 @@ plot the individual components of the model.</p>
             <td>
               <div class="doc-md-description">
                 <p>Whether to add the background to the model prediction when plotting individual
-components. By default, True.</p>
+components.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11307,7 +11266,7 @@ components. By default, True.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional energy grid to use for plotting. If None, the energy grid from the experiment
-is used. By default, None.</p>
+is used.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11489,13 +11448,13 @@ is used. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    plot_components : bool, default=True</span>
-<span class="sd">        Whether to plot the individual components of the model. By default, True.</span>
+<span class="sd">        Whether to plot the individual components of the model.</span>
 <span class="sd">    add_background : bool, default=True</span>
 <span class="sd">        Whether to add the background to the model prediction when plotting individual</span>
-<span class="sd">        components. By default, True.</span>
+<span class="sd">        components.</span>
 <span class="sd">    energy : sc.Variable | None, default=None</span>
 <span class="sd">        Optional energy grid to use for plotting. If None, the energy grid from the experiment</span>
-<span class="sd">        is used. By default, None.</span>
+<span class="sd">        is used.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Keyword arguments to pass to the plotting function.</span>
 
@@ -12099,22 +12058,22 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">            Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
 <span class="sd">            default, None.</span>
 <span class="sd">        experiment : Experiment | None, default=None</span>
 <span class="sd">            The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">            By default, None.</span>
+
 <span class="sd">        sample_model : SampleModel | None, default=None</span>
 <span class="sd">            The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">            created. By default, None.</span>
+<span class="sd">            created.</span>
 <span class="sd">        instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">            The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">            is created. By default, None.</span>
+<span class="sd">            is created.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">            parameters are added. By default, None.</span>
+<span class="sd">            parameters are added.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -12580,7 +12539,7 @@ InstrumentModel contains the model for the instrument, including background and 
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the analysis. By default, 'MyAnalysis'.</p>
+                <p>Display name of the analysis.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12619,8 +12578,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.
-By default, None.</p>
+                <p>The Experiment associated with this Analysis. If None, a default Experiment is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12640,7 +12598,7 @@ By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The SampleModel associated with this Analysis. If None, a default SampleModel is
-created. By default, None.</p>
+created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12660,7 +12618,7 @@ created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
-is created. By default, None.</p>
+is created.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12680,7 +12638,7 @@ is created. By default, None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Extra parameters to be included in the analysis for advanced users. If None, no extra
-parameters are added. By default, None.</p>
+parameters are added.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12814,22 +12772,22 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
-<span class="sd">        Display name of the analysis. By default, &#39;MyAnalysis&#39;.</span>
+<span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
 <span class="sd">        default, None.</span>
 <span class="sd">    experiment : Experiment | None, default=None</span>
 <span class="sd">        The Experiment associated with this Analysis. If None, a default Experiment is created.</span>
-<span class="sd">        By default, None.</span>
+
 <span class="sd">    sample_model : SampleModel | None, default=None</span>
 <span class="sd">        The SampleModel associated with this Analysis. If None, a default SampleModel is</span>
-<span class="sd">        created. By default, None.</span>
+<span class="sd">        created.</span>
 <span class="sd">    instrument_model : InstrumentModel | None, default=None</span>
 <span class="sd">        The InstrumentModel associated with this Analysis. If None, a default InstrumentModel</span>
-<span class="sd">        is created. By default, None.</span>
+<span class="sd">        is created.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
-<span class="sd">        parameters are added. By default, None.</span>
+<span class="sd">        parameters are added.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>

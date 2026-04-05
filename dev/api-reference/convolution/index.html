@@ -2238,10 +2238,7 @@ narrow.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution class that combines analytical and numerical convolution methods to efficiently</span>
 <span class="sd">    perform convolutions of ComponentCollections with ResolutionComponents.</span>
@@ -2295,22 +2292,19 @@ narrow.</p>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">            An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">        upsample_factor : Numeric | None, default=5</span>
-<span class="sd">            The factor by which to upsample the input data before convolution. Default is</span>
-<span class="sd">            5. By default, 5.</span>
+<span class="sd">            The factor by which to upsample the input data before convolution. Default is 5.</span>
 <span class="sd">        extension_factor : Numeric | None, default=0.2</span>
 <span class="sd">            The factor by which to extend the input data range before convolution. Default is 0.2.</span>
-<span class="sd">            By default, 0.2.</span>
 <span class="sd">        temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">            The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">            The temperature to use for detailed balance correction.</span>
 <span class="sd">        temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">            The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">            The unit of the temperature parameter.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance : bool, default=True</span>
-<span class="sd">            Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">            True.</span>
+<span class="sd">            Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2642,7 +2636,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An energy offset to apply to the energy values before convolution. By default, 0.0.</p>
+                <p>An energy offset to apply to the energy values before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2661,8 +2655,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to upsample the input data before convolution. Default is
-5. By default, 5.</p>
+                <p>The factor by which to upsample the input data before convolution. Default is 5.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2681,8 +2674,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to extend the input data range before convolution. Default is 0.2.
-By default, 0.2.</p>
+                <p>The factor by which to extend the input data range before convolution. Default is 0.2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2701,7 +2693,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature to use for detailed balance correction. By default, None.</p>
+                <p>The temperature to use for detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2720,7 +2712,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the temperature parameter. By default, 'K'.</p>
+                <p>The unit of the temperature parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2739,7 +2731,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2758,8 +2750,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to normalize the detailed balance correction. Default is True. By default,
-True.</p>
+                <p>Whether to normalize the detailed balance correction. Default is True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2835,10 +2826,7 @@ True.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -2863,22 +2851,19 @@ True.</p>
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">        The resolution components to convolve with.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">        An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">    upsample_factor : Numeric | None, default=5</span>
-<span class="sd">        The factor by which to upsample the input data before convolution. Default is</span>
-<span class="sd">        5. By default, 5.</span>
+<span class="sd">        The factor by which to upsample the input data before convolution. Default is 5.</span>
 <span class="sd">    extension_factor : Numeric | None, default=0.2</span>
 <span class="sd">        The factor by which to extend the input data range before convolution. Default is 0.2.</span>
-<span class="sd">        By default, 0.2.</span>
 <span class="sd">    temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">        The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">        The temperature to use for detailed balance correction.</span>
 <span class="sd">    temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">        The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">        The unit of the temperature parameter.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    normalize_detailed_balance : bool, default=True</span>
-<span class="sd">        Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">        True.</span>
+<span class="sd">        Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2988,7 +2973,10 @@ issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
@@ -3006,10 +2994,7 @@ issues during <strong>init</strong>.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom setattr to invalidate convolution plan on relevant attribute changes, and build a</span>
 <span class="sd">    new plan.</span>
@@ -3088,7 +3073,10 @@ convolutions for the remaining components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
@@ -3113,10 +3101,7 @@ convolutions for the remaining components.</p>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3766,13 +3751,13 @@ and Voigt profiles.</p>
 <span class="sd">        energy : np.ndarray | sc.Variable</span>
 <span class="sd">            1D array of energy values where the convolution is evaluated.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        sample_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">            The sample model to be convolved. By default, None.</span>
+<span class="sd">            The sample model to be convolved.</span>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">            The resolution model to convolve with. By default, None.</span>
+<span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            An offset to shift the energy values by. By default, 0.0.</span>
+<span class="sd">            An offset to shift the energy values by.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -4305,7 +4290,7 @@ and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4324,7 +4309,7 @@ and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The sample model to be convolved. By default, None.</p>
+                <p>The sample model to be convolved.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4343,7 +4328,7 @@ and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The resolution model to convolve with. By default, None.</p>
+                <p>The resolution model to convolve with.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4362,7 +4347,7 @@ and Voigt profiles.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An offset to shift the energy values by. By default, 0.0.</p>
+                <p>An offset to shift the energy values by.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4424,13 +4409,13 @@ and Voigt profiles.</p>
 <span class="sd">    energy : np.ndarray | sc.Variable</span>
 <span class="sd">        1D array of energy values where the convolution is evaluated.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    sample_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">        The sample model to be convolved. By default, None.</span>
+<span class="sd">        The sample model to be convolved.</span>
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">        The resolution model to convolve with. By default, None.</span>
+<span class="sd">        The resolution model to convolve with.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        An offset to shift the energy values by. By default, 0.0.</span>
+<span class="sd">        An offset to shift the energy values by.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -4987,10 +4972,7 @@ narrow.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution class that combines analytical and numerical convolution methods to efficiently</span>
 <span class="sd">    perform convolutions of ComponentCollections with ResolutionComponents.</span>
@@ -5044,22 +5026,19 @@ narrow.</p>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">            An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">        upsample_factor : Numeric | None, default=5</span>
-<span class="sd">            The factor by which to upsample the input data before convolution. Default is</span>
-<span class="sd">            5. By default, 5.</span>
+<span class="sd">            The factor by which to upsample the input data before convolution. Default is 5.</span>
 <span class="sd">        extension_factor : Numeric | None, default=0.2</span>
 <span class="sd">            The factor by which to extend the input data range before convolution. Default is 0.2.</span>
-<span class="sd">            By default, 0.2.</span>
 <span class="sd">        temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">            The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">            The temperature to use for detailed balance correction.</span>
 <span class="sd">        temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">            The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">            The unit of the temperature parameter.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance : bool, default=True</span>
-<span class="sd">            Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">            True.</span>
+<span class="sd">            Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -5391,7 +5370,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An energy offset to apply to the energy values before convolution. By default, 0.0.</p>
+                <p>An energy offset to apply to the energy values before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5410,8 +5389,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to upsample the input data before convolution. Default is
-5. By default, 5.</p>
+                <p>The factor by which to upsample the input data before convolution. Default is 5.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5430,8 +5408,7 @@ narrow.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to extend the input data range before convolution. Default is 0.2.
-By default, 0.2.</p>
+                <p>The factor by which to extend the input data range before convolution. Default is 0.2.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5450,7 +5427,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature to use for detailed balance correction. By default, None.</p>
+                <p>The temperature to use for detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5469,7 +5446,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the temperature parameter. By default, 'K'.</p>
+                <p>The unit of the temperature parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5488,7 +5465,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5507,8 +5484,7 @@ By default, 0.2.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to normalize the detailed balance correction. Default is True. By default,
-True.</p>
+                <p>Whether to normalize the detailed balance correction. Default is True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5584,10 +5560,7 @@ True.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -5612,22 +5585,19 @@ True.</p>
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">        The resolution components to convolve with.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">        An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">    upsample_factor : Numeric | None, default=5</span>
-<span class="sd">        The factor by which to upsample the input data before convolution. Default is</span>
-<span class="sd">        5. By default, 5.</span>
+<span class="sd">        The factor by which to upsample the input data before convolution. Default is 5.</span>
 <span class="sd">    extension_factor : Numeric | None, default=0.2</span>
 <span class="sd">        The factor by which to extend the input data range before convolution. Default is 0.2.</span>
-<span class="sd">        By default, 0.2.</span>
 <span class="sd">    temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">        The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">        The temperature to use for detailed balance correction.</span>
 <span class="sd">    temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">        The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">        The unit of the temperature parameter.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    normalize_detailed_balance : bool, default=True</span>
-<span class="sd">        Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">        True.</span>
+<span class="sd">        Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -5737,7 +5707,10 @@ issues during <strong>init</strong>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
@@ -5755,10 +5728,7 @@ issues during <strong>init</strong>.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom setattr to invalidate convolution plan on relevant attribute changes, and build a</span>
 <span class="sd">    new plan.</span>
@@ -5837,7 +5807,10 @@ convolutions for the remaining components.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
@@ -5862,10 +5835,7 @@ convolutions for the remaining components.</p>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6359,13 +6329,13 @@ convolutions for the remaining components.</p>
 <span class="sd">        energy : np.ndarray | sc.Variable</span>
 <span class="sd">            1D array of energy values where the convolution is evaluated.</span>
 <span class="sd">        sample_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">            The sample model to be convolved. By default, None.</span>
+<span class="sd">            The sample model to be convolved.</span>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">            The resolution model to convolve with. By default, None.</span>
+<span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            The energy offset applied to the convolution. By default, 0.0.</span>
+<span class="sd">            The energy offset applied to the convolution.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -6728,7 +6698,7 @@ convolutions for the remaining components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The sample model to be convolved. By default, None.</p>
+                <p>The sample model to be convolved.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6747,7 +6717,7 @@ convolutions for the remaining components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The resolution model to convolve with. By default, None.</p>
+                <p>The resolution model to convolve with.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6766,7 +6736,7 @@ convolutions for the remaining components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6785,7 +6755,7 @@ convolutions for the remaining components.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The energy offset applied to the convolution. By default, 0.0.</p>
+                <p>The energy offset applied to the convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6920,13 +6890,13 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
 <span class="sd">    energy : np.ndarray | sc.Variable</span>
 <span class="sd">        1D array of energy values where the convolution is evaluated.</span>
 <span class="sd">    sample_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">        The sample model to be convolved. By default, None.</span>
+<span class="sd">        The sample model to be convolved.</span>
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent | None, default=None</span>
-<span class="sd">        The resolution model to convolve with. By default, None.</span>
+<span class="sd">        The resolution model to convolve with.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        The energy offset applied to the convolution. By default, 0.0.</span>
+<span class="sd">        The energy offset applied to the convolution.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -7940,8 +7910,7 @@ applied to the sample model.</p>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Numerical convolution of a ComponentCollection with a ComponentCollection using FFT.</span>
 
@@ -7975,20 +7944,19 @@ applied to the sample model.</p>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">            The resolution model to convolve with.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">            An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">        upsample_factor : Numeric | None, default=5</span>
-<span class="sd">            The factor by which to upsample the input data before convolution. By default, 5.</span>
+<span class="sd">            The factor by which to upsample the input data before convolution.</span>
 <span class="sd">        extension_factor : Numeric | None, default=0.2</span>
-<span class="sd">            The factor by which to extend the input data range before convolution. By default, 0.2.</span>
+<span class="sd">            The factor by which to extend the input data range before convolution.</span>
 <span class="sd">        temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">            The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">            The temperature to use for detailed balance correction.</span>
 <span class="sd">        temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">            The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">            The unit of the temperature parameter.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance : bool, default=True</span>
-<span class="sd">            Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">            True.</span>
+<span class="sd">            Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -8171,7 +8139,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An energy offset to apply to the energy values before convolution. By default, 0.0.</p>
+                <p>An energy offset to apply to the energy values before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8190,7 +8158,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to upsample the input data before convolution. By default, 5.</p>
+                <p>The factor by which to upsample the input data before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8209,7 +8177,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to extend the input data range before convolution. By default, 0.2.</p>
+                <p>The factor by which to extend the input data range before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8228,7 +8196,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature to use for detailed balance correction. By default, None.</p>
+                <p>The temperature to use for detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8247,7 +8215,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the temperature parameter. By default, 'K'.</p>
+                <p>The unit of the temperature parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8266,7 +8234,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8285,8 +8253,7 @@ applied to the sample model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to normalize the detailed balance correction. Default is True. By default,
-True.</p>
+                <p>Whether to normalize the detailed balance correction. Default is True.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8352,8 +8319,7 @@ True.</p>
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -8378,20 +8344,19 @@ True.</p>
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">        The resolution model to convolve with.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">        An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">    upsample_factor : Numeric | None, default=5</span>
-<span class="sd">        The factor by which to upsample the input data before convolution. By default, 5.</span>
+<span class="sd">        The factor by which to upsample the input data before convolution.</span>
 <span class="sd">    extension_factor : Numeric | None, default=0.2</span>
-<span class="sd">        The factor by which to extend the input data range before convolution. By default, 0.2.</span>
+<span class="sd">        The factor by which to extend the input data range before convolution.</span>
 <span class="sd">    temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">        The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">        The temperature to use for detailed balance correction.</span>
 <span class="sd">    temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">        The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">        The unit of the temperature parameter.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    normalize_detailed_balance : bool, default=True</span>
-<span class="sd">        Whether to normalize the detailed balance correction. Default is True. By default,</span>
-<span class="sd">        True.</span>
+<span class="sd">        Whether to normalize the detailed balance correction. Default is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -8462,7 +8427,8 @@ energy. Includes detailed balance correction if temperature is provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 78</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 77</span>
+<span class="normal"> 78</span>
 <span class="normal"> 79</span>
 <span class="normal"> 80</span>
 <span class="normal"> 81</span>
@@ -8521,8 +8487,7 @@ energy. Includes detailed balance correction if temperature is provided.</p>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -9146,19 +9111,19 @@ class has no convolution functionality.</p>
 <span class="sd">        resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">            The resolution components to convolve with.</span>
 <span class="sd">        energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">            An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">            An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">        upsample_factor : Numeric | None, default=5</span>
-<span class="sd">            The factor by which to upsample the input data before convolution. By default, 5.</span>
+<span class="sd">            The factor by which to upsample the input data before convolution.</span>
 <span class="sd">        extension_factor : Numeric | None, default=0.2</span>
-<span class="sd">            The factor by which to extend the input data range before convolution. By default, 0.2.</span>
+<span class="sd">            The factor by which to extend the input data range before convolution.</span>
 <span class="sd">        temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">            The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">            The temperature to use for detailed balance correction.</span>
 <span class="sd">        temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">            The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">            The unit of the temperature parameter.</span>
 <span class="sd">        energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">            The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">            The unit of the energy.</span>
 <span class="sd">        normalize_detailed_balance : bool, default=True</span>
-<span class="sd">            Whether to normalize the detailed balance correction. By default, True.</span>
+<span class="sd">            Whether to normalize the detailed balance correction.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -9636,7 +9601,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An energy offset to apply to the energy values before convolution. By default, 0.0.</p>
+                <p>An energy offset to apply to the energy values before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9655,7 +9620,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to upsample the input data before convolution. By default, 5.</p>
+                <p>The factor by which to upsample the input data before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9674,7 +9639,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The factor by which to extend the input data range before convolution. By default, 0.2.</p>
+                <p>The factor by which to extend the input data range before convolution.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9693,7 +9658,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The temperature to use for detailed balance correction. By default, None.</p>
+                <p>The temperature to use for detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9712,7 +9677,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the temperature parameter. By default, 'K'.</p>
+                <p>The unit of the temperature parameter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9731,7 +9696,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The unit of the energy. By default, 'meV'.</p>
+                <p>The unit of the energy.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9750,7 +9715,7 @@ class has no convolution functionality.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to normalize the detailed balance correction. By default, True.</p>
+                <p>Whether to normalize the detailed balance correction.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9890,19 +9855,19 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 <span class="sd">    resolution_components : ComponentCollection | ModelComponent</span>
 <span class="sd">        The resolution components to convolve with.</span>
 <span class="sd">    energy_offset : Numeric | Parameter, default=0.0</span>
-<span class="sd">        An energy offset to apply to the energy values before convolution. By default, 0.0.</span>
+<span class="sd">        An energy offset to apply to the energy values before convolution.</span>
 <span class="sd">    upsample_factor : Numeric | None, default=5</span>
-<span class="sd">        The factor by which to upsample the input data before convolution. By default, 5.</span>
+<span class="sd">        The factor by which to upsample the input data before convolution.</span>
 <span class="sd">    extension_factor : Numeric | None, default=0.2</span>
-<span class="sd">        The factor by which to extend the input data range before convolution. By default, 0.2.</span>
+<span class="sd">        The factor by which to extend the input data range before convolution.</span>
 <span class="sd">    temperature : Parameter | Numeric | None, default=None</span>
-<span class="sd">        The temperature to use for detailed balance correction. By default, None.</span>
+<span class="sd">        The temperature to use for detailed balance correction.</span>
 <span class="sd">    temperature_unit : str | sc.Unit, default=&#39;K&#39;</span>
-<span class="sd">        The unit of the temperature parameter. By default, &#39;K&#39;.</span>
+<span class="sd">        The unit of the temperature parameter.</span>
 <span class="sd">    energy_unit : str | sc.Unit, default=&#39;meV&#39;</span>
-<span class="sd">        The unit of the energy. By default, &#39;meV&#39;.</span>
+<span class="sd">        The unit of the energy.</span>
 <span class="sd">    normalize_detailed_balance : bool, default=True</span>
-<span class="sd">        Whether to normalize the detailed balance correction. By default, True.</span>
+<span class="sd">        Whether to normalize the detailed balance correction.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>

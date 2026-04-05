@@ -2431,8 +2431,7 @@
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds data from an experiment as a sc.DataArray along with metadata.</span>
 
@@ -2451,13 +2450,12 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyExperiment&#39;</span>
-<span class="sd">            Display name of the experiment. By default, &#39;MyExperiment&#39;.</span>
+<span class="sd">            Display name of the experiment.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
-<span class="sd">            Unique name of the experiment. If None, a unique name will be generated. By default,</span>
-<span class="sd">            None.</span>
+<span class="sd">            Unique name of the experiment. If None, a unique name will be generated. None.</span>
 <span class="sd">        data : sc.DataArray | str | None, default=None</span>
 <span class="sd">            Dataset associated with the experiment. Can be a sc.DataArray or a filename string to</span>
-<span class="sd">            load from. If None, no data is loaded. By default, None.</span>
+<span class="sd">            load from. If None, no data is loaded.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -2670,7 +2668,7 @@
 <span class="sd">        filename : str</span>
 <span class="sd">            Path to the HDF5 file.</span>
 <span class="sd">        display_name : str | None, default=None</span>
-<span class="sd">            Optional display name for the experiment. By default, None.</span>
+<span class="sd">            Optional display name for the experiment.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -2704,7 +2702,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        filename : str | None, default=None</span>
 <span class="sd">            Path to the output HDF5 file. If None, the file will be named after the unique_name of</span>
-<span class="sd">            the experiment with a .h5 extension. By default, None.</span>
+<span class="sd">            the experiment with a .h5 extension.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -2798,7 +2796,7 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        slicer : bool, default=False</span>
-<span class="sd">            If True, use plopp&#39;s slicer instead of plot. By default, False.</span>
+<span class="sd">            If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to pass to plopp.</span>
 
@@ -3099,7 +3097,8 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">556</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">555</span>
+<span class="normal">556</span>
 <span class="normal">557</span>
 <span class="normal">558</span>
 <span class="normal">559</span>
@@ -3110,8 +3109,7 @@
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a copy of the object.</span>
 
@@ -3172,7 +3170,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the experiment. By default, 'MyExperiment'.</p>
+                <p>Display name of the experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3191,8 +3189,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unique name of the experiment. If None, a unique name will be generated. By default,
-None.</p>
+                <p>Unique name of the experiment. If None, a unique name will be generated. None.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3212,7 +3209,7 @@ None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataset associated with the experiment. Can be a sc.DataArray or a filename string to
-load from. If None, no data is loaded. By default, None.</p>
+load from. If None, no data is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3297,8 +3294,7 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3310,13 +3306,12 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyExperiment&#39;</span>
-<span class="sd">        Display name of the experiment. By default, &#39;MyExperiment&#39;.</span>
+<span class="sd">        Display name of the experiment.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
-<span class="sd">        Unique name of the experiment. If None, a unique name will be generated. By default,</span>
-<span class="sd">        None.</span>
+<span class="sd">        Unique name of the experiment. If None, a unique name will be generated. None.</span>
 <span class="sd">    data : sc.DataArray | str | None, default=None</span>
 <span class="sd">        Dataset associated with the experiment. Can be a sc.DataArray or a filename string to</span>
-<span class="sd">        load from. If None, no data is loaded. By default, None.</span>
+<span class="sd">        load from. If None, no data is loaded.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -3399,7 +3394,8 @@ load from. If None, no data is loaded. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">544</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">543</span>
+<span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
@@ -3408,8 +3404,7 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="normal">550</span>
 <span class="normal">551</span>
 <span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">553</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Experiment object.</span>
 
@@ -3708,7 +3703,8 @@ NaN or Inf for the given Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
+<span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -3741,8 +3737,7 @@ NaN or Inf for the given Q index.</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the energy values from the dataset, removing points where the y values or variances are</span>
 <span class="sd">    NaN or Inf for the given Q index.</span>
@@ -3844,7 +3839,7 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional display name for the experiment. By default, None.</p>
+                <p>Optional display name for the experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3887,7 +3882,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+<span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -3919,8 +3915,7 @@ data is not a sc.DataArray.</p>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load data from an HDF5 file.</span>
 
@@ -3929,7 +3924,7 @@ data is not a sc.DataArray.</p>
 <span class="sd">    filename : str</span>
 <span class="sd">        Path to the HDF5 file.</span>
 <span class="sd">    display_name : str | None, default=None</span>
-<span class="sd">        Optional display name for the experiment. By default, None.</span>
+<span class="sd">        Optional display name for the experiment.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -4002,7 +3997,7 @@ data is not a sc.DataArray.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If True, use plopp's slicer instead of plot. By default, False.</p>
+                <p>If True, use plopp's slicer instead of plot.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4076,7 +4071,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">376</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">375</span>
+<span class="normal">376</span>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
@@ -4122,15 +4118,14 @@ data is not a sc.DataArray.</p>
 <span class="normal">419</span>
 <span class="normal">420</span>
 <span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">422</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    slicer : bool, default=False</span>
-<span class="sd">        If True, use plopp&#39;s slicer instead of plot. By default, False.</span>
+<span class="sd">        If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional keyword arguments to pass to plopp.</span>
 
@@ -4288,7 +4283,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
+<span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
@@ -4340,8 +4336,7 @@ data is not a sc.DataArray.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebin the dataset along specified dimensions.</span>
 
@@ -4425,10 +4420,10 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
+<span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the dataset from the experiment.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -4481,7 +4476,7 @@ data is not a sc.DataArray.</p>
             <td>
               <div class="doc-md-description">
                 <p>Path to the output HDF5 file. If None, the file will be named after the unique_name of
-the experiment with a .h5 extension. By default, None.</p>
+the experiment with a .h5 extension.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4536,7 +4531,8 @@ the experiment with a .h5 extension. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">281</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
+<span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
@@ -4564,8 +4560,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the dataset to HDF5.</span>
 
@@ -4573,7 +4568,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    filename : str | None, default=None</span>
 <span class="sd">        Path to the output HDF5 file. If None, the file will be named after the unique_name of</span>
-<span class="sd">        the experiment with a .h5 extension. By default, None.</span>
+<span class="sd">        the experiment with a .h5 extension.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -5226,8 +5221,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds data from an experiment as a sc.DataArray along with metadata.</span>
 
@@ -5246,13 +5240,12 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        display_name : str | None, default=&#39;MyExperiment&#39;</span>
-<span class="sd">            Display name of the experiment. By default, &#39;MyExperiment&#39;.</span>
+<span class="sd">            Display name of the experiment.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
-<span class="sd">            Unique name of the experiment. If None, a unique name will be generated. By default,</span>
-<span class="sd">            None.</span>
+<span class="sd">            Unique name of the experiment. If None, a unique name will be generated. None.</span>
 <span class="sd">        data : sc.DataArray | str | None, default=None</span>
 <span class="sd">            Dataset associated with the experiment. Can be a sc.DataArray or a filename string to</span>
-<span class="sd">            load from. If None, no data is loaded. By default, None.</span>
+<span class="sd">            load from. If None, no data is loaded.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -5465,7 +5458,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">        filename : str</span>
 <span class="sd">            Path to the HDF5 file.</span>
 <span class="sd">        display_name : str | None, default=None</span>
-<span class="sd">            Optional display name for the experiment. By default, None.</span>
+<span class="sd">            Optional display name for the experiment.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -5499,7 +5492,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">        ----------</span>
 <span class="sd">        filename : str | None, default=None</span>
 <span class="sd">            Path to the output HDF5 file. If None, the file will be named after the unique_name of</span>
-<span class="sd">            the experiment with a .h5 extension. By default, None.</span>
+<span class="sd">            the experiment with a .h5 extension.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -5593,7 +5586,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        slicer : bool, default=False</span>
-<span class="sd">            If True, use plopp&#39;s slicer instead of plot. By default, False.</span>
+<span class="sd">            If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to pass to plopp.</span>
 
@@ -5894,7 +5887,8 @@ the experiment with a .h5 extension. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">556</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">555</span>
+<span class="normal">556</span>
 <span class="normal">557</span>
 <span class="normal">558</span>
 <span class="normal">559</span>
@@ -5905,8 +5899,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a copy of the object.</span>
 
@@ -5967,7 +5960,7 @@ the experiment with a .h5 extension. By default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display name of the experiment. By default, 'MyExperiment'.</p>
+                <p>Display name of the experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5986,8 +5979,7 @@ the experiment with a .h5 extension. By default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unique name of the experiment. If None, a unique name will be generated. By default,
-None.</p>
+                <p>Unique name of the experiment. If None, a unique name will be generated. None.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6007,7 +5999,7 @@ None.</p>
             <td>
               <div class="doc-md-description">
                 <p>Dataset associated with the experiment. Can be a sc.DataArray or a filename string to
-load from. If None, no data is loaded. By default, None.</p>
+load from. If None, no data is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6092,8 +6084,7 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6105,13 +6096,12 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    display_name : str | None, default=&#39;MyExperiment&#39;</span>
-<span class="sd">        Display name of the experiment. By default, &#39;MyExperiment&#39;.</span>
+<span class="sd">        Display name of the experiment.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
-<span class="sd">        Unique name of the experiment. If None, a unique name will be generated. By default,</span>
-<span class="sd">        None.</span>
+<span class="sd">        Unique name of the experiment. If None, a unique name will be generated. None.</span>
 <span class="sd">    data : sc.DataArray | str | None, default=None</span>
 <span class="sd">        Dataset associated with the experiment. Can be a sc.DataArray or a filename string to</span>
-<span class="sd">        load from. If None, no data is loaded. By default, None.</span>
+<span class="sd">        load from. If None, no data is loaded.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -6194,7 +6184,8 @@ load from. If None, no data is loaded. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">544</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">543</span>
+<span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
@@ -6203,8 +6194,7 @@ load from. If None, no data is loaded. By default, None.</p>
 <span class="normal">550</span>
 <span class="normal">551</span>
 <span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">553</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Experiment object.</span>
 
@@ -6503,7 +6493,8 @@ NaN or Inf for the given Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
+<span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -6536,8 +6527,7 @@ NaN or Inf for the given Q index.</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the energy values from the dataset, removing points where the y values or variances are</span>
 <span class="sd">    NaN or Inf for the given Q index.</span>
@@ -6639,7 +6629,7 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional display name for the experiment. By default, None.</p>
+                <p>Optional display name for the experiment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6682,7 +6672,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+<span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -6714,8 +6705,7 @@ data is not a sc.DataArray.</p>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load data from an HDF5 file.</span>
 
@@ -6724,7 +6714,7 @@ data is not a sc.DataArray.</p>
 <span class="sd">    filename : str</span>
 <span class="sd">        Path to the HDF5 file.</span>
 <span class="sd">    display_name : str | None, default=None</span>
-<span class="sd">        Optional display name for the experiment. By default, None.</span>
+<span class="sd">        Optional display name for the experiment.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -6797,7 +6787,7 @@ data is not a sc.DataArray.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If True, use plopp's slicer instead of plot. By default, False.</p>
+                <p>If True, use plopp's slicer instead of plot.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6871,7 +6861,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">376</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">375</span>
+<span class="normal">376</span>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
@@ -6917,15 +6908,14 @@ data is not a sc.DataArray.</p>
 <span class="normal">419</span>
 <span class="normal">420</span>
 <span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">422</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    slicer : bool, default=False</span>
-<span class="sd">        If True, use plopp&#39;s slicer instead of plot. By default, False.</span>
+<span class="sd">        If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional keyword arguments to pass to plopp.</span>
 
@@ -7083,7 +7073,8 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
+<span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
@@ -7135,8 +7126,7 @@ data is not a sc.DataArray.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebin the dataset along specified dimensions.</span>
 
@@ -7220,10 +7210,10 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
+<span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the dataset from the experiment.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -7276,7 +7266,7 @@ data is not a sc.DataArray.</p>
             <td>
               <div class="doc-md-description">
                 <p>Path to the output HDF5 file. If None, the file will be named after the unique_name of
-the experiment with a .h5 extension. By default, None.</p>
+the experiment with a .h5 extension.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7331,7 +7321,8 @@ the experiment with a .h5 extension. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">281</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
+<span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
@@ -7359,8 +7350,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the dataset to HDF5.</span>
 
@@ -7368,7 +7358,7 @@ the experiment with a .h5 extension. By default, None.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    filename : str | None, default=None</span>
 <span class="sd">        Path to the output HDF5 file. If None, the file will be named after the unique_name of</span>
-<span class="sd">        the experiment with a .h5 extension. By default, None.</span>
+<span class="sd">        the experiment with a .h5 extension.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
