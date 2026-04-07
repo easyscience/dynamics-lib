@@ -8,6 +8,7 @@ import numpy as np
 import plopp as pp
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
+from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
 
@@ -32,7 +33,7 @@ class Experiment(NewBase):
 
         Parameters
         ----------
-        display_name : str | None, default="MyExperiment"
+        display_name : str | None, default='MyExperiment'
             Display name of the experiment.
         unique_name : str | None, default=None
             Unique name of the experiment. If None, a unique name will be generated. None.
@@ -146,9 +147,9 @@ class Experiment(NewBase):
         sc.Variable | None
             The Q values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
-        return self._binned_data.coords['Q']
+        return self.binned_data.coords['Q']
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
@@ -179,9 +180,9 @@ class Experiment(NewBase):
         sc.Variable | None
             The energy values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
-        return self._binned_data.coords['energy']
+        return self.binned_data.coords['energy']
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
@@ -222,7 +223,7 @@ class Experiment(NewBase):
         sc.Variable | None
             The masked energy values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
 
         if (
@@ -232,7 +233,7 @@ class Experiment(NewBase):
         ):
             raise IndexError('Q_index must be a valid index for the Q values.')
 
-        energy = self._binned_data.coords['energy']
+        energy = self.binned_data.coords['energy']
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
 
         mask_var = sc.array(dims=['energy'], values=mask)
@@ -377,7 +378,7 @@ class Experiment(NewBase):
         slicer: bool = False,
         transpose_axes: bool = False,
         **kwargs: dict,
-    ) -> None:
+    ) -> InteractiveFigure:
         """
         Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
@@ -387,9 +388,14 @@ class Experiment(NewBase):
             If True, use plopp's slicer instead of plot.
         transpose_axes : bool, default=False
             If True, transpose the data to have dimensions in the order (energy, Q) before
-            plotting.
+            plotting, so that energy is on the x-axis. This only applies when slicer=False.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
+
+        Returns
+        -------
+        InteractiveFigure
+            A plot of the data and model.
 
         Raises
         ------
@@ -401,7 +407,7 @@ class Experiment(NewBase):
             If slicer or transpose_axes are not True or False.
         """
 
-        if self._binned_data is None:
+        if self.binned_data is None:
             raise ValueError('No data to plot. Please load data first.')
 
         if not _in_notebook():
@@ -426,7 +432,7 @@ class Experiment(NewBase):
         plot_kwargs_defaults.update(kwargs)
         if slicer:
             fig = pp.slicer(
-                self._binned_data,
+                self.binned_data,
                 **plot_kwargs_defaults,
             )
             for widget in fig.bottom_bar[0].controls.values():
@@ -580,7 +586,7 @@ class Experiment(NewBase):
 
         Returns
         -------
-        "Experiment"
+        'Experiment'
             A copy of the Experiment object.
         """
         temp = self.to_dict(skip=['unique_name'])
