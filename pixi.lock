@@ -4071,8 +4071,8 @@ packages:
   requires_python: '>=3.5'
 - pypi: ./
   name: easydynamics
-  version: 0.4.0+devdirty10
-  sha256: bd1d44f7263fe45e52e8b62d2740c303be86c7bcc89e3cbec95ec663568953b1
+  version: 0.4.0+devdirty2
+  sha256: aa4f4851802d4abba9dca0112aa3c99739e1c43425b48d91030f822baa577257
   requires_dist:
   - darkdetect
   - easyscience

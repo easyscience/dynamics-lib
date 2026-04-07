@@ -23,7 +23,7 @@ class Experiment(NewBase):
 
     def __init__(
         self,
-        display_name: str | None = 'MyExperiment',
+        display_name: str | None = "MyExperiment",
         unique_name: str | None = None,
         data: sc.DataArray | str | None = None,
     ) -> None:
@@ -32,7 +32,7 @@ class Experiment(NewBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyExperiment'
+        display_name : str | None, default="MyExperiment"
             Display name of the experiment.
         unique_name : str | None, default=None
             Unique name of the experiment. If None, a unique name will be generated. None.
@@ -59,7 +59,7 @@ class Experiment(NewBase):
             self._data = data
         else:
             raise TypeError(
-                f'Data must be a sc.DataArray or a filename string, not {type(data).__name__}'
+                f"Data must be a sc.DataArray or a filename string, not {type(data).__name__}"
             )
 
         self._binned_data = (
@@ -98,7 +98,7 @@ class Experiment(NewBase):
             If the value is not a sc.DataArray.
         """
         if not isinstance(value, sc.DataArray):
-            raise TypeError(f'Data must be a sc.DataArray, not {type(value).__name__}')
+            raise TypeError(f"Data must be a sc.DataArray, not {type(value).__name__}")
         self._validate_coordinates(value)
         self._data = value
         self._binned_data = (
@@ -134,7 +134,9 @@ class Experiment(NewBase):
         AttributeError
             Always, since binned_data is read-only.
         """
-        raise AttributeError('binned_data is a read-only property. Use rebin() to rebin the data')
+        raise AttributeError(
+            "binned_data is a read-only property. Use rebin() to rebin the data"
+        )
 
     @property
     def Q(self) -> sc.Variable | None:
@@ -148,7 +150,7 @@ class Experiment(NewBase):
         """
         if self._binned_data is None:
             return None
-        return self._binned_data.coords['Q']
+        return self._binned_data.coords["Q"]
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
@@ -167,7 +169,7 @@ class Experiment(NewBase):
         AttributeError
             Always, since Q is read-only.
         """
-        raise AttributeError('Q is a read-only property derived from the data.')
+        raise AttributeError("Q is a read-only property derived from the data.")
 
     @property
     def energy(self) -> sc.Variable | None:
@@ -181,7 +183,7 @@ class Experiment(NewBase):
         """
         if self._binned_data is None:
             return None
-        return self._binned_data.coords['energy']
+        return self._binned_data.coords["energy"]
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
@@ -200,7 +202,7 @@ class Experiment(NewBase):
         AttributeError
             Always, since energy is read-only.
         """
-        raise AttributeError('energy is a read-only property derived from the data.')
+        raise AttributeError("energy is a read-only property derived from the data.")
 
     def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
         """
@@ -230,12 +232,12 @@ class Experiment(NewBase):
             or Q_index < 0
             or (self.Q is not None and Q_index >= len(self.Q))
         ):
-            raise IndexError('Q_index must be a valid index for the Q values.')
+            raise IndexError("Q_index must be a valid index for the Q values.")
 
-        energy = self._binned_data.coords['energy']
+        energy = self._binned_data.coords["energy"]
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
 
-        mask_var = sc.array(dims=['energy'], values=mask)
+        mask_var = sc.array(dims=["energy"], values=mask)
         return energy[mask_var]
 
     ###########
@@ -260,19 +262,19 @@ class Experiment(NewBase):
             data is not a sc.DataArray.
         """
         if not isinstance(filename, str):
-            raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
+            raise TypeError(f"Filename must be a string, not {type(filename).__name__}")
 
         if display_name is not None:
             if not isinstance(display_name, str):
                 raise TypeError(
-                    f'Display name must be a string, not {type(display_name).__name__}'
+                    f"Display name must be a string, not {type(display_name).__name__}"
                 )
             self.display_name = display_name
 
         loaded_data = sc_load_hdf5(filename)
         if not isinstance(loaded_data, sc.DataArray):
             raise TypeError(
-                f'Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}'
+                f"Loaded data must be a sc.DataArray, not {type(loaded_data).__name__}"
             )
         self._validate_coordinates(loaded_data)
         self.data = loaded_data
@@ -296,13 +298,13 @@ class Experiment(NewBase):
         """
 
         if filename is None:
-            filename = f'{self.unique_name}.h5'
+            filename = f"{self.unique_name}.h5"
 
         if not isinstance(filename, str):
-            raise TypeError(f'Filename must be a string, not {type(filename).__name__}')
+            raise TypeError(f"Filename must be a string, not {type(filename).__name__}")
 
         if self._data is None:
-            raise ValueError('No data to save.')
+            raise ValueError("No data to save.")
 
         path = Path(filename)
         path.parent.mkdir(exist_ok=True, parents=True)
@@ -335,31 +337,33 @@ class Experiment(NewBase):
 
         if not isinstance(dimensions, dict):
             raise TypeError(
-                'dimensions must be a dictionary mapping dimension names '
-                'to number of bins or bin values as sc.Variable.'
+                "dimensions must be a dictionary mapping dimension names "
+                "to number of bins or bin values as sc.Variable."
             )
         if self._data is None:
-            raise ValueError('No data to rebin. Please load data first.')
+            raise ValueError("No data to rebin. Please load data first.")
         binned_data = self._data.copy()
         dim_copy = dimensions.copy()
         for dim, value in dim_copy.items():
             if not isinstance(dim, str):
                 raise TypeError(
-                    f'Dimension keys must be strings. Got {type(dim)} for {dim} instead.'
+                    f"Dimension keys must be strings. Got {type(dim)} for {dim} instead."
                 )
             if dim not in self._data.dims:
                 raise KeyError(
                     f"Dimension '{dim}' not a valid dimension for rebinning. "
-                    f'Should be one of {self._data.dims}.'
+                    f"Should be one of {self._data.dims}."
                 )
-            if isinstance(value, float) and value.is_integer():  # I allow eg. 2.0 as well as 2
+            if (
+                isinstance(value, float) and value.is_integer()
+            ):  # I allow eg. 2.0 as well as 2
                 value = int(value)
                 # This line can be removed when scipp resize support
                 # resizing with coordinates
                 dimensions[dim] = value
             if not (isinstance(value, (int, sc.Variable))):
                 raise TypeError(
-                    f'Dimension values must be integers or sc.Variable. '
+                    f"Dimension values must be integers or sc.Variable. "
                     f"Got {type(value)} for dimension '{dim}' instead."
                 )
             binned_data = binned_data.bin({dim: value})
@@ -372,7 +376,12 @@ class Experiment(NewBase):
     # other methods
     ###########
 
-    def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
+    def plot_data(
+        self,
+        slicer: bool = False,
+        transpose_axes: bool = False,
+        **kwargs: dict,
+    ) -> None:
         """
         Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
@@ -380,6 +389,9 @@ class Experiment(NewBase):
         ----------
         slicer : bool, default=False
             If True, use plopp's slicer instead of plot.
+        transpose_axes : bool, default=False
+            If True, transpose the data to have dimensions in the order (energy, Q) before
+            plotting.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
 
@@ -389,20 +401,34 @@ class Experiment(NewBase):
             If there is no data to plot.
         RuntimeError
             If not in a Jupyter notebook environment.
+        TypeError
+            If slicer or transpose_axes are not True or False.
         """
 
         if self._binned_data is None:
-            raise ValueError('No data to plot. Please load data first.')
+            raise ValueError("No data to plot. Please load data first.")
 
         if not _in_notebook():
-            raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
+            raise RuntimeError(
+                "plot_data() can only be used in a Jupyter notebook environment."
+            )
+
+        if not isinstance(slicer, bool):
+            raise TypeError(
+                f"slicer must be True or False, not {type(slicer).__name__}"
+            )
+
+        if not isinstance(transpose_axes, bool):
+            raise TypeError(
+                f"transpose_axes must be True or False, not {type(transpose_axes).__name__}"
+            )
 
         plot_kwargs_defaults = {
-            'title': self.display_name,
+            "title": self.display_name,
         }
 
         if slicer:
-            plot_kwargs_defaults['keep'] = 'energy'
+            plot_kwargs_defaults["keep"] = "energy"
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -412,11 +438,15 @@ class Experiment(NewBase):
                 **plot_kwargs_defaults,
             )
             for widget in fig.bottom_bar[0].controls.values():
-                widget.slider_toggler.value = '-o-'
+                widget.slider_toggler.value = "-o-"
 
         else:
+            if transpose_axes:
+                data_to_plot = self.binned_data.transpose(dims=["energy", "Q"])
+            else:
+                data_to_plot = self.binned_data.transpose(dims=["Q", "energy"])
             fig = pp.plot(
-                self._binned_data.transpose(dims=['energy', 'Q']),
+                data_to_plot,
                 **plot_kwargs_defaults,
             )
         return fig
@@ -443,9 +473,9 @@ class Experiment(NewBase):
             If required coordinates are missing.
         """
         if not isinstance(data, sc.DataArray):
-            raise TypeError('Data must be a sc.DataArray.')
+            raise TypeError("Data must be a sc.DataArray.")
 
-        required_coords = ['Q', 'energy']
+        required_coords = ["Q", "energy"]
         for coord in required_coords:
             if coord not in data.coords:
                 raise ValueError(f"Data is missing required coordinate: '{coord}'")
@@ -471,7 +501,9 @@ class Experiment(NewBase):
                 data = data.assign_coords({dim: sc.midpoints(coord)})
         return data
 
-    def _extract_x_y_var(self, Q_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _extract_x_y_var(
+        self, Q_index: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Extract the x, y, and weights arrays from the experiment for the given Q index.
 
@@ -485,8 +517,8 @@ class Experiment(NewBase):
         tuple[np.ndarray, np.ndarray, np.ndarray]
             The x, y, and variances arrays extracted from the experiment for the given Q index.
         """
-        data = self.binned_data['Q', Q_index]
-        x = data.coords['energy'].values
+        data = self.binned_data["Q", Q_index]
+        x = data.coords["energy"].values
         y = data.values
         var = data.variances
         return x, y, var
@@ -530,7 +562,7 @@ class Experiment(NewBase):
         var = var[mask]
 
         if np.any(var == 0):
-            raise ValueError('Cannot compute weights: some variances are zero.')
+            raise ValueError("Cannot compute weights: some variances are zero.")
 
         weights = 1.0 / var**0.5
 
@@ -550,18 +582,18 @@ class Experiment(NewBase):
             A string representation of the Experiment object.
         """
 
-        return f'Experiment `{self.unique_name}` with data: {self._data}'
+        return f"Experiment `{self.unique_name}` with data: {self._data}"
 
-    def __copy__(self) -> 'Experiment':
+    def __copy__(self) -> "Experiment":
         """
         Return a copy of the object.
 
         Returns
         -------
-        'Experiment'
+        "Experiment"
             A copy of the Experiment object.
         """
-        temp = self.to_dict(skip=['unique_name'])
+        temp = self.to_dict(skip=["unique_name"])
         new_obj = self.__class__.from_dict(temp)
         new_obj.data = self.data.copy() if self.data is not None else None
         return new_obj
