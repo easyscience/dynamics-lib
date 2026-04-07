@@ -1881,8 +1881,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
-<span class="normal"> 18</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
 <span class="normal"> 19</span>
 <span class="normal"> 20</span>
 <span class="normal"> 21</span>
@@ -2453,7 +2452,13 @@
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds data from an experiment as a sc.DataArray along with metadata.</span>
 
@@ -2471,7 +2476,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&quot;MyExperiment&quot;</span>
+<span class="sd">        display_name : str | None, default=&#39;MyExperiment&#39;</span>
 <span class="sd">            Display name of the experiment.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the experiment. If None, a unique name will be generated. None.</span>
@@ -2585,9 +2590,9 @@
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The Q values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
     <span class="nd">@Q</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2618,9 +2623,9 @@
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
 
     <span class="nd">@energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2661,7 +2666,7 @@
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The masked energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="p">(</span>
@@ -2671,7 +2676,7 @@
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
 
-        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">)</span>
 
         <span class="n">mask_var</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
@@ -2816,7 +2821,7 @@
         <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">transpose_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
@@ -2826,9 +2831,14 @@
 <span class="sd">            If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">        transpose_axes : bool, default=False</span>
 <span class="sd">            If True, transpose the data to have dimensions in the order (energy, Q) before</span>
-<span class="sd">            plotting.</span>
+<span class="sd">            plotting, so that energy is on the x-axis. This only applies when slicer=False.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to pass to plopp.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        InteractiveFigure</span>
+<span class="sd">            A plot of the data and model.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -2840,7 +2850,7 @@
 <span class="sd">            If slicer or transpose_axes are not True or False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
@@ -2865,7 +2875,7 @@
         <span class="n">plot_kwargs_defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">slicer</span><span class="p">:</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">slicer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">bottom_bar</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -3019,7 +3029,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        &quot;Experiment&quot;</span>
+<span class="sd">        &#39;Experiment&#39;</span>
 <span class="sd">            A copy of the Experiment object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;unique_name&#39;</span><span class="p">])</span>
@@ -3141,25 +3151,25 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a copy of the object.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    &quot;Experiment&quot;</span>
+<span class="sd">    &#39;Experiment&#39;</span>
 <span class="sd">        A copy of the Experiment object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;unique_name&#39;</span><span class="p">])</span>
@@ -3221,7 +3231,7 @@
               </div>
             </td>
             <td>
-                  <code>&#34;MyExperiment&#34;</code>
+                  <code>&#39;MyExperiment&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -3295,8 +3305,7 @@ load from. If None, no data is loaded.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -3338,7 +3347,8 @@ load from. If None, no data is loaded.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3349,7 +3359,7 @@ load from. If None, no data is loaded.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&quot;MyExperiment&quot;</span>
+<span class="sd">    display_name : str | None, default=&#39;MyExperiment&#39;</span>
 <span class="sd">        Display name of the experiment.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the experiment. If None, a unique name will be generated. None.</span>
@@ -3438,17 +3448,17 @@ load from. If None, no data is loaded.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
-<span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Experiment object.</span>
 
@@ -3747,8 +3757,7 @@ NaN or Inf for the given Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -3781,7 +3790,8 @@ NaN or Inf for the given Q index.</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the energy values from the dataset, removing points where the y values or variances are</span>
 <span class="sd">    NaN or Inf for the given Q index.</span>
@@ -3801,7 +3811,7 @@ NaN or Inf for the given Q index.</p>
 <span class="sd">    sc.Variable | None</span>
 <span class="sd">        The masked energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="p">(</span>
@@ -3811,7 +3821,7 @@ NaN or Inf for the given Q index.</p>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
 
-    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">)</span>
 
     <span class="n">mask_var</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
@@ -3926,8 +3936,7 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -3959,7 +3968,8 @@ data is not a sc.DataArray.</p>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
-<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">278</span>
+<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load data from an HDF5 file.</span>
 
@@ -4061,7 +4071,7 @@ data is not a sc.DataArray.</p>
             <td>
               <div class="doc-md-description">
                 <p>If True, transpose the data to have dimensions in the order (energy, Q) before
-plotting.</p>
+plotting, so that energy is on the x-axis. This only applies when slicer=False.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4088,6 +4098,32 @@ plotting.</p>
             </td>
             <td>
                   <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="plopp.backends.matplotlib.figure.InteractiveFigure">InteractiveFigure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A plot of the data and model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
             </td>
           </tr>
       </tbody>
@@ -4148,8 +4184,7 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">375</span>
-<span class="normal">376</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">376</span>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
@@ -4217,12 +4252,18 @@ plotting.</p>
 <span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
-<span class="normal">444</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">transpose_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
@@ -4232,9 +4273,14 @@ plotting.</p>
 <span class="sd">        If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">    transpose_axes : bool, default=False</span>
 <span class="sd">        If True, transpose the data to have dimensions in the order (energy, Q) before</span>
-<span class="sd">        plotting.</span>
+<span class="sd">        plotting, so that energy is on the x-axis. This only applies when slicer=False.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional keyword arguments to pass to plopp.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    InteractiveFigure</span>
+<span class="sd">        A plot of the data and model.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -4246,7 +4292,7 @@ plotting.</p>
 <span class="sd">        If slicer or transpose_axes are not True or False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
@@ -4271,7 +4317,7 @@ plotting.</p>
     <span class="n">plot_kwargs_defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">slicer</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">slicer</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="p">,</span>
             <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">bottom_bar</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -4404,8 +4450,7 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
-<span class="normal">317</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
@@ -4457,7 +4502,8 @@ plotting.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">369</span>
+<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebin the dataset along specified dimensions.</span>
 
@@ -4541,10 +4587,10 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
-<span class="normal">312</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">314</span>
+<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the dataset from the experiment.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -4652,8 +4698,7 @@ the experiment with a .h5 extension.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
-<span class="normal">281</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
@@ -4681,7 +4726,8 @@ the experiment with a .h5 extension.</p>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">309</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the dataset to HDF5.</span>
 
@@ -4792,8 +4838,7 @@ the experiment with a .h5 extension.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
-<span class="normal"> 18</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
 <span class="normal"> 19</span>
 <span class="normal"> 20</span>
 <span class="normal"> 21</span>
@@ -5364,7 +5409,13 @@ the experiment with a .h5 extension.</p>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">(</span><span class="n">NewBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds data from an experiment as a sc.DataArray along with metadata.</span>
 
@@ -5382,7 +5433,7 @@ the experiment with a .h5 extension.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&quot;MyExperiment&quot;</span>
+<span class="sd">        display_name : str | None, default=&#39;MyExperiment&#39;</span>
 <span class="sd">            Display name of the experiment.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the experiment. If None, a unique name will be generated. None.</span>
@@ -5496,9 +5547,9 @@ the experiment with a .h5 extension.</p>
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The Q values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
     <span class="nd">@Q</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5529,9 +5580,9 @@ the experiment with a .h5 extension.</p>
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
 
     <span class="nd">@energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5572,7 +5623,7 @@ the experiment with a .h5 extension.</p>
 <span class="sd">        sc.Variable | None</span>
 <span class="sd">            The masked energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="p">(</span>
@@ -5582,7 +5633,7 @@ the experiment with a .h5 extension.</p>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
 
-        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">)</span>
 
         <span class="n">mask_var</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
@@ -5727,7 +5778,7 @@ the experiment with a .h5 extension.</p>
         <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">transpose_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
@@ -5737,9 +5788,14 @@ the experiment with a .h5 extension.</p>
 <span class="sd">            If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">        transpose_axes : bool, default=False</span>
 <span class="sd">            If True, transpose the data to have dimensions in the order (energy, Q) before</span>
-<span class="sd">            plotting.</span>
+<span class="sd">            plotting, so that energy is on the x-axis. This only applies when slicer=False.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to pass to plopp.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        InteractiveFigure</span>
+<span class="sd">            A plot of the data and model.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -5751,7 +5807,7 @@ the experiment with a .h5 extension.</p>
 <span class="sd">            If slicer or transpose_axes are not True or False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
@@ -5776,7 +5832,7 @@ the experiment with a .h5 extension.</p>
         <span class="n">plot_kwargs_defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">slicer</span><span class="p">:</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">slicer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">bottom_bar</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -5930,7 +5986,7 @@ the experiment with a .h5 extension.</p>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        &quot;Experiment&quot;</span>
+<span class="sd">        &#39;Experiment&#39;</span>
 <span class="sd">            A copy of the Experiment object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;unique_name&#39;</span><span class="p">])</span>
@@ -6052,25 +6108,25 @@ the experiment with a .h5 extension.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a copy of the object.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    &quot;Experiment&quot;</span>
+<span class="sd">    &#39;Experiment&#39;</span>
 <span class="sd">        A copy of the Experiment object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;unique_name&#39;</span><span class="p">])</span>
@@ -6132,7 +6188,7 @@ the experiment with a .h5 extension.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;MyExperiment&#34;</code>
+                  <code>&#39;MyExperiment&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6206,8 +6262,7 @@ load from. If None, no data is loaded.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -6249,7 +6304,8 @@ load from. If None, no data is loaded.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyExperiment&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6260,7 +6316,7 @@ load from. If None, no data is loaded.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&quot;MyExperiment&quot;</span>
+<span class="sd">    display_name : str | None, default=&#39;MyExperiment&#39;</span>
 <span class="sd">        Display name of the experiment.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the experiment. If None, a unique name will be generated. None.</span>
@@ -6349,17 +6405,17 @@ load from. If None, no data is loaded.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
-<span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Experiment object.</span>
 
@@ -6658,8 +6714,7 @@ NaN or Inf for the given Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -6692,7 +6747,8 @@ NaN or Inf for the given Q index.</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_masked_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the energy values from the dataset, removing points where the y values or variances are</span>
 <span class="sd">    NaN or Inf for the given Q index.</span>
@@ -6712,7 +6768,7 @@ NaN or Inf for the given Q index.</p>
 <span class="sd">    sc.Variable | None</span>
 <span class="sd">        The masked energy values from the dataset, or None if no data is loaded.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="p">(</span>
@@ -6722,7 +6778,7 @@ NaN or Inf for the given Q index.</p>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Q_index must be a valid index for the Q values.&#39;</span><span class="p">)</span>
 
-    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">)</span>
 
     <span class="n">mask_var</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
@@ -6837,8 +6893,7 @@ data is not a sc.DataArray.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -6870,7 +6925,8 @@ data is not a sc.DataArray.</p>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
-<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">278</span>
+<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load data from an HDF5 file.</span>
 
@@ -6972,7 +7028,7 @@ data is not a sc.DataArray.</p>
             <td>
               <div class="doc-md-description">
                 <p>If True, transpose the data to have dimensions in the order (energy, Q) before
-plotting.</p>
+plotting, so that energy is on the x-axis. This only applies when slicer=False.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6999,6 +7055,32 @@ plotting.</p>
             </td>
             <td>
                   <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="plopp.backends.matplotlib.figure.InteractiveFigure">InteractiveFigure</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A plot of the data and model.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
             </td>
           </tr>
       </tbody>
@@ -7059,8 +7141,7 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">375</span>
-<span class="normal">376</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">376</span>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
@@ -7128,12 +7209,18 @@ plotting.</p>
 <span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
-<span class="normal">444</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">slicer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">transpose_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the dataset using plopp: https://scipp.github.io/plopp/.</span>
 
@@ -7143,9 +7230,14 @@ plotting.</p>
 <span class="sd">        If True, use plopp&#39;s slicer instead of plot.</span>
 <span class="sd">    transpose_axes : bool, default=False</span>
 <span class="sd">        If True, transpose the data to have dimensions in the order (energy, Q) before</span>
-<span class="sd">        plotting.</span>
+<span class="sd">        plotting, so that energy is on the x-axis. This only applies when slicer=False.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional keyword arguments to pass to plopp.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    InteractiveFigure</span>
+<span class="sd">        A plot of the data and model.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -7157,7 +7249,7 @@ plotting.</p>
 <span class="sd">        If slicer or transpose_axes are not True or False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
@@ -7182,7 +7274,7 @@ plotting.</p>
     <span class="n">plot_kwargs_defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">slicer</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">slicer</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binned_data</span><span class="p">,</span>
             <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">bottom_bar</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">controls</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -7315,8 +7407,7 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
-<span class="normal">317</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
@@ -7368,7 +7459,8 @@ plotting.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">369</span>
+<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebin the dataset along specified dimensions.</span>
 
@@ -7452,10 +7544,10 @@ plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
-<span class="normal">312</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
 <span class="normal">313</span>
-<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">314</span>
+<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the dataset from the experiment.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_binned_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -7563,8 +7655,7 @@ the experiment with a .h5 extension.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/experiment/experiment.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
-<span class="normal">281</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
@@ -7592,7 +7683,8 @@ the experiment with a .h5 extension.</p>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">309</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the dataset to HDF5.</span>
 
