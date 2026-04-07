@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
@@ -15,6 +15,9 @@ from scipp import UnitError
 from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class Polynomial(ModelComponent):

@@ -3,14 +3,18 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.utils.utils import Numeric
 
 from .model_component import ModelComponent
+
+if TYPE_CHECKING:
+    import scipp as sc
+    from easyscience.variable import Parameter
 
 
 class Lorentzian(CreateParametersMixin, ModelComponent):
