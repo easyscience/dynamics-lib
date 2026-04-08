@@ -35,9 +35,9 @@ class ComponentCollection(ModelBase):
 
         Parameters
         ----------
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the collection.
-        display_name : str | None, default="MyComponentCollection"
+        display_name : str | None, default='MyComponentCollection'
             Display name of the collection.
         unique_name : str | None, default=None
             Unique name of the collection.
