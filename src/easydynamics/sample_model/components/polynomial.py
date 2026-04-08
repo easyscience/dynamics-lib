@@ -41,9 +41,9 @@ class Polynomial(ModelComponent):
         ----------
         coefficients : Sequence[Numeric | Parameter], default=(0.0,)
             Coefficients c0, c1, ..., cN.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the Polynomial component.
-        display_name : str | None, default='Polynomial'
+        display_name : str | None, default="Polynomial"
             Display name of the Polynomial component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
@@ -267,26 +267,3 @@ class Polynomial(ModelComponent):
             f'Polynomial(unique_name = {self.unique_name}, '
             f'unit = {self._unit},\n coefficients = [{coeffs_str}])'
         )
-
-
-# from typing import Callable, Dict
-# class UserDefinedComponent(ModelComponent):
-#     """
-#     User-defined model component, defined via a custom function.
-
-#     Args:
-#         func (Callable): Function accepting (x, params) and returning
-# np.ndarray.
-#         params (dict): Parameters passed to the function.
-#     """
-
-#     def __init__(
-#         self, name, func: Callable[[np.ndarray, Dict], np.ndarray],
-# params: Dict
-#     ):
-#         super().__init__(name=name)
-#         self.func = func
-#         self.params = params
-
-#     def evaluate(self, x):
-#         return self.func(x, self.params)
