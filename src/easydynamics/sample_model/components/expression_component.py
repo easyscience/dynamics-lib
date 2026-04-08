@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 import sympy as sp
 from easyscience.variable import Parameter
 
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
-
-from .model_component import ModelComponent
 
 if TYPE_CHECKING:
     import numpy as np

@@ -12,7 +12,7 @@ from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 
-from .components.model_component import ModelComponent
+from easydynamics.sample_model.components.model_component import ModelComponent
 
 if TYPE_CHECKING:
     from easydynamics.utils.utils import Numeric

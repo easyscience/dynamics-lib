@@ -3,13 +3,12 @@
 
 import scipp as sc
 
+from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.sample_model.components import DeltaFunction
+from easydynamics.sample_model.components import Polynomial
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.utils.utils import Q_type
-
-from .component_collection import ComponentCollection
-from .components import DeltaFunction
-from .components import Polynomial
-from .components.model_component import ModelComponent
 
 
 class ResolutionModel(ModelBase):

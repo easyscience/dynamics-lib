@@ -3,11 +3,10 @@
 
 import scipp as sc
 
+from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.utils.utils import Q_type
-
-from .component_collection import ComponentCollection
-from .components.model_component import ModelComponent
 
 
 class BackgroundModel(ModelBase):

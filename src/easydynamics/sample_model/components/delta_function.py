@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
-
-from .model_component import ModelComponent
 
 EPSILON = 1e-8  # small number to avoid floating point issues
 

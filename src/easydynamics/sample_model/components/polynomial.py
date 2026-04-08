@@ -12,9 +12,8 @@ from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 from scipp import UnitError
 
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
-
-from .model_component import ModelComponent
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
