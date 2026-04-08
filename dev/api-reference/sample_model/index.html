@@ -11716,7 +11716,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delta function.</span>
 
@@ -11742,9 +11744,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            Center of the delta function. If None.</span>
 <span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -11892,8 +11894,10 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            A string representation of the Delta function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -11989,7 +11993,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -12008,7 +12012,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;DeltaFunction&#39;</code>
+                  <code>&#34;DeltaFunction&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -12093,9 +12097,9 @@ default, None.</p>
 <span class="sd">        Center of the delta function. If None.</span>
 <span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -12183,7 +12187,9 @@ default, None.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Delta function.</span>
 
@@ -12193,8 +12199,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Delta function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16169,7 +16177,9 @@ want in QENS.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Gaussian function.</span>
 
@@ -16204,9 +16214,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Gaussian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -16377,8 +16387,10 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Gaussian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -16493,7 +16505,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -16512,7 +16524,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Gaussian&#39;</code>
+                  <code>&#34;Gaussian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -16605,9 +16617,9 @@ default, None.</p>
 <span class="sd">        Center of the Gaussian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -16697,7 +16709,9 @@ default, None.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Gaussian.</span>
 
@@ -16707,8 +16721,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Gaussian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -20191,7 +20207,9 @@ want in QENS.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Lorentzian function.</span>
 
@@ -20223,9 +20241,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Lorentzian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -20390,8 +20408,10 @@ want in QENS.</p>
 <span class="sd">        str</span>
 <span class="sd">            A string representation of the Lorentzian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -20506,7 +20526,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -20525,7 +20545,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Lorentzian&#39;</code>
+                  <code>&#34;Lorentzian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -20618,9 +20638,9 @@ default, None.</p>
 <span class="sd">        Center of the Lorentzian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -20709,7 +20729,9 @@ default, None.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Lorentzian.</span>
 
@@ -20718,8 +20740,10 @@ default, None.</p>
 <span class="sd">    str</span>
 <span class="sd">        A string representation of the Lorentzian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -21365,9 +21389,9 @@ the coefficients.</p>
 <span class="sd">        ----------</span>
 <span class="sd">        coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">            Coefficients c0, c1, ..., cN.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the Polynomial component.</span>
-<span class="sd">        display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">            Display name of the Polynomial component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -21667,7 +21691,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -21686,7 +21710,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Polynomial&#39;</code>
+                  <code>&#34;Polynomial&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -21826,9 +21850,9 @@ coefficients is not a number or Parameter.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">        Coefficients c0, c1, ..., cN.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the Polynomial component.</span>
-<span class="sd">    display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">        Display name of the Polynomial component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -25864,7 +25888,9 @@ want in QENS.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Voigt profile, a convolution of Gaussian and Lorentzian.</span>
 
@@ -25897,9 +25923,9 @@ want in QENS.</p>
 <span class="sd">            Standard deviation of the Gaussian part.</span>
 <span class="sd">        lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">            Display name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -26107,11 +26133,13 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Voigt.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -26245,7 +26273,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -26264,7 +26292,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Voigt&#39;</code>
+                  <code>&#34;Voigt&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -26375,9 +26403,9 @@ default, None.</p>
 <span class="sd">        Standard deviation of the Gaussian part.</span>
 <span class="sd">    lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">        Display name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -26482,7 +26510,9 @@ default, None.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Voigt.</span>
 
@@ -26492,11 +26522,13 @@ default, None.</p>
 <span class="sd">        A string representation of the Voigt.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -31653,7 +31685,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delta function.</span>
 
@@ -31679,9 +31713,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            Center of the delta function. If None.</span>
 <span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -31829,8 +31863,10 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            A string representation of the Delta function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -31926,7 +31962,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -31945,7 +31981,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;DeltaFunction&#39;</code>
+                  <code>&#34;DeltaFunction&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -32030,9 +32066,9 @@ default, None.</p>
 <span class="sd">        Center of the delta function. If None.</span>
 <span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -32120,7 +32156,9 @@ default, None.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Delta function.</span>
 
@@ -32130,8 +32168,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Delta function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -36106,7 +36146,9 @@ want in QENS.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Gaussian function.</span>
 
@@ -36141,9 +36183,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Gaussian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -36314,8 +36356,10 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Gaussian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -36430,7 +36474,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -36449,7 +36493,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Gaussian&#39;</code>
+                  <code>&#34;Gaussian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -36542,9 +36586,9 @@ default, None.</p>
 <span class="sd">        Center of the Gaussian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -36634,7 +36678,9 @@ default, None.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Gaussian.</span>
 
@@ -36644,8 +36690,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Gaussian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -37226,7 +37274,9 @@ want in QENS.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Lorentzian function.</span>
 
@@ -37258,9 +37308,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Lorentzian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -37425,8 +37475,10 @@ want in QENS.</p>
 <span class="sd">        str</span>
 <span class="sd">            A string representation of the Lorentzian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -37541,7 +37593,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -37560,7 +37612,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Lorentzian&#39;</code>
+                  <code>&#34;Lorentzian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -37653,9 +37705,9 @@ default, None.</p>
 <span class="sd">        Center of the Lorentzian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -37744,7 +37796,9 @@ default, None.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Lorentzian.</span>
 
@@ -37753,8 +37807,10 @@ default, None.</p>
 <span class="sd">    str</span>
 <span class="sd">        A string representation of the Lorentzian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -38400,9 +38456,9 @@ the coefficients.</p>
 <span class="sd">        ----------</span>
 <span class="sd">        coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">            Coefficients c0, c1, ..., cN.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the Polynomial component.</span>
-<span class="sd">        display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">            Display name of the Polynomial component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -38702,7 +38758,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -38721,7 +38777,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Polynomial&#39;</code>
+                  <code>&#34;Polynomial&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -38861,9 +38917,9 @@ coefficients is not a number or Parameter.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">        Coefficients c0, c1, ..., cN.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the Polynomial component.</span>
-<span class="sd">    display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">        Display name of the Polynomial component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -39857,7 +39913,9 @@ want in QENS.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Voigt profile, a convolution of Gaussian and Lorentzian.</span>
 
@@ -39890,9 +39948,9 @@ want in QENS.</p>
 <span class="sd">            Standard deviation of the Gaussian part.</span>
 <span class="sd">        lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">            Display name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -40100,11 +40158,13 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Voigt.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -40238,7 +40298,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -40257,7 +40317,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Voigt&#39;</code>
+                  <code>&#34;Voigt&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -40368,9 +40428,9 @@ default, None.</p>
 <span class="sd">        Standard deviation of the Gaussian part.</span>
 <span class="sd">    lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">        Display name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -40475,7 +40535,9 @@ default, None.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Voigt.</span>
 
@@ -40485,11 +40547,13 @@ default, None.</p>
 <span class="sd">        A string representation of the Voigt.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -42296,7 +42360,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaFunction</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delta function.</span>
 
@@ -42322,9 +42388,9 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            Center of the delta function. If None.</span>
 <span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -42472,8 +42538,10 @@ fixed, which is typically what you want in QENS.</p>
 <span class="sd">            A string representation of the Delta function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -42569,7 +42637,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -42588,7 +42656,7 @@ fixed, which is typically what you want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;DeltaFunction&#39;</code>
+                  <code>&#34;DeltaFunction&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -42673,9 +42741,9 @@ default, None.</p>
 <span class="sd">        Center of the delta function. If None.</span>
 <span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;DeltaFunction&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;DeltaFunction&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -42763,7 +42831,9 @@ default, None.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Delta function.</span>
 
@@ -42773,8 +42843,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Delta function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;DeltaFunction(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -46883,7 +46955,9 @@ want in QENS.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Gaussian function.</span>
 
@@ -46918,9 +46992,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Gaussian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -47091,8 +47165,10 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Gaussian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -47207,7 +47283,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -47226,7 +47302,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Gaussian&#39;</code>
+                  <code>&#34;Gaussian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -47319,9 +47395,9 @@ default, None.</p>
 <span class="sd">        Center of the Gaussian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Gaussian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Gaussian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. if None, a unique_name is automatically generated. By</span>
@@ -47411,7 +47487,9 @@ default, None.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Gaussian.</span>
 
@@ -47421,8 +47499,10 @@ default, None.</p>
 <span class="sd">        A string representation of the Gaussian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Gaussian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -48049,7 +48129,9 @@ want in QENS.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Lorentzian</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of a Lorentzian function.</span>
 
@@ -48081,9 +48163,9 @@ want in QENS.</p>
 <span class="sd">            Center of the Lorentzian. If None.</span>
 <span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">            Name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -48248,8 +48330,10 @@ want in QENS.</p>
 <span class="sd">        str</span>
 <span class="sd">            A string representation of the Lorentzian.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">            area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -48364,7 +48448,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -48383,7 +48467,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Lorentzian&#39;</code>
+                  <code>&#34;Lorentzian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -48476,9 +48560,9 @@ default, None.</p>
 <span class="sd">        Center of the Lorentzian. If None.</span>
 <span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Lorentzian&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Lorentzian&quot;</span>
 <span class="sd">        Name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -48567,7 +48651,9 @@ default, None.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Lorentzian.</span>
 
@@ -48576,8 +48662,10 @@ default, None.</p>
 <span class="sd">    str</span>
 <span class="sd">        A string representation of the Lorentzian.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Lorentzian(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -51065,9 +51153,9 @@ the coefficients.</p>
 <span class="sd">        ----------</span>
 <span class="sd">        coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">            Coefficients c0, c1, ..., cN.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the Polynomial component.</span>
-<span class="sd">        display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">            Display name of the Polynomial component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -51367,7 +51455,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -51386,7 +51474,7 @@ the coefficients.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Polynomial&#39;</code>
+                  <code>&#34;Polynomial&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -51526,9 +51614,9 @@ coefficients is not a number or Parameter.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    coefficients : Sequence[Numeric | Parameter], default=(0.0,)</span>
 <span class="sd">        Coefficients c0, c1, ..., cN.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the Polynomial component.</span>
-<span class="sd">    display_name : str | None, default=&#39;Polynomial&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Polynomial&quot;</span>
 <span class="sd">        Display name of the Polynomial component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -52568,7 +52656,9 @@ want in QENS.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Voigt</span><span class="p">(</span><span class="n">CreateParametersMixin</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Voigt profile, a convolution of Gaussian and Lorentzian.</span>
 
@@ -52601,9 +52691,9 @@ want in QENS.</p>
 <span class="sd">            Standard deviation of the Gaussian part.</span>
 <span class="sd">        lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the parameters.</span>
-<span class="sd">        display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">            Display name of the component.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -52811,11 +52901,13 @@ want in QENS.</p>
 <span class="sd">            A string representation of the Voigt.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">        lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -52949,7 +53041,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -52968,7 +53060,7 @@ want in QENS.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Voigt&#39;</code>
+                  <code>&#34;Voigt&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -53079,9 +53171,9 @@ default, None.</p>
 <span class="sd">        Standard deviation of the Gaussian part.</span>
 <span class="sd">    lorentzian_width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half max (HWHM) of the Lorentzian part.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the parameters.</span>
-<span class="sd">    display_name : str | None, default=&#39;Voigt&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;Voigt&quot;</span>
 <span class="sd">        Display name of the component.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the component. If None, a unique_name is automatically generated. By</span>
@@ -53186,7 +53278,9 @@ default, None.</p>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Voigt.</span>
 
@@ -53196,11 +53290,13 @@ default, None.</p>
 <span class="sd">        A string representation of the Voigt.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> </span><span class="se">\</span>
-<span class="s1">    lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Voigt(unique_name = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">, unit = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;area = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;center = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;gaussian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_width</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;lorentzian_width = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="si">}</span><span class="s1">)&#39;</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
