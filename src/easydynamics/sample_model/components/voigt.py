@@ -50,9 +50,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
             Standard deviation of the Gaussian part.
         lorentzian_width : Numeric | Parameter, default=1.0
             Half width at half max (HWHM) of the Lorentzian part.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        display_name : str | None, default="Voigt"
+        display_name : str | None, default='Voigt'
             Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By

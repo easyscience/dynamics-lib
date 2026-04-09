@@ -51,9 +51,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             Center of the Gaussian. If None.
         width : Numeric | Parameter, default=1.0
             Standard deviation.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        display_name : str | None, default="Gaussian"
+        display_name : str | None, default='Gaussian'
             Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. if None, a unique_name is automatically generated. By

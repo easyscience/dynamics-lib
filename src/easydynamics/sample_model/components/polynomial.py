@@ -41,9 +41,9 @@ class Polynomial(ModelComponent):
         ----------
         coefficients : Sequence[Numeric | Parameter], default=(0.0,)
             Coefficients c0, c1, ..., cN.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the Polynomial component.
-        display_name : str | None, default="Polynomial"
+        display_name : str | None, default='Polynomial'
             Display name of the Polynomial component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
