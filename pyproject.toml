@@ -17,10 +17,11 @@ classifiers = [
   'Operating System :: OS Independent',
   'Programming Language :: Python :: 3 :: Only',
   'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: 3.11',
   'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
+  'Programming Language :: Python :: 3.14',
 ]
-requires-python = '>=3.11'
+requires-python = '>=3.12'
 dependencies = [
   'easyscience', # The base library of the EasyScience framework
   'pooch',       # Data downloader
@@ -47,7 +48,6 @@ dev = [
   'pytest',                          # Testing
   'pytest-cov',                      # Test coverage
   'pytest-xdist',                    # Enable parallel testing
-  'pytest-forked',                   # Isolate tests in subprocesses
   'ruff',                            # Linting and formatting code
   'radon',                           # Code complexity and maintainability
   'validate-pyproject[all]',         # Validate pyproject.toml
@@ -256,7 +256,8 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
+  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
 ]
@@ -302,6 +303,12 @@ max-doc-length = 99
 
 [tool.ruff.lint.pydocstyle]
 convention = 'numpy'
+
+[tool.ruff.lint.pylint]
+# Ruff counts `self`/`cls` in max-args; traditional pylint does not.
+# Setting 6 here matches pylint's default of 5 (excluding self).
+max-args = 6
+max-positional-args = 6
 
 #############################
 # Configuration for pydoclint

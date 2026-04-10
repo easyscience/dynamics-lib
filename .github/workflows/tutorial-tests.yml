@@ -45,10 +45,6 @@ jobs:
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
 
-      - name: Test tutorials as python scripts
-        shell: bash
-        run: pixi run script-tests
-
       - name: Prepare notebooks
         shell: bash
         run: pixi run notebook-prepare
