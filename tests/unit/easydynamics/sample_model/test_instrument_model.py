@@ -25,14 +25,12 @@ class TestInstrumentModel:
         component2 = Gaussian()
         resolution_model = ResolutionModel(components=component2, Q=Q)
 
-        instrument_model = InstrumentModel(
+        return InstrumentModel(
             display_name='TestInstrumentModel',
             background_model=background_model,
             resolution_model=resolution_model,
             Q=Q,
         )
-
-        return instrument_model
 
     @pytest.fixture
     def instrument_model_without_Q(self):
@@ -42,24 +40,21 @@ class TestInstrumentModel:
         component2 = Gaussian()
         resolution_model = ResolutionModel(components=component2)
 
-        instrument_model_without_Q = InstrumentModel(
+        return InstrumentModel(
             display_name='TestInstrumentModel',
             background_model=background_model,
             resolution_model=resolution_model,
         )
-        return instrument_model_without_Q
 
     @pytest.fixture
     def resolution_model(self):
         component = Gaussian()
-        resolution_model = ResolutionModel(components=component)
-        return resolution_model
+        return ResolutionModel(components=component)
 
     @pytest.fixture
     def background_model(self):
         component = Polynomial(coefficients=[1.0, 2.0])
-        background_model = BackgroundModel(components=component)
-        return background_model
+        return BackgroundModel(components=component)
 
     def test_init(self, instrument_model):
         # WHEN THEN
@@ -200,24 +195,32 @@ class TestInstrumentModel:
         ):
             instrument_model.energy_offset = 'invalid_offset'
 
-    def test_get_energy_offset_at_Q(self, instrument_model):
+    def test_get_energy_offset(self, instrument_model):
         # WHEN
 
         # THEN
-        offset_at_Q0 = instrument_model.get_energy_offset_at_Q(0)
+        offset_at_Q0 = instrument_model.get_energy_offset(0)
 
         # EXPECT
         assert offset_at_Q0.value == instrument_model.energy_offset.value
 
-    def test_get_energy_offset_at_Q_invalid_index_raises(self, instrument_model):
+    def test_get_energy_offset_invalid_index_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
             match='Q_index 5 is out of bounds',
         ):
-            instrument_model.get_energy_offset_at_Q(5)
+            instrument_model.get_energy_offset(5)
 
-    def test_get_energy_offset_at_Q_no_Q_raises(self, instrument_model):
+    def test_get_energy_offset_nonint_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.get_energy_offset('invalid_index')
+
+    def test_get_energy_offset_no_Q_raises(self, instrument_model):
         # WHEN
         instrument_model.clear_Q(confirm=True)
 
@@ -226,7 +229,7 @@ class TestInstrumentModel:
             ValueError,
             match='No Q values are set',
         ):
-            instrument_model.get_energy_offset_at_Q(0)
+            instrument_model.get_energy_offset(0)
 
     def test_convert_unit_calls_all_children(self, instrument_model):
         # WHEN
@@ -423,6 +426,63 @@ class TestInstrumentModel:
         instrument_model_without_Q._generate_energy_offsets.assert_called_once()
         np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
         np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+
+    def test_fix_and_free_offset(self, instrument_model):
+        # WHEN
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is False
+
+        # THEN
+        instrument_model.fix_energy_offset()
+
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is True
+        # THEN
+        instrument_model.free_energy_offset()
+
+        # EXPECT
+        for offset in instrument_model._energy_offsets:
+            assert offset.fixed is False
+
+        # THEN
+        instrument_model.fix_energy_offset(Q_index=1)
+
+        # EXPECT
+        for i, offset in enumerate(instrument_model._energy_offsets):
+            if i == 1:
+                assert offset.fixed is True
+            else:
+                assert offset.fixed is False
+
+    def test_fix_or_free_energy_offset_invalid_Q_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds',
+        ):
+            instrument_model.fix_energy_offset(Q_index=5)
+
+        with pytest.raises(
+            IndexError,
+            match='Q_index 5 is out of bounds',
+        ):
+            instrument_model.free_energy_offset(Q_index=5)
+
+    def test_fix_or_free_energy_offset_nonint_Q_index_raises(self, instrument_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.fix_energy_offset(Q_index='invalid_index')
+
+        with pytest.raises(
+            TypeError,
+            match='Q_index must be an int or None, got str',
+        ):
+            instrument_model.free_energy_offset(Q_index='invalid_index')
 
     def test_on_energy_offset_change(self, instrument_model):
         # WHEN

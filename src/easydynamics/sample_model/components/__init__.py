@@ -1,13 +1,16 @@
 # SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from .damped_harmonic_oscillator import DampedHarmonicOscillator
-from .delta_function import DeltaFunction
-from .exponential import Exponential
-from .gaussian import Gaussian
-from .lorentzian import Lorentzian
-from .polynomial import Polynomial
-from .voigt import Voigt
+from easydynamics.sample_model.components.damped_harmonic_oscillator import (
+    DampedHarmonicOscillator,
+)
+from easydynamics.sample_model.components.delta_function import DeltaFunction
+from easydynamics.sample_model.components.exponential import Exponential
+from easydynamics.sample_model.components.expression_component import ExpressionComponent
+from easydynamics.sample_model.components.gaussian import Gaussian
+from easydynamics.sample_model.components.lorentzian import Lorentzian
+from easydynamics.sample_model.components.polynomial import Polynomial
+from easydynamics.sample_model.components.voigt import Voigt
 
 __all__ = [
     'Gaussian',
@@ -17,4 +20,5 @@ __all__ = [
     'DampedHarmonicOscillator',
     'Polynomial',
     'Exponential',
+    'ExpressionComponent',
 ]

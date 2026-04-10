@@ -20,8 +20,7 @@ class TestExperiment:
         values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 11)))
         data = sc.DataArray(data=values, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(display_name='test_experiment', data=data)
-        return experiment
+        return Experiment(display_name='test_experiment', data=data)
 
     @pytest.fixture
     def experiment_with_data(self):
@@ -36,9 +35,7 @@ class TestExperiment:
 
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
-        experiment = Experiment(data=data_array)
-
-        return experiment
+        return Experiment(data=data_array)
 
     ##############
     # test init
@@ -335,7 +332,15 @@ class TestExperiment:
     # test plotting
     ##############
 
-    def test_plot_data_success(self, experiment):
+    @pytest.mark.parametrize(
+        'transpose_axes, expected_dims',
+        [
+            (False, ['Q', 'energy']),
+            (True, ['energy', 'Q']),
+        ],
+        ids=['no_transpose', 'transpose'],
+    )
+    def test_plot_data_success(self, experiment, transpose_axes, expected_dims):
         "Test plotting data successfully when in notebook environment"
         # WHEN
         with (
@@ -346,12 +351,12 @@ class TestExperiment:
             mock_plot.return_value = mock_fig
 
             # THEN
-            result = experiment.plot_data()
+            result = experiment.plot_data(transpose_axes=transpose_axes)
 
             # EXPECT
             mock_plot.assert_called_once()
             args, kwargs = mock_plot.call_args
-            assert sc.identical(args[0], experiment.data.transpose())
+            assert sc.identical(args[0], experiment.data.transpose(dims=expected_dims))
             assert kwargs['title'] == f'{experiment.display_name}'
             assert result == mock_fig
 
@@ -397,6 +402,25 @@ class TestExperiment:
             ),
         ):
             experiment.plot_data()
+
+    def test_plot_data_invalid_slicer_type_raises(self, experiment):
+        "Test plotting data raises TypeError when slicer argument is invalid"
+        # WHEN THEN EXPECT
+
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            pytest.raises(TypeError, match='slicer must be True or False'),
+        ):
+            experiment.plot_data(slicer='not_a_boolean')
+
+    def test_plot_data_invalid_transpose_type_raises(self, experiment):
+        "Test plotting data raises TypeError when transpose argument is invalid"
+        # WHEN THEN EXPECT
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            pytest.raises(TypeError, match='transpose_axes must be True or False'),
+        ):
+            experiment.plot_data(transpose_axes='not_a_boolean')
 
     ##############
     # test private methods

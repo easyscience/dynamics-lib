@@ -148,8 +148,7 @@ plugins:
         python:
           paths: ['src'] # Change 'src' to your actual sources directory
           options:
-            docstring_style: google
-            render_markdown: true
+            docstring_style: numpy
             group_by_category: false
             heading_level: 1
             show_root_heading: true
@@ -183,6 +182,7 @@ nav:
       - Tutorials: tutorials/index.md
       - Getting Started:
           - Tutorial 1. Brownian Diffusion: tutorials/tutorial1_brownian.ipynb
+          - Tutorial 2. Magnetic nanoparticles: tutorials/tutorial2_nanoparticles.ipynb
       - Classes and Methods:
           - Components: tutorials/components.ipynb
           - Component collection: tutorials/component_collection.ipynb

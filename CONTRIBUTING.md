@@ -230,7 +230,6 @@ pixi run license-check.........................Passed
 pixi run py-lint-check.........................Passed
 pixi run py-format-check.......................Passed
 pixi run docstring-lint-check..................Passed
-pixi run docstring-format-check................Passed
 pixi run nonpy-format-check....................Passed
 pixi run notebook-lint-check...................Passed
 pixi run unit-tests............................Passed

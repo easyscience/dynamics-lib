@@ -19,20 +19,26 @@ angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 def _validate_and_convert_Q(
     Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
 ) -> np.ndarray | None:
-    """Validate and convert Q to a numpy array.
+    """
+    Validate and convert Q to a numpy array.
 
-    Args:
-        Q (np.ndarray | Numeric | list | ArrayLike | sc.Variable | None):
-            Scattering vector values in 1/angstrom.
+    Parameters
+    ----------
+    Q : np.ndarray | Numeric | list | ArrayLike | sc.Variable | None
+        Scattering vector values in 1/angstrom.
 
-    Returns:
-        np.ndarray | None: Q as a np.ndarray or None if Q is None.
+    Raises
+    ------
+    TypeError
+        If Q is not a number, list, numpy array, or scipp Variable.
+    ValueError
+        If Q is a numpy array with more than 1 dimension, or if Q is a scipp Variable that does not
+        have a single dimension named 'Q'.
 
-    Raises:
-        TypeError: If Q is not a number, list, numpy array, or scipp
-            Variable.
-        ValueError: If Q is a numpy array with more than 1 dimension, or
-            if Q is a scipp Variable that does not have a single dimension named 'Q'.
+    Returns
+    -------
+    np.ndarray | None
+        Q as a np.ndarray or None if Q is None.
     """
     if Q is None:
         return None
@@ -57,16 +63,23 @@ def _validate_and_convert_Q(
 
 
 def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
-    """Validate that the unit is a string or scipp Unit.
+    """
+    Validate that the unit is a string or scipp Unit.
 
-    Args:
-        unit (str | sc.Unit | None): Unit to validate.
+    Parameters
+    ----------
+    unit : str | sc.Unit | None
+        Unit to validate.
 
-    Returns:
-        sc.Unit | None: Validated unit or None.
+    Raises
+    ------
+    TypeError
+        If unit is not None, a string, or a scipp Unit.
 
-    Raises:
-        TypeError: If unit is not None, a string, or a scipp Unit.
+    Returns
+    -------
+    sc.Unit | None
+        Validated unit or None.
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
@@ -80,10 +93,13 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
 
 
 def _in_notebook() -> bool:
-    """Check if the code is running in a Jupyter notebook.
+    """
+    Check if the code is running in a Jupyter notebook.
 
-    Returns:
-        bool: True if in a Jupyter notebook, False otherwise.
+    Returns
+    -------
+    bool
+        True if in a Jupyter notebook, False otherwise.
     """
     try:
         from IPython import get_ipython
@@ -91,9 +107,8 @@ def _in_notebook() -> bool:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
             return True  # Jupyter notebook or JupyterLab
-        elif shell == 'TerminalInteractiveShell':
+        if shell == 'TerminalInteractiveShell':
             return False  # Terminal IPython
-        else:
-            return False
+        return False
     except (NameError, ImportError):
         return False  # Standard Python (no IPython)

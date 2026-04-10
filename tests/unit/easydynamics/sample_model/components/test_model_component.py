@@ -64,19 +64,17 @@ class TestModelComponent:
         assert 'DummyComponent' in repr_str
 
     @pytest.mark.parametrize(
-        'case, x_input, expected_array',
+        'x_input, expected_array',
         [
-            ('python_scalar', 5.0, np.array([5.0])),
-            ('python_list', [1.0, 2.0, 3.0], np.array([1.0, 2.0, 3.0])),
-            ('numpy_array', np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 3.0])),
-            ('scipp_scalar', sc.scalar(5.0, unit='meV'), np.array([5.0])),
+            (5.0, np.array([5.0])),
+            ([1.0, 2.0, 3.0], np.array([1.0, 2.0, 3.0])),
+            (np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 3.0])),
+            (sc.scalar(5.0, unit='meV'), np.array([5.0])),
             (
-                'scipp_array',
                 sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='meV'),
                 np.array([1.0, 2.0, 3.0]),
             ),
             (
-                'scipp_dataarray',
                 sc.DataArray(
                     data=sc.array(dims=['x'], values=[10.0, 20.0, 30.0]),
                     coords={'x': sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='meV')},
@@ -93,7 +91,7 @@ class TestModelComponent:
             'scipp_dataarray',
         ],
     )
-    def test_prepare_x_for_evaluate_various_inputs(self, dummy, case, x_input, expected_array):
+    def test_prepare_x_for_evaluate_various_inputs(self, dummy, x_input, expected_array):
         x_prepared = dummy._prepare_x_for_evaluate(x_input)
 
         assert isinstance(x_prepared, np.ndarray)

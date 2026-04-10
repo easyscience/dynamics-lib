@@ -34,14 +34,12 @@ class TestModelBase:
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
         component_collection.append_component(component2)
-        model_base = ModelBase(
+        return ModelBase(
             display_name='InitModel',
             components=component_collection,
             unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
-
-        return model_base
 
     def test_init(self, model_base):
         # WHEN THEN

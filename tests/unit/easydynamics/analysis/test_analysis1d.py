@@ -36,7 +36,7 @@ class TestAnalysis1d:
         sample_model = SampleModel(components=Gaussian())
         instrument_model = InstrumentModel()
 
-        analysis1d = Analysis1d(
+        return Analysis1d(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
@@ -44,8 +44,6 @@ class TestAnalysis1d:
             Q_index=0,
             extra_parameters=None,
         )
-
-        return analysis1d
 
     def test_init(self, analysis1d):
         # WHEN THEN
@@ -79,9 +77,9 @@ class TestAnalysis1d:
         [
             (-1, IndexError, 'Q_index must be'),
             (10, IndexError, 'Q_index must be'),
-            ('invalid', IndexError, 'Q_index must be '),
-            (np.nan, IndexError, 'Q_index must be '),
-            ([1, 2], IndexError, 'Q_index must be '),
+            ('invalid', TypeError, 'Q_index must be '),
+            (np.nan, TypeError, 'Q_index must be '),
+            ([1, 2], TypeError, 'Q_index must be '),
         ],
         ids=[
             'Negative index',
@@ -274,6 +272,24 @@ class TestAnalysis1d:
 
         assert result is fake_fig
 
+    def test_fix_and_free_offset(self, analysis1d):
+        # WHEN
+
+        # EXPECT
+        assert analysis1d.instrument_model.get_energy_offset(Q_index=0).fixed is False
+
+        # THEN
+        analysis1d.fix_energy_offset()
+
+        # EXPECT
+        assert analysis1d.instrument_model.get_energy_offset(Q_index=0).fixed is True
+
+        # THEN
+        analysis1d.free_energy_offset()
+
+        # EXPECT
+        assert analysis1d.instrument_model.get_energy_offset(Q_index=0).fixed is False
+
     #############
     # Private methods: small utilities
     #############
@@ -334,7 +350,7 @@ class TestAnalysis1d:
     def test_calculate_energy_with_offset(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
         energy_offset.value = 1.0  # override with a simple value for testing
 
         # THEN
@@ -347,7 +363,7 @@ class TestAnalysis1d:
     def test_calculate_energy_with_offset_different_units(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+        energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
         energy_offset.value = 1.0  # override with a simple value for testing
         energy_offset.convert_unit('eV')
 
@@ -452,7 +468,7 @@ class TestAnalysis1d:
                 )
             )
 
-            energy_offset = analysis1d.instrument_model.get_energy_offset_at_Q(analysis1d.Q_index)
+            energy_offset = analysis1d.instrument_model.get_energy_offset(analysis1d.Q_index)
 
             # Extract call arguments
             _, kwargs = MockConvolution.call_args
@@ -576,7 +592,7 @@ class TestAnalysis1d:
             return_value=resolution_components
         )
 
-        analysis1d.instrument_model.get_energy_offset_at_Q = MagicMock(return_value=123.0)
+        analysis1d.instrument_model.get_energy_offset = MagicMock(return_value=123.0)
 
         with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
             # THEN

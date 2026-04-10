@@ -17,17 +17,24 @@ class EasyDynamicsModelBase(ModelBase):
         display_name: str | None = 'MyEasyDynamicsModel',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the EasyDynamicsModelBase.
+        """
+        Initialize the EasyDynamicsModelBase.
 
-        Args:
-            unit (str | sc.Unit, default="meV"): Unit of the model.
-            name (str | None, default="MyEasyDynamicsModel"): Name of the model.
-            display_name (str | None, default="MyEasyDynamicsModel"): Display name of the model.
-            unique_name (str | None, default=None): Unique name of the model. If None,
-                a unique name will be generated.
+        Parameters
+        ----------
+        unit : str | sc.Unit, default='meV'
+            Unit of the model.
+        name : str | None, default='MyEasyDynamicsModel'
+            Name of the model.
+        display_name : str | None, default='MyEasyDynamicsModel'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
 
-        Raises:
-            TypeError: If name is not a string or None.
+        Raises
+        ------
+        TypeError
+            If name is not a string or None.
         """
         super().__init__(display_name=display_name, unique_name=unique_name)
         self._unit = _validate_unit(unit)
@@ -38,24 +45,31 @@ class EasyDynamicsModelBase(ModelBase):
 
     @property
     def unit(self) -> str | sc.Unit | None:
-        """Get the unit of the model.
+        """
+        Get the unit of the model.
 
-        Returns:
-            str | sc.Unit | None: The unit of the model.
+        Returns
+        -------
+        str | sc.Unit | None
+             The unit of the model.
         """
 
         return self._unit
 
     @unit.setter
-    def unit(self, unit_str: str) -> None:
-        """Unit is read-only and cannot be set directly.
+    def unit(self, _unit_str: str) -> None:
+        """
+        Unit is read-only and cannot be set directly.
 
-        Args:
-            unit_str (str): The new unit to set (ignored).
+        Parameters
+        ----------
+        _unit_str : str
+            The new unit to set (ignored).
 
-        Raises:
-            AttributeError: Always raised to indicate that the unit is
-                read-only.
+        Raises
+        ------
+        AttributeError
+            Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -64,22 +78,30 @@ class EasyDynamicsModelBase(ModelBase):
 
     @property
     def name(self) -> str | None:
-        """Get the name of the model.
+        """
+        Get the name of the model.
 
-        Returns:
-            str | None: The name of the model.
+        Returns
+        -------
+        str | None
+            The name of the model.
         """
         return self._name
 
     @name.setter
     def name(self, name_str: str) -> None:
-        """Set the name of the model.
+        """
+        Set the name of the model.
 
-        Args:
-            name_str (str): The new name to set.
+        Parameters
+        ----------
+        name_str : str
+            The new name to set.
 
-        Raises:
-            TypeError: If name_str is not a string or None.
+        Raises
+        ------
+        TypeError
+            If name_str is not a string or None.
         """
 
         if name_str is not None and not isinstance(name_str, str):

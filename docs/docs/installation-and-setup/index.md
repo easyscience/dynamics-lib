@@ -5,7 +5,7 @@ icon: material/cog-box
 # :material-cog-box: Installation & Setup
 
 **EasyDynamics** is a cross-platform Python library compatible with
-**Python 3.11** through **3.12**.
+**Python 3.12** through **3.14**.
 
 To install and set up EasyDynamics, we recommend using
 [**Pixi**](https://pixi.prefix.dev), a modern package manager for
@@ -62,9 +62,9 @@ This section describes the simplest way to set up EasyDynamics using
   pixi init easydynamics
   cd easydynamics
   ```
-- Set the Python version for the Pixi environment (e.g., 3.12):
+- Set the Python version for the Pixi environment (e.g., 3.14):
   ```txt
-  pixi add python=3.12
+  pixi add python=3.14
   ```
 - Add EasyDynamics to the Pixi environment from PyPI:
   ```txt
@@ -231,26 +231,36 @@ first. This can be done individually via the :material-download:
 
 - Navigate to your existing Pixi project, created as described in the
   [Installing with Pixi](#installing-with-pixi) section.
-- Launch the Jupyter Lab server:
+- Add JupyterLab and the Pixi kernel for Jupyter:
   ```txt
-  pixi run jupyter lab
+  pixi add --pypi jupyterlab pixi-kernel
+  ```
+- Download the EasyDynamics tutorials to the `tutorials/` directory.
+- Start JupyterLab in the `tutorials/` directory to access the
+  notebooks:
+  ```txt
+  pixi run jupyter lab tutorials/
   ```
 - Your web browser should open automatically. Click on one of the
-  `*.ipynb` files downloaded previously and select the `Python (Pixi)`
-  kernel to get started.
+  `*.ipynb` files and select the `Python (Pixi)` kernel to get started.
 
 ### Classical Run Tutorials Locally
 
+- Install Jupyter Notebook and IPython kernel:
+  ```txt
+  pip install notebook ipykernel
+  ```
 - Add the virtual environment as a Jupyter kernel:
   ```txt
   python -m ipykernel install --user --name=venv --display-name "EasyDynamics Python kernel"
   ```
-- Launch the Jupyter Notebook server:
+- Download the EasyDynamics tutorials to the `tutorials/` directory.
+- Launch the Jupyter Notebook server (opens browser automatically at
+  `http://localhost:8888/`):
   ```txt
-  jupyter notebook
+  jupyter notebook tutorials/
   ```
-- Your web browser should open automatically. Click on one of the
-  `*.ipynb` files downloaded previously and select the
+- Open one of the `*.ipynb` files and select the
   `EasyDynamics Python kernel` to get started.
 
 ### Run Tutorials via Google Colab

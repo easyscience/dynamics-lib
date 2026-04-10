@@ -24,7 +24,7 @@ class TestDetailedBalanceFactor:
         with pytest.raises(TypeError, match='energy_unit must be a string.'):
             detailed_balance_factor(energy, T, energy_unit=energy_unit)
 
-    @pytest.mark.parametrize('temperature_unit', [5, 5.0, dict(), list()])
+    @pytest.mark.parametrize('temperature_unit', [5, 5.0, {}, []])
     def test_temperature_unit_not_string_error(self, temperature_unit):
         # When
         energy = 2.0

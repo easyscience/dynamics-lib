@@ -13,9 +13,18 @@ permissions:
 
 jobs:
   check-labels:
+    if: github.actor != 'easyscience[bot]'
+
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: issue-labels-${{ github.event.issue.number }}
+      cancel-in-progress: true
+
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - name: Setup easyscience[bot]
         id: bot
         uses: ./.github/actions/setup-easyscience-bot

@@ -33,15 +33,13 @@ class TestAnalysis:
         sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
         instrument_model = InstrumentModel()
 
-        analysis = Analysis(
+        return Analysis(
             display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
             extra_parameters=None,
         )
-
-        return analysis
 
     def test_init(self, analysis):
         # WHEN THEN
@@ -262,6 +260,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
@@ -272,7 +273,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=False)
 
@@ -286,7 +287,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
 
         # Check the default kwargs
@@ -312,6 +313,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
@@ -323,7 +327,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=True)
 
@@ -337,7 +341,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
         # Check the default kwargs
         assert kwargs['title'] == 'TestAnalysis'
@@ -475,6 +479,43 @@ class TestAnalysis:
 
         # and that we return the figure
         assert result is fake_fig
+
+    def test_fix_and_free_energy_offset(self, analysis):
+        # EXPECT
+        offsets = analysis.instrument_model.get_energy_offset()
+        for offset in offsets:
+            assert offset.fixed is False
+
+        # THEN
+        analysis.fix_energy_offset()
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is True
+
+        # THEN
+        analysis.free_energy_offset()
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is False
+
+        # THEN
+        analysis.fix_energy_offset(Q_index=1)
+
+        # EXPECT
+        for i, offset in enumerate(offsets):
+            if i == 1:
+                assert offset.fixed is True
+            else:
+                assert offset.fixed is False
+
+        # THEN
+        analysis.free_energy_offset(Q_index=1)
+
+        # EXPECT
+        for offset in offsets:
+            assert offset.fixed is False
 
     def test_on_experiment_changed_similar_Q(self, analysis):
         # WHEN
