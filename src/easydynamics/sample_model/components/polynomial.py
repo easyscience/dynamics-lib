@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
@@ -12,9 +12,11 @@ from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 from scipp import UnitError
 
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-from .model_component import ModelComponent
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class Polynomial(ModelComponent):
@@ -265,26 +267,3 @@ class Polynomial(ModelComponent):
             f'Polynomial(unique_name = {self.unique_name}, '
             f'unit = {self._unit},\n coefficients = [{coeffs_str}])'
         )
-
-
-# from typing import Callable, Dict
-# class UserDefinedComponent(ModelComponent):
-#     """
-#     User-defined model component, defined via a custom function.
-
-#     Args:
-#         func (Callable): Function accepting (x, params) and returning
-# np.ndarray.
-#         params (dict): Parameters passed to the function.
-#     """
-
-#     def __init__(
-#         self, name, func: Callable[[np.ndarray, Dict], np.ndarray],
-# params: Dict
-#     ):
-#         super().__init__(name=name)
-#         self.func = func
-#         self.params = params
-
-#     def evaluate(self, x):
-#         return self.func(x, self.params)

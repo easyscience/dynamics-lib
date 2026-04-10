@@ -3,15 +3,18 @@
 
 from __future__ import annotations
 
-import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
+from typing import TYPE_CHECKING
+
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-from .model_component import ModelComponent
+if TYPE_CHECKING:
+    import numpy as np
+    import scipp as sc
+    from easyscience.variable import Parameter
 
 
 class Voigt(CreateParametersMixin, ModelComponent):
@@ -257,8 +260,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
             A string representation of the Voigt.
         """
 
-        return f'Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n \
-        area = {self.area},\n \
-        center = {self.center},\n \
-        gaussian_width = {self.gaussian_width},\n \
-        lorentzian_width = {self.lorentzian_width})'
+        return (
+            f'Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n'
+            f'area = {self.area},\n'
+            f'center = {self.center},\n'
+            f'gaussian_width = {self.gaussian_width},\n'
+            f'lorentzian_width = {self.lorentzian_width})'
+        )

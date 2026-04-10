@@ -3,16 +3,20 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-from .model_component import ModelComponent
-
 EPSILON = 1e-8  # small number to avoid floating point issues
+
+
+if TYPE_CHECKING:
+    import scipp as sc
+    from easyscience.variable import Parameter
 
 
 class DeltaFunction(CreateParametersMixin, ModelComponent):
@@ -191,5 +195,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             A string representation of the Delta function.
         """
 
-        return f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n \
-        area = {self.area},\n center = {self.center}'
+        return (
+            f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n'
+            f'area = {self.area},\n center = {self.center})'
+        )
