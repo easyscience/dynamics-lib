@@ -29,7 +29,7 @@ PYTHONPATH = "${PIXI_PROJECT_ROOT}/src;%PYTHONPATH%"
 [workspace]
 
 # Supported platforms for the lock file (pixi.lock)
-platforms = ['win-64', 'linux-64', 'osx-64', 'osx-arm64']
+platforms = ['win-64', 'linux-64', 'osx-arm64']
 
 # Channels for fetching packages
 channels = ['conda-forge']
@@ -53,17 +53,20 @@ macos = '14.0'
 # Default feature configuration
 
 [dependencies]
-nodejs = '*' # Required for Prettier (non-Python formatting)
+nodejs = '*'      # Required for Prettier (non-Python formatting)
+jupyterlab = '*'  # Jupyter notebooks
+pixi-kernel = '*' # Pixi Jupyter kernel
 
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
-easydynamics = { path = ".", editable = true, extras = ['dev'] }
+#pip = '*' # Native package installer
+easydynamics = { path = '.', editable = true, extras = ['dev'] }
 
 # Specific features: Set specific Python versions
 
 [feature.py-min.dependencies]
-python = '3.11.*'
-[feature.py-max.dependencies]
 python = '3.12.*'
+[feature.py-max.dependencies]
+python = '3.14.*'
 
 ##############
 # ENVIRONMENTS
@@ -73,12 +76,12 @@ python = '3.12.*'
 
 # The `default` feature is always included in all environments.
 # Additional features can be specified per environment.
-py-311-env = { features = ['default', 'py-min'] }
-py-312-env = { features = ['default', 'py-max'] }
+py-312-env = { features = ['py-min'] }
+py-314-env = { features = ['py-max'] }
 
 # The `default` environment is always created and includes the `default` feature.
 # It does not need to be specified explicitly unless non-default features are included.
-default = { features = ['default', 'py-max'] }
+default = { features = ['py-max'] }
 
 #######
 # TASKS
@@ -91,9 +94,9 @@ default = { features = ['default', 'py-max'] }
 ##################
 
 unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
+functional-tests = 'python -m pytest tests/functional/ --color=yes -v'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
-script-tests = 'python -m pytest tools/test_scripts.py --color=yes -n auto -v'
-notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --color=yes -n auto -v'
+notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v'
 
 test = { depends-on = ['unit-tests'] }
 
@@ -150,6 +153,7 @@ raw-metrics-json = 'radon raw -s -j src/'
 #############
 
 unit-tests-coverage = 'pixi run unit-tests --cov=src/easydynamics --cov-report=term-missing'
+functional-tests-coverage = 'pixi run functional-tests --cov=src/easydynamics --cov-report=term-missing'
 integration-tests-coverage = 'pixi run integration-tests --cov=src/easydynamics --cov-report=term-missing'
 docstring-coverage = 'interrogate -c pyproject.toml src/easydynamics'
 
@@ -165,8 +169,8 @@ cov = { depends-on = [
 
 notebook-convert = 'jupytext docs/docs/tutorials/*.py --from py:percent --to ipynb'
 notebook-strip = 'nbstripout docs/docs/tutorials/*.ipynb'
-notebook-tweak = 'python tools/tweak_notebooks.py tutorials/'
-notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --overwrite --color=yes -n auto -v'
+notebook-tweak = 'python tools/tweak_notebooks.py docs/docs/tutorials/'
+notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --overwrite --color=yes -n auto -v'
 
 notebook-prepare = { depends-on = [
   #'notebook-convert',

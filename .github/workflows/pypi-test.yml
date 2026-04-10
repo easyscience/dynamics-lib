@@ -45,29 +45,29 @@ jobs:
       - name: Init pixi project
         run: pixi init easydynamics
 
-      - name: Add Python 3.12 from Conda
+      - name: Set the minimum system requirements
         working-directory: easydynamics
-        run: pixi add "python=3.12"
+        run: pixi project system-requirements add macos 14.0
+
+      - name: Add Python 3.14 from Conda
+        working-directory: easydynamics
+        run: pixi add "python=3.14"
 
       - name: Add other Conda dependencies
         working-directory: easydynamics
         run: pixi add gsl
 
-      - name: Add easydynamics from PyPI
+      - name: Add easydynamics (with dev dependencies) from PyPI
         working-directory: easydynamics
-        run: pixi add --pypi "easydynamics"
-
-      - name: Add dev dependencies from PyPI
-        working-directory: easydynamics
-        run: pixi add --pypi pytest pytest-xdist
-
-      - name: Add Pixi task as a shortcut
-        working-directory: easydynamics
-        run: pixi task add easydynamics "python -m easydynamics"
+        run: pixi add --pypi "easydynamics[dev]"
 
       - name: Run unit tests to verify the installation
         working-directory: easydynamics
         run: pixi run python -m pytest ../tests/unit/ --color=yes -v
+
+      - name: Run functional tests to verify the installation
+        working-directory: easydynamics
+        run: pixi run python -m pytest ../tests/functional/ --color=yes -v
 
       - name: Run integration tests to verify the installation
         working-directory: easydynamics
