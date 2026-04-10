@@ -1510,7 +1510,7 @@
 
 <h1 id="installation-setup"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.25 12c0 .23-.02.46-.05.68l1.48 1.16c.13.11.17.29.08.45l-1.4 2.42c-.09.15-.27.21-.43.15l-1.74-.7c-.36.28-.76.51-1.19.69l-.25 1.85c-.03.17-.18.3-.35.3h-2.8c-.17 0-.32-.13-.35-.3L10 16.85c-.44-.18-.83-.41-1.19-.69l-1.74.7c-.16.06-.34 0-.43-.15l-1.4-2.42a.35.35 0 0 1 .08-.45l1.48-1.16c-.03-.22-.05-.45-.05-.68s.02-.46.05-.68l-1.48-1.16a.35.35 0 0 1-.08-.45l1.4-2.42c.09-.16.27-.22.43-.16l1.74.71c.36-.28.75-.52 1.19-.69l.25-1.86c.03-.16.18-.29.35-.29h2.8c.17 0 .32.13.35.29L14 7.15c.43.17.83.41 1.19.69l1.74-.71c.16-.06.34 0 .43.16l1.4 2.42c.09.15.05.34-.08.45l-1.48 1.16c.03.22.05.45.05.68M19 3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-7 7c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg></span> Installation &amp; Setup</h1>
 <p><strong>EasyDynamics</strong> is a cross-platform Python library compatible with
-<strong>Python 3.11</strong> through <strong>3.12</strong>.</p>
+<strong>Python 3.12</strong> through <strong>3.14</strong>.</p>
 <p>To install and set up EasyDynamics, we recommend using
 <a href="https://pixi.prefix.dev"><strong><abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></strong></a>, a modern package manager for
 Windows, macOS, and Linux.</p>
@@ -1564,8 +1564,8 @@ where you have full write permissions.</p>
   <div class="language-text highlight"><pre><span></span><code>pixi init easydynamics
 cd easydynamics
 </code></pre></div></li>
-<li>Set the Python version for the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> environment (e.g., 3.12):
-  <div class="language-text highlight"><pre><span></span><code>pixi add python=3.12
+<li>Set the Python version for the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> environment (e.g., 3.14):
+  <div class="language-text highlight"><pre><span></span><code>pixi add python=3.14
 </code></pre></div></li>
 <li>Add EasyDynamics to the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> environment from <abbr title="The Python Package Index is a repository of software for the Python programming language.">PyPI</abbr>:
   <div class="language-text highlight"><pre><span></span><code>pixi add --pypi easydynamics
@@ -1705,23 +1705,31 @@ first. This can be done individually via the <span class="twemoji"><svg xmlns="h
 <ul>
 <li>Navigate to your existing <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> project, created as described in the
   <a href="#installing-with-pixi">Installing with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></a> section.</li>
-<li>Launch the Jupyter Lab server:
-  <div class="language-text highlight"><pre><span></span><code>pixi run jupyter lab
+<li>Add <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> and the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> kernel for Jupyter:
+  <div class="language-text highlight"><pre><span></span><code>pixi add --pypi jupyterlab pixi-kernel
+</code></pre></div></li>
+<li>Download the EasyDynamics tutorials to the <code>tutorials/</code> directory.</li>
+<li>Start <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> in the <code>tutorials/</code> directory to access the
+  notebooks:
+  <div class="language-text highlight"><pre><span></span><code>pixi run jupyter lab tutorials/
 </code></pre></div></li>
 <li>Your web browser should open automatically. Click on one of the
-  <code>*.ipynb</code> files downloaded previously and select the <code>Python (Pixi)</code>
-  kernel to get started.</li>
+  <code>*.ipynb</code> files and select the <code>Python (Pixi)</code> kernel to get started.</li>
 </ul>
 <h3 id="classical-run-tutorials-locally">Classical Run Tutorials Locally</h3>
 <ul>
+<li>Install <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> and IPython kernel:
+  <div class="language-text highlight"><pre><span></span><code>pip install notebook ipykernel
+</code></pre></div></li>
 <li>Add the virtual environment as a Jupyter kernel:
   <div class="language-text highlight"><pre><span></span><code>python -m ipykernel install --user --name=venv --display-name &quot;EasyDynamics Python kernel&quot;
 </code></pre></div></li>
-<li>Launch the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server:
-  <div class="language-text highlight"><pre><span></span><code>jupyter notebook
+<li>Download the EasyDynamics tutorials to the <code>tutorials/</code> directory.</li>
+<li>Launch the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server (opens browser automatically at
+  <code>http://localhost:8888/</code>):
+  <div class="language-text highlight"><pre><span></span><code>jupyter notebook tutorials/
 </code></pre></div></li>
-<li>Your web browser should open automatically. Click on one of the
-  <code>*.ipynb</code> files downloaded previously and select the
+<li>Open one of the <code>*.ipynb</code> files and select the
   <code>EasyDynamics Python kernel</code> to get started.</li>
 </ul>
 <h3 id="run-tutorials-via-google-colab">Run Tutorials via <abbr title="Cloud service that allows you to run Jupyter Notebooks in the cloud.">Google Colab</abbr></h3>
