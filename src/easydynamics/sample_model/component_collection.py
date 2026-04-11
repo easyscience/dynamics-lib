@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
@@ -11,9 +12,10 @@ from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 
-from easydynamics.utils.utils import Numeric
+from easydynamics.sample_model.components.model_component import ModelComponent
 
-from .components.model_component import ModelComponent
+if TYPE_CHECKING:
+    from easydynamics.utils.utils import Numeric
 
 
 class ComponentCollection(ModelBase):

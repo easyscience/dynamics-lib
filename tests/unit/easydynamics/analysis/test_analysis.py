@@ -260,6 +260,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
@@ -270,7 +273,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=False)
 
@@ -284,7 +287,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
 
         # Check the default kwargs
@@ -310,6 +313,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
@@ -321,7 +327,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=True)
 
@@ -335,7 +341,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
         # Check the default kwargs
         assert kwargs['title'] == 'TestAnalysis'

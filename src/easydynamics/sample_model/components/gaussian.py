@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-from .model_component import ModelComponent
+if TYPE_CHECKING:
+    import scipp as sc
+    from easyscience.variable import Parameter
 
 
 class Gaussian(CreateParametersMixin, ModelComponent):
@@ -221,5 +224,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             A string representation of the Gaussian.
         """
 
-        return f'Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n \
-            area = {self.area},\n center = {self.center},\n width = {self.width})'
+        return (
+            f'Gaussian(unique_name = {self.unique_name}, unit = {self._unit},\n'
+            f'area = {self.area},\n center = {self.center},\n width = {self.width})'
+        )

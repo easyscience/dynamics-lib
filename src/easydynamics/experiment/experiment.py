@@ -8,6 +8,7 @@ import numpy as np
 import plopp as pp
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
+from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp.io import load_hdf5 as sc_load_hdf5
 from scipp.io import save_hdf5 as sc_save_hdf5
 
@@ -146,9 +147,9 @@ class Experiment(NewBase):
         sc.Variable | None
             The Q values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
-        return self._binned_data.coords['Q']
+        return self.binned_data.coords['Q']
 
     @Q.setter
     def Q(self, _value: sc.Variable) -> None:
@@ -179,9 +180,9 @@ class Experiment(NewBase):
         sc.Variable | None
             The energy values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
-        return self._binned_data.coords['energy']
+        return self.binned_data.coords['energy']
 
     @energy.setter
     def energy(self, _value: sc.Variable) -> None:
@@ -222,7 +223,7 @@ class Experiment(NewBase):
         sc.Variable | None
             The masked energy values from the dataset, or None if no data is loaded.
         """
-        if self._binned_data is None:
+        if self.binned_data is None:
             return None
 
         if (
@@ -232,7 +233,7 @@ class Experiment(NewBase):
         ):
             raise IndexError('Q_index must be a valid index for the Q values.')
 
-        energy = self._binned_data.coords['energy']
+        energy = self.binned_data.coords['energy']
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
 
         mask_var = sc.array(dims=['energy'], values=mask)
@@ -372,7 +373,12 @@ class Experiment(NewBase):
     # other methods
     ###########
 
-    def plot_data(self, slicer: bool = False, **kwargs: dict) -> None:
+    def plot_data(
+        self,
+        slicer: bool = False,
+        transpose_axes: bool = False,
+        **kwargs: dict,
+    ) -> InteractiveFigure:
         """
         Plot the dataset using plopp: https://scipp.github.io/plopp/.
 
@@ -380,8 +386,16 @@ class Experiment(NewBase):
         ----------
         slicer : bool, default=False
             If True, use plopp's slicer instead of plot.
+        transpose_axes : bool, default=False
+            If True, transpose the data to have dimensions in the order (energy, Q) before
+            plotting, so that energy is on the x-axis. This only applies when slicer=False.
         **kwargs : dict
             Additional keyword arguments to pass to plopp.
+
+        Returns
+        -------
+        InteractiveFigure
+            A plot of the data and model.
 
         Raises
         ------
@@ -389,13 +403,23 @@ class Experiment(NewBase):
             If there is no data to plot.
         RuntimeError
             If not in a Jupyter notebook environment.
+        TypeError
+            If slicer or transpose_axes are not True or False.
         """
 
-        if self._binned_data is None:
+        if self.binned_data is None:
             raise ValueError('No data to plot. Please load data first.')
 
         if not _in_notebook():
             raise RuntimeError('plot_data() can only be used in a Jupyter notebook environment.')
+
+        if not isinstance(slicer, bool):
+            raise TypeError(f'slicer must be True or False, not {type(slicer).__name__}')
+
+        if not isinstance(transpose_axes, bool):
+            raise TypeError(
+                f'transpose_axes must be True or False, not {type(transpose_axes).__name__}'
+            )
 
         plot_kwargs_defaults = {
             'title': self.display_name,
@@ -408,15 +432,19 @@ class Experiment(NewBase):
         plot_kwargs_defaults.update(kwargs)
         if slicer:
             fig = pp.slicer(
-                self._binned_data,
+                self.binned_data,
                 **plot_kwargs_defaults,
             )
             for widget in fig.bottom_bar[0].controls.values():
                 widget.slider_toggler.value = '-o-'
 
         else:
+            if transpose_axes:
+                data_to_plot = self.binned_data.transpose(dims=['energy', 'Q'])
+            else:
+                data_to_plot = self.binned_data.transpose(dims=['Q', 'energy'])
             fig = pp.plot(
-                self._binned_data.transpose(dims=['energy', 'Q']),
+                data_to_plot,
                 **plot_kwargs_defaults,
             )
         return fig
