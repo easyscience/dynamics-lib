@@ -22,22 +22,22 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 class TestAnalysis1d:
     @pytest.fixture
     def analysis1d(self):
-        Q = sc.array(dims=["Q"], values=[1, 2, 3], unit="1/Angstrom")
-        energy = sc.array(dims=["energy"], values=[10.0, 20.0, 30.0], unit="meV")
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
         data = sc.array(
-            dims=["Q", "energy"],
+            dims=['Q', 'energy'],
             values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
             variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
         )
 
-        data_array = sc.DataArray(data=data, coords={"Q": Q, "energy": energy})
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         experiment = Experiment(data=data_array)
         sample_model = SampleModel(components=Gaussian())
         instrument_model = InstrumentModel()
 
         return Analysis1d(
-            display_name="TestAnalysis",
+            display_name='TestAnalysis',
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
@@ -49,7 +49,7 @@ class TestAnalysis1d:
         # WHEN THEN
 
         # EXPECT
-        assert analysis1d.display_name == "TestAnalysis"
+        assert analysis1d.display_name == 'TestAnalysis'
         assert isinstance(analysis1d._experiment, Experiment)
         assert isinstance(analysis1d._sample_model, SampleModel)
         assert isinstance(analysis1d._instrument_model, InstrumentModel)
@@ -59,7 +59,7 @@ class TestAnalysis1d:
 
     def test_init_no_experiment(self):
         # WHEN
-        analysis1d = Analysis1d(display_name="TestAnalysisNoExperiment")
+        analysis1d = Analysis1d(display_name='TestAnalysisNoExperiment')
 
         # THEN EXPECT
         assert isinstance(analysis1d._experiment, Experiment)
@@ -73,20 +73,20 @@ class TestAnalysis1d:
         assert analysis1d.Q_index == 1
 
     @pytest.mark.parametrize(
-        "invalid_Q_index, expected_exception, expected_message",
+        'invalid_Q_index, expected_exception, expected_message',
         [
-            (-1, IndexError, "Q_index must be"),
-            (10, IndexError, "Q_index must be"),
-            ("invalid", TypeError, "Q_index must be "),
-            (np.nan, TypeError, "Q_index must be "),
-            ([1, 2], TypeError, "Q_index must be "),
+            (-1, IndexError, 'Q_index must be'),
+            (10, IndexError, 'Q_index must be'),
+            ('invalid', TypeError, 'Q_index must be '),
+            (np.nan, TypeError, 'Q_index must be '),
+            ([1, 2], TypeError, 'Q_index must be '),
         ],
         ids=[
-            "Negative index",
-            "Index out of range",
-            "Non-integer string",
-            "NaN value",
-            "List instead of integer",
+            'Negative index',
+            'Index out of range',
+            'Non-integer string',
+            'NaN value',
+            'List instead of integer',
         ],
     )
     def test_Q_index_setter_incorrect_Q(
@@ -136,7 +136,7 @@ class TestAnalysis1d:
         analysis1d._experiment = None
 
         # EXPECT
-        with pytest.raises(ValueError, match="No experiment"):
+        with pytest.raises(ValueError, match='No experiment'):
             analysis1d.fit()
 
     def test_fit_calls_fitter_with_correct_arguments(self, analysis1d):
@@ -154,17 +154,17 @@ class TestAnalysis1d:
             return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
 
-        analysis1d._create_convolver = MagicMock(return_value="fake_convolver")
+        analysis1d._create_convolver = MagicMock(return_value='fake_convolver')
 
         fake_fit_result = object()
         fake_fitter_instance = MagicMock()
         fake_fitter_instance.fit.return_value = fake_fit_result
 
         with patch(
-            "easydynamics.analysis.analysis1d.EasyScienceFitter",
+            'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=fake_fitter_instance,
         ) as mock_fitter:
-            analysis1d.as_fit_function = MagicMock(return_value="fit_func")
+            analysis1d.as_fit_function = MagicMock(return_value='fit_func')
 
             # THEN
             result = analysis1d.fit()
@@ -177,7 +177,7 @@ class TestAnalysis1d:
 
         mock_fitter.assert_called_once_with(
             fit_object=analysis1d,
-            fit_function="fit_func",
+            fit_function='fit_func',
         )
 
         analysis1d.experiment._extract_x_y_weights_only_finite.assert_called_once()
@@ -214,8 +214,8 @@ class TestAnalysis1d:
 
     def test_get_all_variables(self, analysis1d):
         # WHEN
-        extra_par1 = Parameter(name="extra_par1", value=1.0)
-        extra_par2 = Parameter(name="extra_par2", value=2.0)
+        extra_par1 = Parameter(name='extra_par1', value=1.0)
+        extra_par2 = Parameter(name='extra_par2', value=2.0)
         analysis1d._extra_parameters = [extra_par1, extra_par2]
 
         # THEN
@@ -223,12 +223,8 @@ class TestAnalysis1d:
 
         # EXPECT
         assert isinstance(variables, list)
-        sample_vars = analysis1d.sample_model.get_all_variables(
-            Q_index=analysis1d.Q_index
-        )
-        instrument_vars = analysis1d.instrument_model.get_all_variables(
-            Q_index=analysis1d.Q_index
-        )
+        sample_vars = analysis1d.sample_model.get_all_variables(Q_index=analysis1d.Q_index)
+        instrument_vars = analysis1d.instrument_model.get_all_variables(Q_index=analysis1d.Q_index)
         extra_vars = [extra_par1, extra_par2]
         expected_vars = sample_vars + instrument_vars + extra_vars
         assert Counter(variables) == Counter(expected_vars)
@@ -239,30 +235,24 @@ class TestAnalysis1d:
         analysis1d.experiment._binned_data = None
 
         # EXPECT
-        with pytest.raises(ValueError, match="No data"):
+        with pytest.raises(ValueError, match='No data'):
             analysis1d.plot_data_and_model()
 
     def test_plot_calls_plopp_with_correct_arguments(self, analysis1d):
         # WHEN
 
         # Mock the data and model components to be plotted
-        fake_model = sc.DataArray(data=sc.array(dims=["energy"], values=[1, 2, 3]))
+        fake_model = sc.DataArray(data=sc.array(dims=['energy'], values=[1, 2, 3]))
         analysis1d._create_model_array = MagicMock(return_value=fake_model)
 
-        fake_components = sc.Dataset(
-            {
-                "Component1": sc.DataArray(
-                    data=sc.array(dims=["energy"], values=[0.1, 0.2, 0.3])
-                )
-            }
-        )
-        analysis1d._create_components_dataset_single_Q = MagicMock(
-            return_value=fake_components
-        )
+        fake_components = sc.Dataset({
+            'Component1': sc.DataArray(data=sc.array(dims=['energy'], values=[0.1, 0.2, 0.3]))
+        })
+        analysis1d._create_components_dataset_single_Q = MagicMock(return_value=fake_components)
 
         fake_fig = object()
 
-        with patch("plopp.plot", return_value=fake_fig) as mock_plot:
+        with patch('plopp.plot', return_value=fake_fig) as mock_plot:
             # THEN
             result = analysis1d.plot_data_and_model()
 
@@ -279,9 +269,9 @@ class TestAnalysis1d:
 
         dataset_passed = args[0]
 
-        assert "Data" in dataset_passed
-        assert "Model" in dataset_passed
-        assert "Component1" in dataset_passed
+        assert 'Data' in dataset_passed
+        assert 'Model' in dataset_passed
+        assert 'Component1' in dataset_passed
 
         assert result is fake_fig
 
@@ -319,7 +309,7 @@ class TestAnalysis1d:
         analysis1d._Q_index = None
 
         # EXPECT
-        with pytest.raises(ValueError, match="Q_index must be set"):
+        with pytest.raises(ValueError, match='Q_index must be set'):
             analysis1d._require_Q_index()
 
     def test_on_Q_index_changed(self, analysis1d):
@@ -334,7 +324,7 @@ class TestAnalysis1d:
 
     def test_verify_energy(self, analysis1d):
         # WHEN
-        energy = sc.array(dims=["energy"], values=[10.0, 20.0, 30.0], unit="meV")
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
 
         # THEN
         result = analysis1d._verify_energy(energy)
@@ -357,15 +347,13 @@ class TestAnalysis1d:
         energy = np.array([10.0, 20.0])
 
         # THEN / EXPECT
-        with pytest.raises(TypeError, match="Energy must be a sc.Variable or None"):
+        with pytest.raises(TypeError, match='Energy must be a sc.Variable or None'):
             analysis1d._verify_energy(energy)
 
     def test_calculate_energy_with_offset(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = analysis1d.instrument_model.get_energy_offset(
-            Q_index=analysis1d.Q_index
-        )
+        energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
         energy_offset.value = 1.0  # override with a simple value for testing
 
         # THEN
@@ -378,11 +366,9 @@ class TestAnalysis1d:
     def test_calculate_energy_with_offset_different_units(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = analysis1d.instrument_model.get_energy_offset(
-            Q_index=analysis1d.Q_index
-        )
+        energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
         energy_offset.value = 1.0  # override with a simple value for testing
-        energy_offset.convert_unit("eV")
+        energy_offset.convert_unit('eV')
 
         # THEN
         result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
@@ -391,18 +377,14 @@ class TestAnalysis1d:
         expected = energy.values - energy_offset.value
         np.testing.assert_array_equal(result.values, expected)
 
-    def test_calculate_energy_with_offset_raises_if_incompatible_units(
-        self, analysis1d
-    ):
+    def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
         # WHEN
         energy = analysis1d.experiment.energy
-        energy_offset = Parameter(
-            name="energy_offset", value=1.0, unit="m"
-        )  # incompatible unit
+        energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
 
         # THEN / EXPECT
         with pytest.raises(
-            sc.UnitError, match="Energy and energy offset must have compatible units"
+            sc.UnitError, match='Energy and energy offset must have compatible units'
         ):
             analysis1d._calculate_energy_with_offset(energy, energy_offset)
 
@@ -470,7 +452,7 @@ class TestAnalysis1d:
         analysis1d.instrument_model.resolution_model.components = Gaussian()
         components = Gaussian()
 
-        with patch("easydynamics.analysis.analysis1d.Convolution") as MockConvolution:
+        with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
             # THEN
             analysis1d._evaluate_components(
                 components=components,
@@ -489,21 +471,19 @@ class TestAnalysis1d:
                 )
             )
 
-            energy_offset = analysis1d.instrument_model.get_energy_offset(
-                analysis1d.Q_index
-            )
+            energy_offset = analysis1d.instrument_model.get_energy_offset(analysis1d.Q_index)
 
             # Extract call arguments
             _, kwargs = MockConvolution.call_args
 
-            assert kwargs["sample_components"] == components
-            assert kwargs["resolution_components"] == resolution_components
-            assert kwargs["temperature"] == analysis1d.temperature
-            assert kwargs["energy_offset"] == energy_offset
+            assert kwargs['sample_components'] == components
+            assert kwargs['resolution_components'] == resolution_components
+            assert kwargs['temperature'] == analysis1d.temperature
+            assert kwargs['energy_offset'] == energy_offset
 
             # check that the energy array passed to the convolver is the
             # same as the analysis1d energy array
-            assert sc.identical(kwargs["energy"], analysis1d.energy)
+            assert sc.identical(kwargs['energy'], analysis1d.energy)
 
             # and check that convolution() was called
             MockConvolution.return_value.convolution.assert_called_once_with()
@@ -554,9 +534,7 @@ class TestAnalysis1d:
 
     def test_evaluate_background(self, analysis1d):
         # WHEN
-        analysis1d.instrument_model.background_model.get_component_collection = (
-            MagicMock()
-        )
+        analysis1d.instrument_model.background_model.get_component_collection = MagicMock()
         analysis1d._evaluate_components = MagicMock()
 
         # THEN
@@ -613,13 +591,13 @@ class TestAnalysis1d:
             return_value=sample_components
         )
 
-        analysis1d.instrument_model.resolution_model.get_component_collection = (
-            MagicMock(return_value=resolution_components)
+        analysis1d.instrument_model.resolution_model.get_component_collection = MagicMock(
+            return_value=resolution_components
         )
 
         analysis1d.instrument_model.get_energy_offset = MagicMock(return_value=123.0)
 
-        with patch("easydynamics.analysis.analysis1d.Convolution") as MockConvolution:
+        with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
             # THEN
             result = analysis1d._create_convolver()
 
@@ -629,17 +607,15 @@ class TestAnalysis1d:
 
             _, kwargs = MockConvolution.call_args
 
-            assert kwargs["sample_components"] is sample_components
-            assert kwargs["resolution_components"] is resolution_components
-            assert sc.identical(kwargs["energy"], analysis1d.energy)
-            assert kwargs["temperature"] is analysis1d.temperature
-            assert kwargs["energy_offset"] == 123.0
+            assert kwargs['sample_components'] is sample_components
+            assert kwargs['resolution_components'] is resolution_components
+            assert sc.identical(kwargs['energy'], analysis1d.energy)
+            assert kwargs['temperature'] is analysis1d.temperature
+            assert kwargs['energy_offset'] == 123.0
 
             assert result == MockConvolution.return_value
 
-    def test_create_convolver_returns_none_if_no_resolution_components(
-        self, analysis1d
-    ):
+    def test_create_convolver_returns_none_if_no_resolution_components(self, analysis1d):
         # WHEN
         analysis1d.instrument_model.resolution_model.clear_components()
 
@@ -664,14 +640,14 @@ class TestAnalysis1d:
     #############
 
     @pytest.mark.parametrize(
-        "background",
+        'background',
         [
             None,
             np.array([0.5, 0.5, 0.5]),
         ],
         ids=[
-            "No background",
-            "With background",
+            'No background',
+            'With background',
         ],
     )
     def test_create_component_scipp_array(self, analysis1d, background):
@@ -683,18 +659,14 @@ class TestAnalysis1d:
         # WHEN
 
         # Mock the functions that will be called.
-        analysis1d._evaluate_sample_component = MagicMock(
-            return_value=np.array([1.0, 2.0, 3.0])
-        )
+        analysis1d._evaluate_sample_component = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
 
         analysis1d._to_scipp_array = MagicMock()
 
         component = object()
 
         # THEN
-        analysis1d._create_component_scipp_array(
-            component=component, background=background
-        )
+        analysis1d._create_component_scipp_array(component=component, background=background)
 
         # EXPECT
         analysis1d._evaluate_sample_component.assert_called_once_with(
@@ -711,7 +683,7 @@ class TestAnalysis1d:
         _, kwargs = analysis1d._to_scipp_array.call_args
 
         np.testing.assert_array_equal(
-            kwargs["values"],
+            kwargs['values'],
             expected_values,
         )
 
@@ -745,7 +717,7 @@ class TestAnalysis1d:
         _, kwargs = analysis1d._to_scipp_array.call_args
 
         np.testing.assert_array_equal(
-            kwargs["values"],
+            kwargs['values'],
             np.array([1.0, 2.0, 3.0]),
         )
 
@@ -772,14 +744,14 @@ class TestAnalysis1d:
         _, kwargs = analysis1d._to_scipp_array.call_args
 
         np.testing.assert_array_equal(
-            kwargs["values"],
+            kwargs['values'],
             np.array([1.0, 2.0, 3.0]),
         )
 
     @pytest.mark.parametrize(
-        "add_background",
+        'add_background',
         [True, False],
-        ids=["With background", "Without background"],
+        ids=['With background', 'Without background'],
     )
     def test_create_components_dataset_single_Q(
         self,
@@ -798,7 +770,7 @@ class TestAnalysis1d:
 
         # ---- Sample component ----
         sample_component = MagicMock()
-        sample_component.display_name = "sample_comp"
+        sample_component.display_name = 'sample_comp'
 
         sample_collection = MagicMock()
         sample_collection.components = [sample_component]
@@ -809,13 +781,13 @@ class TestAnalysis1d:
 
         # ---- Background component ----
         background_component = MagicMock()
-        background_component.display_name = "background_comp"
+        background_component.display_name = 'background_comp'
 
         background_collection = MagicMock()
         background_collection.components = [background_component]
 
-        analysis1d.instrument_model.background_model.get_component_collection = (
-            MagicMock(return_value=background_collection)
+        analysis1d.instrument_model.background_model.get_component_collection = MagicMock(
+            return_value=background_collection
         )
 
         # ---- Background evaluation ----
@@ -823,26 +795,18 @@ class TestAnalysis1d:
         analysis1d._evaluate_background = MagicMock(return_value=background_value)
 
         # ---- Return scipp DataArrays ----
-        fake_sample_da = sc.DataArray(
-            data=sc.array(dims=["energy"], values=[1.0, 2.0, 3.0])
-        )
+        fake_sample_da = sc.DataArray(data=sc.array(dims=['energy'], values=[1.0, 2.0, 3.0]))
 
-        analysis1d._create_component_scipp_array = MagicMock(
-            return_value=fake_sample_da
-        )
+        analysis1d._create_component_scipp_array = MagicMock(return_value=fake_sample_da)
 
-        fake_background_da = sc.DataArray(
-            data=sc.array(dims=["energy"], values=[4.0, 5.0, 6.0])
-        )
+        fake_background_da = sc.DataArray(data=sc.array(dims=['energy'], values=[4.0, 5.0, 6.0]))
 
         analysis1d._create_background_component_scipp_array = MagicMock(
             return_value=fake_background_da
         )
 
         # THEN
-        dataset = analysis1d._create_components_dataset_single_Q(
-            add_background=add_background
-        )
+        dataset = analysis1d._create_components_dataset_single_Q(add_background=add_background)
 
         # EXPECT
 
@@ -870,26 +834,26 @@ class TestAnalysis1d:
         analysis1d._create_component_scipp_array.assert_called_once()
         _, kwargs = analysis1d._create_component_scipp_array.call_args
 
-        assert kwargs["component"] is sample_component
+        assert kwargs['component'] is sample_component
 
         if expected_background is None:
-            assert kwargs["background"] is None
+            assert kwargs['background'] is None
         else:
             np.testing.assert_array_equal(
-                kwargs["background"],
+                kwargs['background'],
                 expected_background,
             )
 
         # Background component creation
         analysis1d._create_background_component_scipp_array.assert_called_once()
         _, kwargs = analysis1d._create_background_component_scipp_array.call_args
-        assert kwargs["component"] is background_component
-        assert sc.identical(kwargs["energy"], analysis1d.energy)
+        assert kwargs['component'] is background_component
+        assert sc.identical(kwargs['energy'], analysis1d.energy)
 
         # Dataset content
         assert isinstance(dataset, sc.Dataset)
-        assert "sample_comp" in dataset
-        assert "background_comp" in dataset
+        assert 'sample_comp' in dataset
+        assert 'background_comp' in dataset
 
     def test_to_scipp_array(self, analysis1d):
         # WHEN
@@ -903,10 +867,10 @@ class TestAnalysis1d:
         np.testing.assert_array_equal(scipp_array.values, numpy_array)
 
         np.testing.assert_array_equal(
-            scipp_array.coords["energy"].values, analysis1d.experiment.energy.values
+            scipp_array.coords['energy'].values, analysis1d.experiment.energy.values
         )
 
         np.testing.assert_array_equal(
-            scipp_array.coords["Q"].values,
+            scipp_array.coords['Q'].values,
             analysis1d.experiment.Q[analysis1d.Q_index].values,
         )

@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 """EasyDynamics library."""
 
-from .analysis import Analysis
-from .experiment import Experiment
+from easydynamics.analysis import Analysis
+from easydynamics.experiment import Experiment
 
 __all__ = [
-    "Analysis",
-    "Experiment",
+    'Analysis',
+    'Experiment',
 ]
