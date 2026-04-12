@@ -202,7 +202,7 @@ select = [
   #'FURB', # https://docs.astral.sh/ruff/rules/#refurb-furb
   'I', # https://docs.astral.sh/ruff/rules/#isort-i
   #'N',    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
-  #'NPY',  # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+  'NPY', # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
   #'PGH',  # https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
   #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
   'RUF', # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
@@ -272,7 +272,6 @@ ignore = [
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
-  #  'RUF',    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
 ]
 'docs/**' = [
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
