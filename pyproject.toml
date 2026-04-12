@@ -205,7 +205,7 @@ select = [
   #'NPY',  # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
   #'PGH',  # https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
   #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
-  #'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  'RUF', # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
   #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
   'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
@@ -256,8 +256,7 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
-  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
 ]
@@ -273,6 +272,7 @@ ignore = [
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
+  'RUF',    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
 ]
 'docs/**' = [
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/

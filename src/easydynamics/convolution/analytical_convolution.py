@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import ClassVar
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -26,7 +28,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
     # Mapping of supported component type pairs to convolution methods.
     # Delta functions are handled separately.
-    _CONVOLUTIONS = {
+    _CONVOLUTIONS: ClassVar[dict[str, object]] = {
         ('Gaussian', 'Gaussian'): '_convolute_gaussian_gaussian',
         ('Gaussian', 'Lorentzian'): '_convolute_gaussian_lorentzian',
         ('Gaussian', 'Voigt'): '_convolute_gaussian_voigt',

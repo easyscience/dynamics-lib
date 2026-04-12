@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import ClassVar
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -33,7 +35,7 @@ class Convolution(NumericalConvolutionBase):
 
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
-    _invalidate_plan_on_change = {
+    _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
         'energy',
         '_energy',
         '_energy_grid',

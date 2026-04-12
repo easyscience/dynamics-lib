@@ -432,8 +432,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         return (
             f'{self.__class__.__name__}('
             f'energy=array of shape {self.energy.values.shape},\n '
-            f'sample_components={repr(self.sample_components)}, \n'
-            f'resolution_components={repr(self.resolution_components)},\n '
+            f'sample_components={self.sample_components!r}, \n'
+            f'resolution_components={self.resolution_components!r},\n '
             f'energy_unit={self._energy_unit}, '
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '

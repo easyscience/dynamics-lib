@@ -173,7 +173,7 @@ class ComponentCollection(ModelBase):
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
+        )
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
         """

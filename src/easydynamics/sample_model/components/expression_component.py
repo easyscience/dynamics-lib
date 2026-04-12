@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import ClassVar
 
 import sympy as sp
 from easyscience.variable import Parameter
@@ -29,7 +30,7 @@ class ExpressionComponent(ModelComponent):
     # -------------------------
     # Allowed symbolic functions
     # -------------------------
-    _ALLOWED_FUNCS = {
+    _ALLOWED_FUNCS: ClassVar[dict[str, object]] = {
         # Exponentials & logs
         'exp': sp.exp,
         'log': sp.log,
@@ -62,12 +63,12 @@ class ExpressionComponent(ModelComponent):
     # -------------------------
     # Allowed constants
     # -------------------------
-    _ALLOWED_CONSTANTS = {
+    _ALLOWED_CONSTANTS: ClassVar[dict[str, object]] = {
         'pi': sp.pi,
         'E': sp.E,
     }
 
-    _RESERVED_NAMES = {'x'}
+    _RESERVED_NAMES: ClassVar[dict[str, object]] = {'x'}
 
     def __init__(
         self,

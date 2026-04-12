@@ -72,7 +72,7 @@ class ModelComponent(ModelBase):
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
+        )
 
     def fix_all_parameters(self) -> None:
         """Fix all parameters in the model component."""
@@ -123,7 +123,7 @@ class ModelComponent(ModelBase):
                     f'Found {ncoords} coordinates: {coord_names}.'
                 )
             # get the coordinate, it's a sc.Variable
-            coord_name, coord_obj = next(iter(coords.items()))
+            _, coord_obj = next(iter(coords.items()))
             x = coord_obj
         if isinstance(x, sc.Variable):
             # Need to check if the units are consistent,
