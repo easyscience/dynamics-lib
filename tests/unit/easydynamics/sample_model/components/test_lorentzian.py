@@ -24,18 +24,18 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian.display_name == 'Lorentzian'
-        assert lorentzian.area.value == 1.0
-        assert lorentzian.center.value == 0.0
-        assert lorentzian.width.value == 1.0
+        assert lorentzian.area.value == pytest.approx(1.0)
+        assert lorentzian.center.value == pytest.approx(0.0)
+        assert lorentzian.width.value == pytest.approx(1.0)
         assert lorentzian.unit == 'meV'
         assert lorentzian.center.fixed is True
 
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
         assert lorentzian.display_name == 'TestLorentzian'
-        assert lorentzian.area.value == 2.0
-        assert lorentzian.center.value == 0.5
-        assert lorentzian.width.value == 0.6
+        assert lorentzian.area.value == pytest.approx(2.0)
+        assert lorentzian.center.value == pytest.approx(0.5)
+        assert lorentzian.width.value == pytest.approx(0.6)
         assert lorentzian.unit == 'meV'
 
     def test_init_with_parameters(self):
@@ -88,7 +88,7 @@ class TestLorentzian:
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
-            ValueError, match='The width of a Lorentzian must be greater than zero.'
+            ValueError, match=r'The width of a Lorentzian must be greater than zero.'
         ):
             Lorentzian(
                 display_name='TestLorentzian',
@@ -152,7 +152,7 @@ class TestLorentzian:
         lorentzian.center = None
 
         # EXPECT
-        assert lorentzian.center.value == 0.0
+        assert lorentzian.center.value == pytest.approx(0.0)
         assert lorentzian.center.fixed is True
 
     def test_get_all_parameters(self, lorentzian: Lorentzian):
@@ -189,9 +189,9 @@ class TestLorentzian:
 
         # EXPECT
         assert lorentzian.unit == 'microeV'
-        assert lorentzian.area.value == 2 * 1e3
-        assert lorentzian.center.value == 0.5 * 1e3
-        assert lorentzian.width.value == 0.6 * 1e3
+        assert lorentzian.area.value == pytest.approx(2 * 1e3)
+        assert lorentzian.center.value == pytest.approx(0.5 * 1e3)
+        assert lorentzian.width.value == pytest.approx(0.6 * 1e3)
 
     def test_copy(self, lorentzian: Lorentzian):
         # WHEN THEN

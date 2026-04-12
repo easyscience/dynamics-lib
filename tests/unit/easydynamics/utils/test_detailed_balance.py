@@ -21,7 +21,7 @@ class TestDetailedBalanceFactor:
         T = 100
         energy_unit = 5
         # Then Expect
-        with pytest.raises(TypeError, match='energy_unit must be a string.'):
+        with pytest.raises(TypeError, match=r'energy_unit must be a string.'):
             detailed_balance_factor(energy, T, energy_unit=energy_unit)
 
     @pytest.mark.parametrize('temperature_unit', [5, 5.0, {}, []])
@@ -30,7 +30,7 @@ class TestDetailedBalanceFactor:
         energy = 2.0
         T = 100
         # Then Expect
-        with pytest.raises(TypeError, match='temperature_unit must be a string.'):
+        with pytest.raises(TypeError, match=r'temperature_unit must be a string.'):
             detailed_balance_factor(energy, T, temperature_unit=temperature_unit)
 
     def test_divide_by_temperature_not_bool_error(self):
@@ -39,7 +39,7 @@ class TestDetailedBalanceFactor:
         T = 100
         divide_by_temperature = 'yes'
         # Then Expect
-        with pytest.raises(TypeError, match='divide_by_temperature must be True or False.'):
+        with pytest.raises(TypeError, match=r'divide_by_temperature must be True or False.'):
             detailed_balance_factor(energy, T, divide_by_temperature=divide_by_temperature)
 
     @pytest.mark.parametrize(
@@ -219,7 +219,7 @@ class TestDetailedBalanceFactor:
         # Then
         with pytest.warns(
             UserWarning,
-            match='Input energy has unit µeV, but energy_unit was set to meV. Using µeV.',
+            match='Input energy has unit [µμ]eV, but energy_unit was set to meV. Using [µμ]eV.',
         ):
             result = detailed_balance_factor(
                 energy=energy,

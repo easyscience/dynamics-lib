@@ -272,7 +272,7 @@ ignore = [
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
-  'RUF',    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  #  'RUF',    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
 ]
 'docs/**' = [
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/

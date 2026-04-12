@@ -8,8 +8,6 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 
-Numeric = float | int
-
 
 class DummyComponent(ModelComponent):
     def __init__(self):
@@ -42,13 +40,13 @@ class TestModelComponent:
 
         # EXPECT
         assert dummy.unit == 'microeV'
-        assert dummy.area.value == 1 * 1e3
-        assert dummy.center.value == 2 * 1e3
-        assert dummy.width.value == 3 * 1e3
+        assert dummy.area.value == pytest.approx(1 * 1e3)
+        assert dummy.center.value == pytest.approx(2 * 1e3)
+        assert dummy.width.value == pytest.approx(3 * 1e3)
 
     def test_convert_unit_incorrect_unit_raises(self, dummy: DummyComponent):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Unit must be a string or sc.Unit'):
+        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
             dummy.convert_unit(123)
 
     def test_free_and_fix_all_parameters(self, dummy):
@@ -150,7 +148,7 @@ class TestModelComponent:
         # THEN EXPECT
         with pytest.warns(
             UserWarning,
-            match='Input x has unit µeV, but DummyComponent component ',
+            match='Input x has unit [µμ]eV, but DummyComponent component ',
         ):
             x_prepared = dummy._prepare_x_for_evaluate(x)
 
@@ -158,7 +156,7 @@ class TestModelComponent:
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == (3,)
         np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-        assert dummy.unit == 'µeV'
-        assert dummy.area.value == 1.0 * 1e3
-        assert dummy.center.value == 2.0 * 1e3
-        assert dummy.width.value == 3.0 * 1e3
+        assert dummy.unit == 'µeV'  # noqa: RUF001
+        assert dummy.area.value == pytest.approx(1.0 * 1e3)
+        assert dummy.center.value == pytest.approx(2.0 * 1e3)
+        assert dummy.width.value == pytest.approx(3.0 * 1e3)

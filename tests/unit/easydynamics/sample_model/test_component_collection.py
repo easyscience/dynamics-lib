@@ -66,7 +66,7 @@ class TestComponentCollection:
 
     def test_init_with_invalid_components_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Component must be.'):
+        with pytest.raises(TypeError, match='Component must be'):
             ComponentCollection(components=['NotAComponent'])
 
     def test_init_with_invalid_list_of_components_raises(self):
@@ -152,7 +152,7 @@ class TestComponentCollection:
 
     def test_component_setter_invalid_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=' must be instances of ModelComponent.'):
+        with pytest.raises(TypeError, match=r' must be instances of ModelComponent.'):
             component_collection.components = ['NotAComponent']
 
         with pytest.raises(TypeError, match='components must be a list of'):
@@ -174,7 +174,7 @@ class TestComponentCollection:
 
     def test_is_empty_setter(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(AttributeError, match='is_empty is a read-only property.'):
+        with pytest.raises(AttributeError, match=r'is_empty is a read-only property.'):
             component_collection.is_empty = True
 
     def test_component_setter_empty_list(self, component_collection):
@@ -204,7 +204,7 @@ class TestComponentCollection:
 
     def test_convert_unit_incorrect_unit_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Unit must be a string or sc.Unit'):
+        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
             component_collection.convert_unit(123)
 
     def test_convert_unit_failure_rolls_back(self, component_collection):
@@ -224,7 +224,7 @@ class TestComponentCollection:
         }
 
         # EXPECT
-        with pytest.raises(RuntimeError, match='Conversion failed.'):
+        with pytest.raises(RuntimeError, match=r'Conversion failed.'):
             component_collection.convert_unit('eV')
 
         # Check that all components have their original units
@@ -235,7 +235,7 @@ class TestComponentCollection:
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match='Unit is read-only. Use convert_unit to change the unit',
+            match=r'Unit is read-only. Use convert_unit to change the unit',
         ):
             component_collection.unit = 'eV'
 
@@ -255,7 +255,7 @@ class TestComponentCollection:
         x = np.linspace(-5, 5, 100)
         # EXPECT
         result = component_collection.evaluate(x)
-        assert np.all(result == 0.0)
+        assert np.all(result == pytest.approx(0.0))
         assert result.shape == x.shape
 
     def test_evaluate_component(self, component_collection):
@@ -283,7 +283,7 @@ class TestComponentCollection:
         component_collection = ComponentCollection(display_name='EmptyModel')
         x = np.linspace(-5, 5, 100)
         # EXPECT
-        with pytest.raises(ValueError, match='No components in the model to evaluate.'):
+        with pytest.raises(ValueError, match=r'No components in the model to evaluate.'):
             component_collection.evaluate_component(x, 'AnyComponent')
 
     def test_evaluate_component_invalid_name_type_raises(self, component_collection):
@@ -293,7 +293,7 @@ class TestComponentCollection:
         # THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="Component unique name must be a string, got <class 'int'> instead.",
+            match=r"Component unique name must be a string, got <class 'int'> instead.",
         ):
             component_collection.evaluate_component(x, 123)
 
@@ -312,7 +312,7 @@ class TestComponentCollection:
         # WHEN THEN
         component_collection = ComponentCollection(display_name='EmptyModel')
         # EXPECT
-        with pytest.raises(ValueError, match='No components in the model to normalize.'):
+        with pytest.raises(ValueError, match=r'No components in the model to normalize.'):
             component_collection.normalize_area()
 
     @pytest.mark.parametrize(
@@ -326,7 +326,7 @@ class TestComponentCollection:
         component_collection.components[1].area = area_value
 
         # EXPECT
-        with pytest.raises(ValueError, match='cannot normalize.'):
+        with pytest.raises(ValueError, match=r'cannot normalize'):
             component_collection.normalize_area()
 
     def test_normalize_area_non_area_component_warns(self, component_collection):
