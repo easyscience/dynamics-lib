@@ -215,26 +215,26 @@ select = [
   #'PLC', # https://docs.astral.sh/ruff/rules/#convention-plc
   #'PLE', # https://docs.astral.sh/ruff/rules/#error-ple
   #'PLR', # https://docs.astral.sh/ruff/rules/#refactor-plr
-  #'PLW', # https://docs.astral.sh/ruff/rules/#warning-plw
+  #'PLW', # https://docs.astral.sh/ruff/rules/#warning-plw # Good to enable
   # flake8 rules
-  'A',   # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
-  'ANN', # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-  'ARG', # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
-  #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
-  'B', # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-  #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
+  'A',     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  'ANN',   # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'ARG',   # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+  'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
+  'B',     # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble # enable when base classes have been merged in
   'C4',  # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
   'COM', # https://docs.astral.sh/ruff/rules/#flake8-commas-com
-  #'DTZ',   # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
-  #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
+  'DTZ', # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+  #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em # Unsure if I want it - requires all error messages to be rewritten
   'FA', # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
-  #'FBT',   # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
-  #'FIX',   # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
-  #'G',     # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
-  #'ICN',   # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
-  #'INP',   # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
-  #'ISC',   # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
-  #'LOG',   # https://docs.astral.sh/ruff/rules/#flake8-logging-log
+  #'FBT',   # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt # should eventually be enabled, but may break serialization
+  'FIX', # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
+  'G',   # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
+  'ICN', # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
+  'INP', # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
+  'ISC', # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
+  'LOG', # https://docs.astral.sh/ruff/rules/#flake8-logging-log
   'PIE', # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
   #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt # Should eventually be enabled, but quite a few errors to fix
   'PTH',  # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
