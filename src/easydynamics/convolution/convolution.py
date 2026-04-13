@@ -80,9 +80,9 @@ class Convolution(NumericalConvolutionBase):
             The factor by which to extend the input data range before convolution. Default is 0.2.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
-        temperature_unit : str | sc.Unit, default="K"
+        temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
-        energy_unit : str | sc.Unit, default="meV"
+        energy_unit : str | sc.Unit, default='meV'
             The unit of the energy.
         normalize_detailed_balance : bool, default=True
             Whether to normalize the detailed balance correction. Default is True.

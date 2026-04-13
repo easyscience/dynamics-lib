@@ -671,7 +671,6 @@ class Analysis1d(AnalysisBase):
         if resolution_components.is_empty:
             return None
 
-        # TODO: allow convolution options to be set.
         return Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,

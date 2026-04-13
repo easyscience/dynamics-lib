@@ -206,7 +206,7 @@ select = [
   #'PGH',  # https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
   'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
   'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
-  #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
+  #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try # overly restrictive
   'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
   'E', # https://docs.astral.sh/ruff/rules/#error-e
@@ -246,8 +246,8 @@ select = [
   #'SLF',   # https://docs.astral.sh/ruff/rules/#flake8-self-slf
   #'SLOT',  # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
   #'T20',   # https://docs.astral.sh/ruff/rules/#flake8-print-t20
-  'TC', # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
-  #'TD',    # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+  'TC',  # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
+  'TD',  # https://docs.astral.sh/ruff/rules/#flake8-todos-td
   'TID', # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
 ]
 

@@ -439,8 +439,6 @@ class SampleModel(ModelBase):
         Generate ComponentCollections from the DiffusionModels for each Q and add the components
         from self._components.
         """
-        # TODO regenerate automatically if Q, diffusion models
-        # or components have changed
         super()._generate_component_collections()
 
         if self._Q is None:
