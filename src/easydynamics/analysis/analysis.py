@@ -40,7 +40,7 @@ class Analysis(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyAnalysis'
+        display_name : str | None, default="MyAnalysis"
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -172,7 +172,7 @@ class Analysis(AnalysisBase):
 
         Parameters
         ----------
-        fit_method : str, default='independent'
+        fit_method : str, default="independent"
             Method to use for fitting. Options are "independent" (fit each Q index independently,
             one after the other) or "simultaneous" (fit all Q indices simultaneously).
         Q_index : int | None, default=None
@@ -567,14 +567,18 @@ class Analysis(AnalysisBase):
         ys = []
         ws = []
 
-        for analysis in self.analysis_list:
-            x, y, weight, _ = self.experiment._extract_x_y_weights_only_finite(analysis.Q_index)
+        for analysis1d in self.analysis_list:
+            x, y, weight, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+                analysis1d.Q_index
+            )
             xs.append(x)
             ys.append(y)
             ws.append(weight)
 
             # Make sure the convolver is up to date for this Q index
-            analysis._convolver = analysis._create_convolver(energy=x)
+            analysis1d._convolver = analysis1d._create_convolver(  # noqa: SLF001
+                energy=x
+            )
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,
@@ -655,10 +659,10 @@ class Analysis(AnalysisBase):
             energy = self.energy
 
         datasets = [
-            analysis._create_components_dataset_single_Q(
+            analysis1d._create_components_dataset_single_Q(  # noqa: SLF001
                 add_background=add_background, energy=energy
             )
-            for analysis in self.analysis_list
+            for analysis1d in self.analysis_list
         ]
 
         return sc.concat(datasets, dim='Q')

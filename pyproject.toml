@@ -239,16 +239,16 @@ select = [
   #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
   'PTH', # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
   #'PYI',   # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
-  'RET', # https://docs.astral.sh/ruff/rules/#flake8-return-ret
-  #'RSE',   # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
-  'S',   # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
-  'SIM', # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
-  #'SLF',   # https://docs.astral.sh/ruff/rules/#flake8-self-slf
-  #'SLOT',  # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
-  #'T20',   # https://docs.astral.sh/ruff/rules/#flake8-print-t20
-  'TC',  # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
-  'TD',  # https://docs.astral.sh/ruff/rules/#flake8-todos-td
-  'TID', # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
+  'RET',  # https://docs.astral.sh/ruff/rules/#flake8-return-ret
+  'RSE',  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
+  'S',    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+  'SIM',  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  'SLF',  # https://docs.astral.sh/ruff/rules/#flake8-self-slf
+  'SLOT', # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
+  'T20',  # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+  'TC',   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
+  'TD',   # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+  'TID',  # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
 ]
 
 # Exceptions to the linting rules
@@ -272,6 +272,7 @@ ignore = [
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
+  'SLF',    # https://docs.astral.sh/ruff/rules/#flake8-self-slf # may want to eventually enable it, but accessing private methods is quite useful in tests
 ]
 'docs/**' = [
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
