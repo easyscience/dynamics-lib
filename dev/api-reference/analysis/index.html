@@ -656,10 +656,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -699,62 +695,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tutorials/tutorial0_basics/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tutorial 0. Basics
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tutorials/tutorial0_more_advanced/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tutorial 0. More Advanced
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -2629,7 +2569,11 @@
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -3177,14 +3121,18 @@
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">analysis1d</span><span class="o">.</span><span class="n">Q_index</span>
+            <span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
             <span class="c1"># Make sure the convolver is up to date for this Q index</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">x</span>
+            <span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
             <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">,</span>
@@ -3265,10 +3213,10 @@
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
 
         <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
+            <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
@@ -4263,16 +4211,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -5930,7 +5878,11 @@ title, linestyle, marker, color).</p>
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -6478,14 +6430,18 @@ title, linestyle, marker, color).</p>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">analysis1d</span><span class="o">.</span><span class="n">Q_index</span>
+            <span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
             <span class="c1"># Make sure the convolver is up to date for this Q index</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">x</span>
+            <span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
             <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">,</span>
@@ -6566,10 +6522,10 @@ title, linestyle, marker, color).</p>
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
 
         <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
+            <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
@@ -7564,16 +7520,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -9432,7 +9388,10 @@ title, linestyle, marker, color).</p>
 <span class="normal">834</span>
 <span class="normal">835</span>
 <span class="normal">836</span>
-<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -9607,7 +9566,7 @@ title, linestyle, marker, color).</p>
             <span class="n">fit_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">as_fit_function</span><span class="p">(),</span>
         <span class="p">)</span>
 
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
             <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">()</span>
         <span class="p">)</span>
         <span class="n">fit_result</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -9706,6 +9665,28 @@ title, linestyle, marker, color).</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
+
+        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span><span class="p">]</span>
+        <span class="n">model_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_sample_scipp_array</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">)</span>
+
+        <span class="n">component_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+            <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Create a dataset containing the data, model, and individual</span>
+        <span class="c1"># components for plotting.</span>
+        <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>
+            <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+            <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="n">model_array</span><span class="p">,</span>
+        <span class="p">})</span>
+
+        <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="n">component_dataset</span><span class="p">)</span>
         <span class="n">plot_kwargs_defaults</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
             <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span>
@@ -9714,26 +9695,8 @@ title, linestyle, marker, color).</p>
             <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">},</span>
         <span class="p">}</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
-
-        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
-
-        <span class="c1"># Create a dataset containing the data, model, and individual</span>
-        <span class="c1"># components for plotting.</span>
-        <span class="n">data_and_model</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span><span class="p">],</span>
-            <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_model_array</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">),</span>
-        <span class="p">}</span>
-
         <span class="k">if</span> <span class="n">plot_components</span><span class="p">:</span>
-            <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
-                <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
-                <span class="n">data_and_model</span><span class="p">[</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">comp_name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="p">:</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
                 <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -10079,7 +10042,6 @@ title, linestyle, marker, color).</p>
         <span class="k">if</span> <span class="n">resolution_components</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># TODO: allow convolution options to be set.</span>
         <span class="k">return</span> <span class="n">Convolution</span><span class="p">(</span>
             <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
@@ -10152,7 +10114,7 @@ title, linestyle, marker, color).</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_scipp_array</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_model_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_sample_scipp_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a scipp DataArray for the full sample model including background.</span>
 
@@ -11061,7 +11023,7 @@ and reused during parameter optimization for performance reasons.</p>
         <span class="n">fit_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">as_fit_function</span><span class="p">(),</span>
     <span class="p">)</span>
 
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
         <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="n">fit_result</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -11099,9 +11061,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -11134,9 +11096,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -11480,7 +11442,11 @@ is used.</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_background</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -11518,6 +11484,28 @@ is used.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span><span class="p">]</span>
+    <span class="n">model_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_sample_scipp_array</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">)</span>
+
+    <span class="n">component_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+        <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create a dataset containing the data, model, and individual</span>
+    <span class="c1"># components for plotting.</span>
+    <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>
+        <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="n">model_array</span><span class="p">,</span>
+    <span class="p">})</span>
+
+    <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="n">component_dataset</span><span class="p">)</span>
     <span class="n">plot_kwargs_defaults</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
         <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span>
@@ -11526,26 +11514,8 @@ is used.</p>
         <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">},</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to plot. Please load data first.&#39;</span><span class="p">)</span>
-
-    <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
-
-    <span class="c1"># Create a dataset containing the data, model, and individual</span>
-    <span class="c1"># components for plotting.</span>
-    <span class="n">data_and_model</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span><span class="p">],</span>
-        <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_model_array</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">),</span>
-    <span class="p">}</span>
-
     <span class="k">if</span> <span class="n">plot_components</span><span class="p">:</span>
-        <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
-            <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
-            <span class="n">data_and_model</span><span class="p">[</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">comp_name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">comp_name</span> <span class="ow">in</span> <span class="n">component_dataset</span><span class="p">:</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
             <span class="n">plot_kwargs_defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">comp_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -12076,9 +12046,7 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="normal">410</span>
 <span class="normal">411</span>
 <span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for analysis in EasyDynamics.</span>
 
@@ -12476,10 +12444,8 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="sd">        str</span>
 <span class="sd">            A string representation of the Analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> (display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">)&#39;</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">  (display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">        unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">)&#39;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -12947,9 +12913,7 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="normal">410</span>
 <span class="normal">411</span>
 <span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Analysis.</span>
 
@@ -12958,10 +12922,8 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">    str</span>
 <span class="sd">        A string representation of the Analysis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> (display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">, &#39;</span>
-        <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">)&#39;</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">  (display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">    unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">)&#39;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
