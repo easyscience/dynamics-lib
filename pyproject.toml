@@ -235,8 +235,8 @@ select = [
   #'INP',   # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
   #'ISC',   # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
   #'LOG',   # https://docs.astral.sh/ruff/rules/#flake8-logging-log
-  #'PIE',   # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
-  #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
+  'PIE', # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+  #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt # Should eventually be enabled, but quite a few errors to fix
   'PTH',  # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
   'PYI',  # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
   'RET',  # https://docs.astral.sh/ruff/rules/#flake8-return-ret

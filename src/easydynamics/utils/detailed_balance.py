@@ -25,8 +25,8 @@ LARGE_THRESHOLD = 100
 def detailed_balance_factor(
     energy: float | list | np.ndarray | sc.Variable,
     temperature: float | sc.Variable | Parameter,
-    energy_unit: str | sc.Unit = "meV",
-    temperature_unit: str | sc.Unit = "K",
+    energy_unit: str | sc.Unit = 'meV',
+    temperature_unit: str | sc.Unit = 'K',
     divide_by_temperature: bool = True,
 ) -> np.ndarray:
     r"""
@@ -84,54 +84,54 @@ def detailed_balance_factor(
 
     # Input validation
     if not isinstance(divide_by_temperature, bool):
-        raise TypeError("divide_by_temperature must be True or False.")
+        raise TypeError('divide_by_temperature must be True or False.')
 
     if not isinstance(energy_unit, (str, sc.Unit)):
-        raise TypeError("energy_unit must be a string or scipp.Unit.")
+        raise TypeError('energy_unit must be a string or scipp.Unit.')
 
     if not isinstance(temperature_unit, (str, sc.Unit)):
-        raise TypeError("temperature_unit must be a string or scipp.Unit.")
+        raise TypeError('temperature_unit must be a string or scipp.Unit.')
 
     # Convert temperature and energy to sc variables
     # to make units easy to handle
     temperature = _convert_to_scipp_variable(
-        value=temperature, unit=temperature_unit, name="temperature"
+        value=temperature, unit=temperature_unit, name='temperature'
     )
 
     if temperature.value < 0:
-        raise ValueError("Temperature must be non-negative.")
+        raise ValueError('Temperature must be non-negative.')
 
-    energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name="energy")
+    energy = _convert_to_scipp_variable(value=energy, unit=energy_unit, name='energy')
 
     # What if people give units that don't make sense?
     try:
-        sc.to_unit(energy, unit="meV")
+        sc.to_unit(energy, unit='meV')
     except Exception as e:
         raise UnitError(
-            f"The unit of energy is wrong: {energy.unit}: {e} Check that energy has a valid unit."
+            f'The unit of energy is wrong: {energy.unit}: {e} Check that energy has a valid unit.'
         ) from e
     # We give users the option to specify the unit of the energy,
     # but if the input has a unit, they might clash
     if energy.unit != energy_unit:
         warnings.warn(
-            f"Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. "
-            f"Using {energy.unit}.",
+            f'Input energy has unit {energy.unit}, but energy_unit was set to {energy_unit}. '
+            f'Using {energy.unit}.',
             stacklevel=2,
         )
 
     # Same for temperature
     try:
-        sc.to_unit(temperature, unit="K")
+        sc.to_unit(temperature, unit='K')
     except Exception as e:
         raise UnitError(
-            f"The unit of temperature is wrong: {temperature.unit}: {e} "
-            f"Check that temperature has a valid unit."
+            f'The unit of temperature is wrong: {temperature.unit}: {e} '
+            f'Check that temperature has a valid unit.'
         ) from e
 
     if temperature.unit != temperature_unit:
         warnings.warn(
-            f"Input temperature has unit {temperature.unit}, "
-            f"but temperature_unit was set to {temperature_unit}. Using {temperature.unit}.",
+            f'Input temperature has unit {temperature.unit}, '
+            f'but temperature_unit was set to {temperature_unit}. Using {temperature.unit}.',
             stacklevel=2,
         )
 
@@ -139,7 +139,7 @@ def detailed_balance_factor(
     # Here, DBF is 0 for energy<0 and energy for energy>0
     if temperature.value == 0:
         if divide_by_temperature:
-            raise ZeroDivisionError("Cannot divide by T when T = 0.")
+            raise ZeroDivisionError('Cannot divide by T when T = 0.')
         DBF = sc.where(energy < 0.0 * energy.unit, 0.0 * energy.unit, energy)
 
         return np.array([DBF.value]) if DBF.sizes == {} else DBF.values
@@ -151,7 +151,7 @@ def detailed_balance_factor(
 
     x = energy / (kB * temperature)
 
-    x = sc.to_unit(x, unit="1")  # Make sure the unit is 1 and not e.g. 1e3
+    x = sc.to_unit(x, unit='1')  # Make sure the unit is 1 and not e.g. 1e3
 
     # Now compute DBF. First handle small and large x, then general.
 
@@ -168,9 +168,7 @@ def detailed_balance_factor(
 
     # General case: exact formula
     mid = sc.logical_not(small) & sc.logical_not(large)
-    DBF = sc.where(
-        mid, x / (1 - sc.exp(-x)), DBF
-    )  # zeros in x are handled by SMALL_THRESHOLD
+    DBF = sc.where(mid, x / (1 - sc.exp(-x)), DBF)  # zeros in x are handled by SMALL_THRESHOLD
 
     #
     if not divide_by_temperature:
@@ -190,7 +188,7 @@ def _convert_to_scipp_variable(
 
     Parameters
     ----------
-    value : int | float | list | np.ndarray | Parameter | sc.Variable
+    value : float | list | np.ndarray | Parameter | sc.Variable
         The value to convert. Can be a number, list, numpy array, Parameter, or scipp Variable. If
         a number or list, the unit must be specified in the unit argument.
     name : str
@@ -224,13 +222,9 @@ def _convert_to_scipp_variable(
         array_value = np.array(value.value)
         unit = value.unit
     else:
-        if name == "energy":
-            raise TypeError(
-                f"{name} must be a number, list, numpy array or scipp Variable"
-            )
-        raise TypeError(
-            f"{name} must be a number, list, numpy array, Parameter or scipp Variable"
-        )
+        if name == 'energy':
+            raise TypeError(f'{name} must be a number, list, numpy array or scipp Variable')
+        raise TypeError(f'{name} must be a number, list, numpy array, Parameter or scipp Variable')
 
     # Create appropriate scipp variable based on shape
     if array_value.shape == () or (array_value.shape == (1,)):
@@ -242,6 +236,6 @@ def _convert_to_scipp_variable(
     else:
         # Multi-element array
         try:
-            return sc.array(dims=["x"], values=array_value, unit=unit)
+            return sc.array(dims=['x'], values=array_value, unit=unit)
         except UnitError as e:
             raise UnitError(f"Invalid unit string '{unit}' for {name}: {e}") from e

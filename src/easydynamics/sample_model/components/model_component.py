@@ -235,7 +235,6 @@ class ModelComponent(ModelBase):
         np.ndarray
             Evaluated function values.
         """
-        pass
 
     def __repr__(self) -> str:
         """
