@@ -204,8 +204,8 @@ select = [
   #'N',    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
   'NPY', # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
   #'PGH',  # https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
-  #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
-  'RUF', # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
+  'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
   #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
   'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
