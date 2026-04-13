@@ -237,8 +237,8 @@ select = [
   #'LOG',   # https://docs.astral.sh/ruff/rules/#flake8-logging-log
   #'PIE',   # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
   #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
-  'PTH', # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
-  #'PYI',   # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+  'PTH',  # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+  'PYI',  # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
   'RET',  # https://docs.astral.sh/ruff/rules/#flake8-return-ret
   'RSE',  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
   'S',    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
