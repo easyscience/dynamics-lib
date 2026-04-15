@@ -195,7 +195,7 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(
+        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
             Q_index=self._require_Q_index()
         )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
@@ -667,7 +667,6 @@ class Analysis1d(AnalysisBase):
         if resolution_components.is_empty:
             return None
 
-        # TODO: allow convolution options to be set.
         return Convolution(
             sample_components=sample_components,
             resolution_components=resolution_components,

@@ -26,9 +26,9 @@ class TestJumpTranslationalDiffusion:
         # WHEN THEN EXPECT
         assert jump_diffusion_model.display_name == 'JumpTranslationalDiffusion'
         assert jump_diffusion_model.unit == 'meV'
-        assert jump_diffusion_model.scale.value == 1.0
-        assert jump_diffusion_model.diffusion_coefficient.value == 1.0
-        assert jump_diffusion_model.relaxation_time.value == 1.0
+        assert jump_diffusion_model.scale.value == pytest.approx(1.0)
+        assert jump_diffusion_model.diffusion_coefficient.value == pytest.approx(1.0)
+        assert jump_diffusion_model.relaxation_time.value == pytest.approx(1.0)
 
     @pytest.mark.parametrize(
         'kwargs,expected_exception, expected_message',
@@ -84,16 +84,16 @@ class TestJumpTranslationalDiffusion:
         jump_diffusion_model.diffusion_coefficient = 3.0
 
         # THEN EXPECT
-        assert jump_diffusion_model.diffusion_coefficient.value == 3.0
+        assert jump_diffusion_model.diffusion_coefficient.value == pytest.approx(3.0)
 
     def test_diffusion_coefficient_setter_raises(self, jump_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='diffusion_coefficient must be a number.'):
+        with pytest.raises(TypeError, match=r'diffusion_coefficient must be a number.'):
             jump_diffusion_model.diffusion_coefficient = 'invalid'  # Invalid type
 
     def test_diffusion_coefficient_setter_negative_raises(self, jump_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='diffusion_coefficient must be non-negative.'):
+        with pytest.raises(ValueError, match=r'diffusion_coefficient must be non-negative.'):
             jump_diffusion_model.diffusion_coefficient = -1.0  # Invalid negative value
 
     def test_relaxation_time_setter(self, jump_diffusion_model):
@@ -101,16 +101,16 @@ class TestJumpTranslationalDiffusion:
         jump_diffusion_model.relaxation_time = 2.5
 
         # THEN EXPECT
-        assert jump_diffusion_model.relaxation_time.value == 2.5
+        assert jump_diffusion_model.relaxation_time.value == pytest.approx(2.5)
 
     def test_relaxation_time_setter_raises(self, jump_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='relaxation_time must be a number.'):
+        with pytest.raises(TypeError, match=r'relaxation_time must be a number.'):
             jump_diffusion_model.relaxation_time = 'invalid'  # Invalid type
 
     def test_relaxation_time_setter_negative_raises(self, jump_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='relaxation_time must be non-negative.'):
+        with pytest.raises(ValueError, match=r'relaxation_time must be non-negative.'):
             jump_diffusion_model.relaxation_time = -1.0  # Invalid negative value
 
     def test_calculate_width_type_error(self, jump_diffusion_model):
@@ -208,7 +208,7 @@ class TestJumpTranslationalDiffusion:
         self, jump_diffusion_model
     ):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='component_name must be a string.'):
+        with pytest.raises(TypeError, match=r'component_name must be a string.'):
             jump_diffusion_model.create_component_collections(
                 Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
             )
@@ -220,7 +220,7 @@ class TestJumpTranslationalDiffusion:
 
     def test_create_component_collections_Q_1dimensional_error(self, jump_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='Q must be a 1-dimensional array.'):
+        with pytest.raises(ValueError, match=r'Q must be a 1-dimensional array.'):
             jump_diffusion_model.create_component_collections(
                 Q=np.array([[0.1, 0.2], [0.3, 0.4]])
             )  # Invalid shape

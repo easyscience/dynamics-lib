@@ -265,7 +265,7 @@ class TestAnalysis1d:
         mock_plot.assert_called_once()
 
         # Inspect arguments
-        args, kwargs = mock_plot.call_args
+        args, _ = mock_plot.call_args
 
         dataset_passed = args[0]
 
@@ -347,7 +347,7 @@ class TestAnalysis1d:
         energy = np.array([10.0, 20.0])
 
         # THEN / EXPECT
-        with pytest.raises(TypeError, match='Energy must be a sc.Variable or None'):
+        with pytest.raises(TypeError, match=r'Energy must be a sc.Variable or None'):
             analysis1d._verify_energy(energy)
 
     def test_calculate_energy_with_offset(self, analysis1d):
@@ -402,7 +402,7 @@ class TestAnalysis1d:
         # EXPECT
         assert isinstance(result, np.ndarray)
         assert result.shape == (len(analysis1d.experiment.energy),)
-        assert np.all(result == 0.0)
+        assert np.all(result == pytest.approx(0.0))
 
     def test_evaluate_components_no_convolution(self, analysis1d):
         # WHEN
@@ -611,7 +611,7 @@ class TestAnalysis1d:
             assert kwargs['resolution_components'] is resolution_components
             assert sc.identical(kwargs['energy'], analysis1d.energy)
             assert kwargs['temperature'] is analysis1d.temperature
-            assert kwargs['energy_offset'] == 123.0
+            assert kwargs['energy_offset'] == pytest.approx(123.0)
 
             assert result == MockConvolution.return_value
 

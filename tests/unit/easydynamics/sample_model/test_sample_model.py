@@ -65,7 +65,7 @@ class TestSampleModel:
         assert isinstance(model.diffusion_models, list)
         assert len(model.diffusion_models) == 1
         assert isinstance(model.diffusion_models[0], BrownianTranslationalDiffusion)
-        assert model.temperature.value == 10.0
+        assert model.temperature.value == pytest.approx(10.0)
         assert model.divide_by_temperature is True
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
@@ -205,7 +205,7 @@ class TestSampleModel:
         model.temperature = 20.0
 
         # EXPECT
-        assert model.temperature.value == 20.0
+        assert model.temperature.value == pytest.approx(20.0)
 
         # THEN
         model.temperature = None
@@ -217,7 +217,7 @@ class TestSampleModel:
         model.temperature = 0.0
 
         # EXPECT
-        assert model.temperature.value == 0.0
+        assert model.temperature.value == pytest.approx(0.0)
 
     @pytest.mark.parametrize(
         'invalid_value',
@@ -233,7 +233,7 @@ class TestSampleModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             (TypeError, ValueError),
-            match='temperature must be a number or None|temperature must be non-negative',
+            match=r'temperature must be a number or None|temperature must be non-negative',
         ):
             sample_model.temperature = invalid_value
 
@@ -347,9 +347,9 @@ class TestSampleModel:
             assert isinstance(collection, ComponentCollection)
             assert len(collection.components) == 3  # 3 components
             assert collection.components[0].display_name == 'TestGaussian1'
-            assert collection.components[0].area.value == 1.0
+            assert collection.components[0].area.value == pytest.approx(1.0)
             assert collection.components[1].display_name == 'TestLorentzian1'
-            assert collection.components[1].area.value == 2.0
+            assert collection.components[1].area.value == pytest.approx(2.0)
             assert collection.components[2].display_name == 'Brownian diffusion'
             assert isinstance(collection.components[2], Lorentzian)
 

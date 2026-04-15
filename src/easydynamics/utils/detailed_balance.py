@@ -23,8 +23,8 @@ LARGE_THRESHOLD = 100
 
 
 def detailed_balance_factor(
-    energy: int | float | list | np.ndarray | sc.Variable,
-    temperature: int | float | sc.Variable | Parameter,
+    energy: float | list | np.ndarray | sc.Variable,
+    temperature: float | sc.Variable | Parameter,
     energy_unit: str | sc.Unit = 'meV',
     temperature_unit: str | sc.Unit = 'K',
     divide_by_temperature: bool = True,
@@ -37,9 +37,9 @@ def detailed_balance_factor(
 
     Parameters
     ----------
-    energy : int | float | list | np.ndarray | sc.Variable
+    energy : float | list | np.ndarray | sc.Variable
         The energy transfer. If number, assumed to be in meV unless energy_unit is set.
-    temperature : int | float | sc.Variable | Parameter
+    temperature : float | sc.Variable | Parameter
         The temperature. If number, assumed to be in K unless temperature_unit is set.
     energy_unit : str | sc.Unit, default='meV'
         Unit for energy if energy is given as a number or list.
@@ -179,7 +179,7 @@ def detailed_balance_factor(
 
 
 def _convert_to_scipp_variable(
-    value: int | float | list | np.ndarray | Parameter | sc.Variable,
+    value: float | list | np.ndarray | Parameter | sc.Variable,
     name: str,
     unit: str | None = None,
 ) -> sc.Variable:
@@ -188,7 +188,7 @@ def _convert_to_scipp_variable(
 
     Parameters
     ----------
-    value : int | float | list | np.ndarray | Parameter | sc.Variable
+    value : float | list | np.ndarray | Parameter | sc.Variable
         The value to convert. Can be a number, list, numpy array, Parameter, or scipp Variable. If
         a number or list, the unit must be specified in the unit argument.
     name : str

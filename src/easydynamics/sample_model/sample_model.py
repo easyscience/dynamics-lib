@@ -302,7 +302,7 @@ class SampleModel(ModelBase):
         raise AttributeError(
             f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types '  # noqa: E501
             f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
+        )
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:
         """
@@ -439,8 +439,6 @@ class SampleModel(ModelBase):
         Generate ComponentCollections from the DiffusionModels for each Q and add the components
         from self._components.
         """
-        # TODO regenerate automatically if Q, diffusion models
-        # or components have changed
         super()._generate_component_collections()
 
         if self._Q is None:

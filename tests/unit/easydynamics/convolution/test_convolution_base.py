@@ -169,7 +169,7 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='Energy must be a Number, a numpy ndarray or a scipp Variable.',
+            match=r'Energy must be a Number, a numpy ndarray or a scipp Variable.',
         ):
             convolution_base.energy = 'invalid'
 
@@ -181,7 +181,7 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match='Use convert_unit to change the unit between allowed types ',
+            match=r'Use convert_unit to change the unit between allowed types ',
         ):
             convolution_base.unit = 'K'
 
@@ -198,7 +198,7 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='Energy unit must be a string or scipp unit.',
+            match=r'Energy unit must be a string or scipp unit.',
         ):
             convolution_base.convert_unit(123)
 
@@ -206,7 +206,7 @@ class TestConvolutionBase:
         # WHEN THEN
         with pytest.raises(
             UnitError,
-            match='Conversion from `meV` to `s` is not valid.',
+            match=r'Conversion from `meV` to `s` is not valid.',
         ):
             convolution_base.convert_unit('s')
 
@@ -221,7 +221,7 @@ class TestConvolutionBase:
         # THEN
         with pytest.raises(
             UnitError,
-            match='Conversion from `s` to `meV` is not valid.',
+            match=r'Conversion from `s` to `meV` is not valid.',
         ):
             convolution_base.convert_unit('meV')
 
@@ -246,7 +246,7 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
-            match='Energy_offset must be a number or a Parameter.',
+            match=r'Energy_offset must be a number or a Parameter.',
         ):
             convolution_base.energy_offset = 'invalid'
 
@@ -277,8 +277,8 @@ class TestConvolutionBase:
         with pytest.raises(
             TypeError,
             match=(
-                '`sample_components` is an instance of str, '
-                'but must be a ComponentCollection or ModelComponent.'
+                r'`sample_components` is an instance of str, '
+                r'but must be a ComponentCollection or ModelComponent.'
             ),
         ):
             convolution_base.sample_components = 'invalid'
@@ -301,8 +301,8 @@ class TestConvolutionBase:
         with pytest.raises(
             TypeError,
             match=(
-                '`resolution_components` is an instance of str, '
-                'but must be a ComponentCollection or ModelComponent.'
+                r'`resolution_components` is an instance of str, '
+                r'but must be a ComponentCollection or ModelComponent.'
             ),
         ):
             convolution_base.resolution_components = 'invalid'

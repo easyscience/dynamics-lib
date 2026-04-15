@@ -66,13 +66,13 @@ class NumericalConvolutionBase(ConvolutionBase):
             The factor by which to extend the input data range before convolution.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
-        temperature_unit : str | sc.Unit, default='K'
+        temperature_unit : str | sc.Unit, default="K"
             The unit of the temperature parameter.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             The unit of the energy.
         normalize_detailed_balance : bool, default=True
             Whether to normalize the detailed balance correction.
-        display_name : str | None, default='MyConvolution'
+        display_name : str | None, default="MyConvolution"
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
@@ -440,8 +440,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         return (
             f'{self.__class__.__name__}('
             f'energy=array of shape {self.energy.values.shape},\n '
-            f'sample_components={repr(self.sample_components)}, \n'
-            f'resolution_components={repr(self.resolution_components)},\n '
+            f'sample_components={self.sample_components!r}, \n'
+            f'resolution_components={self.resolution_components!r},\n '
             f'unit={self.unit}, '
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '

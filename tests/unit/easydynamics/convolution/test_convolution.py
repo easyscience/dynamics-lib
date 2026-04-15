@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from contextlib import nullcontext
+from typing import ClassVar
 from unittest.mock import patch
 
 import numpy as np
@@ -74,7 +75,7 @@ class TestConvolution:
         assert isinstance(default_convolution._sample_components, ComponentCollection)
         assert isinstance(default_convolution._resolution_components, ComponentCollection)
         assert default_convolution.upsample_factor == 5
-        assert default_convolution.extension_factor == 0.2
+        assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
         assert default_convolution.unit == 'meV'
         assert default_convolution.normalize_detailed_balance is True
@@ -108,7 +109,7 @@ class TestConvolution:
         assert isinstance(convolution_with_components._sample_components, ComponentCollection)
         assert isinstance(convolution_with_components._resolution_components, ComponentCollection)
         assert convolution_with_components.upsample_factor == 5
-        assert convolution_with_components.extension_factor == 0.2
+        assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
         assert convolution_with_components.unit == 'meV'
         assert convolution_with_components.normalize_detailed_balance is True
@@ -317,7 +318,7 @@ class TestConvolution:
         assert np.allclose(result, expected_values)
 
     # List of analytic functions
-    analytic_functions = [
+    analytic_functions: ClassVar[list[object]] = [
         Gaussian(display_name='G', area=1.0, center=0.0, width=0.1),
         Lorentzian(display_name='L', area=1.0, center=0.0, width=0.1),
         Voigt(
@@ -330,14 +331,19 @@ class TestConvolution:
     ]
 
     # List of non-analytic functions
-    non_analytic_functions = [
+    non_analytic_functions: ClassVar[list[object]] = [
         DampedHarmonicOscillator(display_name='DHO', area=1.0, center=1.0, width=0.1),
         Polynomial(display_name='P', coefficients=[1.0, 0.0, 0.0]),
     ]
 
-    all_functions_except_delta = analytic_functions + non_analytic_functions
-    all_functions = all_functions_except_delta + [
-        DeltaFunction(display_name='Delta', area=1.0, center=0.0)
+    all_functions_except_delta: ClassVar[list[object]] = [
+        *analytic_functions,
+        *non_analytic_functions,
+    ]
+
+    all_functions: ClassVar[list[object]] = [
+        *all_functions_except_delta,
+        DeltaFunction(display_name='Delta', area=1.0, center=0.0),
     ]
 
     @pytest.mark.parametrize('function1', all_functions, ids=lambda f: f.__class__.__name__)

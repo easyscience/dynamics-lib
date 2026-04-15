@@ -28,17 +28,17 @@ class TestExponential:
 
         # THEN EXPECT
         assert exponential.display_name == 'Exponential'
-        assert exponential.amplitude.value == 1.0
-        assert exponential.center.value == 0.0
-        assert exponential.rate.value == 1.0
+        assert exponential.amplitude.value == pytest.approx(1.0)
+        assert exponential.center.value == pytest.approx(0.0)
+        assert exponential.rate.value == pytest.approx(1.0)
         assert exponential.unit == 'meV'
 
     def test_initialization(self, exponential: Exponential):
         # WHEN THEN EXPECT
         assert exponential.display_name == 'TestExponential'
-        assert exponential.amplitude.value == 2.0
-        assert exponential.center.value == 0.5
-        assert exponential.rate.value == 1.2
+        assert exponential.amplitude.value == pytest.approx(2.0)
+        assert exponential.center.value == pytest.approx(0.5)
+        assert exponential.rate.value == pytest.approx(1.2)
         assert exponential.unit == 'meV'
 
     def test_init_with_parameters(self):
@@ -133,7 +133,7 @@ class TestExponential:
         exponential.center = None
 
         # EXPECT
-        assert exponential.center.value == 0.0
+        assert exponential.center.value == pytest.approx(0.0)
         assert exponential.center.fixed is True
 
     def test_evaluate(self, exponential: Exponential):
@@ -172,33 +172,33 @@ class TestExponential:
         # THEN EXPECT
         assert exponential.unit == 'microeV'
 
-        assert exponential.amplitude.value == 2.0 * 1e3
-        assert exponential.center.value == 0.5 * 1e3
+        assert exponential.amplitude.value == pytest.approx(2.0 * 1e3)
+        assert exponential.center.value == pytest.approx(0.5 * 1e3)
 
         # rate should scale inversely
-        assert exponential.rate.value == 1.2 / 1e3
+        assert exponential.rate.value == pytest.approx(1.2 / 1e3)
         assert str(exponential.rate.unit) == '1/ueV'
 
     def test_convert_unit_incorrect_unit_raises(self, exponential: Exponential):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='unit must be a string or sc.Unit'):
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
             exponential.convert_unit(123)
 
     def test_convert_unit_rollback(self, exponential: Exponential):
         # WHEN
         with pytest.raises(
             UnitError,
-            match='Failed to convert unit: Conversion from `meV` to `m` is not valid.',
+            match=r'Failed to convert unit: Conversion from `meV` to `m` is not valid.',
         ):
             exponential.convert_unit('m')
 
         # THEN EXPECT - values should be unchanged
         assert exponential.unit == 'meV'
-        assert exponential.amplitude.value == 2.0
+        assert exponential.amplitude.value == pytest.approx(2.0)
         assert exponential.amplitude.unit == 'meV'
-        assert exponential.center.value == 0.5
+        assert exponential.center.value == pytest.approx(0.5)
         assert exponential.center.unit == 'meV'
-        assert exponential.rate.value == 1.2
+        assert exponential.rate.value == pytest.approx(1.2)
         assert exponential.rate.unit == '1/meV'
 
     def test_copy(self, exponential: Exponential):

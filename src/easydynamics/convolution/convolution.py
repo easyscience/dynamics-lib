@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import ClassVar
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -33,7 +35,7 @@ class Convolution(NumericalConvolutionBase):
 
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
-    _invalidate_plan_on_change = {
+    _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
         'energy',
         '_energy',
         '_energy_grid',
@@ -239,11 +241,10 @@ class Convolution(NumericalConvolutionBase):
             # If temperature is not set, check if all
             # resolution components can be convolved analytically with
             # this sample component
-            pair_is_analytic = []
-            for resolution_component in self._resolution_components.components:
-                pair_is_analytic.append(
-                    self._check_if_pair_is_analytic(sample_component, resolution_component)
-                )
+            pair_is_analytic = [
+                self._check_if_pair_is_analytic(sample_component, resolution_component)
+                for resolution_component in self._resolution_components.components
+            ]
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
             # sample model. If not, it goes to numerical sample model.

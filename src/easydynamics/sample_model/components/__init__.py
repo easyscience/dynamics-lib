@@ -13,12 +13,12 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.components.voigt import Voigt
 
 __all__ = [
-    'Gaussian',
-    'Lorentzian',
-    'Voigt',
-    'DeltaFunction',
     'DampedHarmonicOscillator',
-    'Polynomial',
+    'DeltaFunction',
     'Exponential',
     'ExpressionComponent',
+    'Gaussian',
+    'Lorentzian',
+    'Polynomial',
+    'Voigt',
 ]

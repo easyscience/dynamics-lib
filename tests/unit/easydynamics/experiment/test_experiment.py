@@ -305,7 +305,7 @@ class TestExperiment:
 
         # EXPECT
         assert len(masked_energy) == 1
-        assert masked_energy.values == 30.0
+        assert masked_energy.values == pytest.approx(30.0)
 
     def test_get_masked_energy_no_data_returns_None(self):
         "Test getting masked energy returns zero when no data is present"
@@ -526,7 +526,9 @@ class TestExperiment:
         assert np.isfinite(x).all()
         assert np.isfinite(y).all()
         assert np.isfinite(weights).all()
-        assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        assert weights[0] == pytest.approx(
+            1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        )
         assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
         # Mask should indicate which values were removed
         assert np.array_equal(mask, [False, False, True])

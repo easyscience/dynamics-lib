@@ -23,16 +23,16 @@ class TestExpressionComponent:
         assert expr.display_name == 'TestExpression'
         assert expr.unit == 'meV'
 
-        assert expr.A.value == 2.0
-        assert expr.x0.value == 0.5
-        assert expr.sigma.value == 0.6
+        assert expr.A.value == pytest.approx(2.0)
+        assert expr.x0.value == pytest.approx(0.5)
+        assert expr.sigma.value == pytest.approx(0.6)
 
     def test_init_without_parameters(self):
         # WHEN THEN
         expr = ExpressionComponent('A * x', parameters=None)
 
         # EXPECT
-        assert expr.A.value == 1.0  # default
+        assert expr.A.value == pytest.approx(1.0)  # default
 
     def test_invalid_expression_raises(self):
         # WHEN THEN EXPECT
@@ -88,7 +88,7 @@ class TestExpressionComponent:
         expr.A = 3.0
 
         # EXPECT
-        assert expr.A.value == 3.0
+        assert expr.A.value == pytest.approx(3.0)
         assert isinstance(expr.A, Parameter)
 
     def test_parameter_getter_invalid_name(self, expr: ExpressionComponent):
@@ -131,8 +131,8 @@ class TestExpressionComponent:
         expr = ExpressionComponent('A * x + B', parameters={'A': 2.0})
 
         # EXPECT
-        assert expr.A.value == 2.0
-        assert expr.B.value == 1.0  # default
+        assert expr.A.value == pytest.approx(2.0)
+        assert expr.B.value == pytest.approx(1.0)  # default
 
     def test_dir_includes_parameters(self, expr: ExpressionComponent):
         # WHEN THEN
