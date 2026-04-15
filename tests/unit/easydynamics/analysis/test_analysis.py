@@ -41,6 +41,31 @@ class TestAnalysis:
             extra_parameters=None,
         )
 
+    @pytest.fixture
+    def analysis_single_Q(self):
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        experiment = Experiment(data=data_array)
+        experiment.rebin({'Q': 1})
+        sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
+        instrument_model = InstrumentModel()
+
+        return Analysis(
+            display_name='TestAnalysis',
+            experiment=experiment,
+            sample_model=sample_model,
+            instrument_model=instrument_model,
+            extra_parameters=None,
+        )
+
     def test_init(self, analysis):
         # WHEN THEN
 
@@ -729,3 +754,27 @@ class TestAnalysis:
             assert component_name in components_dataset
             assert 'Q' in components_dataset[component_name].dims
             assert 'energy' in components_dataset[component_name].dims
+        assert components_dataset.sizes['Q'] == analysis.Q.sizes['Q']
+
+    def test_create_components_dataset_single_Q(self, analysis_single_Q):
+        # WHEN
+
+        # Add another component so that there are two components
+        analysis_single_Q.sample_model.append_component(
+            Gaussian(display_name='Gaussian2', area=0.5)
+        )
+
+        # THEN
+        components_dataset = analysis_single_Q._create_components_dataset(add_background=True)
+
+        # THEN EXPECT
+        assert isinstance(components_dataset, sc.Dataset)
+        component_names = [comp.display_name for comp in analysis_single_Q.sample_model.components]
+        for component_name in component_names:
+            assert component_name in components_dataset
+            assert 'Q' in components_dataset[component_name].dims
+            assert 'energy' in components_dataset[component_name].dims
+
+        assert components_dataset.coords['Q'].dims == ('Q',)
+        assert components_dataset.sizes['Q'] == 1
+        assert components_dataset.coords['Q'].ndim == 1
