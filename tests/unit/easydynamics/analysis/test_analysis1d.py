@@ -230,8 +230,11 @@ class TestAnalysis1d:
         assert Counter(variables) == Counter(expected_vars)
 
     def test_plot_raises_if_no_data(self, analysis1d):
-        analysis1d.experiment._data = None
+        # WHEN THEN
+        # override the binned data with None to simulate no data available for plotting
+        analysis1d.experiment._binned_data = None
 
+        # EXPECT
         with pytest.raises(ValueError, match='No data'):
             analysis1d.plot_data_and_model()
 
@@ -240,7 +243,7 @@ class TestAnalysis1d:
 
         # Mock the data and model components to be plotted
         fake_model = sc.DataArray(data=sc.array(dims=['energy'], values=[1, 2, 3]))
-        analysis1d._create_sample_scipp_array = MagicMock(return_value=fake_model)
+        analysis1d._create_model_array = MagicMock(return_value=fake_model)
 
         fake_components = sc.Dataset({
             'Component1': sc.DataArray(data=sc.array(dims=['energy'], values=[0.1, 0.2, 0.3]))
@@ -718,8 +721,8 @@ class TestAnalysis1d:
             np.array([1.0, 2.0, 3.0]),
         )
 
-    def test_create_sample_scipp_array(self, analysis1d):
-        """Test that _create_sample_scipp_array correctly
+    def test_create_model_array(self, analysis1d):
+        """Test that _create_model_array correctly
         evaluates the full model and calls _to_scipp_array with the
         correct values."""
 
@@ -730,7 +733,7 @@ class TestAnalysis1d:
         analysis1d._to_scipp_array = MagicMock()
 
         # THEN
-        analysis1d._create_sample_scipp_array()
+        analysis1d._create_model_array()
 
         # EXPECT
         analysis1d._calculate.assert_called_once()

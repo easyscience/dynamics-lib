@@ -294,28 +294,6 @@ class Analysis1d(AnalysisBase):
         """
         import plopp as pp
 
-        if self.experiment.data is None:
-            raise ValueError('No data to plot. Please load data first.')
-
-        energy = self._verify_energy(energy)
-        if energy is None:
-            energy = self._masked_energy
-
-        data = self.experiment.data['Q', self.Q_index]
-        model_array = self._create_sample_scipp_array(energy=energy)
-
-        component_dataset = self._create_components_dataset_single_Q(
-            add_background=add_background, energy=energy
-        )
-
-        # Create a dataset containing the data, model, and individual
-        # components for plotting.
-        data_and_model = sc.Dataset({
-            'Data': data,
-            'Model': model_array,
-        })
-
-        data_and_model = sc.merge(data_and_model, component_dataset)
         plot_kwargs_defaults = {
             'title': self.display_name,
             'linestyle': {'Data': 'none', 'Model': '-'},
@@ -324,8 +302,26 @@ class Analysis1d(AnalysisBase):
             'markerfacecolor': {'Data': 'none', 'Model': 'none'},
         }
 
+        if self.experiment.binned_data is None:
+            raise ValueError('No data to plot. Please load data first.')
+
+        energy = self._verify_energy(energy)
+        if energy is None:
+            energy = self._masked_energy
+
+        # Create a dataset containing the data, model, and individual
+        # components for plotting.
+        data_and_model = {
+            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Model': self._create_model_array(energy=energy),
+        }
+
         if plot_components:
-            for comp_name in component_dataset:
+            components = self._create_components_dataset_single_Q(
+                add_background=add_background, energy=energy
+            )
+            for comp_name in components:
+                data_and_model[comp_name] = components[comp_name]
                 plot_kwargs_defaults['linestyle'][comp_name] = '--'
                 plot_kwargs_defaults['marker'][comp_name] = None
 
@@ -744,7 +740,7 @@ class Analysis1d(AnalysisBase):
         )
         return self._to_scipp_array(values=values, energy=energy)
 
-    def _create_sample_scipp_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
+    def _create_model_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
         """
         Create a scipp DataArray for the full sample model including background.
 
