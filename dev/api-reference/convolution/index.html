@@ -9397,19 +9397,7 @@ class has no convolution functionality.</p>
 <span class="normal">447</span>
 <span class="normal">448</span>
 <span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">450</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for numerical convolutions of sample and resolution models.</span>
 
@@ -9426,10 +9414,10 @@ class has no convolution functionality.</p>
         <span class="n">upsample_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s2">&quot;meV&quot;</span><span class="p">,</span>
+        <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;MyConvolution&quot;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -9479,13 +9467,11 @@ class has no convolution functionality.</p>
             <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Temperature must be None, a number or a Parameter.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Temperature must be None, a number or a Parameter.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Temperature_unit must be a string or sc.Unit.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Temperature_unit must be a string or sc.Unit.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_temperature_unit</span> <span class="o">=</span> <span class="n">temperature_unit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
@@ -9550,10 +9536,10 @@ class has no convolution functionality.</p>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Upsample factor must be a numerical value or None.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Upsample factor must be a numerical value or None.&#39;</span><span class="p">)</span>
         <span class="n">factor</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Upsample factor must be greater than 1.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Upsample factor must be greater than 1.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_upsample_factor</span> <span class="o">=</span> <span class="n">factor</span>
 
@@ -9598,9 +9584,9 @@ class has no convolution functionality.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Extension factor must be a number.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Extension factor must be a number.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Extension factor must be non-negative.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Extension factor must be non-negative.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_extension_factor</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span>
         <span class="c1"># Recreate dense grid when extension factor is updated</span>
@@ -9645,7 +9631,7 @@ class has no convolution functionality.</p>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span>
                     <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span>
                     <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_temperature_unit</span><span class="p">,</span>
                     <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -9653,7 +9639,7 @@ class has no convolution functionality.</p>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">temp</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Temperature must be None, a float or a Parameter.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Temperature must be None, a float or a Parameter.&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalize_detailed_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -9689,7 +9675,7 @@ class has no convolution functionality.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalize</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;normalize_detailed_balance must be True or False.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;normalize_detailed_balance must be True or False.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_detailed_balance</span> <span class="o">=</span> <span class="n">normalize</span>
 
@@ -9719,7 +9705,7 @@ class has no convolution functionality.</p>
             <span class="n">is_uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">energy_diff</span><span class="p">,</span> <span class="n">energy_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_uniform</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Input array `energy` must be uniformly spaced if upsample_factor is not given.&quot;</span>  <span class="c1"># noqa: E501</span>
+                    <span class="s1">&#39;Input array `energy` must be uniformly spaced if upsample_factor is not given.&#39;</span>  <span class="c1"># noqa: E501</span>
                 <span class="p">)</span>
             <span class="n">energy_dense</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span>
 
@@ -9736,7 +9722,7 @@ class has no convolution functionality.</p>
             <span class="n">energy_span_dense</span> <span class="o">=</span> <span class="n">extended_max</span> <span class="o">-</span> <span class="n">extended_min</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_dense</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Energy array must have at least two points.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Energy array must have at least two points.&#39;</span><span class="p">)</span>
         <span class="n">energy_dense_step</span> <span class="o">=</span> <span class="n">energy_dense</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">energy_dense</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Handle offset for even length of energy_dense in convolution.</span>
@@ -9749,9 +9735,7 @@ class has no convolution functionality.</p>
         <span class="c1"># select the 4 central points we either get</span>
         <span class="c1"># indices [2,3,4,5] or [1,2,3,4], both of which are offset by</span>
         <span class="c1"># 0.5*dx from the true center at index 3.5.</span>
-        <span class="n">energy_even_length_offset</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">energy_dense_step</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_dense</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
-        <span class="p">)</span>
+        <span class="n">energy_even_length_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">energy_dense_step</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_dense</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
 
         <span class="c1"># Handle the case when energy_dense is not symmetric around 0.</span>
         <span class="c1"># The resolution is still centered around zero (or close to it),</span>
@@ -9792,35 +9776,27 @@ class has no convolution functionality.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle ComponentCollection or ModelComponent</span>
-        <span class="n">components</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">components</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">components</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span>
-                    <span class="o">&gt;</span> <span class="n">LARGE_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span>
-                <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">LARGE_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; </span><span class="se">\</span>
 <span class="s2">                            (</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">) is large compared to the span of the input &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="si">}</span><span class="s2">). </span><span class="se">\</span>
-<span class="s2">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
-<span class="s2">                                Increase extension_factor to improve accuracy.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="si">}</span><span class="s1">). </span><span class="se">\</span>
+<span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
+<span class="s1">                                Increase extension_factor to improve accuracy.&#39;</span><span class="p">,</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span>
-                    <span class="o">&lt;</span> <span class="n">SMALL_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span>
-                <span class="p">):</span>
+                <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">SMALL_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; </span><span class="se">\</span>
 <span class="s2">                            (</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">) is small compared to the spacing of the input &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="si">}</span><span class="s2">). </span><span class="se">\</span>
-<span class="s2">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
-<span class="s2">                                Increase upsample_factor to improve accuracy.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="si">}</span><span class="s1">). </span><span class="se">\</span>
+<span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
+<span class="s1">                                Increase upsample_factor to improve accuracy.&#39;</span><span class="p">,</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -9835,15 +9811,15 @@ class has no convolution functionality.</p>
 <span class="sd">            A string representation of the NumericalConvolutionBase.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;sample_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="si">!r}</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;resolution_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="si">!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;normalize_detailed_balance=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;sample_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="si">!r}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;resolution_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;normalize_detailed_balance=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="si">}</span><span class="s1">)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -10227,9 +10203,7 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">sample_components</span><span class="p">:</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">ModelComponent</span><span class="p">,</span>
@@ -10238,10 +10212,10 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
     <span class="n">upsample_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">extension_factor</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s2">&quot;meV&quot;</span><span class="p">,</span>
+    <span class="n">temperature_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">normalize_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;MyConvolution&quot;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyConvolution&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -10291,13 +10265,11 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
         <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-        <span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Temperature must be None, a number or a Parameter.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Temperature must be None, a number or a Parameter.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperature_unit</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Temperature_unit must be a string or sc.Unit.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Temperature_unit must be a string or sc.Unit.&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_temperature_unit</span> <span class="o">=</span> <span class="n">temperature_unit</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
@@ -10367,26 +10339,26 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">443</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
 <span class="normal">448</span>
 <span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">450</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the NumericalConvolutionBase.</span>
 
@@ -10396,15 +10368,15 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 <span class="sd">        A string representation of the NumericalConvolutionBase.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2"> &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;sample_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="si">!r}</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;resolution_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="si">!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2"> &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2">, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s2">, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s2">, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s2">, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;normalize_detailed_balance=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;energy=array of shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;sample_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="si">!r}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;resolution_components=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;unit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;upsample_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">upsample_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;extension_factor=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extension_factor</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;temperature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="si">}</span><span class="s1">, &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;normalize_detailed_balance=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="si">}</span><span class="s1">)&#39;</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10470,7 +10442,9 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -10480,9 +10454,7 @@ extension_factor is not a number, or if normalize_detailed_balance is not a bool
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ConvolutionBase</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the energy array and recreate the dense grid.</span>
