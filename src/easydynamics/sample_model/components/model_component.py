@@ -28,7 +28,7 @@ class ModelComponent(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             The unit of the model component.
         display_name : str | None, default=None
             A human-readable name for the component.

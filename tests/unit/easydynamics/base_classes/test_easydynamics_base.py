@@ -26,7 +26,7 @@ class TestEasyDynamicsBase:
     def test_init_raises_type_error_for_invalid_name(self):
         """Test that initializing with an invalid name raises a TypeError."""
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Name must be a string or None.'):
+        with pytest.raises(TypeError, match=r'Name must be a string or None.'):
             EasyDynamicsBase(name=123)  # Not a string
 
     def test_init_name_can_be_none(self):
@@ -66,5 +66,5 @@ class TestEasyDynamicsBase:
     def test_name_setter_invalid_type(self, easy_dynamics_base, invalid_name):
         """Test that setting the name to an invalid type raises a TypeError."""
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Name must be a string or None.'):
+        with pytest.raises(TypeError, match=r'Name must be a string or None.'):
             easy_dynamics_base.name = invalid_name

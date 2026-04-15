@@ -5,6 +5,6 @@ from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 
 __all__ = [
-    'EasyDynamicsModelBase',
     'EasyDynamicsBase',
+    'EasyDynamicsModelBase',
 ]

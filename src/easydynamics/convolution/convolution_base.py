@@ -23,9 +23,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         energy_offset: Numeric | Parameter = 0.0,
-        display_name: str | None = "MyConvolution",
+        display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -67,20 +67,16 @@ class ConvolutionBase(EasyDynamicsModelBase):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError(
-                f"Energy must be a numpy ndarray or a scipp Variable. Got {energy}"
-            )
+            raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
 
         if isinstance(energy, np.ndarray):
-            energy = sc.array(dims=["energy"], values=energy, unit=unit)
+            energy = sc.array(dims=['energy'], values=energy, unit=unit)
 
         if isinstance(energy_offset, Numeric):
-            energy_offset = Parameter(
-                name="energy_offset", value=float(energy_offset), unit=unit
-            )
+            energy_offset = Parameter(name='energy_offset', value=float(energy_offset), unit=unit)
 
         if not isinstance(energy_offset, Parameter):
-            raise TypeError("Energy_offset must be a number or a Parameter.")
+            raise TypeError('Energy_offset must be a number or a Parameter.')
 
         self._energy = energy
         self._energy_offset = energy_offset
@@ -89,7 +85,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(sample_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         if isinstance(sample_components, ModelComponent):
             sample_components = ComponentCollection(components=[sample_components])
@@ -99,12 +95,10 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(resolution_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(
-                components=[resolution_components]
-            )
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
 
     @property
@@ -135,7 +129,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             If energy_offset is not a number or a Parameter.
         """
         if not isinstance(energy_offset, Parameter | Numeric):
-            raise TypeError("Energy_offset must be a number or a Parameter.")
+            raise TypeError('Energy_offset must be a number or a Parameter.')
 
         if isinstance(energy_offset, Numeric):
             self._energy_offset.value = float(energy_offset)
@@ -173,7 +167,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             Always raised since energy_with_offset is read-only.
         """
         raise AttributeError(
-            "Energy with offset is a read-only property derived from energy and energy_offset."
+            'Energy with offset is a read-only property derived from energy and energy_offset.'
         )
 
     @property
@@ -209,14 +203,10 @@ class ConvolutionBase(EasyDynamicsModelBase):
             energy = np.array([float(energy)])
 
         if not isinstance(energy, (np.ndarray, sc.Variable)):
-            raise TypeError(
-                "Energy must be a Number, a numpy ndarray or a scipp Variable."
-            )
+            raise TypeError('Energy must be a Number, a numpy ndarray or a scipp Variable.')
 
         if isinstance(energy, np.ndarray):
-            self._energy = sc.array(
-                dims=["energy"], values=energy, unit=self._energy.unit
-            )
+            self._energy = sc.array(dims=['energy'], values=energy, unit=self._energy.unit)
 
         if isinstance(energy, sc.Variable):
             self._energy = energy
@@ -239,7 +229,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             If energy cannot be converted to the specified unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError("Energy unit must be a string or scipp unit.")
+            raise TypeError('Energy unit must be a string or scipp unit.')
 
         old_energy = self.energy.copy()
         try:
@@ -270,9 +260,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         return self._sample_components
 
     @sample_components.setter
-    def sample_components(
-        self, sample_components: ComponentCollection | ModelComponent
-    ) -> None:
+    def sample_components(self, sample_components: ComponentCollection | ModelComponent) -> None:
         """
         Set the sample model.
 
@@ -288,7 +276,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f"`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
 
         if isinstance(sample_components, ModelComponent):
@@ -327,11 +315,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f"`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent."  # noqa: E501
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
             )
 
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(
-                components=[resolution_components]
-            )
+            resolution_components = ComponentCollection(components=[resolution_components])
         self._resolution_components = resolution_components
