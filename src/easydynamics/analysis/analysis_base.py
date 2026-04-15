@@ -409,5 +409,7 @@ class AnalysisBase(EasyScienceModelBase):
         str
             A string representation of the Analysis.
         """
-        return f' {self.__class__.__name__}  (display_name={self.display_name}, \
-        unique_name={self.unique_name})'
+        return (
+            f' {self.__class__.__name__} (display_name={self.display_name}, '
+            f'unique_name={self.unique_name})'
+        )

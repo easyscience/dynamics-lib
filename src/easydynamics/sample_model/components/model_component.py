@@ -8,13 +8,13 @@ from abc import abstractmethod
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
 
 
-class ModelComponent(ModelBase):
+class ModelComponent(EasyDynamicsModelBase):
     """Abstract base class for all model components."""
 
     def __init__(
@@ -28,15 +28,14 @@ class ModelComponent(ModelBase):
 
         Parameters
         ----------
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             The unit of the model component.
         display_name : str | None, default=None
             A human-readable name for the component.
         unique_name : str | None, default=None
             A unique identifier for the component.
         """
-        self.validate_unit(unit)
-        super().__init__(display_name=display_name, unique_name=unique_name)
+        super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
         self._unit = unit
 
     @property
@@ -162,26 +161,6 @@ class ModelComponent(ModelBase):
             raise ValueError('Input x contains infinite values.')
 
         return np.sort(x_in)
-
-    @staticmethod
-    def validate_unit(unit: str | sc.Unit | None) -> None:
-        """
-        Validate that the unit is either a string or a scipp Unit.
-
-        Parameters
-        ----------
-        unit : str | sc.Unit | None
-            The unit to validate.
-
-        Raises
-        ------
-        TypeError
-            If unit is not a string or scipp Unit.
-        """
-        if unit is not None and not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
-            )
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
         """

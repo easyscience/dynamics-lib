@@ -78,7 +78,7 @@ class TestConvolutionBase:
                     'energy': 'invalid',
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'energy_unit': 'meV',
+                    'unit': 'meV',
                     'energy_offset': 0,
                 },
                 'Energy must be',
@@ -88,7 +88,7 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': 'invalid',
                     'resolution_components': ComponentCollection(),
-                    'energy_unit': 'meV',
+                    'unit': 'meV',
                     'energy_offset': 0,
                 },
                 (
@@ -101,7 +101,7 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': 'invalid',
-                    'energy_unit': 'meV',
+                    'unit': 'meV',
                     'energy_offset': 0,
                 },
                 (
@@ -114,17 +114,17 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'energy_unit': 123,
+                    'unit': 123,
                     'energy_offset': 0,
                 },
-                'Energy_unit must be ',
+                'unit must be ',
             ),
             (
                 {
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'energy_unit': 'meV',
+                    'unit': 'meV',
                     'energy_offset': 'invalid',
                 },
                 'Energy_offset must be ',
@@ -173,48 +173,48 @@ class TestConvolutionBase:
         ):
             convolution_base.energy = 'invalid'
 
-    def test_energy_unit_property(self, convolution_base):
+    def test_unit_property(self, convolution_base):
         # WHEN THEN EXPECT
         assert convolution_base.energy.unit == 'meV'
 
-    def test_energy_unit_setter_raises(self, convolution_base):
+    def test_unit_setter_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
             match=r'Use convert_unit to change the unit between allowed types ',
         ):
-            convolution_base.energy_unit = 'K'
+            convolution_base.unit = 'K'
 
-    def test_convert_energy_unit(self, convolution_base):
+    def test_convert_unit(self, convolution_base):
         # WHEN THEN
-        convolution_base.convert_energy_unit('eV')
+        convolution_base.convert_unit('eV')
 
         # EXPECT
         assert convolution_base.energy.unit == 'eV'
-        assert convolution_base.energy_unit == 'eV'
+        assert convolution_base.unit == 'eV'
         assert np.allclose(convolution_base.energy.values, np.linspace(-0.01, 0.01, 100))
 
-    def test_convert_energy_unit_invalid_type_raises(self, convolution_base):
+    def test_convert_unit_invalid_type_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
             match=r'Energy unit must be a string or scipp unit.',
         ):
-            convolution_base.convert_energy_unit(123)
+            convolution_base.convert_unit(123)
 
-    def test_convert_energy_unit_invalid_unit_rollback(self, convolution_base):
+    def test_convert_unit_invalid_unit_rollback(self, convolution_base):
         # WHEN THEN
         with pytest.raises(
             UnitError,
             match=r'Conversion from `meV` to `s` is not valid.',
         ):
-            convolution_base.convert_energy_unit('s')
+            convolution_base.convert_unit('s')
 
         # EXPECT
-        assert convolution_base.energy_unit == 'meV'
+        assert convolution_base.unit == 'meV'
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
 
-    def test_convert_energy_unit_invalid_offset_unit_rollback(self, convolution_base):
+    def test_convert_unit_invalid_offset_unit_rollback(self, convolution_base):
         # WHEN
         convolution_base.energy_offset = Parameter(name='energy_offset', value=5, unit='s')
 
@@ -223,10 +223,10 @@ class TestConvolutionBase:
             UnitError,
             match=r'Conversion from `s` to `meV` is not valid.',
         ):
-            convolution_base.convert_energy_unit('meV')
+            convolution_base.convert_unit('meV')
 
         # EXPECT
-        assert convolution_base.energy_unit == 'meV'
+        assert convolution_base.unit == 'meV'
         assert convolution_base.energy_offset.unit == 's'
 
     def test_energy_offset_property(self, convolution_base):

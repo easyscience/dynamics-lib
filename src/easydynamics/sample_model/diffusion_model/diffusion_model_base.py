@@ -2,23 +2,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
 from scipp import UnitError
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
 
 
-class DiffusionModelBase(ModelBase):
+class DiffusionModelBase(EasyDynamicsModelBase):
     """Base class for constructing diffusion models."""
 
     def __init__(
         self,
-        display_name: str | None = 'MyDiffusionModel',
+        display_name: str | None = "MyDiffusionModel",
         unique_name: str | None = None,
         scale: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
     ) -> None:
         """
         Initialize a new DiffusionModel.
@@ -44,59 +44,26 @@ class DiffusionModelBase(ModelBase):
         """
 
         try:
-            test = DescriptorNumber(name='test', value=1, unit=unit)
-            test.convert_unit('meV')
+            test = DescriptorNumber(name="test", value=1, unit=unit)
+            test.convert_unit("meV")
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
+        scale = Parameter(
+            name="scale", value=float(scale), fixed=False, min=0.0, unit=unit
+        )
 
-        super().__init__(display_name=display_name, unique_name=unique_name)
-        self._unit = unit
+        super().__init__(display_name=display_name, unique_name=unique_name, unit=unit)
         self._scale = scale
 
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
-
-    @property
-    def unit(self) -> str | sc.Unit | None:
-        """
-        Get the unit of the energy axis of the DiffusionModel.
-
-        Returns
-        -------
-        str | sc.Unit | None
-            Unit of the DiffusionModel.
-        """
-        return str(self._unit)
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        The unit of the energy axis is read-only.
-
-        To change the unit, use convert_unit or create a new DiffusionModel with the desired unit.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always, since the unit is read-only.
-        """
-        raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
-        )
 
     @property
     def scale(self) -> Parameter:
@@ -128,10 +95,10 @@ class DiffusionModelBase(ModelBase):
             If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
         if float(scale) < 0:
-            raise ValueError('scale must be non-negative.')
+            raise ValueError("scale must be non-negative.")
         self._scale.value = scale
 
     # ------------------------------------------------------------------
@@ -147,4 +114,4 @@ class DiffusionModelBase(ModelBase):
         str
             String representation of the DiffusionModel.
         """
-        return f'{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})'
+        return f"{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})"

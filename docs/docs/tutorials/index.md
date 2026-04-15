@@ -21,6 +21,11 @@ We are working on expanding the list of tutorials to include advanced
 concept such as interpolating `Parameter`s, sharing `Parameter`s at
 multiple `Q` and analysing complex inelastic data.
 
+- [Tutorial 0: Basics](tutorial0_basics.ipynb) - Get started with
+  EasyDynamics and fit a basic data set.
+- [Tutorial 0: More advanced](tutorial0_more_advanced.ipynb) -
+  Introduction to more advanced features in EasyDynamics, fitting a data
+  set with multiple components and background.
 - [Tutorial 1: Brownian Diffusion](tutorial1_brownian.ipynb) - Learn how
   to analyse QENS data with elastic incoherent background and Brownian
   diffusion.
