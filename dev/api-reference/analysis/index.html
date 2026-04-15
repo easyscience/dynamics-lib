@@ -2629,7 +2629,11 @@
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -3177,14 +3181,18 @@
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">analysis1d</span><span class="o">.</span><span class="n">Q_index</span>
+            <span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
             <span class="c1"># Make sure the convolver is up to date for this Q index</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">x</span>
+            <span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
             <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">,</span>
@@ -3265,10 +3273,10 @@
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
 
         <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
+            <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
@@ -4263,16 +4271,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -5930,7 +5938,11 @@ title, linestyle, marker, color).</p>
 <span class="normal">661</span>
 <span class="normal">662</span>
 <span class="normal">663</span>
-<span class="normal">664</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -6478,14 +6490,18 @@ title, linestyle, marker, color).</p>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">analysis1d</span><span class="o">.</span><span class="n">Q_index</span>
+            <span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
             <span class="c1"># Make sure the convolver is up to date for this Q index</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_convolver</span> <span class="o">=</span> <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_convolver</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">x</span>
+            <span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
             <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">,</span>
@@ -6566,10 +6582,10 @@ title, linestyle, marker, color).</p>
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
 
         <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">analysis</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>
+            <span class="n">analysis1d</span><span class="o">.</span><span class="n">_create_components_dataset_single_Q</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
                 <span class="n">add_background</span><span class="o">=</span><span class="n">add_background</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
+            <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
@@ -7564,16 +7580,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -9431,8 +9447,7 @@ title, linestyle, marker, color).</p>
 <span class="normal">833</span>
 <span class="normal">834</span>
 <span class="normal">835</span>
-<span class="normal">836</span>
-<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">836</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -9607,7 +9622,7 @@ title, linestyle, marker, color).</p>
             <span class="n">fit_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">as_fit_function</span><span class="p">(),</span>
         <span class="p">)</span>
 
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
             <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">()</span>
         <span class="p">)</span>
         <span class="n">fit_result</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -10079,7 +10094,6 @@ title, linestyle, marker, color).</p>
         <span class="k">if</span> <span class="n">resolution_components</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># TODO: allow convolution options to be set.</span>
         <span class="k">return</span> <span class="n">Convolution</span><span class="p">(</span>
             <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
             <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
@@ -11061,7 +11075,7 @@ and reused during parameter optimization for performance reasons.</p>
         <span class="n">fit_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">as_fit_function</span><span class="p">(),</span>
     <span class="p">)</span>
 
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">_extract_x_y_weights_only_finite</span><span class="p">(</span>  <span class="c1"># noqa: SLF001</span>
         <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="n">fit_result</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
