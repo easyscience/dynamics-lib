@@ -42,8 +42,10 @@ class NumericalConvolutionBase(ConvolutionBase):
         extension_factor: Numeric | None = 0.2,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize the NumericalConvolutionBase.
@@ -66,10 +68,14 @@ class NumericalConvolutionBase(ConvolutionBase):
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
-        energy_unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default='meV'
             The unit of the energy.
         normalize_detailed_balance : bool, default=True
             Whether to normalize the detailed balance correction.
+        display_name : str | None, default='MyConvolution'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
 
         Raises
         ------
@@ -82,8 +88,10 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            energy_unit=energy_unit,
+            unit=unit,
             energy_offset=energy_offset,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
         if temperature is not None and not isinstance(temperature, (Numeric, Parameter)):
@@ -434,7 +442,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             f'energy=array of shape {self.energy.values.shape},\n '
             f'sample_components={repr(self.sample_components)}, \n'
             f'resolution_components={repr(self.resolution_components)},\n '
-            f'energy_unit={self._energy_unit}, '
+            f'unit={self.unit}, '
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '
             f'temperature={self.temperature}, '

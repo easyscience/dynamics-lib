@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorNumber
 from easyscience.variable import Parameter
 from scipp import UnitError
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
 
 
-class DiffusionModelBase(ModelBase):
+class DiffusionModelBase(EasyDynamicsModelBase):
     """Base class for constructing diffusion models."""
 
     def __init__(
@@ -56,47 +56,12 @@ class DiffusionModelBase(ModelBase):
 
         scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
 
-        super().__init__(display_name=display_name, unique_name=unique_name)
-        self._unit = unit
+        super().__init__(display_name=display_name, unique_name=unique_name, unit=unit)
         self._scale = scale
 
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
-
-    @property
-    def unit(self) -> str | sc.Unit | None:
-        """
-        Get the unit of the energy axis of the DiffusionModel.
-
-        Returns
-        -------
-        str | sc.Unit | None
-            Unit of the DiffusionModel.
-        """
-        return str(self._unit)
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        The unit of the energy axis is read-only.
-
-        To change the unit, use convert_unit or create a new DiffusionModel with the desired unit.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always, since the unit is read-only.
-        """
-        raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
 
     @property
     def scale(self) -> Parameter:

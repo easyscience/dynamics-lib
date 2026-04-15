@@ -46,7 +46,7 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == 0.2
         assert default_numerical_convolution_base.temperature is None
-        assert default_numerical_convolution_base.energy_unit == 'meV'
+        assert default_numerical_convolution_base.unit == 'meV'
         assert default_numerical_convolution_base.normalize_detailed_balance is True
         assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
 
@@ -63,7 +63,7 @@ class TestNumericalConvolutionBase:
         extension_factor = 0.5
         temperature = 300.0
         temperature_unit = 'K'
-        energy_unit = 'meV'
+        unit = 'meV'
         normalize_detailed_balance = False
 
         # THEN
@@ -75,7 +75,7 @@ class TestNumericalConvolutionBase:
             extension_factor=extension_factor,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            energy_unit=energy_unit,
+            unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
 
@@ -84,7 +84,7 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.extension_factor == extension_factor
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
-        assert numerical_convolution_base.energy_unit == energy_unit
+        assert numerical_convolution_base.unit == unit
         assert numerical_convolution_base.normalize_detailed_balance == normalize_detailed_balance
         assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
 
@@ -502,7 +502,7 @@ class TestNumericalConvolutionBase:
         assert 'resolution_components=' in repr_str
 
         # Important parameters
-        assert 'energy_unit=meV' in repr_str
+        assert 'unit=meV' in repr_str
         assert 'upsample_factor=5' in repr_str
         assert 'extension_factor=0.2' in repr_str
         assert 'temperature=None' in repr_str
