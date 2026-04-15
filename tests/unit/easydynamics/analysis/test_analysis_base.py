@@ -163,7 +163,7 @@ class TestAnalysisBase:
     def test_Q_setter_raises(self, analysis_base):
         with pytest.raises(
             AttributeError,
-            match='Q is a read-only property derived from the Experiment.',
+            match=r'Q is a read-only property derived from the Experiment.',
         ):
             analysis_base.Q = [1, 2, 3]
 
@@ -183,7 +183,7 @@ class TestAnalysisBase:
     def test_energy_setter_raises(self, analysis_base):
         with pytest.raises(
             AttributeError,
-            match='energy is a read-only property derived from the Experiment.',
+            match=r'energy is a read-only property derived from the Experiment.',
         ):
             analysis_base.energy = [10, 20, 30]
 

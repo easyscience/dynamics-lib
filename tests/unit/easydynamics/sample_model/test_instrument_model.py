@@ -172,7 +172,7 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             AttributeError,
-            match='Unit is read-only. Use convert_unit to change the unit between allowed types ',
+            match=r'Unit is read-only. Use convert_unit to change the unit between allowed types ',
         ):
             instrument_model.unit = 'meV'
 
@@ -184,7 +184,7 @@ class TestInstrumentModel:
         instrument_model.energy_offset = 1.0
 
         # EXPECT
-        assert instrument_model.energy_offset.value == 1.0
+        assert instrument_model.energy_offset.value == pytest.approx(1.0)
         instrument_model._on_energy_offset_change.assert_called_once()
 
     def test_energy_offset_setter_raises(self, instrument_model):

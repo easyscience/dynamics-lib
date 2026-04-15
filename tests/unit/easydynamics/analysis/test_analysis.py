@@ -202,7 +202,7 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             ValueError,
-            match="Invalid fit method. Choose 'independent' or 'simultaneous'.",
+            match=r"Invalid fit method. Choose 'independent' or 'simultaneous'.",
         ):
             analysis.fit(fit_method='invalid_fit_method')
 
@@ -671,7 +671,7 @@ class TestAnalysis:
         expected_fit_objects = analysis.analysis_list
         expected_fit_functions = analysis.get_fit_functions()
         mock_fitter.assert_called_once()
-        args, kwargs = mock_fitter.call_args
+        _, kwargs = mock_fitter.call_args
         assert kwargs['fit_objects'] == expected_fit_objects
         assert kwargs['fit_functions'] == expected_fit_functions
 
@@ -688,7 +688,7 @@ class TestAnalysis:
             expected_ws.append(1.0 / np.sqrt(data.variances))
         fake_fitter_instance.fit.assert_called_once()
 
-        args, kwargs = fake_fitter_instance.fit.call_args
+        _, kwargs = fake_fitter_instance.fit.call_args
         np.testing.assert_array_equal(kwargs['x'], expected_xs)
         np.testing.assert_array_equal(kwargs['y'], expected_ys)
         np.testing.assert_array_equal(kwargs['weights'], expected_ws)

@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import ClassVar
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -26,7 +28,7 @@ class AnalyticalConvolution(ConvolutionBase):
 
     # Mapping of supported component type pairs to convolution methods.
     # Delta functions are handled separately.
-    _CONVOLUTIONS = {
+    _CONVOLUTIONS: ClassVar[dict[str, object]] = {
         ('Gaussian', 'Gaussian'): '_convolute_gaussian_gaussian',
         ('Gaussian', 'Lorentzian'): '_convolute_gaussian_lorentzian',
         ('Gaussian', 'Voigt'): '_convolute_gaussian_voigt',
@@ -38,10 +40,12 @@ class AnalyticalConvolution(ConvolutionBase):
     def __init__(
         self,
         energy: np.ndarray | sc.Variable,
-        energy_unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = 'meV',
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         energy_offset: Numeric | Parameter = 0.0,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize an AnalyticalConvolution.
@@ -50,7 +54,7 @@ class AnalyticalConvolution(ConvolutionBase):
         ----------
         energy : np.ndarray | sc.Variable
             1D array of energy values where the convolution is evaluated.
-        energy_unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default='meV'
             The unit of the energy.
         sample_components : ComponentCollection | ModelComponent | None, default=None
             The sample model to be convolved.
@@ -58,13 +62,19 @@ class AnalyticalConvolution(ConvolutionBase):
             The resolution model to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
             An offset to shift the energy values by.
+        display_name : str | None, default='MyConvolution'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
         """
         super().__init__(
             energy=energy,
-            energy_unit=energy_unit,
+            unit=unit,
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_offset=energy_offset,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
     def convolution(

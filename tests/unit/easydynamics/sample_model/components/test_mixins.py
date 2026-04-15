@@ -23,10 +23,10 @@ class TestCreateParametersMixin:
         # EXPECT
         assert isinstance(area_param, Parameter)
         assert area_param.name == 'TestModel area'
-        assert area_param.value == float(area_input)
+        assert area_param.value == pytest.approx(area_input)
         assert area_param.unit == unit
         assert not area_param.fixed
-        assert area_param.min == 0.0
+        assert area_param.min == pytest.approx(0.0)
 
     def test_create_area_parameter_from_parameter(self, dummy_model):
         # WHEN
@@ -37,7 +37,7 @@ class TestCreateParametersMixin:
 
         # EXPECT
         assert area_param is area_input  # Should be the same object
-        assert area_param.min == 0.0
+        assert area_param.min == pytest.approx(0.0)
 
     def test_create_area_parameter_invalid_type_raises(self, dummy_model):
         # WHEN THEN EXPECT
@@ -75,7 +75,7 @@ class TestCreateParametersMixin:
         # EXPECT
         assert isinstance(center_param, Parameter)
         assert center_param.name == 'TestModel center'
-        assert center_param.value == float(center_input)
+        assert center_param.value == pytest.approx(center_input)
         assert center_param.unit == unit
         assert not center_param.fixed
 
@@ -88,7 +88,7 @@ class TestCreateParametersMixin:
         # EXPECT
         assert isinstance(center_param, Parameter)
         assert center_param.name == 'TestModel center'
-        assert center_param.value == 0.0
+        assert center_param.value == pytest.approx(0.0)
         assert center_param.unit == 'meV'
         assert center_param.fixed == fix_if_none
 
@@ -134,7 +134,7 @@ class TestCreateParametersMixin:
         # EXPECT
         assert isinstance(width_param, Parameter)
         assert width_param.name == 'TestModel width'
-        assert width_param.value == float(width_input)
+        assert width_param.value == pytest.approx(width_input)
         assert width_param.unit == unit
         assert not width_param.fixed
 

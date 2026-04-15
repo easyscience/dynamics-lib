@@ -30,20 +30,20 @@ class TestVoigt:
 
         # EXPECT
         assert voigt.display_name == 'Voigt'
-        assert voigt.area.value == 1.0
-        assert voigt.center.value == 0.0
-        assert voigt.gaussian_width.value == 1.0
-        assert voigt.lorentzian_width.value == 1.0
+        assert voigt.area.value == pytest.approx(1.0)
+        assert voigt.center.value == pytest.approx(0.0)
+        assert voigt.gaussian_width.value == pytest.approx(1.0)
+        assert voigt.lorentzian_width.value == pytest.approx(1.0)
         assert voigt.unit == 'meV'
         assert voigt.center.fixed is True
 
     def test_initialization(self, voigt: Voigt):
         # WHEN THEN EXPECT
         assert voigt.display_name == 'TestVoigt'
-        assert voigt.area.value == 2.0
-        assert voigt.center.value == 0.5
-        assert voigt.gaussian_width.value == 0.6
-        assert voigt.lorentzian_width.value == 0.7
+        assert voigt.area.value == pytest.approx(2.0)
+        assert voigt.center.value == pytest.approx(0.5)
+        assert voigt.gaussian_width.value == pytest.approx(0.6)
+        assert voigt.lorentzian_width.value == pytest.approx(0.7)
         assert voigt.unit == 'meV'
 
     def test_init_with_parameters(self):
@@ -133,7 +133,7 @@ class TestVoigt:
     def test_negative_gaussian_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
-            ValueError, match='The gaussian_width of a Voigt must be greater than.'
+            ValueError, match=r'The gaussian_width of a Voigt must be greater than.'
         ):
             Voigt(
                 display_name='TestVoigt',
@@ -148,7 +148,7 @@ class TestVoigt:
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
-            match='The lorentzian_width of a Voigt must be greater than zero.',
+            match=r'The lorentzian_width of a Voigt must be greater than zero.',
         ):
             Voigt(
                 display_name='TestVoigt',
@@ -217,7 +217,7 @@ class TestVoigt:
         voigt.center = None
 
         # EXPECT
-        assert voigt.center.value == 0.0
+        assert voigt.center.value == pytest.approx(0.0)
         assert voigt.center.fixed is True
 
     def test_evaluate(self, voigt: Voigt):
@@ -243,7 +243,7 @@ class TestVoigt:
         )
 
         # EXPECT
-        assert test_voigt.center.value == 0.0
+        assert test_voigt.center.value == pytest.approx(0.0)
         assert test_voigt.center.fixed is True
 
     def test_convert_unit(self, voigt: Voigt):
@@ -252,10 +252,10 @@ class TestVoigt:
 
         # EXPECT
         assert voigt.unit == 'microeV'
-        assert voigt.area.value == 2 * 1e3
-        assert voigt.center.value == 0.5 * 1e3
-        assert voigt.gaussian_width.value == 0.6 * 1e3
-        assert voigt.lorentzian_width.value == 0.7 * 1e3
+        assert voigt.area.value == pytest.approx(2 * 1e3)
+        assert voigt.center.value == pytest.approx(0.5 * 1e3)
+        assert voigt.gaussian_width.value == pytest.approx(0.6 * 1e3)
+        assert voigt.lorentzian_width.value == pytest.approx(0.7 * 1e3)
 
     def test_get_all_parameters(self, voigt: Voigt):
         # WHEN THEN

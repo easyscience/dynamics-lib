@@ -44,9 +44,9 @@ class TestNumericalConvolutionBase:
             ComponentCollection,
         )
         assert default_numerical_convolution_base.upsample_factor == 5
-        assert default_numerical_convolution_base.extension_factor == 0.2
+        assert default_numerical_convolution_base.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution_base.temperature is None
-        assert default_numerical_convolution_base.energy_unit == 'meV'
+        assert default_numerical_convolution_base.unit == 'meV'
         assert default_numerical_convolution_base.normalize_detailed_balance is True
         assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
 
@@ -63,7 +63,7 @@ class TestNumericalConvolutionBase:
         extension_factor = 0.5
         temperature = 300.0
         temperature_unit = 'K'
-        energy_unit = 'meV'
+        unit = 'meV'
         normalize_detailed_balance = False
 
         # THEN
@@ -75,7 +75,7 @@ class TestNumericalConvolutionBase:
             extension_factor=extension_factor,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            energy_unit=energy_unit,
+            unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
         )
 
@@ -84,7 +84,7 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.extension_factor == extension_factor
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
-        assert numerical_convolution_base.energy_unit == energy_unit
+        assert numerical_convolution_base.unit == unit
         assert numerical_convolution_base.normalize_detailed_balance == normalize_detailed_balance
         assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
 
@@ -100,7 +100,7 @@ class TestNumericalConvolutionBase:
         invalid_temperature = 'invalid_temperature'
 
         # THEN EXPECT
-        with pytest.raises(TypeError, match='Temperature must be None, a number or a Parameter.'):
+        with pytest.raises(TypeError, match=r'Temperature must be None, a number or a Parameter.'):
             NumericalConvolutionBase(
                 energy=energy,
                 sample_components=sample_components,
@@ -120,7 +120,7 @@ class TestNumericalConvolutionBase:
         invalid_temperature_unit = 123  # Not a string or sc.Unit
 
         # THEN EXPECT
-        with pytest.raises(TypeError, match='Temperature_unit must be a string or sc.Unit.'):
+        with pytest.raises(TypeError, match=r'Temperature_unit must be a string or sc.Unit.'):
             NumericalConvolutionBase(
                 energy=energy,
                 sample_components=sample_components,
@@ -287,7 +287,7 @@ class TestNumericalConvolutionBase:
 
         # EXPECT
         assert default_numerical_convolution_base.temperature is temp_param
-        assert default_numerical_convolution_base.temperature.value == 350.0
+        assert default_numerical_convolution_base.temperature.value == pytest.approx(350.0)
 
     def test_temperature_setter_raises(self, default_numerical_convolution_base):
         """
@@ -502,7 +502,7 @@ class TestNumericalConvolutionBase:
         assert 'resolution_components=' in repr_str
 
         # Important parameters
-        assert 'energy_unit=meV' in repr_str
+        assert 'unit=meV' in repr_str
         assert 'upsample_factor=5' in repr_str
         assert 'extension_factor=0.2' in repr_str
         assert 'temperature=None' in repr_str

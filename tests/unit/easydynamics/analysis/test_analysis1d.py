@@ -230,8 +230,11 @@ class TestAnalysis1d:
         assert Counter(variables) == Counter(expected_vars)
 
     def test_plot_raises_if_no_data(self, analysis1d):
-        analysis1d.experiment._data = None
+        # WHEN THEN
+        # override the binned data with None to simulate no data available for plotting
+        analysis1d.experiment._binned_data = None
 
+        # EXPECT
         with pytest.raises(ValueError, match='No data'):
             analysis1d.plot_data_and_model()
 
@@ -240,7 +243,7 @@ class TestAnalysis1d:
 
         # Mock the data and model components to be plotted
         fake_model = sc.DataArray(data=sc.array(dims=['energy'], values=[1, 2, 3]))
-        analysis1d._create_sample_scipp_array = MagicMock(return_value=fake_model)
+        analysis1d._create_model_array = MagicMock(return_value=fake_model)
 
         fake_components = sc.Dataset({
             'Component1': sc.DataArray(data=sc.array(dims=['energy'], values=[0.1, 0.2, 0.3]))
@@ -262,7 +265,7 @@ class TestAnalysis1d:
         mock_plot.assert_called_once()
 
         # Inspect arguments
-        args, kwargs = mock_plot.call_args
+        args, _ = mock_plot.call_args
 
         dataset_passed = args[0]
 
@@ -344,7 +347,7 @@ class TestAnalysis1d:
         energy = np.array([10.0, 20.0])
 
         # THEN / EXPECT
-        with pytest.raises(TypeError, match='Energy must be a sc.Variable or None'):
+        with pytest.raises(TypeError, match=r'Energy must be a sc.Variable or None'):
             analysis1d._verify_energy(energy)
 
     def test_calculate_energy_with_offset(self, analysis1d):
@@ -399,7 +402,7 @@ class TestAnalysis1d:
         # EXPECT
         assert isinstance(result, np.ndarray)
         assert result.shape == (len(analysis1d.experiment.energy),)
-        assert np.all(result == 0.0)
+        assert np.all(result == pytest.approx(0.0))
 
     def test_evaluate_components_no_convolution(self, analysis1d):
         # WHEN
@@ -608,7 +611,7 @@ class TestAnalysis1d:
             assert kwargs['resolution_components'] is resolution_components
             assert sc.identical(kwargs['energy'], analysis1d.energy)
             assert kwargs['temperature'] is analysis1d.temperature
-            assert kwargs['energy_offset'] == 123.0
+            assert kwargs['energy_offset'] == pytest.approx(123.0)
 
             assert result == MockConvolution.return_value
 
@@ -718,8 +721,8 @@ class TestAnalysis1d:
             np.array([1.0, 2.0, 3.0]),
         )
 
-    def test_create_sample_scipp_array(self, analysis1d):
-        """Test that _create_sample_scipp_array correctly
+    def test_create_model_array(self, analysis1d):
+        """Test that _create_model_array correctly
         evaluates the full model and calls _to_scipp_array with the
         correct values."""
 
@@ -730,7 +733,7 @@ class TestAnalysis1d:
         analysis1d._to_scipp_array = MagicMock()
 
         # THEN
-        analysis1d._create_sample_scipp_array()
+        analysis1d._create_model_array()
 
         # EXPECT
         analysis1d._calculate.assert_called_once()

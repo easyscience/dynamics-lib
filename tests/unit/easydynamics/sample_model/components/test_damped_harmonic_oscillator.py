@@ -24,17 +24,17 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert dho.display_name == 'DampedHarmonicOscillator'
-        assert dho.area.value == 1.0
-        assert dho.center.value == 1.0
-        assert dho.width.value == 1.0
+        assert dho.area.value == pytest.approx(1.0)
+        assert dho.center.value == pytest.approx(1.0)
+        assert dho.width.value == pytest.approx(1.0)
         assert dho.unit == 'meV'
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
         assert dho.display_name == 'TestDHO'
-        assert dho.area.value == 2.0
-        assert dho.center.value == 1.5
-        assert dho.width.value == 0.3
+        assert dho.area.value == pytest.approx(2.0)
+        assert dho.center.value == pytest.approx(1.5)
+        assert dho.width.value == pytest.approx(0.3)
         assert dho.unit == 'meV'
 
     def test_init_with_parameters(self):
@@ -88,7 +88,7 @@ class TestDampedHarmonicOscillator:
         # WHEN THEN EXPECT
         with pytest.raises(
             ValueError,
-            match='The width of a DampedHarmonicOscillator must be greater than zero.',
+            match=r'The width of a DampedHarmonicOscillator must be greater than zero.',
         ):
             DampedHarmonicOscillator(
                 display_name='TestDampedHarmonicOscillator',
@@ -190,9 +190,9 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert dho.unit == 'microeV'
-        assert dho.area.value == 2 * 1e3
-        assert dho.center.value == 1.5 * 1e3
-        assert dho.width.value == 0.3 * 1e3
+        assert dho.area.value == pytest.approx(2 * 1e3)
+        assert dho.center.value == pytest.approx(1.5 * 1e3)
+        assert dho.width.value == pytest.approx(0.3 * 1e3)
 
     def test_copy(self, dho: DampedHarmonicOscillator):
         # WHEN THEN

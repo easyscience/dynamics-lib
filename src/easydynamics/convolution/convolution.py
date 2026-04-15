@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from typing import ClassVar
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -33,7 +35,7 @@ class Convolution(NumericalConvolutionBase):
 
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
-    _invalidate_plan_on_change = {
+    _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
         'energy',
         '_energy',
         '_energy_grid',
@@ -56,8 +58,10 @@ class Convolution(NumericalConvolutionBase):
         extension_factor: Numeric | None = 0.2,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        energy_unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        display_name: str | None = 'MyConvolution',
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize the Convolution class.
@@ -80,10 +84,14 @@ class Convolution(NumericalConvolutionBase):
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
-        energy_unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default='meV'
             The unit of the energy.
         normalize_detailed_balance : bool, default=True
             Whether to normalize the detailed balance correction. Default is True.
+        display_name : str | None, default='MyConvolution'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
         """
 
         self._convolution_plan_is_valid = False
@@ -97,8 +105,10 @@ class Convolution(NumericalConvolutionBase):
             extension_factor=extension_factor,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            energy_unit=energy_unit,
+            unit=unit,
             normalize_detailed_balance=normalize_detailed_balance,
+            display_name=display_name,
+            unique_name=unique_name,
         )
 
         self._reactions_enabled = True
@@ -231,11 +241,10 @@ class Convolution(NumericalConvolutionBase):
             # If temperature is not set, check if all
             # resolution components can be convolved analytically with
             # this sample component
-            pair_is_analytic = []
-            for resolution_component in self._resolution_components.components:
-                pair_is_analytic.append(
-                    self._check_if_pair_is_analytic(sample_component, resolution_component)
-                )
+            pair_is_analytic = [
+                self._check_if_pair_is_analytic(sample_component, resolution_component)
+                for resolution_component in self._resolution_components.components
+            ]
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
             # sample model. If not, it goes to numerical sample model.

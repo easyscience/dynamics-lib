@@ -126,7 +126,7 @@ class TestAnalyticalConvolution:
 
             # EXPECT
             # 2 sample components x 2 resolution components
-            assert np.all(result == 4.0)
+            assert np.all(result == pytest.approx(4.0))
             assert mocked_pair.call_count == 4
 
             # Gather the actual calls to verify correct pairs
@@ -178,7 +178,7 @@ class TestAnalyticalConvolution:
 
             # EXPECT
             # 1 sample component x 1 resolution component
-            assert np.all(result == 1.0)
+            assert np.all(result == pytest.approx(1.0))
             assert mocked_pair.call_count == 1
 
             # Gather the actual calls to verify correct pairs

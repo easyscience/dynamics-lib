@@ -84,8 +84,11 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
         raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
-    if isinstance(unit, str):
-        unit = sc.Unit(unit)
+    # if isinstance(unit, str):
+    #     unit = sc.Unit(unit)
+
+    if isinstance(unit, sc.Unit):
+        unit = str(unit)
     return unit
 
 

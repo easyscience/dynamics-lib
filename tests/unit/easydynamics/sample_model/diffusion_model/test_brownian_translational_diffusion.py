@@ -26,8 +26,8 @@ class TestBrownianTranslationalDiffusion:
         # WHEN THEN EXPECT
         assert brownian_diffusion_model.display_name == 'BrownianTranslationalDiffusion'
         assert brownian_diffusion_model.unit == 'meV'
-        assert brownian_diffusion_model.scale.value == 1.0
-        assert brownian_diffusion_model.diffusion_coefficient.value == 1.0
+        assert brownian_diffusion_model.scale.value == pytest.approx(1.0)
+        assert brownian_diffusion_model.diffusion_coefficient.value == pytest.approx(1.0)
 
     @pytest.mark.parametrize(
         'kwargs,expected_exception, expected_message',
@@ -70,16 +70,16 @@ class TestBrownianTranslationalDiffusion:
         brownian_diffusion_model.diffusion_coefficient = 3.0
 
         # THEN EXPECT
-        assert brownian_diffusion_model.diffusion_coefficient.value == 3.0
+        assert brownian_diffusion_model.diffusion_coefficient.value == pytest.approx(3.0)
 
     def test_diffusion_coefficient_setter_raises(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='diffusion_coefficient must be a number.'):
+        with pytest.raises(TypeError, match=r'diffusion_coefficient must be a number.'):
             brownian_diffusion_model.diffusion_coefficient = 'invalid'  # Invalid type
 
     def test_diffusion_coefficient_setter_negative_raises(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='diffusion_coefficient must be non-negative.'):
+        with pytest.raises(ValueError, match=r'diffusion_coefficient must be non-negative.'):
             brownian_diffusion_model.diffusion_coefficient = -1.0  # Invalid negative value
 
     def test_calculate_width_type_error(self, brownian_diffusion_model):
@@ -170,7 +170,7 @@ class TestBrownianTranslationalDiffusion:
         self, brownian_diffusion_model
     ):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='component_name must be a string.'):
+        with pytest.raises(TypeError, match=r'component_name must be a string.'):
             brownian_diffusion_model.create_component_collections(
                 Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
             )
@@ -182,7 +182,7 @@ class TestBrownianTranslationalDiffusion:
 
     def test_create_component_collections_Q_1dimensional_error(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='Q must be a 1-dimensional array.'):
+        with pytest.raises(ValueError, match=r'Q must be a 1-dimensional array.'):
             brownian_diffusion_model.create_component_collections(
                 Q=np.array([[0.1, 0.2], [0.3, 0.4]])
             )  # Invalid shape
