@@ -9,6 +9,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -38,13 +39,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
         energy_offset: Numeric | Parameter = 0.0,
-        upsample_factor: Numeric | None = 5,
-        extension_factor: Numeric | None = 0.2,
+        convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = 'K',
-        unit: str | sc.Unit = 'meV',
-        normalize_detailed_balance: bool = True,
-        display_name: str | None = 'MyConvolution',
+        temperature_unit: str | sc.Unit = "K",
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "MyConvolution",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -94,24 +93,55 @@ class NumericalConvolutionBase(ConvolutionBase):
             unique_name=unique_name,
         )
 
-        if temperature is not None and not isinstance(temperature, (Numeric, Parameter)):
-            raise TypeError('Temperature must be None, a number or a Parameter.')
+        if temperature is not None and not isinstance(
+            temperature, (Numeric, Parameter)
+        ):
+            raise TypeError("Temperature must be None, a number or a Parameter.")
 
         if not isinstance(temperature_unit, (str, sc.Unit)):
-            raise TypeError('Temperature_unit must be a string or sc.Unit.')
+            raise TypeError("Temperature_unit must be a string or sc.Unit.")
         self._temperature_unit = temperature_unit
         self._temperature = None
         self.temperature = temperature
 
-        self._normalize_detailed_balance = normalize_detailed_balance
-
-        self._upsample_factor = upsample_factor
-        self._extension_factor = extension_factor
+        if convolution_settings is None:
+            convolution_settings = ConvolutionSettings()
+        self._convolution_settings = convolution_settings
 
         # Create a dense grid to improve accuracy.
         # When upsample_factor>1, we evaluate on this grid and
         # interpolate back to the original values at the end
         self._energy_grid = self._create_energy_grid()
+
+    @property
+    def convolution_settings(self) -> ConvolutionSettings:
+        """
+        Get the convolution settings.
+
+        Returns
+        -------
+        ConvolutionSettings
+            The convolution settings.
+        """
+
+        return self._convolution_settings
+
+    @convolution_settings.setter
+    def convolution_settings(self, settings: ConvolutionSettings) -> None:
+        """
+        Set the convolution settings and recreate the dense grid.
+
+        Parameters
+        ----------
+        settings : ConvolutionSettings
+            The new convolution settings.
+        """
+        if not isinstance(settings, ConvolutionSettings):
+            raise TypeError("settings must be a ConvolutionSettings instance.")
+        self._convolution_settings = settings
+        self._convolution_settings.convolution_plan_is_valid = False
+        # Recreate dense grid when convolution settings are updated
+        # self._energy_grid = self._create_energy_grid()
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
@@ -124,8 +154,9 @@ class NumericalConvolutionBase(ConvolutionBase):
             The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
+        self.convolution_settings.convolution_plan_is_valid = False
         # Recreate dense grid when energy is updated
-        self._energy_grid = self._create_energy_grid()
+        # self._energy_grid = self._create_energy_grid()
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -138,7 +169,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The upsample factor.
         """
 
-        return self._upsample_factor
+        return self.convolution_settings.upsample_factor
 
     @upsample_factor.setter
     def upsample_factor(self, factor: Numeric | None) -> None:
@@ -158,20 +189,20 @@ class NumericalConvolutionBase(ConvolutionBase):
             If factor is not greater than 1.
         """
         if factor is None:
-            self._upsample_factor = factor
-            self._energy_grid = self._create_energy_grid()
+            self.convolution_settings.upsample_factor = factor
+            # self._energy_grid = self._create_energy_grid()
             return
 
         if not isinstance(factor, Numeric):
-            raise TypeError('Upsample factor must be a numerical value or None.')
+            raise TypeError("Upsample factor must be a numerical value or None.")
         factor = float(factor)
         if factor <= 1.0:
-            raise ValueError('Upsample factor must be greater than 1.')
+            raise ValueError("Upsample factor must be greater than 1.")
 
-        self._upsample_factor = factor
+        self.convolution_settings.upsample_factor = factor
 
         # Recreate dense grid when upsample factor is updated
-        self._energy_grid = self._create_energy_grid()
+        # self._energy_grid = self._create_energy_grid()
 
     @property
     def extension_factor(self) -> float:
@@ -187,7 +218,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The extension factor.
         """
 
-        return self._extension_factor
+        return self.convolution_settings.extension_factor
 
     @extension_factor.setter
     def extension_factor(self, factor: Numeric) -> None:
@@ -211,13 +242,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         if not isinstance(factor, Numeric):
-            raise TypeError('Extension factor must be a number.')
+            raise TypeError("Extension factor must be a number.")
         if factor < 0.0:
-            raise ValueError('Extension factor must be non-negative.')
+            raise ValueError("Extension factor must be non-negative.")
 
-        self._extension_factor = float(factor)
+        self.convolution_settings.extension_factor = float(factor)
         # Recreate dense grid when extension factor is updated
-        self._energy_grid = self._create_energy_grid()
+        # self._energy_grid = self._create_energy_grid()
 
     @property
     def temperature(self) -> Parameter | None:
@@ -258,7 +289,7 @@ class NumericalConvolutionBase(ConvolutionBase):
                 self._temperature.value = float(temp)
             else:
                 self._temperature = Parameter(
-                    name='temperature',
+                    name="temperature",
                     value=float(temp),
                     unit=self._temperature_unit,
                     fixed=True,
@@ -266,7 +297,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         elif isinstance(temp, Parameter):
             self._temperature = temp
         else:
-            raise TypeError('Temperature must be None, a float or a Parameter.')
+            raise TypeError("Temperature must be None, a float or a Parameter.")
 
     @property
     def normalize_detailed_balance(self) -> bool:
@@ -281,7 +312,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             Whether to normalize the detailed balance factor.
         """
 
-        return self._normalize_detailed_balance
+        return self.convolution_settings.normalize_detailed_balance
 
     @normalize_detailed_balance.setter
     def normalize_detailed_balance(self, normalize: bool) -> None:
@@ -302,9 +333,9 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         if not isinstance(normalize, bool):
-            raise TypeError('normalize_detailed_balance must be True or False.')
+            raise TypeError("normalize_detailed_balance must be True or False.")
 
-        self._normalize_detailed_balance = normalize
+        self.convolution_settings.normalize_detailed_balance = normalize
 
     def _create_energy_grid(
         self,
@@ -332,7 +363,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
-                    'Input array `energy` must be uniformly spaced if upsample_factor is not given.'  # noqa: E501
+                    "Input array `energy` must be uniformly spaced if upsample_factor is not given."  # noqa: E501
                 )
             energy_dense = self.energy.values
 
@@ -349,7 +380,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy_span_dense = extended_max - extended_min
 
         if len(energy_dense) < 2:
-            raise ValueError('Energy array must have at least two points.')
+            raise ValueError("Energy array must have at least two points.")
         energy_dense_step = energy_dense[1] - energy_dense[0]
 
         # Handle offset for even length of energy_dense in convolution.
@@ -362,7 +393,9 @@ class NumericalConvolutionBase(ConvolutionBase):
         # select the 4 central points we either get
         # indices [2,3,4,5] or [1,2,3,4], both of which are offset by
         # 0.5*dx from the true center at index 3.5.
-        energy_even_length_offset = -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
+        energy_even_length_offset = (
+            -0.5 * energy_dense_step if len(energy_dense) % 2 == 0 else 0.0
+        )
 
         # Handle the case when energy_dense is not symmetric around 0.
         # The resolution is still centered around zero (or close to it),
@@ -374,13 +407,15 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        return EnergyGrid(
+        energy_grid = EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
+        self._energy_grid = energy_grid
+        return energy_grid
 
     def _check_width_thresholds(
         self,
@@ -403,27 +438,35 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         # Handle ComponentCollection or ModelComponent
-        components = model.components if isinstance(model, ComponentCollection) else [model]
+        components = (
+            model.components if isinstance(model, ComponentCollection) else [model]
+        )
 
         for comp in components:
-            if hasattr(comp, 'width'):
-                if comp.width.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
+            if hasattr(comp, "width"):
+                if (
+                    comp.width.value
+                    > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense
+                ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.unique_name}' \
                             ({comp.width.value}) is large compared to the span of the input "
-                        f'array ({self._energy_grid.energy_span_dense}). \
+                        f"array ({self._energy_grid.energy_span_dense}). \
                             This may lead to inaccuracies in the convolution. \
-                                Increase extension_factor to improve accuracy.',
+                                Increase extension_factor to improve accuracy.",
                         UserWarning,
                         stacklevel=3,
                     )
-                if comp.width.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
+                if (
+                    comp.width.value
+                    < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step
+                ):
                     warnings.warn(
                         f"The width of the {model_name} component '{comp.unique_name}' \
                             ({comp.width.value}) is small compared to the spacing of the input "
-                        f'array ({self._energy_grid.energy_dense_step}). \
+                        f"array ({self._energy_grid.energy_dense_step}). \
                             This may lead to inaccuracies in the convolution. \
-                                Increase upsample_factor to improve accuracy.',
+                                Increase upsample_factor to improve accuracy.",
                         UserWarning,
                         stacklevel=3,
                     )
@@ -438,13 +481,13 @@ class NumericalConvolutionBase(ConvolutionBase):
             A string representation of the NumericalConvolutionBase.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'energy=array of shape {self.energy.values.shape},\n '
-            f'sample_components={self.sample_components!r}, \n'
-            f'resolution_components={self.resolution_components!r},\n '
-            f'unit={self.unit}, '
-            f'upsample_factor={self.upsample_factor}, '
-            f'extension_factor={self.extension_factor}, '
-            f'temperature={self.temperature}, '
-            f'normalize_detailed_balance={self.normalize_detailed_balance})'
+            f"{self.__class__.__name__}("
+            f"energy=array of shape {self.energy.values.shape},\n "
+            f"sample_components={self.sample_components!r}, \n"
+            f"resolution_components={self.resolution_components!r},\n "
+            f"unit={self.unit}, "
+            f"upsample_factor={self.upsample_factor}, "
+            f"extension_factor={self.extension_factor}, "
+            f"temperature={self.temperature}, "
+            f"normalize_detailed_balance={self.normalize_detailed_balance})"
         )

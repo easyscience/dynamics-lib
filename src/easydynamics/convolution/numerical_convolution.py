@@ -6,6 +6,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -28,13 +29,11 @@ class NumericalConvolution(NumericalConvolutionBase):
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
         energy_offset: Numeric | Parameter = 0.0,
-        upsample_factor: Numeric | None = 5,
-        extension_factor: Numeric | None = 0.2,
+        convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = 'K',
-        unit: str | sc.Unit = 'meV',
-        normalize_detailed_balance: bool = True,
-        display_name: str | None = 'MyConvolution',
+        temperature_unit: str | sc.Unit = "K",
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "MyConvolution",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -50,18 +49,14 @@ class NumericalConvolution(NumericalConvolutionBase):
             The resolution model to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
             An energy offset to apply to the energy values before convolution.
-        upsample_factor : Numeric | None, default=5
-            The factor by which to upsample the input data before convolution.
-        extension_factor : Numeric | None, default=0.2
-            The factor by which to extend the input data range before convolution.
+        convolution_settings : ConvolutionSettings | None, default=None
+            The settings for the convolution.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
         unit : str | sc.Unit, default='meV'
             The unit of the energy.
-        normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance correction. Default is True.
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -72,12 +67,10 @@ class NumericalConvolution(NumericalConvolutionBase):
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_offset=energy_offset,
-            upsample_factor=upsample_factor,
-            extension_factor=extension_factor,
+            convolution_settings=convolution_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
             unit=unit,
-            normalize_detailed_balance=normalize_detailed_balance,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -94,15 +87,19 @@ class NumericalConvolution(NumericalConvolutionBase):
         np.ndarray
             The convolved values evaluated at energy.
         """
+        # Make sure the convolver is updated with the latest convolution
+        # settings before convolution.
+        if not self.convolution_settings.convolution_plan_is_valid:
+            self._energy_grid = self._create_energy_grid()
 
         # Give warnings if peaks are very wide or very narrow
         self._check_width_thresholds(
             model=self.sample_components,
-            model_name='sample model',
+            model_name="sample model",
         )
         self._check_width_thresholds(
             model=self.resolution_components,
-            model_name='resolution model',
+            model_name="resolution model",
         )
 
         # Evaluate sample model. If called via the Convolution class,
@@ -129,7 +126,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         )
 
         # Convolution
-        convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
+        convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
         convolved *= self._energy_grid.energy_dense_step  # normalize
 
         if self.upsample_factor is not None:
