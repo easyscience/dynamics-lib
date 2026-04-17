@@ -31,9 +31,9 @@ class NumericalConvolution(NumericalConvolutionBase):
         energy_offset: Numeric | Parameter = 0.0,
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = "K",
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "MyConvolution",
+        temperature_unit: str | sc.Unit = 'K',
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -95,11 +95,11 @@ class NumericalConvolution(NumericalConvolutionBase):
         # Give warnings if peaks are very wide or very narrow
         self._check_width_thresholds(
             model=self.sample_components,
-            model_name="sample model",
+            model_name='sample model',
         )
         self._check_width_thresholds(
             model=self.resolution_components,
-            model_name="resolution model",
+            model_name='resolution model',
         )
 
         # Evaluate sample model. If called via the Convolution class,
@@ -126,7 +126,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         )
 
         # Convolution
-        convolved = fftconvolve(sample_vals, resolution_vals, mode="same")
+        convolved = fftconvolve(sample_vals, resolution_vals, mode='same')
         convolved *= self._energy_grid.energy_dense_step  # normalize
 
         if self.upsample_factor is not None:

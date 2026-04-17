@@ -30,7 +30,7 @@ class Analysis1d(AnalysisBase):
 
     def __init__(
         self,
-        display_name: str | None = "MyAnalysis",
+        display_name: str | None = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -47,11 +47,9 @@ class Analysis1d(AnalysisBase):
         display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
-            Unique name of the analysis. If None, a unique name is automatically generated. By
-            default, None.
+            Unique name of the analysis. If None, a unique name is automatically generated.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
             created.
@@ -61,6 +59,8 @@ class Analysis1d(AnalysisBase):
         Q_index : int | None, default=None
             The Q index to analyze. If None, the analysis will not be able to calculate or fit
             until a Q index is set.
+        convolution_settings : ConvolutionSettings | None, default=None
+            The settings for the convolution. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -188,7 +188,7 @@ class Analysis1d(AnalysisBase):
             The result of the fit.
         """
         if self._experiment is None:
-            raise ValueError("No experiment is associated with this Analysis.")
+            raise ValueError('No experiment is associated with this Analysis.')
 
         # Create convolver once to reuse during fitting
         self._convolver = self._create_convolver()
@@ -198,10 +198,8 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights, _ = (
-            self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
-                Q_index=self._require_Q_index()
-            )
+        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+            Q_index=self._require_Q_index()
         )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
 
@@ -300,15 +298,15 @@ class Analysis1d(AnalysisBase):
         import plopp as pp
 
         plot_kwargs_defaults = {
-            "title": self.display_name,
-            "linestyle": {"Data": "none", "Model": "-"},
-            "marker": {"Data": "o", "Model": "none"},
-            "color": {"Data": "black", "Model": "red"},
-            "markerfacecolor": {"Data": "none", "Model": "none"},
+            'title': self.display_name,
+            'linestyle': {'Data': 'none', 'Model': '-'},
+            'marker': {'Data': 'o', 'Model': 'none'},
+            'color': {'Data': 'black', 'Model': 'red'},
+            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
         }
 
         if self.experiment.binned_data is None:
-            raise ValueError("No data to plot. Please load data first.")
+            raise ValueError('No data to plot. Please load data first.')
 
         energy = self._verify_energy(energy)
         if energy is None:
@@ -317,8 +315,8 @@ class Analysis1d(AnalysisBase):
         # Create a dataset containing the data, model, and individual
         # components for plotting.
         data_and_model = {
-            "Data": self.experiment.binned_data["Q", self.Q_index],
-            "Model": self._create_model_array(energy=energy),
+            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Model': self._create_model_array(energy=energy),
         }
 
         if plot_components:
@@ -327,8 +325,8 @@ class Analysis1d(AnalysisBase):
             )
             for comp_name in components:
                 data_and_model[comp_name] = components[comp_name]
-                plot_kwargs_defaults["linestyle"][comp_name] = "--"
-                plot_kwargs_defaults["marker"][comp_name] = None
+                plot_kwargs_defaults['linestyle'][comp_name] = '--'
+                plot_kwargs_defaults['marker'][comp_name] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -367,7 +365,7 @@ class Analysis1d(AnalysisBase):
             The Q index.
         """
         if self._Q_index is None:
-            raise ValueError("Q_index must be set.")
+            raise ValueError('Q_index must be set.')
         return self._Q_index
 
     def _on_Q_index_changed(self) -> None:
@@ -402,9 +400,7 @@ class Analysis1d(AnalysisBase):
         """
 
         if energy is not None and not isinstance(energy, sc.Variable):
-            raise TypeError(
-                f"Energy must be a sc.Variable or None. Got {type(energy)}."
-            )
+            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
         return energy
 
     def _calculate_energy_with_offset(
@@ -438,8 +434,8 @@ class Analysis1d(AnalysisBase):
                 energy_offset.convert_unit(str(energy.unit))
             except Exception as e:
                 raise sc.UnitError(
-                    f"Energy and energy offset must have compatible units. "
-                    f"Got {energy.unit} and {energy_offset.unit}."
+                    f'Energy and energy offset must have compatible units. '
+                    f'Got {energy.unit} and {energy_offset.unit}.'
                 ) from e
 
         energy_with_offset = energy.copy(deep=True)
@@ -515,9 +511,7 @@ class Analysis1d(AnalysisBase):
         # performance is not important.
 
         # We don't create a convolver if the resolution is empty.
-        resolution = self.instrument_model.resolution_model.get_component_collection(
-            Q_index
-        )
+        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
         if resolution.is_empty:
             return components.evaluate(energy_with_offset)
 
@@ -604,10 +598,8 @@ class Analysis1d(AnalysisBase):
             The evaluated background contribution.
         """
         Q_index = self._require_Q_index()
-        background_components = (
-            self.instrument_model.background_model.get_component_collection(
-                Q_index=Q_index
-            )
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
         )
         return self._evaluate_components(
             components=background_components,
@@ -673,8 +665,8 @@ class Analysis1d(AnalysisBase):
         if sample_components.is_empty:
             return None
 
-        resolution_components = (
-            self.instrument_model.resolution_model.get_component_collection(Q_index)
+        resolution_components = self.instrument_model.resolution_model.get_component_collection(
+            Q_index
         )
         if resolution_components.is_empty:
             return None
@@ -796,28 +788,22 @@ class Analysis1d(AnalysisBase):
             Q_index=self.Q_index
         ).components
 
-        background_components = (
-            self.instrument_model.background_model.get_component_collection(
-                Q_index=self.Q_index
-            ).components
-        )
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=self.Q_index
+        ).components
 
         if energy is None:
             energy = self._masked_energy
 
-        background = (
-            self._evaluate_background(energy=energy) if add_background else None
-        )
+        background = self._evaluate_background(energy=energy) if add_background else None
 
         for component in sample_components:
             scipp_arrays[component.display_name] = self._create_component_scipp_array(
                 component=component, background=background, energy=energy
             )
         for component in background_components:
-            scipp_arrays[component.display_name] = (
-                self._create_background_component_scipp_array(
-                    component=component, energy=energy
-                )
+            scipp_arrays[component.display_name] = self._create_background_component_scipp_array(
+                component=component, energy=energy
             )
         return sc.Dataset(scipp_arrays)
 
@@ -847,9 +833,9 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
         return sc.DataArray(
-            data=sc.array(dims=["energy"], values=values),
+            data=sc.array(dims=['energy'], values=values),
             coords={
-                "energy": energy,
-                "Q": self.Q[self.Q_index],
+                'energy': energy,
+                'Q': self.Q[self.Q_index],
             },
         )
