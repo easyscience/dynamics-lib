@@ -305,6 +305,5 @@ class Convolution(NumericalConvolutionBase):
         # Only rebuild the convolution plan if reactions are enabled, to
         # avoid issues during __init__
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
-            if name in self._invalidate_plan_on_change:
-                self.convolution_settings.convolution_plan_is_valid = False
+            self.convolution_settings.convolution_plan_is_valid = False
             self._build_convolution_plan()

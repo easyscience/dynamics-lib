@@ -127,6 +127,10 @@ class TestNumericalConvolutionBase:
                 temperature_unit=invalid_temperature_unit,
             )
 
+    ####################
+    # Test properties
+    ###################
+
     def test_energy_setter(self, default_numerical_convolution_base):
         """
         Test setting a new energy array updates the energy grid
@@ -349,6 +353,64 @@ class TestNumericalConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='normalize_detailed_balance must be'):
             default_numerical_convolution_base.normalize_detailed_balance = 'invalid'
+
+    def test_convolution_settings_setter_valid(
+        self,
+        default_numerical_convolution_base,
+    ):
+        new_settings = ConvolutionSettings()
+
+        # WHEN
+        new_settings.convolution_plan_is_valid = True
+
+        # THEN
+        default_numerical_convolution_base.convolution_settings = new_settings
+
+        # EXPECT
+        assert default_numerical_convolution_base.convolution_settings is new_settings
+        assert new_settings.convolution_plan_is_valid is False
+
+    @pytest.mark.parametrize(
+        'value, expected_exception, match',
+        [
+            (None, TypeError, 'must be a ConvolutionSettings instance'),
+            ('settings', TypeError, 'must be a ConvolutionSettings instance'),
+            (123, TypeError, 'must be a ConvolutionSettings instance'),
+        ],
+        ids=[
+            'none',
+            'string',
+            'int',
+        ],
+    )
+    def test_convolution_settings_setter_invalid(
+        self,
+        default_numerical_convolution_base,
+        value,
+        expected_exception,
+        match,
+    ):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(expected_exception, match=match):
+            default_numerical_convolution_base.convolution_settings = value
+
+    def test_convolution_settings_overwrites_existing(
+        self,
+        default_numerical_convolution_base,
+    ):
+        first = ConvolutionSettings()
+        second = ConvolutionSettings()
+
+        # WHEN
+        default_numerical_convolution_base.convolution_settings = first
+        default_numerical_convolution_base.convolution_settings = second
+
+        # EXPECT
+        assert default_numerical_convolution_base.convolution_settings is second
+
+    ####################
+    # Other tests
+    ###################
 
     def test_create_energy_grid_upsample_none(self, default_numerical_convolution_base):
         """

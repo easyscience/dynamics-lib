@@ -578,3 +578,40 @@ class TestConvolution:
             assert isinstance(conv._numerical_convolver, NumericalConvolution)
         else:
             assert conv._numerical_convolver is None
+
+    def test_setattr_does_not_invalidate_plan_for_non_tracked_attribute(
+        self,
+        default_convolution,
+    ):
+        # WHEN
+        conv = default_convolution
+        conv.convolution_settings.convolution_plan_is_valid = True
+
+        # Capture current identity of internal state to ensure no rebuild
+        old_plan_id = id(conv._analytical_sample_components)
+        old_numerical_id = id(conv._numerical_sample_components)
+        old_delta_id = id(conv._delta_sample_components)
+
+        # THEN (NOT in _invalidate_plan_on_change)
+        conv.display_name = 'new_name'
+
+        # EXPECT
+        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert id(conv._analytical_sample_components) == old_plan_id
+        assert id(conv._numerical_sample_components) == old_numerical_id
+        assert id(conv._delta_sample_components) == old_delta_id
+        assert conv.display_name == 'new_name'
+
+    def test_setattr_invalidates_plan_for_tracked_attribute(
+        self,
+        default_convolution,
+    ):
+        # WHEN
+        conv = default_convolution
+        conv.convolution_settings.convolution_plan_is_valid = True
+
+        # THEN
+        conv.upsample_factor = 10
+
+        # EXPECT
+        assert conv.convolution_settings.convolution_plan_is_valid is False
