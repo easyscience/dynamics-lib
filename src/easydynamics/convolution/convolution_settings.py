@@ -104,7 +104,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         """
         if factor is None:
             self._upsample_factor = factor
-            self._convolution_plan_is_valid = False
+            self.convolution_plan_is_valid = False
             return
 
         if not isinstance(factor, Numeric):
@@ -115,7 +115,7 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         self._upsample_factor = factor
 
-        self._convolution_plan_is_valid = False
+        self.convolution_plan_is_valid = False
 
     @property
     def extension_factor(self) -> float:
@@ -160,7 +160,7 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise ValueError('Extension factor must be non-negative.')
 
         self._extension_factor = float(factor)
-        self._convolution_plan_is_valid = False
+        self.convolution_plan_is_valid = False
 
     @property
     def normalize_detailed_balance(self) -> bool:
