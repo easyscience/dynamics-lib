@@ -2349,8 +2349,7 @@ narrow.</p>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution class that combines analytical and numerical convolution methods to efficiently</span>
 <span class="sd">    perform convolutions of ComponentCollections with ResolutionComponents.</span>
@@ -2636,7 +2635,6 @@ narrow.</p>
         <span class="c1"># avoid issues during __init__</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_reactions_enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invalidate_plan_on_change</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_build_convolution_plan</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3099,8 +3097,7 @@ issues during <strong>init</strong>.</p>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom setattr to invalidate convolution plan on relevant attribute changes, and build a</span>
 <span class="sd">    new plan.</span>
@@ -3121,7 +3118,6 @@ issues during <strong>init</strong>.</p>
     <span class="c1"># avoid issues during __init__</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_reactions_enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invalidate_plan_on_change</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_build_convolution_plan</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5143,8 +5139,7 @@ narrow.</p>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Convolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution class that combines analytical and numerical convolution methods to efficiently</span>
 <span class="sd">    perform convolutions of ComponentCollections with ResolutionComponents.</span>
@@ -5430,7 +5425,6 @@ narrow.</p>
         <span class="c1"># avoid issues during __init__</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_reactions_enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invalidate_plan_on_change</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_build_convolution_plan</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5893,8 +5887,7 @@ issues during <strong>init</strong>.</p>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom setattr to invalidate convolution plan on relevant attribute changes, and build a</span>
 <span class="sd">    new plan.</span>
@@ -5915,7 +5908,6 @@ issues during <strong>init</strong>.</p>
     <span class="c1"># avoid issues during __init__</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_reactions_enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invalidate_plan_on_change</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_build_convolution_plan</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
