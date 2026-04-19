@@ -9,6 +9,7 @@ import pytest
 from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
@@ -36,6 +37,18 @@ class TestAnalysisBase:
         assert isinstance(analysis_base.sample_model, SampleModel)
         assert isinstance(analysis_base.instrument_model, InstrumentModel)
         assert analysis_base._extra_parameters == []
+
+    def test_init_convolution_settings(self):
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=2, extension_factor=0.5, normalize_detailed_balance=False
+        )
+
+        # THEN
+        analysis = AnalysisBase(convolution_settings=convolution_settings)
+
+        # EXPECT
+        assert analysis.convolution_settings is convolution_settings
 
     def test_init_extra_parameter(self):
         extra_parameter = Parameter(name='param1', value=1.0)
@@ -74,6 +87,11 @@ class TestAnalysisBase:
                 'instrument_model must be an instance of InstrumentModel',
             ),
             (
+                {'convolution_settings': 'not convolution settings'},
+                TypeError,
+                'convolution_settings must be an instance of ConvolutionSettings',
+            ),
+            (
                 {'extra_parameters': 123},
                 TypeError,
                 'extra_parameters must be a Parameter or a list of Parameters.',
@@ -88,6 +106,7 @@ class TestAnalysisBase:
             'invalid experiment',
             'invalid sample_model',
             'invalid instrument_model',
+            'invalid convolution_settings',
             'invalid extra_parameters',
             'invalid extra_parameters list',
         ],
@@ -217,6 +236,41 @@ class TestAnalysisBase:
             match='temperature is a read-only property',
         ):
             analysis_base.temperature = 300
+
+    def test_convolution_settings_property(self, analysis_base):
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=2, extension_factor=0.5, normalize_detailed_balance=False
+        )
+
+        # THEN
+        analysis_base.convolution_settings = convolution_settings
+
+        # EXPECT
+        assert analysis_base.convolution_settings is convolution_settings
+
+    def test_convolution_settings_setter_invalid_type(self, analysis_base):
+
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='convolution_settings must be an instance of ConvolutionSettings',
+        ):
+            analysis_base.convolution_settings = 'not convolution settings'
+
+    def test_convolution_settings_calls_on_convolution_settings_changed(self, analysis_base):
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=2, extension_factor=0.5, normalize_detailed_balance=False
+        )
+        with patch.object(
+            analysis_base, '_on_convolution_settings_changed'
+        ) as mock_on_convolution_settings_changed:
+            # THEN
+            analysis_base.convolution_settings = convolution_settings
+
+            # EXPECT
+            mock_on_convolution_settings_changed.assert_called_once()
 
     @pytest.mark.parametrize(
         'extra_parameters',

@@ -244,6 +244,7 @@ class TestConvolution:
             )
 
         conv.sample_components = sample_components  # This updates the internal sample models
+        conv._build_convolution_plan()  # Ensure the plan is built with the new components
 
         # THEN
         # Mock the methods to be tested. Use nullcontext if the
@@ -276,7 +277,7 @@ class TestConvolution:
             patch_numerical as mock_numerical_method,
             patch_delta as mock_delta_method,
         ):
-            conv._convolution_plan_is_valid = True
+            conv.convolution_settings._convolution_plan_is_valid = True
             conv.convolution()
 
             if analytical_component:
@@ -480,8 +481,6 @@ class TestConvolution:
         conv.sample_components = sample_components  # This updates the internal sample models
         if temperature is not None:
             conv.temperature = temperature
-        # It is already called by sample_components setter, but we now
-        # call it explicitly
         conv._build_convolution_plan()
 
         # EXPECT
@@ -563,9 +562,10 @@ class TestConvolution:
             )
 
         # THEN
-        conv.sample_components = sample_components  # This updates the internal sample models
-        # Should already have been called by sample_components setter,
+        conv.sample_components = sample_components
+        # Should already have been called by _build_convolution_plan,
         # but we now call it explicitly
+        conv._build_convolution_plan()  # Ensure the plan is built with the new components
         conv._set_convolvers()
 
         # EXPECT
