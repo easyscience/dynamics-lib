@@ -2717,10 +2717,10 @@ narrow.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span> <span class="o">=</span> <span class="n">analytical_sample_components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span> <span class="o">=</span> <span class="n">delta_sample_components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span> <span class="o">=</span> <span class="n">numerical_sample_components</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Update convolvers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_convolvers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_convolvers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6457,10 +6457,10 @@ narrow.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span> <span class="o">=</span> <span class="n">analytical_sample_components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span> <span class="o">=</span> <span class="n">delta_sample_components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span> <span class="o">=</span> <span class="n">numerical_sample_components</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Update convolvers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_convolvers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_convolvers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -11358,7 +11358,12 @@ class has no convolution functionality.</p>
 <span class="normal">472</span>
 <span class="normal">473</span>
 <span class="normal">474</span>
-<span class="normal">475</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolutionBase</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for numerical convolutions of sample and resolution models.</span>
 
@@ -11739,6 +11744,7 @@ class has no convolution functionality.</p>
             <span class="n">energy_even_length_offset</span><span class="o">=</span><span class="n">energy_even_length_offset</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="n">energy_grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">convolution_plan_is_valid</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">energy_grid</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_width_thresholds</span><span class="p">(</span>
@@ -11768,21 +11774,25 @@ class has no convolution functionality.</p>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">LARGE_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; </span><span class="se">\</span>
-<span class="s2">                            (</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">) is large compared to the span of the input &quot;</span>
-                        <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="si">}</span><span class="s1">). </span><span class="se">\</span>
-<span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
-<span class="s1">                                Increase extension_factor to improve accuracy.&#39;</span><span class="p">,</span>
+                        <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                            <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">) is large compared to the span of the input &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_span_dense</span><span class="si">}</span><span class="s1">). &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;This may lead to inaccuracies in the convolution. &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;Increase extension_factor to improve accuracy.&#39;</span>
+                        <span class="p">),</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">SMALL_WIDTH_THRESHOLD</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; </span><span class="se">\</span>
-<span class="s2">                            (</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">) is small compared to the spacing of the input &quot;</span>
-                        <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="si">}</span><span class="s1">). </span><span class="se">\</span>
-<span class="s1">                            This may lead to inaccuracies in the convolution. </span><span class="se">\</span>
-<span class="s1">                                Increase upsample_factor to improve accuracy.&#39;</span><span class="p">,</span>
+                        <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;The width of the </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> component &#39;</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                            <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">) is small compared to the spacing of the input &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;array (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span><span class="o">.</span><span class="n">energy_dense_step</span><span class="si">}</span><span class="s1">). &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;This may lead to inaccuracies in the convolution. &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;Increase upsample_factor to improve accuracy.&#39;</span>
+                        <span class="p">),</span>
                         <span class="ne">UserWarning</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -12299,12 +12309,7 @@ string or sc.Unit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/convolution/numerical_convolution_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
 <span class="normal">464</span>
@@ -12318,7 +12323,12 @@ string or sc.Unit.</p>
 <span class="normal">472</span>
 <span class="normal">473</span>
 <span class="normal">474</span>
-<span class="normal">475</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the NumericalConvolutionBase.</span>
 
