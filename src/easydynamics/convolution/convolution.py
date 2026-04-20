@@ -8,6 +8,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import ComponentCollection
@@ -42,8 +43,6 @@ class Convolution(NumericalConvolutionBase):
         '_sample_components',
         '_resolution_components',
         '_temperature',
-        '_upsample_factor',
-        '_extension_factor',
         '_energy_unit',
         '_normalize_detailed_balance',
     }
@@ -54,12 +53,10 @@ class Convolution(NumericalConvolutionBase):
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
         energy_offset: Numeric | Parameter = 0.0,
-        upsample_factor: Numeric | None = 5,
-        extension_factor: Numeric | None = 0.2,
+        convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         unit: str | sc.Unit = 'meV',
-        normalize_detailed_balance: bool = True,
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -76,37 +73,30 @@ class Convolution(NumericalConvolutionBase):
             The resolution components to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
             An energy offset to apply to the energy values before convolution.
-        upsample_factor : Numeric | None, default=5
-            The factor by which to upsample the input data before convolution. Default is 5.
-        extension_factor : Numeric | None, default=0.2
-            The factor by which to extend the input data range before convolution. Default is 0.2.
+        convolution_settings : ConvolutionSettings | None, default=None
+            The settings for the convolution. If None, default settings will be used.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
         unit : str | sc.Unit, default='meV'
             The unit of the energy.
-        normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance correction. Default is True.
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
         """
 
-        self._convolution_plan_is_valid = False
         self._reactions_enabled = False
         super().__init__(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
             energy_offset=energy_offset,
-            upsample_factor=upsample_factor,
-            extension_factor=extension_factor,
+            convolution_settings=convolution_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
             unit=unit,
-            normalize_detailed_balance=normalize_detailed_balance,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -114,8 +104,8 @@ class Convolution(NumericalConvolutionBase):
         self._reactions_enabled = True
         # Separate sample model components into pairs that can be
         # handled analytically, delta functions, and the rest
-        # Also initialize analytical and numerical convolvers based on s
-        # ample model component
+        # Also initialize analytical and numerical convolvers based on
+        # sample model component
         self._build_convolution_plan()
 
     def convolution(
@@ -130,7 +120,7 @@ class Convolution(NumericalConvolutionBase):
         np.ndarray
             The convolved values evaluated at energy.
         """
-        if not self._convolution_plan_is_valid:
+        if not self.convolution_settings.convolution_plan_is_valid:
             self._build_convolution_plan()
         total = np.zeros_like(self.energy.values, dtype=float)
 
@@ -256,10 +246,10 @@ class Convolution(NumericalConvolutionBase):
         self._analytical_sample_components = analytical_sample_components
         self._delta_sample_components = delta_sample_components
         self._numerical_sample_components = numerical_sample_components
-        self._convolution_plan_is_valid = True
 
         # Update convolvers
         self._set_convolvers()
+        self.convolution_settings.convolution_plan_is_valid = True
 
     def _set_convolvers(self) -> None:
         """
@@ -285,11 +275,9 @@ class Convolution(NumericalConvolutionBase):
                 energy_offset=self.energy_offset,
                 sample_components=self._numerical_sample_components,
                 resolution_components=self._resolution_components,
-                upsample_factor=self.upsample_factor,
-                extension_factor=self.extension_factor,
+                convolution_settings=self.convolution_settings,
                 temperature=self.temperature,
                 temperature_unit=self._temperature_unit,
-                normalize_detailed_balance=self.normalize_detailed_balance,
             )
         else:
             self._numerical_convolver = None
@@ -312,8 +300,7 @@ class Convolution(NumericalConvolutionBase):
         """
         super().__setattr__(name, value)
 
-        if name in self._invalidate_plan_on_change:
-            self._convolution_plan_is_valid = False
-
+        # Only rebuild the convolution plan if reactions are enabled, to
+        # avoid issues during __init__
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
-            self._build_convolution_plan()
+            self.convolution_settings.convolution_plan_is_valid = False

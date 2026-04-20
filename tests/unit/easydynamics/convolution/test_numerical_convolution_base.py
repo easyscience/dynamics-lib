@@ -6,6 +6,7 @@ import pytest
 import scipp as sc
 from easyscience.variable import Parameter
 
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
@@ -59,33 +60,31 @@ class TestNumericalConvolutionBase:
         energy = np.linspace(-5, 5, 50)
         sample_components = ComponentCollection(display_name='ComponentCollection')
         resolution_components = ComponentCollection(display_name='ResolutionModel')
-        upsample_factor = 10
-        extension_factor = 0.5
+        resolution_settings = ConvolutionSettings(upsample_factor=10, extension_factor=0.5)
         temperature = 300.0
         temperature_unit = 'K'
-        unit = 'meV'
         normalize_detailed_balance = False
+        unit = 'meV'
 
         # THEN
         numerical_convolution_base = NumericalConvolutionBase(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            upsample_factor=upsample_factor,
-            extension_factor=extension_factor,
+            convolution_settings=resolution_settings,
+            normalize_detailed_balance=normalize_detailed_balance,
             temperature=temperature,
             temperature_unit=temperature_unit,
             unit=unit,
-            normalize_detailed_balance=normalize_detailed_balance,
         )
 
         # EXPECT
-        assert numerical_convolution_base.upsample_factor == upsample_factor
-        assert numerical_convolution_base.extension_factor == extension_factor
+        assert numerical_convolution_base.upsample_factor == 10
+        assert numerical_convolution_base.extension_factor == pytest.approx(0.5)
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
         assert numerical_convolution_base.unit == unit
-        assert numerical_convolution_base.normalize_detailed_balance == normalize_detailed_balance
+        assert numerical_convolution_base.normalize_detailed_balance is False
         assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
 
     def test_init_raises_type_error_for_invalid_temperature(self):
@@ -128,6 +127,10 @@ class TestNumericalConvolutionBase:
                 temperature_unit=invalid_temperature_unit,
             )
 
+    ####################
+    # Test properties
+    ###################
+
     def test_energy_setter(self, default_numerical_convolution_base):
         """
         Test setting a new energy array updates the energy grid
@@ -135,41 +138,64 @@ class TestNumericalConvolutionBase:
         """
         # WHEN
         new_energy = np.linspace(-20, 20, 201)
+
+        # THEN
         default_numerical_convolution_base.energy = new_energy
 
-        # THEN EXPECT
+        # EXPECT
         assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
         assert np.allclose(default_numerical_convolution_base.energy.values, new_energy)
+
+        # EXPECT: plan invalidated
+        assert (
+            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
+            is False
+        )
+
+        # THEN
+        # Force regeneration of energy grid
+        default_numerical_convolution_base._create_energy_grid()
+
+        # EXPECT
         assert default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == round(
             201 * default_numerical_convolution_base.upsample_factor
         )
 
-    def test_upsample_factor_setter(self, default_numerical_convolution_base):
+    @pytest.mark.parametrize(
+        'new_upsample_factor, expected_size',
+        [
+            (10, (101 * 10)),
+            (None, 101),
+        ],
+        ids=['upsample_10', 'no_upsampling'],
+    )
+    def test_upsample_factor_setter(
+        self,
+        default_numerical_convolution_base,
+        new_upsample_factor,
+        expected_size,
+    ):
         """
-        Test setting a new upsample factor updates the energy grid
-        accordingly.
+        Test setting upsample factor updates the energy grid correctly,
+        including disabling upsampling when set to None.
         """
         # WHEN
-        new_upsample_factor = 10
         default_numerical_convolution_base.upsample_factor = new_upsample_factor
 
-        # THEN EXPECT
-        assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
-        assert default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == round(
-            101 * new_upsample_factor
+        # EXPECT: plan invalidated
+        assert (
+            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
+            is False
         )
 
-    def test_upsample_factor_setter_none(self, default_numerical_convolution_base):
-        """
-        Test setting upsample factor to None disables upsampling.
-        """
-        # WHEN
-        new_upsample_factor = None
-        default_numerical_convolution_base.upsample_factor = new_upsample_factor
+        # Force regeneration of energy grid
+        default_numerical_convolution_base._create_energy_grid()
 
-        # THEN EXPECT
+        # EXPECT: correct factor + grid size
         assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
-        assert default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == 101
+        assert (
+            default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == expected_size
+        )
 
     @pytest.mark.parametrize(
         'invalid_upsample_factor, expected_exception',
@@ -204,9 +230,21 @@ class TestNumericalConvolutionBase:
         """
         # WHEN
         new_extension_factor = 0.5
+
+        # THEN
         default_numerical_convolution_base.extension_factor = new_extension_factor
 
-        # THEN EXPECT
+        # EXPECT: plan invalidated
+        assert (
+            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
+            is False
+        )
+
+        # THEN
+        # Force regeneration of energy grid
+        default_numerical_convolution_base._create_energy_grid()
+
+        # EXPECT
         assert default_numerical_convolution_base.extension_factor == new_extension_factor
         expected_span = 20 + (0.5 * 20)  # original span + extension
         assert np.isclose(
@@ -316,6 +354,64 @@ class TestNumericalConvolutionBase:
         with pytest.raises(TypeError, match='normalize_detailed_balance must be'):
             default_numerical_convolution_base.normalize_detailed_balance = 'invalid'
 
+    def test_convolution_settings_setter_valid(
+        self,
+        default_numerical_convolution_base,
+    ):
+        new_settings = ConvolutionSettings()
+
+        # WHEN
+        new_settings.convolution_plan_is_valid = True
+
+        # THEN
+        default_numerical_convolution_base.convolution_settings = new_settings
+
+        # EXPECT
+        assert default_numerical_convolution_base.convolution_settings is new_settings
+        assert new_settings.convolution_plan_is_valid is False
+
+    @pytest.mark.parametrize(
+        'value, expected_exception, match',
+        [
+            (None, TypeError, 'must be a ConvolutionSettings instance'),
+            ('settings', TypeError, 'must be a ConvolutionSettings instance'),
+            (123, TypeError, 'must be a ConvolutionSettings instance'),
+        ],
+        ids=[
+            'none',
+            'string',
+            'int',
+        ],
+    )
+    def test_convolution_settings_setter_invalid(
+        self,
+        default_numerical_convolution_base,
+        value,
+        expected_exception,
+        match,
+    ):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(expected_exception, match=match):
+            default_numerical_convolution_base.convolution_settings = value
+
+    def test_convolution_settings_overwrites_existing(
+        self,
+        default_numerical_convolution_base,
+    ):
+        first = ConvolutionSettings()
+        second = ConvolutionSettings()
+
+        # WHEN
+        default_numerical_convolution_base.convolution_settings = first
+        default_numerical_convolution_base.convolution_settings = second
+
+        # EXPECT
+        assert default_numerical_convolution_base.convolution_settings is second
+
+    ####################
+    # Other tests
+    ###################
+
     def test_create_energy_grid_upsample_none(self, default_numerical_convolution_base):
         """
         Test creating energy grid with upsample_factor set to None (no
@@ -347,11 +443,12 @@ class TestNumericalConvolutionBase:
         """
         # WHEN
         default_numerical_convolution_base.energy = np.array([0, 1, 3, 6, 10])
+        default_numerical_convolution_base.upsample_factor = None
         with pytest.raises(
             ValueError,
             match='Input array `energy` must be uniformly spaced if upsample_factor is not given',
         ):
-            default_numerical_convolution_base.upsample_factor = None
+            default_numerical_convolution_base._create_energy_grid()
 
     @pytest.mark.parametrize('num_points', [100, 101], ids=['even', 'odd'])
     def test_create_energy_grid_upsample_and_extension(

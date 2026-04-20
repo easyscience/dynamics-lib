@@ -3,12 +3,12 @@
 
 import warnings
 
-# from dataclasses import dataclass
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -38,12 +38,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         sample_components: ComponentCollection | ModelComponent,
         resolution_components: ComponentCollection | ModelComponent,
         energy_offset: Numeric | Parameter = 0.0,
-        upsample_factor: Numeric | None = 5,
-        extension_factor: Numeric | None = 0.2,
+        convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        unit: str | sc.Unit = 'meV',
         normalize_detailed_balance: bool = True,
+        unit: str | sc.Unit = 'meV',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -60,18 +59,16 @@ class NumericalConvolutionBase(ConvolutionBase):
             The resolution components to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
             An energy offset to apply to the energy values before convolution.
-        upsample_factor : Numeric | None, default=5
-            The factor by which to upsample the input data before convolution.
-        extension_factor : Numeric | None, default=0.2
-            The factor by which to extend the input data range before convolution.
+        convolution_settings : ConvolutionSettings | None, default=None
+             The settings for the convolution. If None, default settings will be used.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
+        normalize_detailed_balance : bool, default=True
+            Whether to normalize the detailed balance factor by temperature.
         unit : str | sc.Unit, default='meV'
             The unit of the energy.
-        normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance correction.
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -81,8 +78,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         ------
         TypeError
             If temperature is not None, a number, or a Parameter, or if temperature_unit is not a
-            string or sc.Unit, or if upsample_factor is not a number or None, or if
-            extension_factor is not a number, or if normalize_detailed_balance is not a bool.
+            string or sc.Unit.
         """
         super().__init__(
             energy=energy,
@@ -103,15 +99,49 @@ class NumericalConvolutionBase(ConvolutionBase):
         self._temperature = None
         self.temperature = temperature
 
-        self._normalize_detailed_balance = normalize_detailed_balance
+        if convolution_settings is None:
+            convolution_settings = ConvolutionSettings()
+        self._convolution_settings = convolution_settings
 
-        self._upsample_factor = upsample_factor
-        self._extension_factor = extension_factor
+        self._normalize_detailed_balance = normalize_detailed_balance
 
         # Create a dense grid to improve accuracy.
         # When upsample_factor>1, we evaluate on this grid and
         # interpolate back to the original values at the end
         self._energy_grid = self._create_energy_grid()
+
+    @property
+    def convolution_settings(self) -> ConvolutionSettings:
+        """
+        Get the convolution settings.
+
+        Returns
+        -------
+        ConvolutionSettings
+            The convolution settings.
+        """
+
+        return self._convolution_settings
+
+    @convolution_settings.setter
+    def convolution_settings(self, settings: ConvolutionSettings) -> None:
+        """
+        Set the convolution settings and recreate the dense grid.
+
+        Parameters
+        ----------
+        settings : ConvolutionSettings
+            The new convolution settings.
+
+        Raises
+        ------
+        TypeError
+            If settings is not a ConvolutionSettings instance.
+        """
+        if not isinstance(settings, ConvolutionSettings):
+            raise TypeError('settings must be a ConvolutionSettings instance.')
+        self._convolution_settings = settings
+        self._convolution_settings.convolution_plan_is_valid = False
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
@@ -124,8 +154,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
-        # Recreate dense grid when energy is updated
-        self._energy_grid = self._create_energy_grid()
+        self.convolution_settings.convolution_plan_is_valid = False
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -138,7 +167,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The upsample factor.
         """
 
-        return self._upsample_factor
+        return self.convolution_settings.upsample_factor
 
     @upsample_factor.setter
     def upsample_factor(self, factor: Numeric | None) -> None:
@@ -158,8 +187,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             If factor is not greater than 1.
         """
         if factor is None:
-            self._upsample_factor = factor
-            self._energy_grid = self._create_energy_grid()
+            self.convolution_settings.upsample_factor = factor
             return
 
         if not isinstance(factor, Numeric):
@@ -168,10 +196,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         if factor <= 1.0:
             raise ValueError('Upsample factor must be greater than 1.')
 
-        self._upsample_factor = factor
-
-        # Recreate dense grid when upsample factor is updated
-        self._energy_grid = self._create_energy_grid()
+        self.convolution_settings.upsample_factor = factor
 
     @property
     def extension_factor(self) -> float:
@@ -187,7 +212,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The extension factor.
         """
 
-        return self._extension_factor
+        return self.convolution_settings.extension_factor
 
     @extension_factor.setter
     def extension_factor(self, factor: Numeric) -> None:
@@ -215,9 +240,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         if factor < 0.0:
             raise ValueError('Extension factor must be non-negative.')
 
-        self._extension_factor = float(factor)
-        # Recreate dense grid when extension factor is updated
-        self._energy_grid = self._create_energy_grid()
+        self.convolution_settings.extension_factor = float(factor)
 
     @property
     def temperature(self) -> Parameter | None:
@@ -374,13 +397,16 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        return EnergyGrid(
+        energy_grid = EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
+        self._energy_grid = energy_grid
+        self.convolution_settings.convolution_plan_is_valid = True
+        return energy_grid
 
     def _check_width_thresholds(
         self,
@@ -409,21 +435,25 @@ class NumericalConvolutionBase(ConvolutionBase):
             if hasattr(comp, 'width'):
                 if comp.width.value > LARGE_WIDTH_THRESHOLD * self._energy_grid.energy_span_dense:
                     warnings.warn(
-                        f"The width of the {model_name} component '{comp.unique_name}' \
-                            ({comp.width.value}) is large compared to the span of the input "
-                        f'array ({self._energy_grid.energy_span_dense}). \
-                            This may lead to inaccuracies in the convolution. \
-                                Increase extension_factor to improve accuracy.',
+                        (
+                            f"The width of the {model_name} component '{comp.unique_name}' "
+                            f'({comp.width.value}) is large compared to the span of the input '
+                            f'array ({self._energy_grid.energy_span_dense}). '
+                            f'This may lead to inaccuracies in the convolution. '
+                            f'Increase extension_factor to improve accuracy.'
+                        ),
                         UserWarning,
                         stacklevel=3,
                     )
                 if comp.width.value < SMALL_WIDTH_THRESHOLD * self._energy_grid.energy_dense_step:
                     warnings.warn(
-                        f"The width of the {model_name} component '{comp.unique_name}' \
-                            ({comp.width.value}) is small compared to the spacing of the input "
-                        f'array ({self._energy_grid.energy_dense_step}). \
-                            This may lead to inaccuracies in the convolution. \
-                                Increase upsample_factor to improve accuracy.',
+                        (
+                            f"The width of the {model_name} component '{comp.unique_name}' "
+                            f'({comp.width.value}) is small compared to the spacing of the input '
+                            f'array ({self._energy_grid.energy_dense_step}). '
+                            f'This may lead to inaccuracies in the convolution. '
+                            f'Increase upsample_factor to improve accuracy.'
+                        ),
                         UserWarning,
                         stacklevel=3,
                     )

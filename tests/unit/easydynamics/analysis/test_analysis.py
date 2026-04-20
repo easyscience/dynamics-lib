@@ -10,6 +10,7 @@ import pytest
 import scipp as sc
 
 from easydynamics.analysis.analysis import Analysis
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
@@ -613,6 +614,18 @@ class TestAnalysis:
         assert analysis.instrument_model is new_instrument_model
         for analysis1d in analysis.analysis_list:
             assert analysis1d.instrument_model is new_instrument_model
+
+    def test_on_convolution_settings_changed(self, analysis):
+        # WHEN
+        new_convolution_settings = ConvolutionSettings()
+
+        # THEN (this calls _on_convolution_settings_changed internally)
+        analysis.convolution_settings = new_convolution_settings
+
+        # EXPECT
+        assert analysis.convolution_settings is new_convolution_settings
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings is new_convolution_settings
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN

@@ -13,6 +13,7 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.convolution.convolution import Convolution
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
@@ -35,6 +36,7 @@ class Analysis1d(AnalysisBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
+        convolution_settings: ConvolutionSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -45,11 +47,9 @@ class Analysis1d(AnalysisBase):
         display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
-            Unique name of the analysis. If None, a unique name is automatically generated. By
-            default, None.
+            Unique name of the analysis. If None, a unique name is automatically generated.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
             created.
@@ -59,6 +59,8 @@ class Analysis1d(AnalysisBase):
         Q_index : int | None, default=None
             The Q index to analyze. If None, the analysis will not be able to calculate or fit
             until a Q index is set.
+        convolution_settings : ConvolutionSettings | None, default=None
+            The settings for the convolution. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -69,6 +71,7 @@ class Analysis1d(AnalysisBase):
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
+            convolution_settings=convolution_settings,
             extra_parameters=extra_parameters,
         )
 
@@ -513,11 +516,12 @@ class Analysis1d(AnalysisBase):
             return components.evaluate(energy_with_offset)
 
         conv = Convolution(
+            energy=energy,
             sample_components=components,
             resolution_components=resolution,
-            energy=energy,
-            temperature=self.temperature,
             energy_offset=energy_offset,
+            convolution_settings=self.convolution_settings,
+            temperature=self.temperature,
         )
         return conv.convolution()
 
@@ -668,11 +672,12 @@ class Analysis1d(AnalysisBase):
             return None
 
         return Convolution(
+            energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            energy=energy,
-            temperature=self.temperature,
             energy_offset=self.instrument_model.get_energy_offset(Q_index),
+            convolution_settings=self.convolution_settings,
+            temperature=self.temperature,
         )
 
     #############

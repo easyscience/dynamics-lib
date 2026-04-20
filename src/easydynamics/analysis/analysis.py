@@ -13,6 +13,7 @@ from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
@@ -33,6 +34,7 @@ class Analysis(AnalysisBase):
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
+        convolution_settings: ConvolutionSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -52,6 +54,8 @@ class Analysis(AnalysisBase):
         instrument_model : InstrumentModel | None, default=None
             The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
             is created.
+        convolution_settings : ConvolutionSettings | None, default=None
+             The settings for the convolution. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -66,6 +70,7 @@ class Analysis(AnalysisBase):
             experiment=experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
+            convolution_settings=convolution_settings,
             extra_parameters=extra_parameters,
         )
 
@@ -509,6 +514,16 @@ class Analysis(AnalysisBase):
             super()._on_instrument_model_changed()
             for analysis in self.analysis_list:
                 analysis.instrument_model = self.instrument_model
+
+    def _on_convolution_settings_changed(self) -> None:
+        """
+        Update the convolution settings in all Analysis1d objects when the convolution settings
+        change.
+        """
+        if self._call_updaters:
+            super()._on_convolution_settings_changed()
+            for analysis1d in self.analysis_list:
+                analysis1d.convolution_settings = self.convolution_settings
 
     def _create_analysis_list(self) -> None:
         """

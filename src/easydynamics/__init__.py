@@ -3,9 +3,11 @@
 """EasyDynamics library."""
 
 from easydynamics.analysis import Analysis
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 
 __all__ = [
     'Analysis',
+    'ConvolutionSettings',
     'Experiment',
 ]

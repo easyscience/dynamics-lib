@@ -6,6 +6,7 @@ import scipp as sc
 from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
 
+from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
@@ -29,6 +30,7 @@ class AnalysisBase(EasyScienceModelBase):
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
+        convolution_settings: ConvolutionSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -43,13 +45,14 @@ class AnalysisBase(EasyScienceModelBase):
             default, None.
         experiment : Experiment | None, default=None
             The Experiment associated with this Analysis. If None, a default Experiment is created.
-
         sample_model : SampleModel | None, default=None
             The SampleModel associated with this Analysis. If None, a default SampleModel is
             created.
         instrument_model : InstrumentModel | None, default=None
             The InstrumentModel associated with this Analysis. If None, a default InstrumentModel
             is created.
+        convolution_settings : ConvolutionSettings | None, default=None
+             The settings for the convolution. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -84,6 +87,15 @@ class AnalysisBase(EasyScienceModelBase):
             self._instrument_model = instrument_model
         else:
             raise TypeError('instrument_model must be an instance of InstrumentModel or None.')
+
+        if convolution_settings is None:
+            self.convolution_settings = ConvolutionSettings()
+        elif isinstance(convolution_settings, ConvolutionSettings):
+            self.convolution_settings = convolution_settings
+        else:
+            raise TypeError(
+                'convolution_settings must be an instance of ConvolutionSettings or None.'
+            )
 
         if extra_parameters is not None:
             if isinstance(extra_parameters, Parameter):
@@ -295,6 +307,38 @@ class AnalysisBase(EasyScienceModelBase):
         raise AttributeError('temperature is a read-only property derived from the SampleModel.')
 
     @property
+    def convolution_settings(self) -> ConvolutionSettings:
+        """
+        Get the convolution settings for this Analysis.
+
+        Returns
+        -------
+        ConvolutionSettings
+            The convolution settings for this Analysis.
+        """
+        return self._convolution_settings
+
+    @convolution_settings.setter
+    def convolution_settings(self, value: ConvolutionSettings) -> None:
+        """
+        Set the convolution settings for this Analysis.
+
+        Parameters
+        ----------
+        value : ConvolutionSettings
+            The convolution settings to set for this Analysis.
+
+        Raises
+        ------
+        TypeError
+            If value is not an instance of ConvolutionSettings.
+        """
+        if not isinstance(value, ConvolutionSettings):
+            raise TypeError('convolution_settings must be an instance of ConvolutionSettings.')
+        self._convolution_settings = value
+        self._on_convolution_settings_changed()
+
+    @property
     def extra_parameters(self) -> list[Parameter]:
         """
         Get the extra parameters included in this Analysis.
@@ -364,6 +408,11 @@ class AnalysisBase(EasyScienceModelBase):
         Update the Q values in the instrument model when the instrument model changes.
         """
         self.instrument_model.Q = self.Q
+
+    def _on_convolution_settings_changed(self) -> None:
+        """
+        For subclasses that implement convolution, this method can be overridden
+        """
 
     def _verify_Q_index(self, Q_index: int | None) -> int | None:
         """
