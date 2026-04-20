@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.utils import detailed_balance_factor
@@ -35,7 +36,7 @@ class SampleModel(ModelBase):
         diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
         temperature: float | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        divide_by_temperature: bool = True,
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
     ) -> None:
         """
         Initialize the SampleModel.
@@ -60,14 +61,15 @@ class SampleModel(ModelBase):
             default, None.
         temperature_unit : str | sc.Unit, default='K'
             Unit of the temperature.
-        divide_by_temperature : bool, default=True
-            Whether to divide the detailed balance factor by temperature.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            Settings for detailed balancing.
 
         Raises
         ------
         TypeError
             If diffusion_models is not a DiffusionModelBase, a list of DiffusionModelBase, or None,
-            or if temperature is not a number or None, or if divide_by_temperature is not a bool.
+            or if temperature is not a number or None, or if detailed_balance_settings is not a
+            DetailedBalanceSettings instance.
         ValueError
             If temperature is negative.
         """
@@ -110,9 +112,12 @@ class SampleModel(ModelBase):
             )
         self._temperature_unit = temperature_unit
 
-        if not isinstance(divide_by_temperature, bool):
-            raise TypeError('divide_by_temperature must be True or False')
-        self._divide_by_temperature = divide_by_temperature
+        if detailed_balance_settings is None:
+            self._detailed_balance_settings = DetailedBalanceSettings()
+        elif isinstance(detailed_balance_settings, DetailedBalanceSettings):
+            self._detailed_balance_settings = detailed_balance_settings
+        else:
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings or None')
 
     # ------------------------------------------------------------------
     # Component management
@@ -321,22 +326,22 @@ class SampleModel(ModelBase):
             If the provided unit is invalid or cannot be converted.
         """
 
-        if self._temperature is None:
+        if self.temperature is None:
             raise ValueError('Temperature is not set, cannot convert unit.')
 
-        old_unit = self._temperature.unit
+        old_unit = self.temperature.unit
 
         try:
-            self._temperature.convert_unit(unit)
+            self.temperature.convert_unit(unit)
             self._temperature_unit = unit
         except Exception:
             # Attempt to rollback on failure
             with suppress(Exception):
-                self._temperature.convert_unit(old_unit)
+                self.temperature.convert_unit(old_unit)
             raise
 
     @property
-    def divide_by_temperature(self) -> bool:
+    def normalize_detailed_balance(self) -> bool:
         """
         Get whether to divide the detailed balance factor by temperature.
 
@@ -345,10 +350,10 @@ class SampleModel(ModelBase):
         bool
             True if the detailed balance factor is divided by temperature, False otherwise.
         """
-        return self._divide_by_temperature
+        return self.detailed_balance_settings.normalize_detailed_balance
 
-    @divide_by_temperature.setter
-    def divide_by_temperature(self, value: bool) -> None:
+    @normalize_detailed_balance.setter
+    def normalize_detailed_balance(self, value: bool) -> None:
         """
         Set whether to divide the detailed balance factor by temperature.
 
@@ -363,8 +368,70 @@ class SampleModel(ModelBase):
             If value is not a bool.
         """
         if not isinstance(value, bool):
-            raise TypeError('divide_by_temperature must be True or False')
-        self._divide_by_temperature = value
+            raise TypeError('normalize_detailed_balance must be True or False')
+        self.detailed_balance_settings.normalize_detailed_balance = value
+
+    @property
+    def use_detailed_balance(self) -> bool:
+        """
+        Get whether to apply detailed balance to the model.
+
+        Returns
+        -------
+        bool
+            True if detailed balance is applied, False otherwise.
+        """
+        return self.detailed_balance_settings.use_detailed_balance
+
+    @use_detailed_balance.setter
+    def use_detailed_balance(self, value: bool) -> None:
+        """
+        Set whether to apply detailed balance to the model.
+
+        Parameters
+        ----------
+        value : bool
+            True to apply detailed balance, False otherwise.
+
+        Raises
+        ------
+        TypeError
+            If value is not a bool.
+        """
+        if not isinstance(value, bool):
+            raise TypeError('use_detailed_balance must be True or False')
+        self.detailed_balance_settings.use_detailed_balance = value
+
+    @property
+    def detailed_balance_settings(self) -> DetailedBalanceSettings:
+        """
+        Get the DetailedBalanceSettings of the SampleModel.
+
+        Returns
+        -------
+        DetailedBalanceSettings
+            The DetailedBalanceSettings of the SampleModel.
+        """
+        return self._detailed_balance_settings
+
+    @detailed_balance_settings.setter
+    def detailed_balance_settings(self, value: DetailedBalanceSettings) -> None:
+        """
+        Set the DetailedBalanceSettings of the SampleModel.
+
+        Parameters
+        ----------
+        value : DetailedBalanceSettings
+            The DetailedBalanceSettings to set.
+
+        Raises
+        ------
+        TypeError
+            If value is not a DetailedBalanceSettings.
+        """
+        if not isinstance(value, DetailedBalanceSettings):
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
+        self._detailed_balance_settings = value
 
     # ------------------------------------------------------------------
     # Other methods
@@ -390,12 +457,12 @@ class SampleModel(ModelBase):
 
         y = super().evaluate(x)
 
-        if self._temperature is not None:
+        if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             DBF = detailed_balance_factor(
                 energy=x,
-                temperature=self._temperature,
-                divide_by_temperature=self._divide_by_temperature,
-                energy_unit=self._unit,
+                temperature=self.temperature,
+                divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
+                energy_unit=self.unit,
             )
             y = [yi * DBF for yi in y]
 
@@ -422,8 +489,8 @@ class SampleModel(ModelBase):
         """
 
         all_vars = super().get_all_variables(Q_index=Q_index)
-        if self._temperature is not None:
-            all_vars.append(self._temperature)
+        if self.temperature is not None:
+            all_vars.append(self.temperature)
 
         for diffusion_model in self._diffusion_models:
             all_vars.extend(diffusion_model.get_all_variables())
@@ -472,9 +539,9 @@ class SampleModel(ModelBase):
         """
 
         return (
-            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit}), '
-            f'Q = {self._Q}, '
-            f'components = {self._components}, diffusion_models = {self._diffusion_models}, '
-            f'temperature = {self._temperature}, '
-            f'divide_by_temperature = {self._divide_by_temperature}'
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), '
+            f'Q = {self.Q}, '
+            f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
+            f'temperature = {self.temperature}, '
+            f'detailed_balance_settings = {self.detailed_balance_settings}'
         )

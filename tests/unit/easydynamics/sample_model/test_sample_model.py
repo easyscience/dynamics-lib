@@ -66,7 +66,7 @@ class TestSampleModel:
         assert len(model.diffusion_models) == 1
         assert isinstance(model.diffusion_models[0], BrownianTranslationalDiffusion)
         assert model.temperature.value == pytest.approx(10.0)
-        assert model.divide_by_temperature is True
+        assert model.normalize_detailed_balance is True
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
     def test_init_list_of_diffusion_model(self):
@@ -103,14 +103,6 @@ class TestSampleModel:
             match='temperature must be non-negative',
         ):
             SampleModel(temperature=-5.0)
-
-    def test_init_raises_with_invalid_divide_by_temperature(self):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(
-            TypeError,
-            match='divide_by_temperature must be True or False',
-        ):
-            SampleModel(divide_by_temperature='invalid_value')
 
     def test_append_and_remove_and_clear_diffusion_model(self, sample_model):
         # WHEN
@@ -279,29 +271,29 @@ class TestSampleModel:
         ):
             model.convert_temperature_unit('invalid_unit')
 
-    def test_divide_by_temperature_setter(self, sample_model):
+    def test_normalize_detailed_balance_setter(self, sample_model):
         # WHEN
         model = sample_model
 
         # THEN
-        model.divide_by_temperature = False
+        model.normalize_detailed_balance = False
 
         # EXPECT
-        assert model.divide_by_temperature is False
+        assert model.normalize_detailed_balance is False
 
         # THEN
-        model.divide_by_temperature = True
+        model.normalize_detailed_balance = True
 
         # EXPECT
-        assert model.divide_by_temperature is True
+        assert model.normalize_detailed_balance is True
 
-    def test_divide_by_temperature_setter_raises_with_invalid_type(self, sample_model):
+    def test_normalize_detailed_balance_setter_raises_with_invalid_type(self, sample_model):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='divide_by_temperature must be True or False',
+            match='normalize_detailed_balance must be True or False',
         ):
-            sample_model.divide_by_temperature = 'invalid_value'
+            sample_model.normalize_detailed_balance = 'invalid_value'
 
     def test_evaluate_calls_dbf(self, sample_model):
         # WHEN
@@ -325,7 +317,7 @@ class TestSampleModel:
             mock_dbf.assert_called_once_with(
                 energy=x,
                 temperature=sample_model.temperature,
-                divide_by_temperature=sample_model.divide_by_temperature,
+                divide_by_temperature=sample_model.normalize_detailed_balance,
                 energy_unit=sample_model.unit,
             )
 
@@ -389,4 +381,4 @@ class TestSampleModel:
         assert 'components' in repr_str
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
-        assert 'divide_by_temperature' in repr_str
+        assert 'normalize_detailed_balance' in repr_str

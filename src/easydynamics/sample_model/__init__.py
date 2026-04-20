@@ -13,6 +13,7 @@ from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.components.voigt import Voigt
+from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
@@ -26,6 +27,7 @@ __all__ = [
     'ComponentCollection',
     'DampedHarmonicOscillator',
     'DeltaFunction',
+    'DetailedBalanceSettings',
     'Exponential',
     'ExpressionComponent',
     'Gaussian',

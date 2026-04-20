@@ -511,6 +511,7 @@ class TestAnalysis1d:
             convolver=analysis1d._convolver,
             convolve=True,
             energy=None,
+            apply_detailed_balance=True,
         )
 
     def test_evaluate_sample_component(self, analysis1d):
@@ -530,6 +531,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=True,
             energy=None,
+            apply_detailed_balance=True,
         )
 
     def test_evaluate_background(self, analysis1d):
@@ -555,6 +557,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=False,
             energy=None,
+            apply_detailed_balance=False,
         )
 
     def test_evaluate_background_component(self, analysis1d):
@@ -574,6 +577,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=False,
             energy=None,
+            apply_detailed_balance=False,
         )
 
     def test_create_convolver(self, analysis1d):

@@ -10,6 +10,7 @@ from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 
@@ -32,6 +33,7 @@ class NumericalConvolution(NumericalConvolutionBase):
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
@@ -55,6 +57,8 @@ class NumericalConvolution(NumericalConvolutionBase):
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            The settings for detailed balance. If None, default settings will be used.
         unit : str | sc.Unit, default='meV'
             The unit of the energy.
         display_name : str | None, default='MyConvolution'
@@ -70,6 +74,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             convolution_settings=convolution_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
+            detailed_balance_settings=detailed_balance_settings,
             unit=unit,
             display_name=display_name,
             unique_name=unique_name,
@@ -111,12 +116,12 @@ class NumericalConvolution(NumericalConvolutionBase):
         )
 
         # Detailed balance correction
-        if self.temperature is not None:
+        if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             detailed_balance_factor_correction = detailed_balance_factor(
                 energy=self._energy_grid.energy_dense - self.energy_offset.value,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
-                divide_by_temperature=self.normalize_detailed_balance,
+                divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
             )
             sample_vals *= detailed_balance_factor_correction
 

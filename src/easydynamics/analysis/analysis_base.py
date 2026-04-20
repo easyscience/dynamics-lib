@@ -10,6 +10,7 @@ from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 
 
 class AnalysisBase(EasyScienceModelBase):
@@ -31,6 +32,7 @@ class AnalysisBase(EasyScienceModelBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         convolution_settings: ConvolutionSettings | None = None,
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -53,6 +55,8 @@ class AnalysisBase(EasyScienceModelBase):
             is created.
         convolution_settings : ConvolutionSettings | None, default=None
              The settings for the convolution. If None, default settings will be used.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            The settings for detailed balance. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -61,8 +65,10 @@ class AnalysisBase(EasyScienceModelBase):
         ------
         TypeError
             If experiment is not an Experiment or None or if sample_model is not a SampleModel or
-            None or if instrument_model is not an InstrumentModel or None or if extra_parameters is
-            not a Parameter, a list of Parameters, or None.
+            None or if instrument_model is not an InstrumentModel or None or if
+            convolution_settings is not a ConvolutionSettings or None or if
+            detailed_balance_settings is not a DetailedBalanceSettings or None or if
+            extra_parameters is not a Parameter, a list of Parameters, or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -108,6 +114,15 @@ class AnalysisBase(EasyScienceModelBase):
                 raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
         else:
             self._extra_parameters = []
+
+        if detailed_balance_settings is None:
+            self._detailed_balance_settings = DetailedBalanceSettings()
+        elif isinstance(detailed_balance_settings, DetailedBalanceSettings):
+            self._detailed_balance_settings = detailed_balance_settings
+        else:
+            raise TypeError(
+                'detailed_balance_settings must be an instance of DetailedBalanceSettings or None.'
+            )
 
         self._on_experiment_changed()
 
@@ -337,6 +352,37 @@ class AnalysisBase(EasyScienceModelBase):
             raise TypeError('convolution_settings must be an instance of ConvolutionSettings.')
         self._convolution_settings = value
         self._on_convolution_settings_changed()
+
+    @property
+    def detailed_balance_settings(self) -> DetailedBalanceSettings:
+        """
+        Get the DetailedBalanceSettings of the SampleModel.
+
+        Returns
+        -------
+        DetailedBalanceSettings
+            The DetailedBalanceSettings of the SampleModel.
+        """
+        return self._detailed_balance_settings
+
+    @detailed_balance_settings.setter
+    def detailed_balance_settings(self, value: DetailedBalanceSettings) -> None:
+        """
+        Set the DetailedBalanceSettings of the SampleModel.
+
+        Parameters
+        ----------
+        value : DetailedBalanceSettings
+            The DetailedBalanceSettings to set.
+
+        Raises
+        ------
+        TypeError
+            If value is not a DetailedBalanceSettings.
+        """
+        if not isinstance(value, DetailedBalanceSettings):
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
+        self._detailed_balance_settings = value
 
     @property
     def extra_parameters(self) -> list[Parameter]:
