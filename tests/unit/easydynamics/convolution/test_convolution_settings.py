@@ -38,6 +38,22 @@ class TestConvolutionSettings:
         assert convolution_settings.extension_factor == pytest.approx(0.5)
         assert convolution_settings.convolution_plan_is_valid is False
 
+    def test_init_with_None(self):
+        """
+        Test initialization of ConvolutionSettings with custom
+        parameters.
+        """
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=None,
+            extension_factor=None,
+        )
+
+        # THEN EXPECT
+        assert convolution_settings.upsample_factor is None
+        assert convolution_settings.extension_factor is None
+        assert convolution_settings.convolution_plan_is_valid is False
+
     @pytest.mark.parametrize(
         'invalid_input, expected_exception, match',
         [

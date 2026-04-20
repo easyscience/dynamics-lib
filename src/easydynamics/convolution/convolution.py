@@ -37,14 +37,14 @@ class Convolution(NumericalConvolutionBase):
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
     _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
-        "energy",
-        "_energy",
-        "_energy_grid",
-        "_sample_components",
-        "_resolution_components",
-        "_temperature",
-        "_energy_unit",
-        "_normalize_detailed_balance",
+        'energy',
+        '_energy',
+        '_energy_grid',
+        '_sample_components',
+        '_resolution_components',
+        '_temperature',
+        '_energy_unit',
+        '_normalize_detailed_balance',
     }
 
     def __init__(
@@ -55,9 +55,9 @@ class Convolution(NumericalConvolutionBase):
         energy_offset: Numeric | Parameter = 0.0,
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
-        temperature_unit: str | sc.Unit = "K",
-        unit: str | sc.Unit = "meV",
-        display_name: str | None = "MyConvolution",
+        temperature_unit: str | sc.Unit = 'K',
+        unit: str | sc.Unit = 'meV',
+        display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -185,19 +185,19 @@ class Convolution(NumericalConvolutionBase):
 
         if not isinstance(sample_component, ModelComponent):
             raise TypeError(
-                f"`sample_component` is an instance of {type(sample_component).__name__}, \
-                but must be a ModelComponent."
+                f'`sample_component` is an instance of {type(sample_component).__name__}, \
+                but must be a ModelComponent.'
             )
 
         if not isinstance(resolution_component, ModelComponent):
             raise TypeError(
-                f"`resolution_component` is an instance of {type(resolution_component).__name__}, \
-                    but must be a ModelComponent."
+                f'`resolution_component` is an instance of {type(resolution_component).__name__}, \
+                    but must be a ModelComponent.'
             )
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(
-                "resolution components contains delta functions. This is not supported."
+                'resolution components contains delta functions. This is not supported.'
             )
 
         analytical_types = (Gaussian, Lorentzian, Voigt)
@@ -302,8 +302,5 @@ class Convolution(NumericalConvolutionBase):
 
         # Only rebuild the convolution plan if reactions are enabled, to
         # avoid issues during __init__
-        if (
-            getattr(self, "_reactions_enabled", False)
-            and name in self._invalidate_plan_on_change
-        ):
+        if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
             self.convolution_settings.convolution_plan_is_valid = False
