@@ -517,7 +517,7 @@ class Analysis1d(AnalysisBase):
         #       to convolve with the resolution. In this case, apply_detailed_balance is False,
         #       and we evaluate the components without DBF regardles of the settings
         #   Case 2: convolve=True but there is no resolution_model. In this case,
-        #       apply_detailed_balance is False. We apply DBF if temperature is provided and
+        #       apply_detailed_balance is True. We apply DBF if temperature is provided and
         #       the settings say to use detailed balance.
 
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)

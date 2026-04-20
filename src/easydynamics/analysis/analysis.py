@@ -44,7 +44,7 @@ class Analysis(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default="MyAnalysis"
+        display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -173,7 +173,7 @@ class Analysis(AnalysisBase):
 
         Parameters
         ----------
-        fit_method : str, default="independent"
+        fit_method : str, default='independent'
             Method to use for fitting. Options are "independent" (fit each Q index independently,
             one after the other) or "simultaneous" (fit all Q indices simultaneously).
         Q_index : int | None, default=None
