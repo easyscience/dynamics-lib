@@ -43,8 +43,6 @@ class Convolution(NumericalConvolutionBase):
         '_sample_components',
         '_resolution_components',
         '_temperature',
-        '_upsample_factor',
-        '_extension_factor',
         '_energy_unit',
         '_normalize_detailed_balance',
     }

@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
-# from dataclasses import dataclass
-
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.utils.utils import Numeric
 
@@ -17,7 +15,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         self,
         upsample_factor: Numeric | None = 5,
         extension_factor: Numeric | None = 0.2,
-        display_name: str | None = "MyConvolutionSettings",
+        display_name: str | None = 'MyConvolutionSettings',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -49,16 +47,18 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         if extension_factor is not None:
             if not isinstance(extension_factor, Numeric):
-                raise TypeError("Extension factor must be a number.")
+                raise TypeError('Extension factor must be a number.')
+            extension_factor = float(extension_factor)
             if extension_factor < 0.0:
-                raise ValueError("Extension factor must be non-negative.")
+                raise ValueError('Extension factor must be non-negative.')
         self._extension_factor = extension_factor
 
         if upsample_factor is not None:
             if not isinstance(upsample_factor, Numeric):
-                raise TypeError("Upsample factor must be a numerical value or None.")
+                raise TypeError('Upsample factor must be a numerical value or None.')
+            upsample_factor = float(upsample_factor)
             if upsample_factor <= 1.0:
-                raise ValueError("Upsample factor must be greater than 1.")
+                raise ValueError('Upsample factor must be greater than 1.')
         self._upsample_factor = upsample_factor
 
         self._convolution_plan_is_valid = False
@@ -99,10 +99,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             return
 
         if not isinstance(factor, Numeric):
-            raise TypeError("Upsample factor must be a numerical value or None.")
+            raise TypeError('Upsample factor must be a numerical value or None.')
         factor = float(factor)
         if factor <= 1.0:
-            raise ValueError("Upsample factor must be greater than 1.")
+            raise ValueError('Upsample factor must be greater than 1.')
 
         self._upsample_factor = factor
 
@@ -146,9 +146,9 @@ class ConvolutionSettings(EasyDynamicsBase):
         """
 
         if not isinstance(factor, Numeric):
-            raise TypeError("Extension factor must be a number.")
+            raise TypeError('Extension factor must be a number.')
         if factor < 0.0:
-            raise ValueError("Extension factor must be non-negative.")
+            raise ValueError('Extension factor must be non-negative.')
 
         self._extension_factor = float(factor)
         self.convolution_plan_is_valid = False
@@ -181,7 +181,7 @@ class ConvolutionSettings(EasyDynamicsBase):
             If is_valid is not a bool.
         """
         if not isinstance(is_valid, bool):
-            raise TypeError("convolution_plan_is_valid must be True or False.")
+            raise TypeError('convolution_plan_is_valid must be True or False.')
         self._convolution_plan_is_valid = is_valid
 
     def __repr__(self) -> str:
@@ -194,7 +194,7 @@ class ConvolutionSettings(EasyDynamicsBase):
             A string representation of the ConvolutionSettings.
         """
         return (
-            f"{self.__class__.__name__}("
-            f"upsample_factor={self.upsample_factor}, "
-            f"extension_factor={self.extension_factor})"
+            f'{self.__class__.__name__}('
+            f'upsample_factor={self.upsample_factor}, '
+            f'extension_factor={self.extension_factor})'
         )
