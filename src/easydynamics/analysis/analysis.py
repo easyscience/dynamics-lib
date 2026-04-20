@@ -675,11 +675,7 @@ class Analysis(AnalysisBase):
         ]
 
         ds = sc.concat(datasets, dim='Q')
-
-        if len(datasets) == 1:
-            ds = ds.assign_coords(Q=self.Q)
-
-        return ds
+        return ds.assign_coords(Q=self.Q)
 
     #############
     # Dunder methods
