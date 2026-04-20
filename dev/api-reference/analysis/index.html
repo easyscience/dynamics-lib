@@ -8752,9 +8752,7 @@ title, linestyle, marker, color).</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -9569,7 +9567,32 @@ title, linestyle, marker, color).</p>
 <span class="normal">838</span>
 <span class="normal">839</span>
 <span class="normal">840</span>
-<span class="normal">841</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -9585,6 +9608,7 @@ title, linestyle, marker, color).</p>
         <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -9609,6 +9633,8 @@ title, linestyle, marker, color).</p>
 <span class="sd">            until a Q index is set.</span>
 <span class="sd">        convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">            The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">        detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">            The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">            parameters are added.</span>
@@ -9620,6 +9646,7 @@ title, linestyle, marker, color).</p>
             <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
             <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
             <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+            <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
             <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -10000,6 +10027,7 @@ title, linestyle, marker, color).</p>
         <span class="n">convolver</span><span class="p">:</span> <span class="n">Convolution</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convolve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">apply_detailed_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the contribution of a set of components, optionally convolving with the</span>
@@ -10023,6 +10051,9 @@ title, linestyle, marker, color).</p>
 <span class="sd">        energy : sc.Variable | None, default=None</span>
 <span class="sd">            Optional energy grid to use for evaluation. If None, the energy grid from the</span>
 <span class="sd">            experiment is used.</span>
+<span class="sd">        apply_detailed_balance : bool, default=False</span>
+<span class="sd">            Whether to apply detailed balance correction.</span>
+
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -10044,24 +10075,34 @@ title, linestyle, marker, color).</p>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="ow">and</span> <span class="n">components</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-        <span class="c1"># No convolution</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">convolve</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy_with_offset</span><span class="p">)</span>
-
         <span class="c1"># If a convolver is provided, use it. This allows reusing the</span>
         <span class="c1"># same convolver for multiple evaluations during fitting for</span>
         <span class="c1"># performance reasons.</span>
         <span class="k">if</span> <span class="n">convolver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
+        <span class="c1"># No convolution</span>
+        <span class="c1"># We don&#39;t create a convolver if the resolution is empty.</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">convolve</span> <span class="ow">or</span> <span class="n">resolution</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
+            <span class="n">result_no_convolution</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy_with_offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">apply_detailed_balance</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="o">.</span><span class="n">use_detailed_balance</span>
+            <span class="p">):</span>
+                <span class="n">DBF</span> <span class="o">=</span> <span class="n">detailed_balance_factor</span><span class="p">(</span>
+                    <span class="n">energy</span><span class="o">=</span><span class="n">energy_with_offset</span><span class="p">,</span>
+                    <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                    <span class="n">divide_by_temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="o">.</span><span class="n">normalize_detailed_balance</span><span class="p">,</span>
+                    <span class="n">energy_unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">result_no_convolution</span> <span class="o">*=</span> <span class="n">DBF</span>
+            <span class="k">return</span> <span class="n">result_no_convolution</span>
+
         <span class="c1"># If no convolver is provided, create a new one. This is for</span>
         <span class="c1"># evaluating individual components for plotting, where</span>
         <span class="c1"># performance is not important.</span>
-
-        <span class="c1"># We don&#39;t create a convolver if the resolution is empty.</span>
-        <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">resolution</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy_with_offset</span><span class="p">)</span>
 
         <span class="n">conv</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -10070,6 +10111,7 @@ title, linestyle, marker, color).</p>
             <span class="n">energy_offset</span><span class="o">=</span><span class="n">energy_offset</span><span class="p">,</span>
             <span class="n">convolution_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">conv</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
@@ -10100,6 +10142,7 @@ title, linestyle, marker, color).</p>
             <span class="n">convolver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_convolver</span><span class="p">,</span>
             <span class="n">convolve</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">apply_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_sample_component</span><span class="p">(</span>
@@ -10128,6 +10171,7 @@ title, linestyle, marker, color).</p>
             <span class="n">convolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">convolve</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">apply_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -10154,6 +10198,7 @@ title, linestyle, marker, color).</p>
             <span class="n">convolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">convolve</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">apply_detailed_balance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_background_component</span><span class="p">(</span>
@@ -10183,6 +10228,7 @@ title, linestyle, marker, color).</p>
             <span class="n">convolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">convolve</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+            <span class="n">apply_detailed_balance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_convolver</span><span class="p">(</span>
@@ -10461,7 +10507,7 @@ title, linestyle, marker, color).</p>
 
 
 <h4 id="easydynamics.analysis.analysis1d.Analysis1d.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Q_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -10623,6 +10669,25 @@ until a Q index is set.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>detailed_balance_settings</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;DetailedBalanceSettings&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings">DetailedBalanceSettings</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The settings for detailed balance. If None, default settings will be used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>extra_parameters</code>
             </td>
             <td>
@@ -10647,9 +10712,7 @@ parameters are added.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
@@ -10706,7 +10769,13 @@ parameters are added.</p>
 <span class="normal">87</span>
 <span class="normal">88</span>
 <span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -10715,6 +10784,7 @@ parameters are added.</p>
     <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -10739,6 +10809,8 @@ parameters are added.</p>
 <span class="sd">        until a Q index is set.</span>
 <span class="sd">    convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">        The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">    detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">        The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">        parameters are added.</span>
@@ -10750,6 +10822,7 @@ parameters are added.</p>
         <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -10878,13 +10951,7 @@ the calculated model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
@@ -10910,7 +10977,13 @@ the calculated model.</p>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_fit_function</span><span class="p">(</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_fit_function</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">_x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>  <span class="c1"># noqa: ARG002</span>
@@ -11035,13 +11108,7 @@ experiment is used.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
@@ -11055,7 +11122,13 @@ experiment is used.</p>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the model prediction for the chosen Q index.</span>
 
@@ -11160,13 +11233,7 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
@@ -11195,7 +11262,13 @@ and reused during parameter optimization for performance reasons.</p>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
-<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fit the model to the experimental data for the chosen Q index.</span>
 
@@ -11261,9 +11334,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -11296,9 +11369,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -11357,13 +11430,7 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
@@ -11373,7 +11440,13 @@ and reused during parameter optimization for performance reasons.</p>
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all variables used in the analysis.</span>
 
@@ -11567,13 +11640,7 @@ is used.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
 <span class="normal">269</span>
 <span class="normal">270</span>
 <span class="normal">271</span>
@@ -11642,7 +11709,13 @@ is used.</p>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_background</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -11768,6 +11841,14 @@ is used.</p>
 
 
 
+
+
+
+
+
+
+
+
   </div>
 
     </div>
@@ -11843,8 +11924,7 @@ InstrumentModel contains the model for the instrument, including background and 
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 15</span>
-<span class="normal"> 16</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 16</span>
 <span class="normal"> 17</span>
 <span class="normal"> 18</span>
 <span class="normal"> 19</span>
@@ -12292,7 +12372,53 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
-<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalysisBase</span><span class="p">(</span><span class="n">EasyScienceModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for analysis in EasyDynamics.</span>
 
@@ -12311,6 +12437,7 @@ InstrumentModel contains the model for the instrument, including background and 
         <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -12333,6 +12460,8 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="sd">            is created.</span>
 <span class="sd">        convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">             The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">        detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">            The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">            parameters are added.</span>
@@ -12341,8 +12470,10 @@ InstrumentModel contains the model for the instrument, including background and 
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
 <span class="sd">            If experiment is not an Experiment or None or if sample_model is not a SampleModel or</span>
-<span class="sd">            None or if instrument_model is not an InstrumentModel or None or if extra_parameters is</span>
-<span class="sd">            not a Parameter, a list of Parameters, or None.</span>
+<span class="sd">            None or if instrument_model is not an InstrumentModel or None or if</span>
+<span class="sd">            convolution_settings is not a ConvolutionSettings or None or if</span>
+<span class="sd">            detailed_balance_settings is not a DetailedBalanceSettings or None or if</span>
+<span class="sd">            extra_parameters is not a Parameter, a list of Parameters, or None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">)</span>
@@ -12388,6 +12519,15 @@ InstrumentModel contains the model for the instrument, including background and 
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;extra_parameters must be a Parameter or a list of Parameters.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_extra_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">detailed_balance_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span> <span class="o">=</span> <span class="n">DetailedBalanceSettings</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detailed_balance_settings</span><span class="p">,</span> <span class="n">DetailedBalanceSettings</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span> <span class="o">=</span> <span class="n">detailed_balance_settings</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;detailed_balance_settings must be an instance of DetailedBalanceSettings or None.&#39;</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_experiment_changed</span><span class="p">()</span>
 
@@ -12619,6 +12759,37 @@ InstrumentModel contains the model for the instrument, including background and 
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_convolution_settings_changed</span><span class="p">()</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detailed_balance_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetailedBalanceSettings</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the DetailedBalanceSettings of the SampleModel.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DetailedBalanceSettings</span>
+<span class="sd">            The DetailedBalanceSettings of the SampleModel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span>
+
+    <span class="nd">@detailed_balance_settings</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detailed_balance_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the DetailedBalanceSettings of the SampleModel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : DetailedBalanceSettings</span>
+<span class="sd">            The DetailedBalanceSettings to set.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If value is not a DetailedBalanceSettings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DetailedBalanceSettings</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;detailed_balance_settings must be a DetailedBalanceSettings&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">extra_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the extra parameters included in this Analysis.</span>
@@ -12816,7 +12987,7 @@ InstrumentModel contains the model for the instrument, including background and 
 
 
 <h4 id="easydynamics.analysis.analysis_base.AnalysisBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -12959,6 +13130,25 @@ is created.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>detailed_balance_settings</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;DetailedBalanceSettings&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings">DetailedBalanceSettings</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The settings for detailed balance. If None, default settings will be used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>extra_parameters</code>
             </td>
             <td>
@@ -12997,8 +13187,10 @@ parameters are added.</p>
             <td>
               <div class="doc-md-description">
                 <p>If experiment is not an Experiment or None or if sample_model is not a SampleModel or
-None or if instrument_model is not an InstrumentModel or None or if extra_parameters is
-not a Parameter, a list of Parameters, or None.</p>
+None or if instrument_model is not an InstrumentModel or None or if
+convolution_settings is not a ConvolutionSettings or None or if
+detailed_balance_settings is not a DetailedBalanceSettings or None or if
+extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13011,8 +13203,7 @@ not a Parameter, a list of Parameters, or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
-<span class="normal"> 27</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
 <span class="normal"> 30</span>
@@ -13097,7 +13288,22 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -13105,6 +13311,7 @@ not a Parameter, a list of Parameters, or None.</p>
     <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -13127,6 +13334,8 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">        is created.</span>
 <span class="sd">    convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">         The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">    detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">        The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">        parameters are added.</span>
@@ -13135,8 +13344,10 @@ not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">    ------</span>
 <span class="sd">    TypeError</span>
 <span class="sd">        If experiment is not an Experiment or None or if sample_model is not a SampleModel or</span>
-<span class="sd">        None or if instrument_model is not an InstrumentModel or None or if extra_parameters is</span>
-<span class="sd">        not a Parameter, a list of Parameters, or None.</span>
+<span class="sd">        None or if instrument_model is not an InstrumentModel or None or if</span>
+<span class="sd">        convolution_settings is not a ConvolutionSettings or None or if</span>
+<span class="sd">        detailed_balance_settings is not a DetailedBalanceSettings or None or if</span>
+<span class="sd">        extra_parameters is not a Parameter, a list of Parameters, or None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">)</span>
@@ -13182,6 +13393,15 @@ not a Parameter, a list of Parameters, or None.</p>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;extra_parameters must be a Parameter or a list of Parameters.&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extra_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">detailed_balance_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span> <span class="o">=</span> <span class="n">DetailedBalanceSettings</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detailed_balance_settings</span><span class="p">,</span> <span class="n">DetailedBalanceSettings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detailed_balance_settings</span> <span class="o">=</span> <span class="n">detailed_balance_settings</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;detailed_balance_settings must be an instance of DetailedBalanceSettings or None.&#39;</span>
+        <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_experiment_changed</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -13240,19 +13460,19 @@ not a Parameter, a list of Parameters, or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the Analysis.</span>
 
@@ -13315,6 +13535,63 @@ not a Parameter, a list of Parameters, or None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The convolution settings for this Analysis.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="easydynamics.analysis.analysis_base.AnalysisBase.detailed_balance_settings" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">detailed_balance_settings</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the DetailedBalanceSettings of the SampleModel.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;DetailedBalanceSettings&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings">DetailedBalanceSettings</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The DetailedBalanceSettings of the SampleModel.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13581,13 +13858,13 @@ not a Parameter, a list of Parameters, or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalize_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalize_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalize the resolution in the InstrumentModel to ensure that it integrates to 1.</span>
 
@@ -13722,6 +13999,10 @@ not a Parameter, a list of Parameters, or None.</p>
     </div>
 
 </div>
+
+
+
+
 
 
 
