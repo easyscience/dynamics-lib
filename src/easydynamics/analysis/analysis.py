@@ -524,6 +524,7 @@ class Analysis(AnalysisBase):
             super()._on_convolution_settings_changed()
             for analysis1d in self.analysis_list:
                 analysis1d.convolution_settings = self.convolution_settings
+
     def _create_analysis_list(self) -> None:
         """
         Create the list of Analysis1d objects, one for each Q index, based on the current
