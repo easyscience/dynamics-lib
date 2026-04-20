@@ -1987,8 +1987,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
-<span class="normal"> 24</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
 <span class="normal"> 27</span>
@@ -2657,7 +2656,14 @@
 <span class="normal">690</span>
 <span class="normal">691</span>
 <span class="normal">692</span>
-<span class="normal">693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -2672,6 +2678,7 @@
         <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2679,7 +2686,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -2693,6 +2700,8 @@
 <span class="sd">            is created.</span>
 <span class="sd">        convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">             The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">        detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">            The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">            parameters are added.</span>
@@ -2708,6 +2717,7 @@
             <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
             <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
             <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+            <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
             <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -2805,7 +2815,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        fit_method : str, default=&#39;independent&#39;</span>
+<span class="sd">        fit_method : str, default=&quot;independent&quot;</span>
 <span class="sd">            Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
 <span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">        Q_index : int | None, default=None</span>
@@ -3175,6 +3185,8 @@
                 <span class="n">experiment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span>
                 <span class="n">sample_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_model</span><span class="p">,</span>
                 <span class="n">instrument_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="p">,</span>
+                <span class="n">convolution_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="p">,</span>
+                <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
                 <span class="n">extra_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extra_parameters</span><span class="p">,</span>
                 <span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">,</span>
             <span class="p">)</span>
@@ -3345,7 +3357,7 @@
 
 
 <h3 id="easydynamics.analysis.Analysis.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -3385,7 +3397,7 @@
               </div>
             </td>
             <td>
-                  <code>&#39;MyAnalysis&#39;</code>
+                  <code>&#34;MyAnalysis&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -3487,6 +3499,25 @@ is created.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>detailed_balance_settings</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;DetailedBalanceSettings&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings">DetailedBalanceSettings</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The settings for detailed balance. If None, default settings will be used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>extra_parameters</code>
             </td>
             <td>
@@ -3511,8 +3542,7 @@ parameters are added.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
@@ -3563,7 +3593,12 @@ parameters are added.</p>
 <span class="normal">79</span>
 <span class="normal">80</span>
 <span class="normal">81</span>
-<span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3571,6 +3606,7 @@ parameters are added.</p>
     <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3578,7 +3614,7 @@ parameters are added.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -3592,6 +3628,8 @@ parameters are added.</p>
 <span class="sd">        is created.</span>
 <span class="sd">    convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">         The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">    detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">        The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">        parameters are added.</span>
@@ -3607,6 +3645,7 @@ parameters are added.</p>
         <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -3785,12 +3824,7 @@ an integer, returns a single numpy array for that Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
@@ -3816,7 +3850,12 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3904,7 +3943,7 @@ one after the other) or "simultaneous" (fit all Q indices simultaneously).</p>
               </div>
             </td>
             <td>
-                  <code>&#39;independent&#39;</code>
+                  <code>&#34;independent&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -3987,12 +4026,7 @@ simultaneously.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
@@ -4030,7 +4064,12 @@ simultaneously.</p>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
-<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fit_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;independent&#39;</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4040,7 +4079,7 @@ simultaneously.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    fit_method : str, default=&#39;independent&#39;</span>
+<span class="sd">    fit_method : str, default=&quot;independent&quot;</span>
 <span class="sd">        Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
 <span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">    Q_index : int | None, default=None</span>
@@ -4140,12 +4179,7 @@ all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
 <span class="normal">453</span>
@@ -4156,7 +4190,12 @@ all Q values.</p>
 <span class="normal">458</span>
 <span class="normal">459</span>
 <span class="normal">460</span>
-<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fix the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -4239,12 +4278,7 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
 <span class="normal">471</span>
@@ -4255,7 +4289,12 @@ for all Q values.</p>
 <span class="normal">476</span>
 <span class="normal">477</span>
 <span class="normal">478</span>
-<span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Free the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -4328,16 +4367,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">625</span>
 <span class="normal">626</span>
-<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -4431,12 +4470,7 @@ to the parameter values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
@@ -4497,7 +4531,12 @@ to the parameter values.</p>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a scipp dataset with copies of the Parameters in the model.</span>
 
@@ -4787,12 +4826,7 @@ values available for plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">211</span>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
@@ -4896,7 +4930,12 @@ values available for plotting.</p>
 <span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -5155,12 +5194,7 @@ title, linestyle, marker, color).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
@@ -5213,7 +5247,12 @@ title, linestyle, marker, color).</p>
 <span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span>
-<span class="normal">443</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -5353,8 +5392,7 @@ title, linestyle, marker, color).</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
-<span class="normal"> 24</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
 <span class="normal"> 27</span>
@@ -6023,7 +6061,14 @@ title, linestyle, marker, color).</p>
 <span class="normal">690</span>
 <span class="normal">691</span>
 <span class="normal">692</span>
-<span class="normal">693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -6038,6 +6083,7 @@ title, linestyle, marker, color).</p>
         <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6045,7 +6091,7 @@ title, linestyle, marker, color).</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -6059,6 +6105,8 @@ title, linestyle, marker, color).</p>
 <span class="sd">            is created.</span>
 <span class="sd">        convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">             The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">        detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">            The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">        extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">            Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">            parameters are added.</span>
@@ -6074,6 +6122,7 @@ title, linestyle, marker, color).</p>
             <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
             <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
             <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+            <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
             <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -6171,7 +6220,7 @@ title, linestyle, marker, color).</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        fit_method : str, default=&#39;independent&#39;</span>
+<span class="sd">        fit_method : str, default=&quot;independent&quot;</span>
 <span class="sd">            Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
 <span class="sd">            one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">        Q_index : int | None, default=None</span>
@@ -6541,6 +6590,8 @@ title, linestyle, marker, color).</p>
                 <span class="n">experiment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span>
                 <span class="n">sample_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_model</span><span class="p">,</span>
                 <span class="n">instrument_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="p">,</span>
+                <span class="n">convolution_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="p">,</span>
+                <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
                 <span class="n">extra_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extra_parameters</span><span class="p">,</span>
                 <span class="n">Q_index</span><span class="o">=</span><span class="n">Q_index</span><span class="p">,</span>
             <span class="p">)</span>
@@ -6711,7 +6762,7 @@ title, linestyle, marker, color).</p>
 
 
 <h4 id="easydynamics.analysis.analysis.Analysis.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convolution_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -6751,7 +6802,7 @@ title, linestyle, marker, color).</p>
               </div>
             </td>
             <td>
-                  <code>&#39;MyAnalysis&#39;</code>
+                  <code>&#34;MyAnalysis&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6853,6 +6904,25 @@ is created.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>detailed_balance_settings</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;DetailedBalanceSettings&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.detailed_balance_settings.DetailedBalanceSettings">DetailedBalanceSettings</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The settings for detailed balance. If None, default settings will be used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>extra_parameters</code>
             </td>
             <td>
@@ -6877,8 +6947,7 @@ parameters are added.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
@@ -6929,7 +6998,12 @@ parameters are added.</p>
 <span class="normal">79</span>
 <span class="normal">80</span>
 <span class="normal">81</span>
-<span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6937,6 +7011,7 @@ parameters are added.</p>
     <span class="n">sample_model</span><span class="p">:</span> <span class="n">SampleModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument_model</span><span class="p">:</span> <span class="n">InstrumentModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">convolution_settings</span><span class="p">:</span> <span class="n">ConvolutionSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">detailed_balance_settings</span><span class="p">:</span> <span class="n">DetailedBalanceSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">extra_parameters</span><span class="p">:</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6944,7 +7019,7 @@ parameters are added.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -6958,6 +7033,8 @@ parameters are added.</p>
 <span class="sd">        is created.</span>
 <span class="sd">    convolution_settings : ConvolutionSettings | None, default=None</span>
 <span class="sd">         The settings for the convolution. If None, default settings will be used.</span>
+<span class="sd">    detailed_balance_settings : DetailedBalanceSettings | None, default=None</span>
+<span class="sd">        The settings for detailed balance. If None, default settings will be used.</span>
 <span class="sd">    extra_parameters : Parameter | list[Parameter] | None, default=None</span>
 <span class="sd">        Extra parameters to be included in the analysis for advanced users. If None, no extra</span>
 <span class="sd">        parameters are added.</span>
@@ -6973,6 +7050,7 @@ parameters are added.</p>
         <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
         <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
         <span class="n">convolution_settings</span><span class="o">=</span><span class="n">convolution_settings</span><span class="p">,</span>
+        <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
         <span class="n">extra_parameters</span><span class="o">=</span><span class="n">extra_parameters</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -7151,12 +7229,7 @@ an integer, returns a single numpy array for that Q index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
@@ -7182,7 +7255,12 @@ an integer, returns a single numpy array for that Q index.</p>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7270,7 +7348,7 @@ one after the other) or "simultaneous" (fit all Q indices simultaneously).</p>
               </div>
             </td>
             <td>
-                  <code>&#39;independent&#39;</code>
+                  <code>&#34;independent&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7353,12 +7431,7 @@ simultaneously.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
@@ -7396,7 +7469,12 @@ simultaneously.</p>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
-<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fit_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;independent&#39;</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7406,7 +7484,7 @@ simultaneously.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    fit_method : str, default=&#39;independent&#39;</span>
+<span class="sd">    fit_method : str, default=&quot;independent&quot;</span>
 <span class="sd">        Method to use for fitting. Options are &quot;independent&quot; (fit each Q index independently,</span>
 <span class="sd">        one after the other) or &quot;simultaneous&quot; (fit all Q indices simultaneously).</span>
 <span class="sd">    Q_index : int | None, default=None</span>
@@ -7506,12 +7584,7 @@ all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
 <span class="normal">453</span>
@@ -7522,7 +7595,12 @@ all Q values.</p>
 <span class="normal">458</span>
 <span class="normal">459</span>
 <span class="normal">460</span>
-<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fix the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -7605,12 +7683,7 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
 <span class="normal">471</span>
@@ -7621,7 +7694,12 @@ for all Q values.</p>
 <span class="normal">476</span>
 <span class="normal">477</span>
 <span class="normal">478</span>
-<span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Free the energy offset parameter(s) for a specific Q index, or for all Q indices if Q_index</span>
 <span class="sd">    is None.</span>
@@ -7694,16 +7772,16 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">625</span>
 <span class="normal">626</span>
-<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -7797,12 +7875,7 @@ to the parameter values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
@@ -7863,7 +7936,12 @@ to the parameter values.</p>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a scipp dataset with copies of the Parameters in the model.</span>
 
@@ -8153,12 +8231,7 @@ values available for plotting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">211</span>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
@@ -8262,7 +8335,12 @@ values available for plotting.</p>
 <span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -8521,12 +8599,7 @@ title, linestyle, marker, color).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
@@ -8579,7 +8652,12 @@ title, linestyle, marker, color).</p>
 <span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span>
-<span class="normal">443</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -8652,6 +8730,10 @@ title, linestyle, marker, color).</p>
     </div>
 
 </div>
+
+
+
+
 
 
 
@@ -9592,7 +9674,16 @@ title, linestyle, marker, color).</p>
 <span class="normal">863</span>
 <span class="normal">864</span>
 <span class="normal">865</span>
-<span class="normal">866</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span>
+<span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
+<span class="normal">875</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -9616,7 +9707,7 @@ title, linestyle, marker, color).</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -10075,14 +10166,20 @@ title, linestyle, marker, color).</p>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="ow">and</span> <span class="n">components</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-        <span class="c1"># If a convolver is provided, use it. This allows reusing the</span>
+        <span class="c1"># If a convolver is provided, we use it. This allows reusing the</span>
         <span class="c1"># same convolver for multiple evaluations during fitting for</span>
         <span class="c1"># performance reasons.</span>
         <span class="k">if</span> <span class="n">convolver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
-        <span class="c1"># No convolution</span>
-        <span class="c1"># We don&#39;t create a convolver if the resolution is empty.</span>
+        <span class="c1"># No convolution can happen for multiple reasons:</span>
+        <span class="c1">#   Case 1: convolve=False, used for evaluating background components, where we don&#39;t want</span>
+        <span class="c1">#       to convolve with the resolution. In this case, apply_detailed_balance is False,</span>
+        <span class="c1">#       and we evaluate the components without DBF regardles of the settings</span>
+        <span class="c1">#   Case 2: convolve=True but there is no resolution_model. In this case,</span>
+        <span class="c1">#       apply_detailed_balance is False. We apply DBF if temperature is provided and</span>
+        <span class="c1">#       the settings say to use detailed balance.</span>
+
         <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">resolution_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">convolve</span> <span class="ow">or</span> <span class="n">resolution</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="n">result_no_convolution</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy_with_offset</span><span class="p">)</span>
@@ -10100,9 +10197,11 @@ title, linestyle, marker, color).</p>
                 <span class="n">result_no_convolution</span> <span class="o">*=</span> <span class="n">DBF</span>
             <span class="k">return</span> <span class="n">result_no_convolution</span>
 
-        <span class="c1"># If no convolver is provided, create a new one. This is for</span>
+        <span class="c1"># If no convolver is provided, we create a new one. This is for</span>
         <span class="c1"># evaluating individual components for plotting, where</span>
-        <span class="c1"># performance is not important.</span>
+        <span class="c1"># performance is not important. We already handled the case of</span>
+        <span class="c1"># background components above, so we know that this is for sample components,</span>
+        <span class="c1"># where detailed balance settings should be applied.</span>
 
         <span class="n">conv</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
@@ -10272,6 +10371,7 @@ title, linestyle, marker, color).</p>
             <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">get_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="p">),</span>
             <span class="n">convolution_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">detailed_balance_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detailed_balance_settings</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#############</span>
@@ -10547,7 +10647,7 @@ title, linestyle, marker, color).</p>
               </div>
             </td>
             <td>
-                  <code>&#39;MyAnalysis&#39;</code>
+                  <code>&#34;MyAnalysis&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -10792,7 +10892,7 @@ parameters are added.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
