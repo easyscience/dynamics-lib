@@ -2656,7 +2656,8 @@
 <span class="normal">689</span>
 <span class="normal">690</span>
 <span class="normal">691</span>
-<span class="normal">692</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">692</span>
+<span class="normal">693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -3160,6 +3161,7 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_convolution_settings_changed</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
                 <span class="n">analysis1d</span><span class="o">.</span><span class="n">convolution_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_analysis_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create the list of Analysis1d objects, one for each Q index, based on the current</span>
@@ -4326,8 +4328,7 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
-<span class="normal">618</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
 <span class="normal">621</span>
@@ -4335,7 +4336,8 @@ for all Q values.</p>
 <span class="normal">623</span>
 <span class="normal">624</span>
 <span class="normal">625</span>
-<span class="normal">626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">626</span>
+<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
@@ -6020,7 +6022,8 @@ title, linestyle, marker, color).</p>
 <span class="normal">689</span>
 <span class="normal">690</span>
 <span class="normal">691</span>
-<span class="normal">692</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">692</span>
+<span class="normal">693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing two-dimensional data, i.e. intensity as function of energy and Q.</span>
 
@@ -6524,6 +6527,7 @@ title, linestyle, marker, color).</p>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_on_convolution_settings_changed</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">analysis1d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_list</span><span class="p">:</span>
                 <span class="n">analysis1d</span><span class="o">.</span><span class="n">convolution_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_analysis_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create the list of Analysis1d objects, one for each Q index, based on the current</span>
@@ -7690,8 +7694,7 @@ for all Q values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
-<span class="normal">618</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
 <span class="normal">621</span>
@@ -7699,7 +7702,8 @@ for all Q values.</p>
 <span class="normal">623</span>
 <span class="normal">624</span>
 <span class="normal">625</span>
-<span class="normal">626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
+<span class="normal">626</span>
+<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_fit_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get fit functions for all Q indices, which can be used for simultaneous fitting.</span>
 
