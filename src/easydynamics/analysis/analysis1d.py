@@ -47,7 +47,7 @@ class Analysis1d(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyAnalysis'
+        display_name : str | None, default="MyAnalysis"
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -506,14 +506,20 @@ class Analysis1d(AnalysisBase):
         if isinstance(components, ComponentCollection) and components.is_empty:
             return np.zeros_like(energy.values)
 
-        # If a convolver is provided, use it. This allows reusing the
+        # If a convolver is provided, we use it. This allows reusing the
         # same convolver for multiple evaluations during fitting for
         # performance reasons.
         if convolver is not None:
             return convolver.convolution()
 
-        # No convolution
-        # We don't create a convolver if the resolution is empty.
+        # No convolution can happen for multiple reasons:
+        #   Case 1: convolve=False, used for evaluating background components, where we don't want
+        #       to convolve with the resolution. In this case, apply_detailed_balance is False,
+        #       and we evaluate the components without DBF regardles of the settings
+        #   Case 2: convolve=True but there is no resolution_model. In this case,
+        #       apply_detailed_balance is False. We apply DBF if temperature is provided and
+        #       the settings say to use detailed balance.
+
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
         if not convolve or resolution.is_empty:
             result_no_convolution = components.evaluate(energy_with_offset)
@@ -531,9 +537,11 @@ class Analysis1d(AnalysisBase):
                 result_no_convolution *= DBF
             return result_no_convolution
 
-        # If no convolver is provided, create a new one. This is for
+        # If no convolver is provided, we create a new one. This is for
         # evaluating individual components for plotting, where
-        # performance is not important.
+        # performance is not important. We already handled the case of
+        # background components above, so we know that this is for sample components,
+        # where detailed balance settings should be applied.
 
         conv = Convolution(
             energy=energy,
@@ -703,6 +711,7 @@ class Analysis1d(AnalysisBase):
             energy_offset=self.instrument_model.get_energy_offset(Q_index),
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
+            detailed_balance_settings=self.detailed_balance_settings,
         )
 
     #############
