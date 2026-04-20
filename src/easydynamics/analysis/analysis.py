@@ -76,18 +76,8 @@ class Analysis(AnalysisBase):
 
         self._analysis_list = []
         if self.Q is not None:
-            for Q_index in range(len(self.Q)):
-                analysis = Analysis1d(
-                    display_name=f'{self.display_name}_Q{Q_index}',
-                    unique_name=(f'{self.unique_name}_Q{Q_index}'),
-                    experiment=self.experiment,
-                    sample_model=self.sample_model,
-                    instrument_model=self.instrument_model,
-                    convolution_settings=self.convolution_settings,
-                    extra_parameters=self._extra_parameters,
-                    Q_index=Q_index,
-                )
-                self._analysis_list.append(analysis)
+            self._create_analysis_list()
+
         # Now we can allow updates to trigger recalculations
         self._call_updaters = True
 
@@ -534,6 +524,23 @@ class Analysis(AnalysisBase):
             super()._on_convolution_settings_changed()
             for analysis1d in self.analysis_list:
                 analysis1d.convolution_settings = self.convolution_settings
+    def _create_analysis_list(self) -> None:
+        """
+        Create the list of Analysis1d objects, one for each Q index, based on the current
+        experiment, sample model, and instrument model.
+        """
+        self._analysis_list = []
+        for Q_index in range(len(self.Q)):
+            analysis = Analysis1d(
+                display_name=f'{self.display_name}_Q{Q_index}',
+                unique_name=(f'{self.unique_name}_Q{Q_index}'),
+                experiment=self.experiment,
+                sample_model=self.sample_model,
+                instrument_model=self.instrument_model,
+                extra_parameters=self._extra_parameters,
+                Q_index=Q_index,
+            )
+            self._analysis_list.append(analysis)
 
     #############
     # Private methods
@@ -681,7 +688,8 @@ class Analysis(AnalysisBase):
             for analysis1d in self.analysis_list
         ]
 
-        return sc.concat(datasets, dim='Q')
+        ds = sc.concat(datasets, dim='Q')
+        return ds.assign_coords(Q=self.Q)
 
     #############
     # Dunder methods
