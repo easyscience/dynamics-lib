@@ -3,17 +3,17 @@
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase as EasyScienceModelBase
 from easyscience.variable import Parameter
 
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
-from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
-class AnalysisBase(EasyScienceModelBase):
+class AnalysisBase(EasyDynamicsModelBase):
     """
     Base class for analysis in EasyDynamics.
 

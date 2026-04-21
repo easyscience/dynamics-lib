@@ -9,9 +9,9 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.sample_model.model_base import ModelBase
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type

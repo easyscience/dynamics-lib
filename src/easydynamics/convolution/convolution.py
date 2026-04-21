@@ -8,7 +8,6 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.analytical_convolution import AnalyticalConvolution
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import ComponentCollection
@@ -17,7 +16,8 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import Numeric
 
 

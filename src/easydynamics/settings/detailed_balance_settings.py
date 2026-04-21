@@ -14,7 +14,7 @@ class DetailedBalanceSettings(EasyDynamicsBase):
         self,
         use_detailed_balance: bool = True,
         normalize_detailed_balance: bool = True,
-        display_name: str = 'MySampleModel',
+        display_name: str = 'DetailedBalanceSettings',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -26,8 +26,8 @@ class DetailedBalanceSettings(EasyDynamicsBase):
             Whether to apply detailed balance to the model. If False, no detailed balance is
             applied.
         normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance factor by temperature.
-        display_name : str, default='MySampleModel'
+            Whether to normalize the detailed balance factor by dividing with temperature.
+        display_name : str, default="DetailedBalanceSettings"
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
@@ -94,20 +94,21 @@ class DetailedBalanceSettings(EasyDynamicsBase):
         Returns
         -------
         bool
-            True if the detailed balance factor should be normalized by temperature, False
-            otherwise.
+            True if the detailed balance factor should be normalized by dividing with temperature,
+            False otherwise.
         """
         return self._normalize_detailed_balance
 
     @normalize_detailed_balance.setter
     def normalize_detailed_balance(self, value: bool) -> None:
         """
-        Set whether to normalize the detailed balance factor by temperature.
+        Set whether to normalize the detailed balance factor by dividing with temperature.
 
         Parameters
         ----------
         value : bool
-            True to normalize the detailed balance factor by temperature, False otherwise.
+            True to normalize the detailed balance factor by dividing with temperature, False
+            otherwise.
 
         Raises
         ------

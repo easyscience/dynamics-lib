@@ -13,11 +13,11 @@ from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
-from easydynamics.sample_model.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.sample_model.instrument_model import InstrumentModel
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import _in_notebook
 
 

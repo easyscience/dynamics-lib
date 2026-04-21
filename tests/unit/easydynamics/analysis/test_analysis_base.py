@@ -9,10 +9,10 @@ import pytest
 from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 
 
 class TestAnalysisBase:

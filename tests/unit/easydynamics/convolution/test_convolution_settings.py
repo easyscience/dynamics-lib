@@ -3,7 +3,7 @@
 
 import pytest
 
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 
 
 class TestConvolutionSettings:
