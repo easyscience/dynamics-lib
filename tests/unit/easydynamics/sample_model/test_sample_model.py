@@ -15,6 +15,7 @@ from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion 
     BrownianTranslationalDiffusion,
 )
 from easydynamics.sample_model.sample_model import SampleModel
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
 class TestSampleModel:
@@ -66,51 +67,75 @@ class TestSampleModel:
         assert len(model.diffusion_models) == 1
         assert isinstance(model.diffusion_models[0], BrownianTranslationalDiffusion)
         assert model.temperature.value == pytest.approx(10.0)
-        assert model.divide_by_temperature is True
+        assert model.normalize_detailed_balance is True
+        assert model.use_detailed_balance is True
+        assert isinstance(model.detailed_balance_settings, DetailedBalanceSettings)
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
-    def test_init_list_of_diffusion_model(self):
+    def test_init_custom_input(self):
         # WHEN THEN
         diffusion_model1 = BrownianTranslationalDiffusion()
         diffusion_model2 = BrownianTranslationalDiffusion()
-        sample_model = SampleModel(diffusion_models=[diffusion_model1, diffusion_model2])
+
+        detailed_balance_settings = DetailedBalanceSettings(
+            use_detailed_balance=False,
+            normalize_detailed_balance=False,
+        )
+        sample_model = SampleModel(
+            diffusion_models=[diffusion_model1, diffusion_model2],
+            detailed_balance_settings=detailed_balance_settings,
+        )
 
         # EXPECT
         assert len(sample_model.diffusion_models) == 2
         assert sample_model.diffusion_models[0] is diffusion_model1
         assert sample_model.diffusion_models[1] is diffusion_model2
+        assert sample_model.use_detailed_balance is False
+        assert sample_model.normalize_detailed_balance is False
+        assert sample_model.detailed_balance_settings is detailed_balance_settings
 
-    def test_init_raises_with_invalid_diffusion_model(self):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(
-            TypeError,
-            match='diffusion_models must be ',
-        ):
-            SampleModel(diffusion_models='invalid_diffusion_model')
-
-    def test_init_raises_with_invalid_temperature(self):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(
-            TypeError,
-            match='temperature must be a number or None',
-        ):
-            SampleModel(temperature='invalid_temperature')
-
-    def test_init_raises_with_negative_temperature(self):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(
-            ValueError,
-            match='temperature must be non-negative',
-        ):
-            SampleModel(temperature=-5.0)
-
-    def test_init_raises_with_invalid_divide_by_temperature(self):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(
-            TypeError,
-            match='divide_by_temperature must be True or False',
-        ):
-            SampleModel(divide_by_temperature='invalid_value')
+    @pytest.mark.parametrize(
+        'invalid_input, expected_exception, match',
+        [
+            # diffusion_models
+            (
+                {'diffusion_models': 'invalid_diffusion_model'},
+                TypeError,
+                'diffusion_models must be a DiffusionModelBase',
+            ),
+            # temperature
+            (
+                {'temperature': 'invalid_temperature'},
+                TypeError,
+                'temperature must be a number or None',
+            ),
+            (
+                {'temperature': -5.0},
+                ValueError,
+                'temperature must be non-negative',
+            ),
+            # detailed_balance_settings
+            (
+                {'detailed_balance_settings': 'invalid_settings'},
+                TypeError,
+                'detailed_balance_settings must be a DetailedBalanceSettings or None',
+            ),
+        ],
+        ids=[
+            'diffusion_models_invalid_type',
+            'temperature_not_numeric',
+            'temperature_negative',
+            'detailed_balance_settings_invalid_type',
+        ],
+    )
+    def test_init_raises_for_invalid_input(self, invalid_input, expected_exception, match):
+        """
+        Test that initialization raises appropriate exceptions for
+        invalid input parameters.
+        """
+        # WHEN THEN EXPECT
+        with pytest.raises(expected_exception, match=match):
+            SampleModel(**invalid_input)
 
     def test_append_and_remove_and_clear_diffusion_model(self, sample_model):
         # WHEN
@@ -279,29 +304,75 @@ class TestSampleModel:
         ):
             model.convert_temperature_unit('invalid_unit')
 
-    def test_divide_by_temperature_setter(self, sample_model):
+    def test_normalize_detailed_balance_setter(self, sample_model):
         # WHEN
         model = sample_model
 
         # THEN
-        model.divide_by_temperature = False
+        model.normalize_detailed_balance = False
 
         # EXPECT
-        assert model.divide_by_temperature is False
+        assert model.normalize_detailed_balance is False
 
         # THEN
-        model.divide_by_temperature = True
+        model.normalize_detailed_balance = True
 
         # EXPECT
-        assert model.divide_by_temperature is True
+        assert model.normalize_detailed_balance is True
 
-    def test_divide_by_temperature_setter_raises_with_invalid_type(self, sample_model):
+    def test_normalize_detailed_balance_setter_raises_with_invalid_type(self, sample_model):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='divide_by_temperature must be True or False',
+            match='normalize_detailed_balance must be True or False',
         ):
-            sample_model.divide_by_temperature = 'invalid_value'
+            sample_model.normalize_detailed_balance = 'invalid_value'
+
+    def test_use_detailed_balance_setter(self, sample_model):
+        # WHEN
+        model = sample_model
+
+        # THEN
+        model.use_detailed_balance = False
+
+        # EXPECT
+        assert model.use_detailed_balance is False
+
+        # THEN
+        model.use_detailed_balance = True
+
+        # EXPECT
+        assert model.use_detailed_balance is True
+
+    def test_use_detailed_balance_setter_raises_with_invalid_type(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='use_detailed_balance must be True or False',
+        ):
+            sample_model.use_detailed_balance = 'invalid_value'
+
+    def test_detailed_balance_settings_property(self, sample_model):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN
+        sample_model.detailed_balance_settings = new_settings
+
+        # EXPECT
+        assert sample_model.detailed_balance_settings is new_settings
+        assert sample_model.use_detailed_balance is False
+        assert sample_model.normalize_detailed_balance is False
+
+    def test_detailed_balance_settings_setter_invalid(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='detailed_balance_settings must be a DetailedBalanceSettings',
+        ):
+            sample_model.detailed_balance_settings = 'invalid_settings'
 
     def test_evaluate_calls_dbf(self, sample_model):
         # WHEN
@@ -325,7 +396,7 @@ class TestSampleModel:
             mock_dbf.assert_called_once_with(
                 energy=x,
                 temperature=sample_model.temperature,
-                divide_by_temperature=sample_model.divide_by_temperature,
+                divide_by_temperature=sample_model.normalize_detailed_balance,
                 energy_unit=sample_model.unit,
             )
 
@@ -336,6 +407,51 @@ class TestSampleModel:
             # Check that DBF was applied elementwise
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]) * 10.0)
             np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]) * 10.0)
+
+    @pytest.mark.parametrize(
+        'temperature, use_detailed_balance',
+        [
+            (None, True),  # DB disabled because temperature is None
+            (300.0, False),  # DB disabled explicitly
+        ],
+        ids=[
+            'temperature_none',
+            'use_detailed_balance_false',
+        ],
+    )
+    def test_evaluate_doesnt_call_dbf_when_disabled(
+        self, sample_model, temperature, use_detailed_balance
+    ):
+        # WHEN
+        x = np.array([0.0, 1.0, 2.0])
+
+        collection1 = Mock()
+        collection2 = Mock()
+
+        collection1.evaluate.return_value = np.array([1.0, 2.0, 3.0])
+        collection2.evaluate.return_value = np.array([4.0, 5.0, 6.0])
+
+        sample_model._component_collections = [collection1, collection2]
+
+        sample_model.temperature = temperature
+        sample_model.use_detailed_balance = use_detailed_balance
+
+        with patch('easydynamics.sample_model.sample_model.detailed_balance_factor') as mock_dbf:
+            mock_dbf.return_value = np.array([10.0, 10.0, 10.0])  # simplified DBF
+            # THEN
+            result = sample_model.evaluate(x)
+
+            # EXPECT
+            # Check that DBF was not called since detailed balance is disabled
+            mock_dbf.assert_not_called()
+
+            # Check that evaluate was called on each component
+            collection1.evaluate.assert_called_once_with(x)
+            collection2.evaluate.assert_called_once_with(x)
+
+            # Check that results were not modified by DBF
+            np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
+            np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]))
 
     def test_generate_component_collections(self, sample_model):
         # WHEN THEN
@@ -389,4 +505,4 @@ class TestSampleModel:
         assert 'components' in repr_str
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
-        assert 'divide_by_temperature' in repr_str
+        assert 'normalize_detailed_balance' in repr_str

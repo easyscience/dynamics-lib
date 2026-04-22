@@ -8,10 +8,11 @@ import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import Numeric
 
 # The thresholds are illustrated in
@@ -41,7 +42,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         convolution_settings: ConvolutionSettings | None = None,
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
-        normalize_detailed_balance: bool = True,
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
         unit: str | sc.Unit = 'meV',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
@@ -65,8 +66,8 @@ class NumericalConvolutionBase(ConvolutionBase):
             The temperature to use for detailed balance correction.
         temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
-        normalize_detailed_balance : bool, default=True
-            Whether to normalize the detailed balance factor by temperature.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            The settings for detailed balance. If None, default settings will be used.
         unit : str | sc.Unit, default='meV'
             The unit of the energy.
         display_name : str | None, default='MyConvolution'
@@ -103,7 +104,13 @@ class NumericalConvolutionBase(ConvolutionBase):
             convolution_settings = ConvolutionSettings()
         self._convolution_settings = convolution_settings
 
-        self._normalize_detailed_balance = normalize_detailed_balance
+        if detailed_balance_settings is None:
+            detailed_balance_settings = DetailedBalanceSettings()
+        if not isinstance(detailed_balance_settings, DetailedBalanceSettings):
+            raise TypeError(
+                'detailed_balance_settings must be a DetailedBalanceSettings instance.'
+            )
+        self._detailed_balance_settings = detailed_balance_settings
 
         # Create a dense grid to improve accuracy.
         # When upsample_factor>1, we evaluate on this grid and
@@ -292,42 +299,35 @@ class NumericalConvolutionBase(ConvolutionBase):
             raise TypeError('Temperature must be None, a float or a Parameter.')
 
     @property
-    def normalize_detailed_balance(self) -> bool:
+    def detailed_balance_settings(self) -> DetailedBalanceSettings:
         """
-        Get whether to normalize the detailed balance factor.
-
-        If True, the detailed balance factor is divided by temperature.
+        Get the DetailedBalanceSettings of the Convolution.
 
         Returns
         -------
-        bool
-            Whether to normalize the detailed balance factor.
+        DetailedBalanceSettings
+            The DetailedBalanceSettings of the Convolution.
         """
+        return self._detailed_balance_settings
 
-        return self._normalize_detailed_balance
-
-    @normalize_detailed_balance.setter
-    def normalize_detailed_balance(self, normalize: bool) -> None:
+    @detailed_balance_settings.setter
+    def detailed_balance_settings(self, value: DetailedBalanceSettings) -> None:
         """
-        Set whether to normalize the detailed balance factor.
-
-        If True, the detailed balance factor is divided by temperature.
+        Set the DetailedBalanceSettings of the Convolution.
 
         Parameters
         ----------
-        normalize : bool
-            Whether to normalize the detailed balance factor.
+        value : DetailedBalanceSettings
+            The DetailedBalanceSettings to set.
 
         Raises
         ------
         TypeError
-            If normalize is not a bool.
+            If value is not a DetailedBalanceSettings.
         """
-
-        if not isinstance(normalize, bool):
-            raise TypeError('normalize_detailed_balance must be True or False.')
-
-        self._normalize_detailed_balance = normalize
+        if not isinstance(value, DetailedBalanceSettings):
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
+        self._detailed_balance_settings = value
 
     def _create_energy_grid(
         self,
@@ -476,5 +476,5 @@ class NumericalConvolutionBase(ConvolutionBase):
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '
             f'temperature={self.temperature}, '
-            f'normalize_detailed_balance={self.normalize_detailed_balance})'
+            f'detailed_balance={self.detailed_balance_settings!r})'
         )

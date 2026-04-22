@@ -78,7 +78,7 @@ class TestConvolution:
         assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
         assert default_convolution.unit == 'meV'
-        assert default_convolution.normalize_detailed_balance is True
+        assert default_convolution.detailed_balance_settings.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
         assert isinstance(default_convolution._analytical_sample_components, ComponentCollection)
@@ -112,7 +112,10 @@ class TestConvolution:
         assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
         assert convolution_with_components.unit == 'meV'
-        assert convolution_with_components.normalize_detailed_balance is True
+        assert (
+            convolution_with_components.detailed_balance_settings.normalize_detailed_balance
+            is True
+        )
         assert isinstance(convolution_with_components._energy_grid, EnergyGrid)
 
         assert isinstance(

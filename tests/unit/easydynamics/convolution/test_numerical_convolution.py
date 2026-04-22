@@ -49,7 +49,10 @@ class TestNumericalConvolution:
         assert default_numerical_convolution.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution.temperature is None
         assert default_numerical_convolution.unit == 'meV'
-        assert default_numerical_convolution.normalize_detailed_balance is True
+        assert (
+            default_numerical_convolution.detailed_balance_settings.normalize_detailed_balance
+            is True
+        )
         assert isinstance(default_numerical_convolution._energy_grid, EnergyGrid)
 
     @pytest.mark.parametrize('upsample_factor', [None, 5])

@@ -13,12 +13,14 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.convolution.convolution import Convolution
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.detailed_balance import detailed_balance_factor
 
 
 class Analysis1d(AnalysisBase):
@@ -37,6 +39,7 @@ class Analysis1d(AnalysisBase):
         instrument_model: InstrumentModel | None = None,
         Q_index: int | None = None,
         convolution_settings: ConvolutionSettings | None = None,
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -61,6 +64,8 @@ class Analysis1d(AnalysisBase):
             until a Q index is set.
         convolution_settings : ConvolutionSettings | None, default=None
             The settings for the convolution. If None, default settings will be used.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            The settings for detailed balance. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -72,6 +77,7 @@ class Analysis1d(AnalysisBase):
             sample_model=sample_model,
             instrument_model=instrument_model,
             convolution_settings=convolution_settings,
+            detailed_balance_settings=detailed_balance_settings,
             extra_parameters=extra_parameters,
         )
 
@@ -452,6 +458,7 @@ class Analysis1d(AnalysisBase):
         convolver: Convolution | None = None,
         convolve: bool = True,
         energy: sc.Variable | None = None,
+        apply_detailed_balance: bool = False,
     ) -> np.ndarray:
         """
         Calculate the contribution of a set of components, optionally convolving with the
@@ -475,6 +482,9 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
             experiment is used.
+        apply_detailed_balance : bool, default=False
+            Whether to apply detailed balance correction.
+
 
         Returns
         -------
@@ -496,24 +506,42 @@ class Analysis1d(AnalysisBase):
         if isinstance(components, ComponentCollection) and components.is_empty:
             return np.zeros_like(energy.values)
 
-        # No convolution
-        if not convolve:
-            return components.evaluate(energy_with_offset)
-
-        # If a convolver is provided, use it. This allows reusing the
+        # If a convolver is provided, we use it. This allows reusing the
         # same convolver for multiple evaluations during fitting for
         # performance reasons.
         if convolver is not None:
             return convolver.convolution()
 
-        # If no convolver is provided, create a new one. This is for
-        # evaluating individual components for plotting, where
-        # performance is not important.
+        # No convolution can happen for multiple reasons:
+        #   Case 1: convolve=False, used for evaluating background components, where we don't want
+        #       to convolve with the resolution. In this case, apply_detailed_balance is False,
+        #       and we evaluate the components without DBF regardles of the settings
+        #   Case 2: convolve=True but there is no resolution_model. In this case,
+        #       apply_detailed_balance is True. We apply DBF if temperature is provided and
+        #       the settings say to use detailed balance.
 
-        # We don't create a convolver if the resolution is empty.
         resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
-        if resolution.is_empty:
-            return components.evaluate(energy_with_offset)
+        if not convolve or resolution.is_empty:
+            result_no_convolution = components.evaluate(energy_with_offset)
+            if (
+                apply_detailed_balance
+                and self.temperature is not None
+                and self.detailed_balance_settings.use_detailed_balance
+            ):
+                DBF = detailed_balance_factor(
+                    energy=energy_with_offset,
+                    temperature=self.temperature,
+                    divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
+                    energy_unit=self.unit,
+                )
+                result_no_convolution *= DBF
+            return result_no_convolution
+
+        # If no convolver is provided, we create a new one. This is for
+        # evaluating individual components for plotting, where
+        # performance is not important. We already handled the case of
+        # background components above, so we know that this is for sample components,
+        # where detailed balance settings should be applied.
 
         conv = Convolution(
             energy=energy,
@@ -522,6 +550,7 @@ class Analysis1d(AnalysisBase):
             energy_offset=energy_offset,
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
+            detailed_balance_settings=self.detailed_balance_settings,
         )
         return conv.convolution()
 
@@ -552,6 +581,7 @@ class Analysis1d(AnalysisBase):
             convolver=self._convolver,
             convolve=True,
             energy=energy,
+            apply_detailed_balance=True,
         )
 
     def _evaluate_sample_component(
@@ -580,6 +610,7 @@ class Analysis1d(AnalysisBase):
             convolver=None,
             convolve=True,
             energy=energy,
+            apply_detailed_balance=True,
         )
 
     def _evaluate_background(self, energy: sc.Variable | None = None) -> np.ndarray:
@@ -606,6 +637,7 @@ class Analysis1d(AnalysisBase):
             convolver=None,
             convolve=False,
             energy=energy,
+            apply_detailed_balance=False,
         )
 
     def _evaluate_background_component(
@@ -635,6 +667,7 @@ class Analysis1d(AnalysisBase):
             convolver=None,
             convolve=False,
             energy=energy,
+            apply_detailed_balance=False,
         )
 
     def _create_convolver(
@@ -678,6 +711,7 @@ class Analysis1d(AnalysisBase):
             energy_offset=self.instrument_model.get_energy_offset(Q_index),
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
+            detailed_balance_settings=self.detailed_balance_settings,
         )
 
     #############

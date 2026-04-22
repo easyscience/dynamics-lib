@@ -10,11 +10,11 @@ import pytest
 import scipp as sc
 
 from easydynamics.analysis.analysis import Analysis
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 
 
 class TestAnalysis:

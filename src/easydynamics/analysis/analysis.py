@@ -13,10 +13,11 @@ from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -35,6 +36,7 @@ class Analysis(AnalysisBase):
         sample_model: SampleModel | None = None,
         instrument_model: InstrumentModel | None = None,
         convolution_settings: ConvolutionSettings | None = None,
+        detailed_balance_settings: DetailedBalanceSettings | None = None,
         extra_parameters: Parameter | list[Parameter] | None = None,
     ) -> None:
         """
@@ -56,6 +58,8 @@ class Analysis(AnalysisBase):
             is created.
         convolution_settings : ConvolutionSettings | None, default=None
              The settings for the convolution. If None, default settings will be used.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            The settings for detailed balance. If None, default settings will be used.
         extra_parameters : Parameter | list[Parameter] | None, default=None
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
@@ -71,6 +75,7 @@ class Analysis(AnalysisBase):
             sample_model=sample_model,
             instrument_model=instrument_model,
             convolution_settings=convolution_settings,
+            detailed_balance_settings=detailed_balance_settings,
             extra_parameters=extra_parameters,
         )
 
@@ -538,6 +543,8 @@ class Analysis(AnalysisBase):
                 experiment=self.experiment,
                 sample_model=self.sample_model,
                 instrument_model=self.instrument_model,
+                convolution_settings=self.convolution_settings,
+                detailed_balance_settings=self.detailed_balance_settings,
                 extra_parameters=self._extra_parameters,
                 Q_index=Q_index,
             )

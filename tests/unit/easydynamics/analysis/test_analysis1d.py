@@ -446,6 +446,38 @@ class TestAnalysis1d:
         components.evaluate.assert_called_once()
         assert np.array_equal(result, np.array([1.0, 2.0, 3.0]))
 
+    def test_evaluate_components_empty_resolution_DBF(self, analysis1d):
+        # WHEN
+        components = MagicMock()
+        components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
+
+        # Set temperature so DBF will be applied
+        analysis1d.sample_model.temperature = 10
+        mock_dbf = np.array([10.0, 10.0, 10.0])
+
+        # The default analysis1d has no resolution model components, so
+        # no convolution should be applied even if convolve=True
+
+        with patch(
+            'easydynamics.analysis.analysis1d.detailed_balance_factor',
+            return_value=mock_dbf,
+        ) as dbf_mock:
+            # WHEN
+            result = analysis1d._evaluate_components(
+                components=components,
+                convolver=None,
+                convolve=True,
+                apply_detailed_balance=True,
+            )
+
+        # EXPECT
+        components.evaluate.assert_called_once()
+        dbf_mock.assert_called_once()
+
+        # EXPECT multiplication applied
+        expected = np.array([1.0, 2.0, 3.0]) * mock_dbf
+        assert np.array_equal(result, expected)
+
     def test_evaluate_with_resolution(self, analysis1d):
         # WHEN (set up the resolution model and create a component to
         # evaluate)
@@ -511,6 +543,7 @@ class TestAnalysis1d:
             convolver=analysis1d._convolver,
             convolve=True,
             energy=None,
+            apply_detailed_balance=True,
         )
 
     def test_evaluate_sample_component(self, analysis1d):
@@ -530,6 +563,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=True,
             energy=None,
+            apply_detailed_balance=True,
         )
 
     def test_evaluate_background(self, analysis1d):
@@ -555,6 +589,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=False,
             energy=None,
+            apply_detailed_balance=False,
         )
 
     def test_evaluate_background_component(self, analysis1d):
@@ -574,6 +609,7 @@ class TestAnalysis1d:
             convolver=None,
             convolve=False,
             energy=None,
+            apply_detailed_balance=False,
         )
 
     def test_create_convolver(self, analysis1d):

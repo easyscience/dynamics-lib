@@ -6,11 +6,12 @@ import pytest
 import scipp as sc
 from easyscience.variable import Parameter
 
-from easydynamics.convolution.convolution_settings import ConvolutionSettings
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
 class TestNumericalConvolutionBase:
@@ -48,7 +49,10 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution_base.temperature is None
         assert default_numerical_convolution_base.unit == 'meV'
-        assert default_numerical_convolution_base.normalize_detailed_balance is True
+        assert (
+            default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
+            is True
+        )
         assert isinstance(default_numerical_convolution_base._energy_grid, EnergyGrid)
 
     def test_init_with_custom_parameters(self):
@@ -63,7 +67,7 @@ class TestNumericalConvolutionBase:
         resolution_settings = ConvolutionSettings(upsample_factor=10, extension_factor=0.5)
         temperature = 300.0
         temperature_unit = 'K'
-        normalize_detailed_balance = False
+        detailed_balance_settings = DetailedBalanceSettings(normalize_detailed_balance=False)
         unit = 'meV'
 
         # THEN
@@ -72,7 +76,7 @@ class TestNumericalConvolutionBase:
             sample_components=sample_components,
             resolution_components=resolution_components,
             convolution_settings=resolution_settings,
-            normalize_detailed_balance=normalize_detailed_balance,
+            detailed_balance_settings=detailed_balance_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
             unit=unit,
@@ -84,47 +88,58 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
         assert numerical_convolution_base.unit == unit
-        assert numerical_convolution_base.normalize_detailed_balance is False
+        assert (
+            numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
+            is False
+        )
+        assert numerical_convolution_base.detailed_balance_settings is detailed_balance_settings
         assert isinstance(numerical_convolution_base._energy_grid, EnergyGrid)
 
-    def test_init_raises_type_error_for_invalid_temperature(self):
+    @pytest.mark.parametrize(
+        'invalid_input, expected_exception, match',
+        [
+            # temperature
+            (
+                {'temperature': 'invalid_temperature'},
+                TypeError,
+                r'Temperature must be None, a number or a Parameter.',
+            ),
+            # temperature_unit
+            (
+                {'temperature_unit': 123},
+                TypeError,
+                r'Temperature_unit must be a string or sc.Unit.',
+            ),
+            # detailed_balance_settings
+            (
+                {'detailed_balance_settings': 'invalid_settings'},
+                TypeError,
+                r'detailed_balance_settings must be a DetailedBalanceSettings instance.',
+            ),
+        ],
+        ids=[
+            'temperature_invalid_type',
+            'temperature_unit_invalid_type',
+            'detailed_balance_settings_invalid_type',
+        ],
+    )
+    def test_init_raises_for_invalid_input(self, invalid_input, expected_exception, match):
         """
-        Test that initialization raises TypeError for invalid
-        temperature.
+        Test that initialization raises appropriate exceptions for
+        invalid input parameters.
         """
         # WHEN
         energy = np.linspace(-5, 5, 50)
         sample_components = ComponentCollection(display_name='ComponentCollection')
         resolution_components = ComponentCollection(display_name='ResolutionModel')
-        invalid_temperature = 'invalid_temperature'
 
         # THEN EXPECT
-        with pytest.raises(TypeError, match=r'Temperature must be None, a number or a Parameter.'):
+        with pytest.raises(expected_exception, match=match):
             NumericalConvolutionBase(
                 energy=energy,
                 sample_components=sample_components,
                 resolution_components=resolution_components,
-                temperature=invalid_temperature,
-            )
-
-    def test_init_raises_type_error_for_invalid_temperature_unit(self):
-        """
-        Test that initialization raises TypeError for invalid
-        temperature_unit.
-        """
-        # WHEN
-        energy = np.linspace(-5, 5, 50)
-        sample_components = ComponentCollection(display_name='ComponentCollection')
-        resolution_components = ComponentCollection(display_name='ResolutionModel')
-        invalid_temperature_unit = 123  # Not a string or sc.Unit
-
-        # THEN EXPECT
-        with pytest.raises(TypeError, match=r'Temperature_unit must be a string or sc.Unit.'):
-            NumericalConvolutionBase(
-                energy=energy,
-                sample_components=sample_components,
-                resolution_components=resolution_components,
-                temperature_unit=invalid_temperature_unit,
+                **invalid_input,
             )
 
     ####################
@@ -340,10 +355,15 @@ class TestNumericalConvolutionBase:
         Test setting normalize_detailed_balance to False.
         """
         # WHEN
-        default_numerical_convolution_base.normalize_detailed_balance = False
+        default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance = (
+            False
+        )
 
         # THEN EXPECT
-        assert default_numerical_convolution_base.normalize_detailed_balance is False
+        assert (
+            default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
+            is False
+        )
 
     def test_normalize_detailed_balance_setter_raises(self, default_numerical_convolution_base):
         """
@@ -352,7 +372,29 @@ class TestNumericalConvolutionBase:
         """
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='normalize_detailed_balance must be'):
-            default_numerical_convolution_base.normalize_detailed_balance = 'invalid'
+            default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance = (  # noqa: E501
+                'invalid'
+            )
+
+    def test_detailed_balance_settings_property(self, default_numerical_convolution_base):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN
+        default_numerical_convolution_base.detailed_balance_settings = new_settings
+
+        # EXPECT
+        assert default_numerical_convolution_base.detailed_balance_settings is new_settings
+
+    def test_detailed_balance_settings_setter_invalid(self, default_numerical_convolution_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='detailed_balance_settings must be a DetailedBalanceSettings',
+        ):
+            default_numerical_convolution_base.detailed_balance_settings = 'invalid_settings'
 
     def test_convolution_settings_setter_valid(
         self,
