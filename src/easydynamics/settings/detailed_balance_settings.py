@@ -27,7 +27,7 @@ class DetailedBalanceSettings(EasyDynamicsBase):
             applied.
         normalize_detailed_balance : bool, default=True
             Whether to normalize the detailed balance factor by dividing with temperature.
-        display_name : str, default="DetailedBalanceSettings"
+        display_name : str, default='DetailedBalanceSettings'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.

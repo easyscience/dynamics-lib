@@ -13,6 +13,7 @@ from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
 class TestAnalysisBase:
@@ -47,6 +48,19 @@ class TestAnalysisBase:
 
         # EXPECT
         assert analysis.convolution_settings is convolution_settings
+
+    def test_init_detailed_balance_settings(self):
+        # WHEN
+        detailed_balance_settings = DetailedBalanceSettings(
+            use_detailed_balance=False,
+            normalize_detailed_balance=False,
+        )
+
+        # THEN
+        analysis = AnalysisBase(detailed_balance_settings=detailed_balance_settings)
+
+        # EXPECT
+        assert analysis.detailed_balance_settings is detailed_balance_settings
 
     def test_init_extra_parameter(self):
         extra_parameter = Parameter(name='param1', value=1.0)
@@ -90,6 +104,11 @@ class TestAnalysisBase:
                 'convolution_settings must be an instance of ConvolutionSettings',
             ),
             (
+                {'detailed_balance_settings': 'not detailed balance settings'},
+                TypeError,
+                'detailed_balance_settings must be an instance of DetailedBalanceSettings',
+            ),
+            (
                 {'extra_parameters': 123},
                 TypeError,
                 'extra_parameters must be a Parameter or a list of Parameters.',
@@ -105,6 +124,7 @@ class TestAnalysisBase:
             'invalid sample_model',
             'invalid instrument_model',
             'invalid convolution_settings',
+            'invalid detailed_balance_settings',
             'invalid extra_parameters',
             'invalid extra_parameters list',
         ],
@@ -271,6 +291,26 @@ class TestAnalysisBase:
 
             # EXPECT
             mock_on_convolution_settings_changed.assert_called_once()
+
+    def test_detailed_balance_settings_property(self, analysis_base):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN
+        analysis_base.detailed_balance_settings = new_settings
+
+        # EXPECT
+        assert analysis_base.detailed_balance_settings is new_settings
+
+    def test_detailed_balance_settings_setter_invalid(self, analysis_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='detailed_balance_settings must be a DetailedBalanceSettings',
+        ):
+            analysis_base.detailed_balance_settings = 'invalid_settings'
 
     @pytest.mark.parametrize(
         'extra_parameters',

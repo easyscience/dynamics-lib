@@ -20,9 +20,7 @@ class TestDetailedBalanceSettings:
         assert isinstance(default_detailed_balance_settings, DetailedBalanceSettings)
         assert default_detailed_balance_settings.use_detailed_balance is True
         assert default_detailed_balance_settings.normalize_detailed_balance is True
-        assert (
-            default_detailed_balance_settings.display_name == "DetailedBalanceSettings"
-        )
+        assert default_detailed_balance_settings.display_name == 'DetailedBalanceSettings'
 
     def test_init_with_custom_parameters(self):
         """
@@ -38,30 +36,28 @@ class TestDetailedBalanceSettings:
         # THEN EXPECT
         assert detailed_balance_settings.use_detailed_balance is False
         assert detailed_balance_settings.normalize_detailed_balance is False
-        assert detailed_balance_settings.display_name == "DetailedBalanceSettings"
+        assert detailed_balance_settings.display_name == 'DetailedBalanceSettings'
 
     @pytest.mark.parametrize(
-        "invalid_input, expected_exception, match",
+        'invalid_input, expected_exception, match',
         [
             (
-                {"use_detailed_balance": "not_a_boolean"},
+                {'use_detailed_balance': 'not_a_boolean'},
                 TypeError,
-                "must be True or False",
+                'must be True or False',
             ),
             (
-                {"normalize_detailed_balance": "not_a_boolean"},
+                {'normalize_detailed_balance': 'not_a_boolean'},
                 TypeError,
-                "must be True or False",
+                'must be True or False',
             ),
         ],
         ids=[
-            "use_detailed_balance_not_boolean",
-            "normalize_detailed_balance_not_boolean",
+            'use_detailed_balance_not_boolean',
+            'normalize_detailed_balance_not_boolean',
         ],
     )
-    def test_init_raises_for_invalid_input(
-        self, invalid_input, expected_exception, match
-    ):
+    def test_init_raises_for_invalid_input(self, invalid_input, expected_exception, match):
         """
         Test that initialization raises appropriate exceptions for
         invalid input parameters.
@@ -86,16 +82,16 @@ class TestDetailedBalanceSettings:
         assert default_detailed_balance_settings.normalize_detailed_balance is False
 
     @pytest.mark.parametrize(
-        "value, expected_exception, match",
+        'value, expected_exception, match',
         [
-            ("5", TypeError, "must be True or False"),
-            (1, TypeError, "must be True or False"),
-            (None, TypeError, "must be True or False"),
+            ('5', TypeError, 'must be True or False'),
+            (1, TypeError, 'must be True or False'),
+            (None, TypeError, 'must be True or False'),
         ],
         ids=[
-            "string",
-            "integer",
-            "none",
+            'string',
+            'integer',
+            'none',
         ],
     )
     def test_setters_invalid(
@@ -119,7 +115,7 @@ class TestDetailedBalanceSettings:
 
         # EXPECT
         assert repr_str == (
-            "DetailedBalanceSettings(use_detailed_balance=True, normalize_detailed_balance=True)"
+            'DetailedBalanceSettings(use_detailed_balance=True, normalize_detailed_balance=True)'
         )
 
     def test_repr_reflects_updated_values(self, default_detailed_balance_settings):
@@ -131,5 +127,5 @@ class TestDetailedBalanceSettings:
 
         # EXPECT
         assert repr_str == (
-            "DetailedBalanceSettings(use_detailed_balance=False, normalize_detailed_balance=False)"
+            'DetailedBalanceSettings(use_detailed_balance=False, normalize_detailed_balance=False)'
         )
