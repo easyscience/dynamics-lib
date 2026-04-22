@@ -20,7 +20,7 @@ class TestDiffusionModel:
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match='Unit is read-only. Use convert_unit to change the unit between allowed types',
+            match=r'Unit is read-only. Use convert_unit to change the unit between allowed types',
         ):
             diffusion_model.unit = 'eV'
 
@@ -29,16 +29,16 @@ class TestDiffusionModel:
         diffusion_model.scale = 2.0
 
         # THEN EXPECT
-        assert diffusion_model.scale.value == 2.0
+        assert diffusion_model.scale.value == pytest.approx(2.0)
 
     def test_scale_setter_negative_raises(self, diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='scale must be non-negative.'):
+        with pytest.raises(ValueError, match=r'scale must be non-negative.'):
             diffusion_model.scale = -1.0  # Invalid negative value
 
     def test_scale_setter_raises(self, diffusion_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='scale must be a number.'):
+        with pytest.raises(TypeError, match=r'scale must be a number.'):
             diffusion_model.scale = 'invalid'  # Invalid type
 
     def test_repr(self, diffusion_model):

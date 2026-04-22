@@ -14,6 +14,7 @@ from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 
 
 class TestAnalysis:
@@ -30,6 +31,31 @@ class TestAnalysis:
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         experiment = Experiment(data=data_array)
+        sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
+        instrument_model = InstrumentModel()
+
+        return Analysis(
+            display_name='TestAnalysis',
+            experiment=experiment,
+            sample_model=sample_model,
+            instrument_model=instrument_model,
+            extra_parameters=None,
+        )
+
+    @pytest.fixture
+    def analysis_single_Q(self):
+        Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        experiment = Experiment(data=data_array)
+        experiment.rebin({'Q': 1})
         sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
         instrument_model = InstrumentModel()
 
@@ -177,7 +203,7 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             ValueError,
-            match="Invalid fit method. Choose 'independent' or 'simultaneous'.",
+            match=r"Invalid fit method. Choose 'independent' or 'simultaneous'.",
         ):
             analysis.fit(fit_method='invalid_fit_method')
 
@@ -260,6 +286,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
@@ -270,7 +299,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=False)
 
@@ -284,7 +313,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
 
         # Check the default kwargs
@@ -310,6 +339,9 @@ class TestAnalysis:
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
+        fake_data = MagicMock()
+        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
+
         analysis._create_model_array = MagicMock(return_value='MODEL')
         analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
         with (
@@ -321,7 +353,7 @@ class TestAnalysis:
             ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = 'DATA'
+            mock_binned.return_value = fake_data
             # THEN
             fig = analysis.plot_data_and_model(plot_components=True)
 
@@ -335,7 +367,7 @@ class TestAnalysis:
         assert 'Data' in data_passed
         assert 'Model' in data_passed
 
-        assert data_passed['Data'] == 'DATA'
+        assert data_passed['Data'] == fake_data
         assert data_passed['Model'] == 'MODEL'
         # Check the default kwargs
         assert kwargs['title'] == 'TestAnalysis'
@@ -583,6 +615,18 @@ class TestAnalysis:
         for analysis1d in analysis.analysis_list:
             assert analysis1d.instrument_model is new_instrument_model
 
+    def test_on_convolution_settings_changed(self, analysis):
+        # WHEN
+        new_convolution_settings = ConvolutionSettings()
+
+        # THEN (this calls _on_convolution_settings_changed internally)
+        analysis.convolution_settings = new_convolution_settings
+
+        # EXPECT
+        assert analysis.convolution_settings is new_convolution_settings
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings is new_convolution_settings
+
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
         analysis.analysis_list[1].fit = MagicMock(return_value='fit_result_Q1')
@@ -640,7 +684,7 @@ class TestAnalysis:
         expected_fit_objects = analysis.analysis_list
         expected_fit_functions = analysis.get_fit_functions()
         mock_fitter.assert_called_once()
-        args, kwargs = mock_fitter.call_args
+        _, kwargs = mock_fitter.call_args
         assert kwargs['fit_objects'] == expected_fit_objects
         assert kwargs['fit_functions'] == expected_fit_functions
 
@@ -657,7 +701,7 @@ class TestAnalysis:
             expected_ws.append(1.0 / np.sqrt(data.variances))
         fake_fitter_instance.fit.assert_called_once()
 
-        args, kwargs = fake_fitter_instance.fit.call_args
+        _, kwargs = fake_fitter_instance.fit.call_args
         np.testing.assert_array_equal(kwargs['x'], expected_xs)
         np.testing.assert_array_equal(kwargs['y'], expected_ys)
         np.testing.assert_array_equal(kwargs['weights'], expected_ws)
@@ -723,3 +767,27 @@ class TestAnalysis:
             assert component_name in components_dataset
             assert 'Q' in components_dataset[component_name].dims
             assert 'energy' in components_dataset[component_name].dims
+        assert components_dataset.sizes['Q'] == analysis.Q.sizes['Q']
+
+    def test_create_components_dataset_single_Q(self, analysis_single_Q):
+        # WHEN
+
+        # Add another component so that there are two components
+        analysis_single_Q.sample_model.append_component(
+            Gaussian(display_name='Gaussian2', area=0.5)
+        )
+
+        # THEN
+        components_dataset = analysis_single_Q._create_components_dataset(add_background=True)
+
+        # THEN EXPECT
+        assert isinstance(components_dataset, sc.Dataset)
+        component_names = [comp.display_name for comp in analysis_single_Q.sample_model.components]
+        for component_name in component_names:
+            assert component_name in components_dataset
+            assert 'Q' in components_dataset[component_name].dims
+            assert 'energy' in components_dataset[component_name].dims
+
+        assert components_dataset.coords['Q'].dims == ('Q',)
+        assert components_dataset.sizes['Q'] == 1
+        assert components_dataset.coords['Q'].ndim == 1

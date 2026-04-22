@@ -12,6 +12,8 @@ from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.settings.convolution_settings import ConvolutionSettings
+from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 
 class TestAnalysisBase:
@@ -36,6 +38,29 @@ class TestAnalysisBase:
         assert isinstance(analysis_base.sample_model, SampleModel)
         assert isinstance(analysis_base.instrument_model, InstrumentModel)
         assert analysis_base._extra_parameters == []
+
+    def test_init_convolution_settings(self):
+        # WHEN
+        convolution_settings = ConvolutionSettings(upsample_factor=2, extension_factor=0.5)
+
+        # THEN
+        analysis = AnalysisBase(convolution_settings=convolution_settings)
+
+        # EXPECT
+        assert analysis.convolution_settings is convolution_settings
+
+    def test_init_detailed_balance_settings(self):
+        # WHEN
+        detailed_balance_settings = DetailedBalanceSettings(
+            use_detailed_balance=False,
+            normalize_detailed_balance=False,
+        )
+
+        # THEN
+        analysis = AnalysisBase(detailed_balance_settings=detailed_balance_settings)
+
+        # EXPECT
+        assert analysis.detailed_balance_settings is detailed_balance_settings
 
     def test_init_extra_parameter(self):
         extra_parameter = Parameter(name='param1', value=1.0)
@@ -74,6 +99,16 @@ class TestAnalysisBase:
                 'instrument_model must be an instance of InstrumentModel',
             ),
             (
+                {'convolution_settings': 'not convolution settings'},
+                TypeError,
+                'convolution_settings must be an instance of ConvolutionSettings',
+            ),
+            (
+                {'detailed_balance_settings': 'not detailed balance settings'},
+                TypeError,
+                'detailed_balance_settings must be an instance of DetailedBalanceSettings',
+            ),
+            (
                 {'extra_parameters': 123},
                 TypeError,
                 'extra_parameters must be a Parameter or a list of Parameters.',
@@ -88,6 +123,8 @@ class TestAnalysisBase:
             'invalid experiment',
             'invalid sample_model',
             'invalid instrument_model',
+            'invalid convolution_settings',
+            'invalid detailed_balance_settings',
             'invalid extra_parameters',
             'invalid extra_parameters list',
         ],
@@ -163,7 +200,7 @@ class TestAnalysisBase:
     def test_Q_setter_raises(self, analysis_base):
         with pytest.raises(
             AttributeError,
-            match='Q is a read-only property derived from the Experiment.',
+            match=r'Q is a read-only property derived from the Experiment.',
         ):
             analysis_base.Q = [1, 2, 3]
 
@@ -183,7 +220,7 @@ class TestAnalysisBase:
     def test_energy_setter_raises(self, analysis_base):
         with pytest.raises(
             AttributeError,
-            match='energy is a read-only property derived from the Experiment.',
+            match=r'energy is a read-only property derived from the Experiment.',
         ):
             analysis_base.energy = [10, 20, 30]
 
@@ -217,6 +254,63 @@ class TestAnalysisBase:
             match='temperature is a read-only property',
         ):
             analysis_base.temperature = 300
+
+    def test_convolution_settings_property(self, analysis_base):
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=2,
+            extension_factor=0.5,
+        )
+
+        # THEN
+        analysis_base.convolution_settings = convolution_settings
+
+        # EXPECT
+        assert analysis_base.convolution_settings is convolution_settings
+
+    def test_convolution_settings_setter_invalid_type(self, analysis_base):
+
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='convolution_settings must be an instance of ConvolutionSettings',
+        ):
+            analysis_base.convolution_settings = 'not convolution settings'
+
+    def test_convolution_settings_calls_on_convolution_settings_changed(self, analysis_base):
+        # WHEN
+        convolution_settings = ConvolutionSettings(
+            upsample_factor=2,
+            extension_factor=0.5,
+        )
+        with patch.object(
+            analysis_base, '_on_convolution_settings_changed'
+        ) as mock_on_convolution_settings_changed:
+            # THEN
+            analysis_base.convolution_settings = convolution_settings
+
+            # EXPECT
+            mock_on_convolution_settings_changed.assert_called_once()
+
+    def test_detailed_balance_settings_property(self, analysis_base):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN
+        analysis_base.detailed_balance_settings = new_settings
+
+        # EXPECT
+        assert analysis_base.detailed_balance_settings is new_settings
+
+    def test_detailed_balance_settings_setter_invalid(self, analysis_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='detailed_balance_settings must be a DetailedBalanceSettings',
+        ):
+            analysis_base.detailed_balance_settings = 'invalid_settings'
 
     @pytest.mark.parametrize(
         'extra_parameters',

@@ -22,15 +22,15 @@ class TestPolynomial:
 
         # EXPECT
         assert polynomial.display_name == 'Polynomial'
-        assert polynomial.coefficients[0].value == 0.0
+        assert polynomial.coefficients[0].value == pytest.approx(0.0)
         assert polynomial.unit == 'meV'
 
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         assert polynomial.display_name == 'TestPolynomial'
-        assert polynomial.coefficients[0].value == 1.0
-        assert polynomial.coefficients[1].value == -2.0
-        assert polynomial.coefficients[2].value == 3.0
+        assert polynomial.coefficients[0].value == pytest.approx(1.0)
+        assert polynomial.coefficients[1].value == pytest.approx(-2.0)
+        assert polynomial.coefficients[2].value == pytest.approx(3.0)
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
@@ -60,7 +60,7 @@ class TestPolynomial:
 
     def test_init_no_coefficients_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='At least one coefficient must be provided.'):
+        with pytest.raises(ValueError, match=r'At least one coefficient must be provided.'):
             Polynomial(display_name='TestPolynomial', coefficients=[])
 
     def test_negative_value_warns_in_evaluate(self):

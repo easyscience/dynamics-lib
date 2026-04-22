@@ -3,26 +3,25 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
+from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-from .model_component import ModelComponent
+if TYPE_CHECKING:
+    import scipp as sc
+    from easyscience.variable import Parameter
 
 
 class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
-    r"""Model of a Damped Harmonic Oscillator (DHO).
+    r"""
+    Model of a Damped Harmonic Oscillator (DHO).
 
-    The intensity is given by
-    $$
-        I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 +
-        (2 \gamma x)^2 \right)},
-    $$
-    where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
-    width.
+    The intensity is given by $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2
+    \gamma x)^2 \right)}, $$ where $A$ is the area, $x_0$ is the center, and $\gamma$ is the width.
     """
 
     def __init__(
@@ -34,19 +33,25 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         display_name: str | None = 'DampedHarmonicOscillator',
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the Damped Harmonic Oscillator.
+        """
+        Initialize the Damped Harmonic Oscillator.
 
-        Args:
-            area (Numeric | Parameter, default=1.0): Area under the curve.
-            center (Numeric | Parameter, default=1.0): Resonance frequency, approximately the
-                peak position.
-            width (Numeric | Parameter, default=1.0): Damping constant, approximately the
-                half width at half max (HWHM) of the peaks.
-            unit (str | sc.Unit, default='meV'): Unit of the parameters.
-            display_name (str | None, default='DampedHarmonicOscillator'):
-                Display name of the component.
-            unique_name (str | None, default=None): Unique name of the component.
-                If None, a unique_name is automatically generated.
+        Parameters
+        ----------
+        area : Numeric | Parameter, default=1.0
+            Area under the curve.
+        center : Numeric | Parameter, default=1.0
+            Resonance frequency, approximately the peak position.
+        width : Numeric | Parameter, default=1.0
+            Damping constant, approximately the half width at half max (HWHM) of the peaks. By
+            default, 1.0.
+        unit : str | sc.Unit, default='meV'
+            Unit of the parameters.
+        display_name : str | None, default='DampedHarmonicOscillator'
+            Display name of the component.
+        unique_name : str | None, default=None
+            Unique name of the component. If None, a unique_name is automatically generated. By
+            default, None.
         """
 
         super().__init__(
@@ -73,22 +78,30 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     @property
     def area(self) -> Parameter:
-        """Get the area parameter.
+        """
+        Get the area parameter.
 
-        Returns:
-            Parameter: The area parameter.
+        Returns
+        -------
+        Parameter
+            The area parameter.
         """
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
-        """Set the value of the area parameter.
+        """
+        Set the value of the area parameter.
 
-        Args:
-            value (Numeric): The new value for the area parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the area parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
+        Raises
+        ------
+        TypeError
+            If the value is not a number.
         """
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
@@ -96,23 +109,32 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     @property
     def center(self) -> Parameter:
-        """Get the center parameter.
+        """
+        Get the center parameter.
 
-        Returns:
-            Parameter: The center parameter.
+        Returns
+        -------
+        Parameter
+            The center parameter.
         """
         return self._center
 
     @center.setter
     def center(self, value: Numeric) -> None:
-        """Set the value of the center parameter.
+        """
+        Set the value of the center parameter.
 
-        Args:
-            value (Numeric): The new value for the center parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the center parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
-            ValueError: If the value is not positive.
+        Raises
+        ------
+        TypeError
+            If the value is not a number.
+        ValueError
+            If the value is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('center must be a number')
@@ -123,23 +145,32 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     @property
     def width(self) -> Parameter:
-        """Get the width parameter.
+        """
+        Get the width parameter.
 
-        Returns:
-            Parameter: The width parameter.
+        Returns
+        -------
+        Parameter
+            The width parameter.
         """
         return self._width
 
     @width.setter
     def width(self, value: Numeric) -> None:
-        """Set the value of the width parameter.
+        """
+        Set the value of the width parameter.
 
-        Args:
-            value (Numeric): The new value for the width parameter.
+        Parameters
+        ----------
+        value : Numeric
+            The new value for the width parameter.
 
-        Raises:
-            TypeError: If the value is not a number.
-            ValueError: If the value is not positive.
+        Raises
+        ------
+        TypeError
+            If the value is not a number.
+        ValueError
+            If the value is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
@@ -150,24 +181,22 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         self._width.value = value
 
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        r"""Evaluate the Damped Harmonic Oscillator at the given x
-        values.
+        r"""
+        Evaluate the Damped Harmonic Oscillator at the given x values.
 
-        If x is a scipp Variable, the unit of the DHO will be converted
-        to match x. The intensity is given by
-        $$
-            I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 +
-            (2 \gamma x)^2 \right)},
-        $$
-        where $A$ is the area, $x_0$ is the center, and $\gamma$ is the
-        width.
+        If x is a scipp Variable, the unit of the DHO will be converted to match x. The intensity
+        is given by $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2 \gamma x)^2
+        \right)}, $$ where $A$ is the area, $x_0$ is the center, and $\gamma$ is the width.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The x values at which to evaluate the DHO.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values at which to evaluate the DHO.
 
-        Returns:
-            np.ndarray: The intensity of the DHO at the given x values.
+        Returns
+        -------
+        np.ndarray
+            The intensity of the DHO at the given x values.
         """
 
         x = self._prepare_x_for_evaluate(x)
@@ -179,14 +208,16 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         return self.area.value * normalization / (denominator)
 
     def __repr__(self) -> str:
-        """Return a string representation of the Damped Harmonic
-        Oscillator.
+        """
+        Return a string representation of the Damped Harmonic Oscillator.
 
-        Returns:
-            str: A string representation of the Damped Harmonic
-                Oscillator.
+        Returns
+        -------
+        str
+            A string representation of the Damped Harmonic Oscillator.
         """
         return (
-            f'DampedHarmonicOscillator(display_name = {self.display_name}, unit = {self._unit},\n \
-        area = {self.area},\n center = {self.center},\n width = {self.width})'
+            f'DampedHarmonicOscillator(display_name = {self.display_name}, '
+            f'unit = {self._unit},\n '
+            f'area = {self.area},\n center = {self.center},\n width = {self.width})'
         )

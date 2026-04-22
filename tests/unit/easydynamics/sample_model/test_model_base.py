@@ -268,7 +268,7 @@ class TestModelBase:
 
     def test_convert_unit_incorrect_unit_raises(self, model_base):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Unit must be a string or sc.Unit'):
+        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
             model_base.convert_unit(123)
 
     def test_components_setter(self, model_base):

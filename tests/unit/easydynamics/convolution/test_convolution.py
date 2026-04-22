@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from contextlib import nullcontext
+from typing import ClassVar
 from unittest.mock import patch
 
 import numpy as np
@@ -74,10 +75,10 @@ class TestConvolution:
         assert isinstance(default_convolution._sample_components, ComponentCollection)
         assert isinstance(default_convolution._resolution_components, ComponentCollection)
         assert default_convolution.upsample_factor == 5
-        assert default_convolution.extension_factor == 0.2
+        assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
-        assert default_convolution.energy_unit == 'meV'
-        assert default_convolution.normalize_detailed_balance is True
+        assert default_convolution.unit == 'meV'
+        assert default_convolution.detailed_balance_settings.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
         assert isinstance(default_convolution._analytical_sample_components, ComponentCollection)
@@ -96,7 +97,7 @@ class TestConvolution:
             default_convolution._delta_sample_components.components[0]
             is default_convolution.sample_components.components[2]
         )
-        assert default_convolution._convolution_plan_is_valid is True
+        assert default_convolution.convolution_settings.convolution_plan_is_valid is True
         assert default_convolution._reactions_enabled is True
 
     def test_init_components(self, convolution_with_components):
@@ -108,10 +109,13 @@ class TestConvolution:
         assert isinstance(convolution_with_components._sample_components, ComponentCollection)
         assert isinstance(convolution_with_components._resolution_components, ComponentCollection)
         assert convolution_with_components.upsample_factor == 5
-        assert convolution_with_components.extension_factor == 0.2
+        assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
-        assert convolution_with_components.energy_unit == 'meV'
-        assert convolution_with_components.normalize_detailed_balance is True
+        assert convolution_with_components.unit == 'meV'
+        assert (
+            convolution_with_components.detailed_balance_settings.normalize_detailed_balance
+            is True
+        )
         assert isinstance(convolution_with_components._energy_grid, EnergyGrid)
 
         assert isinstance(
@@ -132,7 +136,7 @@ class TestConvolution:
             convolution_with_components._delta_sample_components, ComponentCollection
         )
         assert convolution_with_components._delta_sample_components.is_empty
-        assert convolution_with_components._convolution_plan_is_valid is True
+        assert convolution_with_components.convolution_settings.convolution_plan_is_valid is True
         assert convolution_with_components._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
@@ -141,7 +145,7 @@ class TestConvolution:
         """
         # WHEN
         conv = default_convolution
-        conv._convolution_plan_is_valid = False
+        conv.convolution_settings.convolution_plan_is_valid = False
 
         # THEN EXPECT
         with patch.object(conv, '_build_convolution_plan') as build_plan:
@@ -243,6 +247,7 @@ class TestConvolution:
             )
 
         conv.sample_components = sample_components  # This updates the internal sample models
+        conv._build_convolution_plan()  # Ensure the plan is built with the new components
 
         # THEN
         # Mock the methods to be tested. Use nullcontext if the
@@ -275,7 +280,7 @@ class TestConvolution:
             patch_numerical as mock_numerical_method,
             patch_delta as mock_delta_method,
         ):
-            conv._convolution_plan_is_valid = True
+            conv.convolution_settings._convolution_plan_is_valid = True
             conv.convolution()
 
             if analytical_component:
@@ -317,7 +322,7 @@ class TestConvolution:
         assert np.allclose(result, expected_values)
 
     # List of analytic functions
-    analytic_functions = [
+    analytic_functions: ClassVar[list[object]] = [
         Gaussian(display_name='G', area=1.0, center=0.0, width=0.1),
         Lorentzian(display_name='L', area=1.0, center=0.0, width=0.1),
         Voigt(
@@ -330,14 +335,19 @@ class TestConvolution:
     ]
 
     # List of non-analytic functions
-    non_analytic_functions = [
+    non_analytic_functions: ClassVar[list[object]] = [
         DampedHarmonicOscillator(display_name='DHO', area=1.0, center=1.0, width=0.1),
         Polynomial(display_name='P', coefficients=[1.0, 0.0, 0.0]),
     ]
 
-    all_functions_except_delta = analytic_functions + non_analytic_functions
-    all_functions = all_functions_except_delta + [
-        DeltaFunction(display_name='Delta', area=1.0, center=0.0)
+    all_functions_except_delta: ClassVar[list[object]] = [
+        *analytic_functions,
+        *non_analytic_functions,
+    ]
+
+    all_functions: ClassVar[list[object]] = [
+        *all_functions_except_delta,
+        DeltaFunction(display_name='Delta', area=1.0, center=0.0),
     ]
 
     @pytest.mark.parametrize('function1', all_functions, ids=lambda f: f.__class__.__name__)
@@ -474,8 +484,6 @@ class TestConvolution:
         conv.sample_components = sample_components  # This updates the internal sample models
         if temperature is not None:
             conv.temperature = temperature
-        # It is already called by sample_components setter, but we now
-        # call it explicitly
         conv._build_convolution_plan()
 
         # EXPECT
@@ -514,7 +522,7 @@ class TestConvolution:
                 expected_numerical_count += 1
             assert len(conv._numerical_sample_components.components) == expected_numerical_count
 
-        assert conv._convolution_plan_is_valid is True
+        assert conv.convolution_settings.convolution_plan_is_valid is True
 
     @pytest.mark.parametrize(
         'analytical_component',
@@ -557,9 +565,10 @@ class TestConvolution:
             )
 
         # THEN
-        conv.sample_components = sample_components  # This updates the internal sample models
-        # Should already have been called by sample_components setter,
+        conv.sample_components = sample_components
+        # Should already have been called by _build_convolution_plan,
         # but we now call it explicitly
+        conv._build_convolution_plan()  # Ensure the plan is built with the new components
         conv._set_convolvers()
 
         # EXPECT
@@ -572,3 +581,40 @@ class TestConvolution:
             assert isinstance(conv._numerical_convolver, NumericalConvolution)
         else:
             assert conv._numerical_convolver is None
+
+    def test_setattr_does_not_invalidate_plan_for_non_tracked_attribute(
+        self,
+        default_convolution,
+    ):
+        # WHEN
+        conv = default_convolution
+        conv.convolution_settings.convolution_plan_is_valid = True
+
+        # Capture current identity of internal state to ensure no rebuild
+        old_plan_id = id(conv._analytical_sample_components)
+        old_numerical_id = id(conv._numerical_sample_components)
+        old_delta_id = id(conv._delta_sample_components)
+
+        # THEN (NOT in _invalidate_plan_on_change)
+        conv.display_name = 'new_name'
+
+        # EXPECT
+        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert id(conv._analytical_sample_components) == old_plan_id
+        assert id(conv._numerical_sample_components) == old_numerical_id
+        assert id(conv._delta_sample_components) == old_delta_id
+        assert conv.display_name == 'new_name'
+
+    def test_setattr_invalidates_plan_for_tracked_attribute(
+        self,
+        default_convolution,
+    ):
+        # WHEN
+        conv = default_convolution
+        conv.convolution_settings.convolution_plan_is_valid = True
+
+        # THEN
+        conv.upsample_factor = 10
+
+        # EXPECT
+        assert conv.convolution_settings.convolution_plan_is_valid is False

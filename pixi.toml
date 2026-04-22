@@ -5,7 +5,7 @@
 # Platform-independent
 
 [activation.env]
-PYTHONIOENCODING = "utf-8"
+PYTHONIOENCODING = 'utf-8'
 
 # Platform-specific
 
@@ -29,13 +29,13 @@ PYTHONPATH = "${PIXI_PROJECT_ROOT}/src;%PYTHONPATH%"
 [workspace]
 
 # Supported platforms for the lock file (pixi.lock)
-platforms = ['win-64', 'linux-64', 'osx-64', 'osx-arm64']
+platforms = ['win-64', 'linux-64', 'osx-arm64']
 
 # Channels for fetching packages
 channels = ['conda-forge']
 
 #####################
-# System requirements
+# SYSTEM REQUIREMENTS
 #####################
 
 [system-requirements]
@@ -53,17 +53,20 @@ macos = '14.0'
 # Default feature configuration
 
 [dependencies]
-nodejs = '*' # Required for Prettier (non-Python formatting)
+nodejs = '*'      # Required for Prettier (non-Python formatting)
+jupyterlab = '*'  # Jupyter notebooks
+pixi-kernel = '*' # Pixi Jupyter kernel
 
 [pypi-dependencies] # == [feature.default.pypi-dependencies]
-easydynamics = { path = ".", editable = true, extras = ['dev'] }
+#pip = '*' # Native package installer
+easydynamics = { path = '.', editable = true, extras = ['dev'] }
 
 # Specific features: Set specific Python versions
 
 [feature.py-min.dependencies]
-python = '3.11.*'
-[feature.py-max.dependencies]
 python = '3.12.*'
+[feature.py-max.dependencies]
+python = '3.14.*'
 
 ##############
 # ENVIRONMENTS
@@ -73,12 +76,12 @@ python = '3.12.*'
 
 # The `default` feature is always included in all environments.
 # Additional features can be specified per environment.
-py-311-env = { features = ['default', 'py-min'] }
-py-312-env = { features = ['default', 'py-max'] }
+py-312-env = { features = ['py-min'] }
+py-314-env = { features = ['py-max'] }
 
 # The `default` environment is always created and includes the `default` feature.
 # It does not need to be specified explicitly unless non-default features are included.
-default = { features = ['default', 'py-max'] }
+default = { features = ['py-max'] }
 
 #######
 # TASKS
@@ -91,9 +94,9 @@ default = { features = ['default', 'py-max'] }
 ##################
 
 unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
+functional-tests = 'python -m pytest tests/functional/ --color=yes -v'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
-notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --color=yes -n auto -v'
-script-tests = 'python -m pytest tools/test_scripts.py --color=yes -n auto -v'
+notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v'
 
 test = { depends-on = ['unit-tests'] }
 
@@ -103,12 +106,11 @@ test = { depends-on = ['unit-tests'] }
 
 pyproject-check = 'python -m validate_pyproject pyproject.toml'
 docstring-lint-check = 'pydoclint --quiet src/'
-docstring-format-check = 'docformatter --check src/'
 notebook-lint-check = 'nbqa ruff docs/docs/tutorials/'
 py-lint-check = 'ruff check src/ tests/ docs/docs/tutorials/'
-py-format-check = "ruff format --check src/ tests/ docs/docs/tutorials/"
-nonpy-format-check = "npx prettier --list-different --config=prettierrc.toml --ignore-unknown ."
-nonpy-format-check-modified = "python tools/nonpy_prettier_modified.py"
+py-format-check = 'ruff format --check src/ tests/ docs/docs/tutorials/'
+nonpy-format-check = 'npx prettier --list-different --config=prettierrc.toml --ignore-unknown .'
+nonpy-format-check-modified = 'python tools/nonpy_prettier_modified.py'
 
 check = 'pre-commit run --hook-stage manual --all-files'
 
@@ -116,22 +118,23 @@ check = 'pre-commit run --hook-stage manual --all-files'
 # 🛠️ Fixes
 ##########
 
-docs-format-fix = 'docformatter --in-place src/ docs/docs/tutorials/'
+docstring-transform = 'pixi run docstripy src/ -s=numpy -w'
+docstring-format-fix = 'format-docstring src/'
 notebook-lint-fix = 'nbqa ruff --fix docs/docs/tutorials/'
 py-lint-fix = 'ruff check --fix src/ tests/ docs/docs/tutorials/'
 py-lint-fix-unsafe = 'ruff check --fix --unsafe-fixes src/ tests/ docs/docs/tutorials/'
-py-format-fix = "ruff format src/ tests/ docs/docs/tutorials/"
+py-format-fix = 'ruff format src/ tests/ docs/docs/tutorials/'
 nonpy-format-fix = 'npx prettier --write --list-different --config=prettierrc.toml --ignore-unknown .'
-nonpy-format-fix-modified = "python tools/nonpy_prettier_modified.py --write"
-success-message-fix = 'echo "✅ All auto-formatting steps completed successfully!"'
+nonpy-format-fix-modified = 'python tools/nonpy_prettier_modified.py --write'
+success-message = 'echo "✅ All auto-formatting steps completed successfully!"'
 
 fix = { depends-on = [
+  'docstring-format-fix',
   'py-format-fix',
-  'docs-format-fix',
   'py-lint-fix',
   'nonpy-format-fix',
   'notebook-lint-fix',
-  'success-message-fix',
+  'success-message',
 ] }
 
 ####################
@@ -150,6 +153,7 @@ raw-metrics-json = 'radon raw -s -j src/'
 #############
 
 unit-tests-coverage = 'pixi run unit-tests --cov=src/easydynamics --cov-report=term-missing'
+functional-tests-coverage = 'pixi run functional-tests --cov=src/easydynamics --cov-report=term-missing'
 integration-tests-coverage = 'pixi run integration-tests --cov=src/easydynamics --cov-report=term-missing'
 docstring-coverage = 'interrogate -c pyproject.toml src/easydynamics'
 
@@ -165,8 +169,8 @@ cov = { depends-on = [
 
 notebook-convert = 'jupytext docs/docs/tutorials/*.py --from py:percent --to ipynb'
 notebook-strip = 'nbstripout docs/docs/tutorials/*.ipynb'
-notebook-tweak = 'python tools/tweak_notebooks.py tutorials/'
-notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=600 --overwrite --color=yes -n auto -v'
+notebook-tweak = 'python tools/tweak_notebooks.py docs/docs/tutorials/'
+notebook-exec = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --overwrite --color=yes -n auto -v'
 
 notebook-prepare = { depends-on = [
   #'notebook-convert',
@@ -179,11 +183,11 @@ notebook-prepare = { depends-on = [
 ########################
 
 docs-vars = "JUPYTER_PLATFORM_DIRS=1 PYTHONWARNINGS='ignore::RuntimeWarning'"
-docs-pre = "pixi run docs-vars python -m mkdocs"
-docs-serve = "pixi run docs-pre serve -f docs/mkdocs.yml"
-docs-serve-dirty = "pixi run docs-serve --dirty"
-docs-build = "pixi run docs-pre build -f docs/mkdocs.yml"
-docs-build-local = "pixi run docs-build --no-directory-urls"
+docs-pre = 'pixi run docs-vars python -m mkdocs'
+docs-serve = 'pixi run docs-pre serve -f docs/mkdocs.yml'
+docs-serve-dirty = 'pixi run docs-serve --dirty'
+docs-build = 'pixi run docs-pre build -f docs/mkdocs.yml'
+docs-build-local = 'pixi run docs-build --no-directory-urls'
 
 docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type redirect'
 docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-pages'
@@ -194,9 +198,9 @@ docs-update-assets = 'python tools/update_docs_assets.py'
 # 📦 Template Management Tasks
 ##############################
 
-copier-copy = "copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-recopy = "copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
-copier-update = "copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib"
+copier-copy = 'copier copy gh:easyscience/templates . --data-file ../dynamics/.copier-answers.yml --data template_type=lib'
+copier-recopy = 'copier recopy --data-file ../dynamics/.copier-answers.yml --data template_type=lib'
+copier-update = 'copier update --data-file ../dynamics/.copier-answers.yml --data template_type=lib'
 
 #####################
 # 🪝 Pre-commit Hooks
@@ -243,9 +247,9 @@ github-labels = 'python tools/update_github_labels.py'
 # ⚖️ SPDX License Headers
 #########################
 
-license-remove = 'python tools/remove_license_headers.py src/ tests/'
-license-add = 'python tools/add_license_headers.py src/ tests/'
-license-check = 'python tools/check_license_headers.py src/ tests/'
+license-remove = 'python tools/license_headers.py remove src/ tests/ --exclude-from-pyproject-toml tool.ruff.exclude'
+license-add = 'python tools/license_headers.py add src/ tests/ --exclude-from-pyproject-toml tool.ruff.exclude'
+license-check = 'python tools/license_headers.py check src/ tests/ --exclude-from-pyproject-toml tool.ruff.exclude'
 
 ####################################
 # 🚀 Other Development & Build Tasks

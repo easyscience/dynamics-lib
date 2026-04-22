@@ -22,18 +22,18 @@ class TestGaussian:
 
         # EXPECT
         assert gaussian.display_name == 'Gaussian'
-        assert gaussian.area.value == 1.0
-        assert gaussian.center.value == 0.0
-        assert gaussian.width.value == 1.0
+        assert gaussian.area.value == pytest.approx(1.0)
+        assert gaussian.center.value == pytest.approx(0.0)
+        assert gaussian.width.value == pytest.approx(1.0)
         assert gaussian.unit == 'meV'
         assert gaussian.center.fixed is True
 
     def test_initialization(self, gaussian: Gaussian):
         # WHEN THEN EXPECT
         assert gaussian.display_name == 'TestGaussian'
-        assert gaussian.area.value == 2.0
-        assert gaussian.center.value == 0.5
-        assert gaussian.width.value == 0.6
+        assert gaussian.area.value == pytest.approx(2.0)
+        assert gaussian.center.value == pytest.approx(0.5)
+        assert gaussian.width.value == pytest.approx(0.6)
         assert gaussian.unit == 'meV'
 
     def test_init_with_parameters(self):
@@ -85,7 +85,9 @@ class TestGaussian:
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='The width of a Gaussian must be greater than zero.'):
+        with pytest.raises(
+            ValueError, match=r'The width of a Gaussian must be greater than zero.'
+        ):
             Gaussian(
                 display_name='TestGaussian',
                 area=2.0,
@@ -150,7 +152,7 @@ class TestGaussian:
         gaussian.center = None
 
         # EXPECT
-        assert gaussian.center.value == 0.0
+        assert gaussian.center.value == pytest.approx(0.0)
         assert gaussian.center.fixed is True
 
     def test_get_all_parameters(self, gaussian: Gaussian):
@@ -190,9 +192,9 @@ class TestGaussian:
 
         # EXPECT
         assert gaussian.unit == 'microeV'
-        assert gaussian.area.value == 2 * 1e3
-        assert gaussian.center.value == 0.5 * 1e3
-        assert gaussian.width.value == 0.6 * 1e3
+        assert gaussian.area.value == pytest.approx(2 * 1e3)
+        assert gaussian.center.value == pytest.approx(0.5 * 1e3)
+        assert gaussian.width.value == pytest.approx(0.6 * 1e3)
 
     def test_copy(self, gaussian: Gaussian):
         # WHEN THEN

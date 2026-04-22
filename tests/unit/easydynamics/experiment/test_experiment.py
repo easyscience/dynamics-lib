@@ -305,7 +305,7 @@ class TestExperiment:
 
         # EXPECT
         assert len(masked_energy) == 1
-        assert masked_energy.values == 30.0
+        assert masked_energy.values == pytest.approx(30.0)
 
     def test_get_masked_energy_no_data_returns_None(self):
         "Test getting masked energy returns zero when no data is present"
@@ -332,7 +332,15 @@ class TestExperiment:
     # test plotting
     ##############
 
-    def test_plot_data_success(self, experiment):
+    @pytest.mark.parametrize(
+        'transpose_axes, expected_dims',
+        [
+            (False, ['Q', 'energy']),
+            (True, ['energy', 'Q']),
+        ],
+        ids=['no_transpose', 'transpose'],
+    )
+    def test_plot_data_success(self, experiment, transpose_axes, expected_dims):
         "Test plotting data successfully when in notebook environment"
         # WHEN
         with (
@@ -343,12 +351,12 @@ class TestExperiment:
             mock_plot.return_value = mock_fig
 
             # THEN
-            result = experiment.plot_data()
+            result = experiment.plot_data(transpose_axes=transpose_axes)
 
             # EXPECT
             mock_plot.assert_called_once()
             args, kwargs = mock_plot.call_args
-            assert sc.identical(args[0], experiment.data.transpose())
+            assert sc.identical(args[0], experiment.data.transpose(dims=expected_dims))
             assert kwargs['title'] == f'{experiment.display_name}'
             assert result == mock_fig
 
@@ -394,6 +402,25 @@ class TestExperiment:
             ),
         ):
             experiment.plot_data()
+
+    def test_plot_data_invalid_slicer_type_raises(self, experiment):
+        "Test plotting data raises TypeError when slicer argument is invalid"
+        # WHEN THEN EXPECT
+
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            pytest.raises(TypeError, match='slicer must be True or False'),
+        ):
+            experiment.plot_data(slicer='not_a_boolean')
+
+    def test_plot_data_invalid_transpose_type_raises(self, experiment):
+        "Test plotting data raises TypeError when transpose argument is invalid"
+        # WHEN THEN EXPECT
+        with (
+            patch(f'{Experiment.__module__}._in_notebook', return_value=True),
+            pytest.raises(TypeError, match='transpose_axes must be True or False'),
+        ):
+            experiment.plot_data(transpose_axes='not_a_boolean')
 
     ##############
     # test private methods
@@ -499,7 +526,9 @@ class TestExperiment:
         assert np.isfinite(x).all()
         assert np.isfinite(y).all()
         assert np.isfinite(weights).all()
-        assert weights[0] == 1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        assert weights[0] == pytest.approx(
+            1.0 / (experiment_with_data.data.variances[Q_index][2] ** 0.5)
+        )
         assert len(x) == len(y) == len(weights) == 1  # 2 values should be removed
         # Mask should indicate which values were removed
         assert np.array_equal(mask, [False, False, True])

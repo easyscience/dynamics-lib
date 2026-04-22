@@ -17,10 +17,11 @@ classifiers = [
   'Operating System :: OS Independent',
   'Programming Language :: Python :: 3 :: Only',
   'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: 3.11',
   'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
+  'Programming Language :: Python :: 3.14',
 ]
-requires-python = '>=3.11'
+requires-python = '>=3.12'
 dependencies = [
   'easyscience', # The base library of the EasyScience framework
   'pooch',       # Data downloader
@@ -47,7 +48,6 @@ dev = [
   'pytest',                          # Testing
   'pytest-cov',                      # Test coverage
   'pytest-xdist',                    # Enable parallel testing
-  'pytest-forked',                   # Isolate tests in subprocesses
   'ruff',                            # Linting and formatting code
   'radon',                           # Code complexity and maintainability
   'validate-pyproject[all]',         # Validate pyproject.toml
@@ -55,7 +55,8 @@ dev = [
   'jupytext',                        # Jupyter notebook text format support
   'jupyterquiz',                     # Quizzes in Jupyter notebooks
   'pydoclint',                       # Docstring linter
-  'docformatter',                    # Docstring formatter
+  'format-docstring',                # Docstring formatter
+  'docstripy',                       # Convert docstrings to other formats
   'interrogate',                     # Docstring coverage checker
   'copier',                          # Template management
   'mike',                            # MkDocs: Versioned documentation support
@@ -177,14 +178,14 @@ testpaths = ['tests']
 [tool.ruff]
 exclude = ['tmp']
 indent-width = 4
-line-length = 99
+line-length = 99  # See also `max-line-length` in [tool.ruff.lint.pycodestyle]
 preview = true    # Enable new rules that are not yet stable, like DOC
 
 # Formatting options for Ruff
 
 [tool.ruff.format]
 docstring-code-format = true    # Whether to format code snippets in docstrings
-docstring-code-line-length = 72 # Line length for code snippets in docstrings
+docstring-code-line-length = 99 # Line length for code snippets in docstrings
 indent-style = 'space'          # PEP 8 recommends using spaces over tabs
 line-ending = 'lf'              # Line endings will be converted to \n
 quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 257)
@@ -195,16 +196,17 @@ quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 25
 select = [
   # Various rules
   #'C90',  # https://docs.astral.sh/ruff/rules/#mccabe-c90
+  #'D',   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
   'F', # https://docs.astral.sh/ruff/rules/#pyflakes-f
   #'FLY',  # https://docs.astral.sh/ruff/rules/#flynt-fly
   #'FURB', # https://docs.astral.sh/ruff/rules/#refurb-furb
   'I', # https://docs.astral.sh/ruff/rules/#isort-i
   #'N',    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
-  #'NPY',  # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+  'NPY', # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
   #'PGH',  # https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
-  #'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
-  #'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
-  #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try
+  'PERF', # https://docs.astral.sh/ruff/rules/#perflint-perf
+  'RUF',  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  #'TRY',  # https://docs.astral.sh/ruff/rules/#tryceratops-try # overly restrictive
   'UP', # https://docs.astral.sh/ruff/rules/#pyupgrade-up
   # pycodestyle (E, W) rules
   'E', # https://docs.astral.sh/ruff/rules/#error-e
@@ -213,40 +215,40 @@ select = [
   #'PLC', # https://docs.astral.sh/ruff/rules/#convention-plc
   #'PLE', # https://docs.astral.sh/ruff/rules/#error-ple
   #'PLR', # https://docs.astral.sh/ruff/rules/#refactor-plr
-  #'PLW', # https://docs.astral.sh/ruff/rules/#warning-plw
+  #'PLW', # https://docs.astral.sh/ruff/rules/#warning-plw # Good to enable
   # flake8 rules
-  #'A',     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
-  'ANN', # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-  'ARG', # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
-  #'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
-  'B', # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-  #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
-  'C4', # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
-  #'COM',   # https://docs.astral.sh/ruff/rules/#flake8-commas-com
-  #'DTZ',   # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
-  #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
-  #'FA',    # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
-  #'FBT',   # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
-  #'FIX',   # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
-  #'G',     # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
-  #'ICN',   # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
-  #'INP',   # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
-  #'ISC',   # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
-  #'LOG',   # https://docs.astral.sh/ruff/rules/#flake8-logging-log
-  #'PIE',   # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
-  #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
-  'PTH', # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
-  #'PYI',   # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
-  'RET', # https://docs.astral.sh/ruff/rules/#flake8-return-ret
-  #'RSE',   # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
-  'S',   # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
-  'SIM', # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
-  #'SLF',   # https://docs.astral.sh/ruff/rules/#flake8-self-slf
-  #'SLOT',  # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
-  #'T20',   # https://docs.astral.sh/ruff/rules/#flake8-print-t20
-  #'TC',    # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
-  #'TD',    # https://docs.astral.sh/ruff/rules/#flake8-todos-td
-  #'TID',   # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
+  'A',     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  'ANN',   # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'ARG',   # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+  'ASYNC', # https://docs.astral.sh/ruff/rules/#flake8-async-async
+  'B',     # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  #'BLE',   # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble # enable when base classes have been merged in
+  'C4',  # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  'COM', # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+  'DTZ', # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+  #'EM',    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em # Unsure if I want it - requires all error messages to be rewritten
+  'FA', # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+  #'FBT',   # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt # should eventually be enabled, but may break serialization
+  'FIX', # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
+  'G',   # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
+  'ICN', # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
+  'INP', # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
+  'ISC', # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
+  'LOG', # https://docs.astral.sh/ruff/rules/#flake8-logging-log
+  'PIE', # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+  #'PT',    # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt # Should eventually be enabled, but quite a few errors to fix
+  'PTH',  # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+  'PYI',  # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+  'RET',  # https://docs.astral.sh/ruff/rules/#flake8-return-ret
+  'RSE',  # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
+  'S',    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+  'SIM',  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  'SLF',  # https://docs.astral.sh/ruff/rules/#flake8-self-slf
+  'SLOT', # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
+  'T20',  # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+  'TC',   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tc
+  'TD',   # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+  'TID',  # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
 ]
 
 # Exceptions to the linting rules
@@ -254,18 +256,23 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following covered by [tool.pydoclint] section below
-  'D',   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
-  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
+  'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
 ]
 
 # Ignore specific rules in certain files or directories
 [tool.ruff.lint.per-file-ignores]
+'*/__init__.py' = [
+  'F401', # re-exports are intentional in __init__.py
+]
 'tests/**' = [
   'ANN',    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'D',      # https://docs.astral.sh/ruff/rules/#pydocstyle-d
   'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
   'S101',   # https://docs.astral.sh/ruff/rules/assert/
+  'SLF',    # https://docs.astral.sh/ruff/rules/#flake8-self-slf # may want to eventually enable it, but accessing private methods is quite useful in tests
 ]
 'docs/**' = [
   'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
@@ -290,17 +297,18 @@ max-complexity = 10
 # PEP 8 line length guidance:
 # https://peps.python.org/pep-0008/#maximum-line-length
 # Use 99 characters as the project-wide maximum for regular code lines.
-max-line-length = 99
-# allow longer lines so that parameter declarations such as
-# `name (Type | Type | None):` remain on a single line. Splitting these
-# lines can prevent tools such as MkDocs and IDEs from correctly
-# parsing and rendering parameter documentation.
-# The descriptive text itself is wrapped more strictly by
-# `docformatter` (see the configuration in [tool.docformatter] below)
-# whenever it is treated as normal paragraph text.
-# The line length for code snippets in docstrings is also more strict,
-# as defined in the [tool.ruff.format] section above.
+# Use 99 characters for docstrings.
+max-line-length = 99 # See also `line-length` in [tool.ruff]
 max-doc-length = 99
+
+[tool.ruff.lint.pydocstyle]
+convention = 'numpy'
+
+[tool.ruff.lint.pylint]
+# Ruff counts `self`/`cls` in max-args; traditional pylint does not.
+# Setting 6 here matches pylint's default of 5 (excluding self).
+max-args = 6
+max-positional-args = 6
 
 #############################
 # Configuration for pydoclint
@@ -317,20 +325,22 @@ max-doc-length = 99
 # the parameter declarations in the code (in function's signature).
 
 [tool.pydoclint]
-style = "google"
+#exclude = '\.' # Temporarily disable pydoclint until we are ready
+style = 'numpy'
 check-style-mismatch = true
 check-arg-defaults = true
 allow-init-docstring = true
 
-################################
-# Configuration for docformatter
-################################
+####################################
+# Configuration for format-docstring
+####################################
 
-# 'docformatter' -- Code formatter for docstrings
-# https://docformatter.readthedocs.io/en/latest/
+# 'format-docstring' -- Code formatter for docstrings
+# https://github.com/jsh9/format-docstring
 
-[tool.docformatter]
-recursive = true
-wrap-summaries = 72
-wrap-descriptions = 72
-close-quotes-on-newline = true
+[tool.format_docstring]
+#exclude = '\.' # Temporarily disable format-docstring until we are ready
+docstring_style = 'numpy'
+line_length = 99
+fix_rst_backticks = true
+verbose = 'default'

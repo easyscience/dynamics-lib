@@ -8,13 +8,13 @@ from abc import abstractmethod
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
 from scipp import UnitError
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
 
 
-class ModelComponent(ModelBase):
+class ModelComponent(EasyDynamicsModelBase):
     """Abstract base class for all model components."""
 
     def __init__(
@@ -23,44 +23,55 @@ class ModelComponent(ModelBase):
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
-        """Initialize the ModelComponent.
-
-        Args:
-            unit (str | sc.Unit, default="meV"): The unit of the model component.
-            display_name (str | None, default=None): A human-readable name for the
-                component.
-            unique_name (str | None, default=None): A unique identifier for the
-                component.
         """
-        self.validate_unit(unit)
-        super().__init__(display_name=display_name, unique_name=unique_name)
+        Initialize the ModelComponent.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit, default='meV'
+            The unit of the model component.
+        display_name : str | None, default=None
+            A human-readable name for the component.
+        unique_name : str | None, default=None
+            A unique identifier for the component.
+        """
+        super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
         self._unit = unit
 
     @property
     def unit(self) -> str:
-        """Get the unit.
+        """
+        Get the unit.
 
-        Returns:
-            str: The unit of the model component.
+        Returns
+        -------
+        str
+            The unit of the model component.
         """
         return str(self._unit)
 
     @unit.setter
     def unit(self, _unit_str: str) -> None:
-        """Unit is read-only. Use convert_unit to change the unit
-        between allowed types or create a new ModelComponent with the
-        desired unit.
+        """
+        Unit is read-only.
 
-        Args:
-            _unit_str (str): The new unit to set.
+        Use convert_unit to change the unit between allowed types or create a new ModelComponent
+        with the desired unit.
 
-        Raises:
-            AttributeError: Always raised since unit is read-only.
+        Parameters
+        ----------
+        _unit_str : str
+            The new unit to set.
+
+        Raises
+        ------
+        AttributeError
+            Always raised since unit is read-only.
         """
         raise AttributeError(
             f'Unit is read-only. Use convert_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'
-        )  # noqa: E501
+        )
 
     def fix_all_parameters(self) -> None:
         """Fix all parameters in the model component."""
@@ -77,21 +88,26 @@ class ModelComponent(ModelBase):
     def _prepare_x_for_evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
     ) -> np.ndarray:
-        """Prepare the input x for evaluation by handling units and
-        converting to a numpy array.
+        """
+        Prepare the input x for evaluation by handling units and converting to a numpy array.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The input data to prepare.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The input data to prepare.
 
-        Returns:
-            np.ndarray: The prepared input data as a numpy array.
+        Raises
+        ------
+        ValueError
+            If x contains NaN or infinite values, or if a sc.DataArray has more than one
+            coordinate.
+        UnitError
+            If x has incompatible units that cannot be converted to the component's unit.
 
-        Raises:
-            ValueError: If x contains NaN or infinite values, or if a
-                sc.DataArray has more than one coordinate.
-            UnitError: If x has incompatible units that cannot be
-                converted to the component's unit.
+        Returns
+        -------
+        np.ndarray
+            The prepared input data as a numpy array.
         """
 
         # Handle units
@@ -106,7 +122,7 @@ class ModelComponent(ModelBase):
                     f'Found {ncoords} coordinates: {coord_names}.'
                 )
             # get the coordinate, it's a sc.Variable
-            coord_name, coord_obj = next(iter(coords.items()))
+            _, coord_obj = next(iter(coords.items()))
             x = coord_obj
         if isinstance(x, sc.Variable):
             # Need to check if the units are consistent,
@@ -146,31 +162,21 @@ class ModelComponent(ModelBase):
 
         return np.sort(x_in)
 
-    @staticmethod
-    def validate_unit(unit: str | sc.Unit | None) -> None:
-        """Validate that the unit is either a string or a scipp Unit.
-
-        Args:
-            unit (str | sc.Unit | None): The unit to validate.
-
-        Raises:
-            TypeError: If unit is not a string or scipp Unit.
-        """
-        if unit is not None and not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
-            )
-
     def convert_unit(self, unit: str | sc.Unit) -> None:
-        """Convert the unit of the Parameters in the component.
+        """
+        Convert the unit of the Parameters in the component.
 
-        Args:
-            unit (str | sc.Unit): The new unit to convert to.
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new unit to convert to.
 
-        Raises:
-            TypeError: If the provided unit is not a str or sc.Unit
-            Exception: If the provided unit is invalid or incompatible
-                with the component's parameters.
+        Raises
+        ------
+        TypeError
+            If the provided unit is not a str or sc.Unit.
+        Exception
+            If the provided unit is invalid or incompatible with the component's parameters.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
@@ -193,23 +199,30 @@ class ModelComponent(ModelBase):
 
     @abstractmethod
     def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        """Abstract method to evaluate the model component at input x.
+        """
+        Abstract method to evaluate the model component at input x.
+
         Must be implemented by subclasses.
 
-        Args:
-            x (Numeric | list | np.ndarray | sc.Variable | sc.DataArray):
-                The x values at which to evaluate the component.
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values at which to evaluate the component.
 
-        Returns:
-            np.ndarray: Evaluated function values.
+        Returns
+        -------
+        np.ndarray
+            Evaluated function values.
         """
-        pass
 
     def __repr__(self) -> str:
-        """Return a string representation of the ModelComponent.
+        """
+        Return a string representation of the ModelComponent.
 
-        Returns:
-            str: A string representation of the ModelComponent.
+        Returns
+        -------
+        str
+            A string representation of the ModelComponent.
         """
 
         return f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})'

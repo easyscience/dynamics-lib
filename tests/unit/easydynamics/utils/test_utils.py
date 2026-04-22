@@ -92,13 +92,13 @@ class TestValidateUnit:
         if unit_input is None:
             assert unit is None
         else:
-            assert isinstance(unit, sc.Unit)
+            assert isinstance(unit, str)
 
     def test_validate_unit_string_conversion(self):
-        unit = _validate_unit('meV')
+        unit = _validate_unit(sc.Unit('meV'))
 
-        assert isinstance(unit, sc.Unit)
-        assert unit == sc.Unit('meV')
+        assert isinstance(unit, str)
+        assert unit == 'meV'
 
     @pytest.mark.parametrize(
         'unit_input',

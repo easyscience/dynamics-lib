@@ -23,16 +23,16 @@ class TestDeltaFunction:
 
         # EXPECT
         assert delta_function.display_name == 'DeltaFunction'
-        assert delta_function.area.value == 1.0
-        assert delta_function.center.value == 0.0
+        assert delta_function.area.value == pytest.approx(1.0)
+        assert delta_function.center.value == pytest.approx(0.0)
         assert delta_function.unit == 'meV'
         assert delta_function.center.fixed is True
 
     def test_initialization(self, delta_function: DeltaFunction):
         # WHEN THEN EXPECT
         assert delta_function.display_name == 'TestDeltaFunction'
-        assert delta_function.area.value == 2.0
-        assert delta_function.center.value == 0.5
+        assert delta_function.area.value == pytest.approx(2.0)
+        assert delta_function.center.value == pytest.approx(0.5)
         assert delta_function.unit == 'meV'
 
     @pytest.mark.parametrize(
@@ -167,7 +167,7 @@ class TestDeltaFunction:
         delta_function.center = None
 
         # EXPECT
-        assert delta_function.center.value == 0.0
+        assert delta_function.center.value == pytest.approx(0.0)
         assert delta_function.center.fixed is True
 
     def test_get_all_parameters(self, delta_function: DeltaFunction):
@@ -190,8 +190,8 @@ class TestDeltaFunction:
 
         # EXPECT
         assert delta_function.unit == 'microeV'
-        assert delta_function.area.value == 2 * 1e3
-        assert delta_function.center.value == 0.5 * 1e3
+        assert delta_function.area.value == pytest.approx(2 * 1e3)
+        assert delta_function.center.value == pytest.approx(0.5 * 1e3)
 
     def test_copy(self, delta_function: DeltaFunction):
         # WHEN THEN
