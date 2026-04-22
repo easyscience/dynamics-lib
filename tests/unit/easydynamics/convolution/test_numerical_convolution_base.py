@@ -376,6 +376,26 @@ class TestNumericalConvolutionBase:
                 'invalid'
             )
 
+    def test_detailed_balance_settings_property(self, default_numerical_convolution_base):
+        # WHEN
+        new_settings = DetailedBalanceSettings(
+            use_detailed_balance=False, normalize_detailed_balance=False
+        )
+
+        # THEN
+        default_numerical_convolution_base.detailed_balance_settings = new_settings
+
+        # EXPECT
+        assert default_numerical_convolution_base.detailed_balance_settings is new_settings
+
+    def test_detailed_balance_settings_setter_invalid(self, default_numerical_convolution_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match='detailed_balance_settings must be a DetailedBalanceSettings',
+        ):
+            default_numerical_convolution_base.detailed_balance_settings = 'invalid_settings'
+
     def test_convolution_settings_setter_valid(
         self,
         default_numerical_convolution_base,
