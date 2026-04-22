@@ -4,6 +4,10 @@
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
+# from easydynamics.settings.parameter_analysis_fit_settings import (
+#     ParameterAnalysisFitSettings,
+# )
+
 __all__ = [
     'ConvolutionSettings',
     'DetailedBalanceSettings',
