@@ -49617,7 +49617,9 @@ width) with appropriate bounds and type checking.</p>
 <span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CreateParametersMixin</span><span class="p">:</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CreateParametersMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides parameter creation and validation methods for model components.</span>
 
@@ -49677,7 +49679,8 @@ width) with appropriate bounds and type checking.</p>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">area</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_area</span>
+            <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">minimum_area</span><span class="p">:</span>
+                <span class="n">area</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_area</span>
 
         <span class="k">return</span> <span class="n">area</span>
 
@@ -49733,7 +49736,7 @@ width) with appropriate bounds and type checking.</p>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;center must be None, a finite number or a Parameter&#39;</span><span class="p">)</span>
 
             <span class="n">center</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; center&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">center</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">enforce_minimum_center</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">enforce_minimum_center</span> <span class="ow">and</span> <span class="n">center</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">DHO_MINIMUM_CENTER</span><span class="p">:</span>
             <span class="n">center</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">DHO_MINIMUM_CENTER</span>
         <span class="k">return</span> <span class="n">center</span>
 
@@ -49795,7 +49798,8 @@ width) with appropriate bounds and type checking.</p>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;The </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> of a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> must be greater than zero.&#39;</span>
                 <span class="p">)</span>
-            <span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_width</span>
+            <span class="k">if</span> <span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">minimum_width</span><span class="p">:</span>
+                <span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_width</span>
 
         <span class="k">return</span> <span class="n">width</span>
 </code></pre></div></td></tr></table></div>
