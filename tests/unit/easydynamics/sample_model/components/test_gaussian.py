@@ -197,7 +197,13 @@ class TestGaussian:
         assert gaussian.width.value == pytest.approx(0.6 * 1e3)
 
     def test_copy(self, gaussian: Gaussian):
-        # WHEN THEN
+        # WHEN
+        gaussian.area.min = 0.5
+        gaussian.width.min = 0.1
+        gaussian.area.fixed = True
+        gaussian.area.max = 5.0
+
+        # THEN
         gaussian_copy = copy(gaussian)
         # EXPECT
         assert gaussian_copy is not gaussian
@@ -205,12 +211,18 @@ class TestGaussian:
 
         assert gaussian_copy.area.value == gaussian.area.value
         assert gaussian_copy.area.fixed == gaussian.area.fixed
+        assert gaussian_copy.area.min == gaussian.area.min
+        assert gaussian_copy.area.max == gaussian.area.max
 
         assert gaussian_copy.center.value == gaussian.center.value
         assert gaussian_copy.center.fixed == gaussian.center.fixed
+        assert gaussian_copy.center.min == gaussian.center.min
+        assert gaussian_copy.center.max == gaussian.center.max
 
         assert gaussian_copy.width.value == gaussian.width.value
         assert gaussian_copy.width.fixed == gaussian.width.fixed
+        assert gaussian_copy.width.min == gaussian.width.min
+        assert gaussian_copy.width.max == gaussian.width.max
 
         assert gaussian_copy.unit == gaussian.unit
 
