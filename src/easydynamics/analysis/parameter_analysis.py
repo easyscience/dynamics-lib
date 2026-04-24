@@ -4,6 +4,7 @@
 from typing import Any
 
 import numpy as np
+import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
@@ -12,8 +13,9 @@ from easydynamics.analysis.analysis import Analysis
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
-from easydynamics.settings.parameter_analysis_fit_settings import ParameterAnalysisFitSettings
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
+    DiffusionModelBase,
+)
 
 
 class ParameterAnalysis(EasyDynamicsBase):
@@ -24,16 +26,20 @@ class ParameterAnalysis(EasyDynamicsBase):
     def __init__(
         self,
         parameters: sc.Dataset | Analysis | None = None,
-        parameter_names: str | list[str] | None = None,
         fit_functions: (
-            ModelComponent
-            | ComponentCollection
-            | DiffusionModelBase
-            | list[ModelComponent | ComponentCollection | DiffusionModelBase]
+            dict[
+                str,
+                ModelComponent
+                | ComponentCollection
+                | DiffusionModelBase
+                | list[ModelComponent | ComponentCollection | DiffusionModelBase]
+                | None,
+            ]
             | None
         ) = None,
-        fit_settings: ParameterAnalysisFitSettings | None = None,
-        display_name: str | None = 'MyAnalysis',
+        # fit_settings: ParameterAnalysisFitSettings | None = None,
+        fit_settings: dict[str, str | list[str]] | None = None,
+        display_name: str | None = "MyAnalysis",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -49,19 +55,15 @@ class ParameterAnalysis(EasyDynamicsBase):
 
         Raises
         ------
-        TypeError
-            If experiment is not an Experiment or None or if sample_model is not a SampleModel or
-            None or if instrument_model is not an InstrumentModel or None or if
-            convolution_settings is not a ConvolutionSettings or None or if
-            detailed_balance_settings is not a DetailedBalanceSettings or None or if
-            extra_parameters is not a Parameter, a list of Parameters, or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         # Check parameters
-        if parameters is not None and not isinstance(parameters, (sc.Dataset, Analysis)):
-            raise TypeError('parameters must be an sc.Dataset, an Analysis, or None.')
+        if parameters is not None and not isinstance(
+            parameters, (sc.Dataset, Analysis)
+        ):
+            raise TypeError("parameters must be an sc.Dataset, an Analysis, or None.")
 
         if isinstance(parameters, Analysis):
             self._parameters = parameters.parameters_to_dataset()
@@ -69,84 +71,54 @@ class ParameterAnalysis(EasyDynamicsBase):
             self._parameters = parameters
 
         # Check fit settings
-        if fit_settings is not None and not isinstance(fit_settings, ParameterAnalysisFitSettings):
-            raise TypeError('fit_settings must be a ParameterAnalysisFitSettings or None.')
         if fit_settings is None:
-            fit_settings = ParameterAnalysisFitSettings()
-        self._fit_settings = fit_settings
+            fit_settings = {}
 
-        # Check fit_functions
-        if fit_functions is not None and not isinstance(
-            fit_functions,
-            (
-                ModelComponent,
-                ComponentCollection,
-                DiffusionModelBase,
-                list,
-            ),
-        ):
+        if not isinstance(fit_settings, dict):
             raise TypeError(
-                'fit_functions must be a ModelComponent, a ComponentCollection, a list of '
-                'ModelComponent/ComponentCollection, a DiffusionModelBase, or None.'
+                "fit_settings must be a dictionary of fit settings or None."
             )
 
-        # Make fit_functions a list if it's not already
-        if isinstance(fit_functions, (ModelComponent, ComponentCollection, DiffusionModelBase)):
-            fit_functions = [fit_functions]
+        for key, value in fit_settings.items():
+            if not isinstance(key, str):
+                raise TypeError("All keys in fit_settings must be strings.")
+            if not isinstance(value, (str, list)):
+                raise TypeError(
+                    "All values in fit_settings must be strings or lists of strings."
+                )
+            if isinstance(value, list) and not all(
+                isinstance(item, str) for item in value
+            ):
+                raise TypeError("All items in lists in fit_settings must be strings.")
 
-        for func in fit_functions:
+        self._fit_settings = fit_settings
+
+        if fit_functions is None:
+            fit_functions = {}
+
+        if not isinstance(fit_functions, dict):
+            raise TypeError(
+                "fit_functions must be a dictionary mapping parameter names to fit functions."
+            )
+
+        for name, func in fit_functions.items():
+            if not isinstance(name, str):
+                raise TypeError("All keys in fit_functions must be strings.")
             if not isinstance(
                 func,
-                (ModelComponent, ComponentCollection, DiffusionModelBase),
+                (
+                    ModelComponent,
+                    ComponentCollection,
+                    DiffusionModelBase,
+                ),
             ):
                 raise TypeError(
-                    'All items in fit_functions list must be a ModelComponent, '
-                    'a ComponentCollection, or a DiffusionModelBase.'
+                    "All values in fit_functions must be a ModelComponent, a ComponentCollection, "
+                    "or a DiffusionModelBase."
                 )
+        self._fit_functions = fit_functions
 
-        # Check parameter names
-        if parameter_names is not None and not isinstance(parameter_names, (str, list)):
-            raise TypeError('parameter_names must be a string, a list of strings, or None.')
-        # Make parameter_names a list if it's not already
-        if isinstance(parameter_names, str):
-            parameter_names = [parameter_names]
-
-        for name in parameter_names:
-            if not isinstance(name, str):
-                raise TypeError('All items in parameter_names list must be strings.')
-
-        # Check that parameter_names and fit_functions have the same length
-        if len(parameter_names) != len(fit_functions):
-            raise ValueError('parameter_names must have the same length as fit_functions.')
-
-        # Convert fit_functions to a list of callables and expand parameter_names if necessary
-        fit_function_callables = []
-        fit_objects = []
-        expanded_parameter_names = []
-        if fit_functions is not None:
-            for name, func in zip(parameter_names, fit_functions, strict=True):
-                if isinstance(func, DiffusionModelBase):
-                    fit_funcs, fit_objs = self._diffusion_model_to_fit_functions(func)
-                    fit_function_callables.extend(fit_funcs)
-                    fit_objects.extend(fit_objs)
-                    expanded_parameter_names.extend(
-                        self._get_diffusion_model_parameter_names(name)
-                    )
-                elif isinstance(func, (ModelComponent, ComponentCollection)):
-                    fit_function_callables.append(self._components_to_fit_function(func))
-                    fit_objects.append(func)
-                    expanded_parameter_names.append(name)
-            self._fit_functions = fit_functions
-            self._fit_function_callables = fit_function_callables
-            self._fit_objects = fit_objects
-            self._parameter_names = parameter_names
-            self._expanded_parameter_names = expanded_parameter_names
-
-        # Check that all names are in the DataSet
-        if self._parameters is not None:
-            for name in self._expanded_parameter_names:
-                if name not in self._parameters:
-                    raise ValueError(f"Parameter name '{name}' not found in parameters DataSet.")
+        self._prepare_fit_functions_and_parameter_names()
 
     #############
     # Properties
@@ -179,7 +151,7 @@ class ParameterAnalysis(EasyDynamicsBase):
             If value is not a ParameterAnalysisFitSettings.
         """
         if not isinstance(value, ParameterAnalysisFitSettings):
-            raise TypeError('fit_settings must be a ParameterAnalysisFitSettings.')
+            raise TypeError("fit_settings must be a ParameterAnalysisFitSettings.")
         self._fit_settings = value
 
     #############
@@ -201,11 +173,7 @@ class ParameterAnalysis(EasyDynamicsBase):
         ws = []
 
         for name in self._expanded_parameter_names:
-            (
-                x,
-                y,
-                weight,
-            ) = self._get_xyweight_from_dataset(name)
+            (x, y, weight) = self._get_xyweight_from_dataset(name)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
@@ -221,12 +189,62 @@ class ParameterAnalysis(EasyDynamicsBase):
             weights=ws,
         )
 
+    def plot(
+        self, names: str | list[str] | None = None, **kwargs: dict[str, Any]
+    ) -> None:
+        """
+        Plot the parameters and fit results.
+
+        Parameters
+        ----------
+        names : str | list[str] | None, optional
+            The names of the parameters to plot. If None, all parameters are plotted.
+        **kwargs : dict[str, Any]
+            Additional keyword arguments to pass to the plotting function.
+        """
+        if names is None:
+            names = self._expanded_parameter_names
+        elif isinstance(names, str):
+            names = [names]
+
+        for name in names:
+            if name not in self._parameters:
+                raise ValueError(
+                    f"Parameter name '{name}' not found in parameters DataSet."
+                )
+
+        data = sc.Dataset(coords=self._parameters.coords)
+
+        for name in names:
+            data[name] = self._parameters[name]
+
+        x = self._parameters.coords["Q"]
+
+        fit_arrays = {}
+
+        for name, func in zip(names, self._fit_function_callables, strict=True):
+            fit_values = func(x.values)
+
+            fit_arrays[name + " fit"] = sc.DataArray(
+                data=sc.array(
+                    dims=["Q"], values=fit_values, unit=self._parameters[name].unit
+                ),
+                coords={"Q": x},
+            )
+
+        fit_dataset = sc.Dataset(fit_arrays)
+
+        full_dataset = sc.merge(data, fit_dataset)
+
+        return pp.plot(full_dataset, **kwargs)
+
     #############
     # Private methods
     #############
 
     def _diffusion_model_to_fit_functions(
         self,
+        parameter_name: str,
         diffusion_model: DiffusionModelBase,
     ) -> tuple[list[callable], list[DiffusionModelBase]]:
         """
@@ -234,6 +252,8 @@ class ParameterAnalysis(EasyDynamicsBase):
 
         Parameters
         ----------
+        parameter_name : str
+            The name of the parameter.
         diffusion_model : DiffusionModelBase
             The diffusion model to convert.
 
@@ -249,11 +269,23 @@ class ParameterAnalysis(EasyDynamicsBase):
         fit_functions = []
         fit_objects = []
 
-        if self.fit_settings.fit_area:
+        if parameter_name in self.fit_settings:
+            fit_setting = self.fit_settings[parameter_name]
+            if isinstance(fit_setting, str):
+                fit_setting = [fit_setting]
+
+            if "area" in fit_setting:
+                fit_functions.append(self._make_area_function(diffusion_model))
+                fit_objects.append(diffusion_model)
+
+            if "width" in fit_setting:
+                fit_functions.append(self._make_width_function(diffusion_model))
+                fit_objects.append(diffusion_model)
+        else:
+            # If no fit settings are provided for this parameter, fit
+            # both area and width by default.
             fit_functions.append(self._make_area_function(diffusion_model))
             fit_objects.append(diffusion_model)
-
-        if self.fit_settings.fit_width:
             fit_functions.append(self._make_width_function(diffusion_model))
             fit_objects.append(diffusion_model)
 
@@ -297,7 +329,7 @@ class ParameterAnalysis(EasyDynamicsBase):
 
         return fit_function
 
-    def _components_to_fit_functions(
+    def _components_to_fit_function(
         self,
         components: ModelComponent | ComponentCollection | None,
     ) -> callable:
@@ -350,11 +382,58 @@ class ParameterAnalysis(EasyDynamicsBase):
             A list of parameter names.
         """
         parameter_names = []
-        if self.fit_settings.fit_area:
-            parameter_names.append(parameter_name + ' area')
-        if self.fit_settings.fit_width:
-            parameter_names.append(parameter_name + ' width')
+
+        if parameter_name in self.fit_settings:
+            fit_setting = self.fit_settings[parameter_name]
+            if isinstance(fit_setting, str):
+                fit_setting = [fit_setting]
+
+            if "area" in fit_setting:
+                parameter_names.append(parameter_name + " area")
+
+            if "width" in fit_setting:
+                parameter_names.append(parameter_name + " width")
+        else:
+            parameter_names.append(parameter_name + " area")
+            parameter_names.append(parameter_name + " width")
+
         return parameter_names
+
+    def _prepare_fit_functions_and_parameter_names(self) -> None:
+        """
+        Make a list of fit functions callables, fit objects and
+        parameter names, expanding diffusion models into their
+        parameters if necessary.
+        """
+        fit_function_callables = []
+        fit_objects = []
+        expanded_parameter_names = []
+        for name, func in self._fit_functions.items():
+            if isinstance(func, DiffusionModelBase):
+                fit_funcs, fit_objs = self._diffusion_model_to_fit_functions(name, func)
+                fit_function_callables.extend(fit_funcs)
+                fit_objects.extend(fit_objs)
+                expanded_parameter_names.extend(
+                    self._get_diffusion_model_parameter_names(name)
+                )
+            elif isinstance(func, (ModelComponent, ComponentCollection)):
+                fit_function_callables.append(self._components_to_fit_function(func))
+                fit_objects.append(func)
+                expanded_parameter_names.append(name)
+        self._fit_function_callables = fit_function_callables
+        self._fit_objects = fit_objects
+        self._parameter_names = list(self._fit_functions.keys())
+        self._expanded_parameter_names = expanded_parameter_names
+
+        # Check that all names are in the DataSet
+        if self._parameters is not None:
+            for name in self._expanded_parameter_names:
+                if name not in self._parameters:
+                    raise ValueError(
+                        f"Parameter name '{name}' not found in parameters DataSet."
+                    )
+
+        return
 
     def _get_xyweight_from_dataset(
         self, parameter_name: str
@@ -378,11 +457,13 @@ class ParameterAnalysis(EasyDynamicsBase):
             If the parameter name is not found in the parameters DataSet.
         """
         if self._parameters is None:
-            raise ValueError('No parameters DataSet provided.')
+            raise ValueError("No parameters DataSet provided.")
         if parameter_name not in self._parameters:
-            raise ValueError(f"Parameter name '{parameter_name}' not found in parameters DataSet.")
+            raise ValueError(
+                f"Parameter name '{parameter_name}' not found in parameters DataSet."
+            )
         return (
-            self._parameters[parameter_name].coords['Q'].values,
+            self._parameters[parameter_name].coords["Q"].values,
             self._parameters[parameter_name].values,
             1 / self._parameters[parameter_name].variances ** 0.5,
         )
@@ -401,6 +482,6 @@ class ParameterAnalysis(EasyDynamicsBase):
             A string representation of the Analysis.
         """
         return (
-            f' {self.__class__.__name__} (display_name={self.display_name}, '
-            f'unique_name={self.unique_name})'
+            f" {self.__class__.__name__} (display_name={self.display_name}, "
+            f"unique_name={self.unique_name})"
         )
