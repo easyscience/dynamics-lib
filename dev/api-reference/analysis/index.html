@@ -1754,6 +1754,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#easydynamics.analysis.parameter_dataclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parameter_dataclass
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2165,6 +2176,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#easydynamics.analysis.parameter_dataclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parameter_dataclass
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5614,7 +5636,12 @@ title, linestyle, marker, color).</p>
 
 
 
-        <p>Analysing fitted parameters.</p>
+        <p>For analysing fitted parameters.</p>
+<p>Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase
+objects, and to plot the parameters and fit results. The parameters to be analyzed can be
+provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
+simultaneously, and the fit functions can be customized for each parameter. For diffusion
+models, the area and width can be fitted separately (or not at all) by specifying fit settings.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5628,8 +5655,7 @@ title, linestyle, marker, color).</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
-<span class="normal"> 26</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -6364,20 +6390,15 @@ title, linestyle, marker, color).</p>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Analysing fitted parameters.</span>
+<span class="sd">    For analysing fitted parameters.</span>
+
+<span class="sd">    Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase</span>
+<span class="sd">    objects, and to plot the parameters and fit results. The parameters to be analyzed can be</span>
+<span class="sd">    provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted</span>
+<span class="sd">    simultaneously, and the fit functions can be customized for each parameter. For diffusion</span>
+<span class="sd">    models, the area and width can be fitted separately (or not at all) by specifying fit settings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6415,13 +6436,7 @@ title, linestyle, marker, color).</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">fit_settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">fit_functions</span><span class="p">)</span>
 
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Properties</span>
@@ -6449,13 +6464,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The new parameters for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_parameters</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_functions</span><span class="p">(</span>
@@ -6485,13 +6494,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The new fit functions for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
@@ -6516,13 +6519,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">            The new fit settings for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Other methods</span>
@@ -6547,25 +6544,25 @@ title, linestyle, marker, color).</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit functions provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameter names found for fit functions.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="p">:</span>
             <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
-            <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
+            <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_objects</span><span class="p">,</span>
+            <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">mf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -6595,7 +6592,8 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet.</span>
+<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet. If the</span>
+<span class="sd">            units of the specified parameters are not consistent.</span>
 <span class="sd">        RuntimeError</span>
 <span class="sd">            If plot_data() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -6607,7 +6605,7 @@ title, linestyle, marker, color).</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
@@ -6615,13 +6613,18 @@ title, linestyle, marker, color).</p>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
+        <span class="c1"># Make a new Dataset with only the desired parameters.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+        <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
-
+        <span class="c1"># Create fit arrays and plot kwargs for each parameter and fit function</span>
         <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">]</span>
         <span class="n">marker_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
@@ -6635,13 +6638,20 @@ title, linestyle, marker, color).</p>
             <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
             <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">}</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">display_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">):</span>
+        <span class="c1"># for name, func, display_name in zip(</span>
+        <span class="c1">#     names,</span>
+        <span class="c1">#     self._prepared_fit_data.fit_function_callables,</span>
+        <span class="c1">#     self._prepared_fit_data.fit_function_display_names,</span>
+        <span class="c1">#     strict=True,</span>
+        <span class="c1"># ):</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_display_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
             <span class="n">fit_values</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
             <span class="c1"># Units need to be handled better here. See issue #65</span>
@@ -6671,9 +6681,9 @@ title, linestyle, marker, color).</p>
 
         <span class="n">fit_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">fit_arrays</span><span class="p">)</span>
 
-        <span class="n">full_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">full_dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6711,6 +6721,8 @@ title, linestyle, marker, color).</p>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
 <span class="sd">            If parameters is not a sc.Dataset, an Analysis, or None.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If parameters is a sc.Dataset but does not have a &#39;Q&#39; coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parameters must be an sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
@@ -6719,6 +6731,9 @@ title, linestyle, marker, color).</p>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+        <span class="k">if</span> <span class="n">verified_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_fit_settings</span><span class="p">(</span>
@@ -6811,33 +6826,17 @@ title, linestyle, marker, color).</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_fit_functions_and_parameter_names</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="n">FIT_FUNCTION_TYPE</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_PreparedFitData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make a list of fit functions callables, fit objects and parameter names, expanding</span>
-<span class="sd">        diffusion models into their parameters if necessary. The following attributes are prepared:</span>
-<span class="sd">        - self._fit_function_callables: A list of callables corresponding to the fit functions.</span>
-<span class="sd">        - self._fit_function_display_names: A list of display names corresponding to the fit</span>
-<span class="sd">            functions, where diffusion models are expanded into their parameters</span>
-<span class="sd">            (e.g. &quot;D area&quot;, &quot;D width&quot; for a diffusion model &quot;D&quot;).</span>
-<span class="sd">        - self._fit_objects: A list of the original fit objects corresponding to the fit functions.</span>
-<span class="sd">        - self._parameter_names: A list of the original parameter names corresponding to the fit</span>
-<span class="sd">            functions.</span>
-<span class="sd">        - self._expanded_parameter_names: A list of the expanded parameter names corresponding to</span>
-<span class="sd">            the fit functions, where diffusion models are expanded into their parameters</span>
-<span class="sd">            (e.g. &quot;D area&quot;, &quot;D width&quot; for a diffusion model &quot;D&quot;).</span>
+<span class="sd">        Prepare the fit functions and parameter names for fitting.</span>
+
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple[list[callable], list[FIT_FUNCTION_TYPE], list[str], list[str], list[str]]</span>
-<span class="sd">            A tuple containing the list of fit function callables, the list of fit objects, the</span>
-<span class="sd">            list of fit function display names, the list of original parameter names, and the list</span>
-<span class="sd">            of expanded parameter names.</span>
+<span class="sd">        _PreparedFitData</span>
+<span class="sd">            A _PreparedFitData object containing the list of fit function callables, the list of</span>
+<span class="sd">            fit objects, the list of fit function display names, the list of original parameter</span>
+<span class="sd">            names, and the list of expanded parameter names.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -6870,12 +6869,12 @@ title, linestyle, marker, color).</p>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">fit_function_callables</span><span class="p">,</span>
-            <span class="n">fit_objects</span><span class="p">,</span>
-            <span class="n">fit_function_display_names</span><span class="p">,</span>
-            <span class="n">parameter_names</span><span class="p">,</span>
-            <span class="n">expanded_parameter_names</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">_PreparedFitData</span><span class="p">(</span>
+            <span class="n">fit_function_callables</span><span class="o">=</span><span class="n">fit_function_callables</span><span class="p">,</span>
+            <span class="n">fit_objects</span><span class="o">=</span><span class="n">fit_objects</span><span class="p">,</span>
+            <span class="n">fit_function_display_names</span><span class="o">=</span><span class="n">fit_function_display_names</span><span class="p">,</span>
+            <span class="n">parameter_names</span><span class="o">=</span><span class="n">parameter_names</span><span class="p">,</span>
+            <span class="n">expanded_parameter_names</span><span class="o">=</span><span class="n">expanded_parameter_names</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#############</span>
@@ -7076,18 +7075,22 @@ title, linestyle, marker, color).</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If the parameter name is not found in the parameters DataSet.</span>
+<span class="sd">            If the parameter name is not found in the parameters DataSet. If non-finite weights are</span>
+<span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Need to check the variances.</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">weight</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Non-finite weights found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-            <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">weight</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#############</span>
@@ -7120,7 +7123,7 @@ title, linestyle, marker, color).</p>
             <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;  fit_functions=</span><span class="si">{</span><span class="n">fit_keys</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7269,14 +7272,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
@@ -7310,7 +7306,8 @@ default, None.</p>
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7345,13 +7342,7 @@ default, None.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">fit_settings</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">fit_functions</span><span class="p">)</span>
 
-    <span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7408,7 +7399,18 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">744</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
 <span class="normal">745</span>
 <span class="normal">746</span>
 <span class="normal">747</span>
@@ -7425,18 +7427,7 @@ default, None.</p>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the ParameterAnalysis.</span>
 
@@ -7462,7 +7453,7 @@ default, None.</p>
         <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;  fit_functions=</span><span class="si">{</span><span class="n">fit_keys</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7548,7 +7539,24 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">178</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
@@ -7575,24 +7583,7 @@ names are found for the fit functions.</p>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fit the parameters using the specified fit functions and settings.</span>
 
@@ -7611,25 +7602,25 @@ names are found for the fit functions.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit functions provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameter names found for fit functions.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="p">:</span>
         <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
     <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
-        <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-        <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
+        <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_objects</span><span class="p">,</span>
+        <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">mf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -7807,7 +7798,11 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -7815,11 +7810,7 @@ names are found for the fit functions.</p>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all variables from the fit functions.</span>
 
@@ -8011,7 +8002,8 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the parameters DataSet.</p>
+                <p>If any of the specified parameter names are not found in the parameters DataSet. If the
+units of the specified parameters are not consistent.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8037,7 +8029,24 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
@@ -8132,11 +8141,7 @@ names are found for the fit functions.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8157,7 +8162,8 @@ names are found for the fit functions.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet.</span>
+<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet. If the</span>
+<span class="sd">        units of the specified parameters are not consistent.</span>
 <span class="sd">    RuntimeError</span>
 <span class="sd">        If plot_data() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -8169,7 +8175,7 @@ names are found for the fit functions.</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
@@ -8177,13 +8183,18 @@ names are found for the fit functions.</p>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Make a new Dataset with only the desired parameters.</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
         <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
-
+    <span class="c1"># Create fit arrays and plot kwargs for each parameter and fit function</span>
     <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
     <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">]</span>
     <span class="n">marker_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
@@ -8197,13 +8208,20 @@ names are found for the fit functions.</p>
         <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">}</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">display_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-        <span class="n">names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-        <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="c1"># for name, func, display_name in zip(</span>
+    <span class="c1">#     names,</span>
+    <span class="c1">#     self._prepared_fit_data.fit_function_callables,</span>
+    <span class="c1">#     self._prepared_fit_data.fit_function_display_names,</span>
+    <span class="c1">#     strict=True,</span>
+    <span class="c1"># ):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_display_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
         <span class="n">fit_values</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
         <span class="c1"># Units need to be handled better here. See issue #65</span>
@@ -8233,9 +8251,9 @@ names are found for the fit functions.</p>
 
     <span class="n">fit_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">fit_arrays</span><span class="p">)</span>
 
-    <span class="n">full_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">full_dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17129,7 +17147,12 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
 
 
-        <p>Analysing fitted parameters.</p>
+        <p>For analysing fitted parameters.</p>
+<p>Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase
+objects, and to plot the parameters and fit results. The parameters to be analyzed can be
+provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
+simultaneously, and the fit functions can be customized for each parameter. For diffusion
+models, the area and width can be fitted separately (or not at all) by specifying fit settings.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -17143,8 +17166,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
-<span class="normal"> 26</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -17879,20 +17901,15 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Analysing fitted parameters.</span>
+<span class="sd">    For analysing fitted parameters.</span>
+
+<span class="sd">    Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase</span>
+<span class="sd">    objects, and to plot the parameters and fit results. The parameters to be analyzed can be</span>
+<span class="sd">    provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted</span>
+<span class="sd">    simultaneously, and the fit functions can be customized for each parameter. For diffusion</span>
+<span class="sd">    models, the area and width can be fitted separately (or not at all) by specifying fit settings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -17930,13 +17947,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">fit_settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">fit_functions</span><span class="p">)</span>
 
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Properties</span>
@@ -17964,13 +17975,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">            The new parameters for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_parameters</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_functions</span><span class="p">(</span>
@@ -18000,13 +18005,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">            The new fit functions for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
@@ -18031,13 +18030,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">            The new fit settings for the parameter analysis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Other methods</span>
@@ -18062,25 +18055,25 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit functions provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameter names found for fit functions.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="p">:</span>
             <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
         <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
-            <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-            <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
+            <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_objects</span><span class="p">,</span>
+            <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">mf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -18110,7 +18103,8 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet.</span>
+<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet. If the</span>
+<span class="sd">            units of the specified parameters are not consistent.</span>
 <span class="sd">        RuntimeError</span>
 <span class="sd">            If plot_data() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -18122,7 +18116,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
@@ -18130,13 +18124,18 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
+        <span class="c1"># Make a new Dataset with only the desired parameters.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+        <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
-
+        <span class="c1"># Create fit arrays and plot kwargs for each parameter and fit function</span>
         <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">]</span>
         <span class="n">marker_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
@@ -18150,13 +18149,20 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
             <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
             <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">}</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">display_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">names</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-            <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">):</span>
+        <span class="c1"># for name, func, display_name in zip(</span>
+        <span class="c1">#     names,</span>
+        <span class="c1">#     self._prepared_fit_data.fit_function_callables,</span>
+        <span class="c1">#     self._prepared_fit_data.fit_function_display_names,</span>
+        <span class="c1">#     strict=True,</span>
+        <span class="c1"># ):</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_display_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
             <span class="n">fit_values</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
             <span class="c1"># Units need to be handled better here. See issue #65</span>
@@ -18186,9 +18192,9 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
         <span class="n">fit_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">fit_arrays</span><span class="p">)</span>
 
-        <span class="n">full_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">full_dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -18226,6 +18232,8 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
 <span class="sd">            If parameters is not a sc.Dataset, an Analysis, or None.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If parameters is a sc.Dataset but does not have a &#39;Q&#39; coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parameters must be an sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
@@ -18234,6 +18242,9 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+        <span class="k">if</span> <span class="n">verified_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_fit_settings</span><span class="p">(</span>
@@ -18326,33 +18337,17 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_fit_functions_and_parameter_names</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">callable</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="n">FIT_FUNCTION_TYPE</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_PreparedFitData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make a list of fit functions callables, fit objects and parameter names, expanding</span>
-<span class="sd">        diffusion models into their parameters if necessary. The following attributes are prepared:</span>
-<span class="sd">        - self._fit_function_callables: A list of callables corresponding to the fit functions.</span>
-<span class="sd">        - self._fit_function_display_names: A list of display names corresponding to the fit</span>
-<span class="sd">            functions, where diffusion models are expanded into their parameters</span>
-<span class="sd">            (e.g. &quot;D area&quot;, &quot;D width&quot; for a diffusion model &quot;D&quot;).</span>
-<span class="sd">        - self._fit_objects: A list of the original fit objects corresponding to the fit functions.</span>
-<span class="sd">        - self._parameter_names: A list of the original parameter names corresponding to the fit</span>
-<span class="sd">            functions.</span>
-<span class="sd">        - self._expanded_parameter_names: A list of the expanded parameter names corresponding to</span>
-<span class="sd">            the fit functions, where diffusion models are expanded into their parameters</span>
-<span class="sd">            (e.g. &quot;D area&quot;, &quot;D width&quot; for a diffusion model &quot;D&quot;).</span>
+<span class="sd">        Prepare the fit functions and parameter names for fitting.</span>
+
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple[list[callable], list[FIT_FUNCTION_TYPE], list[str], list[str], list[str]]</span>
-<span class="sd">            A tuple containing the list of fit function callables, the list of fit objects, the</span>
-<span class="sd">            list of fit function display names, the list of original parameter names, and the list</span>
-<span class="sd">            of expanded parameter names.</span>
+<span class="sd">        _PreparedFitData</span>
+<span class="sd">            A _PreparedFitData object containing the list of fit function callables, the list of</span>
+<span class="sd">            fit objects, the list of fit function display names, the list of original parameter</span>
+<span class="sd">            names, and the list of expanded parameter names.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -18385,12 +18380,12 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">fit_function_callables</span><span class="p">,</span>
-            <span class="n">fit_objects</span><span class="p">,</span>
-            <span class="n">fit_function_display_names</span><span class="p">,</span>
-            <span class="n">parameter_names</span><span class="p">,</span>
-            <span class="n">expanded_parameter_names</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">_PreparedFitData</span><span class="p">(</span>
+            <span class="n">fit_function_callables</span><span class="o">=</span><span class="n">fit_function_callables</span><span class="p">,</span>
+            <span class="n">fit_objects</span><span class="o">=</span><span class="n">fit_objects</span><span class="p">,</span>
+            <span class="n">fit_function_display_names</span><span class="o">=</span><span class="n">fit_function_display_names</span><span class="p">,</span>
+            <span class="n">parameter_names</span><span class="o">=</span><span class="n">parameter_names</span><span class="p">,</span>
+            <span class="n">expanded_parameter_names</span><span class="o">=</span><span class="n">expanded_parameter_names</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#############</span>
@@ -18591,18 +18586,22 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If the parameter name is not found in the parameters DataSet.</span>
+<span class="sd">            If the parameter name is not found in the parameters DataSet. If non-finite weights are</span>
+<span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Need to check the variances.</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">weight</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Non-finite weights found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-            <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">weight</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#############</span>
@@ -18635,7 +18634,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
             <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;  fit_functions=</span><span class="si">{</span><span class="n">fit_keys</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -18784,14 +18783,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
@@ -18825,7 +18817,8 @@ default, None.</p>
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18860,13 +18853,7 @@ default, None.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fit_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_settings</span><span class="p">(</span><span class="n">fit_settings</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fit_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_fit_functions</span><span class="p">(</span><span class="n">fit_functions</span><span class="p">)</span>
 
-    <span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fit_functions_and_parameter_names</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -18923,7 +18910,18 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">744</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
 <span class="normal">745</span>
 <span class="normal">746</span>
 <span class="normal">747</span>
@@ -18940,18 +18938,7 @@ default, None.</p>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the ParameterAnalysis.</span>
 
@@ -18977,7 +18964,7 @@ default, None.</p>
         <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;  fit_functions=</span><span class="si">{</span><span class="n">fit_keys</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;  expanded_parameters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -19063,7 +19050,24 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">178</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
@@ -19090,24 +19094,7 @@ names are found for the fit functions.</p>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fit the parameters using the specified fit functions and settings.</span>
 
@@ -19126,25 +19113,25 @@ names are found for the fit functions.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit functions provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_names</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameter names found for fit functions.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="p">:</span>
         <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
 
     <span class="n">mf</span> <span class="o">=</span> <span class="n">MultiFitter</span><span class="p">(</span>
-        <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_objects</span><span class="p">,</span>
-        <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
+        <span class="n">fit_objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_objects</span><span class="p">,</span>
+        <span class="n">fit_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">mf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -19322,7 +19309,11 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -19330,11 +19321,7 @@ names are found for the fit functions.</p>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all variables from the fit functions.</span>
 
@@ -19526,7 +19513,8 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the parameters DataSet.</p>
+                <p>If any of the specified parameter names are not found in the parameters DataSet. If the
+units of the specified parameters are not consistent.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -19552,7 +19540,24 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
@@ -19647,11 +19652,7 @@ names are found for the fit functions.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -19672,7 +19673,8 @@ names are found for the fit functions.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet.</span>
+<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet. If the</span>
+<span class="sd">        units of the specified parameters are not consistent.</span>
 <span class="sd">    RuntimeError</span>
 <span class="sd">        If plot_data() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -19684,7 +19686,7 @@ names are found for the fit functions.</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded_parameter_names</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
@@ -19692,13 +19694,18 @@ names are found for the fit functions.</p>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Make a new Dataset with only the desired parameters.</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
         <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
-
+    <span class="c1"># Create fit arrays and plot kwargs for each parameter and fit function</span>
     <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
     <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">]</span>
     <span class="n">marker_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
@@ -19712,13 +19719,20 @@ names are found for the fit functions.</p>
         <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">}</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">display_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-        <span class="n">names</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_callables</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_display_names</span><span class="p">,</span>
-        <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="c1"># for name, func, display_name in zip(</span>
+    <span class="c1">#     names,</span>
+    <span class="c1">#     self._prepared_fit_data.fit_function_callables,</span>
+    <span class="c1">#     self._prepared_fit_data.fit_function_display_names,</span>
+    <span class="c1">#     strict=True,</span>
+    <span class="c1"># ):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">expanded_parameter_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_callables</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">display_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared_fit_data</span><span class="o">.</span><span class="n">fit_function_display_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
         <span class="n">fit_values</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
         <span class="c1"># Units need to be handled better here. See issue #65</span>
@@ -19748,9 +19762,9 @@ names are found for the fit functions.</p>
 
     <span class="n">fit_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">fit_arrays</span><span class="p">)</span>
 
-    <span class="n">full_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fit_dataset</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">full_dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs_defaults</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -19765,6 +19779,56 @@ names are found for the fit functions.</p>
     </div>
 
 </div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="easydynamics.analysis.parameter_dataclass" class="doc doc-heading">
+            <code>parameter_dataclass</code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
