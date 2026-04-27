@@ -25,7 +25,13 @@ FIT_FUNCTION_TYPE = ModelComponent | ComponentCollection | DiffusionModelBase
 
 class ParameterAnalysis(EasyDynamicsModelBase):
     """
-    Analysing fitted parameters.
+    For analysing fitted parameters.
+
+    Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase
+    objects, and to plot the parameters and fit results. The parameters to be analyzed can be
+    provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
+    simultaneously, and the fit functions can be customized for each parameter. For diffusion
+    models, the area and width can be fitted separately (or not at all) by specifying fit settings.
     """
 
     def __init__(
@@ -244,7 +250,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         data = sc.Dataset(coords=self._parameters.coords)
 
         units = [self._parameters[name].unit for name in names]
-        if len(set(units)) != 1:
+        first_unit = units[0]
+        if any(unit != first_unit for unit in units):
             raise ValueError(f'Units are not consistent, and cannot be plotted together: {units}')
 
         for name in names:
@@ -266,12 +273,18 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         }
         x = self._parameters.coords['Q']
 
-        for name, func, display_name in zip(
-            names,
-            self._prepared_fit_data.fit_function_callables,
-            self._prepared_fit_data.fit_function_display_names,
-            strict=True,
-        ):
+        # for name, func, display_name in zip(
+        #     names,
+        #     self._prepared_fit_data.fit_function_callables,
+        #     self._prepared_fit_data.fit_function_display_names,
+        #     strict=True,
+        # ):
+        for name in names:
+            idx = self._prepared_fit_data.expanded_parameter_names.index(name)
+
+            func = self._prepared_fit_data.fit_function_callables[idx]
+            display_name = self._prepared_fit_data.fit_function_display_names[idx]
+
             fit_values = func(x.values)
 
             # Units need to be handled better here. See issue #65
@@ -341,6 +354,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         ------
         TypeError
             If parameters is not a sc.Dataset, an Analysis, or None.
+        ValueError
+            If parameters is a sc.Dataset but does not have a 'Q' coordinate.
         """
         if parameters is not None and not isinstance(parameters, (sc.Dataset, Analysis)):
             raise TypeError('parameters must be an sc.Dataset, an Analysis, or None.')
@@ -349,6 +364,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             verified_parameters = parameters.parameters_to_dataset()
         else:
             verified_parameters = parameters
+
+        if verified_parameters is not None and 'Q' not in verified_parameters.coords:
+            raise ValueError("parameters must have a 'Q' coordinate.")
         return verified_parameters
 
     def _verify_fit_settings(
@@ -690,18 +708,22 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If the parameter name is not found in the parameters DataSet.
+            If the parameter name is not found in the parameters DataSet. If non-finite weights are
+            found for the parameter.
         """
         if self._parameters is None:
             raise ValueError('No parameters DataSet provided.')
         if parameter_name not in self._parameters:
             raise ValueError(f"Parameter name '{parameter_name}' not found in parameters DataSet.")
 
-        # Need to check the variances.
+        weight = 1 / self._parameters[parameter_name].variances ** 0.5
+        if not np.all(np.isfinite(weight)):
+            raise ValueError(f"Non-finite weights found for parameter '{parameter_name}'")
+
         return (
             self._parameters[parameter_name].coords['Q'].values,
             self._parameters[parameter_name].values,
-            1 / self._parameters[parameter_name].variances ** 0.5,
+            weight,
         )
 
     #############

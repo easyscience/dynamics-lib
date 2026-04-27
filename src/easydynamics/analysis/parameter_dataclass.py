@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
+
 from dataclasses import dataclass
 
 from easydynamics.sample_model.component_collection import ComponentCollection
