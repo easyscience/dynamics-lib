@@ -13,6 +13,7 @@ from matplotlib import rcParams
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis import Analysis
+from easydynamics.analysis.parameter_dataclass import _PreparedFitData
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -62,13 +63,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         self._fit_settings = self._verify_fit_settings(fit_settings)
         self._fit_functions = self._verify_fit_functions(fit_functions)
 
-        (
-            self._fit_function_callables,
-            self._fit_objects,
-            self._fit_function_display_names,
-            self._parameter_names,
-            self._expanded_parameter_names,
-        ) = self._prepare_fit_functions_and_parameter_names()
+        self._prepared_fit_data = self._prepare_fit_functions_and_parameter_names()
 
     #############
     # Properties
@@ -96,13 +91,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The new parameters for the parameter analysis.
         """
         self._parameters = self._verify_parameters(value)
-        (
-            self._fit_function_callables,
-            self._fit_objects,
-            self._fit_function_display_names,
-            self._parameter_names,
-            self._expanded_parameter_names,
-        ) = self._prepare_fit_functions_and_parameter_names()
+        self._prepared_fit_data = self._prepare_fit_functions_and_parameter_names()
 
     @property
     def fit_functions(
@@ -132,13 +121,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The new fit functions for the parameter analysis.
         """
         self._fit_functions = self._verify_fit_functions(value)
-        (
-            self._fit_function_callables,
-            self._fit_objects,
-            self._fit_function_display_names,
-            self._parameter_names,
-            self._expanded_parameter_names,
-        ) = self._prepare_fit_functions_and_parameter_names()
+        self._prepared_fit_data = self._prepare_fit_functions_and_parameter_names()
 
     @property
     def fit_settings(self) -> dict[str, str | list[str]]:
@@ -163,13 +146,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The new fit settings for the parameter analysis.
         """
         self._fit_settings = self._verify_fit_settings(value)
-        (
-            self._fit_function_callables,
-            self._fit_objects,
-            self._fit_function_display_names,
-            self._parameter_names,
-            self._expanded_parameter_names,
-        ) = self._prepare_fit_functions_and_parameter_names()
+        self._prepared_fit_data = self._prepare_fit_functions_and_parameter_names()
 
     #############
     # Other methods
@@ -194,25 +171,25 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if self._parameters is None:
             raise ValueError('No parameters DataSet provided.')
 
-        if not self._fit_function_callables:
+        if not self._prepared_fit_data.fit_function_callables:
             raise ValueError('No fit functions provided.')
 
-        if not self._parameter_names:
+        if not self._prepared_fit_data.parameter_names:
             raise ValueError('No parameter names found for fit functions.')
 
         xs = []
         ys = []
         ws = []
 
-        for name in self._expanded_parameter_names:
+        for name in self._prepared_fit_data.expanded_parameter_names:
             (x, y, weight) = self._get_xyweight_from_dataset(name)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
 
         mf = MultiFitter(
-            fit_objects=self._fit_objects,
-            fit_functions=self._fit_function_callables,
+            fit_objects=self._prepared_fit_data.fit_objects,
+            fit_functions=self._prepared_fit_data.fit_function_callables,
         )
 
         return mf.fit(
@@ -242,7 +219,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If any of the specified parameter names are not found in the parameters DataSet.
+            If any of the specified parameter names are not found in the parameters DataSet. If the
+            units of the specified parameters are not consistent.
         RuntimeError
             If plot_data() is called outside of a Jupyter notebook environment.
         """
@@ -254,7 +232,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             raise ValueError('No parameters available to plot.')
 
         if names is None:
-            names = self._expanded_parameter_names
+            names = self._prepared_fit_data.expanded_parameter_names
         elif isinstance(names, str):
             names = [names]
 
@@ -262,13 +240,17 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             if name not in self._parameters:
                 raise ValueError(f"Parameter name '{name}' not found in parameters DataSet.")
 
+        # Make a new Dataset with only the desired parameters.
         data = sc.Dataset(coords=self._parameters.coords)
+
+        units = [self._parameters[name].unit for name in names]
+        if len(set(units)) != 1:
+            raise ValueError(f'Units are not consistent, and cannot be plotted together: {units}')
 
         for name in names:
             data[name] = self._parameters[name]
 
-        x = self._parameters.coords['Q']
-
+        # Create fit arrays and plot kwargs for each parameter and fit function
         color_cycle = itertools.cycle(rcParams['axes.prop_cycle'].by_key()['color'])
         markers = ['o', 's', 'D', '^', 'v', '<', '>']
         marker_cycle = itertools.cycle(markers)
@@ -282,11 +264,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             'color': {},
             'markerfacecolor': {},
         }
+        x = self._parameters.coords['Q']
 
         for name, func, display_name in zip(
             names,
-            self._fit_function_callables,
-            self._fit_function_display_names,
+            self._prepared_fit_data.fit_function_callables,
+            self._prepared_fit_data.fit_function_display_names,
             strict=True,
         ):
             fit_values = func(x.values)
@@ -318,9 +301,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         fit_dataset = sc.Dataset(fit_arrays)
 
-        full_dataset = sc.merge(fit_dataset, data)
+        data_and_model = sc.merge(fit_dataset, data)
 
-        return pp.plot(full_dataset, **plot_kwargs_defaults)
+        return pp.plot(data_and_model, **plot_kwargs_defaults)
 
     def get_all_variables(self) -> list:
         """
@@ -458,33 +441,17 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
     def _prepare_fit_functions_and_parameter_names(
         self,
-    ) -> tuple[
-        list[callable],
-        list[FIT_FUNCTION_TYPE],
-        list[str],
-        list[str],
-        list[str],
-    ]:
+    ) -> _PreparedFitData:
         """
-        Make a list of fit functions callables, fit objects and parameter names, expanding
-        diffusion models into their parameters if necessary. The following attributes are prepared:
-        - self._fit_function_callables: A list of callables corresponding to the fit functions.
-        - self._fit_function_display_names: A list of display names corresponding to the fit
-            functions, where diffusion models are expanded into their parameters
-            (e.g. "D area", "D width" for a diffusion model "D").
-        - self._fit_objects: A list of the original fit objects corresponding to the fit functions.
-        - self._parameter_names: A list of the original parameter names corresponding to the fit
-            functions.
-        - self._expanded_parameter_names: A list of the expanded parameter names corresponding to
-            the fit functions, where diffusion models are expanded into their parameters
-            (e.g. "D area", "D width" for a diffusion model "D").
+        Prepare the fit functions and parameter names for fitting.
+
 
         Returns
         -------
-        tuple[list[callable], list[FIT_FUNCTION_TYPE], list[str], list[str], list[str]]
-            A tuple containing the list of fit function callables, the list of fit objects, the
-            list of fit function display names, the list of original parameter names, and the list
-            of expanded parameter names.
+        _PreparedFitData
+            A _PreparedFitData object containing the list of fit function callables, the list of
+            fit objects, the list of fit function display names, the list of original parameter
+            names, and the list of expanded parameter names.
 
         Raises
         ------
@@ -517,12 +484,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 if name not in self._parameters:
                     raise ValueError(f"Parameter name '{name}' not found in parameters DataSet.")
 
-        return (
-            fit_function_callables,
-            fit_objects,
-            fit_function_display_names,
-            parameter_names,
-            expanded_parameter_names,
+        return _PreparedFitData(
+            fit_function_callables=fit_function_callables,
+            fit_objects=fit_objects,
+            fit_function_display_names=fit_function_display_names,
+            parameter_names=parameter_names,
+            expanded_parameter_names=expanded_parameter_names,
         )
 
     #############
@@ -767,6 +734,6 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             f'  n_parameters={n_params},\n'
             f'  parameter_names={param_names},\n'
             f'  fit_functions={fit_keys},\n'
-            f'  expanded_parameters={self._expanded_parameter_names}\n'
+            f'  expanded_parameters={self._prepared_fit_data.expanded_parameter_names}\n'
             f')'
         )
