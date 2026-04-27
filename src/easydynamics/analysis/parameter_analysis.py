@@ -16,6 +16,8 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 
+FIT_FUNCTION_TYPE = ModelComponent | ComponentCollection | DiffusionModelBase
+
 
 class ParameterAnalysis(EasyDynamicsModelBase):
     """
@@ -25,9 +27,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     def __init__(
         self,
         parameters: sc.Dataset | Analysis | None = None,
-        fit_functions: (
-            dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None
-        ) = None,
+        fit_functions: dict[str, FIT_FUNCTION_TYPE] | None = None,
         fit_settings: dict[str, str | list[str]] | None = None,
         display_name: str | None = 'ParameterAnalysis',
         unique_name: str | None = None,
@@ -40,7 +40,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         parameters : sc.Dataset | Analysis | None, default=None
             The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which
             case the parameters will be extracted from the Analysis).
-        fit_functions : dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None, default=None
+        fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None
             Dictionary mapping parameter names to fit functions. The fit functions can be provided
             as ModelComponents, ComponentCollections, or DiffusionModelBase objects.
         fit_settings : dict[str, str | list[str]] | None, default=None
