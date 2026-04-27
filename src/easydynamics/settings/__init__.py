@@ -5,6 +5,6 @@ from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
 __all__ = [
-    "ConvolutionSettings",
-    "DetailedBalanceSettings",
+    'ConvolutionSettings',
+    'DetailedBalanceSettings',
 ]
