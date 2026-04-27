@@ -5628,9 +5628,7 @@ title, linestyle, marker, color).</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
 <span class="normal"> 25</span>
@@ -6253,9 +6251,7 @@ title, linestyle, marker, color).</p>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fit_functions</span><span class="p">:</span> <span class="p">(</span>
-            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">DiffusionModelBase</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fit_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6268,7 +6264,7 @@ title, linestyle, marker, color).</p>
 <span class="sd">        parameters : sc.Dataset | Analysis | None, default=None</span>
 <span class="sd">            The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which</span>
 <span class="sd">            case the parameters will be extracted from the Analysis).</span>
-<span class="sd">        fit_functions : dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None, default=None</span>
+<span class="sd">        fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None</span>
 <span class="sd">            Dictionary mapping parameter names to fit functions. The fit functions can be provided</span>
 <span class="sd">            as ModelComponents, ComponentCollections, or DiffusionModelBase objects.</span>
 <span class="sd">        fit_settings : dict[str, str | list[str]] | None, default=None</span>
@@ -6929,7 +6925,7 @@ case the parameters will be extracted from the Analysis).</p>
                 <code>fit_functions</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;DiffusionModelBase&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase">DiffusionModelBase</a>] | None</code>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.analysis.parameter_analysis.FIT_FUNCTION_TYPE">FIT_FUNCTION_TYPE</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7009,9 +7005,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
@@ -7049,9 +7043,7 @@ default, None.</p>
 <span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">fit_functions</span><span class="p">:</span> <span class="p">(</span>
-        <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">DiffusionModelBase</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">fit_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7064,7 +7056,7 @@ default, None.</p>
 <span class="sd">    parameters : sc.Dataset | Analysis | None, default=None</span>
 <span class="sd">        The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which</span>
 <span class="sd">        case the parameters will be extracted from the Analysis).</span>
-<span class="sd">    fit_functions : dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None, default=None</span>
+<span class="sd">    fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None</span>
 <span class="sd">        Dictionary mapping parameter names to fit functions. The fit functions can be provided</span>
 <span class="sd">        as ModelComponents, ComponentCollections, or DiffusionModelBase objects.</span>
 <span class="sd">    fit_settings : dict[str, str | list[str]] | None, default=None</span>
@@ -16687,9 +16679,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
 <span class="normal"> 25</span>
@@ -17312,9 +17302,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fit_functions</span><span class="p">:</span> <span class="p">(</span>
-            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">DiffusionModelBase</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fit_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -17327,7 +17315,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 <span class="sd">        parameters : sc.Dataset | Analysis | None, default=None</span>
 <span class="sd">            The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which</span>
 <span class="sd">            case the parameters will be extracted from the Analysis).</span>
-<span class="sd">        fit_functions : dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None, default=None</span>
+<span class="sd">        fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None</span>
 <span class="sd">            Dictionary mapping parameter names to fit functions. The fit functions can be provided</span>
 <span class="sd">            as ModelComponents, ComponentCollections, or DiffusionModelBase objects.</span>
 <span class="sd">        fit_settings : dict[str, str | list[str]] | None, default=None</span>
@@ -17988,7 +17976,7 @@ case the parameters will be extracted from the Analysis).</p>
                 <code>fit_functions</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <a class="autorefs autorefs-internal" title="&lt;code&gt;ModelComponent&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.model_component.ModelComponent&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.components.model_component.ModelComponent">ModelComponent</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a> | <a class="autorefs autorefs-internal" title="&lt;code&gt;DiffusionModelBase&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase&lt;/code&gt;)" href="../sample_model/#easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase">DiffusionModelBase</a>] | None</code>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="easydynamics.analysis.parameter_analysis.FIT_FUNCTION_TYPE">FIT_FUNCTION_TYPE</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -18068,9 +18056,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
@@ -18108,9 +18094,7 @@ default, None.</p>
 <span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">fit_functions</span><span class="p">:</span> <span class="p">(</span>
-        <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span> <span class="o">|</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="n">DiffusionModelBase</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fit_functions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FIT_FUNCTION_TYPE</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">fit_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18123,7 +18107,7 @@ default, None.</p>
 <span class="sd">    parameters : sc.Dataset | Analysis | None, default=None</span>
 <span class="sd">        The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which</span>
 <span class="sd">        case the parameters will be extracted from the Analysis).</span>
-<span class="sd">    fit_functions : dict[str, ModelComponent | ComponentCollection | DiffusionModelBase] | None, default=None</span>
+<span class="sd">    fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None</span>
 <span class="sd">        Dictionary mapping parameter names to fit functions. The fit functions can be provided</span>
 <span class="sd">        as ModelComponents, ComponentCollections, or DiffusionModelBase objects.</span>
 <span class="sd">    fit_settings : dict[str, str | list[str]] | None, default=None</span>
