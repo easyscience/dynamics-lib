@@ -20,9 +20,9 @@ class TestPreparedFitData:
         return _PreparedFitData(
             fit_function_callables=[dummy_callable],
             fit_objects=[object()],
-            fit_function_display_names=["f"],
-            parameter_names=["p"],
-            expanded_parameter_names=["p"],
+            fit_function_display_names=['f'],
+            parameter_names=['p'],
+            expanded_parameter_names=['p'],
         )
 
     def test_initialization(self, prepared_data, dummy_callable):

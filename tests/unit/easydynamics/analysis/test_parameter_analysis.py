@@ -15,35 +15,29 @@ from easydynamics.sample_model.diffusion_model import BrownianTranslationalDiffu
 class TestParameterAnalysis:
     @pytest.fixture
     def dataset(self):
-        Q = sc.array(dims=["Q"], values=[0.1, 0.2])
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2])
         return sc.Dataset(
             data={
-                "parameter1": sc.DataArray(
-                    data=sc.array(
-                        dims=["Q"], values=[1.0, 2.0], variances=[0.1, 0.2], unit="meV"
-                    ),
-                    coords={"Q": Q},
+                'parameter1': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, 2.0], variances=[0.1, 0.2], unit='meV'),
+                    coords={'Q': Q},
                 ),
-                "parameter2": sc.DataArray(
+                'parameter2': sc.DataArray(
                     data=sc.array(
-                        dims=["Q"],
+                        dims=['Q'],
                         values=[1.5, 2.5],
                         variances=[0.15, 0.25],
-                        unit="1/meV",
+                        unit='1/meV',
                     ),
-                    coords={"Q": Q},
+                    coords={'Q': Q},
                 ),
-                "parameter3 area": sc.DataArray(
-                    data=sc.array(
-                        dims=["Q"], values=[4.0, 5.0], variances=[0.3, 0.5], unit="meV"
-                    ),
-                    coords={"Q": Q},
+                'parameter3 area': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[4.0, 5.0], variances=[0.3, 0.5], unit='meV'),
+                    coords={'Q': Q},
                 ),
-                "parameter3 width": sc.DataArray(
-                    data=sc.array(
-                        dims=["Q"], values=[6.0, 7.0], variances=[0.6, 0.7], unit="meV"
-                    ),
-                    coords={"Q": Q},
+                'parameter3 width': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[6.0, 7.0], variances=[0.6, 0.7], unit='meV'),
+                    coords={'Q': Q},
                 ),
             }
         )
@@ -54,7 +48,7 @@ class TestParameterAnalysis:
         func2 = Lorentzian()
         return ParameterAnalysis(
             parameters=dataset,
-            fit_functions={"parameter1": func1, "parameter3 area": func2},
+            fit_functions={'parameter1': func1, 'parameter3 area': func2},
         )
 
     @pytest.fixture
@@ -62,8 +56,8 @@ class TestParameterAnalysis:
         func = BrownianTranslationalDiffusion()
         return ParameterAnalysis(
             parameters=dataset,
-            fit_functions={"parameter3": func},
-            fit_settings={"parameter3": ["area", "width"]},
+            fit_functions={'parameter3': func},
+            fit_settings={'parameter3': ['area', 'width']},
         )
 
     @pytest.fixture
@@ -77,8 +71,8 @@ class TestParameterAnalysis:
         func3 = BrownianTranslationalDiffusion()
         return ParameterAnalysis(
             parameters=dataset,
-            fit_functions={"parameter1": funcs, "parameter3": func3},
-            fit_settings={"parameter3": ["area", "width"]},
+            fit_functions={'parameter1': funcs, 'parameter3': func3},
+            fit_settings={'parameter3': ['area', 'width']},
         )
 
     def test_parameter_analysis_initialization(self, parameter_analysis):
@@ -88,17 +82,17 @@ class TestParameterAnalysis:
         # Parameters
         assert isinstance(parameter_analysis.parameters, sc.Dataset)
         assert set(parameter_analysis.parameters.keys()) == {
-            "parameter1",
-            "parameter2",
-            "parameter3 area",
-            "parameter3 width",
+            'parameter1',
+            'parameter2',
+            'parameter3 area',
+            'parameter3 width',
         }
 
         # Fit functions
         assert isinstance(parameter_analysis.fit_functions, dict)
         assert set(parameter_analysis.fit_functions.keys()) == {
-            "parameter1",
-            "parameter3 area",
+            'parameter1',
+            'parameter3 area',
         }
 
         # Fit settings default
@@ -119,7 +113,7 @@ class TestParameterAnalysis:
         assert len(prepared.fit_function_display_names) == n_funcs
 
         # Parameter names should match input keys
-        assert prepared.parameter_names == ["parameter1", "parameter3 area"]
+        assert prepared.parameter_names == ['parameter1', 'parameter3 area']
 
         # Expanded names should match what exists in dataset
         for name in prepared.expanded_parameter_names:
@@ -132,33 +126,33 @@ class TestParameterAnalysis:
         # THEN EXPECT
         assert isinstance(parameters, sc.Dataset)
         assert set(parameters.keys()) == {
-            "parameter1",
-            "parameter2",
-            "parameter3 area",
-            "parameter3 width",
+            'parameter1',
+            'parameter2',
+            'parameter3 area',
+            'parameter3 width',
         }
 
         # WHEN
-        Q = sc.array(dims=["Q"], values=[0.1, 0.2])
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2])
         new_data = sc.Dataset(
             data={
-                "parameter4": sc.DataArray(
+                'parameter4': sc.DataArray(
                     data=sc.array(
-                        dims=["Q"],
+                        dims=['Q'],
                         values=[71.0, 12.0],
                         variances=[1.1, 2.2],
-                        unit="meV",
+                        unit='meV',
                     ),
-                    coords={"Q": Q},
+                    coords={'Q': Q},
                 ),
-                "parameter5": sc.DataArray(
+                'parameter5': sc.DataArray(
                     data=sc.array(
-                        dims=["Q"],
+                        dims=['Q'],
                         values=[8.5, 0.5],
                         variances=[2.15, 1.25],
-                        unit="1/meV",
+                        unit='1/meV',
                     ),
-                    coords={"Q": Q},
+                    coords={'Q': Q},
                 ),
             }
         )

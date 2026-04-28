@@ -3,6 +3,7 @@
 """EasyDynamics library."""
 
 from easydynamics.analysis import Analysis
+from easydynamics.analysis.fit_bindings import FitBinding
 from easydynamics.analysis.parameter_analysis import ParameterAnalysis
 from easydynamics.experiment import Experiment
 from easydynamics.settings.convolution_settings import ConvolutionSettings
@@ -13,5 +14,6 @@ __all__ = [
     'ConvolutionSettings',
     'DetailedBalanceSettings',
     'Experiment',
+    'FitBinding',
     'ParameterAnalysis',
 ]
