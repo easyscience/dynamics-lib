@@ -8097,7 +8097,8 @@ applied to the sample model.</p>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NumericalConvolution</span><span class="p">(</span><span class="n">NumericalConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Numerical convolution of a ComponentCollection with a ComponentCollection using FFT.</span>
 
@@ -8180,14 +8181,15 @@ applied to the sample model.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
 
         <span class="c1"># Give warnings if peaks are very wide or very narrow</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span>
-            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;sample model&#39;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span>
-            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;resolution model&#39;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">suppress_warnings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span>
+                <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;sample model&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span>
+                <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;resolution model&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Evaluate sample model. If called via the Convolution class,</span>
         <span class="c1"># delta functions are already filtered out.</span>
@@ -8713,7 +8715,8 @@ energy. Includes detailed balance correction if temperature is provided.</p>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8731,14 +8734,15 @@ energy. Includes detailed balance correction if temperature is provided.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_energy_grid</span><span class="p">()</span>
 
     <span class="c1"># Give warnings if peaks are very wide or very narrow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;sample model&#39;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span>
-        <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;resolution model&#39;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolution_settings</span><span class="o">.</span><span class="n">suppress_warnings</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;sample model&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_width_thresholds</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;resolution model&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="c1"># Evaluate sample model. If called via the Convolution class,</span>
     <span class="c1"># delta functions are already filtered out.</span>
