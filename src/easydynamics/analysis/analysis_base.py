@@ -40,7 +40,7 @@ class AnalysisBase(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        display_name : str | None, default="MyAnalysis"
+        display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
