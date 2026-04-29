@@ -55,7 +55,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         fit_settings : dict[str, str | list[str]] | None, default=None
             A dictionary mapping parameter names to fit settings. The fit settings can be provided
             as strings or lists of strings. If None, default fit settings are used.
-        display_name : str | None, default="ParameterAnalysis"
+        display_name : str | None, default='ParameterAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
