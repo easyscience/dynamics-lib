@@ -58,27 +58,25 @@ class TestConvolutionSettings:
         assert convolution_settings.suppress_warnings is False
 
     @pytest.mark.parametrize(
-        "invalid_input, expected_exception, match",
+        'invalid_input, expected_exception, match',
         [
-            ({"extension_factor": "0.2"}, TypeError, "must be a number"),
-            ({"extension_factor": -0.1}, ValueError, "must be non-negative"),
-            ({"upsample_factor": "5"}, TypeError, "must be a numerical value or None"),
-            ({"upsample_factor": 1.0}, ValueError, "must be greater than 1"),
-            ({"upsample_factor": 0.5}, ValueError, "must be greater than 1"),
-            ({"suppress_warnings": "yes"}, TypeError, r"must be True or False"),
+            ({'extension_factor': '0.2'}, TypeError, 'must be a number'),
+            ({'extension_factor': -0.1}, ValueError, 'must be non-negative'),
+            ({'upsample_factor': '5'}, TypeError, 'must be a numerical value or None'),
+            ({'upsample_factor': 1.0}, ValueError, 'must be greater than 1'),
+            ({'upsample_factor': 0.5}, ValueError, 'must be greater than 1'),
+            ({'suppress_warnings': 'yes'}, TypeError, r'must be True or False'),
         ],
         ids=[
-            "extension_factor_not_numeric",
-            "extension_factor_negative",
-            "upsample_factor_not_numeric",
-            "upsample_factor_equal_1",
-            "upsample_factor_less_than_1",
-            "suppress_warnings_not_boolean",
+            'extension_factor_not_numeric',
+            'extension_factor_negative',
+            'upsample_factor_not_numeric',
+            'upsample_factor_equal_1',
+            'upsample_factor_less_than_1',
+            'suppress_warnings_not_boolean',
         ],
     )
-    def test_init_raises_for_invalid_input(
-        self, invalid_input, expected_exception, match
-    ):
+    def test_init_raises_for_invalid_input(self, invalid_input, expected_exception, match):
         """
         Test that initialization raises appropriate exceptions for
         invalid input parameters.
@@ -88,12 +86,12 @@ class TestConvolutionSettings:
             ConvolutionSettings(**invalid_input)
 
     @pytest.mark.parametrize(
-        "value",
+        'value',
         [2, 5.0, None],
         ids=[
-            "integer_valid",
-            "float_valid",
-            "none_valid",
+            'integer_valid',
+            'float_valid',
+            'none_valid',
         ],
     )
     def test_upsample_factor_setter_valid(self, default_convolution_settings, value):
@@ -112,16 +110,16 @@ class TestConvolutionSettings:
         assert settings.convolution_plan_is_valid is False
 
     @pytest.mark.parametrize(
-        "value, expected_exception, match",
+        'value, expected_exception, match',
         [
-            ("5", TypeError, "must be a numerical value or None"),
-            (1.0, ValueError, "must be greater than 1"),
-            (0.5, ValueError, "must be greater than 1"),
+            ('5', TypeError, 'must be a numerical value or None'),
+            (1.0, ValueError, 'must be greater than 1'),
+            (0.5, ValueError, 'must be greater than 1'),
         ],
         ids=[
-            "not_numeric",
-            "equal_1",
-            "less_than_1",
+            'not_numeric',
+            'equal_1',
+            'less_than_1',
         ],
     )
     def test_upsample_factor_setter_invalid(
@@ -136,13 +134,13 @@ class TestConvolutionSettings:
             default_convolution_settings.upsample_factor = value
 
     @pytest.mark.parametrize(
-        "value",
+        'value',
         [0.0, 0.2, 1, 5.5],
         ids=[
-            "zero",
-            "typical_fraction",
-            "integer",
-            "float",
+            'zero',
+            'typical_fraction',
+            'integer',
+            'float',
         ],
     )
     def test_extension_factor_setter_valid(self, default_convolution_settings, value):
@@ -154,20 +152,18 @@ class TestConvolutionSettings:
         default_convolution_settings.extension_factor = value
 
         # EXPECT
-        assert default_convolution_settings.extension_factor == pytest.approx(
-            float(value)
-        )
+        assert default_convolution_settings.extension_factor == pytest.approx(float(value))
         assert default_convolution_settings.convolution_plan_is_valid is False
 
     @pytest.mark.parametrize(
-        "value, expected_exception, match",
+        'value, expected_exception, match',
         [
-            ("0.2", TypeError, "must be a number"),
-            (-0.1, ValueError, "must be non-negative"),
+            ('0.2', TypeError, 'must be a number'),
+            (-0.1, ValueError, 'must be non-negative'),
         ],
         ids=[
-            "not_numeric",
-            "negative",
+            'not_numeric',
+            'negative',
         ],
     )
     def test_extension_factor_setter_invalid(
@@ -183,11 +179,11 @@ class TestConvolutionSettings:
             default_convolution_settings.extension_factor = value
 
     @pytest.mark.parametrize(
-        "value",
+        'value',
         [True, False],
         ids=[
-            "true",
-            "false",
+            'true',
+            'false',
         ],
     )
     def test_convolution_plan_is_valid_setter_valid(
@@ -205,16 +201,16 @@ class TestConvolutionSettings:
         assert default_convolution_settings.convolution_plan_is_valid is value
 
     @pytest.mark.parametrize(
-        "value, expected_exception, match",
+        'value, expected_exception, match',
         [
-            ("True", TypeError, "must be True or False"),
-            (1, TypeError, "must be True or False"),
-            (None, TypeError, "must be True or False"),
+            ('True', TypeError, 'must be True or False'),
+            (1, TypeError, 'must be True or False'),
+            (None, TypeError, 'must be True or False'),
         ],
         ids=[
-            "string",
-            "int",
-            "none",
+            'string',
+            'int',
+            'none',
         ],
     )
     def test_convolution_plan_is_valid_setter_invalid(
@@ -237,8 +233,8 @@ class TestConvolutionSettings:
 
     def test_suppress_warnings_setter_invalid(self, default_convolution_settings):
         # WHEN / THEN / EXPECT
-        with pytest.raises(TypeError, match=r"must be True or False"):
-            default_convolution_settings.suppress_warnings = "True"
+        with pytest.raises(TypeError, match=r'must be True or False'):
+            default_convolution_settings.suppress_warnings = 'True'
 
     def test_repr_default(self, default_convolution_settings):
         # WHEN
@@ -246,9 +242,9 @@ class TestConvolutionSettings:
 
         # EXPECT
         assert repr_str == (
-            f"ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, "
-            f"extension_factor={default_convolution_settings.extension_factor}, "
-            f"suppress_warnings={default_convolution_settings.suppress_warnings})"
+            f'ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, '
+            f'extension_factor={default_convolution_settings.extension_factor}, '
+            f'suppress_warnings={default_convolution_settings.suppress_warnings})'
         )
 
     def test_repr_reflects_updated_values(self, default_convolution_settings):
@@ -260,7 +256,7 @@ class TestConvolutionSettings:
 
         # EXPECT
         assert repr_str == (
-            f"ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, "
-            f"extension_factor={default_convolution_settings.extension_factor}, "
-            f"suppress_warnings={default_convolution_settings.suppress_warnings})"
+            f'ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, '
+            f'extension_factor={default_convolution_settings.extension_factor}, '
+            f'suppress_warnings={default_convolution_settings.suppress_warnings})'
         )

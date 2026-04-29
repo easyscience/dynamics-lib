@@ -456,19 +456,30 @@ class AnalysisBase(EasyDynamicsModelBase):
         ------
         TypeError
             If rtol or atol is not a float.
+        ValueError
+            If rtol or atol is negative.
         """
 
-        if not isinstance(rtol, float):
+        if not isinstance(rtol, (int, float)):
             raise TypeError(f'rtol must be a float. Got {type(rtol)}.')
 
-        if not isinstance(atol, float):
+        if rtol < 0:
+            raise ValueError(f'rtol must be non-negative. Got {rtol}.')
+
+        if not isinstance(atol, (int, float)):
             raise TypeError(f'atol must be a float. Got {type(atol)}.')
+
+        if atol < 0:
+            raise ValueError(f'atol must be non-negative. Got {atol}.')
 
         parameters = self.get_all_parameters()
         at_bounds = []
 
         for p in parameters:
             value = p.value
+            if not np.isfinite(value):
+                at_bounds.append(p)
+                continue
 
             at_min = not np.isneginf(p.min) and np.isclose(value, p.min, rtol=rtol, atol=atol)
 

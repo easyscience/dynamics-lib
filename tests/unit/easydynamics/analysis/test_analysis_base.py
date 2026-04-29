@@ -441,34 +441,51 @@ class TestAnalysisBase:
         assert components[1].center in near_bounds
 
     @pytest.mark.parametrize(
-        'rtol, atol, expected_param',
+        'rtol, atol, expected_param, expected_error',
         [
-            ('1e-5', 1e-8, 'rtol'),  # str
-            (None, 1e-8, 'rtol'),  # None
-            (1e-5, '1e-8', 'atol'),  # str
-            (1e-5, None, 'atol'),  # None
+            ('1e-5', 1e-8, 'rtol', TypeError),  # str
+            (None, 1e-8, 'rtol', TypeError),  # None
+            (1e-5, '1e-8', 'atol', TypeError),  # str
+            (1e-5, None, 'atol', TypeError),  # None
+            (-1e-5, 1e-8, 'rtol', ValueError),  # negative rtol
+            (1e-5, -1e-8, 'atol', ValueError),  # negative atol
         ],
         ids=[
             'rtol as string',
             'rtol as None',
             'atol as string',
             'atol as None',
+            'rtol negative',
+            'atol negative',
         ],
     )
-    def test_get_parameters_near_bounds_type_errors(
-        self,
-        analysis_base_with_components,
-        rtol,
-        atol,
-        expected_param,
+    def test_get_parameters_near_bounds_errors(
+        self, analysis_base_with_components, rtol, atol, expected_param, expected_error
     ):
-        with pytest.raises(TypeError) as exc:
+        with pytest.raises(expected_error) as exc:
             analysis_base_with_components.get_parameters_near_bounds(
                 rtol=rtol,
                 atol=atol,
             )
 
         assert expected_param in str(exc.value)
+
+    def test_not_finite_parameters(self, analysis_base_with_components):
+        # WHEN
+        components = analysis_base_with_components.sample_model.get_component_collection(
+            Q_index=0
+        ).components
+        components[0].area.value = np.inf
+        components[1].center.value = np.nan
+
+        # THEN
+        near_bounds = analysis_base_with_components.get_parameters_near_bounds()
+
+        # EXPECT
+        assert isinstance(near_bounds, list)
+        assert len(near_bounds) == 2
+        assert components[0].area in near_bounds
+        assert components[1].center in near_bounds
 
     #############
     # Private methods
