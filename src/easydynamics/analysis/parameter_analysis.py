@@ -49,12 +49,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         parameters : sc.Dataset | Analysis | None, default=None
             The parameters to analyze. Can be provided as a sc.Dataset or as an Analysis (in which
             case the parameters will be extracted from the Analysis).
-        fit_functions : dict[str, FIT_FUNCTION_TYPE] | None, default=None
-            Dictionary mapping parameter names to fit functions. The fit functions can be provided
-            as ModelComponents, ComponentCollections, or DiffusionModelBase objects.
-        fit_settings : dict[str, str | list[str]] | None, default=None
-            A dictionary mapping parameter names to fit settings. The fit settings can be provided
-            as strings or lists of strings. If None, default fit settings are used.
+        bindings : FitBinding | list[FitBinding] | None, default=None
+            The fit bindings to use for fitting the parameters. Can be a single FitBinding or a
+            list of FitBindings. If None, no fit bindings are provided.
         display_name : str | None, default='ParameterAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
@@ -137,6 +134,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         ValueError
             If no parameters DataSet is provided. If no fit functions are provided. If no parameter
             names are found for the fit functions.
+
+        RuntimeError
+            If there is a mismatch between the number of parameter names and the number of
+            callables in the fit bindings.
         """
 
         if self._parameters is None:
