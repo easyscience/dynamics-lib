@@ -40,7 +40,7 @@ class AnalysisBase(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyAnalysis'
+        display_name : str | None, default="MyAnalysis"
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
@@ -431,6 +431,53 @@ class AnalysisBase(EasyDynamicsModelBase):
         This is important for accurate fitting and interpretation of the results.
         """
         self.instrument_model.normalize_resolution()
+
+    def get_parameters_near_bounds(
+        self,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+    ) -> list[Parameter]:
+        """
+        Get a list of parameters that are near their bounds.
+
+        Parameters
+        ----------
+        rtol : float, default=1e-5
+            Relative tolerance for determining if a parameter is near its bound.
+        atol : float, default=1e-8
+            Absolute tolerance for determining if a parameter is near its bound.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of parameters that are near their bounds.
+
+        Raises
+        ------
+        TypeError
+            If rtol or atol is not a float.
+        """
+
+        if not isinstance(rtol, float):
+            raise TypeError(f'rtol must be a float. Got {type(rtol)}.')
+
+        if not isinstance(atol, float):
+            raise TypeError(f'atol must be a float. Got {type(atol)}.')
+
+        parameters = self.get_all_parameters()
+        at_bounds = []
+
+        for p in parameters:
+            value = p.value
+
+            at_min = not np.isneginf(p.min) and np.isclose(value, p.min, rtol=rtol, atol=atol)
+
+            at_max = not np.isposinf(p.max) and np.isclose(value, p.max, rtol=rtol, atol=atol)
+
+            if at_min or at_max:
+                at_bounds.append(p)
+
+        return at_bounds
 
     #############
     # Private methods
