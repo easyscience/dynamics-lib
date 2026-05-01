@@ -70,15 +70,17 @@ class FitBinding(EasyDynamicsBase):
 
         2. Usage with a DiffusionModelBase and specific modes:
         >>> brownian_diffusion_model = sm.BrownianTranslationalDiffusion(
-        ...     display_name='Brownian Diffusion', diffusion_coefficient=2.4e-9, scale=0.5
+        ...     display_name='Brownian Translational Diffusion',
+        ...     diffusion_coefficient=2.4e-9,
+        ...     scale=0.5,
         ... )
         >>> binding = edyn.FitBinding(
         ...     parameter_name='Lorentzian',
         ...     model=brownian_diffusion_model,
         ...     modes=['area', 'width'],
         ... )
-        FitBinding(parameter_name=Lorentzian, model=Brownian Diffusion, modes=['area', 'width'],
-        display_name=FitBinding_1, unique_name=FitBinding_1)
+        FitBinding(parameter_name=Lorentzian, model=Brownian Translational Diffusion,
+        modes=['area', 'width'], display_name=FitBinding_1, unique_name=FitBinding_1)
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)

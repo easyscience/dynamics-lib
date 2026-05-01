@@ -132,16 +132,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If no parameters DataSet is provided. If no fit functions are provided. If no parameter
+            If no parameters Dataset is provided. If no fit functions are provided. If no parameter
             names are found for the fit functions.
-
-        RuntimeError
-            If there is a mismatch between the number of parameter names and the number of
-            callables in the fit bindings.
         """
 
         if self._parameters is None:
-            raise ValueError('No parameters DataSet provided.')
+            raise ValueError('No parameters Dataset provided.')
 
         if not self._bindings:
             raise ValueError('No fit bindings provided.')
@@ -155,13 +151,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             param_names = binding.get_parameter_names()
             callables = binding.build_callables()
 
-            if len(param_names) != len(callables):
-                raise RuntimeError('Mismatch between parameter names and callables.')
-
             for pname, func in zip(param_names, callables, strict=True):
                 if pname not in self._parameters:
                     raise ValueError(
-                        f"Dataset key '{pname}' from binding '{binding.parameter_name}' not found."
+                        f"Parameter '{pname}' from binding '{binding.unique_name}' "
+                        f'not found in parameters Dataset.'
                     )
 
                 x, y, weight = self._get_xyweight_from_dataset(pname)
@@ -321,10 +315,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         list
             A list of all variables from the fit functions.
         """
-        variables = []
+        variables = set()
         for b in self._bindings:
-            variables.extend(b.model.get_all_variables())
-        return variables
+            variables.update(b.model.get_all_variables())
+        return list(variables)
 
     #############
     # Private methods: verification and preparation
