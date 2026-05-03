@@ -211,7 +211,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if self._parameters is None:
             raise ValueError('No parameters available to plot.')
 
-        model_dataset = self.build_model_dataset(self._bindings)
+        model_dataset = self.calculate_model_dataset(self._bindings)
 
         # Need a check of names
         # for name in names:
@@ -277,10 +277,38 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         return pp.plot(data_and_model, **plot_kwargs)
 
-    def build_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
+    def calculate_model_dataset(self, bindings: list[FitBinding]) -> sc.Dataset:
         """
         Evaluate all bindings into a sc.Dataset of model predictions.
+
+        Parameters
+        ----------
+        bindings : list[FitBinding]
+            The bindings to evaluate.
+
+        Returns
+        -------
+        sc.Dataset
+            A sc.Dataset containing the model predictions for all bindings.
+
+        Raises
+        ------
+        ValueError
+            If any parameter name from the bindings is not found in the parameters DataSet.
+
+        TypeError
+            If bindings is not a list of FitBinding objects.
         """
+
+        if self.parameters is None:
+            raise ValueError('No parameters Dataset provided.')
+
+        if not bindings:
+            raise ValueError('No fit bindings provided.')
+
+        if not isinstance(bindings, list) or not all(isinstance(b, FitBinding) for b in bindings):
+            raise TypeError('bindings must be a list of FitBinding objects.')
+
         arrays = {}
 
         for b in bindings:
@@ -289,7 +317,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             callables = b.build_callables()
 
             for pname, mname, func in zip(param_names, model_names, callables, strict=True):
-                da = self._parameters[pname]
+                if pname not in self.parameters:
+                    raise ValueError(
+                        f"Parameter '{pname}' from binding '{b.unique_name}' "
+                        f'not found in parameters Dataset.'
+                    )
+                da = self.parameters[pname]
                 x = da.coords['Q']
 
                 y_model = func(x.values)
@@ -301,9 +334,27 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         return sc.Dataset(arrays)
 
     def append_binding(self, binding: FitBinding) -> None:
+        """
+        Append a FitBinding to the list of bindings for the parameter analysis.
+
+        Parameters
+        ----------
+        binding : FitBinding
+            The FitBinding to append.
+
+        Raises
+        ------
+        TypeError
+            If binding is not a FitBinding object.
+        """
+        if not isinstance(binding, FitBinding):
+            raise TypeError('binding must be a FitBinding object.')
         self._bindings.append(binding)
 
     def clear_bindings(self) -> None:
+        """
+        Clear all FitBindings from the list of bindings for the parameter analysis.
+        """
         self._bindings.clear()
 
     def get_all_variables(self) -> list:
