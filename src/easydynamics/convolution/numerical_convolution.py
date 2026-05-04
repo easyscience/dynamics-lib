@@ -98,14 +98,15 @@ class NumericalConvolution(NumericalConvolutionBase):
             self._energy_grid = self._create_energy_grid()
 
         # Give warnings if peaks are very wide or very narrow
-        self._check_width_thresholds(
-            model=self.sample_components,
-            model_name='sample model',
-        )
-        self._check_width_thresholds(
-            model=self.resolution_components,
-            model_name='resolution model',
-        )
+        if not self.convolution_settings.suppress_warnings:
+            self._check_width_thresholds(
+                model=self.sample_components,
+                model_name='sample model',
+            )
+            self._check_width_thresholds(
+                model=self.resolution_components,
+                model_name='resolution model',
+            )
 
         # Evaluate sample model. If called via the Convolution class,
         # delta functions are already filtered out.

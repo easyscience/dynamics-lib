@@ -432,6 +432,64 @@ class AnalysisBase(EasyDynamicsModelBase):
         """
         self.instrument_model.normalize_resolution()
 
+    def get_parameters_near_bounds(
+        self,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+    ) -> list[Parameter]:
+        """
+        Get a list of parameters that are near their bounds.
+
+        Parameters
+        ----------
+        rtol : float, default=1e-5
+            Relative tolerance for determining if a parameter is near its bound.
+        atol : float, default=1e-8
+            Absolute tolerance for determining if a parameter is near its bound.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of parameters that are near their bounds.
+
+        Raises
+        ------
+        TypeError
+            If rtol or atol is not a float.
+        ValueError
+            If rtol or atol is negative.
+        """
+
+        if not isinstance(rtol, (int, float)):
+            raise TypeError(f'rtol must be a float. Got {type(rtol)}.')
+
+        if rtol < 0:
+            raise ValueError(f'rtol must be non-negative. Got {rtol}.')
+
+        if not isinstance(atol, (int, float)):
+            raise TypeError(f'atol must be a float. Got {type(atol)}.')
+
+        if atol < 0:
+            raise ValueError(f'atol must be non-negative. Got {atol}.')
+
+        parameters = self.get_all_parameters()
+        at_bounds = []
+
+        for p in parameters:
+            value = p.value
+            if not np.isfinite(value):
+                at_bounds.append(p)
+                continue
+
+            at_min = not np.isneginf(p.min) and np.isclose(value, p.min, rtol=rtol, atol=atol)
+
+            at_max = not np.isposinf(p.max) and np.isclose(value, p.max, rtol=rtol, atol=atol)
+
+            if at_min or at_max:
+                at_bounds.append(p)
+
+        return at_bounds
+
     #############
     # Private methods
     #############
