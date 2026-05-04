@@ -9,7 +9,8 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from easydynamics.analysis.fit_bindings import FitBinding
+from easydynamics.analysis.analysis import Analysis
+from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.analysis.parameter_analysis import ParameterAnalysis
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.polynomial import Polynomial
@@ -204,6 +205,50 @@ class TestParameterAnalysis:
             np.testing.assert_allclose(w[0], expected_w)
 
             assert result is mock_result
+
+    def test_plot_not_in_notebook_raises(self, parameter_analysis):
+        # WHEN / THEN / EXPECT
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=False,
+            ),
+            pytest.raises(
+                RuntimeError,
+                match=r'can only be used in a Jupyter notebook environment',
+            ),
+        ):
+            parameter_analysis.plot()
+
+    def test_plot_no_parameters_raises(self, parameter_analysis):
+        # WHEN
+        parameter_analysis.parameters = None
+
+        # THEN EXPECT
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(ValueError, match=r'No parameters available to plot.'),
+        ):
+            parameter_analysis.plot()
+
+    # def test_plot_inconsistent_units_raises(self, parameter_analysis):
+    #     # WHEN
+
+    #     # THEN EXPECT
+    #     with (
+    #         patch(
+    #             "easydynamics.analysis.parameter_analysis._in_notebook",
+    #             return_value=True,
+    #         ),
+    #         pytest.raises(
+    #             ValueError,
+    #             match=r"Units are not consistent, and cannot be plotted together.",
+    #         ),
+    #     ):
+    #         parameter_analysis.plot()
 
     # TEST PLOT
     # TEST PLOT
@@ -516,3 +561,165 @@ class TestParameterAnalysis:
         # WHEN THEN EXPECT
         with pytest.raises((ValueError, TypeError)):
             parameter_analysis._verify_bindings(invalid_bindings)
+
+    def test_verify_parameters_none(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        assert parameter_analysis._verify_parameters(None) is None
+
+    def test_verify_parameters_wrong_type(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            TypeError, match=r'parameters must be a sc.Dataset, an Analysis, or None'
+        ):
+            parameter_analysis._verify_parameters('not_a_dataset_or_analysis')
+
+    def test_verify_parameters_wrong_coordinate(self, parameter_analysis):
+        # WHEN
+        T = sc.array(dims=['T'], values=[0.1, 0.2])
+        wrong_dataset = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(dims=['T'], values=[1.0, 2.0], variances=[0.1, 0.2], unit='meV'),
+                    coords={'T': T},
+                ),
+            }
+        )
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match="parameters must have a 'Q' coordinate"):
+            parameter_analysis._verify_parameters(wrong_dataset)
+
+    @pytest.mark.parametrize(
+        'input_type',
+        ['dataset', 'analysis'],
+    )
+    def test_verify_parameters_valid_inputs(self, parameter_analysis, dataset, input_type):
+        # WHEN
+        if input_type == 'dataset':
+            input_value = dataset
+        else:
+            mock_analysis = MagicMock(spec=Analysis)
+            mock_analysis.parameters_to_dataset.return_value = dataset
+            input_value = mock_analysis
+
+        # THEN
+        result = parameter_analysis._verify_parameters(input_value)
+
+        # EXPECT
+        assert result is dataset
+
+        if input_type == 'analysis':
+            input_value.parameters_to_dataset.assert_called_once()
+
+    def test_normalize_names_none(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        assert parameter_analysis._normalize_names(None) is None
+
+    def test_normalize_names_wrong_type(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError, match=r'names must be a string, a list of strings, or None.'
+        ):
+            parameter_analysis._normalize_names(123)
+
+    def test_normalize_names_list_with_non_string(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=r'All names in the list must be strings.'):
+            parameter_analysis._normalize_names(['parameter1', 123])
+
+    def test_normalize_names_nonexistent_parameter(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match=r"Parameter name 'nonexistent_parameter' not found in parameters Dataset.",
+        ):
+            parameter_analysis._normalize_names('nonexistent_parameter')
+
+        with pytest.raises(
+            ValueError,
+            match=r"Parameter name 'nonexistent_parameter' not found in parameters Dataset.",
+        ):
+            parameter_analysis._normalize_names(['parameter1', 'nonexistent_parameter'])
+
+    def test_normalize_names_valid_string(self, parameter_analysis):
+        # WHEN
+        result = parameter_analysis._normalize_names('parameter1')
+
+        # THEN EXPECT
+        assert result == ['parameter1']
+
+    def test_normalize_names_valid_list(self, parameter_analysis):
+        # WHEN
+        result = parameter_analysis._normalize_names(['parameter1', 'parameter2'])
+
+        # THEN EXPECT
+        assert result == ['parameter1', 'parameter2']
+
+    def test_get_xyweight_from_dataset_no_parameters_raises(self, parameter_analysis):
+        # WHEN
+        parameter_analysis.parameters = None
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='No parameters Dataset provided'):
+            parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+    def test_get_xyweight_from_dataset_wrong_parameter_name_raises(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match="Parameter name 'nonexistent_parameter' not found in parameters Dataset",
+        ):
+            parameter_analysis._get_xyweight_from_dataset('nonexistent_parameter')
+
+    @pytest.mark.parametrize(
+        'non_finite_variance',
+        [np.inf, -np.inf, np.nan, -1.0, 0.0],
+        ids=['inf', '-inf', 'nan', 'negative', 'zero'],
+    )
+    def test_get_xyweight_from_dataset_non_finite_weights_raises(
+        self, parameter_analysis, non_finite_variance
+    ):
+        # WHEN
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2])
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(
+                        dims=['Q'],
+                        values=[1.0, 2.0],
+                        variances=[1.0, non_finite_variance],
+                        unit='meV',
+                    ),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        # THEN EXPECT
+        with pytest.raises(
+            ValueError, match="Non-finite variances found for parameter 'parameter1'"
+        ):
+            parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+    def test_get_xyweight_from_dataset_valid(self, parameter_analysis):
+        # WHEN THEN
+        x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+        # EXPECT
+        np.testing.assert_allclose(x, [0.1, 0.2])
+        np.testing.assert_allclose(y, [1.0, 2.0])
+        expected_w = 1 / np.sqrt([0.1, 0.2])
+        np.testing.assert_allclose(w, expected_w)
+
+    def test_repr(self, parameter_analysis):
+        # WHEN
+        repr_str = repr(parameter_analysis)
+
+        # THEN EXPECT
+        assert isinstance(repr_str, str)
+        assert 'ParameterAnalysis' in repr_str
+        assert f'display_name={parameter_analysis.display_name}' in repr_str
+        assert f'unique_name={parameter_analysis.unique_name}' in repr_str
+        assert f'n_parameters={len(parameter_analysis.parameters)}' in repr_str
+        assert 'parameter_names=' in repr_str
+        assert 'bindings=' in repr_str
