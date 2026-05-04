@@ -1738,19 +1738,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#easydynamics.analysis.fit_bindings" class="md-nav__link">
+  <a href="#easydynamics.analysis.fit_binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        fit_bindings
+        fit_binding
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="fit_bindings">
+    <nav class="md-nav" aria-label="fit_binding">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#easydynamics.analysis.fit_bindings.FitBinding" class="md-nav__link">
+  <a href="#easydynamics.analysis.fit_binding.FitBinding" class="md-nav__link">
     <span class="md-ellipsis">
       
         FitBinding
@@ -2191,19 +2191,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#easydynamics.analysis.fit_bindings" class="md-nav__link">
+  <a href="#easydynamics.analysis.fit_binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        fit_bindings
+        fit_binding
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="fit_bindings">
+    <nav class="md-nav" aria-label="fit_binding">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#easydynamics.analysis.fit_bindings.FitBinding" class="md-nav__link">
+  <a href="#easydynamics.analysis.fit_binding.FitBinding" class="md-nav__link">
     <span class="md-ellipsis">
       
         FitBinding
@@ -6193,7 +6193,54 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
-<span class="normal">508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing fitted parameters.</span>
 
@@ -6357,7 +6404,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        names : str | list[str] | None, default=None</span>
-<span class="sd">            The names of the parameters to plot. If None, all parameters are plotted.</span>
+<span class="sd">            The names of the parameters to plot. If None, all parameters with bindings are plotted.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments to pass to the plotting function.</span>
 
@@ -6369,42 +6416,32 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet. If the</span>
-<span class="sd">            units of the specified parameters are not consistent.</span>
+<span class="sd">            If the units of the specified parameters are not consistent.</span>
 <span class="sd">        RuntimeError</span>
-<span class="sd">            If plot_data() is called outside of a Jupyter notebook environment.</span>
+<span class="sd">            If plot() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot_data() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
-        <span class="n">model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">)</span>
+        <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">)</span>
 
-        <span class="c1"># Need a check of names</span>
-        <span class="c1"># for name in names:</span>
-        <span class="c1">#     if name not in self._parameters:</span>
-        <span class="c1">#         raise ValueError(</span>
-        <span class="c1">#             f&quot;Parameter name &#39;{name}&#39; not found in parameters DataSet.&quot;</span>
-        <span class="c1">#         )</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+                <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">())</span>
 
-        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_names</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
-            <span class="n">model_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">model_dataset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">names</span><span class="p">})</span>
-
-        <span class="c1"># # Make a new Dataset with only the desired parameters.</span>
-        <span class="c1"># data = sc.Dataset(coords=self._parameters.coords)</span>
-
-        <span class="c1"># units = [self._parameters[name].unit for name in names]</span>
-        <span class="c1"># first_unit = units[0]</span>
-        <span class="c1"># if any(unit != first_unit for unit in units):</span>
-        <span class="c1">#     raise ValueError(</span>
-        <span class="c1">#         f&quot;Units are not consistent, and cannot be plotted together: {units}&quot;</span>
-        <span class="c1">#     )</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
@@ -6418,21 +6455,31 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="p">}</span>
 
         <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">model_arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
-            <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
-            <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
+        <span class="c1"># map parameter names to model names</span>
+        <span class="n">param_to_model</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+                <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+                <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-                <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
-                <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+                <span class="n">param_to_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
-                <span class="c1"># Data styling</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
+            <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+
+            <span class="c1"># Data styling</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+            <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
+                <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+                <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
                 <span class="c1"># Model styling</span>
                 <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
@@ -6443,7 +6490,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
-        <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_dataset</span><span class="p">)</span>
+        <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_arrays</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 
@@ -6464,7 +6511,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any parameter name from the bindings is not found in the parameters DataSet.</span>
+<span class="sd">            If any parameter name from the bindings is not found in the parameters Dataset.</span>
 
 <span class="sd">        TypeError</span>
 <span class="sd">            If bindings is not a list of FitBinding objects.</span>
@@ -6593,17 +6640,57 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        ValueError</span>
 <span class="sd">            If parameters is a sc.Dataset but does not have a &#39;Q&#39; coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parameters must be an sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;parameters must be a sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">):</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
 
-        <span class="k">if</span> <span class="n">verified_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize the names input to a list of strings and verify that they exist in the parameters</span>
+<span class="sd">        Dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        names : str | list[str] | None</span>
+<span class="sd">            The names to normalize and verify.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[str] | None</span>
+<span class="sd">            The normalized list of names, or None if names was None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any of the specified names are not found in the parameters Dataset, or if names is a</span>
+<span class="sd">            list that contains non-string elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;names must be a string, a list of strings, or None.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All names in the list must be strings.&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">names</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Private methods</span>
@@ -6613,7 +6700,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the x, y, and weight values for a given parameter name from the parameters DataSet.</span>
+<span class="sd">        Get the x, y, and weight values for a given parameter name from the parameters Dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -6628,17 +6715,24 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If the parameter name is not found in the parameters DataSet. If non-finite weights are</span>
+<span class="sd">            If the parameter name is not found in the parameters Dataset. If non-finite weights are</span>
 <span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
 
-        <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">weight</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Non-finite weights found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">variances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span>
+        <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">variances</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">variances</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Non-finite variances found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;cannot compute weights.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
@@ -6669,11 +6763,11 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6742,7 +6836,7 @@ case the parameters will be extracted from the Analysis).</p>
                 <code>bindings</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a> | <span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>] | None</code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a> | <span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6905,7 +6999,7 @@ default, None.</p>
                 <code>binding</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7029,7 +7123,7 @@ default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>] | None</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7085,7 +7179,7 @@ default, None.</p>
                 <code>bindings</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>]</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7144,7 +7238,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any parameter name from the bindings is not found in the parameters DataSet.</p>
+                <p>If any parameter name from the bindings is not found in the parameters Dataset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7241,7 +7335,7 @@ default, None.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any parameter name from the bindings is not found in the parameters DataSet.</span>
+<span class="sd">        If any parameter name from the bindings is not found in the parameters Dataset.</span>
 
 <span class="sd">    TypeError</span>
 <span class="sd">        If bindings is not a list of FitBinding objects.</span>
@@ -7700,7 +7794,7 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The names of the parameters to plot. If None, all parameters are plotted.</p>
+                <p>The names of the parameters to plot. If None, all parameters with bindings are plotted.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7774,8 +7868,7 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the parameters DataSet. If the
-units of the specified parameters are not consistent.</p>
+                <p>If the units of the specified parameters are not consistent.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7788,7 +7881,7 @@ units of the specified parameters are not consistent.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If plot_data() is called outside of a Jupyter notebook environment.</p>
+                <p>If plot() is called outside of a Jupyter notebook environment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7907,7 +8000,7 @@ units of the specified parameters are not consistent.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    names : str | list[str] | None, default=None</span>
-<span class="sd">        The names of the parameters to plot. If None, all parameters are plotted.</span>
+<span class="sd">        The names of the parameters to plot. If None, all parameters with bindings are plotted.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments to pass to the plotting function.</span>
 
@@ -7919,42 +8012,32 @@ units of the specified parameters are not consistent.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet. If the</span>
-<span class="sd">        units of the specified parameters are not consistent.</span>
+<span class="sd">        If the units of the specified parameters are not consistent.</span>
 <span class="sd">    RuntimeError</span>
-<span class="sd">        If plot_data() is called outside of a Jupyter notebook environment.</span>
+<span class="sd">        If plot() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot_data() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
-    <span class="n">model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">)</span>
+    <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">)</span>
 
-    <span class="c1"># Need a check of names</span>
-    <span class="c1"># for name in names:</span>
-    <span class="c1">#     if name not in self._parameters:</span>
-    <span class="c1">#         raise ValueError(</span>
-    <span class="c1">#             f&quot;Parameter name &#39;{name}&#39; not found in parameters DataSet.&quot;</span>
-    <span class="c1">#         )</span>
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">())</span>
 
-    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_names</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
-        <span class="n">model_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">model_dataset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">names</span><span class="p">})</span>
-
-    <span class="c1"># # Make a new Dataset with only the desired parameters.</span>
-    <span class="c1"># data = sc.Dataset(coords=self._parameters.coords)</span>
-
-    <span class="c1"># units = [self._parameters[name].unit for name in names]</span>
-    <span class="c1"># first_unit = units[0]</span>
-    <span class="c1"># if any(unit != first_unit for unit in units):</span>
-    <span class="c1">#     raise ValueError(</span>
-    <span class="c1">#         f&quot;Units are not consistent, and cannot be plotted together: {units}&quot;</span>
-    <span class="c1">#     )</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
     <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
@@ -7968,21 +8051,31 @@ units of the specified parameters are not consistent.</p>
     <span class="p">}</span>
 
     <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">model_arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
-        <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
-        <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
+    <span class="c1"># map parameter names to model names</span>
+    <span class="n">param_to_model</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+            <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
-            <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+            <span class="n">param_to_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
-            <span class="c1"># Data styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+
+        <span class="c1"># Data styling</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+        <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
+            <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+            <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
             <span class="c1"># Model styling</span>
             <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
@@ -7993,7 +8086,7 @@ units of the specified parameters are not consistent.</p>
     <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
-    <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_dataset</span><span class="p">)</span>
+    <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_arrays</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -16827,8 +16920,8 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
 
 
-<h2 id="easydynamics.analysis.fit_bindings" class="doc doc-heading">
-            <code>fit_bindings</code>
+<h2 id="easydynamics.analysis.fit_binding" class="doc doc-heading">
+            <code>fit_binding</code>
 
 
 </h2>
@@ -16868,7 +16961,7 @@ extra_parameters is not a Parameter, a list of Parameters, or None.</p>
 
 
 
-<h3 id="easydynamics.analysis.fit_bindings.FitBinding" class="doc doc-heading">
+<h3 id="easydynamics.analysis.fit_binding.FitBinding" class="doc doc-heading">
             <code>FitBinding</code>
 
 
@@ -16896,7 +16989,7 @@ fit function callable.</p>
 
 
               <details class="mkdocstrings-source">
-                <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+                <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
 <span class="normal"> 18</span>
 <span class="normal"> 19</span>
@@ -17532,7 +17625,7 @@ fit function callable.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.__init__" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.__init__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">parameter_name</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">modes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
@@ -17726,7 +17819,7 @@ strings, or None.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+              <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
@@ -17896,7 +17989,7 @@ strings, or None.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.__repr__" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.__repr__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
 
 </h4>
@@ -17937,7 +18030,7 @@ strings, or None.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+              <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span>
@@ -17983,7 +18076,7 @@ strings, or None.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.build_callables" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.build_callables" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">build_callables</span><span class="p">()</span></code>
 
 </h4>
@@ -18024,7 +18117,7 @@ strings, or None.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+              <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -18078,7 +18171,7 @@ strings, or None.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.get_model_names" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.get_model_names" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_model_names</span><span class="p">()</span></code>
 
 </h4>
@@ -18119,7 +18212,7 @@ strings, or None.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+              <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
@@ -18173,7 +18266,7 @@ strings, or None.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.get_parameter_names" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.get_parameter_names" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_parameter_names</span><span class="p">()</span></code>
 
 </h4>
@@ -18214,7 +18307,7 @@ strings, or None.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easydynamics/analysis/fit_bindings.py</code></summary>
+              <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
@@ -18275,7 +18368,7 @@ strings, or None.</p>
 
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.model" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.model" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">model</span></code>
 
   <span class="doc doc-labels">
@@ -18333,7 +18426,7 @@ DiffusionModelBase.</p>
 
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.modes" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.modes" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">modes</span></code>
 
   <span class="doc doc-labels">
@@ -18391,7 +18484,7 @@ None (which defaults to ["area", "width"]).</p>
 
 
 
-<h4 id="easydynamics.analysis.fit_bindings.FitBinding.parameter_name" class="doc doc-heading">
+<h4 id="easydynamics.analysis.fit_binding.FitBinding.parameter_name" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">parameter_name</span></code>
 
   <span class="doc doc-labels">
@@ -19037,7 +19130,54 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
-<span class="normal">508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing fitted parameters.</span>
 
@@ -19201,7 +19341,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        names : str | list[str] | None, default=None</span>
-<span class="sd">            The names of the parameters to plot. If None, all parameters are plotted.</span>
+<span class="sd">            The names of the parameters to plot. If None, all parameters with bindings are plotted.</span>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Additional keyword arguments to pass to the plotting function.</span>
 
@@ -19213,42 +19353,32 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any of the specified parameter names are not found in the parameters DataSet. If the</span>
-<span class="sd">            units of the specified parameters are not consistent.</span>
+<span class="sd">            If the units of the specified parameters are not consistent.</span>
 <span class="sd">        RuntimeError</span>
-<span class="sd">            If plot_data() is called outside of a Jupyter notebook environment.</span>
+<span class="sd">            If plot() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot_data() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
-        <span class="n">model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">)</span>
+        <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">)</span>
 
-        <span class="c1"># Need a check of names</span>
-        <span class="c1"># for name in names:</span>
-        <span class="c1">#     if name not in self._parameters:</span>
-        <span class="c1">#         raise ValueError(</span>
-        <span class="c1">#             f&quot;Parameter name &#39;{name}&#39; not found in parameters DataSet.&quot;</span>
-        <span class="c1">#         )</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+                <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">())</span>
 
-        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_names</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
-            <span class="n">model_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">model_dataset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">names</span><span class="p">})</span>
-
-        <span class="c1"># # Make a new Dataset with only the desired parameters.</span>
-        <span class="c1"># data = sc.Dataset(coords=self._parameters.coords)</span>
-
-        <span class="c1"># units = [self._parameters[name].unit for name in names]</span>
-        <span class="c1"># first_unit = units[0]</span>
-        <span class="c1"># if any(unit != first_unit for unit in units):</span>
-        <span class="c1">#     raise ValueError(</span>
-        <span class="c1">#         f&quot;Units are not consistent, and cannot be plotted together: {units}&quot;</span>
-        <span class="c1">#     )</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
@@ -19262,21 +19392,31 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="p">}</span>
 
         <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">model_arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
-            <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
-            <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
+        <span class="c1"># map parameter names to model names</span>
+        <span class="n">param_to_model</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+                <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+                <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-                <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
-                <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+                <span class="n">param_to_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
-                <span class="c1"># Data styling</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
+            <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+
+            <span class="c1"># Data styling</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+            <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
+                <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+                <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
                 <span class="c1"># Model styling</span>
                 <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
@@ -19287,7 +19427,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
-        <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_dataset</span><span class="p">)</span>
+        <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_arrays</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 
@@ -19308,7 +19448,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If any parameter name from the bindings is not found in the parameters DataSet.</span>
+<span class="sd">            If any parameter name from the bindings is not found in the parameters Dataset.</span>
 
 <span class="sd">        TypeError</span>
 <span class="sd">            If bindings is not a list of FitBinding objects.</span>
@@ -19437,17 +19577,57 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        ValueError</span>
 <span class="sd">            If parameters is a sc.Dataset but does not have a &#39;Q&#39; coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parameters must be an sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;parameters must be a sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">):</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
 
-        <span class="k">if</span> <span class="n">verified_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize the names input to a list of strings and verify that they exist in the parameters</span>
+<span class="sd">        Dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        names : str | list[str] | None</span>
+<span class="sd">            The names to normalize and verify.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[str] | None</span>
+<span class="sd">            The normalized list of names, or None if names was None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any of the specified names are not found in the parameters Dataset, or if names is a</span>
+<span class="sd">            list that contains non-string elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;names must be a string, a list of strings, or None.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All names in the list must be strings.&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">names</span>
 
     <span class="c1">#############</span>
     <span class="c1"># Private methods</span>
@@ -19457,7 +19637,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the x, y, and weight values for a given parameter name from the parameters DataSet.</span>
+<span class="sd">        Get the x, y, and weight values for a given parameter name from the parameters Dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -19472,17 +19652,24 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If the parameter name is not found in the parameters DataSet. If non-finite weights are</span>
+<span class="sd">            If the parameter name is not found in the parameters Dataset. If non-finite weights are</span>
 <span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters DataSet provided.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters DataSet.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
 
-        <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span> <span class="o">**</span> <span class="mf">0.5</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">weight</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Non-finite weights found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">variances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span>
+        <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">variances</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">variances</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Non-finite variances found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;cannot compute weights.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
@@ -19513,11 +19700,11 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">!r}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;  bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -19586,7 +19773,7 @@ case the parameters will be extracted from the Analysis).</p>
                 <code>bindings</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a> | <span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>] | None</code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a> | <span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19749,7 +19936,7 @@ default, None.</p>
                 <code>binding</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19873,7 +20060,7 @@ default, None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>] | None</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19929,7 +20116,7 @@ default, None.</p>
                 <code>bindings</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_bindings.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_bindings.FitBinding">FitBinding</a>]</code>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;FitBinding&lt;/code&gt; (&lt;code&gt;easydynamics.analysis.fit_binding.FitBinding&lt;/code&gt;)" href="#easydynamics.analysis.fit_binding.FitBinding">FitBinding</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -19988,7 +20175,7 @@ default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any parameter name from the bindings is not found in the parameters DataSet.</p>
+                <p>If any parameter name from the bindings is not found in the parameters Dataset.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20085,7 +20272,7 @@ default, None.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any parameter name from the bindings is not found in the parameters DataSet.</span>
+<span class="sd">        If any parameter name from the bindings is not found in the parameters Dataset.</span>
 
 <span class="sd">    TypeError</span>
 <span class="sd">        If bindings is not a list of FitBinding objects.</span>
@@ -20544,7 +20731,7 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The names of the parameters to plot. If None, all parameters are plotted.</p>
+                <p>The names of the parameters to plot. If None, all parameters with bindings are plotted.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20618,8 +20805,7 @@ names are found for the fit functions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If any of the specified parameter names are not found in the parameters DataSet. If the
-units of the specified parameters are not consistent.</p>
+                <p>If the units of the specified parameters are not consistent.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20632,7 +20818,7 @@ units of the specified parameters are not consistent.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If plot_data() is called outside of a Jupyter notebook environment.</p>
+                <p>If plot() is called outside of a Jupyter notebook environment.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -20751,7 +20937,7 @@ units of the specified parameters are not consistent.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    names : str | list[str] | None, default=None</span>
-<span class="sd">        The names of the parameters to plot. If None, all parameters are plotted.</span>
+<span class="sd">        The names of the parameters to plot. If None, all parameters with bindings are plotted.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Additional keyword arguments to pass to the plotting function.</span>
 
@@ -20763,42 +20949,32 @@ units of the specified parameters are not consistent.</p>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any of the specified parameter names are not found in the parameters DataSet. If the</span>
-<span class="sd">        units of the specified parameters are not consistent.</span>
+<span class="sd">        If the units of the specified parameters are not consistent.</span>
 <span class="sd">    RuntimeError</span>
-<span class="sd">        If plot_data() is called outside of a Jupyter notebook environment.</span>
+<span class="sd">        If plot() is called outside of a Jupyter notebook environment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot_data() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
-    <span class="n">model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">)</span>
+    <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">)</span>
 
-    <span class="c1"># Need a check of names</span>
-    <span class="c1"># for name in names:</span>
-    <span class="c1">#     if name not in self._parameters:</span>
-    <span class="c1">#         raise ValueError(</span>
-    <span class="c1">#             f&quot;Parameter name &#39;{name}&#39; not found in parameters DataSet.&quot;</span>
-    <span class="c1">#         )</span>
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">())</span>
 
-    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_names</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
-        <span class="n">model_dataset</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">model_dataset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">names</span><span class="p">})</span>
-
-    <span class="c1"># # Make a new Dataset with only the desired parameters.</span>
-    <span class="c1"># data = sc.Dataset(coords=self._parameters.coords)</span>
-
-    <span class="c1"># units = [self._parameters[name].unit for name in names]</span>
-    <span class="c1"># first_unit = units[0]</span>
-    <span class="c1"># if any(unit != first_unit for unit in units):</span>
-    <span class="c1">#     raise ValueError(</span>
-    <span class="c1">#         f&quot;Units are not consistent, and cannot be plotted together: {units}&quot;</span>
-    <span class="c1">#     )</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not consistent, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
     <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
@@ -20812,21 +20988,31 @@ units of the specified parameters are not consistent.</p>
     <span class="p">}</span>
 
     <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">model_arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
-        <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
-        <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
+    <span class="c1"># map parameter names to model names</span>
+    <span class="n">param_to_model</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">param_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+            <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
-            <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+            <span class="n">param_to_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
-            <span class="c1"># Data styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">data_arrays</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
+
+        <span class="c1"># Data styling</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+        <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
+            <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+            <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
             <span class="c1"># Model styling</span>
             <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
@@ -20837,7 +21023,7 @@ units of the specified parameters are not consistent.</p>
     <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">data_and_model</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_arrays</span><span class="p">)</span>
-    <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_dataset</span><span class="p">)</span>
+    <span class="n">data_and_model</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_arrays</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_and_model</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
