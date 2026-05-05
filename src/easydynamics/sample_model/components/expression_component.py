@@ -21,11 +21,6 @@ if TYPE_CHECKING:
 class ExpressionComponent(ModelComponent):
     """
     Model component defined by a symbolic expression.
-
-    Example: expr = ExpressionComponent( "A * exp(-(x - x0)**2 / (2*sigma**2))", parameters={"A":
-    10, "x0": 0, "sigma": 1}, )
-
-        expr.A = 5 y = expr.evaluate(x)
     """
 
     # -------------------------
@@ -88,9 +83,9 @@ class ExpressionComponent(ModelComponent):
             The symbolic expression as a string. Must contain 'x' as the independent variable.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the output.
-        display_name : str | None, default='Expression'
+        display_name : str | None, default="Expression"
             Display name for the component.
         unique_name : str | None, default=None
             Unique name for the component.
@@ -101,6 +96,18 @@ class ExpressionComponent(ModelComponent):
             If the expression is invalid or does not contain 'x'.
         TypeError
             If any parameter value is not numeric.
+
+        Examples
+        --------
+        >>> expr = ExpressionComponent(
+        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
+        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
+        ...     unit='meV',
+        ...     display_name='Gaussian Peak',
+        ... )
+
+        >>> expr.A = 5
+        >>> y = expr.evaluate(x)
         """
         super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
 
@@ -199,7 +206,14 @@ class ExpressionComponent(ModelComponent):
 
     @property
     def expression(self) -> str:
-        """Return the original expression string."""
+        """
+        Return the original expression string.
+
+        Returns
+        -------
+        str
+             The original expression string provided at initialization.
+        """
         return self._expression_str
 
     @expression.setter
@@ -343,7 +357,14 @@ class ExpressionComponent(ModelComponent):
         return super().__dir__() + list(self._parameters.keys())
 
     def __repr__(self) -> str:
-        """Repr function."""
+        """
+        Return a string representation of the ExpressionComponent.
+
+        Returns
+        -------
+        str
+            String representation of the ExpressionComponent.
+        """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
             f'{self.__class__.__name__}(\n'
