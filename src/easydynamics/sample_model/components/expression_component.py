@@ -88,9 +88,9 @@ class ExpressionComponent(ModelComponent):
             The symbolic expression as a string. Must contain 'x' as the independent variable.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the output.
-        display_name : str | None, default='Expression'
+        display_name : str | None, default="Expression"
             Display name for the component.
         unique_name : str | None, default=None
             Unique name for the component.
@@ -158,8 +158,11 @@ class ExpressionComponent(ModelComponent):
 
         if parameters is not None:
             for name, value in parameters.items():
-                if not isinstance(value, Numeric):
-                    raise TypeError(f"Parameter '{name}' must be numeric")
+                if not isinstance(value, (Numeric, Parameter, dict)):
+                    raise TypeError(
+                        f"Parameter '{name}' must be numeric, "
+                        f'a Parameter instance, or a dictionary, got {type(value).__name__}'
+                    )
         parameters = parameters or {}
         self._parameters: dict[str, Parameter] = {}
 
@@ -169,12 +172,17 @@ class ExpressionComponent(ModelComponent):
                 continue
 
             value = parameters.get(name, 1.0)
+            if isinstance(value, Parameter):
+                self._parameters[name] = value
 
-            self._parameters[name] = Parameter(
-                name=name,
-                value=value,
-                unit=self._unit,
-            )
+            elif isinstance(value, dict) and value.get('@class') == 'Parameter':
+                self._parameters[name] = Parameter.from_dict(value)
+            else:
+                self._parameters[name] = Parameter(
+                    name=name,
+                    value=value,
+                    unit=self._unit,
+                )
 
         # Create numerical function
         ordered_symbols = [sp.Symbol(name) for name in self._symbol_names]
