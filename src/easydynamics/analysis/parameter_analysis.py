@@ -211,20 +211,27 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             raise ValueError('No parameters available to plot.')
 
         full_model_dataset = None
-        if self.bindings is not None:
+        if self.bindings:
             full_model_dataset = self.calculate_model_dataset(self.bindings)
 
+        # If no names are provided, default to plot all parameters that have bindings.
+        # If no bindings are provided, plot all parameters.
         if names is None:
             names = []
-            for b in self.bindings:
-                names.extend(b.get_parameter_names())
+
+            if not self.bindings:
+                names = list(self.parameters.keys())
+            else:
+                for b in self.bindings:
+                    names.extend(b.get_parameter_names())
 
         names = self._normalize_names(names)
 
+        # Check that the units of the specified parameters are consistent.
         units = [self.parameters[name].unit for name in names]
         first_unit = units[0]
         if any(unit != first_unit for unit in units):
-            raise ValueError(f'Units are not consistent, and cannot be plotted together: {units}')
+            raise ValueError(f'Units are not compatible, and cannot be plotted together: {units}')
 
         color_cycle = itertools.cycle(rcParams['axes.prop_cycle'].by_key()['color'])
         markers = itertools.cycle(['o', 's', 'D', '^', 'v', '<', '>'])

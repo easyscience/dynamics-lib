@@ -56,6 +56,9 @@ class TestParameterAnalysis:
             'BrownianTranslationalDiffusion area': sc.DataArray(
                 data=sc.array(dims=['Q'], values=[6.1, 7.1], unit='meV')
             ),
+            'BrownianTranslationalDiffusion width': sc.DataArray(
+                data=sc.array(dims=['Q'], values=[8.1, 9.1], unit='meV')
+            ),
         })
 
     @pytest.fixture
@@ -243,6 +246,74 @@ class TestParameterAnalysis:
         ):
             parameter_analysis.plot()
 
+    def test_plot_incompatible_units_raises(self, parameter_analysis):
+        # WHEN THEN EXPECT
+        with (
+            patch(
+                'easydynamics.analysis.parameter_analysis._in_notebook',
+                return_value=True,
+            ),
+            pytest.raises(ValueError, match=r'Units are not compatible'),
+        ):
+            # parameter1 in meV, parameter2 in 1/meV
+            parameter_analysis.plot(names=['parameter1', 'parameter2'])
+
+    @patch('easydynamics.analysis.parameter_analysis._in_notebook', return_value=True)
+    @patch('easydynamics.analysis.parameter_analysis.pp.plot')
+    def test_plot_calls_dependencies_correctly_names_none(
+        self, mock_plot, mock_notebook, parameter_analysis, mock_model_dataset, dataset
+    ):
+        # WHEN
+        # ensure compatible units for all parameters
+        dataset.pop('parameter2')
+        parameter_analysis.parameters = dataset
+
+        # Mock calculate_model_dataset
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        result = parameter_analysis.plot()
+
+        # EXPECT
+
+        # 1. Notebook check
+        mock_notebook.assert_called_once()
+
+        # 2. Model dataset calculation
+        parameter_analysis.calculate_model_dataset.assert_called_once_with(
+            parameter_analysis.bindings
+        )
+
+        # 3. Plot called
+        mock_plot.assert_called_once()
+
+        # Extract call args
+        args, kwargs = mock_plot.call_args
+
+        # 4. Dataset passed correctly
+        dataset = args[0]
+        assert isinstance(dataset, sc.Dataset)
+
+        # Data keys
+        assert 'parameter1' in dataset
+        assert 'parameter3 area' in dataset
+        assert 'parameter3 width' in dataset
+
+        # Model keys (from bindings)
+        assert 'Polynomial' in dataset
+        assert 'BrownianTranslationalDiffusion area' in dataset
+        assert 'BrownianTranslationalDiffusion width' in dataset
+
+        # 5. Check some kwargs
+        assert kwargs['title'] == parameter_analysis.display_name
+
+        # Ensure styling dictionaries exist
+        for key in ['linestyle', 'marker', 'color', 'markerfacecolor']:
+            assert key in kwargs
+
+        # 6. Return value propagated
+        assert result == mock_plot.return_value
+
     @patch('easydynamics.analysis.parameter_analysis._in_notebook', return_value=True)
     @patch('easydynamics.analysis.parameter_analysis.pp.plot')
     def test_plot_calls_dependencies_correctly(
@@ -286,6 +357,62 @@ class TestParameterAnalysis:
         # Model keys (from bindings)
         assert 'Polynomial' in dataset
         assert 'BrownianTranslationalDiffusion area' in dataset
+        assert 'BrownianTranslationalDiffusion width' not in dataset  # not requested
+
+        # 5. Check some kwargs
+        assert kwargs['title'] == parameter_analysis.display_name
+
+        # Ensure styling dictionaries exist
+        for key in ['linestyle', 'marker', 'color', 'markerfacecolor']:
+            assert key in kwargs
+
+        # 6. Return value propagated
+        assert result == mock_plot.return_value
+
+    @patch('easydynamics.analysis.parameter_analysis._in_notebook', return_value=True)
+    @patch('easydynamics.analysis.parameter_analysis.pp.plot')
+    def test_plot_no_bindings(
+        self, mock_plot, mock_notebook, parameter_analysis, mock_model_dataset, dataset
+    ):
+        # WHEN
+        # ensure compatible units for all parameters
+        dataset.pop('parameter2')
+        parameter_analysis.parameters = dataset
+        parameter_analysis.bindings = None
+
+        # Mock calculate_model_dataset
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
+
+        # THEN
+        result = parameter_analysis.plot()
+
+        # EXPECT
+
+        # 1. Notebook check
+        mock_notebook.assert_called_once()
+
+        # 2. Model dataset calculation
+        parameter_analysis.calculate_model_dataset.assert_not_called()
+
+        # 3. Plot called
+        mock_plot.assert_called_once()
+
+        # Extract call args
+        args, kwargs = mock_plot.call_args
+
+        # 4. Dataset passed correctly
+        dataset = args[0]
+        assert isinstance(dataset, sc.Dataset)
+
+        # Data keys
+        assert 'parameter1' in dataset
+        assert 'parameter3 area' in dataset
+        assert 'parameter3 width' in dataset
+
+        # Model keys should be absent
+        assert 'Polynomial' not in dataset
+        assert 'BrownianTranslationalDiffusion area' not in dataset
+        assert 'BrownianTranslationalDiffusion width' not in dataset
 
         # 5. Check some kwargs
         assert kwargs['title'] == parameter_analysis.display_name
