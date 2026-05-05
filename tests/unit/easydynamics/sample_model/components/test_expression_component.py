@@ -36,6 +36,14 @@ class TestExpressionComponent:
         # EXPECT
         assert expr.A.value == pytest.approx(1.0)  # default
 
+    def test_init_with_parameter(self):
+        # WHEN THEN
+        A = Parameter('A', 3.0)
+        expr = ExpressionComponent('A * x', parameters={'A': A})
+
+        # EXPECT
+        assert expr.A.value == pytest.approx(3.0)
+
     def test_invalid_expression_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Invalid expression'):
