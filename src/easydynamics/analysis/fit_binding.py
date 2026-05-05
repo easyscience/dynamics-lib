@@ -52,7 +52,7 @@ class FitBinding(EasyDynamicsBase):
 
         Raises
         ------
-        ValueError
+        TypeError
             If parameter_name is not a string, if model is not a ModelComponent,
             ComponentCollection or DiffusionModelBase, or if modes is not a string, list of
             strings, or None.
@@ -86,15 +86,18 @@ class FitBinding(EasyDynamicsBase):
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         if not isinstance(parameter_name, str):
-            raise ValueError('parameter_name must be a string')
+            raise TypeError('parameter_name must be a string')
 
         if not isinstance(model, (ModelComponent, ComponentCollection, DiffusionModelBase)):
-            raise ValueError(
+            raise TypeError(
                 'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase'
             )
 
         if modes is not None and not isinstance(modes, (str, list)):
-            raise ValueError('modes must be a string, list of strings, or None')
+            raise TypeError('modes must be a string, list of strings, or None')
+
+        if isinstance(modes, list) and not all(isinstance(mode, str) for mode in modes):
+            raise TypeError('All modes in the list must be strings')
 
         self._parameter_name = parameter_name
         self._model = model
@@ -128,11 +131,11 @@ class FitBinding(EasyDynamicsBase):
 
         Raises
         ------
-        ValueError
+        TypeError
             If the value is not a string.
         """
         if not isinstance(value, str):
-            raise ValueError('parameter_name must be a string')
+            raise TypeError('parameter_name must be a string')
         self._parameter_name = value
 
     @property
@@ -160,12 +163,12 @@ class FitBinding(EasyDynamicsBase):
 
         Raises
         ------
-        ValueError
+        TypeError
             If the value is not a ModelComponent, ComponentCollection, or DiffusionModelBase.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, DiffusionModelBase)):
-            raise ValueError(
-                'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase'
+            raise TypeError(
+                'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase.'
             )
         self._model = value
 
@@ -194,11 +197,16 @@ class FitBinding(EasyDynamicsBase):
 
         Raises
         ------
-        ValueError
+        TypeError
             If the value is not a string, list of strings, or None.
         """
         if value is not None and not isinstance(value, (str, list)):
-            raise ValueError('modes must be a string, list of strings, or None')
+            raise TypeError('modes must be a string, list of strings, or None')
+
+        if isinstance(value, str):
+            value = [value]
+        if isinstance(value, list) and not all(isinstance(mode, str) for mode in value):
+            raise TypeError('All modes in the list must be strings')
         self._modes = value
 
     # ------------------------------------------------------------------
@@ -214,12 +222,7 @@ class FitBinding(EasyDynamicsBase):
         list[Callable]
             A list of callables for fitting.
         """
-        if isinstance(self.modes, str):
-            modes = [self.modes]
-        elif self.modes is None:
-            modes = ['area', 'width']  # default
-        else:
-            modes = self.modes
+        modes = self._get_modes()
 
         if isinstance(self.model, DiffusionModelBase):
             return [self._build_diffusion_callable(mode) for mode in modes]
@@ -235,12 +238,7 @@ class FitBinding(EasyDynamicsBase):
         list[str]
             A list of model names.
         """
-        if isinstance(self.modes, str):
-            modes = [self.modes]
-        elif self.modes is None:
-            modes = ['area', 'width']
-        else:
-            modes = self.modes
+        modes = self._get_modes()
 
         if isinstance(self.model, DiffusionModelBase):
             return [f'{self.model.display_name} {mode}' for mode in modes]
@@ -256,15 +254,7 @@ class FitBinding(EasyDynamicsBase):
         list[str]
             A list of parameter names.
         """
-        if isinstance(self.modes, str):
-            modes = [self.modes]
-        elif self.modes is None:
-            modes = ['area', 'width']
-        else:
-            modes = self.modes
-
-        if len(modes) == 1:
-            return [self.parameter_name]
+        modes = self._get_modes()
 
         if isinstance(self.model, DiffusionModelBase):
             return [f'{self.parameter_name} {mode}' for mode in modes]
@@ -282,7 +272,7 @@ class FitBinding(EasyDynamicsBase):
         Parameters
         ----------
         mode : str
-            The diffusion mode ("area", "width", or "auto").
+            The diffusion mode ("area" or "width").
 
         Returns
         -------
@@ -296,13 +286,24 @@ class FitBinding(EasyDynamicsBase):
         """
         model = self.model
 
-        if mode == 'area' or mode == 'auto':
+        if mode == 'area':
             return lambda x, **_: model.calculate_QISF(x) * model.scale.value
 
         if mode == 'width':
             return lambda x, **_: model.calculate_width(x)
 
         raise ValueError(f'Unknown diffusion mode: {mode}')
+
+    def _get_modes(self) -> list[str]:
+        """
+        Get the modes to fit for diffusion models, defaulting to ["area", "width"] if not set.
+
+        Returns
+        -------
+        list[str]
+            The modes to fit for diffusion models.
+        """
+        return ['area', 'width'] if self.modes is None else self.modes
 
     # ------------------------------------------------------------------
     # dunder methods
