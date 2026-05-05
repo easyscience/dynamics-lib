@@ -136,10 +136,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             names are found for the fit functions.
         """
 
-        if self._parameters is None:
+        if self.parameters is None:
             raise ValueError('No parameters Dataset provided.')
 
-        if not self._bindings:
+        if not self.bindings:
             raise ValueError('No fit bindings provided.')
 
         xs = []
@@ -147,12 +147,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         ws = []
         funcs, models = [], []
 
-        for binding in self._bindings:
+        for binding in self.bindings:
             param_names = binding.get_parameter_names()
             callables = binding.build_callables()
 
             for pname, func in zip(param_names, callables, strict=True):
-                if pname not in self._parameters:
+                if pname not in self.parameters:
                     raise ValueError(
                         f"Parameter '{pname}' from binding '{binding.unique_name}' "
                         f'not found in parameters Dataset.'

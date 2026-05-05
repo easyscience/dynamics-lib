@@ -50,6 +50,15 @@ class TestParameterAnalysis:
         )
 
     @pytest.fixture
+    def mock_model_dataset(self):
+        return sc.Dataset({
+            'Polynomial': sc.DataArray(data=sc.array(dims=['Q'], values=[1.1, 2.1], unit='meV')),
+            'BrownianTranslationalDiffusion area': sc.DataArray(
+                data=sc.array(dims=['Q'], values=[6.1, 7.1], unit='meV')
+            ),
+        })
+
+    @pytest.fixture
     def parameter_analysis(self, dataset):
         model = Polynomial(coefficients=[1.0, 0.5])
         diffusion_model = BrownianTranslationalDiffusion()
@@ -234,35 +243,59 @@ class TestParameterAnalysis:
         ):
             parameter_analysis.plot()
 
-    # def test_plot_inconsistent_units_raises(self, parameter_analysis):
-    #     # WHEN
+    @patch('easydynamics.analysis.parameter_analysis._in_notebook', return_value=True)
+    @patch('easydynamics.analysis.parameter_analysis.pp.plot')
+    def test_plot_calls_dependencies_correctly(
+        self,
+        mock_plot,
+        mock_notebook,
+        parameter_analysis,
+        mock_model_dataset,
+    ):
+        # WHEN
+        # Mock calculate_model_dataset
+        parameter_analysis.calculate_model_dataset = MagicMock(return_value=mock_model_dataset)
 
-    #     # THEN EXPECT
-    #     with (
-    #         patch(
-    #             "easydynamics.analysis.parameter_analysis._in_notebook",
-    #             return_value=True,
-    #         ),
-    #         pytest.raises(
-    #             ValueError,
-    #             match=r"Units are not consistent, and cannot be plotted together.",
-    #         ),
-    #     ):
-    #         parameter_analysis.plot()
+        # THEN
+        result = parameter_analysis.plot(names=['parameter1', 'parameter3 area'])
 
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
-    # TEST PLOT
+        # EXPECT
+
+        # 1. Notebook check
+        mock_notebook.assert_called_once()
+
+        # 2. Model dataset calculation
+        parameter_analysis.calculate_model_dataset.assert_called_once_with(
+            parameter_analysis.bindings
+        )
+
+        # 3. Plot called
+        mock_plot.assert_called_once()
+
+        # Extract call args
+        args, kwargs = mock_plot.call_args
+
+        # 4. Dataset passed correctly
+        dataset = args[0]
+        assert isinstance(dataset, sc.Dataset)
+
+        # Data keys
+        assert 'parameter1' in dataset
+        assert 'parameter3 area' in dataset
+
+        # Model keys (from bindings)
+        assert 'Polynomial' in dataset
+        assert 'BrownianTranslationalDiffusion area' in dataset
+
+        # 5. Check some kwargs
+        assert kwargs['title'] == parameter_analysis.display_name
+
+        # Ensure styling dictionaries exist
+        for key in ['linestyle', 'marker', 'color', 'markerfacecolor']:
+            assert key in kwargs
+
+        # 6. Return value propagated
+        assert result == mock_plot.return_value
 
     @pytest.mark.parametrize(
         'set_pars_none, bindings, expected_exception, match',
