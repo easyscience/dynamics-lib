@@ -14140,8 +14140,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 21</span>
 <span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
@@ -14465,7 +14464,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model component defined by a symbolic expression.</span>
 
@@ -14629,7 +14629,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
             <span class="n">ordered_symbols</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-            <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+            <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
         <span class="p">)</span>
 
         <span class="c1"># -------------------------</span>
@@ -14849,8 +14849,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
-<span class="normal">326</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
@@ -14858,7 +14857,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Include parameter names in dir() output for better IDE support.</span>
 
@@ -14984,8 +14984,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
-<span class="normal">276</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
@@ -15005,7 +15004,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
-<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow access to parameters as attributes.</span>
 
@@ -15206,8 +15206,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 73</span>
-<span class="normal"> 74</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
 <span class="normal"> 75</span>
 <span class="normal"> 76</span>
 <span class="normal"> 77</span>
@@ -15318,7 +15317,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15429,7 +15429,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
         <span class="n">ordered_symbols</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-        <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+        <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -15461,8 +15461,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
@@ -15470,7 +15469,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Repr function.&quot;&quot;&quot;</span>
     <span class="n">param_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -15589,8 +15589,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">298</span>
-<span class="normal">299</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
@@ -15614,7 +15613,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">323</span>
+<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow setting parameter values as attributes.</span>
 
@@ -15731,8 +15731,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
-<span class="normal">253</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -15748,7 +15747,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
-<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the unit of the expression.</span>
 
@@ -15856,8 +15856,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
-<span class="normal">214</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
@@ -15882,7 +15881,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -15996,8 +15996,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
-<span class="normal">242</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
 <span class="normal">245</span>
@@ -16005,7 +16004,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
-<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return all parameters.</span>
 
@@ -34360,8 +34360,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 21</span>
 <span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
@@ -34685,7 +34684,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model component defined by a symbolic expression.</span>
 
@@ -34849,7 +34849,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
             <span class="n">ordered_symbols</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-            <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+            <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
         <span class="p">)</span>
 
         <span class="c1"># -------------------------</span>
@@ -35069,8 +35069,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
-<span class="normal">326</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
@@ -35078,7 +35077,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Include parameter names in dir() output for better IDE support.</span>
 
@@ -35204,8 +35204,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
-<span class="normal">276</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
@@ -35225,7 +35224,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
-<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow access to parameters as attributes.</span>
 
@@ -35426,8 +35426,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 73</span>
-<span class="normal"> 74</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
 <span class="normal"> 75</span>
 <span class="normal"> 76</span>
 <span class="normal"> 77</span>
@@ -35538,7 +35537,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -35649,7 +35649,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
         <span class="n">ordered_symbols</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-        <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+        <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -35681,8 +35681,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
@@ -35690,7 +35689,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Repr function.&quot;&quot;&quot;</span>
     <span class="n">param_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -35809,8 +35809,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">298</span>
-<span class="normal">299</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
@@ -35834,7 +35833,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">323</span>
+<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow setting parameter values as attributes.</span>
 
@@ -35951,8 +35951,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
-<span class="normal">253</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -35968,7 +35967,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
-<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the unit of the expression.</span>
 
@@ -36076,8 +36076,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
-<span class="normal">214</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
@@ -36102,7 +36101,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -36216,8 +36216,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
-<span class="normal">242</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
 <span class="normal">245</span>
@@ -36225,7 +36224,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
-<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return all parameters.</span>
 
@@ -45123,8 +45123,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 21</span>
 <span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
@@ -45448,7 +45447,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExpressionComponent</span><span class="p">(</span><span class="n">ModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model component defined by a symbolic expression.</span>
 
@@ -45612,7 +45612,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
             <span class="n">ordered_symbols</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-            <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+            <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
         <span class="p">)</span>
 
         <span class="c1"># -------------------------</span>
@@ -45832,8 +45832,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
-<span class="normal">326</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
@@ -45841,7 +45840,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Include parameter names in dir() output for better IDE support.</span>
 
@@ -45967,8 +45967,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
-<span class="normal">276</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
@@ -45988,7 +45987,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
-<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow access to parameters as attributes.</span>
 
@@ -46189,8 +46189,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 73</span>
-<span class="normal"> 74</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
 <span class="normal"> 75</span>
 <span class="normal"> 76</span>
 <span class="normal"> 77</span>
@@ -46301,7 +46300,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -46412,7 +46412,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_func</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span>
         <span class="n">ordered_symbols</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expr</span><span class="p">,</span>
-        <span class="n">modules</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
+        <span class="n">modules</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;erf&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">},</span> <span class="s1">&#39;numpy&#39;</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -46444,8 +46444,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
@@ -46453,7 +46452,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
-<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Repr function.&quot;&quot;&quot;</span>
     <span class="n">param_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -46572,8 +46572,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">298</span>
-<span class="normal">299</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
 <span class="normal">300</span>
 <span class="normal">301</span>
 <span class="normal">302</span>
@@ -46597,7 +46596,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">323</span>
+<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow setting parameter values as attributes.</span>
 
@@ -46714,8 +46714,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
-<span class="normal">253</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -46731,7 +46730,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
-<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_new_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the unit of the expression.</span>
 
@@ -46839,8 +46839,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
-<span class="normal">214</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
@@ -46865,7 +46864,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -46979,8 +46979,7 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/components/expression_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
-<span class="normal">242</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
 <span class="normal">245</span>
@@ -46988,7 +46987,8 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
-<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return all parameters.</span>
 
