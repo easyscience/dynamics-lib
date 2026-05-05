@@ -61,7 +61,7 @@ class TestFittingWithDiffusionModel:
 
         assert fit_result_independent_single_Q.success
         assert fit_result_independent_single_Q.chi2 < 75.0
-        assert fit_result_independent_single_Q.reduced_chi < 0.4
+        assert fit_result_independent_single_Q.reduced_chi2 < 0.4
 
         diffusion_experiment = Experiment('Diffusion')
 
