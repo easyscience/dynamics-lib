@@ -101,7 +101,7 @@ class TestFittingWithDiffusionModel:
 
         assert fit_result[0].success
         assert fit_result[0].chi2 < 43.0
-        assert fit_result[0].reduced_chi < 0.3
+        assert fit_result[0].reduced_chi2 < 0.3
 
         ###############
         # Diffusion model
@@ -142,7 +142,7 @@ class TestFittingWithDiffusionModel:
 
         assert fit_result[0].success
         assert fit_result[0].chi2 < 56.0
-        assert fit_result[0].reduced_chi < 0.4
+        assert fit_result[0].reduced_chi2 < 0.4
 
         pars = diffusion_model.get_all_parameters()
 
