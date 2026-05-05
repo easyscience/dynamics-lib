@@ -6353,10 +6353,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            names are found for the fit functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6364,12 +6364,12 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">funcs</span><span class="p">,</span> <span class="n">models</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
             <span class="n">param_names</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
             <span class="n">callables</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                         <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
@@ -7567,10 +7567,10 @@ names are found for the fit functions.</p>
 <span class="sd">        names are found for the fit functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -7578,12 +7578,12 @@ names are found for the fit functions.</p>
     <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">funcs</span><span class="p">,</span> <span class="n">models</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
         <span class="n">param_names</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
         <span class="n">callables</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                     <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
@@ -19639,10 +19639,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            names are found for the fit functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -19650,12 +19650,12 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">funcs</span><span class="p">,</span> <span class="n">models</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
             <span class="n">param_names</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
             <span class="n">callables</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                         <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
@@ -20853,10 +20853,10 @@ names are found for the fit functions.</p>
 <span class="sd">        names are found for the fit functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -20864,12 +20864,12 @@ names are found for the fit functions.</p>
     <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">funcs</span><span class="p">,</span> <span class="n">models</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
         <span class="n">param_names</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
         <span class="n">callables</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                     <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
