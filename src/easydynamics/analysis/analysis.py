@@ -285,25 +285,35 @@ class Analysis(AnalysisBase):
 
         import plopp as pp
 
+        data_and_model = self.data_and_model_to_datagroup(
+            energy=energy,
+            add_background=add_background,
+            include_components=plot_components,
+        )
+
         plot_kwargs_defaults = {
             'title': self.display_name,
-            'linestyle': {'Data': 'none', 'Model': '-'},
-            'marker': {'Data': 'o', 'Model': None},
-            'color': {'Data': 'black', 'Model': 'red'},
-            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            'linestyle': {},
+            'marker': {},
+            'color': {},
+            'markerfacecolor': {},
             'keep': 'energy',
         }
-        data_and_model = {
-            'Data': self.experiment.binned_data,
-            'Model': self._create_model_array(energy=energy),
-        }
 
-        if plot_components:
-            components = self._create_components_dataset(
-                add_background=add_background, energy=energy
-            )
-            for key in components:
-                data_and_model[key] = components[key]
+        for key in data_and_model:
+            if key == 'Data':
+                plot_kwargs_defaults['linestyle'][key] = 'none'
+                plot_kwargs_defaults['marker'][key] = 'o'
+                plot_kwargs_defaults['color'][key] = 'black'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
+
+            elif key == 'Model':
+                plot_kwargs_defaults['linestyle'][key] = '-'
+                plot_kwargs_defaults['marker'][key] = None
+                plot_kwargs_defaults['color'][key] = 'red'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
+
+            else:
                 plot_kwargs_defaults['linestyle'][key] = '--'
                 plot_kwargs_defaults['marker'][key] = None
 
@@ -318,6 +328,68 @@ class Analysis(AnalysisBase):
             widget.slider_toggler.value = '-o-'
 
         return fig
+
+    def data_and_model_to_datagroup(
+        self,
+        energy: sc.Variable | None = None,
+        add_background: bool = True,
+        include_components: bool = True,
+    ) -> sc.DataGroup:
+        """
+        Create a scipp DataGroup containing the experimental data, model calculation and optionally
+        the individual components of the model.
+
+        Parameters
+        ----------
+        energy : sc.Variable | None, default=None
+            The energy values to use for calculating the model. If None, uses the energy from the
+            experiment.
+        add_background : bool, default=True
+            Whether to add background components to the sample model components when creating the
+            DataGroup.
+        include_components : bool, default=True
+            Whether to include the individual components of the model in the DataGroup. If False,
+            only the total model will be included.
+        Raises
+        ------
+        ValueError
+            If there is no data to include in the DataGroup, or if there are no Q values available
+            for creating the DataGroup.
+        TypeError
+            If add_background is not True or False.
+        Returns
+        -------
+        sc.DataGroup
+            A DataGroup containing the experimental data, model calculation, and optionally the
+            individual components of the model.
+        """
+        if self.experiment.binned_data is None:
+            raise ValueError('No data to include in DataGroup. Please load data first.')
+
+        if self.Q is None:
+            raise ValueError(
+                'No Q values available for creating DataGroup. Please check the experiment data.'
+            )
+
+        if not isinstance(add_background, bool):
+            raise TypeError('add_background must be True or False.')
+
+        if energy is None:
+            energy = self.energy
+
+        data_and_model = {
+            'Data': self.experiment.binned_data,
+            'Model': self._create_model_array(energy=energy),
+        }
+
+        if include_components:
+            components = self._create_components_dataset(
+                add_background=add_background, energy=energy
+            )
+            for key in components:
+                data_and_model[key] = components[key]
+
+        return sc.DataGroup(data_and_model)
 
     def parameters_to_dataset(self) -> sc.Dataset:
         """

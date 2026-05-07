@@ -303,36 +303,36 @@ class Analysis1d(AnalysisBase):
         """
         import plopp as pp
 
+        data_and_model = self.data_and_model_to_datagroup(
+            energy=energy,
+            add_background=add_background,
+            include_components=plot_components,
+        )
+
         plot_kwargs_defaults = {
             'title': self.display_name,
-            'linestyle': {'Data': 'none', 'Model': '-'},
-            'marker': {'Data': 'o', 'Model': 'none'},
-            'color': {'Data': 'black', 'Model': 'red'},
-            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            'linestyle': {},
+            'marker': {},
+            'color': {},
+            'markerfacecolor': {},
         }
 
-        if self.experiment.binned_data is None:
-            raise ValueError('No data to plot. Please load data first.')
+        for key in data_and_model:
+            if key == 'Data':
+                plot_kwargs_defaults['linestyle'][key] = 'none'
+                plot_kwargs_defaults['marker'][key] = 'o'
+                plot_kwargs_defaults['color'][key] = 'black'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
-        energy = self._verify_energy(energy)
-        if energy is None:
-            energy = self._masked_energy
+            elif key == 'Model':
+                plot_kwargs_defaults['linestyle'][key] = '-'
+                plot_kwargs_defaults['marker'][key] = None
+                plot_kwargs_defaults['color'][key] = 'red'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
-        # Create a dataset containing the data, model, and individual
-        # components for plotting.
-        data_and_model = {
-            'Data': self.experiment.binned_data['Q', self.Q_index],
-            'Model': self._create_model_array(energy=energy),
-        }
-
-        if plot_components:
-            components = self._create_components_dataset_single_Q(
-                add_background=add_background, energy=energy
-            )
-            for comp_name in components:
-                data_and_model[comp_name] = components[comp_name]
-                plot_kwargs_defaults['linestyle'][comp_name] = '--'
-                plot_kwargs_defaults['marker'][comp_name] = None
+            else:
+                plot_kwargs_defaults['linestyle'][key] = '--'
+                plot_kwargs_defaults['marker'][key] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -341,6 +341,41 @@ class Analysis1d(AnalysisBase):
             data_and_model,
             **plot_kwargs_defaults,
         )
+
+    def data_and_model_to_datagroup(
+        self,
+        energy: sc.Variable | None = None,
+        add_background: bool = True,
+        include_components: bool = True,
+    ) -> sc.DataGroup:
+        """
+        Create a scipp DataGroup containing the experimental data, model calculation, and
+        optionally the individual components.
+        """
+
+        if self.experiment.binned_data is None:
+            raise ValueError('No data to include in DataGroup. Please load data first.')
+
+        energy = self._verify_energy(energy)
+
+        if energy is None:
+            energy = self._masked_energy
+
+        data_and_model = {
+            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Model': self._create_model_array(energy=energy),
+        }
+
+        if include_components:
+            components = self._create_components_dataset_single_Q(
+                add_background=add_background,
+                energy=energy,
+            )
+
+            for key in components:
+                data_and_model[key] = components[key]
+
+        return sc.DataGroup(data_and_model)
 
     def fix_energy_offset(self) -> None:
         """Fix the energy offset parameter for the current Q index."""
