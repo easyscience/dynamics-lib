@@ -47,7 +47,7 @@ class Analysis1d(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default='MyAnalysis'
+        display_name : str | None, default="MyAnalysis"
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -364,6 +364,12 @@ class Analysis1d(AnalysisBase):
         ------
         ValueError
             If no data is available in the experiment to include in the DataGroup.
+
+        Returns
+        -------
+        sc.DataGroup
+            A DataGroup containing the experimental data, model calculation, and optionally the
+            individual components.
         """
 
         if self.experiment.binned_data is None:
