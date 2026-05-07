@@ -291,11 +291,6 @@ class Analysis1d(AnalysisBase):
         **kwargs : dict[str, Any]
             Keyword arguments to pass to the plotting function.
 
-        Raises
-        ------
-        ValueError
-            If no data is available to plot.
-
         Returns
         -------
         InteractiveFigure
@@ -351,6 +346,24 @@ class Analysis1d(AnalysisBase):
         """
         Create a scipp DataGroup containing the experimental data, model calculation, and
         optionally the individual components.
+
+        Parameters
+        ----------
+        energy : sc.Variable | None, default=None
+            Optional energy grid to use for the model calculation. If None, the energy grid from
+            the experiment is used.
+        add_background : bool, default=True
+            Whether to add the background to the model prediction when plotting individual
+            components.
+        include_components : bool, default=True
+            Whether to include the individual components of the model in the DataGroup. If True,
+            the DataGroup will include a DataArray for each component with the component's display
+            name as the key
+
+        Raises
+        ------
+        ValueError
+            If no data is available in the experiment to include in the DataGroup.
         """
 
         if self.experiment.binned_data is None:
