@@ -10656,7 +10656,26 @@ title, linestyle, marker, color).</p>
 <span class="normal">907</span>
 <span class="normal">908</span>
 <span class="normal">909</span>
-<span class="normal">910</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">910</span>
+<span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span>
+<span class="normal">915</span>
+<span class="normal">916</span>
+<span class="normal">917</span>
+<span class="normal">918</span>
+<span class="normal">919</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
+<span class="normal">924</span>
+<span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span>
+<span class="normal">929</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -10680,7 +10699,7 @@ title, linestyle, marker, color).</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -10924,11 +10943,6 @@ title, linestyle, marker, color).</p>
 <span class="sd">        **kwargs : dict[str, Any]</span>
 <span class="sd">            Keyword arguments to pass to the plotting function.</span>
 
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If no data is available to plot.</span>
-
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        InteractiveFigure</span>
@@ -10984,6 +10998,30 @@ title, linestyle, marker, color).</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a scipp DataGroup containing the experimental data, model calculation, and</span>
 <span class="sd">        optionally the individual components.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy : sc.Variable | None, default=None</span>
+<span class="sd">            Optional energy grid to use for the model calculation. If None, the energy grid from</span>
+<span class="sd">            the experiment is used.</span>
+<span class="sd">        add_background : bool, default=True</span>
+<span class="sd">            Whether to add the background to the model prediction when plotting individual</span>
+<span class="sd">            components.</span>
+<span class="sd">        include_components : bool, default=True</span>
+<span class="sd">            Whether to include the individual components of the model in the DataGroup. If True,</span>
+<span class="sd">            the DataGroup will include a DataArray for each component with the component&#39;s display</span>
+<span class="sd">            name as the key</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If no data is available in the experiment to include in the DataGroup.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sc.DataGroup</span>
+<span class="sd">            A DataGroup containing the experimental data, model calculation, and optionally the</span>
+<span class="sd">            individual components.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -11655,7 +11693,7 @@ title, linestyle, marker, color).</p>
               </div>
             </td>
             <td>
-                  <code>&#39;MyAnalysis&#39;</code>
+                  <code>&#34;MyAnalysis&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -11900,7 +11938,7 @@ parameters are added.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    display_name : str | None, default=&#39;MyAnalysis&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;MyAnalysis&quot;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated.</span>
@@ -12286,9 +12324,143 @@ optionally the individual components.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code><span title="scipp.Variable">Variable</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional energy grid to use for the model calculation. If None, the energy grid from
+the experiment is used.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>add_background</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to add the background to the model prediction when plotting individual
+components.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_components</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to include the individual components of the model in the DataGroup. If True,
+the DataGroup will include a DataArray for each component with the component's display
+name as the key</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no data is available in the experiment to include in the DataGroup.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp.DataGroup">DataGroup</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A DataGroup containing the experimental data, model calculation, and optionally the
+individual components.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
@@ -12321,7 +12493,26 @@ optionally the individual components.</p>
 <span class="normal">375</span>
 <span class="normal">376</span>
 <span class="normal">377</span>
-<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">data_and_model_to_datagroup</span><span class="p">(</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">data_and_model_to_datagroup</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">add_background</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -12330,6 +12521,30 @@ optionally the individual components.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a scipp DataGroup containing the experimental data, model calculation, and</span>
 <span class="sd">    optionally the individual components.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    energy : sc.Variable | None, default=None</span>
+<span class="sd">        Optional energy grid to use for the model calculation. If None, the energy grid from</span>
+<span class="sd">        the experiment is used.</span>
+<span class="sd">    add_background : bool, default=True</span>
+<span class="sd">        Whether to add the background to the model prediction when plotting individual</span>
+<span class="sd">        components.</span>
+<span class="sd">    include_components : bool, default=True</span>
+<span class="sd">        Whether to include the individual components of the model in the DataGroup. If True,</span>
+<span class="sd">        the DataGroup will include a DataArray for each component with the component&#39;s display</span>
+<span class="sd">        name as the key</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If no data is available in the experiment to include in the DataGroup.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sc.DataGroup</span>
+<span class="sd">        A DataGroup containing the experimental data, model calculation, and optionally the</span>
+<span class="sd">        individual components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">binned_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -12540,9 +12755,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fix_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fix the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -12575,9 +12790,9 @@ and reused during parameter optimization for performance reasons.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/analysis1d.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">free_energy_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Free the energy offset parameter for the current Q index.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">free_energy_offset</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_Q_index</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -12792,32 +13007,6 @@ is used.</p>
     </table>
 
 
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If no data is available to plot.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
     <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
@@ -12916,12 +13105,7 @@ is used.</p>
 <span class="normal">335</span>
 <span class="normal">336</span>
 <span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
+<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_data_and_model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">plot_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_background</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -12946,11 +13130,6 @@ is used.</p>
 <span class="sd">        is used.</span>
 <span class="sd">    **kwargs : dict[str, Any]</span>
 <span class="sd">        Keyword arguments to pass to the plotting function.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If no data is available to plot.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
