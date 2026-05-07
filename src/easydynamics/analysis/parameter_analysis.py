@@ -15,19 +15,14 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
-from easydynamics.sample_model.component_collection import ComponentCollection
-from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import _in_notebook
-
-FIT_FUNCTION_TYPE = ModelComponent | ComponentCollection | DiffusionModelBase
 
 
 class ParameterAnalysis(EasyDynamicsModelBase):
     """
     For analysing fitted parameters.
 
-    Can be used to fit paramters to ModelComponents, ComponentCollections, or DiffusionModelBase
+    Can be used to fit parameters to ModelComponents, ComponentCollections, or DiffusionModelBase
     objects, and to plot the parameters and fit results. The parameters to be analyzed can be
     provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
     simultaneously, and the fit functions can be customized for each parameter. For diffusion
@@ -93,13 +88,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         self._parameters = self._verify_parameters(value)
 
     @property
-    def bindings(self) -> list[FitBinding] | None:
+    def bindings(self) -> list[FitBinding]:
         """
         Get the fit bindings for the parameter analysis.
 
         Returns
         -------
-        list[FitBinding] | None
+        list[FitBinding]
             The fit bindings for the parameter analysis.
         """
         return self._bindings
