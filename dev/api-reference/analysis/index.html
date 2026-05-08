@@ -6759,33 +6759,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing fitted parameters.</span>
 
@@ -6800,7 +6774,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;ParameterAnalysis&quot;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6814,7 +6788,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        bindings : FitBinding | list[FitBinding] | None, default=None</span>
 <span class="sd">            The fit bindings to use for fitting the parameters. Can be a single FitBinding or a</span>
 <span class="sd">            list of FitBindings. If None, no fit bindings are provided.</span>
-<span class="sd">        display_name : str | None, default=&quot;ParameterAnalysis&quot;</span>
+<span class="sd">        display_name : str | None, default=&#39;ParameterAnalysis&#39;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
@@ -6899,10 +6873,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6917,7 +6891,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
                 <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                        <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                     <span class="p">)</span>
 
                 <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
@@ -6967,12 +6941,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;plot() can only be used in a Jupyter notebook environment.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters available to plot.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
         <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
@@ -6995,19 +6967,17 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
         <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
-        <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">])</span>
+        <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+        <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
 
         <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-            <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">}</span>
 
         <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
@@ -7028,19 +6998,19 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
 
             <span class="c1"># Data styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
             <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
                 <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
                 <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
                 <span class="c1"># Model styling</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
 
         <span class="c1"># Update kwargs with user provided kwargs.</span>
         <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -7074,15 +7044,13 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">bindings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bindings must be a list of FitBinding objects.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a list of FitBinding objects.&#39;</span><span class="p">)</span>
 
         <span class="n">arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -7091,22 +7059,20 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
             <span class="n">callables</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">):</span>
+            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                        <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                     <span class="p">)</span>
                 <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
                 <span class="n">y_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
                 <span class="n">arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
-                    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
+                    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 
@@ -7125,7 +7091,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            If binding is not a FitBinding object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;binding must be a FitBinding object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;binding must be a FitBinding object.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -7152,9 +7118,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
     <span class="c1"># Private methods: verification and preparation</span>
     <span class="c1">#############</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_bindings</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify the bindings input.</span>
 
@@ -7177,17 +7141,11 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">bindings</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">bindings</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;bindings must be a FitBinding, a list of FitBindings, or None.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a FitBinding, a list of FitBindings, or None.&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_parameters</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify the parameters input and convert it to a sc.Dataset if it&#39;s an Analysis.</span>
 
@@ -7212,14 +7170,14 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must be a sc.Dataset, an Analysis, or None.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;parameters must be a sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">):</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
 
-        <span class="k">if</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
 
@@ -7247,20 +7205,16 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;names must be a string, a list of strings, or None.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;names must be a string, a list of strings, or None.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All names in the list must be strings.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All names in the list must be strings.&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">names</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">names</span>
 
@@ -7291,11 +7245,9 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
 
         <span class="n">variances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span>
         <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -7303,13 +7255,13 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">variances</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">variances</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Non-finite variances found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;cannot compute weights.&quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;cannot compute weights.&#39;</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">weight</span><span class="p">,</span>
         <span class="p">)</span>
@@ -7320,33 +7272,29 @@ models, the area and width can be fitted separately (or not at all) by specifyin
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-        <span class="n">n_params</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="p">)</span>
+        <span class="n">n_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
         <span class="n">param_names</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span>
-            <span class="k">else</span> <span class="kc">None</span>
+            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
         <span class="n">binding_info</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;parameter&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">,</span>
-                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-                <span class="s2">&quot;modes&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
+                <span class="s1">&#39;parameter&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+                <span class="s1">&#39;modes&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">(</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;)&quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -7445,7 +7393,7 @@ list of FitBindings. If None, no fit bindings are provided.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;ParameterAnalysis&#34;</code>
+                  <code>&#39;ParameterAnalysis&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7507,7 +7455,7 @@ default, None.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;ParameterAnalysis&quot;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -7521,7 +7469,7 @@ default, None.</p>
 <span class="sd">    bindings : FitBinding | list[FitBinding] | None, default=None</span>
 <span class="sd">        The fit bindings to use for fitting the parameters. Can be a single FitBinding or a</span>
 <span class="sd">        list of FitBindings. If None, no fit bindings are provided.</span>
-<span class="sd">    display_name : str | None, default=&quot;ParameterAnalysis&quot;</span>
+<span class="sd">    display_name : str | None, default=&#39;ParameterAnalysis&#39;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
@@ -7623,7 +7571,15 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
@@ -7631,15 +7587,7 @@ default, None.</p>
 <span class="normal">351</span>
 <span class="normal">352</span>
 <span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_binding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binding</span><span class="p">:</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_binding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binding</span><span class="p">:</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Append a FitBinding to the list of bindings for the parameter analysis.</span>
 
@@ -7654,7 +7602,7 @@ default, None.</p>
 <span class="sd">        If binding is not a FitBinding object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;binding must be a FitBinding object.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;binding must be a FitBinding object.&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7842,7 +7790,11 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
@@ -7892,15 +7844,7 @@ default, None.</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate all bindings into a sc.Dataset of model predictions.</span>
 
@@ -7924,15 +7868,13 @@ default, None.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bindings</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bindings must be a list of FitBinding objects.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a list of FitBinding objects.&#39;</span><span class="p">)</span>
 
     <span class="n">arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -7941,22 +7883,20 @@ default, None.</p>
         <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
         <span class="n">callables</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">):</span>
+        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                    <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                 <span class="p">)</span>
             <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
             <span class="n">y_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
             <span class="n">arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
-                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
+                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7989,11 +7929,11 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clear all FitBindings from the list of bindings for the parameter analysis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -8154,10 +8094,10 @@ names are found for the fit functions.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8172,7 +8112,7 @@ names are found for the fit functions.</p>
             <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                    <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                 <span class="p">)</span>
 
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
@@ -8250,19 +8190,19 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">370</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all variables from the fit functions.</span>
 
@@ -8584,11 +8524,7 @@ names are found for the fit functions.</p>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8615,12 +8551,10 @@ names are found for the fit functions.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;plot() can only be used in a Jupyter notebook environment.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters available to plot.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
     <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
@@ -8643,19 +8577,17 @@ names are found for the fit functions.</p>
     <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
     <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
-    <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">])</span>
+    <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+    <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
 
     <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">}</span>
 
     <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8676,19 +8608,19 @@ names are found for the fit functions.</p>
         <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
 
         <span class="c1"># Data styling</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
         <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
             <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
             <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
             <span class="c1"># Model styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
 
     <span class="c1"># Update kwargs with user provided kwargs.</span>
     <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -21053,33 +20985,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParameterAnalysis</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing fitted parameters.</span>
 
@@ -21094,7 +21000,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;ParameterAnalysis&quot;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -21108,7 +21014,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        bindings : FitBinding | list[FitBinding] | None, default=None</span>
 <span class="sd">            The fit bindings to use for fitting the parameters. Can be a single FitBinding or a</span>
 <span class="sd">            list of FitBindings. If None, no fit bindings are provided.</span>
-<span class="sd">        display_name : str | None, default=&quot;ParameterAnalysis&quot;</span>
+<span class="sd">        display_name : str | None, default=&#39;ParameterAnalysis&#39;</span>
 <span class="sd">            Display name of the analysis.</span>
 <span class="sd">        unique_name : str | None, default=None</span>
 <span class="sd">            Unique name of the analysis. If None, a unique name is automatically generated. By</span>
@@ -21193,10 +21099,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
         <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -21211,7 +21117,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
                 <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                        <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                     <span class="p">)</span>
 
                 <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
@@ -21261,12 +21167,10 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;plot() can only be used in a Jupyter notebook environment.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters available to plot.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
         <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
@@ -21289,19 +21193,17 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
         <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
-        <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">])</span>
+        <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+        <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
 
         <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-            <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">}</span>
 
         <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
@@ -21322,19 +21224,19 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
 
             <span class="c1"># Data styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
             <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
                 <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
                 <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
                 <span class="c1"># Model styling</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
 
         <span class="c1"># Update kwargs with user provided kwargs.</span>
         <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -21368,15 +21270,13 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">bindings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bindings must be a list of FitBinding objects.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a list of FitBinding objects.&#39;</span><span class="p">)</span>
 
         <span class="n">arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -21385,22 +21285,20 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
             <span class="n">callables</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">):</span>
+            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                        <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                     <span class="p">)</span>
                 <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
                 <span class="n">y_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
                 <span class="n">arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
-                    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
+                    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 
@@ -21419,7 +21317,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            If binding is not a FitBinding object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;binding must be a FitBinding object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;binding must be a FitBinding object.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -21446,9 +21344,7 @@ models, the area and width can be fitted separately (or not at all) by specifyin
     <span class="c1"># Private methods: verification and preparation</span>
     <span class="c1">#############</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_bindings</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify the bindings input.</span>
 
@@ -21471,17 +21367,11 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">bindings</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">bindings</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;bindings must be a FitBinding, a list of FitBindings, or None.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a FitBinding, a list of FitBindings, or None.&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_parameters</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify the parameters input and convert it to a sc.Dataset if it&#39;s an Analysis.</span>
 
@@ -21506,14 +21396,14 @@ models, the area and width can be fitted separately (or not at all) by specifyin
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must be a sc.Dataset, an Analysis, or None.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;parameters must be a sc.Dataset, an Analysis, or None.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Analysis</span><span class="p">):</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">parameters_to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verified_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
 
-        <span class="k">if</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verified_parameters</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;parameters must have a &#39;Q&#39; coordinate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verified_parameters</span>
 
@@ -21541,20 +21431,16 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;names must be a string, a list of strings, or None.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;names must be a string, a list of strings, or None.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All names in the list must be strings.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All names in the list must be strings.&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">names</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">names</span>
 
@@ -21585,11 +21471,9 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <span class="sd">            found for the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parameter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter name &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39; not found in parameters Dataset.&quot;</span><span class="p">)</span>
 
         <span class="n">variances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">variances</span>
         <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -21597,13 +21481,13 @@ models, the area and width can be fitted separately (or not at all) by specifyin
         <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">variances</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">variances</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Non-finite variances found for parameter &#39;</span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;cannot compute weights.&quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;cannot compute weights.&#39;</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">parameter_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">weight</span><span class="p">,</span>
         <span class="p">)</span>
@@ -21614,33 +21498,29 @@ models, the area and width can be fitted separately (or not at all) by specifyin
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-        <span class="n">n_params</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="p">)</span>
+        <span class="n">n_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
         <span class="n">param_names</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span>
-            <span class="k">else</span> <span class="kc">None</span>
+            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
         <span class="n">binding_info</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;parameter&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">,</span>
-                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-                <span class="s2">&quot;modes&quot;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
+                <span class="s1">&#39;parameter&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">,</span>
+                <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+                <span class="s1">&#39;modes&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span>
         <span class="p">]</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">(</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;)&quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;display_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;unique_name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;n_parameters=</span><span class="si">{</span><span class="n">n_params</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;parameter_names=</span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;bindings=</span><span class="si">{</span><span class="n">binding_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;)&#39;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -21739,7 +21619,7 @@ list of FitBindings. If None, no fit bindings are provided.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;ParameterAnalysis&#34;</code>
+                  <code>&#39;ParameterAnalysis&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -21801,7 +21681,7 @@ default, None.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">Analysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">bindings</span><span class="p">:</span> <span class="n">FitBinding</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;ParameterAnalysis&quot;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;ParameterAnalysis&#39;</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -21815,7 +21695,7 @@ default, None.</p>
 <span class="sd">    bindings : FitBinding | list[FitBinding] | None, default=None</span>
 <span class="sd">        The fit bindings to use for fitting the parameters. Can be a single FitBinding or a</span>
 <span class="sd">        list of FitBindings. If None, no fit bindings are provided.</span>
-<span class="sd">    display_name : str | None, default=&quot;ParameterAnalysis&quot;</span>
+<span class="sd">    display_name : str | None, default=&#39;ParameterAnalysis&#39;</span>
 <span class="sd">        Display name of the analysis.</span>
 <span class="sd">    unique_name : str | None, default=None</span>
 <span class="sd">        Unique name of the analysis. If None, a unique name is automatically generated. By</span>
@@ -21917,7 +21797,15 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
@@ -21925,15 +21813,7 @@ default, None.</p>
 <span class="normal">351</span>
 <span class="normal">352</span>
 <span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_binding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binding</span><span class="p">:</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append_binding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binding</span><span class="p">:</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Append a FitBinding to the list of bindings for the parameter analysis.</span>
 
@@ -21948,7 +21828,7 @@ default, None.</p>
 <span class="sd">        If binding is not a FitBinding object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;binding must be a FitBinding object.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;binding must be a FitBinding object.&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -22136,7 +22016,11 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
@@ -22186,15 +22070,7 @@ default, None.</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FitBinding</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate all bindings into a sc.Dataset of model predictions.</span>
 
@@ -22218,15 +22094,13 @@ default, None.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bindings</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bindings must be a list of FitBinding objects.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">FitBinding</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bindings must be a list of FitBinding objects.&#39;</span><span class="p">)</span>
 
     <span class="n">arrays</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -22235,22 +22109,20 @@ default, None.</p>
         <span class="n">model_names</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_model_names</span><span class="p">()</span>
         <span class="n">callables</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">build_callables</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">):</span>
+        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">mname</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">model_names</span><span class="p">,</span> <span class="n">callables</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                    <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                 <span class="p">)</span>
             <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
 
             <span class="n">y_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
             <span class="n">arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
-                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">y_model</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
+                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -22283,11 +22155,11 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clear all FitBindings from the list of bindings for the parameter analysis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -22448,10 +22320,10 @@ names are found for the fit functions.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters Dataset provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters Dataset provided.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No fit bindings provided.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fit bindings provided.&#39;</span><span class="p">)</span>
 
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -22466,7 +22338,7 @@ names are found for the fit functions.</p>
             <span class="k">if</span> <span class="n">pname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">pname</span><span class="si">}</span><span class="s2">&#39; from binding &#39;</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">unique_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;not found in parameters Dataset.&quot;</span>
+                    <span class="sa">f</span><span class="s1">&#39;not found in parameters Dataset.&#39;</span>
                 <span class="p">)</span>
 
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xyweight_from_dataset</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
@@ -22544,19 +22416,19 @@ names are found for the fit functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/parameter_analysis.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">370</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all variables from the fit functions.</span>
 
@@ -22878,11 +22750,7 @@ names are found for the fit functions.</p>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveFigure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -22909,12 +22777,10 @@ names are found for the fit functions.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_in_notebook</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;plot() can only be used in a Jupyter notebook environment.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;plot() can only be used in a Jupyter notebook environment.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters available to plot.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No parameters available to plot.&#39;</span><span class="p">)</span>
 
     <span class="n">full_model_dataset</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
@@ -22937,19 +22803,17 @@ names are found for the fit functions.</p>
     <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
     <span class="n">first_unit</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="o">!=</span> <span class="n">first_unit</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Units are not compatible, and cannot be plotted together: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
-    <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">])</span>
+    <span class="n">color_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+    <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">])</span>
 
     <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
-        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">}</span>
 
     <span class="n">data_arrays</span> <span class="o">=</span> <span class="p">{}</span>
@@ -22970,19 +22834,19 @@ names are found for the fit functions.</p>
         <span class="n">marker</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
 
         <span class="c1"># Data styling</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
-        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">][</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
         <span class="k">if</span> <span class="n">full_model_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">param_to_model</span><span class="p">:</span>
             <span class="n">mname</span> <span class="o">=</span> <span class="n">param_to_model</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
             <span class="n">model_arrays</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_model_dataset</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span>
 
             <span class="c1"># Model styling</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;linestyle&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
 
     <span class="c1"># Update kwargs with user provided kwargs.</span>
     <span class="n">plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
