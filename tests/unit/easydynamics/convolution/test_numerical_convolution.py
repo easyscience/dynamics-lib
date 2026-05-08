@@ -109,3 +109,127 @@ class TestNumericalConvolution:
         )
 
         assert np.allclose(result, expected_result, rtol=1e-4)
+
+    @pytest.mark.parametrize(
+        'plan_valid, suppress_warnings, use_db, upsample',
+        [
+            (True, True, False, None),
+            (False, True, False, None),
+            (True, False, False, None),
+            (True, False, True, None),
+            (True, False, True, 10),
+            (False, False, True, 10),
+        ],
+        ids=[
+            'plan_valid=True, suppress_warnings=True, use_db=False, upsample=None',
+            'plan_valid=False, suppress_warnings=True, use_db=False, upsample=None',
+            'plan_valid=True, suppress_warnings=False, use_db=False, upsample=None',
+            'plan_valid=True, suppress_warnings=False, use_db=True, upsample=None',
+            'plan_valid=True, suppress_warnings=False, use_db=True, upsample=10',
+            'plan_valid=False, suppress_warnings=False, use_db=True, upsample=10',
+        ],
+    )
+    def test_convolution_branches(
+        self,
+        default_numerical_convolution,
+        monkeypatch,
+        plan_valid,
+        suppress_warnings,
+        use_db,
+        upsample,
+    ):
+        "Test that convolution branches are executed as expected based on settings."
+        # WHEN
+        conv = default_numerical_convolution
+
+        # --- Configure branches ---
+        conv.convolution_settings.suppress_warnings = suppress_warnings
+
+        conv.detailed_balance_settings.use_detailed_balance = use_db
+        conv.temperature = 10.0 if use_db else None
+
+        conv.upsample_factor = upsample
+
+        conv.convolution_settings.convolution_plan_is_valid = plan_valid
+
+        # --- Track calls ---
+        create_grid_called = False
+        check_width_calls = []
+
+        # Mock the methods that would be called in the branches to track
+        # whether they were called or not.
+        def fake_create_energy_grid():
+            nonlocal create_grid_called
+            create_grid_called = True
+            return conv._energy_grid
+
+        def fake_check_width_thresholds(*args, **kwargs):
+            check_width_calls.append((args, kwargs))
+
+        monkeypatch.setattr(conv, '_create_energy_grid', fake_create_energy_grid)
+        monkeypatch.setattr(conv, '_check_width_thresholds', fake_check_width_thresholds)
+
+        # --- Simplify numerics ---
+        dense = conv._energy_grid.energy_dense
+
+        monkeypatch.setattr(
+            conv.sample_components,
+            'evaluate',
+            lambda x: np.ones_like(dense),  # noqa: ARG005
+        )
+        monkeypatch.setattr(
+            conv.resolution_components,
+            'evaluate',
+            lambda x: np.ones_like(dense),  # noqa: ARG005
+        )
+
+        db_called = False
+
+        def fake_db(*args, **kwargs):  # noqa: ARG001
+            nonlocal db_called
+            db_called = True
+            return np.ones_like(dense)
+
+        monkeypatch.setattr(
+            'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
+            fake_db,
+        )
+
+        monkeypatch.setattr(
+            'easydynamics.convolution.numerical_convolution.fftconvolve',
+            lambda a, b, mode: np.ones_like(dense),  # noqa: ARG005
+        )
+
+        interp_called = False
+
+        def fake_interp(*args, **kwargs):  # noqa: ARG001
+            nonlocal interp_called
+            interp_called = True
+            return np.ones_like(conv.energy.values)
+
+        monkeypatch.setattr(np, 'interp', fake_interp)
+
+        # THEN
+        result = conv.convolution()
+
+        # EXPECT
+        # Branch 1: energy grid recreation
+        assert create_grid_called is (not plan_valid)
+
+        # Branch 2: warnings
+        if suppress_warnings:
+            assert len(check_width_calls) == 0
+        else:
+            assert len(check_width_calls) == 2
+
+        # Branch 3: detailed balance
+        assert db_called is (use_db and conv.temperature is not None)
+
+        # Branch 4: interpolation
+        assert interp_called is (upsample is not None)
+
+        # Sanity: result shape
+        if upsample is not None:
+            assert result.shape == conv.energy.values.shape
+        else:
+            assert result.shape == dense.shape

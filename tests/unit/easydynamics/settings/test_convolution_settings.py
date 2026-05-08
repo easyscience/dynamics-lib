@@ -31,12 +31,14 @@ class TestConvolutionSettings:
         convolution_settings = ConvolutionSettings(
             upsample_factor=10,
             extension_factor=0.5,
+            suppress_warnings=True,
         )
 
         # THEN EXPECT
         assert convolution_settings.upsample_factor == 10
         assert convolution_settings.extension_factor == pytest.approx(0.5)
         assert convolution_settings.convolution_plan_is_valid is False
+        assert convolution_settings.suppress_warnings is True
 
     def test_init_with_None(self):
         """
@@ -53,6 +55,7 @@ class TestConvolutionSettings:
         assert convolution_settings.upsample_factor is None
         assert convolution_settings.extension_factor is None
         assert convolution_settings.convolution_plan_is_valid is False
+        assert convolution_settings.suppress_warnings is False
 
     @pytest.mark.parametrize(
         'invalid_input, expected_exception, match',
@@ -62,6 +65,7 @@ class TestConvolutionSettings:
             ({'upsample_factor': '5'}, TypeError, 'must be a numerical value or None'),
             ({'upsample_factor': 1.0}, ValueError, 'must be greater than 1'),
             ({'upsample_factor': 0.5}, ValueError, 'must be greater than 1'),
+            ({'suppress_warnings': 'yes'}, TypeError, r'must be True or False'),
         ],
         ids=[
             'extension_factor_not_numeric',
@@ -69,6 +73,7 @@ class TestConvolutionSettings:
             'upsample_factor_not_numeric',
             'upsample_factor_equal_1',
             'upsample_factor_less_than_1',
+            'suppress_warnings_not_boolean',
         ],
     )
     def test_init_raises_for_invalid_input(self, invalid_input, expected_exception, match):
@@ -219,12 +224,28 @@ class TestConvolutionSettings:
         with pytest.raises(expected_exception, match=match):
             default_convolution_settings.convolution_plan_is_valid = value
 
+    def test_suppress_warnings_setter_valid(self, default_convolution_settings):
+        # WHEN
+        default_convolution_settings.suppress_warnings = True
+
+        # THEN EXPECT
+        assert default_convolution_settings.suppress_warnings is True
+
+    def test_suppress_warnings_setter_invalid(self, default_convolution_settings):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(TypeError, match=r'must be True or False'):
+            default_convolution_settings.suppress_warnings = 'True'
+
     def test_repr_default(self, default_convolution_settings):
         # WHEN
         repr_str = repr(default_convolution_settings)
 
         # EXPECT
-        assert repr_str == ('ConvolutionSettings(upsample_factor=5.0, extension_factor=0.2)')
+        assert repr_str == (
+            f'ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, '
+            f'extension_factor={default_convolution_settings.extension_factor}, '
+            f'suppress_warnings={default_convolution_settings.suppress_warnings})'
+        )
 
     def test_repr_reflects_updated_values(self, default_convolution_settings):
         # WHEN
@@ -234,4 +255,8 @@ class TestConvolutionSettings:
         repr_str = repr(default_convolution_settings)
 
         # EXPECT
-        assert repr_str == ('ConvolutionSettings(upsample_factor=3.0, extension_factor=0.5)')
+        assert repr_str == (
+            f'ConvolutionSettings(upsample_factor={default_convolution_settings.upsample_factor}, '
+            f'extension_factor={default_convolution_settings.extension_factor}, '
+            f'suppress_warnings={default_convolution_settings.suppress_warnings})'
+        )

@@ -475,9 +475,17 @@ class TestComponentCollection:
     def test_copy(self, component_collection):
         # WHEN
         component_collection.temperature = 300
+        component_collection.components[0].area.min = 0.5
+        component_collection.components[0].area.fixed = True
+        component_collection.components[0].area.max = 5.0
+        component_collection.components[1].width.min = 0.1
+        component_collection.components[1].width.fixed = True
+        component_collection.components[1].width.max = 2.0
+
+        # THEN
         model_copy = copy(component_collection)
 
-        # THEN: collection-level checks
+        # EXPECT collection-level checks
         assert model_copy is not component_collection
         assert model_copy.display_name == component_collection.display_name
         assert len(model_copy.components) == len(component_collection.components)

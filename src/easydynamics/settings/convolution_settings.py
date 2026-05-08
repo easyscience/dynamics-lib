@@ -15,6 +15,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         self,
         upsample_factor: Numeric | None = 5,
         extension_factor: Numeric | None = 0.2,
+        suppress_warnings: bool = False,
         display_name: str | None = 'MyConvolutionSettings',
         unique_name: str | None = None,
     ) -> None:
@@ -27,6 +28,8 @@ class ConvolutionSettings(EasyDynamicsBase):
             The factor by which to upsample the input data before convolution.
         extension_factor : Numeric | None, default=0.2
             The factor by which to extend the input data range before convolution.
+        suppress_warnings : bool, default=False
+            Whether to suppress warnings about wide or narrow peaks in the models.
         display_name : str | None, default='MyConvolutionSettings'
             Display name of the model.
         unique_name : str | None, default=None
@@ -36,7 +39,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         ------
         TypeError
             If upsample_factor is not a number or None. If extension_factor is not a number or
-            None.
+            None. If suppress_warnings is not a boolean.
         ValueError
             If upsample_factor is not greater than 1. If extension_factor is negative.
         """
@@ -60,6 +63,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             if upsample_factor <= 1.0:
                 raise ValueError('Upsample factor must be greater than 1.')
         self._upsample_factor = upsample_factor
+
+        if not isinstance(suppress_warnings, bool):
+            raise TypeError('suppress_warnings must be True or False.')
+        self._suppress_warnings = suppress_warnings
 
         self._convolution_plan_is_valid = False
 
@@ -184,6 +191,37 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise TypeError('convolution_plan_is_valid must be True or False.')
         self._convolution_plan_is_valid = is_valid
 
+    @property
+    def suppress_warnings(self) -> bool:
+        """
+        Get whether to suppress warnings.
+
+        Returns
+        -------
+        bool
+            Whether to suppress warnings.
+        """
+        return self._suppress_warnings
+
+    @suppress_warnings.setter
+    def suppress_warnings(self, suppress: bool) -> None:
+        """
+        Set whether to suppress warnings.
+
+        Parameters
+        ----------
+        suppress : bool
+            Whether to suppress warnings.
+
+        Raises
+        ------
+        TypeError
+            If suppress is not a bool.
+        """
+        if not isinstance(suppress, bool):
+            raise TypeError('suppress_warnings must be True or False.')
+        self._suppress_warnings = suppress
+
     def __repr__(self) -> str:
         """
         Return a string representation of the ConvolutionSettings.
@@ -196,5 +234,6 @@ class ConvolutionSettings(EasyDynamicsBase):
         return (
             f'{self.__class__.__name__}('
             f'upsample_factor={self.upsample_factor}, '
-            f'extension_factor={self.extension_factor})'
+            f'extension_factor={self.extension_factor}, '
+            f'suppress_warnings={self.suppress_warnings})'
         )
