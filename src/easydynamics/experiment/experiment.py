@@ -437,6 +437,7 @@ class Experiment(EasyDynamicsBase):
             )
             for widget in fig.bottom_bar[0].controls.values():
                 widget.slider_toggler.value = '-o-'
+            fig.autoscale()
 
         else:
             if transpose_axes:

@@ -549,6 +549,30 @@ class AnalysisBase(EasyDynamicsModelBase):
             raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
 
+    def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:
+        """
+        Verify that the provided energy is the correct type.
+
+        Parameters
+        ----------
+        energy : sc.Variable | None
+            The energy to verify.
+
+        Raises
+        ------
+        TypeError
+            If energy is not a sc.Variable or None.
+
+        Returns
+        -------
+        sc.Variable | None
+            The verified energy, or None if no energy is provided.
+        """
+
+        if energy is not None and not isinstance(energy, sc.Variable):
+            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
+        return energy
+
     #############
     # Dunder methods
     #############

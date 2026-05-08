@@ -47,7 +47,7 @@ class Analysis1d(AnalysisBase):
 
         Parameters
         ----------
-        display_name : str | None, default="MyAnalysis"
+        display_name : str | None, default='MyAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated.
@@ -363,7 +363,11 @@ class Analysis1d(AnalysisBase):
         Raises
         ------
         ValueError
-            If no data is available in the experiment to include in the DataGroup.
+            If no data is available in the experiment to include in the DataGroup. If no Q values
+            are available in the experiment to create the DataGroup. If Q_index is not set to
+            create the DataGroup.
+        TypeError
+            If add_background is not a boolean. If include_components is not a boolean.
 
         Returns
         -------
@@ -374,6 +378,20 @@ class Analysis1d(AnalysisBase):
 
         if self.experiment.binned_data is None:
             raise ValueError('No data to include in DataGroup. Please load data first.')
+
+        if self.Q is None:
+            raise ValueError(
+                'No Q values available for creating DataGroup. Please check the experiment data.'
+            )
+
+        if not isinstance(add_background, bool):
+            raise TypeError('add_background must be True or False.')
+
+        if not isinstance(include_components, bool):
+            raise TypeError('include_components must be True or False.')
+
+        if self.Q_index is None:
+            raise ValueError('Q_index must be set to create DataGroup.')
 
         energy = self._verify_energy(energy)
 
@@ -438,30 +456,6 @@ class Analysis1d(AnalysisBase):
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver = self._create_convolver()
-
-    def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:
-        """
-        Verify that the provided energy is the correct type.
-
-        Parameters
-        ----------
-        energy : sc.Variable | None
-            The energy to verify.
-
-        Raises
-        ------
-        TypeError
-            If energy is not a sc.Variable or None.
-
-        Returns
-        -------
-        sc.Variable | None
-            The verified energy, or None if no energy is provided.
-        """
-
-        if energy is not None and not isinstance(energy, sc.Variable):
-            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
-        return energy
 
     def _calculate_energy_with_offset(
         self,

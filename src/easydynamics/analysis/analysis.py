@@ -326,7 +326,7 @@ class Analysis(AnalysisBase):
         )
         for widget in fig.bottom_bar[0].controls.values():
             widget.slider_toggler.value = '-o-'
-
+        fig.autoscale()
         return fig
 
     def data_and_model_to_datagroup(
@@ -350,13 +350,16 @@ class Analysis(AnalysisBase):
         include_components : bool, default=True
             Whether to include the individual components of the model in the DataGroup. If False,
             only the total model will be included.
+
         Raises
         ------
         ValueError
             If there is no data to include in the DataGroup, or if there are no Q values available
             for creating the DataGroup.
+
         TypeError
-            If add_background is not True or False.
+            If add_background is not True or False. If include_components is not True or False.
+
         Returns
         -------
         sc.DataGroup
@@ -373,6 +376,11 @@ class Analysis(AnalysisBase):
 
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
+
+        if not isinstance(include_components, bool):
+            raise TypeError('include_components must be True or False.')
+
+        energy = self._verify_energy(energy)
 
         if energy is None:
             energy = self.energy
