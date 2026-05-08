@@ -74,7 +74,8 @@ class CreateParametersMixin:
                 stacklevel=3,
             )
         else:
-            area.min = minimum_area
+            if area.min < minimum_area:
+                area.min = minimum_area
 
         return area
 
@@ -130,7 +131,7 @@ class CreateParametersMixin:
                 raise ValueError('center must be None, a finite number or a Parameter')
 
             center = Parameter(name=name + ' center', value=float(center), unit=unit)
-        if enforce_minimum_center:
+        if enforce_minimum_center and center.min < DHO_MINIMUM_CENTER:
             center.min = DHO_MINIMUM_CENTER
         return center
 
@@ -192,6 +193,7 @@ class CreateParametersMixin:
                 raise ValueError(
                     f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
                 )
-            width.min = minimum_width
+            if width.min < minimum_width:
+                width.min = minimum_width
 
         return width

@@ -6,12 +6,14 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
+from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
@@ -21,6 +23,33 @@ class TestAnalysisBase:
     def analysis_base(self):
         experiment = Experiment()
         sample_model = SampleModel()
+        instrument_model = InstrumentModel()
+        return AnalysisBase(
+            display_name='TestAnalysis',
+            experiment=experiment,
+            sample_model=sample_model,
+            instrument_model=instrument_model,
+        )
+
+    @pytest.fixture
+    def analysis_base_with_components(self):
+        Q = sc.array(dims=['Q'], values=[1, 2], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+            variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+        )
+
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+
+        experiment = Experiment(data=data_array)
+
+        comp1 = Gaussian(area=1, width=2, center=3)
+        comp2 = Gaussian(area=4, width=5, center=6)
+        sample_model = SampleModel()
+        sample_model.append_component(comp1)
+        sample_model.append_component(comp2)
         instrument_model = InstrumentModel()
         return AnalysisBase(
             display_name='TestAnalysis',
@@ -368,6 +397,95 @@ class TestAnalysisBase:
         ) as mock_normalize_resolution:
             analysis_base.normalize_resolution()
             mock_normalize_resolution.assert_called_once()
+
+    def test_get_parameters_near_bounds_no_bounds(self, analysis_base_with_components):
+        # WHEN THEN
+        near_bounds = analysis_base_with_components.get_parameters_near_bounds()
+
+        # EXPECT
+        assert isinstance(near_bounds, list)
+        assert len(near_bounds) == 0
+
+    def test_get_parameters_near_bounds_at_bounds(self, analysis_base_with_components):
+        # WHEN
+        components = analysis_base_with_components.sample_model.get_component_collection(
+            Q_index=0
+        ).components
+        components[0].area.min = 1.0
+        components[1].center.max = 6.0
+
+        # THEN
+        near_bounds = analysis_base_with_components.get_parameters_near_bounds()
+
+        # EXPECT
+        assert isinstance(near_bounds, list)
+        assert len(near_bounds) == 2
+        assert components[0].area in near_bounds
+        assert components[1].center in near_bounds
+
+    def test_get_parameters_near_bounds_with_tolerances(self, analysis_base_with_components):
+        # WHEN
+        components = analysis_base_with_components.sample_model.get_component_collection(
+            Q_index=0
+        ).components
+        components[0].area.min = 0.99999
+        components[1].center.max = 6.00001
+
+        # THEN
+        near_bounds = analysis_base_with_components.get_parameters_near_bounds()
+
+        # EXPECT
+        assert isinstance(near_bounds, list)
+        assert len(near_bounds) == 2
+        assert components[0].area in near_bounds
+        assert components[1].center in near_bounds
+
+    @pytest.mark.parametrize(
+        'rtol, atol, expected_param, expected_error',
+        [
+            ('1e-5', 1e-8, 'rtol', TypeError),  # str
+            (None, 1e-8, 'rtol', TypeError),  # None
+            (1e-5, '1e-8', 'atol', TypeError),  # str
+            (1e-5, None, 'atol', TypeError),  # None
+            (-1e-5, 1e-8, 'rtol', ValueError),  # negative rtol
+            (1e-5, -1e-8, 'atol', ValueError),  # negative atol
+        ],
+        ids=[
+            'rtol as string',
+            'rtol as None',
+            'atol as string',
+            'atol as None',
+            'rtol negative',
+            'atol negative',
+        ],
+    )
+    def test_get_parameters_near_bounds_errors(
+        self, analysis_base_with_components, rtol, atol, expected_param, expected_error
+    ):
+        with pytest.raises(expected_error) as exc:
+            analysis_base_with_components.get_parameters_near_bounds(
+                rtol=rtol,
+                atol=atol,
+            )
+
+        assert expected_param in str(exc.value)
+
+    def test_not_finite_parameters(self, analysis_base_with_components):
+        # WHEN
+        components = analysis_base_with_components.sample_model.get_component_collection(
+            Q_index=0
+        ).components
+        components[0].area.value = np.inf
+        components[1].center.value = np.nan
+
+        # THEN
+        near_bounds = analysis_base_with_components.get_parameters_near_bounds()
+
+        # EXPECT
+        assert isinstance(near_bounds, list)
+        assert len(near_bounds) == 2
+        assert components[0].area in near_bounds
+        assert components[1].center in near_bounds
 
     #############
     # Private methods
