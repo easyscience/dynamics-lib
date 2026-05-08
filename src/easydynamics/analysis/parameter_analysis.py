@@ -33,7 +33,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         self,
         parameters: sc.Dataset | Analysis | None = None,
         bindings: FitBinding | list[FitBinding] | None = None,
-        display_name: str | None = "ParameterAnalysis",
+        display_name: str | None = 'ParameterAnalysis',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -47,7 +47,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         bindings : FitBinding | list[FitBinding] | None, default=None
             The fit bindings to use for fitting the parameters. Can be a single FitBinding or a
             list of FitBindings. If None, no fit bindings are provided.
-        display_name : str | None, default="ParameterAnalysis"
+        display_name : str | None, default='ParameterAnalysis'
             Display name of the analysis.
         unique_name : str | None, default=None
             Unique name of the analysis. If None, a unique name is automatically generated. By
@@ -132,10 +132,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
 
         if self.parameters is None:
-            raise ValueError("No parameters Dataset provided.")
+            raise ValueError('No parameters Dataset provided.')
 
         if not self.bindings:
-            raise ValueError("No fit bindings provided.")
+            raise ValueError('No fit bindings provided.')
 
         xs = []
         ys = []
@@ -150,7 +150,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 if pname not in self.parameters:
                     raise ValueError(
                         f"Parameter '{pname}' from binding '{binding.unique_name}' "
-                        f"not found in parameters Dataset."
+                        f'not found in parameters Dataset.'
                     )
 
                 x, y, weight = self._get_xyweight_from_dataset(pname)
@@ -200,12 +200,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
 
         if not _in_notebook():
-            raise RuntimeError(
-                "plot() can only be used in a Jupyter notebook environment."
-            )
+            raise RuntimeError('plot() can only be used in a Jupyter notebook environment.')
 
         if self.parameters is None:
-            raise ValueError("No parameters available to plot.")
+            raise ValueError('No parameters available to plot.')
 
         full_model_dataset = None
         if self.bindings:
@@ -228,19 +226,17 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         units = [self.parameters[name].unit for name in names]
         first_unit = units[0]
         if any(unit != first_unit for unit in units):
-            raise ValueError(
-                f"Units are not compatible, and cannot be plotted together: {units}"
-            )
+            raise ValueError(f'Units are not compatible, and cannot be plotted together: {units}')
 
-        color_cycle = itertools.cycle(rcParams["axes.prop_cycle"].by_key()["color"])
-        markers = itertools.cycle(["o", "s", "D", "^", "v", "<", ">"])
+        color_cycle = itertools.cycle(rcParams['axes.prop_cycle'].by_key()['color'])
+        markers = itertools.cycle(['o', 's', 'D', '^', 'v', '<', '>'])
 
         plot_kwargs = {
-            "title": self.display_name,
-            "linestyle": {},
-            "marker": {},
-            "color": {},
-            "markerfacecolor": {},
+            'title': self.display_name,
+            'linestyle': {},
+            'marker': {},
+            'color': {},
+            'markerfacecolor': {},
         }
 
         data_arrays = {}
@@ -261,19 +257,19 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             marker = next(markers)
 
             # Data styling
-            plot_kwargs["linestyle"][pname] = "none"
-            plot_kwargs["marker"][pname] = marker
-            plot_kwargs["color"][pname] = color
-            plot_kwargs["markerfacecolor"][pname] = "none"
+            plot_kwargs['linestyle'][pname] = 'none'
+            plot_kwargs['marker'][pname] = marker
+            plot_kwargs['color'][pname] = color
+            plot_kwargs['markerfacecolor'][pname] = 'none'
 
             if full_model_dataset is not None and pname in param_to_model:
                 mname = param_to_model[pname]
                 model_arrays[mname] = full_model_dataset[mname]
 
                 # Model styling
-                plot_kwargs["linestyle"][mname] = "--"
-                plot_kwargs["marker"][mname] = None
-                plot_kwargs["color"][mname] = color
+                plot_kwargs['linestyle'][mname] = '--'
+                plot_kwargs['marker'][mname] = None
+                plot_kwargs['color'][mname] = color
 
         # Update kwargs with user provided kwargs.
         plot_kwargs.update(kwargs)
@@ -307,15 +303,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
 
         if self.parameters is None:
-            raise ValueError("No parameters Dataset provided.")
+            raise ValueError('No parameters Dataset provided.')
 
         if not bindings:
-            raise ValueError("No fit bindings provided.")
+            raise ValueError('No fit bindings provided.')
 
-        if not isinstance(bindings, list) or not all(
-            isinstance(b, FitBinding) for b in bindings
-        ):
-            raise TypeError("bindings must be a list of FitBinding objects.")
+        if not isinstance(bindings, list) or not all(isinstance(b, FitBinding) for b in bindings):
+            raise TypeError('bindings must be a list of FitBinding objects.')
 
         arrays = {}
 
@@ -324,22 +318,20 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             model_names = b.get_model_names()
             callables = b.build_callables()
 
-            for pname, mname, func in zip(
-                param_names, model_names, callables, strict=True
-            ):
+            for pname, mname, func in zip(param_names, model_names, callables, strict=True):
                 if pname not in self.parameters:
                     raise ValueError(
                         f"Parameter '{pname}' from binding '{b.unique_name}' "
-                        f"not found in parameters Dataset."
+                        f'not found in parameters Dataset.'
                     )
                 da = self.parameters[pname]
-                x = da.coords["Q"]
+                x = da.coords['Q']
 
                 y_model = func(x.values)
 
                 arrays[mname] = sc.DataArray(
-                    data=sc.array(dims=["Q"], values=y_model, unit=da.unit),
-                    coords={"Q": x},
+                    data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
+                    coords={'Q': x},
                 )
         return sc.Dataset(arrays)
 
@@ -358,7 +350,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             If binding is not a FitBinding object.
         """
         if not isinstance(binding, FitBinding):
-            raise TypeError("binding must be a FitBinding object.")
+            raise TypeError('binding must be a FitBinding object.')
         self._bindings.append(binding)
 
     def clear_bindings(self) -> None:
@@ -385,9 +377,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # Private methods: verification and preparation
     #############
 
-    def _verify_bindings(
-        self, bindings: FitBinding | list[FitBinding] | None
-    ) -> list[FitBinding]:
+    def _verify_bindings(self, bindings: FitBinding | list[FitBinding] | None) -> list[FitBinding]:
         """
         Verify the bindings input.
 
@@ -410,17 +400,11 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             return []
         if isinstance(bindings, FitBinding):
             return [bindings]
-        if isinstance(bindings, list) and all(
-            isinstance(b, FitBinding) for b in bindings
-        ):
+        if isinstance(bindings, list) and all(isinstance(b, FitBinding) for b in bindings):
             return bindings
-        raise TypeError(
-            "bindings must be a FitBinding, a list of FitBindings, or None."
-        )
+        raise TypeError('bindings must be a FitBinding, a list of FitBindings, or None.')
 
-    def _verify_parameters(
-        self, parameters: sc.Dataset | Analysis | None
-    ) -> sc.Dataset | None:
+    def _verify_parameters(self, parameters: sc.Dataset | Analysis | None) -> sc.Dataset | None:
         """
         Verify the parameters input and convert it to a sc.Dataset if it's an Analysis.
 
@@ -445,14 +429,14 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             return None
 
         if not isinstance(parameters, (sc.Dataset, Analysis)):
-            raise TypeError(r"parameters must be a sc.Dataset, an Analysis, or None.")
+            raise TypeError(r'parameters must be a sc.Dataset, an Analysis, or None.')
 
         if isinstance(parameters, Analysis):
             verified_parameters = parameters.parameters_to_dataset()
         else:
             verified_parameters = parameters
 
-        if "Q" not in verified_parameters.coords:
+        if 'Q' not in verified_parameters.coords:
             raise ValueError(r"parameters must have a 'Q' coordinate.")
         return verified_parameters
 
@@ -480,20 +464,16 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         if names is None:
             return None
         if not isinstance(names, (str, list)):
-            raise ValueError("names must be a string, a list of strings, or None.")
+            raise ValueError('names must be a string, a list of strings, or None.')
         if isinstance(names, list):
             if not all(isinstance(name, str) for name in names):
-                raise ValueError("All names in the list must be strings.")
+                raise ValueError('All names in the list must be strings.')
             for name in names:
                 if name not in self.parameters:
-                    raise ValueError(
-                        f"Parameter name '{name}' not found in parameters Dataset."
-                    )
+                    raise ValueError(f"Parameter name '{name}' not found in parameters Dataset.")
         if isinstance(names, str):
             if names not in self.parameters:
-                raise ValueError(
-                    f"Parameter name '{names}' not found in parameters Dataset."
-                )
+                raise ValueError(f"Parameter name '{names}' not found in parameters Dataset.")
             names = [names]
         return names
 
@@ -524,11 +504,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             found for the parameter.
         """
         if self._parameters is None:
-            raise ValueError("No parameters Dataset provided.")
+            raise ValueError('No parameters Dataset provided.')
         if parameter_name not in self._parameters:
-            raise ValueError(
-                f"Parameter name '{parameter_name}' not found in parameters Dataset."
-            )
+            raise ValueError(f"Parameter name '{parameter_name}' not found in parameters Dataset.")
 
         variances = self._parameters[parameter_name].variances
         if variances is None:
@@ -536,13 +514,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         elif np.any(~np.isfinite(variances)) or np.any(variances <= 0):
             raise ValueError(
                 f"Non-finite variances found for parameter '{parameter_name}', "
-                f"cannot compute weights."
+                f'cannot compute weights.'
             )
         else:
             weight = 1 / np.sqrt(variances)
 
         return (
-            self._parameters[parameter_name].coords["Q"].values,
+            self._parameters[parameter_name].coords['Q'].values,
             self._parameters[parameter_name].values,
             weight,
         )
@@ -553,31 +531,27 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     def __repr__(self) -> str:
         cls = self.__class__.__name__
 
-        n_params = (
-            len(self._parameters) if isinstance(self._parameters, sc.Dataset) else 0
-        )
+        n_params = len(self._parameters) if isinstance(self._parameters, sc.Dataset) else 0
 
         param_names = (
-            list(self._parameters.keys())
-            if isinstance(self._parameters, sc.Dataset)
-            else None
+            list(self._parameters.keys()) if isinstance(self._parameters, sc.Dataset) else None
         )
 
         binding_info = [
             {
-                "parameter": b.parameter_name,
-                "model": b.model.display_name,
-                "modes": b.modes,
+                'parameter': b.parameter_name,
+                'model': b.model.display_name,
+                'modes': b.modes,
             }
             for b in self._bindings
         ]
 
         return (
-            f"{cls}(\n"
-            f"display_name={self.display_name},\n"
-            f"unique_name={self.unique_name},\n"
-            f"n_parameters={n_params},\n"
-            f"parameter_names={param_names},\n"
-            f"bindings={binding_info}\n"
-            f")"
+            f'{cls}(\n'
+            f'display_name={self.display_name},\n'
+            f'unique_name={self.unique_name},\n'
+            f'n_parameters={n_params},\n'
+            f'parameter_names={param_names},\n'
+            f'bindings={binding_info}\n'
+            f')'
         )
