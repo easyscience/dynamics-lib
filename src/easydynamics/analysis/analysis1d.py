@@ -291,11 +291,6 @@ class Analysis1d(AnalysisBase):
         **kwargs : dict[str, Any]
             Keyword arguments to pass to the plotting function.
 
-        Raises
-        ------
-        ValueError
-            If no data is available to plot.
-
         Returns
         -------
         InteractiveFigure
@@ -303,36 +298,36 @@ class Analysis1d(AnalysisBase):
         """
         import plopp as pp
 
+        data_and_model = self.data_and_model_to_datagroup(
+            energy=energy,
+            add_background=add_background,
+            include_components=plot_components,
+        )
+
         plot_kwargs_defaults = {
             'title': self.display_name,
-            'linestyle': {'Data': 'none', 'Model': '-'},
-            'marker': {'Data': 'o', 'Model': 'none'},
-            'color': {'Data': 'black', 'Model': 'red'},
-            'markerfacecolor': {'Data': 'none', 'Model': 'none'},
+            'linestyle': {},
+            'marker': {},
+            'color': {},
+            'markerfacecolor': {},
         }
 
-        if self.experiment.binned_data is None:
-            raise ValueError('No data to plot. Please load data first.')
+        for key in data_and_model:
+            if key == 'Data':
+                plot_kwargs_defaults['linestyle'][key] = 'none'
+                plot_kwargs_defaults['marker'][key] = 'o'
+                plot_kwargs_defaults['color'][key] = 'black'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
-        energy = self._verify_energy(energy)
-        if energy is None:
-            energy = self._masked_energy
+            elif key == 'Model':
+                plot_kwargs_defaults['linestyle'][key] = '-'
+                plot_kwargs_defaults['marker'][key] = None
+                plot_kwargs_defaults['color'][key] = 'red'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
-        # Create a dataset containing the data, model, and individual
-        # components for plotting.
-        data_and_model = {
-            'Data': self.experiment.binned_data['Q', self.Q_index],
-            'Model': self._create_model_array(energy=energy),
-        }
-
-        if plot_components:
-            components = self._create_components_dataset_single_Q(
-                add_background=add_background, energy=energy
-            )
-            for comp_name in components:
-                data_and_model[comp_name] = components[comp_name]
-                plot_kwargs_defaults['linestyle'][comp_name] = '--'
-                plot_kwargs_defaults['marker'][comp_name] = None
+            else:
+                plot_kwargs_defaults['linestyle'][key] = '--'
+                plot_kwargs_defaults['marker'][key] = None
 
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
@@ -341,6 +336,83 @@ class Analysis1d(AnalysisBase):
             data_and_model,
             **plot_kwargs_defaults,
         )
+
+    def data_and_model_to_datagroup(
+        self,
+        energy: sc.Variable | None = None,
+        add_background: bool = True,
+        include_components: bool = True,
+    ) -> sc.DataGroup:
+        """
+        Create a scipp DataGroup containing the experimental data, model calculation, and
+        optionally the individual components.
+
+        Parameters
+        ----------
+        energy : sc.Variable | None, default=None
+            Optional energy grid to use for the model calculation. If None, the energy grid from
+            the experiment is used.
+        add_background : bool, default=True
+            Whether to add the background to the model prediction when plotting individual
+            components.
+        include_components : bool, default=True
+            Whether to include the individual components of the model in the DataGroup. If True,
+            the DataGroup will include a DataArray for each component with the component's display
+            name as the key
+
+        Raises
+        ------
+        ValueError
+            If no data is available in the experiment to include in the DataGroup. If no Q values
+            are available in the experiment to create the DataGroup. If Q_index is not set to
+            create the DataGroup.
+        TypeError
+            If add_background is not a boolean. If include_components is not a boolean.
+
+        Returns
+        -------
+        sc.DataGroup
+            A DataGroup containing the experimental data, model calculation, and optionally the
+            individual components.
+        """
+
+        if self.experiment.binned_data is None:
+            raise ValueError('No data to include in DataGroup. Please load data first.')
+
+        if self.Q is None:
+            raise ValueError(
+                'No Q values available for creating DataGroup. Please check the experiment data.'
+            )
+
+        if not isinstance(add_background, bool):
+            raise TypeError('add_background must be True or False.')
+
+        if not isinstance(include_components, bool):
+            raise TypeError('include_components must be True or False.')
+
+        if self.Q_index is None:
+            raise ValueError('Q_index must be set to create DataGroup.')
+
+        energy = self._verify_energy(energy)
+
+        if energy is None:
+            energy = self._masked_energy
+
+        data_and_model = {
+            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Model': self._create_model_array(energy=energy),
+        }
+
+        if include_components:
+            components = self._create_components_dataset_single_Q(
+                add_background=add_background,
+                energy=energy,
+            )
+
+            for key in components:
+                data_and_model[key] = components[key]
+
+        return sc.DataGroup(data_and_model)
 
     def fix_energy_offset(self) -> None:
         """Fix the energy offset parameter for the current Q index."""
@@ -384,30 +456,6 @@ class Analysis1d(AnalysisBase):
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver = self._create_convolver()
-
-    def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:
-        """
-        Verify that the provided energy is the correct type.
-
-        Parameters
-        ----------
-        energy : sc.Variable | None
-            The energy to verify.
-
-        Raises
-        ------
-        TypeError
-            If energy is not a sc.Variable or None.
-
-        Returns
-        -------
-        sc.Variable | None
-            The verified energy, or None if no energy is provided.
-        """
-
-        if energy is not None and not isinstance(energy, sc.Variable):
-            raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
-        return energy
 
     def _calculate_energy_with_offset(
         self,

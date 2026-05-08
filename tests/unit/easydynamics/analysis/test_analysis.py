@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from unittest.mock import MagicMock
-from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import numpy as np
@@ -273,111 +272,131 @@ class TestAnalysis:
         ):
             analysis.plot_data_and_model(add_background='not_a_boolean')
 
-    def test_plot_data_and_model_defaults(self, analysis):
-
+    @pytest.mark.parametrize(
+        'plot_components, expect_components',
+        [
+            (False, False),
+            (True, True),
+        ],
+        ids=[
+            'No components',
+            'With components',
+        ],
+    )
+    def test_plot_data_and_model(
+        self,
+        analysis,
+        plot_components,
+        expect_components,
+    ):
         # WHEN
-        # Create fake widget
         fake_widget = MagicMock()
         fake_widget.slider_toggler = MagicMock()
-        fake_widget.slider_toggler.value = None
 
-        # Create fake fig with required structure
         fake_fig = MagicMock()
         fake_fig.bottom_bar = [MagicMock()]
         fake_fig.bottom_bar[0].controls = {'test': fake_widget}
 
-        fake_data = MagicMock()
-        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
-
-        analysis._create_model_array = MagicMock(return_value='MODEL')
         with (
             patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
-            patch.object(
-                type(analysis.experiment),
-                'binned_data',
-                new_callable=PropertyMock,
-            ) as mock_binned,
             patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
         ):
-            mock_binned.return_value = fake_data
             # THEN
-            fig = analysis.plot_data_and_model(plot_components=False)
+            fig = analysis.plot_data_and_model(plot_components=plot_components)
 
         # EXPECT
+        assert fig is fake_fig
+
         mock_slicer.assert_called_once()
-        assert fig == fake_fig
-        # Inspect arguments passed to slicer
+
         args, kwargs = mock_slicer.call_args
 
-        data_passed = args[0]
-        assert 'Data' in data_passed
-        assert 'Model' in data_passed
+        datagroup = args[0]
 
-        assert data_passed['Data'] == fake_data
-        assert data_passed['Model'] == 'MODEL'
+        assert isinstance(datagroup, sc.DataGroup)
 
-        # Check the default kwargs
-        assert kwargs['title'] == 'TestAnalysis'
-        assert kwargs['linestyle'] == {'Data': 'none', 'Model': '-'}
-        assert kwargs['marker'] == {'Data': 'o', 'Model': None}
-        assert kwargs['color'] == {'Data': 'black', 'Model': 'red'}
-        assert kwargs['markerfacecolor'] == {
-            'Data': 'none',
-            'Model': 'none',
-        }
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
 
-    def test_plot_data_and_model_plot_components_true(self, analysis):
+        component_keys = set(datagroup.keys()) - {'Data', 'Model'}
 
+        if expect_components:
+            assert len(component_keys) > 0
+
+            for key in component_keys:
+                assert kwargs['linestyle'][key] == '--'
+                assert kwargs['marker'][key] is None
+        else:
+            assert component_keys == set()
+
+        # Default plotting kwargs
+        assert kwargs['title'] == analysis.display_name
+
+        assert kwargs['linestyle']['Data'] == 'none'
+        assert kwargs['linestyle']['Model'] == '-'
+
+        assert kwargs['marker']['Data'] == 'o'
+        assert kwargs['marker']['Model'] is None
+
+        assert kwargs['color']['Data'] == 'black'
+        assert kwargs['color']['Model'] == 'red'
+
+        assert kwargs['markerfacecolor']['Data'] == 'none'
+        assert kwargs['markerfacecolor']['Model'] == 'none'
+
+        assert kwargs['keep'] == 'energy'
+
+        # Widget toggler updated
+        assert fake_widget.slider_toggler.value == '-o-'
+
+    def test_data_and_model_to_datagroup(self, analysis):
         # WHEN
-        # Create fake widget
-        fake_widget = MagicMock()
-        fake_widget.slider_toggler = MagicMock()
-        fake_widget.slider_toggler.value = None
-
-        # Create fake fig with required structure
-        fake_fig = MagicMock()
-        fake_fig.bottom_bar = [MagicMock()]
-        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
-
-        fake_data = MagicMock()
-        fake_data.coords = {'Q': 'Q_VALUES', 'energy': 'ENERGY_VALUES'}
-
-        analysis._create_model_array = MagicMock(return_value='MODEL')
-        analysis._create_components_dataset = MagicMock(return_value={'Gaussian': 'GAUSS'})
-        with (
-            patch('plopp.slicer', return_value=fake_fig) as mock_slicer,
-            patch.object(
-                type(analysis.experiment),
-                'binned_data',
-                new_callable=PropertyMock,
-            ) as mock_binned,
-            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
-        ):
-            mock_binned.return_value = fake_data
-            # THEN
-            fig = analysis.plot_data_and_model(plot_components=True)
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+        datagroup = analysis.data_and_model_to_datagroup(energy=energy)
 
         # EXPECT
-        mock_slicer.assert_called_once()
-        assert fig == fake_fig
-        # Inspect arguments passed to slicer
-        args, kwargs = mock_slicer.call_args
+        assert isinstance(datagroup, sc.DataGroup)
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+        assert sc.identical(datagroup['Data'], analysis.experiment.binned_data)
+        assert sc.identical(datagroup['Model'], analysis._create_model_array(energy=energy))
 
-        data_passed = args[0]
-        assert 'Data' in data_passed
-        assert 'Model' in data_passed
+    def test_data_and_model_to_datagroup_no_data_raises(self, analysis):
+        # WHEN
+        analysis.experiment._binned_data = None
 
-        assert data_passed['Data'] == fake_data
-        assert data_passed['Model'] == 'MODEL'
-        # Check the default kwargs
-        assert kwargs['title'] == 'TestAnalysis'
-        assert kwargs['linestyle'] == {'Data': 'none', 'Model': '-', 'Gaussian': '--'}
-        assert kwargs['marker'] == {'Data': 'o', 'Model': None, 'Gaussian': None}
-        assert kwargs['color'] == {'Data': 'black', 'Model': 'red'}
-        assert kwargs['markerfacecolor'] == {
-            'Data': 'none',
-            'Model': 'none',
-        }
+        # THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match='No data to include in DataGroup',
+        ):
+            analysis.data_and_model_to_datagroup()
+
+    def test_data_and_model_to_datagroup_no_Q_raises(self, analysis):
+        with (
+            patch.object(type(analysis), 'Q', new=None),
+            pytest.raises(
+                ValueError,
+                match='No Q values available for creating DataGroup',
+            ),
+        ):
+            analysis.data_and_model_to_datagroup()
+
+    def test_data_and_model_to_datagroup_add_background_not_bool_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'add_background must be True or False',
+        ):
+            analysis.data_and_model_to_datagroup(add_background='not_a_boolean')
+
+    def test_data_and_model_to_datagroup_include_components_not_bool_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'include_components must be True or False',
+        ):
+            analysis.data_and_model_to_datagroup(include_components='not_a_boolean')
 
     def test_parameters_to_dataset(self, analysis):
         # WHEN
