@@ -28,12 +28,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     Examples
     --------
-    >>>Q=np.linspace(0.5,2,7) >>>energy=np.linspace(-2, 2, 501) >>>scale=1.0
-    >>>diffusion_coefficient = 2.4e-9  # m^2/s
-    >>>diffusion_model=BrownianTranslationalDiffusion(display_name="DiffusionModel",
-    >>>scale=scale, diffusion_coefficient= diffusion_coefficient)
-    >>>component_collections=diffusion_model.create_component_collections(Q) See also the
-    tutorials.
+    >>> Q=np.linspace(0.5,2,7) >>>energy=np.linspace(-2, 2, 501)
+    >>> scale = 1.0
+    >>> diffusion_coefficient = 2.4e-9  # m^2/s
+    >>> diffusion_model=BrownianTranslationalDiffusion(name="DiffusionModel",
+    >>> scale=scale, diffusion_coefficient= diffusion_coefficient,)
+    >>> component_collections = diffusion_model.create_component_collections(Q)
+
+    See also the tutorials.
     """
 
     def __init__(
