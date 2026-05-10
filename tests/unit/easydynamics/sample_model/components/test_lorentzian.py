@@ -15,7 +15,12 @@ class TestLorentzian:
     @pytest.fixture
     def lorentzian(self):
         return Lorentzian(
-            display_name='TestLorentzian', area=2.0, center=0.5, width=0.6, unit='meV'
+            name='LorentzianName',
+            display_name='TestLorentzian',
+            area=2.0,
+            center=0.5,
+            width=0.6,
+            unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -163,9 +168,9 @@ class TestLorentzian:
         assert len(params) == 3
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'TestLorentzian area',
-            'TestLorentzian center',
-            'TestLorentzian width',
+            'LorentzianName area',
+            'LorentzianName center',
+            'LorentzianName width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -218,7 +223,7 @@ class TestLorentzian:
 
         # EXPECT
         assert 'Lorentzian' in repr_str
-        assert 'unique_name = Lorentzian' in repr_str
+        assert 'name = LorentzianName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

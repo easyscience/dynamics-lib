@@ -15,7 +15,13 @@ from easydynamics.sample_model import DeltaFunction
 class TestDeltaFunction:
     @pytest.fixture
     def delta_function(self):
-        return DeltaFunction(display_name='TestDeltaFunction', area=2.0, center=0.5, unit='meV')
+        return DeltaFunction(
+            name='DeltaFunctionName',
+            display_name='TestDeltaFunction',
+            area=2.0,
+            center=0.5,
+            unit='meV',
+        )
 
     def test_init_no_inputs(self):
         # WHEN THEN
@@ -178,8 +184,8 @@ class TestDeltaFunction:
         assert len(params) == 2
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'TestDeltaFunction area',
-            'TestDeltaFunction center',
+            'DeltaFunctionName area',
+            'DeltaFunctionName center',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -215,7 +221,7 @@ class TestDeltaFunction:
 
         # EXPECT
         assert 'DeltaFunction' in repr_str
-        assert 'unique_name = DeltaFunction' in repr_str
+        assert 'name = DeltaFunctionName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

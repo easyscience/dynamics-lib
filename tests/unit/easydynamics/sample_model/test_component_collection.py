@@ -19,6 +19,7 @@ class TestComponentCollection:
     def component_collection(self):
         model = ComponentCollection(display_name='TestComponentCollection')
         component1 = Gaussian(
+            name='TestGaussian1Name',
             display_name='TestGaussian1',
             area=1.0,
             center=0.0,
@@ -27,6 +28,7 @@ class TestComponentCollection:
             unique_name='TestGaussian1',
         )
         component2 = Lorentzian(
+            name='TestLorentzian1Name',
             display_name='TestLorentzian1',
             area=2.0,
             center=1.0,
@@ -345,12 +347,12 @@ class TestComponentCollection:
         assert len(parameters) == 6
 
         expected_names = {
-            'TestGaussian1 area',
-            'TestGaussian1 center',
-            'TestGaussian1 width',
-            'TestLorentzian1 area',
-            'TestLorentzian1 center',
-            'TestLorentzian1 width',
+            'TestGaussian1Name area',
+            'TestGaussian1Name center',
+            'TestGaussian1Name width',
+            'TestLorentzian1Name area',
+            'TestLorentzian1Name center',
+            'TestLorentzian1Name width',
         }
         actual_names = {param.name for param in parameters}
         assert actual_names == expected_names
@@ -380,10 +382,10 @@ class TestComponentCollection:
         assert len(fit_parameters) == 4
 
         expected_names = {
-            'TestGaussian1 center',
-            'TestGaussian1 width',
-            'TestLorentzian1 area',
-            'TestLorentzian1 center',
+            'TestGaussian1Name center',
+            'TestGaussian1Name width',
+            'TestLorentzian1Name area',
+            'TestLorentzian1Name center',
         }
         actual_names = {param.name for param in fit_parameters}
         assert actual_names == expected_names

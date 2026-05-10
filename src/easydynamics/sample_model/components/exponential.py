@@ -29,6 +29,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter | None = None,
         rate: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
+        name: str = 'Exponential',
         display_name: str | None = 'Exponential',
         unique_name: str | None = None,
     ) -> None:
@@ -45,10 +46,12 @@ class Exponential(CreateParametersMixin, ModelComponent):
             Decay or growth constant of the Exponential.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
+        name : str, default='Exponential'
+            Name of the component for indexing.
         display_name : str | None, default='Exponential'
             Name of the component.
         unique_name : str | None, default=None
-            Unique name of the component. if None, a unique_name is automatically generated. By
+            Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.
 
         Raises
@@ -60,8 +63,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
-            display_name=display_name,
             unit=unit,
+            name=name,
+            display_name=display_name,
             unique_name=unique_name,
         )
 
@@ -72,12 +76,10 @@ class Exponential(CreateParametersMixin, ModelComponent):
             if not np.isfinite(amplitude):
                 raise ValueError('amplitude must be a finite number or a Parameter')
 
-            amplitude = Parameter(
-                name=display_name + ' amplitude', value=float(amplitude), unit=unit
-            )
+            amplitude = Parameter(name=name + ' amplitude', value=float(amplitude), unit=unit)
 
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=True, unit=self._unit
+            center=center, name=name, fix_if_none=True, unit=self._unit
         )
 
         if not isinstance(rate, (Parameter, Numeric)):
@@ -87,7 +89,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             if not np.isfinite(rate):
                 raise ValueError('rate must be a finite number or a Parameter')
 
-            rate = Parameter(name=display_name + ' rate', value=float(rate), unit='1/' + str(unit))
+            rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + str(unit))
 
         self._amplitude = amplitude
         self._center = center
@@ -270,5 +272,10 @@ class Exponential(CreateParametersMixin, ModelComponent):
             A string representation of the Exponential.
         """
 
-        return f'Exponential(unique_name = {self.unique_name}, unit = {self._unit},\n \
-            amplitude = {self.amplitude},\n center = {self.center},\n rate = {self.rate})'
+        return (
+            f'Exponential(name = {self.name}, display_name = {self.display_name}, '
+            f'unit = {self._unit},\n '
+            f'    amplitude = {self.amplitude},\n '
+            f'    center = {self.center},\n '
+            f'    rate = {self.rate})'
+        )

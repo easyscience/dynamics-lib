@@ -75,6 +75,7 @@ class ExpressionComponent(ModelComponent):
         expression: str,
         parameters: dict[str, Numeric] | None = None,
         unit: str | sc.Unit = 'meV',
+        name: str = 'Expression',
         display_name: str | None = 'Expression',
         unique_name: str | None = None,
     ) -> None:
@@ -89,6 +90,8 @@ class ExpressionComponent(ModelComponent):
             Dictionary of parameter names and their initial values.
         unit : str | sc.Unit, default='meV'
             Unit of the output.
+        name : str, default='Expression'
+            Name of the component for indexing.
         display_name : str | None, default='Expression'
             Display name for the component.
         unique_name : str | None, default=None
@@ -101,7 +104,7 @@ class ExpressionComponent(ModelComponent):
         TypeError
             If any parameter value is not numeric.
         """
-        super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
+        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
 
         if 'np.' in expression:
             raise ValueError(
@@ -334,12 +337,18 @@ class ExpressionComponent(ModelComponent):
         return super().__dir__() + list(self._parameters.keys())
 
     def __repr__(self) -> str:
-        """Repr function."""
+        """
+        Repr function.
+
+        Returns
+        -------
+        str
+            String representation of the ExpressionComponent.
+        """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
-            f'{self.__class__.__name__}(\n'
-            f"  expr='{self._expression_str}',\n"
-            f'  unit={self._unit},\n'
-            f'  parameters={{ {param_str} }}\n'
-            f')'
+            f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '
+            f'unit={self._unit},\n'
+            f"    expr='{self._expression_str}',\n"
+            f'    parameters={{ {param_str} }} )'
         )

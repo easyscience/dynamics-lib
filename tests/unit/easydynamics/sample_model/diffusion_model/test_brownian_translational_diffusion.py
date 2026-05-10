@@ -172,6 +172,15 @@ class TestBrownianTranslationalDiffusion:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'component_name must be a string.'):
             brownian_diffusion_model.create_component_collections(
+                Q=np.array([0.1, 0.2, 0.3]), component_name=123
+            )
+
+    def test_create_component_collections_component_display_name_must_be_string(
+        self, brownian_diffusion_model
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'component_display_name must be a string.'):
+            brownian_diffusion_model.create_component_collections(
                 Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
             )
 

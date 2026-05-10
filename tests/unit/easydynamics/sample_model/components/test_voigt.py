@@ -16,6 +16,7 @@ class TestVoigt:
     @pytest.fixture
     def voigt(self):
         return Voigt(
+            name='VoigtName',
             display_name='TestVoigt',
             area=2.0,
             center=0.5,
@@ -234,7 +235,6 @@ class TestVoigt:
     def test_center_is_fixed_if_init_to_None(self):
         # WHEN THEN
         test_voigt = Voigt(
-            display_name='TestVoigt',
             area=2.0,
             center=None,
             gaussian_width=0.6,
@@ -265,10 +265,10 @@ class TestVoigt:
         assert len(params) == 4
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'TestVoigt area',
-            'TestVoigt center',
-            'TestVoigt gaussian_width',
-            'TestVoigt lorentzian_width',
+            'VoigtName area',
+            'VoigtName center',
+            'VoigtName gaussian_width',
+            'VoigtName lorentzian_width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -318,7 +318,7 @@ class TestVoigt:
 
         # EXPECT
         assert 'Voigt' in repr_str
-        assert 'unique_name = Voigt' in repr_str
+        assert 'name = VoigtName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

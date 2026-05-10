@@ -30,7 +30,9 @@ class TestAnalysis:
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
 
         experiment = Experiment(data=data_array)
-        sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
+        sample_model = SampleModel(
+            components=Gaussian(name='GaussianName'), display_name='Gaussian'
+        )
         instrument_model = InstrumentModel()
 
         return Analysis(
@@ -55,7 +57,9 @@ class TestAnalysis:
 
         experiment = Experiment(data=data_array)
         experiment.rebin({'Q': 1})
-        sample_model = SampleModel(components=Gaussian(), display_name='Gaussian')
+        sample_model = SampleModel(
+            components=Gaussian(name='GaussianName'), display_name='Gaussian'
+        )
         instrument_model = InstrumentModel()
 
         return Analysis(
@@ -400,19 +404,21 @@ class TestAnalysis:
 
     def test_parameters_to_dataset(self, analysis):
         # WHEN
-        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
+        analysis.sample_model.append_component(
+            Gaussian(name='Gaussian2Name', display_name='Gaussian2', area=0.5)
+        )
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()
 
         # EXPECT
         assert isinstance(parameters_dataset, sc.Dataset)
         parameter_names = [
-            'Gaussian area',
-            'Gaussian center',
-            'Gaussian width',
-            'Gaussian2 area',
-            'Gaussian2 center',
-            'Gaussian2 width',
+            'GaussianName area',
+            'GaussianName center',
+            'GaussianName width',
+            'Gaussian2Name area',
+            'Gaussian2Name center',
+            'Gaussian2Name width',
             'energy_offset',
         ]
         for parameter_name in parameter_names:
@@ -422,7 +428,9 @@ class TestAnalysis:
     def test_parameters_to_dataset_different_units(self, analysis):
 
         # WHEN
-        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
+        analysis.sample_model.append_component(
+            Gaussian(name='Gaussian2Name', display_name='Gaussian2', area=0.5)
+        )
 
         # Convert the unit of a component to eV.
         analysis.sample_model.get_component_collection(Q_index=1).components[0].convert_unit('eV')
@@ -433,12 +441,12 @@ class TestAnalysis:
         # EXPECT
         assert isinstance(parameters_dataset, sc.Dataset)
         parameter_names = [
-            'Gaussian area',
-            'Gaussian center',
-            'Gaussian width',
-            'Gaussian2 area',
-            'Gaussian2 center',
-            'Gaussian2 width',
+            'GaussianName area',
+            'GaussianName center',
+            'GaussianName width',
+            'Gaussian2Name area',
+            'Gaussian2Name center',
+            'Gaussian2Name width',
             'energy_offset',
         ]
         for parameter_name in parameter_names:

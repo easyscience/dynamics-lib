@@ -34,6 +34,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter | None = None,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
+        name: str = 'Lorentzian',
         display_name: str | None = 'Lorentzian',
         unique_name: str | None = None,
     ) -> None:
@@ -50,6 +51,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             Half width at half maximum (HWHM).
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
+        name : str, default='Lorentzian'
+            Name of the component for indexing.
         display_name : str | None, default='Lorentzian'
             Name of the component.
         unique_name : str | None, default=None
@@ -58,17 +61,18 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         """
 
         super().__init__(
-            display_name=display_name,
             unit=unit,
+            name=name,
+            display_name=display_name,
             unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=True, unit=self._unit
+            center=center, name=name, fix_if_none=True, unit=self._unit
         )
-        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
+        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
 
         self._area = area
         self._center = center
@@ -216,6 +220,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             A string representation of the Lorentzian.
         """
         return (
-            f'Lorentzian(unique_name = {self.unique_name}, unit = {self._unit},\n'
-            f'area = {self.area},\n center = {self.center},\n width = {self.width})'
+            f'Lorentzian(name = {self.name}, display_name = {self.display_name}, '
+            f'unit = {self._unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center},\n'
+            f'    width = {self.width})'
         )

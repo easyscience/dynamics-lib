@@ -18,6 +18,7 @@ class TestModelBase:
     @pytest.fixture
     def model_base(self):
         component1 = Gaussian(
+            name='TestGaussian1Name',
             display_name='TestGaussian1',
             area=1.0,
             center=0.0,
@@ -25,6 +26,7 @@ class TestModelBase:
             unit='meV',
         )
         component2 = Lorentzian(
+            name='TestLorentzian1Name',
             display_name='TestLorentzian1',
             area=2.0,
             center=1.0,
@@ -126,12 +128,12 @@ class TestModelBase:
 
         # THEN
         expected_var_display_names = {
-            'TestGaussian1 area',
-            'TestGaussian1 center',
-            'TestGaussian1 width',
-            'TestLorentzian1 area',
-            'TestLorentzian1 center',
-            'TestLorentzian1 width',
+            'TestGaussian1Name area',
+            'TestGaussian1Name center',
+            'TestGaussian1Name width',
+            'TestLorentzian1Name area',
+            'TestLorentzian1Name center',
+            'TestLorentzian1Name width',
         }
 
         retrieved_var_display_names = {var.display_name for var in all_vars}
@@ -145,12 +147,12 @@ class TestModelBase:
 
         # THEN
         expected_var_display_names = {
-            'TestGaussian1 area',
-            'TestGaussian1 center',
-            'TestGaussian1 width',
-            'TestLorentzian1 area',
-            'TestLorentzian1 center',
-            'TestLorentzian1 width',
+            'TestGaussian1Name area',
+            'TestGaussian1Name center',
+            'TestGaussian1Name width',
+            'TestLorentzian1Name area',
+            'TestLorentzian1Name center',
+            'TestLorentzian1Name width',
         }
 
         retrieved_var_display_names = {var.display_name for var in all_vars}

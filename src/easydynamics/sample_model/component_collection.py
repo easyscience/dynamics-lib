@@ -8,41 +8,44 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
-from easyscience.base_classes.model_base import ModelBase
 from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 
+from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 if TYPE_CHECKING:
     from easydynamics.utils.utils import Numeric
 
 
-class ComponentCollection(ModelBase):
+class ComponentCollection(EasyDynamicsModelBase):
     """
     Collection of model components representing a sample, background or resolution model.
     """
 
     def __init__(
         self,
+        components: list[ModelComponent] | None = None,
         unit: str | sc.Unit = 'meV',
+        name: str = 'ComponentCollection',
         display_name: str | None = 'MyComponentCollection',
         unique_name: str | None = None,
-        components: list[ModelComponent] | None = None,
     ) -> None:
         """
         Initialize a new ComponentCollection.
 
         Parameters
         ----------
+        components : list[ModelComponent] | None, default=None
+            Initial model components to add to the ComponentCollection.
         unit : str | sc.Unit, default='meV'
             Unit of the collection.
+        name : str, default='ComponentCollection'
+            Name of the collection.
         display_name : str | None, default='MyComponentCollection'
             Display name of the collection.
         unique_name : str | None, default=None
             Unique name of the collection.
-        components : list[ModelComponent] | None, default=None
-            Initial model components to add to the ComponentCollection.
 
         Raises
         ------
@@ -50,13 +53,13 @@ class ComponentCollection(ModelBase):
             If unit is not a string or sc.Unit, or if components is not a list of ModelComponent.
         """
 
-        super().__init__(display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            unit=unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
-        if unit is not None and not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}'
-            )
-        self._unit = unit
         self._components = []
 
         # Add initial components if provided. Used for serialization.
@@ -140,39 +143,6 @@ class ComponentCollection(ModelBase):
         raise AttributeError(
             'is_empty is a read-only property that indicates '
             'whether the collection has components.'
-        )
-
-    @property
-    def unit(self) -> str | sc.Unit | None:
-        """
-        Get the unit of the ComponentCollection.
-
-        Returns
-        -------
-        str | sc.Unit | None
-            The unit of the ComponentCollection, which is the same as the unit of its components.
-        """
-        return self._unit
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        Unit is read-only and cannot be set directly.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The unit to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always raised since unit is read-only.
-        """
-
-        raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
         )
 
     def convert_unit(self, unit: str | sc.Unit) -> None:
