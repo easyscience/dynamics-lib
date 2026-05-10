@@ -35,7 +35,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         lorentzian_width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Voigt',
-        display_name: str | None = 'Voigt',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -55,7 +55,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
             Unit of the parameters.
         name : str, default='Voigt'
             Name of the component for indexing.
-        display_name : str | None, default='Voigt'
+        display_name : str | None, default=None
             Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By

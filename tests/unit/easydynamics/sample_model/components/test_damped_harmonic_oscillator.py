@@ -15,7 +15,12 @@ class TestDampedHarmonicOscillator:
     @pytest.fixture
     def dho(self):
         return DampedHarmonicOscillator(
-            display_name='TestDHO', area=2.0, center=1.5, width=0.3, unit='meV'
+            name='TestDHOName',
+            display_name='TestDHO',
+            area=2.0,
+            center=1.5,
+            width=0.3,
+            unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -164,9 +169,9 @@ class TestDampedHarmonicOscillator:
         assert len(params) == 3
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'TestDHO area',
-            'TestDHO center',
-            'TestDHO width',
+            'TestDHOName area',
+            'TestDHOName center',
+            'TestDHOName width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -219,7 +224,7 @@ class TestDampedHarmonicOscillator:
 
         # EXPECT
         assert 'DampedHarmonicOscillator' in repr_str
-        assert 'name = TestDHO' in repr_str
+        assert 'name = TestDHOName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

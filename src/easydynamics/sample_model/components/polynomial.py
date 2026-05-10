@@ -32,7 +32,7 @@ class Polynomial(ModelComponent):
         coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = 'meV',
         name: str = 'Polynomial',
-        display_name: str | None = 'Polynomial',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -46,7 +46,7 @@ class Polynomial(ModelComponent):
             Unit of the Polynomial component.
         name : str, default='Polynomial'
             Name of the component for indexing.
-        display_name : str | None, default='Polynomial'
+        display_name : str | None, default=None
             Display name of the Polynomial component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By

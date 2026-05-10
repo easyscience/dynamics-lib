@@ -30,7 +30,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         rate: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Exponential',
-        display_name: str | None = 'Exponential',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -48,8 +48,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
             Unit of the parameters.
         name : str, default='Exponential'
             Name of the component for indexing.
-        display_name : str | None, default='Exponential'
-            Name of the component.
+        display_name : str | None, default=None
+            Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.

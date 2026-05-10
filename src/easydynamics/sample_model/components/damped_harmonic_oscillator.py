@@ -31,7 +31,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'DampedHarmonicOscillator',
-        display_name: str | None = 'DampedHarmonicOscillator',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -50,7 +50,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             Unit of the parameters.
         name : str, default='DampedHarmonicOscillator'
             Name of the component for indexing.
-        display_name : str | None, default='DampedHarmonicOscillator'
+        display_name : str | None, default=None
             Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
@@ -65,16 +65,16 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
             center=center,
-            name=display_name,
+            name=name,
             fix_if_none=False,
             unit=self._unit,
             enforce_minimum_center=True,
         )
 
-        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
+        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
 
         self._area = area
         self._center = center

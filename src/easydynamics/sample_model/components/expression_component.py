@@ -76,7 +76,7 @@ class ExpressionComponent(ModelComponent):
         parameters: dict[str, Numeric] | None = None,
         unit: str | sc.Unit = 'meV',
         name: str = 'Expression',
-        display_name: str | None = 'Expression',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -92,7 +92,7 @@ class ExpressionComponent(ModelComponent):
             Unit of the output.
         name : str, default='Expression'
             Name of the component for indexing.
-        display_name : str | None, default='Expression'
+        display_name : str | None, default=None
             Display name for the component.
         unique_name : str | None, default=None
             Unique name for the component.

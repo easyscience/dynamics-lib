@@ -38,7 +38,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Gaussian',
-        display_name: str | None = 'Gaussian',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -56,7 +56,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             Unit of the parameters.
         name : str, default='Gaussian'
             Name of the component for indexing.
-        display_name : str | None, default='Gaussian'
+        display_name : str | None, default=None
             Name of the component.
         unique_name : str | None, default=None
             Unique name of the component. if None, a unique_name is automatically generated. By
