@@ -229,11 +229,12 @@ jobs:
               exit 1
             fi
 
-            whl_abs_path="$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${whl_path[0]}")"
 
-            echo "Installing easydynamics from: $whl_abs_path"
+            whl_path=$(python -c 'import os,sys; print(os.path.relpath(os.path.abspath(sys.argv[1]), os.getcwd()))' "${whl_path[0]}")
 
-            pixi run pip install "$whl_abs_path[dev]"
+            echo "Adding easydynamics from local wheel: $whl_path"
+            pixi add --pypi "easydynamics[dev] @ ${whl_path}"
+
             echo "Exiting pixi project directory"
             cd ..
           done
