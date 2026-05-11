@@ -28,11 +28,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ----------
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DiffusionModel'
+        name : str, default="DiffusionModel"
             Name of the diffusion model.
-        display_name : str | None, default='MyDiffusionModel'
+        display_name : str | None, default="MyDiffusionModel"
             Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
@@ -115,4 +115,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         str
             String representation of the DiffusionModel.
         """
-        return f'{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})'
+        return (
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'unit={self.unit}), \n'
+            f'    scale={self.scale})'
+        )
