@@ -6,9 +6,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
-import scipy
 import sympy as sp
 from easyscience.variable import Parameter
+from scipy.special import erf
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
@@ -197,7 +197,7 @@ class ExpressionComponent(ModelComponent):
         self._func = sp.lambdify(
             ordered_symbols,
             self._expr,
-            modules=[{'erf': scipy.special.erf}, 'numpy'],
+            modules=[{'erf': erf}, 'numpy'],
         )
 
         # -------------------------
