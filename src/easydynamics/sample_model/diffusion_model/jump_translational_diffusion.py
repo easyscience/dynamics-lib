@@ -29,11 +29,21 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
     Q-values.
 
-    Example: >>> Q = np.linspace(0.5, 2, 7) >>> energy = np.linspace(-2, 2, 501) >>> scale = 1.0
-    >>> diffusion_coefficient = 2.4e-9  # m^2/s >>> relaxation_time = 1.0  # ps >>>
-    diffusion_model=JumpTranslationalDiffusion( >>> scale = scale, diffusion_coefficient =
-    (diffusion_coefficient,) >>> relaxation_time=relaxation_time) >>> component_collections= >>>
-    diffusion_model.create_component_collections(Q) See also the tutorials..
+    Examples
+    --------
+    >>> Q = np.linspace(0.5, 2, 7)
+    >>> energy = np.linspace(-2, 2, 501)
+    >>> scale = 1.0
+    >>> diffusion_coefficient = 2.4e-9  # m^2/s
+    >>> relaxation_time = 1.0  # ps
+    >>> diffusion_model = JumpTranslationalDiffusion(
+    >>>     scale=scale,
+    >>>     diffusion_coefficient=(diffusion_coefficient,),
+    >>>     relaxation_time=relaxation_time,
+    >>> )
+    >>> component_collections = diffusion_model.create_component_collections(Q)
+
+    See also the tutorials..
     """
 
     def __init__(
@@ -50,12 +60,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
         Parameters
         ----------
-        display_name : str | None, default='JumpTranslationalDiffusion'
+        display_name : str | None, default="JumpTranslationalDiffusion"
             Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
@@ -260,7 +270,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         ----------
         Q : Q_type
             Scattering vector in 1/angstrom. Can be a single value or an array of values.
-        component_display_name : str, default='Jump translational diffusion'
+        component_display_name : str, default="Jump translational diffusion"
             Name of the Jump Diffusion Lorentzian component.
 
         Raises
