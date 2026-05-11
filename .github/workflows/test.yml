@@ -229,11 +229,11 @@ jobs:
               exit 1
             fi
 
-            whl_url="file://$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${whl_path[0]}")"
+            whl_abs_path="$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${whl_path[0]}")"
 
-            echo "Adding easydynamics from: $whl_url"
-            pixi add --pypi "easydynamics[dev] @ ${whl_url}"
+            echo "Installing easydynamics from: $whl_abs_path"
 
+            pixi run pip install "$whl_abs_path[dev]"
             echo "Exiting pixi project directory"
             cd ..
           done
