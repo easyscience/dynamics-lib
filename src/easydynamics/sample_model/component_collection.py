@@ -28,7 +28,7 @@ class ComponentCollection(EasyDynamicsModelBase):
         components: list[ModelComponent] | None = None,
         unit: str | sc.Unit = 'meV',
         name: str = 'ComponentCollection',
-        display_name: str | None = 'MyComponentCollection',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -42,7 +42,7 @@ class ComponentCollection(EasyDynamicsModelBase):
             Unit of the collection.
         name : str, default='ComponentCollection'
             Name of the collection.
-        display_name : str | None, default='MyComponentCollection'
+        display_name : str | None, default=None
             Display name of the collection.
         unique_name : str | None, default=None
             Unique name of the collection.

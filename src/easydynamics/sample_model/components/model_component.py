@@ -44,7 +44,6 @@ class ModelComponent(EasyDynamicsModelBase):
             display_name=display_name,
             unique_name=unique_name,
         )
-        self._unit = unit
 
     @property
     def unit(self) -> str:
