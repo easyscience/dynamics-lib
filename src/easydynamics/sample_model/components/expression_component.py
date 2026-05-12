@@ -83,9 +83,9 @@ class ExpressionComponent(ModelComponent):
             The symbolic expression as a string. Must contain 'x' as the independent variable.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the output.
-        display_name : str | None, default="Expression"
+        display_name : str | None, default='Expression'
             Display name for the component.
         unique_name : str | None, default=None
             Unique name for the component.
