@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -184,7 +184,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download package (incl. extras) from previous job
         uses: ./.github/actions/download-artifact
@@ -229,11 +229,11 @@ jobs:
               exit 1
             fi
 
-            whl_path=$(python -c 'import os,sys; print(os.path.relpath(os.path.abspath(sys.argv[1]), os.getcwd()))' "${whl_path[0]}")
+            whl_abs_path="$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${whl_path[0]}")"
 
-            echo "Adding easydynamics from local wheel: $whl_path"
-            pixi add --pypi "easydynamics[dev] @ ${whl_path}"
-            
+            echo "Adding easydynamics from: $whl_abs_path"
+            pixi add --pypi "easydynamics[dev] @ ${whl_abs_path}"
+
             echo "Exiting pixi project directory"
             cd ..
           done
