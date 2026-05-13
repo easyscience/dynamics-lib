@@ -8,6 +8,7 @@ from typing import ClassVar
 
 import sympy as sp
 from easyscience.variable import Parameter
+from scipy.special import erf
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
@@ -20,11 +21,6 @@ if TYPE_CHECKING:
 class ExpressionComponent(ModelComponent):
     """
     Model component defined by a symbolic expression.
-
-    Example: expr = ExpressionComponent( "A * exp(-(x - x0)**2 / (2*sigma**2))", parameters={"A":
-    10, "x0": 0, "sigma": 1}, )
-
-        expr.A = 5 y = expr.evaluate(x)
     """
 
     # -------------------------
@@ -103,6 +99,18 @@ class ExpressionComponent(ModelComponent):
             If the expression is invalid or does not contain 'x'.
         TypeError
             If any parameter value is not numeric.
+
+        Examples
+        --------
+        >>> expr = ExpressionComponent(
+        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
+        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
+        ...     unit='meV',
+        ...     display_name='Gaussian Peak',
+        ... )
+
+        >>> expr.A = 5
+        >>> y = expr.evaluate(x)
         """
         super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
 
@@ -160,8 +168,11 @@ class ExpressionComponent(ModelComponent):
 
         if parameters is not None:
             for name, value in parameters.items():
-                if not isinstance(value, Numeric):
-                    raise TypeError(f"Parameter '{name}' must be numeric")
+                if not isinstance(value, (Numeric, Parameter, dict)):
+                    raise TypeError(
+                        f"Parameter '{name}' must be numeric, "
+                        f'a Parameter instance, or a dictionary, got {type(value).__name__}'
+                    )
         parameters = parameters or {}
         self._parameters: dict[str, Parameter] = {}
 
@@ -171,12 +182,17 @@ class ExpressionComponent(ModelComponent):
                 continue
 
             value = parameters.get(name, 1.0)
+            if isinstance(value, Parameter):
+                self._parameters[name] = value
 
-            self._parameters[name] = Parameter(
-                name=name,
-                value=value,
-                unit=self._unit,
-            )
+            elif isinstance(value, dict) and value.get('@class') == 'Parameter':
+                self._parameters[name] = Parameter.from_dict(value)
+            else:
+                self._parameters[name] = Parameter(
+                    name=name,
+                    value=value,
+                    unit=self._unit,
+                )
 
         # Create numerical function
         ordered_symbols = [sp.Symbol(name) for name in self._symbol_names]
@@ -184,7 +200,7 @@ class ExpressionComponent(ModelComponent):
         self._func = sp.lambdify(
             ordered_symbols,
             self._expr,
-            modules=['numpy'],
+            modules=[{'erf': erf}, 'numpy'],
         )
 
         # -------------------------
@@ -193,7 +209,14 @@ class ExpressionComponent(ModelComponent):
 
     @property
     def expression(self) -> str:
-        """Return the original expression string."""
+        """
+        Return the original expression string.
+
+        Returns
+        -------
+        str
+             The original expression string provided at initialization.
+        """
         return self._expression_str
 
     @expression.setter
@@ -338,7 +361,7 @@ class ExpressionComponent(ModelComponent):
 
     def __repr__(self) -> str:
         """
-        Repr function.
+        Return a string representation of the ExpressionComponent.
 
         Returns
         -------
