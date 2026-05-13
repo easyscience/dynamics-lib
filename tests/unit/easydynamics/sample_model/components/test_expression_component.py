@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
+
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
@@ -33,6 +35,14 @@ class TestExpressionComponent:
 
         # EXPECT
         assert expr.A.value == pytest.approx(1.0)  # default
+
+    def test_init_with_parameter(self):
+        # WHEN THEN
+        A = Parameter('A', 3.0)
+        expr = ExpressionComponent('A * x', parameters={'A': A})
+
+        # EXPECT
+        assert expr.A.value == pytest.approx(3.0)
 
     def test_invalid_expression_raises(self):
         # WHEN THEN EXPECT
@@ -172,3 +182,30 @@ class TestExpressionComponent:
 
         assert 'A' in names
         assert 'x' not in names  # x is reserved
+
+    def test_copy(self, expr: ExpressionComponent):
+        # WHEN THEN
+        expr_copy = copy(expr)
+
+        # EXPECT the copy is a new instance with the same properties
+        assert expr_copy is not expr
+        assert isinstance(expr_copy, ExpressionComponent)
+        assert expr_copy.expression == expr.expression
+        assert expr_copy.unit == expr.unit
+        assert expr_copy.display_name == expr.display_name
+
+        assert expr_copy.A.value == pytest.approx(expr.A.value)
+        assert expr_copy.x0.value == pytest.approx(expr.x0.value)
+        assert expr_copy.sigma.value == pytest.approx(expr.sigma.value)
+
+    def test_erf(self):
+        # WHEN
+        expr = ExpressionComponent('erf(x)')
+        x = np.array([-1.0, 0.0, 1.0])
+
+        # THEN
+        result = expr.evaluate(x)
+
+        # EXPECT
+        expected = np.array([-0.84270079, 0.0, 0.84270079])  # erf(-1), erf(0), erf(1)
+        np.testing.assert_allclose(result, expected, rtol=1e-5)

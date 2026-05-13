@@ -240,16 +240,6 @@ class TestAnalysis1d:
 
     def test_plot_calls_plopp_with_correct_arguments(self, analysis1d):
         # WHEN
-
-        # Mock the data and model components to be plotted
-        fake_model = sc.DataArray(data=sc.array(dims=['energy'], values=[1, 2, 3]))
-        analysis1d._create_model_array = MagicMock(return_value=fake_model)
-
-        fake_components = sc.Dataset({
-            'Component1': sc.DataArray(data=sc.array(dims=['energy'], values=[0.1, 0.2, 0.3]))
-        })
-        analysis1d._create_components_dataset_single_Q = MagicMock(return_value=fake_components)
-
         fake_fig = object()
 
         with patch('plopp.plot', return_value=fake_fig) as mock_plot:
@@ -258,22 +248,99 @@ class TestAnalysis1d:
 
         # EXPECT
 
-        # Ensure component dataset created
-        analysis1d._create_components_dataset_single_Q.assert_called_once()
-
-        # Ensure plot called
+        # plot called once
         mock_plot.assert_called_once()
 
-        # Inspect arguments
-        args, _ = mock_plot.call_args
+        # Extract arguments
+        args, kwargs = mock_plot.call_args
 
-        dataset_passed = args[0]
+        datagroup = args[0]
 
-        assert 'Data' in dataset_passed
-        assert 'Model' in dataset_passed
-        assert 'Component1' in dataset_passed
+        # Basic structure
+        assert isinstance(datagroup, sc.DataGroup)
 
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+
+        # Gaussian sample component should also be included
+        # because plot_components=True by default
+        component_names = set(datagroup.keys()) - {'Data', 'Model'}
+        assert len(component_names) > 0
+
+        # Check plotting defaults
+        assert kwargs['title'] == analysis1d.display_name
+
+        assert kwargs['linestyle']['Data'] == 'none'
+        assert kwargs['marker']['Data'] == 'o'
+        assert kwargs['color']['Data'] == 'black'
+
+        assert kwargs['linestyle']['Model'] == '-'
+        assert kwargs['color']['Model'] == 'red'
+
+        # Return value propagated
         assert result is fake_fig
+
+    def test_data_and_model_to_datagroup(self, analysis1d):
+        # WHEN
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+
+        # THEN
+        datagroup = analysis1d.data_and_model_to_datagroup(energy=energy)
+
+        # EXPECT
+        assert isinstance(datagroup, sc.DataGroup)
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+        assert sc.identical(
+            datagroup['Data'],
+            analysis1d.experiment.binned_data['Q', analysis1d.Q_index],
+        )
+        assert sc.identical(datagroup['Model'], analysis1d._create_model_array(energy=energy))
+
+    def test_data_and_model_to_datagroup_no_data_raises(self, analysis1d):
+        # WHEN
+        analysis1d.experiment._binned_data = None
+
+        # THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match='No data to include in DataGroup',
+        ):
+            analysis1d.data_and_model_to_datagroup()
+
+    def test_data_and_model_to_datagroup_no_Q_raises(self, analysis1d):
+        with (
+            patch.object(type(analysis1d), 'Q', new=None),
+            pytest.raises(
+                ValueError,
+                match='No Q values available for creating DataGroup',
+            ),
+        ):
+            analysis1d.data_and_model_to_datagroup()
+
+    def test_data_and_model_to_datagroup_add_background_not_bool_raises(self, analysis1d):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'add_background must be True or False',
+        ):
+            analysis1d.data_and_model_to_datagroup(add_background='not_a_boolean')
+
+    def test_data_and_model_to_datagroup_include_components_not_bool_raises(self, analysis1d):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'include_components must be True or False',
+        ):
+            analysis1d.data_and_model_to_datagroup(include_components='not_a_boolean')
+
+    def test_plot_data_and_model_no_Q_index_raises(self, analysis1d):
+        # WHEN
+        analysis1d._Q_index = None
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index must be set'):
+            analysis1d.plot_data_and_model()
 
     def test_fix_and_free_offset(self, analysis1d):
         # WHEN
