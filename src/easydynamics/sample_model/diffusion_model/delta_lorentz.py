@@ -54,6 +54,7 @@ class DeltaLorentz(DiffusionModelBase):
         mean_u_squared: Numeric = 0.0,
         A_0: Numeric = 1.0,
         lorentzian_width: Numeric = 1.0,
+        allow_Q_dependence: bool = False,
     ) -> None:
         """
         Initialize a new DeltaLorentz model.
@@ -75,11 +76,13 @@ class DeltaLorentz(DiffusionModelBase):
             Amplitude of the delta function.
         lorentzian_width : Numeric, default=1.0
             Width of the Lorentzian function.
+        allow_Q_dependence : bool, default=False
+            Whether to allow Q-dependence for the model.
 
         Raises
         ------
         TypeError
-            If scale or diffusion_coefficient is not a number.
+            If scale, mean_u_squared, A_0, or lorentzian_width is not a number.
         """
         if not isinstance(scale, Numeric):
             raise TypeError("scale must be a number.")
@@ -115,6 +118,10 @@ class DeltaLorentz(DiffusionModelBase):
             dependency_expression="1 - A_0",
             dependency_map={"A_0": A_0},
         )
+        self._allow_Q_dependence = allow_Q_dependence
+
+        self._A_0_list = []
+        self._A_1_list = []
 
         mean_u_squared = Parameter(
             name="mean_u_squared",
@@ -322,11 +329,11 @@ class DeltaLorentz(DiffusionModelBase):
 
         # Need to handle units better
         Q = _validate_and_convert_Q(Q)
-        return (
-            self.scale.value
-            * np.exp(-self.mean_u_squared.value * Q**2 / 3)
-            * self.A_0.value
-        )
+        if self._allow_Q_dependence is True:
+            A_0_values = [A_0.value for A_0 in self._A_0_list]
+        else:
+            A_0_values = [self.A_0.value] * len(Q)
+        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
         """
@@ -344,11 +351,11 @@ class DeltaLorentz(DiffusionModelBase):
         """
 
         Q = _validate_and_convert_Q(Q)
-        return (
-            self.scale.value
-            * np.exp(-self.mean_u_squared.value * Q**2 / 3)
-            * self.A_1.value
-        )
+        if self._allow_Q_dependence is True:
+            A_1_values = [A_1.value for A_1 in self._A_1_list]
+        else:
+            A_1_values = [self.A_1.value] * len(Q)
+        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
     def create_component_collections(
         self,
@@ -381,10 +388,14 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(component_display_name, str):
             raise TypeError("component_name must be a string.")
 
+        if self._allow_Q_dependence is True:
+            A_0_list, A_1_list = self._create_A0_A1_parameters(self.A_0, Q)
+            self._A_0_list = A_0_list
+            self._A_1_list = A_1_list
+
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
         # Lorentzians and the delta function.
-        QISF = self.calculate_QISF(Q)
 
         # Create a Lorentzian component for each Q-value, with
         # width D*Q^2 and area equal to scale.
@@ -400,7 +411,6 @@ class DeltaLorentz(DiffusionModelBase):
             )
 
             # Make the width dependent on Q
-
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=self._write_width_dependency_expression(Q_value),
                 dependency_map=self._write_width_dependency_map_expression(),
@@ -408,11 +418,15 @@ class DeltaLorentz(DiffusionModelBase):
             )
 
             # Make the area dependent on Q
+            if self._allow_Q_dependence is True:
+                dependency_map = self._write_lorz_area_dependency_map_expression(i)
+            else:
+                dependency_map = self._write_lorz_area_dependency_map_expression(None)
             lorentzian_component.area.make_dependent_on(
                 dependency_expression=self._write_lorz_area_dependency_expression(
                     Q_value
                 ),
-                dependency_map=self._write_lorz_area_dependency_map_expression(),
+                dependency_map=dependency_map,
             )
 
             component_collection_list[i].append_component(lorentzian_component)
@@ -420,20 +434,75 @@ class DeltaLorentz(DiffusionModelBase):
             delta_component = DeltaFunction(
                 display_name="Delta function", unit=self.unit
             )
+            if self._allow_Q_dependence is True:
+                dependency_map = self._write_delta_area_dependency_map_expression(i)
+            else:
+                dependency_map = self._write_delta_area_dependency_map_expression(None)
             delta_component.area.make_dependent_on(
                 dependency_expression=self._write_delta_area_dependency_expression(
                     Q_value
                 ),
-                dependency_map=self._write_delta_area_dependency_map_expression(),
+                dependency_map=dependency_map,
             )
 
             component_collection_list[i].append_component(delta_component)
 
         return component_collection_list
 
+    def get_all_variables(self) -> list[DescriptorNumber]:
+
+        if self._allow_Q_dependence is False:
+            return super().get_all_variables()
+
+        variables = [self.scale, self.mean_u_squared, self.lorentzian_width]
+        variables.extend(self._A_0_list)
+        variables.extend(self._A_1_list)
+        return variables
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _create_A0_A1_parameters(
+        self, A_0: Parameter, Q: Q_type
+    ) -> tuple[list[Parameter], list[Parameter]]:
+        """
+        Create lists of A_0 and A_1 parameters for each Q value.
+        Parameters
+        ----------
+        A_0 : Parameter
+            The A_0 parameter to use as the base for creating the A_0 parameters for
+            each Q value.
+        Returns
+        -------
+        tuple[list[Parameter], list[Parameter]]
+            A tuple containing two lists: the first list contains the A_0 parameters for each Q
+            value, and the second list contains the A_1 parameters for each Q value.
+        """
+        A_0_list = []
+        A_1_list = []
+        for i, Q_value in enumerate(Q):
+            A_0_list.append(
+                Parameter(
+                    name=f"A_0_Q{Q_value:.2f}",
+                    value=float(A_0.value),
+                    fixed=False,
+                    min=0.0,
+                    max=1.0,
+                )
+            )
+            A_1_list.append(
+                Parameter.from_dependency(
+                    name=f"A_1_Q{Q_value:.2f}",
+                    dependency_expression="1 - A_0",
+                    dependency_map={"A_0": A_0_list[i]},
+                )
+            )
+
+        self._A_0_list = A_0_list
+        self._A_1_list = A_1_list
+
+        return A_0_list, A_1_list
 
     def _write_width_dependency_expression(self, Q: float) -> str:
         """
@@ -458,7 +527,6 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError("Q must be a float.")
 
-        # Q is given as a float, so we need to add the units
         return "lorentzian_width"
 
     def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
@@ -498,7 +566,9 @@ class DeltaLorentz(DiffusionModelBase):
 
         return f"scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_1"
 
-    def _write_lorz_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
+    def _write_lorz_area_dependency_map_expression(
+        self, Q_index
+    ) -> dict[str, DescriptorNumber]:
         """
         Write the dependency map expression to make dependent Parameters.
 
@@ -507,10 +577,17 @@ class DeltaLorentz(DiffusionModelBase):
         dict[str, DescriptorNumber]
             Dependency map for the area.
         """
+        if Q_index is None:
+            return {
+                "scale": self.scale,
+                "mean_u_squared": self.mean_u_squared,
+                "A_1": self.A_1,
+            }
+
         return {
             "scale": self.scale,
             "mean_u_squared": self.mean_u_squared,
-            "A_1": self.A_1,
+            "A_1": self._A_1_list[Q_index],
         }
 
     def _write_delta_area_dependency_expression(self, Q) -> str:
@@ -539,6 +616,7 @@ class DeltaLorentz(DiffusionModelBase):
 
     def _write_delta_area_dependency_map_expression(
         self,
+        Q_index,
     ) -> dict[str, DescriptorNumber]:
         """
         Write the dependency map expression to make dependent Parameters.
@@ -548,10 +626,16 @@ class DeltaLorentz(DiffusionModelBase):
         dict[str, DescriptorNumber]
             Dependency map for the area.
         """
+        if Q_index is None:
+            return {
+                "scale": self.scale,
+                "mean_u_squared": self.mean_u_squared,
+                "A_0": self.A_0,
+            }
         return {
             "scale": self.scale,
             "mean_u_squared": self.mean_u_squared,
-            "A_0": self.A_0,
+            "A_0": self._A_0_list[Q_index],
         }
 
     # ------------------------------------------------------------------
