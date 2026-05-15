@@ -3,13 +3,15 @@
 
 from easyscience.base_classes.new_base import NewBase
 
+from easydynamics.base_classes.name_mixin import NameMixin
 
-class EasyDynamicsBase(NewBase):
+
+class EasyDynamicsBase(NewBase, NameMixin):
     """Base class for all EasyDynamics classes."""
 
     def __init__(
         self,
-        name: str = 'MyEasyDynamicsModel',
+        name: str = "MyEasyDynamicsModel",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -30,43 +32,9 @@ class EasyDynamicsBase(NewBase):
         TypeError
             If name is not a string.
         """
-        if not isinstance(name, str):
-            raise TypeError('Name must be a string.')
-        self._name = name
+        NameMixin.__init__(self, name=name)
 
         if display_name is None:
-            display_name = name
+            display_name = self.name
 
-        super().__init__(display_name=display_name, unique_name=unique_name)
-
-    @property
-    def name(self) -> str:
-        """
-        Get the name of the model.
-
-        Returns
-        -------
-        str
-            The name of the model.
-        """
-        return self._name
-
-    @name.setter
-    def name(self, name_str: str) -> None:
-        """
-        Set the name of the model.
-
-        Parameters
-        ----------
-        name_str : str
-            The new name to set.
-
-        Raises
-        ------
-        TypeError
-            If name_str is not a string.
-        """
-
-        if not isinstance(name_str, str):
-            raise TypeError('Name must be a string.')
-        self._name = name_str
+        NewBase.__init__(self, display_name=display_name, unique_name=unique_name)

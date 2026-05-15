@@ -4,16 +4,17 @@
 import scipp as sc
 from easyscience.base_classes import ModelBase
 
+from easydynamics.base_classes.name_mixin import NameMixin
 from easydynamics.utils.utils import _validate_unit
 
 
-class EasyDynamicsModelBase(ModelBase):
+class EasyDynamicsModelBase(ModelBase, NameMixin):
     """Base class for all EasyDynamics models."""
 
     def __init__(
         self,
-        unit: str | sc.Unit = 'meV',
-        name: str = 'MyEasyDynamicsModel',
+        unit: str | sc.Unit = "meV",
+        name: str = "MyEasyDynamicsModel",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -36,14 +37,12 @@ class EasyDynamicsModelBase(ModelBase):
         TypeError
             If name is not a string.
         """
-        if not isinstance(name, str):
-            raise TypeError('Name must be a string.')
-        self._name = name
+        NameMixin.__init__(self, name=name)
 
         if display_name is None:
-            display_name = name
+            display_name = self.name
 
-        super().__init__(display_name=display_name, unique_name=unique_name)
+        ModelBase.__init__(self, display_name=display_name, unique_name=unique_name)
         self._unit = _validate_unit(unit)
 
     @property
@@ -75,8 +74,8 @@ class EasyDynamicsModelBase(ModelBase):
             Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
+            f"Unit is read-only. Use convert_unit to change the unit between allowed types "
+            f"or create a new {self.__class__.__name__} with the desired unit."
         )
 
     @property
@@ -108,5 +107,5 @@ class EasyDynamicsModelBase(ModelBase):
         """
 
         if not isinstance(name_str, str):
-            raise TypeError('Name must be a string.')
+            raise TypeError("Name must be a string.")
         self._name = name_str
