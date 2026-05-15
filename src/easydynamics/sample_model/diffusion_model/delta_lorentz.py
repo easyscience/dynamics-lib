@@ -16,57 +16,60 @@ from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
-from easydynamics.utils.utils import angstrom
-from easydynamics.utils.utils import hbar
+
+MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
 
 class DeltaLorentz(DiffusionModelBase):
     r"""
-    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor.
-    $$
-    I = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]
+    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor. $$ I
+    = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]
     $$,
 
-    where $K$ is the scale factor, $\langle u^2 \rangle$ is the mean square displacement, $Q$ is the scattering vector, $A_0$ and $A_1$ are the amplitudes of the delta function and Lorentzian, respectively, and $L(E, \Gamma)$ is the Lorentzian function with width $\Gamma$.
-    $A_0+A_1=1$ and $A_0$ is the EISF, while $A_1$ is the QISF.
+    where $K$ is the scale factor, $\langle u^2 \rangle$ is the mean square displacement, $Q$ is
+    the scattering vector, $A_0$ and $A_1$ are the amplitudes of the delta function and Lorentzian,
+    respectively, and $L(E, \Gamma)$ is the Lorentzian function with width $\Gamma$. $A_0+A_1=1$
+    and $A_0$ is the EISF, while $A_1$ is the QISF. $A_0$ and $A_1$ can be Q-dependent or not.
 
-    Creates ComponentCollections with Lorentzian components for given
-    Q-values.
 
-    Example
+    Examples
     --------
-    >>> Q=np.linspace(0.5,2,7) >>>energy=np.linspace(-2, 2, 501) >>>scale=1.0
-    >>> diffusion_coefficient = 2.4e-9  # m^2/s
-    >>> diffusion_model=DeltaLorentz(display_name="DiffusionModel",
-    >>> scale=scale, diffusion_coefficient= diffusion_coefficient,)
-    >>> component_collections=diffusion_model.create_component_collections(Q)
+    >>> Q = np.linspace(0.5, 2, 7)
+    >>> energy = np.linspace(-2, 2, 501)
+    >>> scale = 1.0
+    >>> mean_u_squared = 0.02
+    >>> A_0 = 0.7
+    >>> lorentzian_width = 1.0
+    >>> model = DeltaLorentz(
+    ...     display_name='DiffusionModel',
+    ...     scale=scale,
+    ...     mean_u_squared=mean_u_squared,
+    ...     A_0=A_0,
+    ...     lorentzian_width=lorentzian_width,
+    ...     allow_Q_dependence=True,
+    ... )
+    >>> component_collections = model.create_component_collections(Q)
 
-    See also the
-    tutorials.
+    See also the tutorials.
     """
 
     def __init__(
         self,
-        display_name: str | None = "DeltaLorentz",
-        unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
         scale: Numeric = 1.0,
         mean_u_squared: Numeric = 0.0,
         A_0: Numeric = 1.0,
         lorentzian_width: Numeric = 1.0,
         allow_Q_dependence: bool = False,
+        unit: str | sc.Unit = "meV",
+        display_name: str | None = "DeltaLorentz",
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize a new DeltaLorentz model.
 
         Parameters
         ----------
-        display_name : str | None, default='DeltaLorentz'
-            Display name of the diffusion model.
-        unique_name : str | None, default=None
-            Unique name of the diffusion model. If None, a unique name will be generated. By
-            default, None.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
@@ -77,7 +80,12 @@ class DeltaLorentz(DiffusionModelBase):
         lorentzian_width : Numeric, default=1.0
             Width of the Lorentzian function.
         allow_Q_dependence : bool, default=False
-            Whether to allow Q-dependence for the model.
+            Whether to allow Q-dependence of A_0 and A_1
+        display_name : str | None, default="DeltaLorentz"
+            Display name of the diffusion model.
+        unique_name : str | None, default=None
+            Unique name of the diffusion model. If None, a unique name will be generated. By
+            default, None.
 
         Raises
         ------
@@ -96,15 +104,15 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(lorentzian_width, Numeric):
             raise TypeError("lorentzian_width must be a number.")
 
+        if not isinstance(allow_Q_dependence, bool):
+            raise TypeError("allow_Q_dependence must be True or False.")
+
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
             unit=unit,
             scale=scale,
         )
-        self._hbar = hbar
-        self._angstrom = angstrom
-        self._mean_u_squared = mean_u_squared
 
         A_0 = Parameter(
             name="A_0",
@@ -113,11 +121,15 @@ class DeltaLorentz(DiffusionModelBase):
             min=0.0,
             max=1.0,
         )
+        self._A_0 = A_0
+
         A_1 = Parameter.from_dependency(
             name="A_1",
             dependency_expression="1 - A_0",
             dependency_map={"A_0": A_0},
         )
+        self._A_1 = A_1
+
         self._allow_Q_dependence = allow_Q_dependence
 
         self._A_0_list = []
@@ -136,12 +148,9 @@ class DeltaLorentz(DiffusionModelBase):
             name="lorentzian_width",
             value=float(lorentzian_width),
             fixed=False,
-            min=0.0,
+            min=MINIMUM_WIDTH,
             unit=unit,
         )
-
-        self._A_0 = A_0
-        self._A_1 = A_1
         self._lorentzian_width = lorentzian_width
 
     # ------------------------------------------------------------------
@@ -235,7 +244,8 @@ class DeltaLorentz(DiffusionModelBase):
     @A_1.setter
     def A_1(self, _A_1: Numeric) -> None:
         """
-        A_1 cannot be set directly, as it is a dependent parameter defined as 1 - A_0. To change A_1, set A_0 to the desired value and A_1 will update accordingly.
+        A_1 cannot be set directly, as it is a dependent parameter defined as 1 - A_0. To change
+        A_1, set A_0 to the desired value and A_1 will update accordingly.
 
 
         Parameters
@@ -245,8 +255,7 @@ class DeltaLorentz(DiffusionModelBase):
 
         Raises
         ------
-         AttributeError
-             If an attempt is made to set A_1 directly.
+         AttributeError If an attempt is made to set A_1 directly.
         """
         raise AttributeError(
             "A_1 is a dependent parameter and cannot be set directly. Set A_0 to change A_1 accordingly."
@@ -279,13 +288,13 @@ class DeltaLorentz(DiffusionModelBase):
         TypeError
             If lorentzian_width is not a number.
         ValueError
-            If lorentzian_width is negative.
+            If lorentzian_width is less than the minimum allowed width.
         """
         if not isinstance(lorentzian_width, Numeric):
             raise TypeError("lorentzian_width must be a number.")
 
-        if float(lorentzian_width) < 0:
-            raise ValueError("lorentzian_width must be non-negative.")
+        if float(lorentzian_width) < MINIMUM_WIDTH:
+            raise ValueError(f"lorentzian_width must be at least {MINIMUM_WIDTH}.")
         self._lorentzian_width.value = float(lorentzian_width)
 
     # ------------------------------------------------------------------
@@ -363,14 +372,13 @@ class DeltaLorentz(DiffusionModelBase):
         component_display_name: str = "DeltaLorentz component",
     ) -> list[ComponentCollection]:
         r"""
-        Create ComponentCollection components for the DeltaLorentz model at
-        given Q values.
+        Create ComponentCollection components for the DeltaLorentz model at given Q values.
 
         Parameters
         ----------
         Q : Q_type
             Scattering vector values.
-        component_display_name : str, default='DeltaLorentz component'
+        component_display_name : str, default="DeltaLorentz component"
             Name of the Lorentzian component.
 
         Raises
@@ -381,7 +389,8 @@ class DeltaLorentz(DiffusionModelBase):
         Returns
         -------
         list[ComponentCollection]
-            List of ComponentCollections with Lorentzian and delta functioncomponents for each Q value.
+            List of ComponentCollections with Lorentzian and delta functioncomponents for each Q
+            value.
         """
         Q = _validate_and_convert_Q(Q)
 
@@ -471,8 +480,7 @@ class DeltaLorentz(DiffusionModelBase):
         Parameters
         ----------
         A_0 : Parameter
-            The A_0 parameter to use as the base for creating the A_0 parameters for
-            each Q value.
+            The A_0 parameter to use as the base for creating the A_0 parameters for each Q value.
         Returns
         -------
         tuple[list[Parameter], list[Parameter]]
