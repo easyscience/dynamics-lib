@@ -8,10 +8,9 @@ from typing import Any
 from typing import TypeVar
 
 from easyscience.base_classes.easy_list import EasyList
+from easyscience.base_classes.new_base import NewBase
 
 from easydynamics.base_classes.name_mixin import NameMixin
-
-from .new_base import NewBase
 
 ProtectedType_ = TypeVar("ProtectedType", bound=NewBase)
 
@@ -76,6 +75,7 @@ class EasyDynamicsList(EasyList, NameMixin):
         value : ProtectedType_
             The item to insert. Must be an instance of one of the protected types.
         """
+        self._validate_type(value)
         self._check_name_unique(value)
         super().insert(index, value)
         value.lock_name()
@@ -88,6 +88,7 @@ class EasyDynamicsList(EasyList, NameMixin):
         value : ProtectedType_
             The item to append. Must be an instance of one of the protected types.
         """
+        self._validate_type(value)
         self._check_name_unique(value)
         super().append(value)
         value.lock_name()
@@ -100,7 +101,12 @@ class EasyDynamicsList(EasyList, NameMixin):
         values : Iterable[ProtectedType_]
             An iterable of items to append. Each item must be an instance of one of the protected types.
         """
+        if not isinstance(values, Iterable):
+            raise TypeError("Values must be an iterable.")
         values = list(values)
+
+        for v in values:
+            self._validate_type(v)
         self._check_name_unique(values)
         for v in values:
             self.append(v)
@@ -119,6 +125,8 @@ class EasyDynamicsList(EasyList, NameMixin):
         ProtectedType_
             The item that was popped.
         """
+        if not isinstance(idx, int):
+            raise TypeError("Index must be an integer.")
         item = self[idx]
         item.unlock_name()
         return super().pop(idx)
@@ -168,6 +176,27 @@ class EasyDynamicsList(EasyList, NameMixin):
             The name of the object.
         """
         return obj.name
+
+    def _validate_type(self, value: Any) -> None:
+        """
+        Validate that a value is an instance of one of the protected types.
+
+        Parameters
+        ----------
+        value : Any
+            The value to validate.
+
+        Raises
+        ------
+        TypeError
+             If the value is not an instance of one of the protected types.
+        """
+
+        if not isinstance(value, tuple(self._protected_types)):
+            allowed = ", ".join(t.__name__ for t in self._protected_types)
+            raise TypeError(
+                f"Value must be an instance of type: {allowed}. Got {type(value).__name__} instead."  # noqa: E501
+            )
 
     # ------------------------------------------------------------------
     # dunder methods

@@ -16,9 +16,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
     def __init__(
         self,
         scale: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
-        name: str = 'DiffusionModel',
-        display_name: str | None = 'MyDiffusionModel',
+        unit: str | sc.Unit = "meV",
+        name: str = "DiffusionModel",
+        display_name: str | None = "MyDiffusionModel",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -47,19 +47,23 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
 
         try:
-            test = DescriptorNumber(name='test', value=1, unit=unit)
-            test.convert_unit('meV')
+            test = DescriptorNumber(name="test", value=1, unit=unit)
+            test.convert_unit("meV")
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
+        scale = Parameter(
+            name="scale", value=float(scale), fixed=False, min=0.0, unit=unit
+        )
 
-        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            unit=unit, name=name, display_name=display_name, unique_name=unique_name
+        )
         self._scale = scale
 
     # ------------------------------------------------------------------
@@ -96,10 +100,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
         if float(scale) < 0:
-            raise ValueError('scale must be non-negative.')
+            raise ValueError("scale must be non-negative.")
         self._scale.value = float(scale)
 
     # ------------------------------------------------------------------
@@ -116,7 +120,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'unit={self.unit}), \n'
-            f'    scale={self.scale})'
+            f"{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, "
+            f"unit={self.unit}), \n"
+            f"    scale={self.scale})"
         )

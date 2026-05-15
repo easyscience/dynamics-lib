@@ -17,24 +17,22 @@ from easydynamics.sample_model import Polynomial
 class TestComponentCollection:
     @pytest.fixture
     def component_collection(self):
-        model = ComponentCollection(display_name='TestComponentCollection')
+        model = ComponentCollection(display_name="TestComponentCollection")
         component1 = Gaussian(
-            name='TestGaussian1Name',
-            display_name='TestGaussian1',
+            name="TestGaussian1Name",
+            display_name="TestGaussian1",
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
-            unique_name='TestGaussian1',
+            unit="meV",
         )
         component2 = Lorentzian(
-            name='TestLorentzian1Name',
-            display_name='TestLorentzian1',
+            name="TestLorentzian1Name",
+            display_name="TestLorentzian1",
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
-            unique_name='TestLorentzian1',
+            unit="meV",
         )
         model.append_component(component1)
         model.append_component(component2)
@@ -42,43 +40,49 @@ class TestComponentCollection:
 
     def test_init(self):
         # WHEN THEN
-        component_collection = ComponentCollection(display_name='InitModel')
+        component_collection = ComponentCollection(display_name="InitModel")
 
         # EXPECT
-        assert component_collection.display_name == 'InitModel'
-        assert component_collection.components == []
+        assert component_collection.display_name == "InitModel"
+        assert not component_collection
 
     def test_init_with_components(self):
         # WHEN THEN
         component1 = Gaussian(
-            display_name='TestGaussian1', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="TestGaussian1", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component2 = Lorentzian(
-            display_name='TestLorentzian1', area=2.0, center=1.0, width=0.5, unit='meV'
+            display_name="TestLorentzian1", area=2.0, center=1.0, width=0.5, unit="meV"
         )
         component_collection = ComponentCollection(
-            display_name='InitModel', components=[component1, component2]
+            display_name="InitModel", components=[component1, component2]
         )
 
         # EXPECT
-        assert component_collection.display_name == 'InitModel'
-        assert len(component_collection.components) == 2
-        assert component_collection.components[0] is component1
-        assert component_collection.components[1] is component2
+        assert component_collection.display_name == "InitModel"
+        assert len(component_collection) == 2
+        assert component_collection[0] is component1
+        assert component_collection[1] is component2
 
     def test_init_with_invalid_components_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Component must be'):
-            ComponentCollection(components=['NotAComponent'])
+        with pytest.raises(
+            TypeError,
+            match="All items in components must be instances of ModelComponent",
+        ):
+            ComponentCollection(components=["NotAComponent"])
 
     def test_init_with_invalid_list_of_components_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='components must be a list of'):
-            ComponentCollection(components='NotAList')
+        with pytest.raises(
+            TypeError,
+            match="components must be a ModelComponent or a list of ModelComponent",
+        ):
+            ComponentCollection(components="NotAList")
 
     def test_init_with_invalid_unit_raises(self):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='unit must be'):
+        with pytest.raises(TypeError, match="unit must be"):
             ComponentCollection(unit=123)
 
     # ───── Component Management ─────
@@ -86,89 +90,56 @@ class TestComponentCollection:
     def test_append_component(self, component_collection):
         # WHEN
         component = Gaussian(
-            display_name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
         component_collection.append_component(component)
         # EXPECT
-        assert component_collection.components[-1] is component
+        assert component_collection[-1] is component
 
     def test_append_component_collection(self, component_collection):
         # WHEN
         component = Gaussian(
-            display_name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component_collection2 = ComponentCollection()
         component_collection2.append_component(component)
         # THEN
         component_collection.append_component(component_collection2)
         # EXPECT
-        assert component_collection.components[-1] is component
+        assert component_collection[-1] is component
 
     def test_append_existing_component_raises(self, component_collection):
         # WHEN THEN
-        component = component_collection.components[0]
+        component = component_collection[0]
         # EXPECT
-        with pytest.raises(ValueError, match='is already in the collection'):
+        with pytest.raises(ValueError, match="already exists in list"):
             component_collection.append_component(component)
 
     def test_append_invalid_component_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Component must be '):
-            component_collection.append_component('NotAComponent')
-
-    def test_remove_component(self, component_collection):
-        # WHEN THEN
-        component_collection.remove_component('TestGaussian1')
-        # EXPECT
-        assert 'TestGaussian1' not in component_collection.components
-
-    def test_remove_component_raises(self, component_collection):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Component name must be a string'):
-            component_collection.remove_component(123)
-
-    def test_remove_nonexistent_component_raises(self, component_collection):
-        # WHEN THEN EXPECT
-        with pytest.raises(KeyError, match="No component named 'NonExistentComponent' exists"):
-            component_collection.remove_component('NonExistentComponent')
+        with pytest.raises(TypeError, match="Value must be an instance of type"):
+            component_collection.append_component("NotAComponent")
 
     def test_getitem(self, component_collection):
         # WHEN
         component = Gaussian(
-            display_name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # THEN
         component_collection.append_component(component)
         # EXPECT
-        assert component_collection.components[-1] is component
-
-    def test_component_setter(self, component_collection):
-        # WHEN
-        new_components = [Lorentzian()]
-        # THEN
-        component_collection.components = new_components
-        # EXPECT
-        assert len(component_collection.components) == 1
-        assert component_collection.components[0] is new_components[0]
-
-    def test_component_setter_invalid_raises(self, component_collection):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r' must be instances of ModelComponent.'):
-            component_collection.components = ['NotAComponent']
-
-        with pytest.raises(TypeError, match='components must be a list of'):
-            component_collection.components = 'NotAList'
+        assert component_collection[-1] is component
 
     def test_is_empty(self):
         # WHEN THEN
-        component_collection = ComponentCollection(display_name='EmptyModel')
+        component_collection = ComponentCollection(display_name="EmptyModel")
         # EXPECT
         assert component_collection.is_empty is True
 
         # WHEN THEN
         component = Gaussian(
-            display_name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="TestComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component_collection.append_component(component)
         # EXPECT
@@ -176,37 +147,27 @@ class TestComponentCollection:
 
     def test_is_empty_setter(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(AttributeError, match=r'is_empty is a read-only property.'):
+        with pytest.raises(AttributeError, match=r"is_empty is a read-only property."):
             component_collection.is_empty = True
-
-    def test_component_setter_empty_list(self, component_collection):
-        component_collection.components = []
-        assert component_collection.components == []
 
     def test_list_component_names(self, component_collection):
         # WHEN THEN
         components = component_collection.list_component_names()
         # EXPECT
         assert len(components) == 2
-        assert components[0] == 'TestGaussian1'
-        assert components[1] == 'TestLorentzian1'
-
-    def test_clear_components(self, component_collection):
-        # WHEN THEN
-        component_collection.clear_components()
-        # EXPECT
-        assert len(component_collection.components) == 0
+        assert components[0] == "TestGaussian1Name"
+        assert components[1] == "TestLorentzian1Name"
 
     def test_convert_unit(self, component_collection):
         # WHEN THEN
-        component_collection.convert_unit('eV')
+        component_collection.convert_unit("eV")
         # EXPECT
-        for component in component_collection.components:
-            assert component.unit == 'eV'
+        for component in component_collection:
+            assert component.unit == "eV"
 
     def test_convert_unit_incorrect_unit_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
+        with pytest.raises(TypeError, match=r"Unit must be a string or sc.Unit"):
             component_collection.convert_unit(123)
 
     def test_convert_unit_failure_rolls_back(self, component_collection):
@@ -214,46 +175,46 @@ class TestComponentCollection:
         # Introduce a faulty component that will fail conversion
         class FaultyComponent(Gaussian):
             def convert_unit(self, _unit: str) -> None:
-                raise RuntimeError('Conversion failed.')
+                raise RuntimeError("Conversion failed.")
 
         faulty_component = FaultyComponent(
-            display_name='FaultyComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="FaultyComponent", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         component_collection.append_component(faulty_component)
 
         original_units = {
-            component.display_name: component.unit for component in component_collection.components
+            component.name: component.unit for component in component_collection
         }
 
         # EXPECT
-        with pytest.raises(RuntimeError, match=r'Conversion failed.'):
-            component_collection.convert_unit('eV')
+        with pytest.raises(RuntimeError, match=r"Conversion failed."):
+            component_collection.convert_unit("eV")
 
         # Check that all components have their original units
-        for component in component_collection.components:
-            assert component.unit == original_units[component.display_name]
+        for component in component_collection:
+            assert component.unit == original_units[component.name]
 
     def test_set_unit(self, component_collection):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match=r'Unit is read-only. Use convert_unit to change the unit',
+            match=r"Unit is read-only. Use convert_unit to change the unit",
         ):
-            component_collection.unit = 'eV'
+            component_collection.unit = "eV"
 
     def test_evaluate(self, component_collection):
         # WHEN
         x = np.linspace(-5, 5, 100)
         result = component_collection.evaluate(x)
         # EXPECT
-        expected_result = component_collection.components[0].evaluate(
-            x
-        ) + component_collection.components[1].evaluate(x)
+        expected_result = component_collection[0].evaluate(x) + component_collection[
+            1
+        ].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_no_components_returns_zero(self):
         # WHEN THEN
-        component_collection = ComponentCollection(display_name='EmptyModel')
+        component_collection = ComponentCollection(display_name="EmptyModel")
         x = np.linspace(-5, 5, 100)
         # EXPECT
         result = component_collection.evaluate(x)
@@ -263,12 +224,12 @@ class TestComponentCollection:
     def test_evaluate_component(self, component_collection):
         # WHEN  THEN
         x = np.linspace(-5, 5, 100)
-        result1 = component_collection.evaluate_component(x, 'TestGaussian1')
-        result2 = component_collection.evaluate_component(x, 'TestLorentzian1')
+        result1 = component_collection.evaluate_component(x, "TestGaussian1Name")
+        result2 = component_collection.evaluate_component(x, "TestLorentzian1Name")
 
         # EXPECT
-        expected_result1 = component_collection.components[0].evaluate(x)
-        expected_result2 = component_collection.components[1].evaluate(x)
+        expected_result1 = component_collection[0].evaluate(x)
+        expected_result2 = component_collection[1].evaluate(x)
         np.testing.assert_allclose(result1, expected_result1, rtol=1e-5)
         np.testing.assert_allclose(result2, expected_result2, rtol=1e-5)
 
@@ -277,16 +238,20 @@ class TestComponentCollection:
         x = np.linspace(-5, 5, 100)
 
         # THEN EXPECT
-        with pytest.raises(KeyError, match="No component named 'NonExistentComponent' exists"):
-            component_collection.evaluate_component(x, 'NonExistentComponent')
+        with pytest.raises(
+            KeyError, match="No component named 'NonExistentComponent' exists"
+        ):
+            component_collection.evaluate_component(x, "NonExistentComponent")
 
     def test_evaluate_component_no_components_raises(self):
         # WHEN THEN
-        component_collection = ComponentCollection(display_name='EmptyModel')
+        component_collection = ComponentCollection(display_name="EmptyModel")
         x = np.linspace(-5, 5, 100)
         # EXPECT
-        with pytest.raises(ValueError, match=r'No components in the model to evaluate.'):
-            component_collection.evaluate_component(x, 'AnyComponent')
+        with pytest.raises(
+            ValueError, match=r"No components in the model to evaluate."
+        ):
+            component_collection.evaluate_component(x, "AnyComponent")
 
     def test_evaluate_component_invalid_name_type_raises(self, component_collection):
         # WHEN
@@ -295,7 +260,7 @@ class TestComponentCollection:
         # THEN EXPECT
         with pytest.raises(
             TypeError,
-            match=r"Component unique name must be a string, got <class 'int'> instead.",
+            match=r"Component name must be a string, got <class 'int'> instead.",
         ):
             component_collection.evaluate_component(x, 123)
 
@@ -312,28 +277,34 @@ class TestComponentCollection:
 
     def test_normalize_area_no_components_raises(self):
         # WHEN THEN
-        component_collection = ComponentCollection(display_name='EmptyModel')
+        component_collection = ComponentCollection(display_name="EmptyModel")
         # EXPECT
-        with pytest.raises(ValueError, match=r'No components in the model to normalize.'):
+        with pytest.raises(
+            ValueError, match=r"No components in the model to normalize."
+        ):
             component_collection.normalize_area()
 
     @pytest.mark.parametrize(
-        'area_value',
+        "area_value",
         [np.nan, 0.0, np.inf],
-        ids=['NaN area', 'Zero area', 'Infinite area'],
+        ids=["NaN area", "Zero area", "Infinite area"],
     )
-    def test_normalize_area_not_finite_area_raises(self, component_collection, area_value):
+    def test_normalize_area_not_finite_area_raises(
+        self, component_collection, area_value
+    ):
         # WHEN THEN
-        component_collection.components[0].area = area_value
-        component_collection.components[1].area = area_value
+        component_collection[0].area = area_value
+        component_collection[1].area = area_value
 
         # EXPECT
-        with pytest.raises(ValueError, match=r'cannot normalize'):
+        with pytest.raises(ValueError, match=r"cannot normalize"):
             component_collection.normalize_area()
 
     def test_normalize_area_non_area_component_warns(self, component_collection):
         # WHEN
-        component1 = Polynomial(display_name='TestPolynomial', coefficients=[1, 2, 3], unit='meV')
+        component1 = Polynomial(
+            display_name="TestPolynomial", coefficients=[1, 2, 3], unit="meV"
+        )
         component_collection.append_component(component1)
 
         # THEN EXPECT
@@ -347,19 +318,19 @@ class TestComponentCollection:
         assert len(parameters) == 6
 
         expected_names = {
-            'TestGaussian1Name area',
-            'TestGaussian1Name center',
-            'TestGaussian1Name width',
-            'TestLorentzian1Name area',
-            'TestLorentzian1Name center',
-            'TestLorentzian1Name width',
+            "TestGaussian1Name area",
+            "TestGaussian1Name center",
+            "TestGaussian1Name width",
+            "TestLorentzian1Name area",
+            "TestLorentzian1Name center",
+            "TestLorentzian1Name width",
         }
         actual_names = {param.name for param in parameters}
         assert actual_names == expected_names
         assert all(isinstance(param, Parameter) for param in parameters)
 
     def test_get_parameters_no_components(self):
-        component_collection = ComponentCollection(display_name='EmptyModel')
+        component_collection = ComponentCollection(display_name="EmptyModel")
         # WHEN THEN
         parameters = component_collection.get_all_parameters()
         # EXPECT
@@ -369,10 +340,10 @@ class TestComponentCollection:
         # WHEN
 
         # Fix one parameter and make another dependent
-        component_collection.components[0].area.fixed = True
-        component_collection.components[1].width.make_dependent_on(
-            'comp1_width',
-            {'comp1_width': component_collection.components[0].width},
+        component_collection[0].area.fixed = True
+        component_collection[1].width.make_dependent_on(
+            "comp1_width",
+            {"comp1_width": component_collection[0].width},
         )
 
         # THEN
@@ -382,10 +353,10 @@ class TestComponentCollection:
         assert len(fit_parameters) == 4
 
         expected_names = {
-            'TestGaussian1Name center',
-            'TestGaussian1Name width',
-            'TestLorentzian1Name area',
-            'TestLorentzian1Name center',
+            "TestGaussian1Name center",
+            "TestGaussian1Name width",
+            "TestLorentzian1Name area",
+            "TestLorentzian1Name center",
         }
         actual_names = {param.name for param in fit_parameters}
         assert actual_names == expected_names
@@ -407,18 +378,18 @@ class TestComponentCollection:
             assert param.fixed is False
 
     def test_contains(self, component_collection):
-        assert 'TestGaussian1' in component_collection
-        assert 'TestLorentzian1' in component_collection
-        assert 'NonExistentComponent' not in component_collection
+        assert "TestGaussian1Name" in component_collection
+        assert "TestLorentzian1Name" in component_collection
+        assert "NonExistentComponent" not in component_collection
 
-        gaussian_component = component_collection.components[0]
-        lorentzian_component = component_collection.components[1]
+        gaussian_component = component_collection[0]
+        lorentzian_component = component_collection[1]
         assert gaussian_component in component_collection
         assert lorentzian_component in component_collection
 
         # WHEN THEN
         fake_component = Gaussian(
-            display_name='FakeGaussian', area=1.0, center=0.0, width=1.0, unit='meV'
+            name="FakeGaussian", area=1.0, center=0.0, width=1.0, unit="meV"
         )
         # EXPECT
         assert fake_component not in component_collection
@@ -428,24 +399,24 @@ class TestComponentCollection:
         # WHEN THEN
         rep = repr(component_collection)
         # EXPECT
-        assert 'ComponentCollection' in rep
-        assert 'TestGaussian' in rep
+        assert "ComponentCollection" in rep
+        assert "TestGaussian1Name" in rep
 
     def test_to_dict(self, component_collection):
-        # WHEN THEN
+        # WHEN
         model_dict = component_collection.to_dict()
 
         # EXPECT
-        assert model_dict['display_name'] == component_collection.display_name
-        assert model_dict['unit'] == component_collection.unit
-        assert len(model_dict['components']) == len(component_collection.components)
+        assert model_dict["display_name"] == component_collection.display_name
+        assert model_dict["unit"] == component_collection.unit
+        assert len(model_dict["components"]) == len(component_collection)
 
         for comp, comp_dict in zip(
-            component_collection.components, model_dict['components'], strict=True
+            component_collection, model_dict["components"], strict=True
         ):
-            assert comp_dict['@class'] == type(comp).__name__
-            assert comp_dict['display_name'] == comp.display_name
-            assert comp_dict['unit'] == comp.unit
+            assert comp_dict["@class"] == type(comp).__name__
+            assert comp_dict["display_name"] == comp.display_name
+            assert comp_dict["unit"] == comp.unit
 
     def test_from_dict(self, component_collection):
         # WHEN
@@ -456,19 +427,18 @@ class TestComponentCollection:
 
         # EXPECT
         assert new_model.display_name == component_collection.display_name
-        assert len(new_model.components) == len(component_collection.components)
+        assert len(new_model) == len(component_collection)
 
-        # Compare each component and its parameters
-        for orig_comp, new_comp in zip(
-            component_collection.components, new_model.components, strict=True
-        ):
+        for orig_comp, new_comp in zip(component_collection, new_model, strict=True):
             assert type(new_comp) is type(orig_comp)
             assert new_comp.display_name == orig_comp.display_name
             assert new_comp.unit == orig_comp.unit
 
             orig_params = orig_comp.get_all_parameters()
             new_params = new_comp.get_all_parameters()
+
             assert len(orig_params) == len(new_params)
+
             for param_orig, param_new in zip(orig_params, new_params, strict=True):
                 assert param_new.name == param_orig.name
                 assert param_new.value == param_orig.value
@@ -476,13 +446,12 @@ class TestComponentCollection:
 
     def test_copy(self, component_collection):
         # WHEN
-        component_collection.temperature = 300
-        component_collection.components[0].area.min = 0.5
-        component_collection.components[0].area.fixed = True
-        component_collection.components[0].area.max = 5.0
-        component_collection.components[1].width.min = 0.1
-        component_collection.components[1].width.fixed = True
-        component_collection.components[1].width.max = 2.0
+        component_collection[0].area.min = 0.5
+        component_collection[0].area.fixed = True
+        component_collection[0].area.max = 5.0
+        component_collection[1].width.min = 0.1
+        component_collection[1].width.fixed = True
+        component_collection[1].width.max = 2.0
 
         # THEN
         model_copy = copy(component_collection)
@@ -490,11 +459,11 @@ class TestComponentCollection:
         # EXPECT collection-level checks
         assert model_copy is not component_collection
         assert model_copy.display_name == component_collection.display_name
-        assert len(model_copy.components) == len(component_collection.components)
+        assert len(model_copy) == len(component_collection)
 
         # EXPECT: deep copy, same order
         for orig_comp, copied_comp in zip(
-            component_collection.components, model_copy.components, strict=True
+            component_collection, model_copy, strict=True
         ):
             # New object
             assert copied_comp is not orig_comp

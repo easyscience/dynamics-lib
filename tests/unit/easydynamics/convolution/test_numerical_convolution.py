@@ -17,13 +17,13 @@ class TestNumericalConvolution:
     @pytest.fixture
     def default_numerical_convolution(self):
         energy = np.linspace(-10, 10, 5001)
-        sample_components = ComponentCollection(display_name='ComponentCollection')
+        sample_components = ComponentCollection(display_name="ComponentCollection")
         sample_components.append_component(
-            Gaussian(display_name='Gaussian1', area=2.0, center=0.1, width=0.4)
+            Gaussian(name="Gaussian1", area=2.0, center=0.1, width=0.4)
         )
-        resolution_components = ComponentCollection(display_name='ResolutionModel')
+        resolution_components = ComponentCollection(display_name="ResolutionModel")
         resolution_components.append_component(
-            Gaussian(display_name='GaussianRes', area=3.0, center=0.2, width=0.5)
+            Gaussian(name="GaussianRes", area=3.0, center=0.2, width=0.5)
         )
 
         return NumericalConvolution(
@@ -40,22 +40,26 @@ class TestNumericalConvolution:
         # WHEN THEN EXPECT
         assert isinstance(default_numerical_convolution, NumericalConvolution)
         assert isinstance(default_numerical_convolution.energy, sc.Variable)
-        assert np.allclose(default_numerical_convolution.energy.values, np.linspace(-10, 10, 5001))
-        assert isinstance(default_numerical_convolution._sample_components, ComponentCollection)
+        assert np.allclose(
+            default_numerical_convolution.energy.values, np.linspace(-10, 10, 5001)
+        )
+        assert isinstance(
+            default_numerical_convolution._sample_components, ComponentCollection
+        )
         assert isinstance(
             default_numerical_convolution._resolution_components, ComponentCollection
         )
         assert default_numerical_convolution.upsample_factor == 5
         assert default_numerical_convolution.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution.temperature is None
-        assert default_numerical_convolution.unit == 'meV'
+        assert default_numerical_convolution.unit == "meV"
         assert (
             default_numerical_convolution.detailed_balance_settings.normalize_detailed_balance
             is True
         )
         assert isinstance(default_numerical_convolution._energy_grid, EnergyGrid)
 
-    @pytest.mark.parametrize('upsample_factor', [None, 5])
+    @pytest.mark.parametrize("upsample_factor", [None, 5])
     def test_convolution(self, default_numerical_convolution, upsample_factor):
         """
         Test that convolution of two Gaussians produces the
@@ -67,13 +71,15 @@ class TestNumericalConvolution:
         result = default_numerical_convolution.convolution()
 
         # EXPECT
-        expected_area = 2.0 * 3.0  # area of sample_components * area of resolution_components
+        expected_area = (
+            2.0 * 3.0
+        )  # area of sample_components * area of resolution_components
         expected_center = (
             0.1 + 0.2 + 0.4
         )  # center of sample_components + center of resolution_components
         expected_width = np.sqrt(0.4**2 + 0.5**2)  # sqrt(width_sample^2 + width_res^2)
         expected_result = Gaussian(
-            display_name='ExpectedConvolution',
+            name="ExpectedConvolution",
             area=expected_area,
             center=expected_center,
             width=expected_width,
@@ -102,8 +108,12 @@ class TestNumericalConvolution:
         resolution_vals = default_numerical_convolution._resolution_components.evaluate(
             default_numerical_convolution.energy.values
         )
-        DBF = detailed_balance_factor(energy=default_numerical_convolution.energy, temperature=5.0)
-        expected_result = fftconvolve(sample_valds * DBF, resolution_vals, mode='same') * (
+        DBF = detailed_balance_factor(
+            energy=default_numerical_convolution.energy, temperature=5.0
+        )
+        expected_result = fftconvolve(
+            sample_valds * DBF, resolution_vals, mode="same"
+        ) * (
             default_numerical_convolution.energy.values[1]
             - default_numerical_convolution.energy.values[0]
         )
@@ -111,7 +121,7 @@ class TestNumericalConvolution:
         assert np.allclose(result, expected_result, rtol=1e-4)
 
     @pytest.mark.parametrize(
-        'plan_valid, suppress_warnings, use_db, upsample',
+        "plan_valid, suppress_warnings, use_db, upsample",
         [
             (True, True, False, None),
             (False, True, False, None),
@@ -121,12 +131,12 @@ class TestNumericalConvolution:
             (False, False, True, 10),
         ],
         ids=[
-            'plan_valid=True, suppress_warnings=True, use_db=False, upsample=None',
-            'plan_valid=False, suppress_warnings=True, use_db=False, upsample=None',
-            'plan_valid=True, suppress_warnings=False, use_db=False, upsample=None',
-            'plan_valid=True, suppress_warnings=False, use_db=True, upsample=None',
-            'plan_valid=True, suppress_warnings=False, use_db=True, upsample=10',
-            'plan_valid=False, suppress_warnings=False, use_db=True, upsample=10',
+            "plan_valid=True, suppress_warnings=True, use_db=False, upsample=None",
+            "plan_valid=False, suppress_warnings=True, use_db=False, upsample=None",
+            "plan_valid=True, suppress_warnings=False, use_db=False, upsample=None",
+            "plan_valid=True, suppress_warnings=False, use_db=True, upsample=None",
+            "plan_valid=True, suppress_warnings=False, use_db=True, upsample=10",
+            "plan_valid=False, suppress_warnings=False, use_db=True, upsample=10",
         ],
     )
     def test_convolution_branches(
@@ -166,20 +176,22 @@ class TestNumericalConvolution:
         def fake_check_width_thresholds(*args, **kwargs):
             check_width_calls.append((args, kwargs))
 
-        monkeypatch.setattr(conv, '_create_energy_grid', fake_create_energy_grid)
-        monkeypatch.setattr(conv, '_check_width_thresholds', fake_check_width_thresholds)
+        monkeypatch.setattr(conv, "_create_energy_grid", fake_create_energy_grid)
+        monkeypatch.setattr(
+            conv, "_check_width_thresholds", fake_check_width_thresholds
+        )
 
         # --- Simplify numerics ---
         dense = conv._energy_grid.energy_dense
 
         monkeypatch.setattr(
             conv.sample_components,
-            'evaluate',
+            "evaluate",
             lambda x: np.ones_like(dense),  # noqa: ARG005
         )
         monkeypatch.setattr(
             conv.resolution_components,
-            'evaluate',
+            "evaluate",
             lambda x: np.ones_like(dense),  # noqa: ARG005
         )
 
@@ -191,12 +203,12 @@ class TestNumericalConvolution:
             return np.ones_like(dense)
 
         monkeypatch.setattr(
-            'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
+            "easydynamics.convolution.numerical_convolution.detailed_balance_factor",
             fake_db,
         )
 
         monkeypatch.setattr(
-            'easydynamics.convolution.numerical_convolution.fftconvolve',
+            "easydynamics.convolution.numerical_convolution.fftconvolve",
             lambda a, b, mode: np.ones_like(dense),  # noqa: ARG005
         )
 
@@ -207,7 +219,7 @@ class TestNumericalConvolution:
             interp_called = True
             return np.ones_like(conv.energy.values)
 
-        monkeypatch.setattr(np, 'interp', fake_interp)
+        monkeypatch.setattr(np, "interp", fake_interp)
 
         # THEN
         result = conv.convolution()

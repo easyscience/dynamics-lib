@@ -23,20 +23,20 @@ from easydynamics.sample_model.sample_model import SampleModel
 class TestFittingWithDiffusionModel:
     def test_fitting_with_diffusion_model(self):
         # Load the vanadium data
-        vanadium_experiment = Experiment('Vanadium')
+        vanadium_experiment = Experiment("Vanadium")
 
         file_path = pooch.retrieve(
-            url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
-            known_hash='16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873',
+            url="https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5",
+            known_hash="16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873",
         )
 
         vanadium_experiment.load_hdf5(filename=file_path)
 
-        delta_function = DeltaFunction(display_name='DeltaFunction', area=1)
+        delta_function = DeltaFunction(display_name="DeltaFunction", area=1)
         sample_model = SampleModel(components=delta_function)
 
         resolution_components = ComponentCollection()
-        res_gauss = Gaussian(width=0.1, area=1, display_name='Res. Gauss')
+        res_gauss = Gaussian(width=0.1, area=1, name="Res. Gauss")
         res_gauss.area.fixed = True
         resolution_components.append_component(res_gauss)
         resolution_model = ResolutionModel(components=resolution_components)
@@ -49,31 +49,31 @@ class TestFittingWithDiffusionModel:
         )
 
         vanadium_analysis = Analysis(
-            display_name='Vanadium Full Analysis',
+            display_name="Vanadium Full Analysis",
             experiment=vanadium_experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
         )
 
         fit_result_independent_single_Q = vanadium_analysis.fit(
-            fit_method='independent', Q_index=5
+            fit_method="independent", Q_index=5
         )
 
         assert fit_result_independent_single_Q.success
         assert fit_result_independent_single_Q.chi2 < 75.0
         assert fit_result_independent_single_Q.reduced_chi2 < 0.4
 
-        diffusion_experiment = Experiment('Diffusion')
+        diffusion_experiment = Experiment("Diffusion")
 
         file_path = pooch.retrieve(
-            url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/diffusion_data_example.h5',
-            known_hash='5fe846b19aacbda8b8b936eb2e5310d025dc56c25b0b353521e7d6b921f229ab',
+            url="https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/diffusion_data_example.h5",
+            known_hash="5fe846b19aacbda8b8b936eb2e5310d025dc56c25b0b353521e7d6b921f229ab",
         )
 
         diffusion_experiment.load_hdf5(filename=file_path)
 
-        delta_function = DeltaFunction(display_name='DeltaFunction', area=0.2)
-        lorentzian = Lorentzian(display_name='Lorentzian', area=0.5, width=0.3)
+        delta_function = DeltaFunction(display_name="DeltaFunction", area=0.2)
+        lorentzian = Lorentzian(display_name="Lorentzian", area=0.5, width=0.3)
         component_collection = ComponentCollection(
             components=[delta_function, lorentzian],
         )
@@ -91,13 +91,13 @@ class TestFittingWithDiffusionModel:
         instrument_model.resolution_model.fix_all_parameters()
 
         diffusion_analysis = Analysis(
-            display_name='Diffusion Analysis',
+            display_name="Diffusion Analysis",
             experiment=diffusion_experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
         )
 
-        fit_result = diffusion_analysis.fit(fit_method='independent')
+        fit_result = diffusion_analysis.fit(fit_method="independent")
 
         assert fit_result[0].success
         assert fit_result[0].chi2 < 43.0
@@ -107,12 +107,12 @@ class TestFittingWithDiffusionModel:
         # Diffusion model
         ###############
 
-        delta_function = DeltaFunction(display_name='DeltaFunction', area=0.2)
+        delta_function = DeltaFunction(display_name="DeltaFunction", area=0.2)
         component_collection = ComponentCollection(
             components=[delta_function],
         )
         diffusion_model = BrownianTranslationalDiffusion(
-            display_name='Brownian Translational Diffusion',
+            display_name="Brownian Translational Diffusion",
             diffusion_coefficient=2.4e-9,
             scale=0.5,
         )
@@ -130,7 +130,7 @@ class TestFittingWithDiffusionModel:
         )
 
         diffusion_model_analysis = Analysis(
-            display_name='Diffusion Full Analysis',
+            display_name="Diffusion Full Analysis",
             experiment=diffusion_experiment,
             sample_model=sample_model,
             instrument_model=instrument_model,
@@ -138,7 +138,7 @@ class TestFittingWithDiffusionModel:
 
         diffusion_model_analysis.instrument_model.resolution_model.fix_all_parameters()
 
-        fit_result = diffusion_model_analysis.fit(fit_method='simultaneous')
+        fit_result = diffusion_model_analysis.fit(fit_method="simultaneous")
 
         assert fit_result[0].success
         assert fit_result[0].chi2 < 56.0
