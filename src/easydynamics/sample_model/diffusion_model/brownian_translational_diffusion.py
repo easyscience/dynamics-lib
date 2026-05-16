@@ -200,7 +200,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         self,
         Q: Q_type,
         component_name: str = 'Brownian diffusion',
-        component_display_name: str = 'Brownian diffusion',
+        component_display_name: str | None = None,
     ) -> list[ComponentCollection]:
         r"""
         Create ComponentCollection components for the Brownian translational diffusion model at
@@ -212,7 +212,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Scattering vector values.
         component_name : str, default='Brownian diffusion'
             Name of the Brownian diffusion component.
-        component_display_name : str, default='Brownian diffusion'
+        component_display_name : str | None, default=None
             Display name of the Brownian diffusion component.
 
         Raises
@@ -229,11 +229,14 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
         Q = _validate_and_convert_Q(Q)
 
-        if not isinstance(component_display_name, str):
-            raise TypeError('component_display_name must be a string.')
-
         if not isinstance(component_name, str):
             raise TypeError('component_name must be a string.')
+
+        if component_display_name is None:
+            component_display_name = component_name
+
+        if not isinstance(component_display_name, str):
+            raise TypeError('component_display_name must be a string.')
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the

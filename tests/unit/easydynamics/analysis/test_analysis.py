@@ -433,7 +433,7 @@ class TestAnalysis:
         )
 
         # Convert the unit of a component to eV.
-        analysis.sample_model.get_component_collection(Q_index=1).components[0].convert_unit('eV')
+        analysis.sample_model.get_component_collection(Q_index=1)[0].convert_unit('eV')
 
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()
@@ -782,14 +782,14 @@ class TestAnalysis:
     def test_create_components_dataset(self, analysis):
         # WHEN
         # Add another component so that there are two components
-        analysis.sample_model.append_component(Gaussian(display_name='Gaussian2', area=0.5))
+        analysis.sample_model.append_component(Gaussian(name='Gaussian2', area=0.5))
 
         # THEN
         components_dataset = analysis._create_components_dataset(add_background=True)
 
         # THEN EXPECT
         assert isinstance(components_dataset, sc.Dataset)
-        component_names = [comp.display_name for comp in analysis.sample_model.components]
+        component_names = [comp.name for comp in analysis.sample_model.components]
         for component_name in component_names:
             assert component_name in components_dataset
             assert 'Q' in components_dataset[component_name].dims
@@ -800,16 +800,14 @@ class TestAnalysis:
         # WHEN
 
         # Add another component so that there are two components
-        analysis_single_Q.sample_model.append_component(
-            Gaussian(display_name='Gaussian2', area=0.5)
-        )
+        analysis_single_Q.sample_model.append_component(Gaussian(name='Gaussian2', area=0.5))
 
         # THEN
         components_dataset = analysis_single_Q._create_components_dataset(add_background=True)
 
         # THEN EXPECT
         assert isinstance(components_dataset, sc.Dataset)
-        component_names = [comp.display_name for comp in analysis_single_Q.sample_model.components]
+        component_names = [comp.name for comp in analysis_single_Q.sample_model.components]
         for component_name in component_names:
             assert component_name in components_dataset
             assert 'Q' in components_dataset[component_name].dims

@@ -26,25 +26,21 @@ class TestConvolution:
     @pytest.fixture
     def default_convolution(self):
         energy = np.linspace(-10, 10, 5001)
-        sample_components = ComponentCollection(display_name="ComponentCollection")
+        sample_components = ComponentCollection(display_name='ComponentCollection')
 
         sample_components.append_component(
-            Gaussian(name="Gaussian1", area=2.0, center=0.1, width=0.4)
+            Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
         )
 
         sample_components.append_component(
-            DampedHarmonicOscillator(
-                display_name="DHO1", area=2.0, center=1.0, width=0.1
-            )
+            DampedHarmonicOscillator(name='DHO1', area=2.0, center=1.0, width=0.1)
         )
 
-        sample_components.append_component(
-            DeltaFunction(display_name="Delta1", area=2.0, center=0.3)
-        )
+        sample_components.append_component(DeltaFunction(name='Delta1', area=2.0, center=0.3))
 
-        resolution_components = ComponentCollection(display_name="ResolutionModel")
+        resolution_components = ComponentCollection(name='ResolutionModel')
         resolution_components.append_component(
-            Gaussian(name="GaussianRes", area=3.0, center=0.2, width=0.5)
+            Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
         )
 
         return Convolution(
@@ -56,11 +52,9 @@ class TestConvolution:
     @pytest.fixture
     def convolution_with_components(self):
         energy = np.linspace(-10, 10, 5001)
-        sample_components = Gaussian(name="Gaussian1", area=2.0, center=0.1, width=0.4)
+        sample_components = Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
 
-        resolution_components = Gaussian(
-            name="GaussianRes", area=3.0, center=0.2, width=0.5
-        )
+        resolution_components = Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
 
         return Convolution(
             energy=energy,
@@ -73,48 +67,33 @@ class TestConvolution:
         # WHEN THEN EXPECT
         assert isinstance(default_convolution, Convolution)
         assert isinstance(default_convolution.energy, sc.Variable)
-        assert np.allclose(
-            default_convolution.energy.values, np.linspace(-10, 10, 5001)
-        )
+        assert np.allclose(default_convolution.energy.values, np.linspace(-10, 10, 5001))
         assert isinstance(default_convolution._sample_components, ComponentCollection)
-        assert isinstance(
-            default_convolution._resolution_components, ComponentCollection
-        )
+        assert isinstance(default_convolution._resolution_components, ComponentCollection)
         assert default_convolution.upsample_factor == 5
         assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
-        assert default_convolution.unit == "meV"
-        assert (
-            default_convolution.detailed_balance_settings.normalize_detailed_balance
-            is True
-        )
+        assert default_convolution.unit == 'meV'
+        assert default_convolution.detailed_balance_settings.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
-        assert isinstance(
-            default_convolution._analytical_sample_components, ComponentCollection
-        )
+        assert isinstance(default_convolution._analytical_sample_components, ComponentCollection)
         assert (
-            default_convolution._analytical_sample_components.components[0]
-            is default_convolution.sample_components.components[0]
+            default_convolution._analytical_sample_components[0]
+            is default_convolution.sample_components[0]
         )
-        assert isinstance(
-            default_convolution._numerical_sample_components, ComponentCollection
-        )
+        assert isinstance(default_convolution._numerical_sample_components, ComponentCollection)
         assert (
-            default_convolution._numerical_sample_components.components[0]
-            is default_convolution.sample_components.components[1]
+            default_convolution._numerical_sample_components[0]
+            is default_convolution.sample_components[1]
         )
 
-        assert isinstance(
-            default_convolution._delta_sample_components, ComponentCollection
-        )
+        assert isinstance(default_convolution._delta_sample_components, ComponentCollection)
         assert (
-            default_convolution._delta_sample_components.components[0]
-            is default_convolution.sample_components.components[2]
+            default_convolution._delta_sample_components[0]
+            is default_convolution.sample_components[2]
         )
-        assert (
-            default_convolution.convolution_settings.convolution_plan_is_valid is True
-        )
+        assert default_convolution.convolution_settings.convolution_plan_is_valid is True
         assert default_convolution._reactions_enabled is True
 
     def test_init_components(self, convolution_with_components):
@@ -122,19 +101,13 @@ class TestConvolution:
         # WHEN THEN EXPECT
         assert isinstance(convolution_with_components, Convolution)
         assert isinstance(convolution_with_components.energy, sc.Variable)
-        assert np.allclose(
-            convolution_with_components.energy.values, np.linspace(-10, 10, 5001)
-        )
-        assert isinstance(
-            convolution_with_components._sample_components, ComponentCollection
-        )
-        assert isinstance(
-            convolution_with_components._resolution_components, ComponentCollection
-        )
+        assert np.allclose(convolution_with_components.energy.values, np.linspace(-10, 10, 5001))
+        assert isinstance(convolution_with_components._sample_components, ComponentCollection)
+        assert isinstance(convolution_with_components._resolution_components, ComponentCollection)
         assert convolution_with_components.upsample_factor == 5
         assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
-        assert convolution_with_components.unit == "meV"
+        assert convolution_with_components.unit == 'meV'
         assert (
             convolution_with_components.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -146,8 +119,8 @@ class TestConvolution:
             ComponentCollection,
         )
         assert (
-            convolution_with_components._analytical_sample_components.components[0]
-            is convolution_with_components.sample_components.components[0]
+            convolution_with_components._analytical_sample_components[0]
+            is convolution_with_components.sample_components[0]
         )
         assert isinstance(
             convolution_with_components._numerical_sample_components,
@@ -159,10 +132,7 @@ class TestConvolution:
             convolution_with_components._delta_sample_components, ComponentCollection
         )
         assert convolution_with_components._delta_sample_components.is_empty
-        assert (
-            convolution_with_components.convolution_settings.convolution_plan_is_valid
-            is True
-        )
+        assert convolution_with_components.convolution_settings.convolution_plan_is_valid is True
         assert convolution_with_components._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
@@ -174,7 +144,7 @@ class TestConvolution:
         conv.convolution_settings.convolution_plan_is_valid = False
 
         # THEN EXPECT
-        with patch.object(conv, "_build_convolution_plan") as build_plan:
+        with patch.object(conv, '_build_convolution_plan') as build_plan:
             conv.convolution()
             build_plan.assert_called_once()
 
@@ -188,7 +158,7 @@ class TestConvolution:
 
         # THEN EXPECT
         with patch.object(
-            conv._analytical_convolver, "convolution", return_value=np.array([1.0])
+            conv._analytical_convolver, 'convolution', return_value=np.array([1.0])
         ) as analytical_conv:
             conv.convolution()
             analytical_conv.assert_called_once()
@@ -203,7 +173,7 @@ class TestConvolution:
 
         # THEN EXPECT
         with patch.object(
-            conv._numerical_convolver, "convolution", return_value=np.array([1.0])
+            conv._numerical_convolver, 'convolution', return_value=np.array([1.0])
         ) as numerical_conv:
             conv.convolution()
             numerical_conv.assert_called_once()
@@ -219,25 +189,23 @@ class TestConvolution:
         # THEN EXPECT
         with patch.object(
             conv,
-            "_convolve_delta_functions",
+            '_convolve_delta_functions',
             return_value=np.array([1.0]),
         ) as delta_eval:
             conv.convolution()
             delta_eval.assert_called_once()
 
     @pytest.mark.parametrize(
-        "analytical_component",
+        'analytical_component',
         [True, False],
-        ids=["with_analytical", "without_analytical"],
+        ids=['with_analytical', 'without_analytical'],
     )
     @pytest.mark.parametrize(
-        "numerical_component",
+        'numerical_component',
         [True, False],
-        ids=["with_numerical", "without_numerical"],
+        ids=['with_numerical', 'without_numerical'],
     )
-    @pytest.mark.parametrize(
-        "delta_component", [True, False], ids=["with_delta", "without_delta"]
-    )
+    @pytest.mark.parametrize('delta_component', [True, False], ids=['with_delta', 'without_delta'])
     def test_convolution_calls_correct_methods(
         self,
         default_convolution,
@@ -256,13 +224,13 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
             sample_components.append_component(
                 DampedHarmonicOscillator(
-                    display_name="DampedHarmonicOscillator",
+                    display_name='DampedHarmonicOscillator',
                     area=1.0,
                     center=1.0,
                     width=0.1,
@@ -271,12 +239,10 @@ class TestConvolution:
 
         if delta_component:
             sample_components.append_component(
-                DeltaFunction(display_name="DeltaFunction", area=1.0, center=0.0)
+                DeltaFunction(display_name='DeltaFunction', area=1.0, center=0.0)
             )
 
-        conv.sample_components = (
-            sample_components  # This updates the internal sample models
-        )
+        conv.sample_components = sample_components  # This updates the internal sample models
         conv._build_convolution_plan()  # Ensure the plan is built with the new components
 
         # THEN
@@ -284,21 +250,21 @@ class TestConvolution:
         # component type is not present.
         if analytical_component:
             patch_analytical = patch.object(
-                conv._analytical_convolver, "convolution", return_value=np.array([1.0])
+                conv._analytical_convolver, 'convolution', return_value=np.array([1.0])
             )
         else:
             patch_analytical = nullcontext()
 
         if numerical_component:
             patch_numerical = patch.object(
-                conv._numerical_convolver, "convolution", return_value=np.array([1.0])
+                conv._numerical_convolver, 'convolution', return_value=np.array([1.0])
             )
         else:
             patch_numerical = nullcontext()
 
         patch_delta = patch.object(
             conv,
-            "_convolve_delta_functions",
+            '_convolve_delta_functions',
             return_value=np.array([1.0]),
         )
 
@@ -343,7 +309,7 @@ class TestConvolution:
         expected_center = 0.3 + 0.2  # Delta center + Resolution center
         expected_width = 0.5  # Resolution width
         expected_values = Gaussian(
-            name="ExpectedGaussian",
+            name='ExpectedGaussian',
             area=expected_area,
             center=expected_center,
             width=expected_width,
@@ -353,10 +319,10 @@ class TestConvolution:
 
     # List of analytic functions
     analytic_functions: ClassVar[list[object]] = [
-        Gaussian(name="G", area=1.0, center=0.0, width=0.1),
-        Lorentzian(display_name="L", area=1.0, center=0.0, width=0.1),
+        Gaussian(name='G', area=1.0, center=0.0, width=0.1),
+        Lorentzian(display_name='L', area=1.0, center=0.0, width=0.1),
         Voigt(
-            display_name="V",
+            display_name='V',
             area=1.0,
             center=0.0,
             gaussian_width=0.1,
@@ -366,8 +332,8 @@ class TestConvolution:
 
     # List of non-analytic functions
     non_analytic_functions: ClassVar[list[object]] = [
-        DampedHarmonicOscillator(display_name="DHO", area=1.0, center=1.0, width=0.1),
-        Polynomial(display_name="P", coefficients=[1.0, 0.0, 0.0]),
+        DampedHarmonicOscillator(display_name='DHO', area=1.0, center=1.0, width=0.1),
+        Polynomial(display_name='P', coefficients=[1.0, 0.0, 0.0]),
     ]
 
     all_functions_except_delta: ClassVar[list[object]] = [
@@ -377,14 +343,12 @@ class TestConvolution:
 
     all_functions: ClassVar[list[object]] = [
         *all_functions_except_delta,
-        DeltaFunction(display_name="Delta", area=1.0, center=0.0),
+        DeltaFunction(display_name='Delta', area=1.0, center=0.0),
     ]
 
+    @pytest.mark.parametrize('function1', all_functions, ids=lambda f: f.__class__.__name__)
     @pytest.mark.parametrize(
-        "function1", all_functions, ids=lambda f: f.__class__.__name__
-    )
-    @pytest.mark.parametrize(
-        "function2", all_functions_except_delta, ids=lambda f: f.__class__.__name__
+        'function2', all_functions_except_delta, ids=lambda f: f.__class__.__name__
     )
     def test_check_if_pair_is_analytic(self, default_convolution, function1, function2):
         """
@@ -407,22 +371,20 @@ class TestConvolution:
         expected = is_analytic1 and is_analytic2
         assert result == expected
 
-    def test_check_if_pair_is_analytic_raises_with_delta_in_resolution(
-        self, default_convolution
-    ):
+    def test_check_if_pair_is_analytic_raises_with_delta_in_resolution(self, default_convolution):
         """
         Test that _check_if_pair_is_analytic raises TypeError when
         resolution component is DeltaFunction.
         """
         # WHEN
         conv = default_convolution
-        sample_component = Gaussian(name="G", area=1.0, center=0.0, width=0.1)
-        resolution_component = DeltaFunction(display_name="Delta", area=1.0, center=0.0)
+        sample_component = Gaussian(name='G', area=1.0, center=0.0, width=0.1)
+        resolution_component = DeltaFunction(display_name='Delta', area=1.0, center=0.0)
 
         # THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="This is not supported",
+            match='This is not supported',
         ):
             conv._check_if_pair_is_analytic(
                 sample_component=sample_component,
@@ -430,18 +392,18 @@ class TestConvolution:
             )
 
     @pytest.mark.parametrize(
-        "sample_component,resolution_component",
+        'sample_component,resolution_component',
         [
             (
-                "NotAModelComponent",
-                Gaussian(name="G", area=1.0, center=0.0, width=0.1),
+                'NotAModelComponent',
+                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
             ),
             (
-                Gaussian(name="G", area=1.0, center=0.0, width=0.1),
-                "NotAModelComponent",
+                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
+                'NotAModelComponent',
             ),
         ],
-        ids=["invalid_sample_component", "invalid_resolution_component"],
+        ids=['invalid_sample_component', 'invalid_resolution_component'],
     )
     def test_check_if_pair_is_analytic_raises_with_invalid_types(
         self, default_convolution, sample_component, resolution_component
@@ -456,7 +418,7 @@ class TestConvolution:
         # THEN EXPECT
         with pytest.raises(
             TypeError,
-            match="must be a ModelComponent",
+            match='must be a ModelComponent',
         ):
             conv._check_if_pair_is_analytic(
                 sample_component=sample_component,
@@ -464,20 +426,18 @@ class TestConvolution:
             )
 
     @pytest.mark.parametrize(
-        "analytical_component",
+        'analytical_component',
         [True, False],
-        ids=["with_analytical", "without_analytical"],
+        ids=['with_analytical', 'without_analytical'],
     )
     @pytest.mark.parametrize(
-        "numerical_component",
+        'numerical_component',
         [True, False],
-        ids=["with_numerical", "without_numerical"],
+        ids=['with_numerical', 'without_numerical'],
     )
+    @pytest.mark.parametrize('delta_component', [True, False], ids=['with_delta', 'without_delta'])
     @pytest.mark.parametrize(
-        "delta_component", [True, False], ids=["with_delta", "without_delta"]
-    )
-    @pytest.mark.parametrize(
-        "temperature", [None, 100], ids=["with_temperature", "without_temperature"]
+        'temperature', [None, 100], ids=['with_temperature', 'without_temperature']
     )
     def test_build_convolution_plan(
         self,
@@ -498,13 +458,13 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
             sample_components.append_component(
                 DampedHarmonicOscillator(
-                    display_name="DampedHarmonicOscillator",
+                    name='DampedHarmonicOscillator',
                     area=1.0,
                     center=1.0,
                     width=0.1,
@@ -513,13 +473,11 @@ class TestConvolution:
 
         if delta_component:
             sample_components.append_component(
-                DeltaFunction(display_name="DeltaFunction", area=1.0, center=0.0)
+                DeltaFunction(name='DeltaFunction', area=1.0, center=0.0)
             )
 
         # THEN
-        conv.sample_components = (
-            sample_components  # This updates the internal sample models
-        )
+        conv.sample_components = sample_components  # This updates the internal sample models
         if temperature is not None:
             conv.temperature = temperature
         conv._build_convolution_plan()
@@ -527,35 +485,26 @@ class TestConvolution:
         # EXPECT
         assert isinstance(conv._analytical_sample_components, ComponentCollection)
         if analytical_component and not temperature:
-            assert len(conv._analytical_sample_components.components) == 1
-            assert (
-                conv._analytical_sample_components.components[0].display_name
-                == "Gaussian"
-            )
+            assert len(conv._analytical_sample_components) == 1
+            assert conv._analytical_sample_components[0].name == 'Gaussian'
         else:
-            assert len(conv._analytical_sample_components.components) == 0
+            assert len(conv._analytical_sample_components) == 0
 
         assert isinstance(conv._delta_sample_components, ComponentCollection)
         if delta_component:
-            assert len(conv._delta_sample_components.components) == 1
-            assert (
-                conv._delta_sample_components.components[0].display_name
-                == "DeltaFunction"
-            )
+            assert len(conv._delta_sample_components) == 1
+            assert conv._delta_sample_components[0].name == 'DeltaFunction'
         else:
-            assert len(conv._delta_sample_components.components) == 0
+            assert len(conv._delta_sample_components) == 0
 
         assert isinstance(conv._numerical_sample_components, ComponentCollection)
 
         if not temperature:
             if numerical_component:
-                assert len(conv._numerical_sample_components.components) == 1
-                assert (
-                    conv._numerical_sample_components.components[0].display_name
-                    == "DampedHarmonicOscillator"
-                )
+                assert len(conv._numerical_sample_components) == 1
+                assert conv._numerical_sample_components[0].name == 'DampedHarmonicOscillator'
             else:
-                assert len(conv._numerical_sample_components.components) == 0
+                assert len(conv._numerical_sample_components) == 0
         else:
             # analytical and numerical components go to numerical when
             # temperature is set
@@ -564,22 +513,19 @@ class TestConvolution:
                 expected_numerical_count += 1
             if analytical_component:
                 expected_numerical_count += 1
-            assert (
-                len(conv._numerical_sample_components.components)
-                == expected_numerical_count
-            )
+            assert len(conv._numerical_sample_components) == expected_numerical_count
 
         assert conv.convolution_settings.convolution_plan_is_valid is True
 
     @pytest.mark.parametrize(
-        "analytical_component",
+        'analytical_component',
         [True, False],
-        ids=["with_analytical", "without_analytical"],
+        ids=['with_analytical', 'without_analytical'],
     )
     @pytest.mark.parametrize(
-        "numerical_component",
+        'numerical_component',
         [True, False],
-        ids=["with_numerical", "without_numerical"],
+        ids=['with_numerical', 'without_numerical'],
     )
     def test_set_convolvers(
         self,
@@ -598,13 +544,13 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(name="Gaussian", area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
             sample_components.append_component(
                 DampedHarmonicOscillator(
-                    display_name="DampedHarmonicOscillator",
+                    display_name='DampedHarmonicOscillator',
                     area=1.0,
                     center=1.0,
                     width=0.1,
@@ -643,14 +589,14 @@ class TestConvolution:
         old_delta_id = id(conv._delta_sample_components)
 
         # THEN (NOT in _invalidate_plan_on_change)
-        conv.display_name = "new_name"
+        conv.display_name = 'new_name'
 
         # EXPECT
         assert conv.convolution_settings.convolution_plan_is_valid is True
         assert id(conv._analytical_sample_components) == old_plan_id
         assert id(conv._numerical_sample_components) == old_numerical_id
         assert id(conv._delta_sample_components) == old_delta_id
-        assert conv.display_name == "new_name"
+        assert conv.display_name == 'new_name'
 
     def test_setattr_invalidates_plan_for_tracked_attribute(
         self,

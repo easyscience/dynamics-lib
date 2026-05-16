@@ -10,9 +10,7 @@ from typing import TypeVar
 from easyscience.base_classes.easy_list import EasyList
 from easyscience.base_classes.new_base import NewBase
 
-from easydynamics.base_classes.name_mixin import NameMixin
-
-ProtectedType_ = TypeVar("ProtectedType", bound=NewBase)
+ProtectedType_ = TypeVar('ProtectedType', bound=NewBase)
 
 
 class EasyDynamicsList(EasyList):
@@ -31,19 +29,18 @@ class EasyDynamicsList(EasyList):
 
         Parameters
         ----------
-        args : ProtectedType_ | list[ProtectedType_]
-            Initial items to add to the list. Can be a single item or a list of items. Each item must be an instance of one of the protected types.
-        protected_types : list[type[NewBase]] | type[NewBase] | None, optional
-            Types that are allowed in the list. Can be a single NewBase subclass or a list of them. If None, defaults to [NewBase].
-        name : str, default='MyEasyDynamicsList'
-            Name of the list.
+        *args : ProtectedType_ | list[ProtectedType_]
+            Initial items to add to the list. Can be a single item or a list of items. Each item
+            must be an instance of one of the protected types.
+        protected_types : list[type[NewBase]] | type[NewBase] | None, default=None
+            Types that are allowed in the list. Can be a single NewBase subclass or a list of them.
+            If None, defaults to [NewBase].
         display_name : str | None, default=None
             Display name of the list. If None, the name will be used.
         unique_name : str | None, default=None
             Unique name of the list. If None, a unique name will be generated.
-        kwargs : Any
+        **kwargs : Any
             Additional keyword arguments to pass to the EasyList constructor.
-
         """
 
         if display_name is None:
@@ -93,13 +90,21 @@ class EasyDynamicsList(EasyList):
     def extend(self, values: Iterable[ProtectedType_]) -> None:
         """
         Extend the list by appending elements from the iterable.
+
         Parameters
         ----------
         values : Iterable[ProtectedType_]
-            An iterable of items to append. Each item must be an instance of one of the protected types.
+            An iterable of items to append. Each item must be an instance of one of the protected
+            types.
+
+        Raises
+        ------
+        TypeError
+            If values is not an iterable or if any item in values is not an instance of one of the
+            protected types.
         """
         if not isinstance(values, Iterable):
-            raise TypeError("Values must be an iterable.")
+            raise TypeError('Values must be an iterable.')
         values = list(values)
 
         for v in values:
@@ -109,55 +114,46 @@ class EasyDynamicsList(EasyList):
             self.append(v)
 
     def pop(self, index: int | str = -1) -> ProtectedType_:
-        """Remove and return an item at the given index or name.
-
-        :param index: Index or unique_name of the item to remove
-        :return: The removed item
-        """
-        if isinstance(index, int):
-            return self._data.pop(index)
-        elif isinstance(index, str):
-            for i, item in enumerate(self._data):
-                if self._get_key(item) == index:
-                    return self._data.pop(i)
-            raise KeyError(f'No item with unique name "{index}" found')
-        else:
-            raise TypeError("Index must be an int or str")
-
-    def pop(self, index: int | str = -1) -> ProtectedType_:
         """
         Remove and return an item at a specific index or name.
 
         Parameters
         ----------
-        index : int | str
+        index : int | str, default=-1
             The index or name at which to pop the item.
 
         Returns
         -------
         ProtectedType_
             The item that was popped.
+
+        Raises
+        ------
+        TypeError
+            If index is not an int or str.
+        KeyError
+            If index is a str and no item with that name is found.
         """
         if isinstance(index, int):
             item = self[index]
             item.unlock_name()
             return self._data.pop(index)
-        elif isinstance(index, str):
+        if isinstance(index, str):
             for i, item in enumerate(self._data):
                 if self._get_key(item) == index:
                     item = self[i]
                     item.unlock_name()
                     return self._data.pop(i)
             raise KeyError(f'No item with name "{index}" found')
-        else:
-            raise TypeError("Index must be an int or str")
+        raise TypeError('Index must be an int or str')
 
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
 
     def _check_name_unique(self, obj: NewBase | Iterable[NewBase]) -> None:
-        """Check that the name of an object is unique in the list.
+        """
+        Check that the name of an object is unique in the list.
         Parameters
         ----------
         obj : NewBase | Iterable[NewBase]
@@ -174,7 +170,7 @@ class EasyDynamicsList(EasyList):
         new_names = [get_key(item) for item in items]
 
         if len(new_names) != len(set(new_names)):
-            raise ValueError(f"Duplicate names in {obj} detected.")
+            raise ValueError(f'Duplicate names in {obj} detected.')
 
         existing_names = {get_key(o) for o in self._data}
 
@@ -184,7 +180,8 @@ class EasyDynamicsList(EasyList):
             raise ValueError(f'Name "{name}" already exists in list.')
 
     def _get_key(self, obj: NewBase) -> str:
-        """Get the name of an object.
+        """
+        Get the name of an object.
 
         Parameters
         ----------
@@ -198,13 +195,13 @@ class EasyDynamicsList(EasyList):
         """
         return obj.name
 
-    def _validate_type(self, value: Any) -> None:
+    def _validate_type(self, value: object) -> None:
         """
         Validate that a value is an instance of one of the protected types.
 
         Parameters
         ----------
-        value : Any
+        value : object
             The value to validate.
 
         Raises
@@ -214,9 +211,9 @@ class EasyDynamicsList(EasyList):
         """
 
         if not isinstance(value, tuple(self._protected_types)):
-            allowed = ", ".join(t.__name__ for t in self._protected_types)
+            allowed = ', '.join(t.__name__ for t in self._protected_types)
             raise TypeError(
-                f"Value must be an instance of type: {allowed}. Got {type(value).__name__} instead."  # noqa: E501
+                f'Value must be an instance of type: {allowed}. Got {type(value).__name__} instead.'  # noqa: E501
             )
 
     # ------------------------------------------------------------------
@@ -234,7 +231,8 @@ class EasyDynamicsList(EasyList):
         idx : int | slice
             The index at which to set the item.
         value : ProtectedType_ | Iterable[ProtectedType_]
-            The item or items to set. Must be an instance of one of the protected types or an iterable of protected types.
+            The item or items to set. Must be an instance of one of the protected types or an
+            iterable of protected types.
         """
         self._check_name_unique(value)
         super().__setitem__(idx, value)

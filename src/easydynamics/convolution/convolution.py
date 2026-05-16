@@ -139,7 +139,7 @@ class Convolution(NumericalConvolutionBase):
             total += self._numerical_convolver.convolution()
 
         # Delta function components
-        if self._delta_sample_components.components:
+        if self._delta_sample_components:
             total += self._convolve_delta_functions()
 
         return total
@@ -159,7 +159,7 @@ class Convolution(NumericalConvolutionBase):
             * self._resolution_components.evaluate(
                 self.energy_with_offset.values - delta.center.value
             )
-            for delta in self._delta_sample_components.components
+            for delta in self._delta_sample_components
         )
 
     def _check_if_pair_is_analytic(
@@ -221,7 +221,7 @@ class Convolution(NumericalConvolutionBase):
         delta_sample_components = ComponentCollection()
         numerical_sample_components = ComponentCollection()
 
-        for sample_component in self._sample_components.components:
+        for sample_component in self._sample_components:
             # If delta function, put in delta sample model and go to the
             # next component
             if isinstance(sample_component, DeltaFunction):
@@ -242,7 +242,7 @@ class Convolution(NumericalConvolutionBase):
             # this sample component
             pair_is_analytic = [
                 self._check_if_pair_is_analytic(sample_component, resolution_component)
-                for resolution_component in self._resolution_components.components
+                for resolution_component in self._resolution_components
             ]
             # If all resolution components can be convolved analytically
             # with this sample component, add it to analytical
@@ -268,7 +268,7 @@ class Convolution(NumericalConvolutionBase):
         convolution method.
         """
 
-        if self._analytical_sample_components.components:
+        if self._analytical_sample_components:
             self._analytical_convolver = AnalyticalConvolution(
                 energy=self.energy,
                 energy_offset=self.energy_offset,
@@ -278,7 +278,7 @@ class Convolution(NumericalConvolutionBase):
         else:
             self._analytical_convolver = None
 
-        if self._numerical_sample_components.components:
+        if self._numerical_sample_components:
             self._numerical_convolver = NumericalConvolution(
                 energy=self.energy,
                 energy_offset=self.energy_offset,

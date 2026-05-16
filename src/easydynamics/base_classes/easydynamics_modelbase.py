@@ -13,11 +13,10 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
 
     def __init__(
         self,
-        unit: str | sc.Unit = "meV",
-        name: str = "MyEasyDynamicsModel",
+        unit: str | sc.Unit = 'meV',
+        name: str = 'MyEasyDynamicsModel',
         display_name: str | None = None,
         unique_name: str | None = None,
-        **kwargs,
     ) -> None:
         """
         Initialize the EasyDynamicsModelBase.
@@ -38,6 +37,10 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         TypeError
             If name is not a string.
         """
+
+        if not isinstance(name, str):
+            raise TypeError(f'Name must be a string, got {type(name)}')
+
         if display_name is None:
             display_name = name
 
@@ -78,6 +81,6 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
             Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
-            f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )
