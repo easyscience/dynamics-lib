@@ -2421,7 +2421,7 @@ narrow.</p>
             <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
         <span class="c1"># Delta function components</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="p">:</span>
             <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolve_delta_functions</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">total</span>
@@ -2441,7 +2441,7 @@ narrow.</p>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">energy_with_offset</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">delta</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">value</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">delta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span>
+            <span class="k">for</span> <span class="n">delta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_if_pair_is_analytic</span><span class="p">(</span>
@@ -2503,7 +2503,7 @@ narrow.</p>
         <span class="n">delta_sample_components</span> <span class="o">=</span> <span class="n">ComponentCollection</span><span class="p">()</span>
         <span class="n">numerical_sample_components</span> <span class="o">=</span> <span class="n">ComponentCollection</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span><span class="p">:</span>
             <span class="c1"># If delta function, put in delta sample model and go to the</span>
             <span class="c1"># next component</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">DeltaFunction</span><span class="p">):</span>
@@ -2524,7 +2524,7 @@ narrow.</p>
             <span class="c1"># this sample component</span>
             <span class="n">pair_is_analytic</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_check_if_pair_is_analytic</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">resolution_component</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">components</span>
+                <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span>
             <span class="p">]</span>
             <span class="c1"># If all resolution components can be convolved analytically</span>
             <span class="c1"># with this sample component, add it to analytical</span>
@@ -2550,7 +2550,7 @@ narrow.</p>
 <span class="sd">        convolution method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_convolver</span> <span class="o">=</span> <span class="n">AnalyticalConvolution</span><span class="p">(</span>
                 <span class="n">energy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
                 <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -2560,7 +2560,7 @@ narrow.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_convolver</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span> <span class="o">=</span> <span class="n">NumericalConvolution</span><span class="p">(</span>
                 <span class="n">energy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
                 <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -3088,7 +3088,7 @@ convolutions for the remaining components.</p>
         <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
     <span class="c1"># Delta function components</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="p">:</span>
         <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolve_delta_functions</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">total</span>
@@ -3803,10 +3803,7 @@ and Voigt profiles.</p>
 <span class="normal">527</span>
 <span class="normal">528</span>
 <span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
+<span class="normal">530</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AnalyticalConvolution</span><span class="p">(</span><span class="n">ConvolutionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analytical convolution of a ModelComponent or ComponentCollection with a ResolutionModel.</span>
 
@@ -3882,15 +3879,12 @@ and Voigt profiles.</p>
 <span class="sd">            self.energy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
-        <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
-
         <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="n">sample_components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">:</span>
             <span class="c1"># Go through resolution components,</span>
             <span class="c1"># adding analytical contributions</span>
-            <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="n">resolution_components</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">:</span>
                 <span class="n">contrib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolute_analytic_pair</span><span class="p">(</span>
                     <span class="n">sample_component</span><span class="o">=</span><span class="n">sample_component</span><span class="p">,</span>
                     <span class="n">resolution_component</span><span class="o">=</span><span class="n">resolution_component</span><span class="p">,</span>
@@ -4663,10 +4657,7 @@ self.energy.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convolution</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4683,15 +4674,12 @@ self.energy.</p>
 <span class="sd">        self.energy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="o">.</span><span class="n">components</span>
-    <span class="n">resolution_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="o">.</span><span class="n">components</span>
-
     <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="n">sample_components</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_components</span><span class="p">:</span>
         <span class="c1"># Go through resolution components,</span>
         <span class="c1"># adding analytical contributions</span>
-        <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="n">resolution_components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution_components</span><span class="p">:</span>
             <span class="n">contrib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolute_analytic_pair</span><span class="p">(</span>
                 <span class="n">sample_component</span><span class="o">=</span><span class="n">sample_component</span><span class="p">,</span>
                 <span class="n">resolution_component</span><span class="o">=</span><span class="n">resolution_component</span><span class="p">,</span>
@@ -5203,7 +5191,7 @@ narrow.</p>
             <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
         <span class="c1"># Delta function components</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="p">:</span>
             <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolve_delta_functions</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">total</span>
@@ -5223,7 +5211,7 @@ narrow.</p>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">energy_with_offset</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">delta</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">value</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">delta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span>
+            <span class="k">for</span> <span class="n">delta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_if_pair_is_analytic</span><span class="p">(</span>
@@ -5285,7 +5273,7 @@ narrow.</p>
         <span class="n">delta_sample_components</span> <span class="o">=</span> <span class="n">ComponentCollection</span><span class="p">()</span>
         <span class="n">numerical_sample_components</span> <span class="o">=</span> <span class="n">ComponentCollection</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sample_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_components</span><span class="p">:</span>
             <span class="c1"># If delta function, put in delta sample model and go to the</span>
             <span class="c1"># next component</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">DeltaFunction</span><span class="p">):</span>
@@ -5306,7 +5294,7 @@ narrow.</p>
             <span class="c1"># this sample component</span>
             <span class="n">pair_is_analytic</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_check_if_pair_is_analytic</span><span class="p">(</span><span class="n">sample_component</span><span class="p">,</span> <span class="n">resolution_component</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span><span class="o">.</span><span class="n">components</span>
+                <span class="k">for</span> <span class="n">resolution_component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_components</span>
             <span class="p">]</span>
             <span class="c1"># If all resolution components can be convolved analytically</span>
             <span class="c1"># with this sample component, add it to analytical</span>
@@ -5332,7 +5320,7 @@ narrow.</p>
 <span class="sd">        convolution method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_sample_components</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_convolver</span> <span class="o">=</span> <span class="n">AnalyticalConvolution</span><span class="p">(</span>
                 <span class="n">energy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
                 <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -5342,7 +5330,7 @@ narrow.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_analytical_convolver</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_sample_components</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span> <span class="o">=</span> <span class="n">NumericalConvolution</span><span class="p">(</span>
                 <span class="n">energy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>
                 <span class="n">energy_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_offset</span><span class="p">,</span>
@@ -5870,7 +5858,7 @@ convolutions for the remaining components.</p>
         <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
 
     <span class="c1"># Delta function components</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_sample_components</span><span class="p">:</span>
         <span class="n">total</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolve_delta_functions</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">total</span>
@@ -9572,7 +9560,7 @@ class has no convolution functionality.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle ComponentCollection or ModelComponent</span>
-        <span class="n">components</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">components</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">model</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ComponentCollection</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">):</span>

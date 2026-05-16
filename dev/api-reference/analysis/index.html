@@ -13368,9 +13368,7 @@ for all Q values.</p>
 <span class="normal">918</span>
 <span class="normal">919</span>
 <span class="normal">920</span>
-<span class="normal">921</span>
-<span class="normal">922</span>
-<span class="normal">923</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="normal">921</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Analysis1d</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</span>
 
@@ -14213,13 +14211,11 @@ for all Q values.</p>
 <span class="sd">            A dictionary of component names to their corresponding sc.DataArrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">scipp_arrays</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span>
-            <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">components</span>
+        <span class="n">sample_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span><span class="p">)</span>
 
         <span class="n">background_components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_model</span><span class="o">.</span><span class="n">background_model</span><span class="o">.</span><span class="n">get_component_collection</span><span class="p">(</span>
             <span class="n">Q_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Q_index</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">components</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masked_energy</span>
