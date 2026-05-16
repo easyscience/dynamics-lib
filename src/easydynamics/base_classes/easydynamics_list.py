@@ -4,13 +4,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any
 from typing import TypeVar
 
 from easyscience.base_classes.easy_list import EasyList
 from easyscience.base_classes.new_base import NewBase
 
-ProtectedType_ = TypeVar('ProtectedType', bound=NewBase)
+ProtectedType_ = TypeVar("ProtectedType", bound=NewBase)
 
 
 class EasyDynamicsList(EasyList):
@@ -22,7 +21,7 @@ class EasyDynamicsList(EasyList):
         protected_types: list[type[NewBase]] | type[NewBase] | None = None,
         display_name: str | None = None,
         unique_name: str | None = None,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: object,
     ) -> None:
         """
         Initialize the EasyDynamicsList.
@@ -39,7 +38,7 @@ class EasyDynamicsList(EasyList):
             Display name of the list. If None, the name will be used.
         unique_name : str | None, default=None
             Unique name of the list. If None, a unique name will be generated.
-        **kwargs : Any
+        **kwargs : object
             Additional keyword arguments to pass to the EasyList constructor.
         """
 
@@ -104,7 +103,7 @@ class EasyDynamicsList(EasyList):
             protected types.
         """
         if not isinstance(values, Iterable):
-            raise TypeError('Values must be an iterable.')
+            raise TypeError("Values must be an iterable.")
         values = list(values)
 
         for v in values:
@@ -145,7 +144,7 @@ class EasyDynamicsList(EasyList):
                     item.unlock_name()
                     return self._data.pop(i)
             raise KeyError(f'No item with name "{index}" found')
-        raise TypeError('Index must be an int or str')
+        raise TypeError("Index must be an int or str")
 
     # ------------------------------------------------------------------
     # Private methods
@@ -170,7 +169,7 @@ class EasyDynamicsList(EasyList):
         new_names = [get_key(item) for item in items]
 
         if len(new_names) != len(set(new_names)):
-            raise ValueError(f'Duplicate names in {obj} detected.')
+            raise ValueError(f"Duplicate names in {obj} detected.")
 
         existing_names = {get_key(o) for o in self._data}
 
@@ -211,9 +210,9 @@ class EasyDynamicsList(EasyList):
         """
 
         if not isinstance(value, tuple(self._protected_types)):
-            allowed = ', '.join(t.__name__ for t in self._protected_types)
+            allowed = ", ".join(t.__name__ for t in self._protected_types)
             raise TypeError(
-                f'Value must be an instance of type: {allowed}. Got {type(value).__name__} instead.'  # noqa: E501
+                f"Value must be an instance of type: {allowed}. Got {type(value).__name__} instead."  # noqa: E501
             )
 
     # ------------------------------------------------------------------
