@@ -27,9 +27,9 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         ----------
         *args : object
             Positional arguments to pass to the parent class.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the model.
-        name : str, default="MyEasyDynamicsModel"
+        name : str, default='MyEasyDynamicsModel'
             Name of the model.
         display_name : str | None, default=None
             Display name of the model. If None, the name will be used.

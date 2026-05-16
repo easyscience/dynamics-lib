@@ -25,7 +25,7 @@ class EasyDynamicsBase(NameMixin, NewBase):
         ----------
         *args : object
             Positional arguments to pass to the parent class.
-        name : str, default="MyEasyDynamicsModel"
+        name : str, default='MyEasyDynamicsModel'
             Name of the model.
         display_name : str | None, default=None
             Display name of the model. If None, the name will be used.
