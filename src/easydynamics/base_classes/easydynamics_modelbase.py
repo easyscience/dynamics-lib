@@ -14,8 +14,8 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
     def __init__(
         self,
         *args: object,
-        unit: str | sc.Unit = "meV",
-        name: str = "MyEasyDynamicsModel",
+        unit: str | sc.Unit = 'meV',
+        name: str = 'MyEasyDynamicsModel',
         display_name: str | None = None,
         unique_name: str | None = None,
         **kwargs: object,
@@ -25,14 +25,18 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
 
         Parameters
         ----------
-        unit : str | sc.Unit, default='meV'
+        *args : object
+            Positional arguments to pass to the parent class.
+        unit : str | sc.Unit, default="meV"
             Unit of the model.
-        name : str, default='MyEasyDynamicsModel'
+        name : str, default="MyEasyDynamicsModel"
             Name of the model.
         display_name : str | None, default=None
             Display name of the model. If None, the name will be used.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
+        **kwargs : object
+             Additional keyword arguments to pass to the parent class.
 
         Raises
         ------
@@ -41,7 +45,7 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         """
 
         if not isinstance(name, str):
-            raise TypeError(f"Name must be a string, got {type(name)}")
+            raise TypeError(f'Name must be a string, got {type(name)}')
 
         if display_name is None:
             display_name = name
@@ -85,6 +89,6 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
             Always raised to indicate that the unit is read-only.
         """
         raise AttributeError(
-            f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )

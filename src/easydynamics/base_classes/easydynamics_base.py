@@ -13,7 +13,7 @@ class EasyDynamicsBase(NameMixin, NewBase):
     def __init__(
         self,
         *args: object,
-        name: str = "MyEasyDynamicsModel",
+        name: str = 'MyEasyDynamicsModel',
         display_name: str | None = None,
         unique_name: str | None = None,
         **kwargs: object,
@@ -23,7 +23,9 @@ class EasyDynamicsBase(NameMixin, NewBase):
 
         Parameters
         ----------
-        name : str, default='MyEasyDynamicsModel'
+        *args : object
+            Positional arguments to pass to the parent class.
+        name : str, default="MyEasyDynamicsModel"
             Name of the model.
         display_name : str | None, default=None
             Display name of the model. If None, the name will be used.
@@ -39,7 +41,7 @@ class EasyDynamicsBase(NameMixin, NewBase):
         """
 
         if not isinstance(name, str):
-            raise TypeError(f"Name must be a string, got {type(name)}")
+            raise TypeError(f'Name must be a string, got {type(name)}')
 
         if display_name is None:
             display_name = name
