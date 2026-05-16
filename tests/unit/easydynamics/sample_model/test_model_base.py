@@ -19,7 +19,7 @@ class TestModelBase:
     def model_base(self):
         component1 = Gaussian(
             name="TestGaussian1Name",
-            name="TestGaussian1",
+            display_name="TestGaussian1",
             area=1.0,
             center=0.0,
             width=1.0,
@@ -101,11 +101,11 @@ class TestModelBase:
         assert len(model_base._component_collections) == len(model_base.Q)
         for collection in model_base._component_collections:
             assert isinstance(collection, ComponentCollection)
-            assert len(collection.components) == 2
-            assert isinstance(collection.components[0], Gaussian)
-            assert collection.components[0].display_name == "TestGaussian1"
-            assert isinstance(collection.components[1], Lorentzian)
-            assert collection.components[1].display_name == "TestLorentzian1"
+            assert len(collection) == 2
+            assert isinstance(collection[0], Gaussian)
+            assert collection[0].display_name == "TestGaussian1"
+            assert isinstance(collection[1], Lorentzian)
+            assert collection[1].display_name == "TestLorentzian1"
 
     def test_fix_free_all_parameters(self, model_base):
         # WHEN
@@ -200,7 +200,7 @@ class TestModelBase:
 
     def test_append_and_remove_and_clear_component(self, model_base):
         # WHEN
-        new_component = Gaussian(unique_name="NewGaussian")
+        new_component = Gaussian(name="NewGaussian")
 
         # THEN
         model_base.append_component(new_component)
@@ -275,7 +275,7 @@ class TestModelBase:
 
     def test_components_setter(self, model_base):
         # WHEN
-        new_component = Lorentzian(unique_name="NewLorentzian")
+        new_component = Lorentzian(name="NewLorentzian")
         model_base.components = new_component
 
         # THEN / EXPECT
@@ -331,8 +331,10 @@ class TestModelBase:
 
     def test_Q_setter_with_none(self, model_base):
         # WHEN
-        model_base.Q = None
         old_Q = model_base.Q
+
+        # THEN
+        model_base.Q = None
 
         # THEN / EXPECT
         assert model_base.Q is old_Q
@@ -350,9 +352,11 @@ class TestModelBase:
 
     def test_clear_Q(self, model_base):
         # WHEN
+        #
+        # THEN
         model_base.clear_Q(confirm=True)
 
-        # THEN / EXPECT
+        # EXPECT
         assert model_base.Q is None
 
     def test_clear_Q_raises_without_confirm(self, model_base):
@@ -368,9 +372,7 @@ class TestModelBase:
 
         # EXPECT
         for collection in model_base._component_collections:
-            total_area = sum(
-                component.area.value for component in collection.components
-            )
+            total_area = sum(component.area.value for component in collection)
             assert total_area == pytest.approx(1.0)
 
     def test_repr(self, model_base):

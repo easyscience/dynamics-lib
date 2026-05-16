@@ -8,7 +8,7 @@ from easydynamics.base_classes.name_mixin import NameMixin
 from easydynamics.utils.utils import _validate_unit
 
 
-class EasyDynamicsModelBase(ModelBase, NameMixin):
+class EasyDynamicsModelBase(NameMixin, ModelBase):
     """Base class for all EasyDynamics models."""
 
     def __init__(
@@ -17,6 +17,7 @@ class EasyDynamicsModelBase(ModelBase, NameMixin):
         name: str = "MyEasyDynamicsModel",
         display_name: str | None = None,
         unique_name: str | None = None,
+        **kwargs,
     ) -> None:
         """
         Initialize the EasyDynamicsModelBase.
@@ -37,12 +38,15 @@ class EasyDynamicsModelBase(ModelBase, NameMixin):
         TypeError
             If name is not a string.
         """
-        NameMixin.__init__(self, name=name)
-
         if display_name is None:
-            display_name = self.name
+            display_name = name
 
-        ModelBase.__init__(self, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
+
         self._unit = _validate_unit(unit)
 
     @property
@@ -77,35 +81,3 @@ class EasyDynamicsModelBase(ModelBase, NameMixin):
             f"Unit is read-only. Use convert_unit to change the unit between allowed types "
             f"or create a new {self.__class__.__name__} with the desired unit."
         )
-
-    @property
-    def name(self) -> str:
-        """
-        Get the name of the model.
-
-        Returns
-        -------
-        str
-            The name of the model.
-        """
-        return self._name
-
-    @name.setter
-    def name(self, name_str: str) -> None:
-        """
-        Set the name of the model.
-
-        Parameters
-        ----------
-        name_str : str
-            The new name to set.
-
-        Raises
-        ------
-        TypeError
-            If name_str is not a string.
-        """
-
-        if not isinstance(name_str, str):
-            raise TypeError("Name must be a string.")
-        self._name = name_str

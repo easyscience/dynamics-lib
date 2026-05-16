@@ -15,14 +15,13 @@ from easydynamics.base_classes.name_mixin import NameMixin
 ProtectedType_ = TypeVar("ProtectedType", bound=NewBase)
 
 
-class EasyDynamicsList(EasyList, NameMixin):
+class EasyDynamicsList(EasyList):
     """Base class for all EasyDynamics lists."""
 
     def __init__(
         self,
         *args: ProtectedType_ | list[ProtectedType_],
         protected_types: list[type[NewBase]] | type[NewBase] | None = None,
-        name: str = "MyEasyDynamicsList",
         display_name: str | None = None,
         unique_name: str | None = None,
         **kwargs: Any,  # noqa: ANN401
@@ -46,13 +45,11 @@ class EasyDynamicsList(EasyList, NameMixin):
             Additional keyword arguments to pass to the EasyList constructor.
 
         """
-        NameMixin.__init__(self, name=name)
 
         if display_name is None:
-            display_name = self.name
+            display_name = unique_name
 
-        EasyList.__init__(
-            self,
+        super().__init__(
             *args,
             protected_types=protected_types,
             display_name=display_name,
@@ -111,25 +108,49 @@ class EasyDynamicsList(EasyList, NameMixin):
         for v in values:
             self.append(v)
 
-    def pop(self, idx: int) -> ProtectedType_:
+    def pop(self, index: int | str = -1) -> ProtectedType_:
+        """Remove and return an item at the given index or name.
+
+        :param index: Index or unique_name of the item to remove
+        :return: The removed item
         """
-        Remove and return an item at a specific index.
+        if isinstance(index, int):
+            return self._data.pop(index)
+        elif isinstance(index, str):
+            for i, item in enumerate(self._data):
+                if self._get_key(item) == index:
+                    return self._data.pop(i)
+            raise KeyError(f'No item with unique name "{index}" found')
+        else:
+            raise TypeError("Index must be an int or str")
+
+    def pop(self, index: int | str = -1) -> ProtectedType_:
+        """
+        Remove and return an item at a specific index or name.
 
         Parameters
         ----------
-        idx : int
-            The index at which to pop the item.
+        index : int | str
+            The index or name at which to pop the item.
 
         Returns
         -------
         ProtectedType_
             The item that was popped.
         """
-        if not isinstance(idx, int):
-            raise TypeError("Index must be an integer.")
-        item = self[idx]
-        item.unlock_name()
-        return super().pop(idx)
+        if isinstance(index, int):
+            item = self[index]
+            item.unlock_name()
+            return self._data.pop(index)
+        elif isinstance(index, str):
+            for i, item in enumerate(self._data):
+                if self._get_key(item) == index:
+                    item = self[i]
+                    item.unlock_name()
+                    return self._data.pop(i)
+            raise KeyError(f'No item with name "{index}" found')
+        else:
+            raise TypeError("Index must be an int or str")
 
     # ------------------------------------------------------------------
     # Private methods

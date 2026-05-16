@@ -4,9 +4,10 @@
 from easyscience.base_classes.new_base import NewBase
 
 from easydynamics.base_classes.name_mixin import NameMixin
+from typing import Any
 
 
-class EasyDynamicsBase(NewBase, NameMixin):
+class EasyDynamicsBase(NameMixin, NewBase):
     """Base class for all EasyDynamics classes."""
 
     def __init__(
@@ -14,6 +15,7 @@ class EasyDynamicsBase(NewBase, NameMixin):
         name: str = "MyEasyDynamicsModel",
         display_name: str | None = None,
         unique_name: str | None = None,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """
         Initialize the EasyDynamicsBase.
@@ -32,9 +34,13 @@ class EasyDynamicsBase(NewBase, NameMixin):
         TypeError
             If name is not a string.
         """
-        NameMixin.__init__(self, name=name)
 
         if display_name is None:
-            display_name = self.name
+            display_name = name
 
-        NewBase.__init__(self, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+            **kwargs,
+        )

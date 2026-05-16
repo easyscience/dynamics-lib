@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import importlib
 import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
+from easyscience.io.serializer_base import SerializerBase
 from easyscience.variable import DescriptorBase
 from easyscience.variable import Parameter
 
@@ -53,32 +55,29 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         TypeError
             If unit is not a string or sc.Unit, or if components is not a list of ModelComponent.
         """
+        if components is None:
+            components = []
+        if isinstance(components, ModelComponent):
+            components = [components]
+        elif not isinstance(components, list):
+            raise TypeError(
+                f"components must be a ModelComponent or a list of ModelComponent, got {type(components).__name__} instead."  # noqa: E501
+            )
+        for comp in components:
+            if not isinstance(comp, ModelComponent):
+                raise TypeError(
+                    f"All items in components must be instances of ModelComponent, got {type(comp).__name__} instead."  # noqa: E501
+                )
+
+        EasyDynamicsList.__init__(
+            self,
+            *components,
+            protected_types=ModelComponent,
+        )
 
         EasyDynamicsModelBase.__init__(
             self,
             unit=unit,
-            name=name,
-            display_name=display_name,
-            unique_name=unique_name,
-        )
-
-        if components is not None:
-            if isinstance(components, ModelComponent):
-                components = [components]
-            elif not isinstance(components, list):
-                raise TypeError(
-                    f"components must be a ModelComponent or a list of ModelComponent, got {type(components).__name__} instead."  # noqa: E501
-                )
-            for comp in components:
-                if not isinstance(comp, ModelComponent):
-                    raise TypeError(
-                        f"All items in components must be instances of ModelComponent, got {type(comp).__name__} instead."  # noqa: E501
-                    )
-
-        EasyDynamicsList.__init__(
-            self,
-            *(components or []),
-            protected_types=ModelComponent,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
@@ -359,3 +358,42 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         comp_names = ", ".join(c.name for c in self) or "No components"
 
         return f"<ComponentCollection name='{self.name}' | Components: {comp_names}>"
+
+    def to_dict(self) -> dict:
+        return {
+            "@module": self.__class__.__module__,
+            "@class": self.__class__.__name__,
+            "unit": str(self.unit),
+            "name": self.name,
+            "display_name": self.display_name,
+            "components": [c.to_dict() for c in self._data],
+        }
+
+    @classmethod
+    def from_dict(cls, obj_dict: dict) -> ComponentCollection:
+
+        def deserialise_component(d):
+            module = importlib.import_module(d["@module"])
+            cls = getattr(module, d["@class"])
+            return cls.from_dict(d)
+
+        components = [deserialise_component(c) for c in obj_dict.get("components", [])]
+
+        return cls(
+            components=components,
+            unit=obj_dict.get("unit", "meV"),
+            name=obj_dict.get("name", "ComponentCollection"),
+            display_name=obj_dict.get("display_name"),
+        )
+
+    def __copy__(self) -> ComponentCollection:
+        """
+        Create a deep copy of the ComponentCollection.
+
+        Returns
+        -------
+        ComponentCollection
+            A deep copy of the ComponentCollection.
+        """
+
+        return self.from_dict(self.to_dict())

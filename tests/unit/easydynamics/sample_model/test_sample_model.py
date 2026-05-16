@@ -22,16 +22,16 @@ class TestSampleModel:
     @pytest.fixture
     def sample_model(self):
         component1 = Gaussian(
-            name="TestGaussian1",
-            unique_name="TestGaussian1",
+            name="TestGaussian1Name",
+            display_name="TestGaussian1Display",
             area=1.0,
             center=0.0,
             width=1.0,
             unit="meV",
         )
         component2 = Lorentzian(
-            display_name="TestLorentzian1",
-            unique_name="TestLorentzian1",
+            name="TestLorentzian1Name",
+            display_name="TestLorentzian1Display",
             area=2.0,
             center=1.0,
             width=0.5,
@@ -42,7 +42,7 @@ class TestSampleModel:
         component_collection.append_component(component2)
 
         diffusion_model = BrownianTranslationalDiffusion(
-            display_name="DiffusionModel", unique_name="DiffusionModel"
+            display_name="DiffusionModelDisplay", name="DiffusionModelName"
         )
 
         return SampleModel(

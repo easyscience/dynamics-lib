@@ -2,12 +2,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
+from typing import Any
+
+
 class NameMixin:
     """Mixin class to add name functionality to EasyDynamics classes."""
 
     def __init__(
         self,
+        *args: Any,
         name: str = "MyEasyDynamicsModel",
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """
         Initialize the NameMixin.
@@ -22,6 +27,8 @@ class NameMixin:
         TypeError
             If name is not a string.
         """
+
+        super().__init__(*args, **kwargs)
         if not isinstance(name, str):
             raise TypeError("Name must be a string.")
         self._name = name
