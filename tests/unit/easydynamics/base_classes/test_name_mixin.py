@@ -108,3 +108,14 @@ class TestNameMixin:
 
         # EXPECT
         assert name_mixin.is_name_locked() is False
+
+    def test_name_setter_raises_when_locked(self, name_mixin):
+        """Test that setting the name while it is locked raises an AttributeError."""
+        # WHEN THEN EXPECT
+        name_mixin.lock_name()
+
+        # THEN EXPECT
+        with pytest.raises(
+            AttributeError, match=r"Cannot change name while object is in a list."
+        ):
+            name_mixin.name = "AnotherName"
