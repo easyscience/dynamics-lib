@@ -8,7 +8,7 @@ class NameMixin:
     def __init__(
         self,
         *args: object,
-        name: str = 'MyEasyDynamicsModel',
+        name: str = "MyEasyDynamicsModel",
         **kwargs: object,
     ) -> None:
         """
@@ -31,7 +31,7 @@ class NameMixin:
 
         super().__init__(*args, **kwargs)
         if not isinstance(name, str):
-            raise TypeError('Name must be a string.')
+            raise TypeError("Name must be a string.")
         self._name = name
         self._name_lock_count = 0
 
@@ -65,11 +65,11 @@ class NameMixin:
             If name_str is not a string.
         """
 
-        if self._name_lock_count > 0:
-            raise AttributeError('Cannot change name while object is in a list.')
+        if self.is_name_locked():
+            raise AttributeError("Cannot change name while object is in a list.")
 
         if not isinstance(name_str, str):
-            raise TypeError('Name must be a string.')
+            raise TypeError("Name must be a string.")
         self._name = name_str
 
     def lock_name(self) -> None:
@@ -86,6 +86,17 @@ class NameMixin:
             If the name lock count is already zero.
         """
         if self._name_lock_count == 0:
-            raise RuntimeError('Name lock count is already zero.')
+            raise RuntimeError("Name lock count is already zero.")
 
         self._name_lock_count -= 1
+
+    def is_name_locked(self) -> bool:
+        """
+        Check if the name is currently locked.
+
+        Returns
+        -------
+        bool
+            True if the name is locked, False otherwise.
+        """
+        return self._name_lock_count > 0
