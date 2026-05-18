@@ -103,11 +103,11 @@ class TestComponentCollection:
         # EXPECT
         assert component_collection[-1] is component
 
-    def test_append_existing_component_raises(self, component_collection):
+    def test_append_existing_component_warns(self, component_collection):
         # WHEN THEN
         component = component_collection[0]
         # EXPECT
-        with pytest.raises(ValueError, match='already exists in list'):
+        with pytest.warns(UserWarning, match='it will be ignored'):
             component_collection.append_component(component)
 
     def test_append_invalid_component_raises(self, component_collection):
