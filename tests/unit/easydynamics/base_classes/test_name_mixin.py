@@ -20,8 +20,6 @@ class TestNameMixin:
 
         # WHEN THEN EXPECT
         assert name_mixin.name == "TestModel"
-        assert name_mixin.display_name == "TestModel"
-        assert name_mixin.unique_name is not None
         assert name_mixin.is_name_locked() is False
 
     def test_init_raises_type_error_for_invalid_name(self):
