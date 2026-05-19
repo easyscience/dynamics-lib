@@ -29,20 +29,18 @@ class TestConvolution:
         sample_components = ComponentCollection(display_name='ComponentCollection')
 
         sample_components.append_component(
-            Gaussian(display_name='Gaussian1', area=2.0, center=0.1, width=0.4)
+            Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
         )
 
         sample_components.append_component(
-            DampedHarmonicOscillator(display_name='DHO1', area=2.0, center=1.0, width=0.1)
+            DampedHarmonicOscillator(name='DHO1', area=2.0, center=1.0, width=0.1)
         )
 
-        sample_components.append_component(
-            DeltaFunction(display_name='Delta1', area=2.0, center=0.3)
-        )
+        sample_components.append_component(DeltaFunction(name='Delta1', area=2.0, center=0.3))
 
-        resolution_components = ComponentCollection(display_name='ResolutionModel')
+        resolution_components = ComponentCollection(name='ResolutionModel')
         resolution_components.append_component(
-            Gaussian(display_name='GaussianRes', area=3.0, center=0.2, width=0.5)
+            Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
         )
 
         return Convolution(
@@ -54,11 +52,9 @@ class TestConvolution:
     @pytest.fixture
     def convolution_with_components(self):
         energy = np.linspace(-10, 10, 5001)
-        sample_components = Gaussian(display_name='Gaussian1', area=2.0, center=0.1, width=0.4)
+        sample_components = Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
 
-        resolution_components = Gaussian(
-            display_name='GaussianRes', area=3.0, center=0.2, width=0.5
-        )
+        resolution_components = Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
 
         return Convolution(
             energy=energy,
@@ -83,19 +79,19 @@ class TestConvolution:
 
         assert isinstance(default_convolution._analytical_sample_components, ComponentCollection)
         assert (
-            default_convolution._analytical_sample_components.components[0]
-            is default_convolution.sample_components.components[0]
+            default_convolution._analytical_sample_components[0]
+            is default_convolution.sample_components[0]
         )
         assert isinstance(default_convolution._numerical_sample_components, ComponentCollection)
         assert (
-            default_convolution._numerical_sample_components.components[0]
-            is default_convolution.sample_components.components[1]
+            default_convolution._numerical_sample_components[0]
+            is default_convolution.sample_components[1]
         )
 
         assert isinstance(default_convolution._delta_sample_components, ComponentCollection)
         assert (
-            default_convolution._delta_sample_components.components[0]
-            is default_convolution.sample_components.components[2]
+            default_convolution._delta_sample_components[0]
+            is default_convolution.sample_components[2]
         )
         assert default_convolution.convolution_settings.convolution_plan_is_valid is True
         assert default_convolution._reactions_enabled is True
@@ -123,8 +119,8 @@ class TestConvolution:
             ComponentCollection,
         )
         assert (
-            convolution_with_components._analytical_sample_components.components[0]
-            is convolution_with_components.sample_components.components[0]
+            convolution_with_components._analytical_sample_components[0]
+            is convolution_with_components.sample_components[0]
         )
         assert isinstance(
             convolution_with_components._numerical_sample_components,
@@ -228,7 +224,7 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(display_name='Gaussian', area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
@@ -313,7 +309,7 @@ class TestConvolution:
         expected_center = 0.3 + 0.2  # Delta center + Resolution center
         expected_width = 0.5  # Resolution width
         expected_values = Gaussian(
-            display_name='ExpectedGaussian',
+            name='ExpectedGaussian',
             area=expected_area,
             center=expected_center,
             width=expected_width,
@@ -323,7 +319,7 @@ class TestConvolution:
 
     # List of analytic functions
     analytic_functions: ClassVar[list[object]] = [
-        Gaussian(display_name='G', area=1.0, center=0.0, width=0.1),
+        Gaussian(name='G', area=1.0, center=0.0, width=0.1),
         Lorentzian(display_name='L', area=1.0, center=0.0, width=0.1),
         Voigt(
             display_name='V',
@@ -382,7 +378,7 @@ class TestConvolution:
         """
         # WHEN
         conv = default_convolution
-        sample_component = Gaussian(display_name='G', area=1.0, center=0.0, width=0.1)
+        sample_component = Gaussian(name='G', area=1.0, center=0.0, width=0.1)
         resolution_component = DeltaFunction(display_name='Delta', area=1.0, center=0.0)
 
         # THEN EXPECT
@@ -400,10 +396,10 @@ class TestConvolution:
         [
             (
                 'NotAModelComponent',
-                Gaussian(display_name='G', area=1.0, center=0.0, width=0.1),
+                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
             ),
             (
-                Gaussian(display_name='G', area=1.0, center=0.0, width=0.1),
+                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
                 'NotAModelComponent',
             ),
         ],
@@ -462,13 +458,13 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(display_name='Gaussian', area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:
             sample_components.append_component(
                 DampedHarmonicOscillator(
-                    display_name='DampedHarmonicOscillator',
+                    name='DampedHarmonicOscillator',
                     area=1.0,
                     center=1.0,
                     width=0.1,
@@ -477,7 +473,7 @@ class TestConvolution:
 
         if delta_component:
             sample_components.append_component(
-                DeltaFunction(display_name='DeltaFunction', area=1.0, center=0.0)
+                DeltaFunction(name='DeltaFunction', area=1.0, center=0.0)
             )
 
         # THEN
@@ -489,29 +485,26 @@ class TestConvolution:
         # EXPECT
         assert isinstance(conv._analytical_sample_components, ComponentCollection)
         if analytical_component and not temperature:
-            assert len(conv._analytical_sample_components.components) == 1
-            assert conv._analytical_sample_components.components[0].display_name == 'Gaussian'
+            assert len(conv._analytical_sample_components) == 1
+            assert conv._analytical_sample_components[0].name == 'Gaussian'
         else:
-            assert len(conv._analytical_sample_components.components) == 0
+            assert len(conv._analytical_sample_components) == 0
 
         assert isinstance(conv._delta_sample_components, ComponentCollection)
         if delta_component:
-            assert len(conv._delta_sample_components.components) == 1
-            assert conv._delta_sample_components.components[0].display_name == 'DeltaFunction'
+            assert len(conv._delta_sample_components) == 1
+            assert conv._delta_sample_components[0].name == 'DeltaFunction'
         else:
-            assert len(conv._delta_sample_components.components) == 0
+            assert len(conv._delta_sample_components) == 0
 
         assert isinstance(conv._numerical_sample_components, ComponentCollection)
 
         if not temperature:
             if numerical_component:
-                assert len(conv._numerical_sample_components.components) == 1
-                assert (
-                    conv._numerical_sample_components.components[0].display_name
-                    == 'DampedHarmonicOscillator'
-                )
+                assert len(conv._numerical_sample_components) == 1
+                assert conv._numerical_sample_components[0].name == 'DampedHarmonicOscillator'
             else:
-                assert len(conv._numerical_sample_components.components) == 0
+                assert len(conv._numerical_sample_components) == 0
         else:
             # analytical and numerical components go to numerical when
             # temperature is set
@@ -520,7 +513,7 @@ class TestConvolution:
                 expected_numerical_count += 1
             if analytical_component:
                 expected_numerical_count += 1
-            assert len(conv._numerical_sample_components.components) == expected_numerical_count
+            assert len(conv._numerical_sample_components) == expected_numerical_count
 
         assert conv.convolution_settings.convolution_plan_is_valid is True
 
@@ -551,7 +544,7 @@ class TestConvolution:
 
         if analytical_component:
             sample_components.append_component(
-                Gaussian(display_name='Gaussian', area=1.0, center=0.0, width=0.1)
+                Gaussian(name='Gaussian', area=1.0, center=0.0, width=0.1)
             )
 
         if numerical_component:

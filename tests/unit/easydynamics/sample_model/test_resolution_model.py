@@ -16,7 +16,7 @@ class TestResolutionModel:
     @pytest.fixture
     def resolution_model(self):
         component1 = Gaussian(
-            display_name='TestGaussian1',
+            name='TestGaussian1',
             area=1.0,
             center=0.0,
             width=1.0,
@@ -89,7 +89,7 @@ class TestResolutionModel:
 
     def test_append_and_remove_and_clear_component(self, resolution_model):
         # WHEN
-        new_component = Gaussian(unique_name='NewGaussian')
+        new_component = Gaussian(name='NewGaussian')
 
         # THEN
         resolution_model.append_component(new_component)
@@ -113,8 +113,8 @@ class TestResolutionModel:
     def test_append_component_collection(self, resolution_model):
         # WHEN
         new_collection = ComponentCollection()
-        new_component1 = Lorentzian()
-        new_component2 = Gaussian()
+        new_component1 = Lorentzian(name='NewLorentzian')
+        new_component2 = Gaussian(name='NewGaussian')
         new_collection.append_component(new_component1)
         new_collection.append_component(new_component2)
 

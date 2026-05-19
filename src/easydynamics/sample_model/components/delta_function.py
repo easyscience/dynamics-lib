@@ -33,7 +33,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter | None = None,
         area: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'DeltaFunction',
+        name: str = 'DeltaFunction',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -42,28 +43,31 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         center : Numeric | Parameter | None, default=None
-            Center of the delta function. If None.
+            Center of the delta function. If None, it will be centered at 0 and fixed.
         area : Numeric | Parameter, default=1.0
             Total area under the curve.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        display_name : str | None, default='DeltaFunction'
-            Name of the component.
+        name : str, default='DeltaFunction'
+            Name of the component for indexing.
+        display_name : str | None, default=None
+            Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
             default, None.
         """
         # Validate inputs and create Parameters if not given
         super().__init__(
-            display_name=display_name,
             unit=unit,
+            name=name,
+            display_name=display_name,
             unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=True, unit=self._unit
+            center=center, name=name, fix_if_none=True, unit=self._unit
         )
 
         self._area = area
@@ -196,6 +200,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'DeltaFunction(unique_name = {self.unique_name}, unit = {self._unit},\n'
-            f'area = {self.area},\n center = {self.center})'
+            f'DeltaFunction(name = {self.name}, display_name = {self.display_name}, '
+            f'unit = {self.unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center})'
         )

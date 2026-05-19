@@ -67,10 +67,7 @@ class ResolutionModel(ModelBase):
         TypeError
             If the component is a DeltaFunction or Polynomial.
         """
-        if isinstance(component, ComponentCollection):
-            components = component.components
-        else:
-            components = (component,)
+        components = component if isinstance(component, ComponentCollection) else (component,)
 
         for comp in components:
             if isinstance(comp, (DeltaFunction, Polynomial)):

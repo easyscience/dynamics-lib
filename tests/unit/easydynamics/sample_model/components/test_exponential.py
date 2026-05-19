@@ -15,6 +15,7 @@ class TestExponential:
     @pytest.fixture
     def exponential(self):
         return Exponential(
+            name='ExponentialName',
             display_name='TestExponential',
             amplitude=2.0,
             center=0.5,
@@ -156,9 +157,9 @@ class TestExponential:
         assert all(isinstance(param, Parameter) for param in params)
 
         expected_names = {
-            'TestExponential amplitude',
-            'TestExponential center',
-            'TestExponential rate',
+            'ExponentialName amplitude',
+            'ExponentialName center',
+            'ExponentialName rate',
         }
 
         actual_names = {param.name for param in params}
@@ -226,7 +227,7 @@ class TestExponential:
 
         # THEN EXPECT
         assert 'Exponential' in repr_str
-        assert 'unique_name = Exponential' in repr_str
+        assert 'name = ExponentialName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'amplitude =' in repr_str
         assert 'center =' in repr_str

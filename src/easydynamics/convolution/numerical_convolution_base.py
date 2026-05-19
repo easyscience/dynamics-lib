@@ -429,7 +429,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
 
         # Handle ComponentCollection or ModelComponent
-        components = model.components if isinstance(model, ComponentCollection) else [model]
+        components = model if isinstance(model, ComponentCollection) else [model]
 
         for comp in components:
             if hasattr(comp, 'width'):

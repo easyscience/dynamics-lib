@@ -14,7 +14,11 @@ from easydynamics.sample_model import Polynomial
 class TestPolynomial:
     @pytest.fixture
     def polynomial(self):
-        return Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
+        return Polynomial(
+            name='PolynomialName',
+            display_name='TestPolynomial',
+            coefficients=[1.0, -2.0, 3.0],
+        )
 
     def test_init_no_inputs(self):
         # WHEN THEN
@@ -150,9 +154,9 @@ class TestPolynomial:
         assert len(params) == 3
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'TestPolynomial_c0',
-            'TestPolynomial_c1',
-            'TestPolynomial_c2',
+            'PolynomialName_c0',
+            'PolynomialName_c1',
+            'PolynomialName_c2',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -193,6 +197,5 @@ class TestPolynomial:
         repr_str = repr(polynomial)
 
         # EXPECT
-        assert 'Polynomial' in repr_str
-        assert 'unique_name = Polynomial' in repr_str
+        assert 'name = PolynomialName' in repr_str
         assert 'coefficients =' in repr_str

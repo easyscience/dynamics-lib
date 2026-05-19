@@ -15,25 +15,28 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        display_name: str | None = 'MyDiffusionModel',
-        unique_name: str | None = None,
         scale: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
+        name: str = 'DiffusionModel',
+        display_name: str | None = 'MyDiffusionModel',
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize a new DiffusionModel.
 
         Parameters
         ----------
+        scale : Numeric, default=1.0
+            Scale factor for the diffusion model. Must be a non-negative number.
+        unit : str | sc.Unit, default='meV'
+            Unit of the diffusion model. Must be convertible to meV.
+        name : str, default='DiffusionModel'
+            Name of the diffusion model.
         display_name : str | None, default='MyDiffusionModel'
             Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
-        scale : Numeric, default=1.0
-            Scale factor for the diffusion model. Must be a non-negative number.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
 
         Raises
         ------
@@ -56,7 +59,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
 
-        super().__init__(display_name=display_name, unique_name=unique_name, unit=unit)
+        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
         self._scale = scale
 
     # ------------------------------------------------------------------
@@ -97,7 +100,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if float(scale) < 0:
             raise ValueError('scale must be non-negative.')
-        self._scale.value = scale
+        self._scale.value = float(scale)
 
     # ------------------------------------------------------------------
     # dunder methods
@@ -112,4 +115,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         str
             String representation of the DiffusionModel.
         """
-        return f'{self.__class__.__name__}(display_name={self.display_name}, unit={self.unit})'
+        return (
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'unit={self.unit}), \n'
+            f'    scale={self.scale})'
+        )

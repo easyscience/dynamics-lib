@@ -120,21 +120,21 @@ class ModelBase(EasyDynamicsModelBase):
         self._components.append_component(component)
         self._on_components_change()
 
-    def remove_component(self, unique_name: str) -> None:
+    def remove_component(self, name: str) -> None:
         """
-        Remove a ModelComponent from the SampleModel by its unique name.
+        Remove a ModelComponent from the SampleModel by its name.
 
         Parameters
         ----------
-        unique_name : str
-            The unique name of the ModelComponent to remove.
+        name : str
+            The name of the ModelComponent to remove.
         """
-        self._components.remove_component(unique_name)
+        self._components.pop(name)
         self._on_components_change()
 
     def clear_components(self) -> None:
         """Clear all ModelComponents from the SampleModel."""
-        self._components.clear_components()
+        self._components.clear()
         self._on_components_change()
 
     # ------------------------------------------------------------------
@@ -184,7 +184,7 @@ class ModelBase(EasyDynamicsModelBase):
         list[ModelComponent]
             The components of the SampleModel.
         """
-        return self._components.components
+        return self._components
 
     @components.setter
     def components(self, value: ModelComponent | ComponentCollection | None) -> None:
