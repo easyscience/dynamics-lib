@@ -4,6 +4,7 @@
 import pytest
 
 from easydynamics.base_classes.easydynamics_list import EasyDynamicsList
+from easydynamics.exceptions import AmbiguousNameError
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -78,6 +79,15 @@ class TestEasyDynamicsList:
         assert len(easy_dynamics_list) == 3
         assert easy_dynamics_list[1] is new_gaussian
 
+    def test_insert_repeated_component_warns(self, easy_dynamics_list):
+        """Test that inserting a repeated component raises a warning."""
+        # WHEN THEN EXPECT
+        with pytest.warns(UserWarning, match=r'already in EasyDynamicsList'):
+            easy_dynamics_list.insert(1, easy_dynamics_list[0])
+
+        assert len(easy_dynamics_list) == 2
+        assert easy_dynamics_list[1] is not easy_dynamics_list[0]
+
     def test_append(self, easy_dynamics_list):
         """Test that the append method works correctly."""
         # WHEN
@@ -96,6 +106,14 @@ class TestEasyDynamicsList:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             easy_dynamics_list.append('Not a ModelComponent')
+
+    def test_append_repeated_component_warns(self, easy_dynamics_list):
+        """Test that appending a repeated component raises a warning."""
+        # WHEN THEN EXPECT
+        with pytest.warns(UserWarning, match=r'already in EasyDynamicsList'):
+            easy_dynamics_list.append(easy_dynamics_list[0])
+
+        assert len(easy_dynamics_list) == 2
 
     def test_extend(self, easy_dynamics_list):
         """Test that the extend method works correctly."""
@@ -124,6 +142,14 @@ class TestEasyDynamicsList:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             easy_dynamics_list.extend('Not an iterable')
+
+    def test_extend_repeated_component_warns(self, easy_dynamics_list):
+        """Test that extending with a repeated component raises a warning."""
+        # WHEN THEN EXPECT
+        with pytest.warns(UserWarning, match=r'already in EasyDynamicsList'):
+            easy_dynamics_list.extend([easy_dynamics_list[0]])
+
+        assert len(easy_dynamics_list) == 2
 
     def test_pop(self, easy_dynamics_list):
         """Test that the pop method works correctly."""
@@ -154,3 +180,80 @@ class TestEasyDynamicsList:
         # WHEN THEN EXPECT
         with pytest.raises(KeyError, match=r'No item with name "Nonexistent" found'):
             easy_dynamics_list.pop('Nonexistent')
+
+    def test_names(self, easy_dynamics_list):
+        """Test that the names method returns the correct list of names."""
+        # WHEN THEN EXPECT
+        assert easy_dynamics_list.get_names() == ['Gaussian', 'Lorentzian']
+
+    def test_duplicate_names_no_duplicates(self, easy_dynamics_list):
+        """Test that the get_duplicate_names method returns an empty list
+        when there are no duplicates."""
+        # WHEN THEN EXPECT
+        assert easy_dynamics_list.get_duplicate_names() == []
+
+    def test_duplicate_names_with_duplicates(self, easy_dynamics_list):
+        """Test that the get_duplicate_names method returns the correct
+        list of duplicate names."""
+        # WHEN
+        new_gaussian = Gaussian(name='Gaussian')
+        easy_dynamics_list.append(new_gaussian)
+
+        # THEN EXPECT
+        assert easy_dynamics_list.get_duplicate_names() == ['Gaussian']
+
+    def test_getitem_int(self, easy_dynamics_list):
+        """Test getting an item by integer index."""
+        # WHEN
+
+        # THEN
+        item = easy_dynamics_list[0]
+
+        # EXPECT
+        assert isinstance(item, Gaussian)
+        assert item.name == 'Gaussian'
+
+    def test_getitem_slice(self, easy_dynamics_list):
+        """Test getting items by slice."""
+        # WHEN
+
+        # THEN
+        sliced = easy_dynamics_list[:1]
+
+        # EXPECT
+        assert isinstance(sliced, EasyDynamicsList)
+        assert len(sliced) == 1
+        assert isinstance(sliced[0], Gaussian)
+        assert sliced[0].name == 'Gaussian'
+
+    def test_getitem_name(self, easy_dynamics_list):
+        """Test getting an item by name."""
+        # WHEN
+
+        # THEN
+        item = easy_dynamics_list['Gaussian']
+
+        # EXPECT
+        assert isinstance(item, Gaussian)
+        assert item.name == 'Gaussian'
+
+    def test_getitem_nonexistent_name(self, easy_dynamics_list):
+        """Test getting an item with a nonexistent name raises KeyError."""
+        # WHEN THEN EXPECT
+        with pytest.raises(KeyError, match=r'No item with name "Nonexistent" found'):
+            easy_dynamics_list['Nonexistent']
+
+    def test_getitem_ambiguous_name(self, easy_dynamics_list):
+        """Test getting an item with duplicate names raises AmbiguousNameError."""
+        # WHEN
+        easy_dynamics_list.append(Gaussian(name='Gaussian'))
+
+        # THEN EXPECT
+        with pytest.raises(AmbiguousNameError):
+            easy_dynamics_list['Gaussian']
+
+    def test_getitem_invalid_type(self, easy_dynamics_list):
+        """Test getting an item with an invalid index type raises TypeError."""
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'Index must be an int, slice, or str'):
+            easy_dynamics_list[1.5]

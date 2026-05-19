@@ -18,7 +18,7 @@ class NameMixin:
         ----------
         *args : object
             Positional arguments to pass to the parent class.
-        name : str, default="MyEasyDynamicsModel"
+        name : str, default='MyEasyDynamicsModel'
             Name of the model.
         **kwargs : object
             Keyword arguments to pass to the parent class.

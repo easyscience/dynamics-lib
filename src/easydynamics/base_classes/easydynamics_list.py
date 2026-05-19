@@ -100,6 +100,8 @@ class EasyDynamicsList(EasyList):
             The item to append. Must be an instance of one of the protected types.
         """
         self._validate_type(value)
+
+        # append calls insert which checks for duplicates
         super().append(value)
 
     def pop(self, index: int | str = -1) -> ProtectedType_:
@@ -138,7 +140,7 @@ class EasyDynamicsList(EasyList):
     # Other methods
     # ------------------------------------------------------------------
 
-    def names(self) -> list[str]:
+    def get_names(self) -> list[str]:
         """
         Get a list of the names of all items in the list.
 
@@ -147,9 +149,9 @@ class EasyDynamicsList(EasyList):
         list[str]
             A list of the names of all items in the list.
         """
-        return [self._get_key(item) for item in self._data]
+        return [item.name for item in self._data]
 
-    def duplicate_names(self) -> list[str]:
+    def get_duplicate_names(self) -> list[str]:
         """
         Get a list of duplicate names in the list.
 
@@ -161,7 +163,7 @@ class EasyDynamicsList(EasyList):
         seen = set()
         duplicates = set()
         for item in self._data:
-            name = self._get_key(item)
+            name = item.name
             if name in seen:
                 duplicates.add(name)
             else:
