@@ -22,16 +22,16 @@ class TestSampleModel:
     @pytest.fixture
     def sample_model(self):
         component1 = Gaussian(
-            display_name='TestGaussian1',
-            unique_name='TestGaussian1',
+            name='TestGaussian1Name',
+            display_name='TestGaussian1Display',
             area=1.0,
             center=0.0,
             width=1.0,
             unit='meV',
         )
         component2 = Lorentzian(
-            display_name='TestLorentzian1',
-            unique_name='TestLorentzian1',
+            name='TestLorentzian1Name',
+            display_name='TestLorentzian1Display',
             area=2.0,
             center=1.0,
             width=0.5,
@@ -42,7 +42,7 @@ class TestSampleModel:
         component_collection.append_component(component2)
 
         diffusion_model = BrownianTranslationalDiffusion(
-            display_name='DiffusionModel', unique_name='DiffusionModel'
+            display_name='DiffusionModelDisplay', name='DiffusionModelName'
         )
 
         return SampleModel(
@@ -141,7 +141,7 @@ class TestSampleModel:
         # WHEN
         model = sample_model
         new_diffusion_model = BrownianTranslationalDiffusion(
-            unique_name='new_diffusion_model',
+            name='new_diffusion_model',
         )
 
         # THEN
@@ -181,8 +181,8 @@ class TestSampleModel:
     def test_diffusion_model_setter(self, sample_model):
         # WHEN
         model = sample_model
-        new_diffusion_model1 = BrownianTranslationalDiffusion()
-        new_diffusion_model2 = BrownianTranslationalDiffusion()
+        new_diffusion_model1 = BrownianTranslationalDiffusion(name='new_diffusion_model1')
+        new_diffusion_model2 = BrownianTranslationalDiffusion(name='new_diffusion_model2')
 
         # THEN
         model.diffusion_models = [new_diffusion_model1, new_diffusion_model2]
@@ -210,7 +210,10 @@ class TestSampleModel:
         [
             'invalid_diffusion_model',
             123,
-            [BrownianTranslationalDiffusion(), 'invalid_diffusion_model'],
+            [
+                BrownianTranslationalDiffusion(name='valid_diffusion_model'),
+                'invalid_diffusion_model',
+            ],
         ],
         ids=['string', 'integer', 'list with invalid type'],
     )
@@ -461,13 +464,13 @@ class TestSampleModel:
         assert len(sample_model._component_collections) == 3  # 3 Q values
         for collection in sample_model._component_collections:
             assert isinstance(collection, ComponentCollection)
-            assert len(collection.components) == 3  # 3 components
-            assert collection.components[0].display_name == 'TestGaussian1'
-            assert collection.components[0].area.value == pytest.approx(1.0)
-            assert collection.components[1].display_name == 'TestLorentzian1'
-            assert collection.components[1].area.value == pytest.approx(2.0)
-            assert collection.components[2].display_name == 'Brownian diffusion'
-            assert isinstance(collection.components[2], Lorentzian)
+            assert len(list(collection)) == 3  # 3 components
+            assert collection[0].name == 'TestGaussian1Name'
+            assert collection[0].area.value == pytest.approx(1.0)
+            assert collection[1].name == 'TestLorentzian1Name'
+            assert collection[1].area.value == pytest.approx(2.0)
+            assert collection[2].name == 'DiffusionModelName'
+            assert isinstance(collection[2], Lorentzian)
 
     def test_get_all_variables(self, sample_model):
         # WHEN

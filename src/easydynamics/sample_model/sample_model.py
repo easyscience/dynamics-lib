@@ -146,28 +146,28 @@ class SampleModel(ModelBase):
         self._diffusion_models.append(diffusion_model)
         self._generate_component_collections()
 
-    def remove_diffusion_model(self, name: 'str') -> None:
+    def remove_diffusion_model(self, name: str) -> None:
         """
-        Remove a DiffusionModel from the SampleModel by unique name.
+        Remove a DiffusionModel from the SampleModel by name.
 
         Parameters
         ----------
-        name : 'str'
-            The unique name of the DiffusionModel to remove.
+        name : str
+            The name of the DiffusionModel to remove.
 
         Raises
         ------
         ValueError
-            If no DiffusionModel with the given unique name is found.
+            If no DiffusionModel with the given name is found.
         """
         for i, dm in enumerate(self._diffusion_models):
-            if dm.unique_name == name:
+            if dm.name == name:
                 del self._diffusion_models[i]
                 self._generate_component_collections()
                 return
         raise ValueError(
-            f'No DiffusionModel with unique name {name} found. \n'
-            f'The available unique names are: {[dm.unique_name for dm in self._diffusion_models]}'
+            f'No DiffusionModel with name {name} found. \n'
+            f'The available names are: {[dm.name for dm in self._diffusion_models]}'
         )
 
     def clear_diffusion_models(self) -> None:
@@ -508,16 +508,21 @@ class SampleModel(ModelBase):
         """
         super()._generate_component_collections()
 
-        if self._Q is None:
+        if self.Q is None:
             return
         # Generate components from diffusion models
         # and add to component collections
         for diffusion_model in self._diffusion_models:
-            diffusion_collections = diffusion_model.create_component_collections(Q=self._Q)
+            diffusion_collections = diffusion_model.create_component_collections(
+                Q=self.Q,
+                component_name=diffusion_model.name,
+            )
             for target, source in zip(
-                self._component_collections, diffusion_collections, strict=True
+                self._component_collections,
+                diffusion_collections,
+                strict=True,
             ):
-                for component in source.components:
+                for component in source:
                     target.append_component(component)
 
     def _on_diffusion_models_change(self) -> None:
@@ -540,7 +545,7 @@ class SampleModel(ModelBase):
 
         return (
             f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), '
-            f'Q = {self.Q}, '
+            f'Q = {self.Q}, \n '
             f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
             f'temperature = {self.temperature}, '
             f'detailed_balance_settings = {self.detailed_balance_settings}'

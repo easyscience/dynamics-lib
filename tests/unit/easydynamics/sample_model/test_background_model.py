@@ -14,7 +14,7 @@ class TestBackgroundModel:
     @pytest.fixture
     def background_model(self):
         component1 = Gaussian(
-            display_name='TestGaussian1',
+            name='TestGaussian1',
             area=1.0,
             center=0.0,
             width=1.0,

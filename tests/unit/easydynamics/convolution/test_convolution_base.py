@@ -51,8 +51,8 @@ class TestConvolutionBase:
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
         assert isinstance(convolution_base.sample_components, ComponentCollection)
         assert isinstance(convolution_base.resolution_components, ComponentCollection)
-        assert convolution_base.sample_components.components[0] == sample_component
-        assert convolution_base.resolution_components.components[0] == resolution_component
+        assert convolution_base.sample_components[0] == sample_component
+        assert convolution_base.resolution_components[0] == resolution_component
 
     def test_init_energy_numerical_none_offset(self):
         # WHEN

@@ -20,6 +20,7 @@ class ModelComponent(EasyDynamicsModelBase):
     def __init__(
         self,
         unit: str | sc.Unit = 'meV',
+        name: str = 'ModelComponent',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -30,13 +31,19 @@ class ModelComponent(EasyDynamicsModelBase):
         ----------
         unit : str | sc.Unit, default='meV'
             The unit of the model component.
+        name : str, default='ModelComponent'
+            The name of the model component for indexing.
         display_name : str | None, default=None
             A human-readable name for the component.
         unique_name : str | None, default=None
             A unique identifier for the component.
         """
-        super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
-        self._unit = unit
+        super().__init__(
+            unit=unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
     @property
     def unit(self) -> str:

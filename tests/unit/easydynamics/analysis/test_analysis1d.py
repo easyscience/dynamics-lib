@@ -876,7 +876,8 @@ class TestAnalysis1d:
         sample_component.display_name = 'sample_comp'
 
         sample_collection = MagicMock()
-        sample_collection.components = [sample_component]
+        sample_collection.__iter__.return_value = iter([sample_component])
+        sample_collection.__len__.return_value = 1
 
         analysis1d.sample_model.get_component_collection = MagicMock(
             return_value=sample_collection
@@ -887,7 +888,8 @@ class TestAnalysis1d:
         background_component.display_name = 'background_comp'
 
         background_collection = MagicMock()
-        background_collection.components = [background_component]
+        background_collection.__iter__.return_value = iter([background_component])
+        background_collection.__len__.return_value = 1
 
         analysis1d.instrument_model.background_model.get_component_collection = MagicMock(
             return_value=background_collection

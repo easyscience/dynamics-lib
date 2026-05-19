@@ -94,15 +94,12 @@ class AnalyticalConvolution(ConvolutionBase):
             self.energy.
         """
 
-        sample_components = self.sample_components.components
-        resolution_components = self.resolution_components.components
-
         total = np.zeros_like(self.energy.values, dtype=float)
 
-        for sample_component in sample_components:
+        for sample_component in self.sample_components:
             # Go through resolution components,
             # adding analytical contributions
-            for resolution_component in resolution_components:
+            for resolution_component in self.resolution_components:
                 contrib = self._convolute_analytic_pair(
                     sample_component=sample_component,
                     resolution_component=resolution_component,

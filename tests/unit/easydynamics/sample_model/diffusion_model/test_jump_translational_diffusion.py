@@ -198,8 +198,8 @@ class TestJumpTranslationalDiffusion:
         expected_widths = jump_diffusion_model.calculate_width(Q)
         for model_index in range(len(component_collections)):
             model = component_collections[model_index]
-            assert len(model.components) == 1
-            component = model.components[0]
+            assert len(model) == 1
+            component = model[0]
             assert component.width.unit == jump_diffusion_model.unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
@@ -209,6 +209,15 @@ class TestJumpTranslationalDiffusion:
     ):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'component_name must be a string.'):
+            jump_diffusion_model.create_component_collections(
+                Q=np.array([0.1, 0.2, 0.3]), component_name=123
+            )
+
+    def test_create_component_collections_component_display_name_must_be_string(
+        self, jump_diffusion_model
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'component_display_name must be a string.'):
             jump_diffusion_model.create_component_collections(
                 Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
             )

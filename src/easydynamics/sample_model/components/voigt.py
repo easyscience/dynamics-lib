@@ -34,7 +34,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
         gaussian_width: Numeric | Parameter = 1.0,
         lorentzian_width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'Voigt',
+        name: str = 'Voigt',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -52,7 +53,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
             Half width at half max (HWHM) of the Lorentzian part.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        display_name : str | None, default='Voigt'
+        name : str, default='Voigt'
+            Name of the component for indexing.
+        display_name : str | None, default=None
             Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
@@ -60,25 +63,26 @@ class Voigt(CreateParametersMixin, ModelComponent):
         """
 
         super().__init__(
-            display_name=display_name,
             unit=unit,
+            name=name,
+            display_name=display_name,
             unique_name=unique_name,
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
-            center=center, name=display_name, fix_if_none=True, unit=self._unit
+            center=center, name=name, fix_if_none=True, unit=self._unit
         )
         gaussian_width = self._create_width_parameter(
             width=gaussian_width,
-            name=display_name,
+            name=name,
             param_name='gaussian_width',
             unit=self._unit,
         )
         lorentzian_width = self._create_width_parameter(
             width=lorentzian_width,
-            name=display_name,
+            name=name,
             param_name='lorentzian_width',
             unit=self._unit,
         )
@@ -261,9 +265,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Voigt(unique_name = {self.unique_name}, unit = {self._unit},\n'
-            f'area = {self.area},\n'
-            f'center = {self.center},\n'
-            f'gaussian_width = {self.gaussian_width},\n'
-            f'lorentzian_width = {self.lorentzian_width})'
+            f'Voigt(name = {self.name}, display_name = {self.display_name}, unit = {self._unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center},\n'
+            f'    gaussian_width = {self.gaussian_width},\n'
+            f'    lorentzian_width = {self.lorentzian_width})'
         )

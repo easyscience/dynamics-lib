@@ -20,22 +20,20 @@ class TestEasyDynamicsModelBase:
 
         # WHEN THEN EXPECT
         assert easy_dynamics_modelbase.name == 'TestModel'
-        assert easy_dynamics_modelbase.display_name == 'MyEasyDynamicsModel'
+        assert easy_dynamics_modelbase.display_name == 'TestModel'
         assert easy_dynamics_modelbase.unique_name is not None
 
     def test_init_raises_type_error_for_invalid_name(self):
         """Test that initializing with an invalid name raises a TypeError."""
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Name must be a string or None.'):
+        with pytest.raises(TypeError, match=r'Name must be a string.'):
             EasyDynamicsModelBase(name=123)  # Not a string
 
-    def test_init_name_can_be_none(self):
-        """Test that initializing with name as None works correctly."""
+    def test_init_name_cannot_be_none(self):
+        """Test that initializing with name as None raises a TypeError."""
         # WHEN THEN EXPECT
-        model = EasyDynamicsModelBase(name=None)
-
-        # THEN EXPECT
-        assert model.name is None
+        with pytest.raises(TypeError, match=r'Name must be a string.'):
+            EasyDynamicsModelBase(name=None)
 
     def test_name_setter_and_getter(self, easy_dynamics_modelbase):
         """Test that the name setter and getter work correctly."""
@@ -48,11 +46,9 @@ class TestEasyDynamicsModelBase:
         # EXPECT
         assert easy_dynamics_modelbase.name == 'NewName'
 
-        # THEN
-        easy_dynamics_modelbase.name = None
-
-        # EXPECT
-        assert easy_dynamics_modelbase.name is None
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=r'Name must be a string.'):
+            easy_dynamics_modelbase.name = None
 
     @pytest.mark.parametrize(
         'invalid_name',
@@ -66,7 +62,7 @@ class TestEasyDynamicsModelBase:
     def test_name_setter_invalid_type(self, easy_dynamics_modelbase, invalid_name):
         """Test that setting the name to an invalid type raises a TypeError."""
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Name must be a string or None.'):
+        with pytest.raises(TypeError, match=r'Name must be a string.'):
             easy_dynamics_modelbase.name = invalid_name
 
     def test_unit_property(self, easy_dynamics_modelbase):

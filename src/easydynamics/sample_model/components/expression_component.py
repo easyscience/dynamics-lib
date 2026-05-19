@@ -71,7 +71,8 @@ class ExpressionComponent(ModelComponent):
         expression: str,
         parameters: dict[str, Numeric] | None = None,
         unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'Expression',
+        name: str = 'Expression',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -85,7 +86,9 @@ class ExpressionComponent(ModelComponent):
             Dictionary of parameter names and their initial values.
         unit : str | sc.Unit, default='meV'
             Unit of the output.
-        display_name : str | None, default='Expression'
+        name : str, default='Expression'
+            Name of the component for indexing.
+        display_name : str | None, default=None
             Display name for the component.
         unique_name : str | None, default=None
             Unique name for the component.
@@ -109,7 +112,7 @@ class ExpressionComponent(ModelComponent):
         >>> expr.A = 5
         >>> y = expr.evaluate(x)
         """
-        super().__init__(unit=unit, display_name=display_name, unique_name=unique_name)
+        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
 
         if 'np.' in expression:
             raise ValueError(
@@ -367,9 +370,8 @@ class ExpressionComponent(ModelComponent):
         """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
-            f'{self.__class__.__name__}(\n'
-            f"  expr='{self._expression_str}',\n"
-            f'  unit={self._unit},\n'
-            f'  parameters={{ {param_str} }}\n'
-            f')'
+            f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '
+            f'unit={self._unit},\n'
+            f"    expr='{self._expression_str}',\n"
+            f'    parameters={{ {param_str} }} )'
         )

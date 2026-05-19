@@ -30,7 +30,8 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter = 1.0,
         width: Numeric | Parameter = 1.0,
         unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'DampedHarmonicOscillator',
+        name: str = 'DampedHarmonicOscillator',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -47,7 +48,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             default, 1.0.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        display_name : str | None, default='DampedHarmonicOscillator'
+        name : str, default='DampedHarmonicOscillator'
+            Name of the component for indexing.
+        display_name : str | None, default=None
             Display name of the component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
@@ -55,22 +58,23 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         """
 
         super().__init__(
+            name=name,
             display_name=display_name,
             unique_name=unique_name,
             unit=unit,
         )
 
         # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=display_name, unit=self._unit)
+        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
         center = self._create_center_parameter(
             center=center,
-            name=display_name,
+            name=name,
             fix_if_none=False,
             unit=self._unit,
             enforce_minimum_center=True,
         )
 
-        width = self._create_width_parameter(width=width, name=display_name, unit=self._unit)
+        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
 
         self._area = area
         self._center = center
@@ -217,7 +221,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             A string representation of the Damped Harmonic Oscillator.
         """
         return (
-            f'DampedHarmonicOscillator(display_name = {self.display_name}, '
+            f'DampedHarmonicOscillator(name = {self.name}, display_name = {self.display_name}, '
             f'unit = {self._unit},\n '
-            f'area = {self.area},\n center = {self.center},\n width = {self.width})'
+            f'    area = {self.area},\n '
+            f'    center = {self.center},\n '
+            f'    width = {self.width})'
         )
