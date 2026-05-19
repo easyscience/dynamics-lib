@@ -12,19 +12,16 @@ from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.exceptions import AmbiguousNameError
 
-# Need to fix type hints for protected types...
-ProtectedType_ = TypeVar('ProtectedType', bound=EasyDynamicsBase | EasyDynamicsModelBase)
-
-ProtectedType = type[EasyDynamicsBase | EasyDynamicsModelBase]
+ProtectedType_ = TypeVar('T', bound=EasyDynamicsBase | EasyDynamicsModelBase)
 
 
-class EasyDynamicsList(EasyList):
+class EasyDynamicsList(EasyList[ProtectedType_]):
     """Base class for all EasyDynamics lists."""
 
     def __init__(
         self,
         *args: ProtectedType_ | list[ProtectedType_],
-        protected_types: list[ProtectedType] | ProtectedType | None = None,
+        protected_types: (list[type[ProtectedType_]] | type[ProtectedType_] | None) = None,
         display_name: str | None = None,
         unique_name: str | None = None,
         **kwargs: object,
@@ -37,7 +34,7 @@ class EasyDynamicsList(EasyList):
         *args : ProtectedType_ | list[ProtectedType_]
             Initial items to add to the list. Can be a single item or a list of items. Each item
             must be an instance of one of the protected types.
-        protected_types : list[ProtectedType] | ProtectedType | None, default=None
+        protected_types : list[type[ProtectedType_]] | type[ProtectedType_] | None, default=None
             Types that are allowed in the list. Can be a single EasyDynamicsBase or
             EasyDynamicsModelBase subclass or a list of them. If None, defaults to
             [EasyDynamicsBase].
