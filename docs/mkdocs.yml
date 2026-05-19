@@ -200,8 +200,10 @@ nav:
           - Analysis 1D: tutorials/analysis1d.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
-      - convolution: api-reference/convolution.md
-      - sample_model: api-reference/sample_model.md
-      - experiment: api-reference/experiment.md
       - analysis: api-reference/analysis.md
+      - base_classes: api-reference/base_classes.md
+      - convolution: api-reference/convolution.md
+      - experiment: api-reference/experiment.md
+      - sample_model: api-reference/sample_model.md
+      - settings: api-reference/settings.md
       - utils: api-reference/utils.md
