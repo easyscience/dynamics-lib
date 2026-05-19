@@ -45,8 +45,8 @@ class TestAnalysisBase:
 
         experiment = Experiment(data=data_array)
 
-        comp1 = Gaussian(area=1, width=2, center=3)
-        comp2 = Gaussian(area=4, width=5, center=6)
+        comp1 = Gaussian(name='Gaussian1', area=1, width=2, center=3)
+        comp2 = Gaussian(name='Gaussian2', area=4, width=5, center=6)
         sample_model = SampleModel()
         sample_model.append_component(comp1)
         sample_model.append_component(comp2)
@@ -408,9 +408,7 @@ class TestAnalysisBase:
 
     def test_get_parameters_near_bounds_at_bounds(self, analysis_base_with_components):
         # WHEN
-        components = analysis_base_with_components.sample_model.get_component_collection(
-            Q_index=0
-        ).components
+        components = analysis_base_with_components.sample_model.get_component_collection(Q_index=0)
         components[0].area.min = 1.0
         components[1].center.max = 6.0
 
@@ -425,9 +423,7 @@ class TestAnalysisBase:
 
     def test_get_parameters_near_bounds_with_tolerances(self, analysis_base_with_components):
         # WHEN
-        components = analysis_base_with_components.sample_model.get_component_collection(
-            Q_index=0
-        ).components
+        components = analysis_base_with_components.sample_model.get_component_collection(Q_index=0)
         components[0].area.min = 0.99999
         components[1].center.max = 6.00001
 
@@ -472,9 +468,7 @@ class TestAnalysisBase:
 
     def test_not_finite_parameters(self, analysis_base_with_components):
         # WHEN
-        components = analysis_base_with_components.sample_model.get_component_collection(
-            Q_index=0
-        ).components
+        components = analysis_base_with_components.sample_model.get_component_collection(Q_index=0)
         components[0].area.value = np.inf
         components[1].center.value = np.nan
 

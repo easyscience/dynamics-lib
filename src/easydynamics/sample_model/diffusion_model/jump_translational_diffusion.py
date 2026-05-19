@@ -29,40 +29,53 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     units of 1/angstrom. Creates ComponentCollections with Lorentzian components for given
     Q-values.
 
-    Example: >>> Q = np.linspace(0.5, 2, 7) >>> energy = np.linspace(-2, 2, 501) >>> scale = 1.0
-    >>> diffusion_coefficient = 2.4e-9  # m^2/s >>> relaxation_time = 1.0  # ps >>>
-    diffusion_model=JumpTranslationalDiffusion( >>> scale = scale, diffusion_coefficient =
-    (diffusion_coefficient,) >>> relaxation_time=relaxation_time) >>> component_collections= >>>
-    diffusion_model.create_component_collections(Q) See also the tutorials..
+    Examples
+    --------
+    >>> Q = np.linspace(0.5, 2, 7)
+    >>> energy = np.linspace(-2, 2, 501)
+    >>> scale = 1.0
+    >>> diffusion_coefficient = 2.4e-9  # m^2/s
+    >>> relaxation_time = 1.0  # ps
+    >>> diffusion_model = JumpTranslationalDiffusion(
+    ...     scale=scale,
+    ...     diffusion_coefficient=diffusion_coefficient,
+    ...     relaxation_time=relaxation_time,
+    ... )
+    >>> component_collections = diffusion_model.create_component_collections(Q)
+
+    See also the tutorials..
     """
 
     def __init__(
         self,
-        display_name: str | None = 'JumpTranslationalDiffusion',
-        unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
+        unit: str | sc.Unit = 'meV',
+        name: str = 'JumpTranslationalDiffusion',
+        display_name: str | None = 'JumpTranslationalDiffusion',
+        unique_name: str | None = None,
     ) -> None:
         """
         Initialize a new JumpTranslationalDiffusion model.
 
         Parameters
         ----------
-        display_name : str | None, default='JumpTranslationalDiffusion'
-            Display name of the diffusion model.
-        unique_name : str | None, default=None
-            Unique name of the diffusion model. If None, a unique name will be generated. By
-            default, None.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
         scale : Numeric, default=1.0
             Scale factor for the diffusion model. Must be a non-negative number.
         diffusion_coefficient : Numeric, default=1.0
             Diffusion coefficient D in m^2/s.
         relaxation_time : Numeric, default=1.0
             Relaxation time t in ps.
+        unit : str | sc.Unit, default='meV'
+            Unit of the diffusion model. Must be convertible to meV.
+        name : str, default='JumpTranslationalDiffusion'
+            Name of the diffusion model.
+        display_name : str | None, default='JumpTranslationalDiffusion'
+            Display name of the diffusion model.
+        unique_name : str | None, default=None
+            Unique name of the diffusion model. If None, a unique name will be generated. By
+            default, None.
 
         Raises
         ------
@@ -70,6 +83,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             If scale, diffusion_coefficient, or relaxation_time  are not numbers.
         """
         super().__init__(
+            name=name,
             display_name=display_name,
             unique_name=unique_name,
             unit=unit,
@@ -251,6 +265,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     def create_component_collections(
         self,
         Q: Q_type,
+        component_name: str = 'Jump translational diffusion',
         component_display_name: str = 'Jump translational diffusion',
     ) -> list[ComponentCollection]:
         """
@@ -260,13 +275,15 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         ----------
         Q : Q_type
             Scattering vector in 1/angstrom. Can be a single value or an array of values.
+        component_name : str, default='Jump translational diffusion'
+            Name of the Jump Diffusion Lorentzian component.
         component_display_name : str, default='Jump translational diffusion'
             Name of the Jump Diffusion Lorentzian component.
 
         Raises
         ------
         TypeError
-            If component_display_name is not a string.
+            If component_display_name is not a string. If component_name is not a string.
 
         Returns
         -------
@@ -276,6 +293,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         Q = _validate_and_convert_Q(Q)
 
         if not isinstance(component_display_name, str):
+            raise TypeError('component_display_name must be a string.')
+
+        if not isinstance(component_name, str):
             raise TypeError('component_name must be a string.')
 
         component_collection_list = [None] * len(Q)
@@ -288,10 +308,13 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         # is 0.
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f'{self.display_name}_Q{Q_value:.2f}', unit=self.unit
+                name=f'{self.name}_Q{Q_value:.2f}',
+                display_name=f'{self.display_name}_Q{Q_value:.2f}',
+                unit=self.unit,
             )
 
             lorentzian_component = Lorentzian(
+                name=component_name,
                 display_name=component_display_name,
                 unit=self.unit,
             )
@@ -415,6 +438,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             String representation of the JumpTranslationalDiffusion model.
         """
         return (
-            f'JumpTranslationalDiffusion(display_name={self.display_name}, '
-            f'diffusion_coefficient={self._diffusion_coefficient}, scale={self._scale})'
+            f'JumpTranslationalDiffusion(name={self.name}, display_name={self.display_name},\n '
+            f'    diffusion_coefficient={self._diffusion_coefficient}, \n'
+            f'    scale={self._scale})'
         )

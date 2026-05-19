@@ -19,11 +19,11 @@ class TestNumericalConvolution:
         energy = np.linspace(-10, 10, 5001)
         sample_components = ComponentCollection(display_name='ComponentCollection')
         sample_components.append_component(
-            Gaussian(display_name='Gaussian1', area=2.0, center=0.1, width=0.4)
+            Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
         )
         resolution_components = ComponentCollection(display_name='ResolutionModel')
         resolution_components.append_component(
-            Gaussian(display_name='GaussianRes', area=3.0, center=0.2, width=0.5)
+            Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
         )
 
         return NumericalConvolution(
@@ -73,7 +73,7 @@ class TestNumericalConvolution:
         )  # center of sample_components + center of resolution_components
         expected_width = np.sqrt(0.4**2 + 0.5**2)  # sqrt(width_sample^2 + width_res^2)
         expected_result = Gaussian(
-            display_name='ExpectedConvolution',
+            name='ExpectedConvolution',
             area=expected_area,
             center=expected_center,
             width=expected_width,

@@ -36,7 +36,7 @@ class TestFittingWithDiffusionModel:
         sample_model = SampleModel(components=delta_function)
 
         resolution_components = ComponentCollection()
-        res_gauss = Gaussian(width=0.1, area=1, display_name='Res. Gauss')
+        res_gauss = Gaussian(width=0.1, area=1, name='Res. Gauss')
         res_gauss.area.fixed = True
         resolution_components.append_component(res_gauss)
         resolution_model = ResolutionModel(components=resolution_components)

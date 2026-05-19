@@ -14,7 +14,14 @@ from easydynamics.sample_model import Gaussian
 class TestGaussian:
     @pytest.fixture
     def gaussian(self):
-        return Gaussian(display_name='TestGaussian', area=2.0, center=0.5, width=0.6, unit='meV')
+        return Gaussian(
+            name='GaussianName',
+            display_name='TestGaussian',
+            area=2.0,
+            center=0.5,
+            width=0.6,
+            unit='meV',
+        )
 
     def test_init_no_inputs(self):
         # WHEN THEN
@@ -164,9 +171,9 @@ class TestGaussian:
         assert all(isinstance(param, Parameter) for param in params)
 
         expected_names = {
-            'TestGaussian area',
-            'TestGaussian center',
-            'TestGaussian width',
+            'GaussianName area',
+            'GaussianName center',
+            'GaussianName width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -208,6 +215,7 @@ class TestGaussian:
         # EXPECT
         assert gaussian_copy is not gaussian
         assert gaussian_copy.display_name == gaussian.display_name
+        assert gaussian_copy.name == gaussian.name
 
         assert gaussian_copy.area.value == gaussian.area.value
         assert gaussian_copy.area.fixed == gaussian.area.fixed
@@ -231,7 +239,7 @@ class TestGaussian:
         repr_str = repr(gaussian)
         # EXPECT
         assert 'Gaussian' in repr_str
-        assert 'unique_name = Gaussian' in repr_str
+        assert 'name = GaussianName' in repr_str
         assert 'unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

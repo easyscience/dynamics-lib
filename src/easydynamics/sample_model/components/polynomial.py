@@ -31,7 +31,8 @@ class Polynomial(ModelComponent):
         self,
         coefficients: Sequence[Numeric | Parameter] = (0.0,),
         unit: str | sc.Unit = 'meV',
-        display_name: str | None = 'Polynomial',
+        name: str = 'Polynomial',
+        display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -43,7 +44,9 @@ class Polynomial(ModelComponent):
             Coefficients c0, c1, ..., cN.
         unit : str | sc.Unit, default='meV'
             Unit of the Polynomial component.
-        display_name : str | None, default='Polynomial'
+        name : str, default='Polynomial'
+            Name of the component for indexing.
+        display_name : str | None, default=None
             Display name of the Polynomial component.
         unique_name : str | None, default=None
             Unique name of the component. If None, a unique_name is automatically generated. By
@@ -58,7 +61,12 @@ class Polynomial(ModelComponent):
             If coefficients is an empty sequence.
         """
 
-        super().__init__(display_name=display_name, unit=unit, unique_name=unique_name)
+        super().__init__(
+            unit=unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
         if not isinstance(coefficients, (list, tuple, np.ndarray)):
             raise TypeError(
@@ -77,7 +85,7 @@ class Polynomial(ModelComponent):
             if isinstance(coef, Parameter):
                 param = coef
             elif isinstance(coef, Numeric):
-                param = Parameter(name=f'{display_name}_c{i}', value=float(coef))
+                param = Parameter(name=f'{name}_c{i}', value=float(coef))
             else:
                 raise TypeError('Each coefficient must be either a numeric value or a Parameter.')
             self._coefficients.append(param)
@@ -264,6 +272,7 @@ class Polynomial(ModelComponent):
 
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
         return (
-            f'Polynomial(unique_name = {self.unique_name}, '
-            f'unit = {self._unit},\n coefficients = [{coeffs_str}])'
+            f'Polynomial(name = {self.name}, display_name = {self.display_name}, '
+            f'unit = {self._unit},\n'
+            f'    coefficients = [{coeffs_str}])'
         )

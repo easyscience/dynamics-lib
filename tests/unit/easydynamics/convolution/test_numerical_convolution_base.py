@@ -569,9 +569,7 @@ class TestNumericalConvolutionBase:
         too large compared to energy grid span.
         """
         # WHEN
-        wide_gaussian = Gaussian(
-            display_name='ComponentCollection', area=1.0, center=0.0, width=15.0
-        )
+        wide_gaussian = Gaussian(name='ComponentCollection', area=1.0, center=0.0, width=15.0)
 
         # THEN EXPECT
         with pytest.warns(
@@ -590,7 +588,7 @@ class TestNumericalConvolutionBase:
         """
         # WHEN
         narrow_gaussian = Gaussian(
-            display_name='ComponentCollection', area=1.0, center=0.0, width=0.000001
+            name='ComponentCollection', area=1.0, center=0.0, width=0.000001
         )
 
         # THEN EXPECT
@@ -610,9 +608,7 @@ class TestNumericalConvolutionBase:
         ComponentCollection components are checked correctly.
         """
         # WHEN
-        good_gaussian = Gaussian(
-            display_name='ComponentCollection', area=1.0, center=0.0, width=1.0
-        )
+        good_gaussian = Gaussian(name='ComponentCollection', area=1.0, center=0.0, width=1.0)
         sample_components = ComponentCollection(display_name='ComponentCollection')
         sample_components.append_component(good_gaussian)
 

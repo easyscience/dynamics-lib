@@ -3,52 +3,50 @@
 
 import pytest
 
-from easydynamics.base_classes import EasyDynamicsBase
+from easydynamics.base_classes.name_mixin import NameMixin
 
 
-class TestEasyDynamicsBase:
-    """Tests for the EasyDynamicsBase class."""
+class TestNameMixin:
+    """Tests for the NameMixin class."""
 
     @pytest.fixture
-    def easy_dynamics_base(self):
-        """Fixture for creating an instance of EasyDynamicsBase."""
+    def name_mixin(self):
+        """Fixture for creating an instance of NameMixin."""
 
-        return EasyDynamicsBase(name='TestModel')
+        return NameMixin(name='TestModel')
 
-    def test_initialization(self, easy_dynamics_base):
-        """Test that the EasyDynamicsBase is initialized correctly."""
+    def test_initialization(self, name_mixin):
+        """Test that the NameMixin is initialized correctly."""
 
         # WHEN THEN EXPECT
-        assert easy_dynamics_base.name == 'TestModel'
-        assert easy_dynamics_base.display_name == 'TestModel'
-        assert easy_dynamics_base.unique_name is not None
+        assert name_mixin.name == 'TestModel'
 
     def test_init_raises_type_error_for_invalid_name(self):
         """Test that initializing with an invalid name raises a TypeError."""
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Name must be a string.'):
-            EasyDynamicsBase(name=123)  # Not a string
+            NameMixin(name=123)  # Not a string
 
     def test_init_name_cannot_be_none(self):
         """Test that initializing with name as None raises a TypeError."""
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Name must be a string.'):
-            EasyDynamicsBase(name=None)
+            NameMixin(name=None)
 
-    def test_name_setter_and_getter(self, easy_dynamics_base):
+    def test_name_setter_and_getter(self, name_mixin):
         """Test that the name setter and getter work correctly."""
         # WHEN THEN EXPECT
-        assert easy_dynamics_base.name == 'TestModel'
+        assert name_mixin.name == 'TestModel'
 
         # THEN
-        easy_dynamics_base.name = 'NewName'
+        name_mixin.name = 'NewName'
 
         # EXPECT
-        assert easy_dynamics_base.name == 'NewName'
+        assert name_mixin.name == 'NewName'
 
         # THEN
         with pytest.raises(TypeError, match=r'Name must be a string.'):
-            easy_dynamics_base.name = None
+            name_mixin.name = None
 
     @pytest.mark.parametrize(
         'invalid_name',
@@ -59,8 +57,8 @@ class TestEasyDynamicsBase:
         ],
         ids=['integer', 'list', 'dict'],
     )
-    def test_name_setter_invalid_type(self, easy_dynamics_base, invalid_name):
+    def test_name_setter_invalid_type(self, name_mixin, invalid_name):
         """Test that setting the name to an invalid type raises a TypeError."""
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Name must be a string.'):
-            easy_dynamics_base.name = invalid_name
+            name_mixin.name = invalid_name

@@ -866,13 +866,11 @@ class Analysis1d(AnalysisBase):
             A dictionary of component names to their corresponding sc.DataArrays.
         """
         scipp_arrays = {}
-        sample_components = self.sample_model.get_component_collection(
-            Q_index=self.Q_index
-        ).components
+        sample_components = self.sample_model.get_component_collection(Q_index=self.Q_index)
 
         background_components = self.instrument_model.background_model.get_component_collection(
             Q_index=self.Q_index
-        ).components
+        )
 
         if energy is None:
             energy = self._masked_energy
