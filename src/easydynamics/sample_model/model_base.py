@@ -142,39 +142,6 @@ class ModelBase(EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     @property
-    def unit(self) -> str | sc.Unit | None:
-        """
-        Get the unit of the SampleModel.
-
-        Returns
-        -------
-        str | sc.Unit | None
-            The unit of the SampleModel.
-        """
-
-        return self._unit
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        Unit is read-only and cannot be set directly.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always raised to indicate that the unit is read-only.
-        """
-        raise AttributeError(
-            f"Unit is read-only. Use convert_unit to change the unit between allowed types "
-            f"or create a new {self.__class__.__name__} with the desired unit."
-        )
-
-    @property
     def components(self) -> list[ModelComponent]:
         """
         Get the components of the SampleModel.
