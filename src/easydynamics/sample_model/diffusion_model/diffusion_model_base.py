@@ -20,9 +20,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self,
         scale: Numeric = 1.0,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
-        name: str = 'DiffusionModel',
-        display_name: str | None = 'MyDiffusionModel',
+        unit: str | sc.Unit = "meV",
+        name: str = "DiffusionModel",
+        display_name: str | None = "MyDiffusionModel",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -55,19 +55,23 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._Q = _validate_and_convert_Q(Q)
 
         try:
-            test = DescriptorNumber(name='test', value=1, unit=unit)
-            test.convert_unit('meV')
+            test = DescriptorNumber(name="test", value=1, unit=unit)
+            test.convert_unit("meV")
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
+        scale = Parameter(
+            name="scale", value=float(scale), fixed=False, min=0.0, unit=unit
+        )
 
-        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            unit=unit, name=name, display_name=display_name, unique_name=unique_name
+        )
         self._scale = scale
 
     # ------------------------------------------------------------------
@@ -104,10 +108,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+            raise TypeError("scale must be a number.")
 
         if float(scale) < 0:
-            raise ValueError('scale must be non-negative.')
+            raise ValueError("scale must be non-negative.")
         self._scale.value = float(scale)
 
     @property
@@ -152,8 +156,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                'New Q values are not similar to the old ones. '
-                'To change Q values, first run clear_Q().'
+                "New Q values are not similar to the old ones. "
+                "To change Q values, first run clear_Q()."
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
@@ -173,10 +177,17 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         if not confirm:
             raise ValueError(
-                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
+                "Clearing Q values requires confirmation. Set confirm=True to proceed."
             )
         self._Q = None
         self._on_Q_change()
+
+    # ------------------------------------------------------------------
+    # private methods
+    # ------------------------------------------------------------------
+
+    def _on_Q_change(self) -> None:
+        """Handle changes to the Q values."""
 
     # ------------------------------------------------------------------
     # dunder methods
@@ -192,7 +203,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'unit={self.unit}), \n'
-            f'    scale={self.scale})'
+            f"{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, "
+            f"unit={self.unit}), \n"
+            f"    scale={self.scale})"
         )
