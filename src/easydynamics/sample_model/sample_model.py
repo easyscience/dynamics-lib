@@ -9,9 +9,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
-    DiffusionModelBase,
-)
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.sample_model.model_base import ModelBase
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils import detailed_balance_factor
@@ -30,14 +28,14 @@ class SampleModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str = "MySampleModel",
+        display_name: str = 'MySampleModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
         diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
         temperature: float | None = None,
-        temperature_unit: str | sc.Unit = "K",
+        temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
     ) -> None:
         """
@@ -45,11 +43,11 @@ class SampleModel(ModelBase):
 
         Parameters
         ----------
-        display_name : str, default='MySampleModel'
+        display_name : str, default="MySampleModel"
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the model. If None,.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
@@ -61,7 +59,7 @@ class SampleModel(ModelBase):
         temperature : float | None, default=None
             Temperature for detailed balancing. If None, no detailed balancing is applied. By
             default, None.
-        temperature_unit : str | sc.Unit, default='K'
+        temperature_unit : str | sc.Unit, default="K"
             Unit of the temperature.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
             Settings for detailed balancing.
@@ -84,8 +82,8 @@ class SampleModel(ModelBase):
                 isinstance(dm, DiffusionModelBase) for dm in diffusion_models
             ):
                 raise TypeError(
-                    "diffusion_models must be a DiffusionModelBase, "
-                    "a list of DiffusionModelBase or None"
+                    'diffusion_models must be a DiffusionModelBase, '
+                    'a list of DiffusionModelBase or None'
                 )
             self._diffusion_models = diffusion_models
 
@@ -101,15 +99,15 @@ class SampleModel(ModelBase):
             self._temperature = None
         else:
             if not isinstance(temperature, Numeric):
-                raise TypeError("temperature must be a number or None")
+                raise TypeError('temperature must be a number or None')
 
             if temperature < 0:
-                raise ValueError("temperature must be non-negative")
+                raise ValueError('temperature must be non-negative')
             self._temperature = Parameter(
-                name="Temperature",
+                name='Temperature',
                 value=temperature,
                 unit=temperature_unit,
-                display_name="Temperature",
+                display_name='Temperature',
                 fixed=True,
             )
         self._temperature_unit = temperature_unit
@@ -119,9 +117,7 @@ class SampleModel(ModelBase):
         elif isinstance(detailed_balance_settings, DetailedBalanceSettings):
             self._detailed_balance_settings = detailed_balance_settings
         else:
-            raise TypeError(
-                "detailed_balance_settings must be a DetailedBalanceSettings or None"
-            )
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings or None')
 
     # ------------------------------------------------------------------
     # Component management
@@ -144,7 +140,7 @@ class SampleModel(ModelBase):
 
         if not isinstance(diffusion_model, DiffusionModelBase):
             raise TypeError(
-                f"diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}"  # noqa: E501
+                f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
             )
 
         self._diffusion_models.append(diffusion_model)
@@ -170,8 +166,8 @@ class SampleModel(ModelBase):
                 self._generate_component_collections()
                 return
         raise ValueError(
-            f"No DiffusionModel with name {name} found. \n"
-            f"The available names are: {[dm.name for dm in self._diffusion_models]}"
+            f'No DiffusionModel with name {name} found. \n'
+            f'The available names are: {[dm.name for dm in self._diffusion_models]}'
         )
 
     def clear_diffusion_models(self) -> None:
@@ -224,8 +220,8 @@ class SampleModel(ModelBase):
             isinstance(dm, DiffusionModelBase) for dm in value
         ):
             raise TypeError(
-                "diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, "
-                "or None"
+                'diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, '
+                'or None'
             )
         self._diffusion_models = value
         self._on_diffusion_models_change()
@@ -264,17 +260,17 @@ class SampleModel(ModelBase):
             return
 
         if not isinstance(value, Numeric):
-            raise TypeError("temperature must be a number or None")
+            raise TypeError('temperature must be a number or None')
 
         if value < 0:
-            raise ValueError("temperature must be non-negative")
+            raise ValueError('temperature must be non-negative')
 
         if self._temperature is None:
             self._temperature = Parameter(
-                name="Temperature",
+                name='Temperature',
                 value=value,
                 unit=self._temperature_unit,
-                display_name="Temperature",
+                display_name='Temperature',
                 fixed=True,
             )
         else:
@@ -309,8 +305,8 @@ class SampleModel(ModelBase):
         """
 
         raise AttributeError(
-            f"Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types "  # noqa: E501
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types '  # noqa: E501
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:
@@ -331,7 +327,7 @@ class SampleModel(ModelBase):
         """
 
         if self.temperature is None:
-            raise ValueError("Temperature is not set, cannot convert unit.")
+            raise ValueError('Temperature is not set, cannot convert unit.')
 
         old_unit = self.temperature.unit
 
@@ -372,7 +368,7 @@ class SampleModel(ModelBase):
             If value is not a bool.
         """
         if not isinstance(value, bool):
-            raise TypeError("normalize_detailed_balance must be True or False")
+            raise TypeError('normalize_detailed_balance must be True or False')
         self.detailed_balance_settings.normalize_detailed_balance = value
 
     @property
@@ -403,7 +399,7 @@ class SampleModel(ModelBase):
             If value is not a bool.
         """
         if not isinstance(value, bool):
-            raise TypeError("use_detailed_balance must be True or False")
+            raise TypeError('use_detailed_balance must be True or False')
         self.detailed_balance_settings.use_detailed_balance = value
 
     @property
@@ -434,9 +430,7 @@ class SampleModel(ModelBase):
             If value is not a DetailedBalanceSettings.
         """
         if not isinstance(value, DetailedBalanceSettings):
-            raise TypeError(
-                "detailed_balance_settings must be a DetailedBalanceSettings"
-            )
+            raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
         self._detailed_balance_settings = value
 
     # ------------------------------------------------------------------
@@ -463,10 +457,7 @@ class SampleModel(ModelBase):
 
         y = super().evaluate(x)
 
-        if (
-            self.temperature is not None
-            and self.detailed_balance_settings.use_detailed_balance
-        ):
+        if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             DBF = detailed_balance_factor(
                 energy=x,
                 temperature=self.temperature,
@@ -553,9 +544,9 @@ class SampleModel(ModelBase):
         """
 
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), "
-            f"Q = {self.Q}, \n "
-            f"components = {self.components}, diffusion_models = {self.diffusion_models}, "
-            f"temperature = {self.temperature}, "
-            f"detailed_balance_settings = {self.detailed_balance_settings}"
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), '
+            f'Q = {self.Q}, \n '
+            f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
+            f'temperature = {self.temperature}, '
+            f'detailed_balance_settings = {self.detailed_balance_settings}'
         )

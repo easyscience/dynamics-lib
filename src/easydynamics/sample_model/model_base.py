@@ -24,9 +24,9 @@ class ModelBase(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyModelBase",
+        display_name: str = 'MyModelBase',
         unique_name: str | None = None,
-        unit: str | sc.Unit | None = "meV",
+        unit: str | sc.Unit | None = 'meV',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
@@ -35,11 +35,11 @@ class ModelBase(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        display_name : str, default='MyModelBase'
+        display_name : str, default="MyModelBase"
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit | None, default='meV'
+        unit : str | sc.Unit | None, default="meV"
             Unit of the model.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
@@ -63,8 +63,8 @@ class ModelBase(EasyDynamicsModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f"Components must be a ModelComponent, a ComponentCollection or None, "
-                f"got {type(components).__name__}"
+                f'Components must be a ModelComponent, a ComponentCollection or None, '
+                f'got {type(components).__name__}'
             )
 
         self._components = ComponentCollection()
@@ -100,8 +100,8 @@ class ModelBase(EasyDynamicsModelBase):
 
         if not self._component_collections:
             raise ValueError(
-                "No components in the model to evaluate. "
-                "Run generate_component_collections() first"
+                'No components in the model to evaluate. '
+                'Run generate_component_collections() first'
             )
         return [collection.evaluate(x) for collection in self._component_collections]
 
@@ -169,9 +169,7 @@ class ModelBase(EasyDynamicsModelBase):
             If value is not a ModelComponent, ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
-            raise TypeError(
-                "Components must be a ModelComponent or a ComponentCollection"
-            )
+            raise TypeError('Components must be a ModelComponent or a ComponentCollection')
 
         self.clear_components()
         if value is not None:
@@ -219,8 +217,8 @@ class ModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                "New Q values are not similar to the old ones. "
-                "To change Q values, first run clear_Q()."
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
@@ -240,7 +238,7 @@ class ModelBase(EasyDynamicsModelBase):
         """
         if not confirm:
             raise ValueError(
-                "Clearing Q values requires confirmation. Set confirm=True to proceed."
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
         self._on_Q_change()
@@ -269,9 +267,7 @@ class ModelBase(EasyDynamicsModelBase):
         old_unit = self._unit
 
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
-            )
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
         try:
             for component in self.components:
                 component.convert_unit(unit)
@@ -330,13 +326,11 @@ class ModelBase(EasyDynamicsModelBase):
             ]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(
-                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
-                )
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
             if Q_index < 0 or Q_index >= len(self._component_collections):
                 raise IndexError(
-                    f"Q_index {Q_index} is out of bounds for component collections "
-                    f"of length {len(self._component_collections)}"
+                    f'Q_index {Q_index} is out of bounds for component collections '
+                    f'of length {len(self._component_collections)}'
                 )
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
@@ -363,11 +357,11 @@ class ModelBase(EasyDynamicsModelBase):
             The ComponentCollection at the.
         """
         if not isinstance(Q_index, int):
-            raise TypeError(f"Q_index must be an int, got {type(Q_index).__name__}")
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
         if Q_index < 0 or Q_index >= len(self._component_collections):
             raise IndexError(
-                f"Q_index {Q_index} is out of bounds for component collections "
-                f"of length {len(self._component_collections)}"
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
 
@@ -413,6 +407,6 @@ class ModelBase(EasyDynamicsModelBase):
             A string representation of the ModelBase.
         """
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, "
-            f"unit={self.unit}), Q = {self.Q}, components = {self.components}"
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'unit={self.unit}), Q = {self.Q}, components = {self.components}'
         )
