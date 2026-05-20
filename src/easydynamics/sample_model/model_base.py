@@ -383,12 +383,12 @@ class ModelBase(EasyDynamicsModelBase):
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
 
-        if self._Q is None:
+        if self.Q is None:
             self._component_collections = []
             return
 
         self._component_collections = []
-        for _ in self._Q:
+        for _ in self.Q:
             self._component_collections.append(copy(self._components))
 
     def _on_Q_change(self) -> None:

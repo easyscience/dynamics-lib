@@ -60,6 +60,7 @@ class DeltaLorentz(DiffusionModelBase):
         A_0: Numeric = 1.0,
         lorentzian_width: Numeric = 1.0,
         allow_Q_variation: dict | None = None,
+        Q: Q_type | None = None,
         unit: str | sc.Unit = "meV",
         name: str = "DeltaLorentz",
         display_name: str | None = None,
@@ -82,6 +83,8 @@ class DeltaLorentz(DiffusionModelBase):
             Width of the Lorentzian function.
         allow_Q_variation : dict | None, default=None
             Dict describing whether to allow Q variation of A_0 and the Lorentzian width. The dict should have the keys "A_0" and "lorentzian_width", with boolean values indicating whether to allow Q-dependence for each parameter. If None, no Q-dependence will be allowed.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set.
         display_name : str | None, default="DeltaLorentz"
             Display name of the diffusion model.
         unique_name : str | None, default=None
@@ -103,6 +106,7 @@ class DeltaLorentz(DiffusionModelBase):
         super().__init__(
             scale=scale,
             unit=unit,
+            Q=Q,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
@@ -151,7 +155,6 @@ class DeltaLorentz(DiffusionModelBase):
             max=1.0,
         )
         self._A_0 = A_0
-        self._A_0_list = []
 
         A_1 = Parameter.from_dependency(
             name="A_1",
@@ -159,7 +162,6 @@ class DeltaLorentz(DiffusionModelBase):
             dependency_map={"A_0": A_0},
         )
         self._A_1 = A_1
-        self._A_1_list = []
 
         mean_u_squared = Parameter(
             name="mean_u_squared",
@@ -178,7 +180,26 @@ class DeltaLorentz(DiffusionModelBase):
             unit=unit,
         )
         self._lorentzian_width = lorentzian_width
-        self._lorentzian_width_list = []
+
+        if self.Q is None:
+            self._A_0_list = []
+            self._A_1_list = []
+            self._lorentzian_width_list = []
+        else:
+            if self._allow_Q_variation["A_0"] is True:
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameters(
+                    A_0, self.Q
+                )
+            else:
+                self._A_0_list = []
+                self._A_1_list = []
+
+            if self._allow_Q_variation["lorentzian_width"] is True:
+                self._lorentzian_width_list = self._create_lorentzian_width_parameters(
+                    lorentzian_width, self.Q
+                )
+            else:
+                self._lorentzian_width_list = []
 
     # ------------------------------------------------------------------
     # Properties
