@@ -18845,7 +18845,15 @@ fit function callable.</p>
 <span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
-<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FitBinding</span><span class="p">(</span><span class="n">EasyDynamicsBase</span><span class="p">):</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FitBinding</span><span class="p">(</span><span class="n">EasyDynamicsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Contract between dataset, model, and fit function for ParameterAnalysis. This class</span>
 <span class="sd">    encapsulates the necessary information to bind a dataset key to a model and convert it into a</span>
@@ -19088,6 +19096,11 @@ fit function callable.</p>
         <span class="n">modes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_modes</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DiffusionModelBase</span><span class="p">):</span>
+            <span class="c1"># This needs to be generalised.</span>
+            <span class="c1"># TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003</span>
+            <span class="k">if</span> <span class="s1">&#39;delta&#39;</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="si">}</span><span class="s1"> area&#39;</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">]</span>
+
             <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">]</span>
@@ -19122,6 +19135,9 @@ fit function callable.</p>
 
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;width&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">calculate_width</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;delta&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">calculate_EISF</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">scale</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown diffusion mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -19914,7 +19930,12 @@ strings, or None.</p>
 <span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
-<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the names of the parameters based on the current modes.</span>
 
@@ -19926,6 +19947,11 @@ strings, or None.</p>
     <span class="n">modes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_modes</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DiffusionModelBase</span><span class="p">):</span>
+        <span class="c1"># This needs to be generalised.</span>
+        <span class="c1"># TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003</span>
+        <span class="k">if</span> <span class="s1">&#39;delta&#39;</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="si">}</span><span class="s1"> area&#39;</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">modes</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_name</span><span class="p">]</span>
@@ -19980,22 +20006,22 @@ strings, or None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/analysis/fit_binding.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
-<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a string representation of the FitBinding.</span>
 
