@@ -189,6 +189,32 @@ class DiffusionModelBase(EasyDynamicsModelBase):
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
 
+    def _ensure_Q(self, Q: Q_type) -> np.ndarray:
+        """
+        Convert Q to a numpy array, ensuring it is not None.
+        Uses the stored Q if no input is given.
+
+        Parameters:
+        -----------
+        Q : Q_type
+            The Q to be checked
+
+        Raises:
+        -------
+        ValueError
+            If the provided Q and self.Q are both None
+
+
+        """
+        if Q is None:
+            Q = self.Q
+        if Q is None:
+            raise ValueError(
+                "Q must be provided either as an argument or set in the model."
+            )
+
+        return _validate_and_convert_Q(Q)
+
     # ------------------------------------------------------------------
     # dunder methods
     # ------------------------------------------------------------------

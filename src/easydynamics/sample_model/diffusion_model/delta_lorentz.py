@@ -15,7 +15,6 @@ from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
 )
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
-from easydynamics.utils.utils import _validate_and_convert_Q
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
@@ -30,7 +29,7 @@ class DeltaLorentz(DiffusionModelBase):
     the scattering vector, $A_0$ and $A_1$ are the relative amplitudes of the delta function and
     Lorentzian, respectively, with the constraint that $A_0+A_1=1$, and $L(E, \Gamma)$ is the
     Lorentzian function with width $\Gamma$. $A_0$, $A_1$ and the width of the Lorentzian can be
-    Q-dependent or not.
+    the same at all $Q$ or be allowed to vary with $Q$.
 
 
     Examples
@@ -372,13 +371,7 @@ class DeltaLorentz(DiffusionModelBase):
             ]
             return np.array(widths)
 
-        if Q is None:
-            Q = self.Q
-        if Q is None:
-            raise ValueError(
-                "Q must be provided either as an argument or set in the model."
-            )
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
 
         widths = self.lorentzian_width.value * np.ones_like(Q)
 
@@ -403,13 +396,7 @@ class DeltaLorentz(DiffusionModelBase):
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
 
         # Need to handle units better
-        if Q is None:
-            Q = self.Q
-        if Q is None:
-            raise ValueError(
-                "Q must be provided either as an argument or set in the model."
-            )
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
 
         A_0_values = [self.A_0.value] * len(Q)
         return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
@@ -432,14 +419,7 @@ class DeltaLorentz(DiffusionModelBase):
             A_1_values = [A_1_.value for A_1_ in self._A_1_list]
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
-        if Q is None:
-            Q = self.Q
-        if Q is None:
-            raise ValueError(
-                "Q must be provided either as an argument or set in the model."
-            )
-
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
         A_1_values = [self.A_1.value] * len(Q)
         return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
@@ -605,6 +585,7 @@ class DeltaLorentz(DiffusionModelBase):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values. Updates the A_0, A_1 and lorentzian_width parameters if they are allowed to vary with Q."""
         if self.Q is None:
