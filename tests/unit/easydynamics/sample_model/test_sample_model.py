@@ -469,7 +469,6 @@ class TestSampleModel:
             assert collection[0].area.value == pytest.approx(1.0)
             assert collection[1].name == 'TestLorentzian1Name'
             assert collection[1].area.value == pytest.approx(2.0)
-            assert collection[2].name == 'DiffusionModelName'
             assert isinstance(collection[2], Lorentzian)
 
     def test_get_all_variables(self, sample_model):

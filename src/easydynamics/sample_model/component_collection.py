@@ -64,9 +64,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         ----------
         components : ModelComponent | list[ModelComponent] | None, default=None
             Initial model components to add to the ComponentCollection.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the collection.
-        name : str, default="ComponentCollection"
+        name : str, default='ComponentCollection'
             Name of the collection.
         display_name : str | None, default=None
             Display name of the collection.

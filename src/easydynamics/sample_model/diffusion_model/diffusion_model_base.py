@@ -8,6 +8,7 @@ from easyscience.variable import Parameter
 from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -20,9 +21,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self,
         scale: Numeric = 1.0,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = "meV",
-        name: str = "DiffusionModel",
-        display_name: str | None = "MyDiffusionModel",
+        unit: str | sc.Unit = 'meV',
+        name: str = 'DiffusionModel',
+        display_name: str | None = 'MyDiffusionModel',
         unique_name: str | None = None,
     ) -> None:
         """
@@ -34,11 +35,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Scale factor for the diffusion model. Must be a non-negative number.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default="DiffusionModel"
+        name : str, default='DiffusionModel'
             Name of the diffusion model.
-        display_name : str | None, default="MyDiffusionModel"
+        display_name : str | None, default='MyDiffusionModel'
             Display name of the diffusion model.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
@@ -55,23 +56,19 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._Q = _validate_and_convert_Q(Q)
 
         try:
-            test = DescriptorNumber(name="test", value=1, unit=unit)
-            test.convert_unit("meV")
+            test = DescriptorNumber(name='test', value=1, unit=unit)
+            test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f"Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
-        scale = Parameter(
-            name="scale", value=float(scale), fixed=False, min=0.0, unit=unit
-        )
+        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
 
-        super().__init__(
-            unit=unit, name=name, display_name=display_name, unique_name=unique_name
-        )
+        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
         self._scale = scale
 
     # ------------------------------------------------------------------
@@ -108,10 +105,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
         if float(scale) < 0:
-            raise ValueError("scale must be non-negative.")
+            raise ValueError('scale must be non-negative.')
         self._scale.value = float(scale)
 
     @property
@@ -156,8 +153,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                "New Q values are not similar to the old ones. "
-                "To change Q values, first run clear_Q()."
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
@@ -177,10 +174,51 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         if not confirm:
             raise ValueError(
-                "Clearing Q values requires confirmation. Set confirm=True to proceed."
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
         self._on_Q_change()
+
+    # ------------------------------------------------------------------
+    # private methods
+    # ------------------------------------------------------------------
+
+    def get_component_collections(
+        self, Q_index: int | None = None
+    ) -> ComponentCollection | list[ComponentCollection]:
+        """
+        Get the ComponentCollection at the given Q index.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the desired ComponentCollection. If None, all ComponentCollections are
+            returned.
+
+        Raises
+        ------
+        TypeError
+            If Q_index is not an int.
+        IndexError
+            If Q_index is out of bounds for the number of ComponentCollections.
+
+        Returns
+        -------
+        ComponentCollection | list[ComponentCollection]
+            The ComponentCollection at the specified Q index. If Q_index is None, a list of all
+            ComponentCollections is returned.
+        """
+        if Q_index is None:
+            return self._component_collections
+
+        if not isinstance(Q_index, int):
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
+        if Q_index < 0 or Q_index >= len(self._component_collections):
+            raise IndexError(
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
+            )
+        return self._component_collections[Q_index]
 
     # ------------------------------------------------------------------
     # private methods
@@ -191,27 +229,28 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """
-        Convert Q to a numpy array, ensuring it is not None.
-        Uses the stored Q if no input is given.
+        Convert Q to a numpy array, ensuring it is not None. Uses the stored Q if no input is
+        given.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         Q : Q_type
             The Q to be checked
 
-        Raises:
+        Returns
         -------
+        np.ndarray
+            The validated and converted Q values.
+
+        Raises
+        ------
         ValueError
             If the provided Q and self.Q are both None
-
-
         """
         if Q is None:
             Q = self.Q
         if Q is None:
-            raise ValueError(
-                "Q must be provided either as an argument or set in the model."
-            )
+            raise ValueError('Q must be provided either as an argument or set in the model.')
 
         return _validate_and_convert_Q(Q)
 
@@ -229,7 +268,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f"{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, "
-            f"unit={self.unit}), \n"
-            f"    scale={self.scale})"
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'unit={self.unit}), \n'
+            f'    scale={self.scale})'
         )

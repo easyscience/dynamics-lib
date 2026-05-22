@@ -35,11 +35,11 @@ class ModelBase(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        display_name : str, default="MyModelBase"
+        display_name : str, default='MyModelBase'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit | None, default="meV"
+        unit : str | sc.Unit | None, default='meV'
             Unit of the model.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
