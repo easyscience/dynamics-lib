@@ -16,6 +16,10 @@ from easydynamics.sample_model.components.voigt import Voigt
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+    JumpTranslationalDiffusion,
+)
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
 from easydynamics.sample_model.sample_model import SampleModel
@@ -26,10 +30,12 @@ __all__ = [
     'ComponentCollection',
     'DampedHarmonicOscillator',
     'DeltaFunction',
+    'DeltaLorentz',
     'Exponential',
     'ExpressionComponent',
     'Gaussian',
     'InstrumentModel',
+    'JumpTranslationalDiffusion',
     'Lorentzian',
     'Polynomial',
     'ResolutionModel',

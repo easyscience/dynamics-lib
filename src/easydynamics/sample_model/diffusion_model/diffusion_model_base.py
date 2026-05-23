@@ -24,6 +24,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         unit: str | sc.Unit = 'meV',
         name: str = 'DiffusionModel',
         display_name: str | None = 'MyDiffusionModel',
+        lorentzian_name: str | None = None,
+        lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -41,6 +43,12 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Name of the diffusion model.
         display_name : str | None, default='MyDiffusionModel'
             Display name of the diffusion model.
+        lorentzian_name : str | None, default=None
+            Name of the Lorentzian component. If None, it will be set to the name of the diffusion
+            model.
+        lorentzian_display_name : str | None, default=None
+            Display name of the Lorentzian component. If None, it will be set to the
+            lorentzian_name.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
@@ -67,9 +75,24 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             raise TypeError('scale must be a number.')
 
         scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
+        self._scale = scale
 
         super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
-        self._scale = scale
+
+        if lorentzian_name is None:
+            lorentzian_name = name
+
+        if not isinstance(lorentzian_name, str):
+            raise TypeError('lorentzian_name must be a string.')
+
+        if lorentzian_display_name is None:
+            lorentzian_display_name = lorentzian_name
+
+        if not isinstance(lorentzian_display_name, str):
+            raise TypeError('lorentzian_display_name must be a string.')
+
+        self._lorentzian_name = lorentzian_name
+        self._lorentzian_display_name = lorentzian_display_name
 
     # ------------------------------------------------------------------
     # Properties
@@ -157,6 +180,71 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 'To change Q values, first run clear_Q().'
             )
 
+    @property
+    def lorentzian_name(self) -> str:
+        """
+        Get the name of the Lorentzian component.
+
+        Returns
+        -------
+        str
+            Name of the Lorentzian component.
+        """
+        return self._lorentzian_name
+
+    @lorentzian_name.setter
+    def lorentzian_name(self, lorentzian_name: str) -> None:
+        """
+        Set the name of the Lorentzian component.
+
+        Parameters
+        ----------
+        lorentzian_name : str
+            The new name for the Lorentzian component.
+
+        Raises
+        ------
+        TypeError
+            If lorentzian_name is not a string.
+        """
+        if not isinstance(lorentzian_name, str):
+            raise TypeError('lorentzian_name must be a string.')
+        self._lorentzian_name = lorentzian_name
+
+        if self.lorentzian_display_name is None:
+            self.lorentzian_display_name = lorentzian_name
+
+    @property
+    def lorentzian_display_name(self) -> str:
+        """
+        Get the display name of the Lorentzian component.
+
+        Returns
+        -------
+        str
+            Display name of the Lorentzian component.
+        """
+        return self._lorentzian_display_name
+
+    @lorentzian_display_name.setter
+    def lorentzian_display_name(self, lorentzian_display_name: str | None) -> None:
+        """
+        Set the display name of the Lorentzian component.
+
+        Parameters
+        ----------
+        lorentzian_display_name : str | None
+            The new display name for the Lorentzian component.
+
+        Raises
+        ------
+        TypeError
+            If lorentzian_display_name is not a string or None.
+        """
+        if not isinstance(lorentzian_display_name, (str, type(None))):
+            raise TypeError('lorentzian_display_name must be a string or None.')
+        self._lorentzian_display_name = lorentzian_display_name
+
     def clear_Q(self, confirm: bool = False) -> None:
         """
         Clear the Q values of the SampleModel, removing all component collections and their
@@ -219,6 +307,26 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
+
+    def get_all_variables(
+        self,
+        Q_index: int | None = None,  # noqa ARG002
+    ) -> list[Parameter]:
+        """
+        Get all Parameters from the ComponentCollection at the given Q index.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            Unused parameter for compatibility with SampleModel.
+
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all Parameters from the specified ComponentCollection(s).
+        """
+        return super().get_all_variables()
 
     # ------------------------------------------------------------------
     # private methods

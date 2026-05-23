@@ -45,6 +45,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         unit: str | sc.Unit = 'meV',
         name: str = 'BrownianTranslationalDiffusion',
         display_name: str | None = 'BrownianTranslationalDiffusion',
+        lorentzian_name: str | None = None,
+        lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -64,6 +66,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Name of the diffusion model.
         display_name : str | None, default='BrownianTranslationalDiffusion'
             Display name of the diffusion model.
+        lorentzian_name : str | None, default=None
+            Name of the Lorentzian component. If None, it will be set to the name of the diffusion
+            model.
+        lorentzian_display_name : str | None, default=None
+            Display name of the Lorentzian component. If None, it will be set to the
+            lorentzian_name.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
@@ -102,6 +110,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             name=name,
             display_name=display_name,
             unique_name=unique_name,
+            lorentzian_name=lorentzian_name,
+            lorentzian_display_name=lorentzian_display_name,
         )
         self._hbar = hbar
         self._angstrom = angstrom
@@ -212,24 +222,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     def create_component_collections(
         self,
-        component_name: str = 'Brownian diffusion',
-        component_display_name: str | None = None,
     ) -> list[ComponentCollection]:
         r"""
         Create ComponentCollection components for the Brownian translational diffusion model at
         given Q values.
-
-        Parameters
-        ----------
-        component_name : str, default='Brownian diffusion'
-            Name of the Brownian diffusion component.
-        component_display_name : str | None, default=None
-            Display name of the Brownian diffusion component.
-
-        Raises
-        ------
-        TypeError
-            If component_display_name is not a string. If component_name is not a string.
 
         Returns
         -------
@@ -242,15 +238,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         if Q is None:
             self._component_collections = []
             return self._component_collections
-
-        if not isinstance(component_name, str):
-            raise TypeError('component_name must be a string.')
-
-        if component_display_name is None:
-            component_display_name = component_name
-
-        if not isinstance(component_display_name, str):
-            raise TypeError('component_display_name must be a string.')
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -268,8 +255,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             )
 
             lorentzian_component = Lorentzian(
-                name=component_name,
-                display_name=component_display_name,
+                name=self.lorentzian_name,
+                display_name=self.lorentzian_display_name,
                 unit=self.unit,
             )
 

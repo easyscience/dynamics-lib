@@ -166,22 +166,6 @@ class TestBrownianTranslationalDiffusion:
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
 
-    def test_create_component_collections_component_name_must_be_string(
-        self, brownian_diffusion_model
-    ):
-        brownian_diffusion_model.Q = 0.5  # Set a valid Q value to ensure we get past the Q check
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_name must be a string.'):
-            brownian_diffusion_model.create_component_collections(component_name=123)
-
-    def test_create_component_collections_component_display_name_must_be_string(
-        self, brownian_diffusion_model
-    ):
-        brownian_diffusion_model.Q = 0.5  # Set a valid Q value to ensure we get past the Q check
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_display_name must be a string.'):
-            brownian_diffusion_model.create_component_collections(component_display_name=123)
-
     def test_write_width_dependency_expression(self, brownian_diffusion_model):
         # WHEN THEN
         expression = brownian_diffusion_model._write_width_dependency_expression(0.5)

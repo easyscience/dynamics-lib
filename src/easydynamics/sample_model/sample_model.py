@@ -502,7 +502,7 @@ class SampleModel(ModelBase):
             all_vars.append(self.temperature)
 
         for diffusion_model in self.diffusion_models:
-            all_vars.extend(diffusion_model.get_all_variables())
+            all_vars.extend(diffusion_model.get_all_variables(Q_index=Q_index))
 
         return all_vars
 
