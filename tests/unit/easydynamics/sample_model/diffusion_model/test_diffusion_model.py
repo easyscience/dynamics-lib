@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import numpy as np
 import pytest
 from easyscience.variable.parameter import Parameter
 
@@ -14,10 +15,10 @@ class TestDiffusionModel:
 
     def test_init_default(self, diffusion_model):
         # WHEN THEN EXPECT
-        assert diffusion_model.display_name == 'MyDiffusionModel'
-        assert diffusion_model.name == 'MyDiffusionModel'
-        assert diffusion_model.lorentzian_name == 'MyDiffusionModel'
-        assert diffusion_model.lorentzian_display_name == 'MyDiffusionModel'
+        assert diffusion_model.display_name == 'DiffusionModel'
+        assert diffusion_model.name == 'DiffusionModel'
+        assert diffusion_model.lorentzian_name == 'DiffusionModel'
+        assert diffusion_model.lorentzian_display_name == 'DiffusionModel'
         assert diffusion_model.unit == 'meV'
 
     def test_init_raises(self):
@@ -130,7 +131,7 @@ class TestDiffusionModel:
         diffusion_model.Q = [1.0, 2.0, 3.0]
 
         # EXPECT
-        assert diffusion_model.Q == [1.0, 2.0, 3.0]
+        np.testing.assert_allclose(diffusion_model.Q, [1.0, 2.0, 3.0])
 
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'New Q values are not similar to the old ones'):

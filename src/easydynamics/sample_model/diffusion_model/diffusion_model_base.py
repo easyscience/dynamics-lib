@@ -23,7 +23,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         Q: Q_type | None = None,
         unit: str | sc.Unit = 'meV',
         name: str = 'DiffusionModel',
-        display_name: str | None = 'MyDiffusionModel',
+        display_name: str | None = 'DiffusionModel',
         lorentzian_name: str | None = None,
         lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
@@ -41,7 +41,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Unit of the diffusion model. Must be convertible to meV.
         name : str, default='DiffusionModel'
             Name of the diffusion model.
-        display_name : str | None, default='MyDiffusionModel'
+        display_name : str | None, default='DiffusionModel'
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -94,7 +94,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._lorentzian_name = lorentzian_name
         self._lorentzian_display_name = lorentzian_display_name
 
-        self._component_collections = self.create_component_collections()
+        if self.Q is None:
+            self._component_collections = []
+        else:
+            self._component_collections = [ComponentCollection()] * len(self.Q)
 
     # ------------------------------------------------------------------
     # Properties
