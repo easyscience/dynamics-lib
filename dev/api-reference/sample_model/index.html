@@ -19785,7 +19785,9 @@ Q-values.</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Brownian translational diffusion, consisting of a Lorentzian function for each</span>
 <span class="sd">    Q-value, where the width is given by $D Q^2$, where $D$ is the diffusion coefficient. The area</span>
@@ -19829,11 +19831,11 @@ Q-values.</p>
 <span class="sd">            Diffusion coefficient D in m^2/s.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Name of the diffusion model.</span>
-<span class="sd">        display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Display name of the diffusion model.</span>
 <span class="sd">        lorentzian_name : str | None, default=None</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -19853,6 +19855,17 @@ Q-values.</p>
 <span class="sd">        ValueError</span>
 <span class="sd">            If scale or diffusion_coefficient is negative.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -19872,16 +19885,7 @@ Q-values.</p>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
             <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-        <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -20327,7 +20331,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -20346,7 +20350,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -20365,7 +20369,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -20553,7 +20557,9 @@ default, None.</p>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">diffusion_coefficient</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -20576,11 +20582,11 @@ default, None.</p>
 <span class="sd">        Diffusion coefficient D in m^2/s.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Name of the diffusion model.</span>
-<span class="sd">    display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Display name of the diffusion model.</span>
 <span class="sd">    lorentzian_name : str | None, default=None</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -20600,6 +20606,17 @@ default, None.</p>
 <span class="sd">    ValueError</span>
 <span class="sd">        If scale or diffusion_coefficient is negative.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -20619,16 +20636,7 @@ default, None.</p>
         <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
         <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-    <span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -20719,9 +20727,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -20737,7 +20743,9 @@ default, None.</p>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the half-width at half-maximum (HWHM) for the diffusion model.</span>
 
@@ -20842,9 +20850,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
@@ -20859,7 +20865,9 @@ diffusion model.</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational</span>
 <span class="sd">    diffusion model.</span>
@@ -20962,9 +20970,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -20978,7 +20984,9 @@ diffusion model.</p>
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).</span>
 
@@ -21049,9 +21057,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
@@ -21108,7 +21114,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -21219,9 +21227,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
@@ -21233,7 +21239,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the BrownianTranslationalDiffusion model.</span>
 
@@ -22389,19 +22397,19 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="sd">            allowed.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&quot;DeltaLorentz&quot;</span>
+<span class="sd">        name : str, default=&#39;DeltaLorentz&#39;</span>
 <span class="sd">            Name of the diffusion model.</span>
 <span class="sd">        display_name : str | None, default=None</span>
 <span class="sd">            Display name of the diffusion model.</span>
-<span class="sd">        lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
+<span class="sd">        lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">            model.</span>
 <span class="sd">        lorentzian_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">            of the diffusion model.</span>
-<span class="sd">        delta_name : str, default=&quot;Delta function&quot;</span>
+<span class="sd">        delta_name : str, default=&#39;Delta function&#39;</span>
 <span class="sd">            Name of the delta function component.</span>
 <span class="sd">        delta_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the delta function component. If None, it will be set to the display</span>
@@ -23803,7 +23811,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;meV&#34;</code>
+                  <code>&#39;meV&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23822,7 +23830,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;DeltaLorentz&#34;</code>
+                  <code>&#39;DeltaLorentz&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23861,7 +23869,7 @@ model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;Lorentzian&#34;</code>
+                  <code>&#39;Lorentzian&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23900,7 +23908,7 @@ of the diffusion model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;Delta function&#34;</code>
+                  <code>&#39;Delta function&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -24127,19 +24135,19 @@ default, None.</p>
 <span class="sd">        allowed.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&quot;DeltaLorentz&quot;</span>
+<span class="sd">    name : str, default=&#39;DeltaLorentz&#39;</span>
 <span class="sd">        Name of the diffusion model.</span>
 <span class="sd">    display_name : str | None, default=None</span>
 <span class="sd">        Display name of the diffusion model.</span>
-<span class="sd">    lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
+<span class="sd">    lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">        model.</span>
 <span class="sd">    lorentzian_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">        of the diffusion model.</span>
-<span class="sd">    delta_name : str, default=&quot;Delta function&quot;</span>
+<span class="sd">    delta_name : str, default=&#39;Delta function&#39;</span>
 <span class="sd">        Name of the delta function component.</span>
 <span class="sd">    delta_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the delta function component. If None, it will be set to the display</span>
@@ -60159,7 +60167,9 @@ Q-values.</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Brownian translational diffusion, consisting of a Lorentzian function for each</span>
 <span class="sd">    Q-value, where the width is given by $D Q^2$, where $D$ is the diffusion coefficient. The area</span>
@@ -60203,11 +60213,11 @@ Q-values.</p>
 <span class="sd">            Diffusion coefficient D in m^2/s.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Name of the diffusion model.</span>
-<span class="sd">        display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Display name of the diffusion model.</span>
 <span class="sd">        lorentzian_name : str | None, default=None</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -60227,6 +60237,17 @@ Q-values.</p>
 <span class="sd">        ValueError</span>
 <span class="sd">            If scale or diffusion_coefficient is negative.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -60246,16 +60267,7 @@ Q-values.</p>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
             <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-        <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -60701,7 +60713,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -60720,7 +60732,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -60739,7 +60751,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -60927,7 +60939,9 @@ default, None.</p>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">diffusion_coefficient</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -60950,11 +60964,11 @@ default, None.</p>
 <span class="sd">        Diffusion coefficient D in m^2/s.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Name of the diffusion model.</span>
-<span class="sd">    display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Display name of the diffusion model.</span>
 <span class="sd">    lorentzian_name : str | None, default=None</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -60974,6 +60988,17 @@ default, None.</p>
 <span class="sd">    ValueError</span>
 <span class="sd">        If scale or diffusion_coefficient is negative.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -60993,16 +61018,7 @@ default, None.</p>
         <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
         <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-    <span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -61093,9 +61109,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -61111,7 +61125,9 @@ default, None.</p>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the half-width at half-maximum (HWHM) for the diffusion model.</span>
 
@@ -61216,9 +61232,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
@@ -61233,7 +61247,9 @@ diffusion model.</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational</span>
 <span class="sd">    diffusion model.</span>
@@ -61336,9 +61352,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -61352,7 +61366,9 @@ diffusion model.</p>
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).</span>
 
@@ -61423,9 +61439,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
@@ -61482,7 +61496,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -61593,9 +61609,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
@@ -61607,7 +61621,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the BrownianTranslationalDiffusion model.</span>
 
@@ -64200,7 +64216,9 @@ Q-values.</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Brownian translational diffusion, consisting of a Lorentzian function for each</span>
 <span class="sd">    Q-value, where the width is given by $D Q^2$, where $D$ is the diffusion coefficient. The area</span>
@@ -64244,11 +64262,11 @@ Q-values.</p>
 <span class="sd">            Diffusion coefficient D in m^2/s.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Name of the diffusion model.</span>
-<span class="sd">        display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">        display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">            Display name of the diffusion model.</span>
 <span class="sd">        lorentzian_name : str | None, default=None</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -64268,6 +64286,17 @@ Q-values.</p>
 <span class="sd">        ValueError</span>
 <span class="sd">            If scale or diffusion_coefficient is negative.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -64287,16 +64316,7 @@ Q-values.</p>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
             <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-            <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-            <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-            <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-        <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -64742,7 +64762,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -64761,7 +64781,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -64780,7 +64800,7 @@ Q-values.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;BrownianTranslationalDiffusion&#39;</code>
+                  <code>&#34;BrownianTranslationalDiffusion&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -64968,7 +64988,9 @@ default, None.</p>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">diffusion_coefficient</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -64991,11 +65013,11 @@ default, None.</p>
 <span class="sd">        Diffusion coefficient D in m^2/s.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    name : str, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Name of the diffusion model.</span>
-<span class="sd">    display_name : str | None, default=&#39;BrownianTranslationalDiffusion&#39;</span>
+<span class="sd">    display_name : str | None, default=&quot;BrownianTranslationalDiffusion&quot;</span>
 <span class="sd">        Display name of the diffusion model.</span>
 <span class="sd">    lorentzian_name : str | None, default=None</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -65015,6 +65037,17 @@ default, None.</p>
 <span class="sd">    ValueError</span>
 <span class="sd">        If scale or diffusion_coefficient is negative.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
+        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
+        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;scale must be a number.&#39;</span><span class="p">)</span>
 
@@ -65034,16 +65067,7 @@ default, None.</p>
         <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m**2/s&#39;</span><span class="p">,</span>
         <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-        <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span>
-        <span class="n">unique_name</span><span class="o">=</span><span class="n">unique_name</span><span class="p">,</span>
-        <span class="n">lorentzian_name</span><span class="o">=</span><span class="n">lorentzian_name</span><span class="p">,</span>
-        <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
-    <span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_hbar</span> <span class="o">=</span> <span class="n">hbar</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_angstrom</span> <span class="o">=</span> <span class="n">angstrom</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
@@ -65134,9 +65158,7 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -65152,7 +65174,9 @@ default, None.</p>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the half-width at half-maximum (HWHM) for the diffusion model.</span>
 
@@ -65257,9 +65281,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
@@ -65274,7 +65296,9 @@ diffusion model.</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_EISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational</span>
 <span class="sd">    diffusion model.</span>
@@ -65377,9 +65401,7 @@ diffusion model.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -65393,7 +65415,9 @@ diffusion model.</p>
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_QISF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).</span>
 
@@ -65464,9 +65488,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
@@ -65523,7 +65545,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -65634,9 +65658,7 @@ multiplied by the QISF (which is 1 for this model).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/brownian_translational_diffusion.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
@@ -65648,7 +65670,9 @@ multiplied by the QISF (which is 1 for this model).</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the BrownianTranslationalDiffusion model.</span>
 
@@ -66844,19 +66868,19 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="sd">            allowed.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&quot;DeltaLorentz&quot;</span>
+<span class="sd">        name : str, default=&#39;DeltaLorentz&#39;</span>
 <span class="sd">            Name of the diffusion model.</span>
 <span class="sd">        display_name : str | None, default=None</span>
 <span class="sd">            Display name of the diffusion model.</span>
-<span class="sd">        lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
+<span class="sd">        lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">            model.</span>
 <span class="sd">        lorentzian_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">            of the diffusion model.</span>
-<span class="sd">        delta_name : str, default=&quot;Delta function&quot;</span>
+<span class="sd">        delta_name : str, default=&#39;Delta function&#39;</span>
 <span class="sd">            Name of the delta function component.</span>
 <span class="sd">        delta_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the delta function component. If None, it will be set to the display</span>
@@ -68258,7 +68282,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;meV&#34;</code>
+                  <code>&#39;meV&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68277,7 +68301,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;DeltaLorentz&#34;</code>
+                  <code>&#39;DeltaLorentz&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68316,7 +68340,7 @@ model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;Lorentzian&#34;</code>
+                  <code>&#39;Lorentzian&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68355,7 +68379,7 @@ of the diffusion model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;Delta function&#34;</code>
+                  <code>&#39;Delta function&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68582,19 +68606,19 @@ default, None.</p>
 <span class="sd">        allowed.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&quot;DeltaLorentz&quot;</span>
+<span class="sd">    name : str, default=&#39;DeltaLorentz&#39;</span>
 <span class="sd">        Name of the diffusion model.</span>
 <span class="sd">    display_name : str | None, default=None</span>
 <span class="sd">        Display name of the diffusion model.</span>
-<span class="sd">    lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
+<span class="sd">    lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">        model.</span>
 <span class="sd">    lorentzian_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">        of the diffusion model.</span>
-<span class="sd">    delta_name : str, default=&quot;Delta function&quot;</span>
+<span class="sd">    delta_name : str, default=&#39;Delta function&#39;</span>
 <span class="sd">        Name of the delta function component.</span>
 <span class="sd">    delta_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the delta function component. If None, it will be set to the display</span>
@@ -69990,7 +70014,29 @@ values will be included.</p>
 <span class="normal">376</span>
 <span class="normal">377</span>
 <span class="normal">378</span>
-<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DiffusionModelBase</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DiffusionModelBase</span><span class="p">(</span><span class="n">EasyDynamicsModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for constructing diffusion models.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -69999,7 +70045,7 @@ values will be included.</p>
         <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
-        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyDiffusionModel&#39;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
         <span class="n">lorentzian_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lorentzian_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -70017,7 +70063,7 @@ values will be included.</p>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
 <span class="sd">        name : str, default=&#39;DiffusionModel&#39;</span>
 <span class="sd">            Name of the diffusion model.</span>
-<span class="sd">        display_name : str | None, default=&#39;MyDiffusionModel&#39;</span>
+<span class="sd">        display_name : str | None, default=&#39;DiffusionModel&#39;</span>
 <span class="sd">            Display name of the diffusion model.</span>
 <span class="sd">        lorentzian_name : str | None, default=None</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -70065,10 +70111,15 @@ values will be included.</p>
             <span class="n">lorentzian_display_name</span> <span class="o">=</span> <span class="n">lorentzian_name</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lorentzian_display_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lorentzian_display_name must be a string.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lorentzian_display_name must be a string or None.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_name</span> <span class="o">=</span> <span class="n">lorentzian_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_display_name</span> <span class="o">=</span> <span class="n">lorentzian_display_name</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
 
     <span class="c1"># ------------------------------------------------------------------</span>
     <span class="c1"># Properties</span>
@@ -70243,6 +70294,23 @@ values will be included.</p>
     <span class="c1"># ------------------------------------------------------------------</span>
     <span class="c1"># private methods</span>
     <span class="c1"># ------------------------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the ComponentCollections for the diffusion model based on the current Q values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[ComponentCollection]</span>
+<span class="sd">            A list of ComponentCollections corresponding to the current Q values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_component_collections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -70581,7 +70649,7 @@ values will be included.</p>
 
 
 <h5 id="easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;MyDiffusionModel&#39;</span><span class="p">,</span> <span class="n">lorentzian_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span> <span class="n">lorentzian_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lorentzian_display_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -70697,7 +70765,7 @@ values will be included.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;MyDiffusionModel&#39;</code>
+                  <code>&#39;DiffusionModel&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -70805,88 +70873,93 @@ default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">Q</span><span class="p">:</span> <span class="n">Q_type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;MyDiffusionModel&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
     <span class="n">lorentzian_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">lorentzian_display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -70904,7 +70977,7 @@ default, None.</p>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
 <span class="sd">    name : str, default=&#39;DiffusionModel&#39;</span>
 <span class="sd">        Name of the diffusion model.</span>
-<span class="sd">    display_name : str | None, default=&#39;MyDiffusionModel&#39;</span>
+<span class="sd">    display_name : str | None, default=&#39;DiffusionModel&#39;</span>
 <span class="sd">        Display name of the diffusion model.</span>
 <span class="sd">    lorentzian_name : str | None, default=None</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
@@ -70952,10 +71025,15 @@ default, None.</p>
         <span class="n">lorentzian_display_name</span> <span class="o">=</span> <span class="n">lorentzian_name</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lorentzian_display_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lorentzian_display_name must be a string.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lorentzian_display_name must be a string or None.&#39;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_name</span> <span class="o">=</span> <span class="n">lorentzian_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_display_name</span> <span class="o">=</span> <span class="n">lorentzian_display_name</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -71042,12 +71120,7 @@ associated Parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
@@ -71062,7 +71135,12 @@ associated Parameters.</p>
 <span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span>
-<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confirm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confirm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clear the Q values of the SampleModel, removing all component collections and their</span>
 <span class="sd">    associated Parameters.</span>
@@ -71083,6 +71161,88 @@ associated Parameters.</p>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_Q_change</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.diffusion_model.diffusion_model_base.DiffusionModelBase.create_component_collections" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_component_collections</span><span class="p">()</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create the ComponentCollections for the diffusion model based on the current Q values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;ComponentCollection&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of ComponentCollections corresponding to the current Q values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create the ComponentCollections for the diffusion model based on the current Q values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[ComponentCollection]</span>
+<span class="sd">        A list of ComponentCollections corresponding to the current Q values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComponentCollection</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -71209,29 +71369,7 @@ ComponentCollections is returned.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
@@ -71244,7 +71382,29 @@ ComponentCollections is returned.</p>
 <span class="normal">303</span>
 <span class="normal">304</span>
 <span class="normal">305</span>
-<span class="normal">306</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_component_collections</span><span class="p">(</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentCollection</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -71365,25 +71525,25 @@ ComponentCollections is returned.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa ARG002</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
@@ -71453,20 +71613,20 @@ ComponentCollections is returned.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/diffusion_model_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the Diffusion model.</span>
 
