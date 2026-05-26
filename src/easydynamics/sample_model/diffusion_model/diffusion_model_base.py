@@ -89,10 +89,12 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             lorentzian_display_name = lorentzian_name
 
         if not isinstance(lorentzian_display_name, str):
-            raise TypeError('lorentzian_display_name must be a string.')
+            raise TypeError('lorentzian_display_name must be a string or None.')
 
         self._lorentzian_name = lorentzian_name
         self._lorentzian_display_name = lorentzian_display_name
+
+        self._component_collections = self.create_component_collections()
 
     # ------------------------------------------------------------------
     # Properties
@@ -267,6 +269,23 @@ class DiffusionModelBase(EasyDynamicsModelBase):
     # ------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------
+
+    def create_component_collections(self) -> list[ComponentCollection]:
+        """
+        Create the ComponentCollections for the diffusion model based on the current Q values.
+
+        Returns
+        -------
+        list[ComponentCollection]
+            A list of ComponentCollections corresponding to the current Q values.
+        """
+        if self.Q is None:
+            self._component_collections = []
+            return self._component_collections
+
+        self._component_collections = [ComponentCollection()] * len(self.Q)
+
+        return self._component_collections
 
     def get_component_collections(
         self, Q_index: int | None = None
