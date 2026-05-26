@@ -344,9 +344,6 @@ class DeltaLorentz(DiffusionModelBase):
             raise TypeError('delta_name must be a string.')
         self._delta_name = delta_name
 
-        if self.delta_display_name is None:
-            self.delta_display_name = delta_name
-
     @property
     def delta_display_name(self) -> str:
         """
@@ -382,13 +379,15 @@ class DeltaLorentz(DiffusionModelBase):
     # Other methods
     # ------------------------------------------------------------------
 
-    def calculate_width(self, Q: Q_type) -> np.ndarray:
+    def calculate_width(self, Q: Q_type = None) -> np.ndarray:
         """
-        Calculate the half-width at half-maximum (HWHM) for the diffusion model.
+        Calculate the half-width at half-maximum (HWHM) for the diffusion model. If the width is
+        allowed to vary with Q then the Q stored in the model is used and the input is ignored. If
+        the width is not allowed to vary then the same width is returned for all Q values.
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -406,13 +405,13 @@ class DeltaLorentz(DiffusionModelBase):
 
         return np.array(widths)
 
-    def calculate_EISF(self, Q: Q_type) -> np.ndarray:
+    def calculate_EISF(self, Q: Q_type = None) -> np.ndarray:
         """
         Calculate the Elastic Incoherent Structure Factor (EISF) for the diffusion model.
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -420,23 +419,21 @@ class DeltaLorentz(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
+        Q = self._ensure_Q(Q)
         if self._allow_Q_variation['A_0'] is True:
             A_0_values = [A_0_.value for A_0_ in self._A_0_list]
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
 
-        # Need to handle units better
-        Q = self._ensure_Q(Q)
-
         A_0_values = [self.A_0.value] * len(Q)
         return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
 
-    def calculate_QISF(self, Q: Q_type) -> np.ndarray:
+    def calculate_QISF(self, Q: Q_type = None) -> np.ndarray:
         """
         Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -444,11 +441,11 @@ class DeltaLorentz(DiffusionModelBase):
         np.ndarray
             QISF values (dimensionless).
         """
-        if self._allow_Q_variation['A_1'] is True:
+        Q = self._ensure_Q(Q)
+        if self._allow_Q_variation['A_0'] is True:
             A_1_values = [A_1_.value for A_1_ in self._A_1_list]
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
-        Q = self._ensure_Q(Q)
         A_1_values = [self.A_1.value] * len(Q)
         return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
