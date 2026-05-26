@@ -67,11 +67,31 @@ class TestJumpTranslationalDiffusion:
                 {
                     'unit': 'meV',
                     'scale': 1.0,
+                    'diffusion_coefficient': -1.0,
+                    'relaxation_time': 1.0,
+                },
+                ValueError,
+                'diffusion_coefficient must be non-negative',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 'invalid',
                 },
                 TypeError,
                 'relaxation_time must be a number',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
+                    'diffusion_coefficient': 1.0,
+                    'relaxation_time': -1.0,
+                },
+                ValueError,
+                'relaxation_time must be non-negative',
             ),
         ],
     )

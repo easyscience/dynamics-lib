@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+from easyscience.variable import Parameter
 
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 
@@ -197,6 +198,155 @@ class TestDeltaLorentz:
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
+    @pytest.mark.parametrize(
+        ('attribute', 'value', 'expected'),
+        [
+            ('mean_u_squared', 2.0, 2.0),
+            ('mean_u_squared', 0.0, 0.0),
+            ('mean_u_squared', 5, 5.0),
+            ('A_0', 0.0, 0.0),
+            ('A_0', 1.0, 1.0),
+            ('A_0', 0.5, 0.5),
+            ('lorentzian_width', 1.5, 1.5),
+            ('delta_name', 'delta', 'delta'),
+            ('delta_display_name', 'display', 'display'),
+            ('delta_display_name', None, None),
+        ],
+        ids=[
+            'mean_u_squared set to 2.0',
+            'mean_u_squared set to 0.0',
+            'mean_u_squared set to 5 (int)',
+            'A_0 set to 0.0',
+            'A_0 set to 1.0',
+            'A_0 set to 0.5',
+            'lorentzian_width set to 1.5',
+            "delta_name set to 'delta'",
+            "delta_display_name set to 'display'",
+            'delta_display_name set to None',
+        ],
+    )
+    def test_setters_valid(
+        self,
+        delta_lorentz_model,
+        attribute,
+        value,
+        expected,
+    ):
+        # WHEN
+        setattr(delta_lorentz_model, attribute, value)
+
+        # THEN
+        result = getattr(delta_lorentz_model, attribute)
+
+        # Handle Parameters
+        if isinstance(result, Parameter):
+            result = result.value
+
+        # EXPECT
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        ('attribute', 'value', 'exception', 'message'),
+        [
+            (
+                'mean_u_squared',
+                -1.0,
+                ValueError,
+                r'mean_u_squared must be non-negative.',
+            ),
+            (
+                'mean_u_squared',
+                'invalid',
+                TypeError,
+                r'mean_u_squared must be a number.',
+            ),
+            (
+                'A_0',
+                -0.1,
+                ValueError,
+                r'A_0 must be between 0 and 1.',
+            ),
+            (
+                'A_0',
+                1.1,
+                ValueError,
+                r'A_0 must be between 0 and 1.',
+            ),
+            (
+                'A_0',
+                'invalid',
+                TypeError,
+                r'A_0 must be a number.',
+            ),
+            (
+                'A_1',
+                0.5,
+                AttributeError,
+                r'A_1 is a dependent parameter and cannot be set directly.',
+            ),
+            (
+                'lorentzian_width',
+                -0.1,
+                ValueError,
+                r'lorentzian_width must be.',
+            ),
+            (
+                'lorentzian_width',
+                'invalid',
+                TypeError,
+                r'lorentzian_width must be a number.',
+            ),
+            (
+                'delta_name',
+                1,
+                TypeError,
+                r'delta_name must be a string.',
+            ),
+            (
+                'delta_name',
+                None,
+                TypeError,
+                r'delta_name must be a string.',
+            ),
+            (
+                'delta_display_name',
+                1,
+                TypeError,
+                r'delta_display_name must be a string or None.',
+            ),
+            (
+                'delta_display_name',
+                [],
+                TypeError,
+                r'delta_display_name must be a string or None.',
+            ),
+        ],
+        ids=[
+            'mean_u_squared negative',
+            'mean_u_squared not a number',
+            'A_0 less than 0',
+            'A_0 greater than 1',
+            'A_0 not a number',
+            'A_1 set directly',
+            'lorentzian_width negative',
+            'lorentzian_width not a number',
+            'delta_name not a string',
+            'delta_name not a string (None)',
+            'delta_display_name not a string',
+            'delta_display_name not a string (list)',
+        ],
+    )
+    def test_setters_invalid(
+        self,
+        delta_lorentz_model,
+        attribute,
+        value,
+        exception,
+        message,
+    ):
+        # WHEN THEN EXPECT
+        with pytest.raises(exception, match=message):
+            setattr(delta_lorentz_model, attribute, value)
 
     # ------------------------------------------------------------------
     # Other methods
