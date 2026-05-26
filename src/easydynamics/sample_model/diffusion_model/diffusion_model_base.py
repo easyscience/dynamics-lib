@@ -211,18 +211,15 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             raise TypeError('lorentzian_name must be a string.')
         self._lorentzian_name = lorentzian_name
 
-        if self.lorentzian_display_name is None:
-            self.lorentzian_display_name = lorentzian_name
-
     @property
-    def lorentzian_display_name(self) -> str:
+    def lorentzian_display_name(self) -> str | None:
         """
         Get the display name of the Lorentzian component.
 
         Returns
         -------
-        str
-            Display name of the Lorentzian component.
+        str | None
+            Display name of the Lorentzian component, or None if not set.
         """
         return self._lorentzian_display_name
 

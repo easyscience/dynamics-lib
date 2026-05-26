@@ -43,7 +43,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 123,
+                    'unit': 'meV',
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
                 },
@@ -52,12 +52,30 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 123,
+                    'unit': 'meV',
+                    'scale': -123.4,
+                    'diffusion_coefficient': 1.0,
+                },
+                ValueError,
+                'scale must be non-negative',
+            ),
+            (
+                {
+                    'unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 'invalid',
                 },
                 TypeError,
                 'diffusion_coefficient must be a number',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
+                    'diffusion_coefficient': -123.4,
+                },
+                ValueError,
+                'diffusion_coefficient must be non-negative',
             ),
         ],
     )

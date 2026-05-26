@@ -50,6 +50,9 @@ tutorials.
   balancing.
 - [Diffusion model](diffusion_model.ipynb) – Learn how to create and use
   a model of diffusion.
+- [DeltaLorentz](delta_lorentz.ipynb) – Learn how to create and use a
+  model with a Delta function and a Lorentzian that have a shared
+  Debye-Waller-like Q-dependence.
 - [Sample model](sample_model.ipynb) – Learn how to create a model of
   the scattering from your sample including model components and
   diffusion models.

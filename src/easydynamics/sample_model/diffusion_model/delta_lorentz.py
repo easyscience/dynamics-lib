@@ -83,24 +83,24 @@ class DeltaLorentz(DiffusionModelBase):
             Width of the Lorentzian function.
         allow_Q_variation : dict | None, default=None
             Dict describing whether to allow Q variation of A_0 and the Lorentzian width. The dict
-            should have the keys "A_0" and "lorentzian_width", with boolean values indicating
+            can have the keys "A_0" and/or "lorentzian_width", with boolean values indicating
             whether to allow Q-dependence for each parameter. If None, no Q-dependence will be
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DeltaLorentz'
+        name : str, default="DeltaLorentz"
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default='Lorentzian'
+        lorentzian_name : str, default="Lorentzian"
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
             model.
         lorentzian_display_name : str | None, default=None
             Display name of the Lorentzian component. If None, it will be set to the display name
             of the diffusion model.
-        delta_name : str, default='Delta function'
+        delta_name : str, default="Delta function"
             Name of the delta function component.
         delta_display_name : str | None, default=None
             Display name of the delta function component. If None, it will be set to the display
@@ -112,12 +112,7 @@ class DeltaLorentz(DiffusionModelBase):
         Raises
         ------
         TypeError
-            If mean_u_squared, A_0, or lorentzian_width is not a number. If allow_Q_variation is
-            not a dict or None.
-
-        ValueError
-            If A_0 is not between 0 and 1, or if lorentzian_width is less than the minimum allowed
-            width. If mean_u_squared is negative, or if allow_Q_variation contains unknown keys.
+            If delta_name is not a string or if delta_display_name is not a string or None.
         """
         super().__init__(
             scale=scale,
@@ -130,24 +125,18 @@ class DeltaLorentz(DiffusionModelBase):
             unique_name=unique_name,
         )
 
-        if not isinstance(mean_u_squared, Numeric):
-            raise TypeError('mean_u_squared must be a number.')
+        # --------------------------------------------------------------
+        # Parameters
+        # --------------------------------------------------------------
+        self._mean_u_squared = self._create_mean_u_squared_parameter(mean_u_squared)
 
-        if float(mean_u_squared) < 0:
-            raise ValueError('mean_u_squared must be non-negative.')
+        self._A_0, self._A_1 = self._create_A0_A1_parameters(A_0)
 
-        if not isinstance(A_0, Numeric):
-            raise TypeError('A_0 must be a number.')
+        self._lorentzian_width = self._create_lorentzian_width_parameter(lorentzian_width)
 
-        if float(A_0) < 0 or float(A_0) > 1:
-            raise ValueError('A_0 must be between 0 and 1.')
-
-        if not isinstance(lorentzian_width, Numeric):
-            raise TypeError('lorentzian_width must be a number.')
-
-        if float(lorentzian_width) < MINIMUM_WIDTH:
-            raise ValueError(f'lorentzian_width must be at least {MINIMUM_WIDTH}.')
-
+        # --------------------------------------------------------------
+        # names
+        # --------------------------------------------------------------
         if not isinstance(delta_name, str):
             raise TypeError('delta_name must be a string.')
 
@@ -155,79 +144,27 @@ class DeltaLorentz(DiffusionModelBase):
             delta_display_name = delta_name
 
         if not isinstance(delta_display_name, str):
-            raise TypeError('delta_display_name must be a string.')
+            raise TypeError('delta_display_name must be a string or None.')
 
         self._delta_name = delta_name
         self._delta_display_name = delta_display_name
 
-        allow_Q_variation_default = {
-            'A_0': False,
-            'lorentzian_width': False,
-        }
-        allowed_keys = set(allow_Q_variation_default)
+        # --------------------------------------------------------------
+        # Q variation
+        # --------------------------------------------------------------
+        self._allow_Q_variation = self._create_Q_variation_dict(allow_Q_variation)
 
-        if allow_Q_variation is None:
-            allow_Q_variation = {}
-        if not isinstance(allow_Q_variation, dict):
-            raise TypeError('allow_Q_variation must be a dict or None.')
-
-        unknown_keys = set(allow_Q_variation) - allowed_keys
-        if unknown_keys:
-            raise ValueError(f'Unknown keys in allow_Q_variation: {unknown_keys}')
-
-        self._allow_Q_variation = {**allow_Q_variation_default, **allow_Q_variation}
-
-        A_0 = Parameter(
-            name='A_0',
-            value=float(A_0),
-            fixed=False,
-            min=0.0,
-            max=1.0,
-        )
-        self._A_0 = A_0
-
-        A_1 = Parameter.from_dependency(
-            name='A_1',
-            dependency_expression='1 - A_0',
-            dependency_map={'A_0': A_0},
-        )
-        self._A_1 = A_1
-
-        mean_u_squared = Parameter(
-            name='mean_u_squared',
-            value=float(mean_u_squared),
-            fixed=False,
-            min=0.0,
-            unit='angstrom**2',
-        )
-        self._mean_u_squared = mean_u_squared
-
-        lorentzian_width = Parameter(
-            name='lorentzian_width',
-            value=float(lorentzian_width),
-            fixed=False,
-            min=MINIMUM_WIDTH,
-            unit=unit,
-        )
-        self._lorentzian_width = lorentzian_width
-
-        if self.Q is None:
-            self._A_0_list = []
-            self._A_1_list = []
-            self._lorentzian_width_list = []
-        else:
+        self._A_0_list = []
+        self._A_1_list = []
+        self._lorentzian_width_list = []
+        if self.Q is not None:
             if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameters(A_0)
-            else:
-                self._A_0_list = []
-                self._A_1_list = []
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(A_0)
 
             if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameters(
+                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
                     lorentzian_width,
                 )
-            else:
-                self._lorentzian_width_list = []
 
         self._component_collections = self.create_component_collections()
 
@@ -532,12 +469,14 @@ class DeltaLorentz(DiffusionModelBase):
             return []
 
         if self._allow_Q_variation['A_0'] is True:
-            A_0_list, A_1_list = self._create_A0_A1_parameters(self.A_0)
+            A_0_list, A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
             self._A_0_list = A_0_list
             self._A_1_list = A_1_list
 
         if self._allow_Q_variation['lorentzian_width'] is True:
-            lorentzian_width_list = self._create_lorentzian_width_parameters(self.lorentzian_width)
+            lorentzian_width_list = self._create_lorentzian_width_parameter_list(
+                self.lorentzian_width
+            )
             self._lorentzian_width_list = lorentzian_width_list
 
         component_collection_list = [None] * len(Q)
@@ -653,34 +592,165 @@ class DeltaLorentz(DiffusionModelBase):
         return variables
 
     # ------------------------------------------------------------------
-    # Private methods
+    # Private methods for init
     # ------------------------------------------------------------------
 
-    def _on_Q_change(self) -> None:
+    def _create_Q_variation_dict(self, allow_Q_variation: dict | None) -> dict:
         """
-        Handle changes to the Q values. Updates the A_0, A_1 and lorentzian_width parameters if
-        they are allowed to vary with Q.
+        Create a dict for the allow_Q_variation attribute, ensuring that it has the correct keys
+        and default values.
+
+        Parameters
+        ----------
+        allow_Q_variation : dict | None
+            Dict describing whether to allow Q variation of A_0 and the Lorentzian width.
+
+        Raises
+        ------
+        TypeError
+            If allow_Q_variation is not a dict or None.
+        ValueError
+            If allow_Q_variation contains unknown keys.
+
+        Returns
+        -------
+        dict
+            A dict with keys 'A_0' and 'lorentzian_width', indicating whether to allow Q variation
+            for each parameter.
         """
-        if self.Q is None:
-            self._A_0_list = []
-            self._A_1_list = []
-            self._lorentzian_width_list = []
-        else:
-            if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameters(self.A_0)
-            else:
-                self._A_0_list = []
-                self._A_1_list = []
 
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameters(
-                    self.lorentzian_width
-                )
-            else:
-                self._lorentzian_width_list = []
-        self._component_collections = self.create_component_collections()
+        allow_Q_variation_default = {
+            'A_0': False,
+            'lorentzian_width': False,
+        }
+        allowed_keys = set(allow_Q_variation_default)
 
-    def _create_A0_A1_parameters(
+        if allow_Q_variation is None:
+            allow_Q_variation = {}
+        if not isinstance(allow_Q_variation, dict):
+            raise TypeError('allow_Q_variation must be a dict or None.')
+
+        unknown_keys = set(allow_Q_variation) - allowed_keys
+        if unknown_keys:
+            raise ValueError(f'Unknown keys in allow_Q_variation: {unknown_keys}')
+
+        return {**allow_Q_variation_default, **allow_Q_variation}
+
+    def _create_mean_u_squared_parameter(self, mean_u_squared: Numeric) -> Parameter:
+        """
+        Create the mean square displacement parameter.
+
+        Parameters
+        ----------
+        mean_u_squared : Numeric
+            The value for the mean square displacement in angstrom^2.
+
+        Raises
+        ------
+        TypeError
+            If mean_u_squared is not a number.
+        ValueError
+            If mean_u_squared is negative.
+
+        Returns
+        -------
+        Parameter
+            The created mean square displacement parameter.
+        """
+
+        if not isinstance(mean_u_squared, Numeric):
+            raise TypeError('mean_u_squared must be a number.')
+
+        if float(mean_u_squared) < 0:
+            raise ValueError('mean_u_squared must be non-negative.')
+
+        return Parameter(
+            name='mean_u_squared',
+            value=float(mean_u_squared),
+            fixed=False,
+            min=0.0,
+            unit='angstrom**2',
+        )
+
+    def _create_A0_A1_parameters(self, A_0: Numeric) -> tuple[Parameter, Parameter]:
+        """
+        Create the A_0 and A_1 parameters.
+
+        Parameters
+        ----------
+        A_0 : Numeric
+            The value for the A_0 parameter.
+
+        Raises
+        ------
+        TypeError
+            If A_0 is not a number.
+        ValueError
+            If A_0 is not between 0 and 1.
+
+        Returns
+        -------
+        tuple[Parameter, Parameter]
+            A tuple containing the A_0 and A_1 parameters.
+        """
+        if not isinstance(A_0, Numeric):
+            raise TypeError('A_0 must be a number.')
+
+        if float(A_0) < 0 or float(A_0) > 1:
+            raise ValueError('A_0 must be between 0 and 1.')
+
+        A_0 = Parameter(
+            name='A_0',
+            value=float(A_0),
+            fixed=False,
+            min=0.0,
+            max=1.0,
+        )
+
+        A_1 = Parameter.from_dependency(
+            name='A_1',
+            dependency_expression='1 - A_0',
+            dependency_map={'A_0': A_0},
+        )
+        return A_0, A_1
+
+    def _create_lorentzian_width_parameter(self, lorentzian_width: Numeric) -> Parameter:
+        """
+        Create the Lorentzian width parameter.
+
+        Parameters
+        ----------
+        lorentzian_width : Numeric
+            The value for the Lorentzian width parameter.
+
+        Raises
+        ------
+        TypeError
+            If lorentzian_width is not a number.
+        ValueError
+            If lorentzian_width is less than the minimum width.
+
+        Returns
+        -------
+        Parameter
+            The created Lorentzian width parameter.
+        """
+
+        if not isinstance(lorentzian_width, Numeric):
+            raise TypeError('lorentzian_width must be a number.')
+
+        if float(lorentzian_width) < MINIMUM_WIDTH:
+            raise ValueError(f'lorentzian_width must be at least {MINIMUM_WIDTH}.')
+
+        return Parameter(
+            name='lorentzian_width',
+            value=float(lorentzian_width),
+            fixed=False,
+            min=MINIMUM_WIDTH,
+            unit=self.unit,
+        )
+
+    def _create_A0_A1_parameter_lists(
         self,
         A_0: Parameter,
     ) -> tuple[list[Parameter], list[Parameter]]:
@@ -720,7 +790,7 @@ class DeltaLorentz(DiffusionModelBase):
 
         return A_0_list, A_1_list
 
-    def _create_lorentzian_width_parameters(
+    def _create_lorentzian_width_parameter_list(
         self,
         lorentzian_width: Parameter,
     ) -> list[Parameter]:
@@ -748,6 +818,34 @@ class DeltaLorentz(DiffusionModelBase):
             )
             for _ in self.Q
         ]
+
+    # ------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------
+
+    def _on_Q_change(self) -> None:
+        """
+        Handle changes to the Q values. Updates the A_0, A_1 and lorentzian_width parameters if
+        they are allowed to vary with Q.
+        """
+        if self.Q is None:
+            self._A_0_list = []
+            self._A_1_list = []
+            self._lorentzian_width_list = []
+        else:
+            if self._allow_Q_variation['A_0'] is True:
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
+            else:
+                self._A_0_list = []
+                self._A_1_list = []
+
+            if self._allow_Q_variation['lorentzian_width'] is True:
+                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
+                    self.lorentzian_width
+                )
+            else:
+                self._lorentzian_width_list = []
+        self._component_collections = self.create_component_collections()
 
     def _write_lorz_width_dependency_expression(self, Q: float) -> str:
         """
