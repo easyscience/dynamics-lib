@@ -159,11 +159,11 @@ class DeltaLorentz(DiffusionModelBase):
         self._lorentzian_width_list = []
         if self.Q is not None:
             if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(A_0)
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
 
             if self._allow_Q_variation['lorentzian_width'] is True:
                 self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
-                    lorentzian_width,
+                    self.lorentzian_width,
                 )
 
         self._component_collections = self.create_component_collections()
