@@ -91,6 +91,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         ------
         TypeError
             If scale, diffusion_coefficient, or relaxation_time  are not numbers.
+        ValueError
+            If scale, diffusion_coefficient, or relaxation_time are negative.
         """
         super().__init__(
             Q=Q,
@@ -106,14 +108,21 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
 
+        if float(diffusion_coefficient) < 0:
+            raise ValueError('diffusion_coefficient must be non-negative.')
+
         if not isinstance(relaxation_time, Numeric):
             raise TypeError('relaxation_time must be a number.')
+
+        if float(relaxation_time) < 0:
+            raise ValueError('relaxation_time must be non-negative.')
 
         diffusion_coefficient = Parameter(
             name='diffusion_coefficient',
             value=float(diffusion_coefficient),
             fixed=False,
             unit='m**2/s',
+            min=0.0,
         )
 
         relaxation_time = Parameter(
@@ -121,6 +130,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             value=float(relaxation_time),
             fixed=False,
             unit='ps',
+            min=0.0,
         )
 
         self._hbar = hbar

@@ -37,11 +37,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Scale factor for the diffusion model. Must be a non-negative number.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DiffusionModel'
+        name : str, default="DiffusionModel"
             Name of the diffusion model.
-        display_name : str | None, default='DiffusionModel'
+        display_name : str | None, default="DiffusionModel"
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -59,6 +59,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If scale is not a number.
         UnitError
             If unit is not a string or scipp Unit, or if it cannot be converted to meV.
+        ValueError
+            If scale is negative.
         """
 
         self._Q = _validate_and_convert_Q(Q)
@@ -73,6 +75,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
+
+        if float(scale) < 0:
+            raise ValueError('scale must be non-negative.')
 
         scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
         self._scale = scale

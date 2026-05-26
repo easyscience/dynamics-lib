@@ -60,11 +60,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Diffusion coefficient D in m^2/s.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default="BrownianTranslationalDiffusion"
+        name : str, default='BrownianTranslationalDiffusion'
             Name of the diffusion model.
-        display_name : str | None, default="BrownianTranslationalDiffusion"
+        display_name : str | None, default='BrownianTranslationalDiffusion'
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -94,12 +94,6 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             lorentzian_name=lorentzian_name,
             lorentzian_display_name=lorentzian_display_name,
         )
-
-        if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
-
-        if float(scale) < 0:
-            raise ValueError('scale must be non-negative.')
 
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
