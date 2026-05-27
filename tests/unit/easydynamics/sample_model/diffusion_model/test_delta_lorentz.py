@@ -5,6 +5,8 @@ import numpy as np
 import pytest
 from easyscience.variable import Parameter
 
+from easydynamics.sample_model.components.delta_function import DeltaFunction
+from easydynamics.sample_model.components.lorentzian import Lorentzian
 from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 
 
@@ -21,6 +23,16 @@ class TestDeltaLorentz:
             A_0=0.5,
             lorentzian_width=0.0015,
             allow_Q_variation={'A_0': True, 'lorentzian_width': True},
+        )
+
+    @pytest.fixture
+    def delta_lorentz_model_with_Q_no_variation(self):
+        Q = np.linspace(0.5, 2, 7)
+        return DeltaLorentz(
+            Q=Q,
+            A_0=0.5,
+            lorentzian_width=0.0015,
+            allow_Q_variation={'A_0': False, 'lorentzian_width': False},
         )
 
     def test_init_default(self, delta_lorentz_model):
@@ -420,3 +432,73 @@ class TestDeltaLorentz:
             )
 
             assert qisf[i] == pytest.approx(expected)
+
+    def test_create_component_collections_no_Q(self, delta_lorentz_model):
+        # WHEN
+
+        # THEN
+        collections = delta_lorentz_model.create_component_collections()
+
+        # EXPECT
+        assert collections == []
+
+    def test_create_component_collections_with_Q_variation(self, delta_lorentz_model_with_Q):
+        # WHEN
+
+        # THEN
+        collections = delta_lorentz_model_with_Q.create_component_collections()
+
+        # EXPECT
+        assert len(collections) == 7
+
+        for collection in collections:
+            assert len(collection) == 2
+            # Check Lorentzian
+            assert isinstance(collection[0], Lorentzian)
+            assert collection[0].width.value == pytest.approx(0.0015)
+            assert collection[0].width.independent is True
+            assert collection[0].area.independent is False
+            assert (
+                'scale * exp(-mean_u_squared.value *' in collection[0].area.dependency_expression
+            )
+            assert 'A_1' in collection[0].area.dependency_expression
+
+            # Check DeltaFunction
+            assert isinstance(collection[1], DeltaFunction)
+            assert collection[1].area.independent is False
+            assert (
+                'scale * exp(-mean_u_squared.value *' in collection[1].area.dependency_expression
+            )
+            assert 'A_0' in collection[1].area.dependency_expression
+
+    def test_create_component_collections_with_no_Q_variation(
+        self, delta_lorentz_model_with_Q_no_variation
+    ):
+        # WHEN
+
+        # THEN
+        collections = delta_lorentz_model_with_Q_no_variation.create_component_collections()
+
+        # EXPECT
+        assert len(collections) == 7
+
+        for collection in collections:
+            assert len(collection) == 2
+            # Check Lorentzian
+            assert isinstance(collection[0], Lorentzian)
+            assert collection[0].width.value == pytest.approx(0.0015)
+            assert collection[0].width.independent is False
+            assert collection[0].width.dependency_expression == 'lorentzian_width'
+            assert collection[0].area.independent is False
+            assert (
+                'scale * exp(-mean_u_squared.value *' in collection[0].area.dependency_expression
+            )
+            assert 'A_1' in collection[0].area.dependency_expression
+
+            # Check DeltaFunction
+            assert isinstance(collection[1], DeltaFunction)
+            assert collection[1].area.independent is False
+            assert (
+                'scale * exp(-mean_u_squared.value *' in collection[1].area.dependency_expression
+            )
+            assert 'A_0' in collection[1].area.dependency_expression

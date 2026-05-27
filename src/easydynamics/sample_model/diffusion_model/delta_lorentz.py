@@ -88,19 +88,19 @@ class DeltaLorentz(DiffusionModelBase):
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DeltaLorentz'
+        name : str, default="DeltaLorentz"
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default='Lorentzian'
+        lorentzian_name : str, default="Lorentzian"
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
             model.
         lorentzian_display_name : str | None, default=None
             Display name of the Lorentzian component. If None, it will be set to the display name
             of the diffusion model.
-        delta_name : str, default='Delta function'
+        delta_name : str, default="Delta function"
             Name of the delta function component.
         delta_display_name : str | None, default=None
             Display name of the delta function component. If None, it will be set to the display
@@ -453,7 +453,7 @@ class DeltaLorentz(DiffusionModelBase):
         self,
     ) -> list[ComponentCollection]:
         r"""
-        Create ComponentCollection components for the DeltaLorentz model at given Q values.
+        Create ComponentCollections  for the DeltaLorentz model at given Q values.
 
         Returns
         -------
@@ -585,6 +585,9 @@ class DeltaLorentz(DiffusionModelBase):
                 variables.append(self._lorentzian_width_list[Q_index])
         else:
             variables.append(self.lorentzian_width)
+
+        for component_collection in self._component_collections:
+            variables.extend(component_collection.get_all_variables())
 
         return variables
 

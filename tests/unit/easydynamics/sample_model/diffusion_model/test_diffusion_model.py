@@ -147,6 +147,9 @@ class TestDiffusionModel:
         # EXPECT
         assert diffusion_model.Q is None
 
+    # def test_create_component_collections(self, diffusion_model):
+    #     # WHEN
+
     def test_repr(self, diffusion_model):
         # WHEN THEN
         repr_str = repr(diffusion_model)
