@@ -22302,7 +22302,10 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="normal">1012</span>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
-<span class="normal">1015</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor. $$ I</span>
 <span class="sd">    = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]</span>
@@ -22373,19 +22376,19 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="sd">            allowed.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&#39;DeltaLorentz&#39;</span>
+<span class="sd">        name : str, default=&quot;DeltaLorentz&quot;</span>
 <span class="sd">            Name of the diffusion model.</span>
 <span class="sd">        display_name : str | None, default=None</span>
 <span class="sd">            Display name of the diffusion model.</span>
-<span class="sd">        lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
+<span class="sd">        lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">            model.</span>
 <span class="sd">        lorentzian_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">            of the diffusion model.</span>
-<span class="sd">        delta_name : str, default=&#39;Delta function&#39;</span>
+<span class="sd">        delta_name : str, default=&quot;Delta function&quot;</span>
 <span class="sd">            Name of the delta function component.</span>
 <span class="sd">        delta_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the delta function component. If None, it will be set to the display</span>
@@ -22738,7 +22741,7 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create ComponentCollection components for the DeltaLorentz model at given Q values.</span>
+<span class="sd">        Create ComponentCollections  for the DeltaLorentz model at given Q values.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -22870,6 +22873,9 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
                 <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component_collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">component_collection</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">variables</span>
 
@@ -23787,7 +23793,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23806,7 +23812,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;DeltaLorentz&#39;</code>
+                  <code>&#34;DeltaLorentz&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23845,7 +23851,7 @@ model.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Lorentzian&#39;</code>
+                  <code>&#34;Lorentzian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -23884,7 +23890,7 @@ of the diffusion model.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Delta function&#39;</code>
+                  <code>&#34;Delta function&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -24111,19 +24117,19 @@ default, None.</p>
 <span class="sd">        allowed.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&#39;DeltaLorentz&#39;</span>
+<span class="sd">    name : str, default=&quot;DeltaLorentz&quot;</span>
 <span class="sd">        Name of the diffusion model.</span>
 <span class="sd">    display_name : str | None, default=None</span>
 <span class="sd">        Display name of the diffusion model.</span>
-<span class="sd">    lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
+<span class="sd">    lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">        model.</span>
 <span class="sd">    lorentzian_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">        of the diffusion model.</span>
-<span class="sd">    delta_name : str, default=&#39;Delta function&#39;</span>
+<span class="sd">    delta_name : str, default=&quot;Delta function&quot;</span>
 <span class="sd">        Name of the delta function component.</span>
 <span class="sd">    delta_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the delta function component. If None, it will be set to the display</span>
@@ -24595,7 +24601,7 @@ the width is not allowed to vary then the same width is returned for all Q value
 
     <div class="doc doc-contents ">
 
-        <p>Create ComponentCollection components for the DeltaLorentz model at given Q values.</p>
+        <p>Create ComponentCollections  for the DeltaLorentz model at given Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24733,7 +24739,7 @@ value.</p>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create ComponentCollection components for the DeltaLorentz model at given Q values.</span>
+<span class="sd">    Create ComponentCollections  for the DeltaLorentz model at given Q values.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -24951,7 +24957,10 @@ values will be included.</p>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a list of all variables (Parameters and Descriptors) in the model.</span>
 
@@ -24986,6 +24995,9 @@ values will be included.</p>
             <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">component_collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
+        <span class="n">variables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">component_collection</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">variables</span>
 </code></pre></div></td></tr></table></div>
@@ -25039,10 +25051,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1002</span>
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
@@ -25055,7 +25064,10 @@ values will be included.</p>
 <span class="normal">1012</span>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
-<span class="normal">1015</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the DeltaLorentz model.</span>
 
@@ -66831,7 +66843,10 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="normal">1012</span>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
-<span class="normal">1015</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor. $$ I</span>
 <span class="sd">    = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]</span>
@@ -66902,19 +66917,19 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="sd">            allowed.</span>
 <span class="sd">        Q : Q_type | None, default=None</span>
 <span class="sd">            Q values for the model. If None, Q is not set.</span>
-<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">            Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">        name : str, default=&#39;DeltaLorentz&#39;</span>
+<span class="sd">        name : str, default=&quot;DeltaLorentz&quot;</span>
 <span class="sd">            Name of the diffusion model.</span>
 <span class="sd">        display_name : str | None, default=None</span>
 <span class="sd">            Display name of the diffusion model.</span>
-<span class="sd">        lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
+<span class="sd">        lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
 <span class="sd">            Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">            model.</span>
 <span class="sd">        lorentzian_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">            of the diffusion model.</span>
-<span class="sd">        delta_name : str, default=&#39;Delta function&#39;</span>
+<span class="sd">        delta_name : str, default=&quot;Delta function&quot;</span>
 <span class="sd">            Name of the delta function component.</span>
 <span class="sd">        delta_display_name : str | None, default=None</span>
 <span class="sd">            Display name of the delta function component. If None, it will be set to the display</span>
@@ -67267,7 +67282,7 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create ComponentCollection components for the DeltaLorentz model at given Q values.</span>
+<span class="sd">        Create ComponentCollections  for the DeltaLorentz model at given Q values.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -67399,6 +67414,9 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
                 <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component_collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">component_collection</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">variables</span>
 
@@ -68316,7 +68334,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;meV&#39;</code>
+                  <code>&#34;meV&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68335,7 +68353,7 @@ allowed.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;DeltaLorentz&#39;</code>
+                  <code>&#34;DeltaLorentz&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68374,7 +68392,7 @@ model.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Lorentzian&#39;</code>
+                  <code>&#34;Lorentzian&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68413,7 +68431,7 @@ of the diffusion model.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;Delta function&#39;</code>
+                  <code>&#34;Delta function&#34;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -68640,19 +68658,19 @@ default, None.</p>
 <span class="sd">        allowed.</span>
 <span class="sd">    Q : Q_type | None, default=None</span>
 <span class="sd">        Q values for the model. If None, Q is not set.</span>
-<span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
+<span class="sd">    unit : str | sc.Unit, default=&quot;meV&quot;</span>
 <span class="sd">        Unit of the diffusion model. Must be convertible to meV.</span>
-<span class="sd">    name : str, default=&#39;DeltaLorentz&#39;</span>
+<span class="sd">    name : str, default=&quot;DeltaLorentz&quot;</span>
 <span class="sd">        Name of the diffusion model.</span>
 <span class="sd">    display_name : str | None, default=None</span>
 <span class="sd">        Display name of the diffusion model.</span>
-<span class="sd">    lorentzian_name : str, default=&#39;Lorentzian&#39;</span>
+<span class="sd">    lorentzian_name : str, default=&quot;Lorentzian&quot;</span>
 <span class="sd">        Name of the Lorentzian component. If None, it will be set to the name of the diffusion</span>
 <span class="sd">        model.</span>
 <span class="sd">    lorentzian_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the Lorentzian component. If None, it will be set to the display name</span>
 <span class="sd">        of the diffusion model.</span>
-<span class="sd">    delta_name : str, default=&#39;Delta function&#39;</span>
+<span class="sd">    delta_name : str, default=&quot;Delta function&quot;</span>
 <span class="sd">        Name of the delta function component.</span>
 <span class="sd">    delta_display_name : str | None, default=None</span>
 <span class="sd">        Display name of the delta function component. If None, it will be set to the display</span>
@@ -69124,7 +69142,7 @@ the width is not allowed to vary then the same width is returned for all Q value
 
     <div class="doc doc-contents ">
 
-        <p>Create ComponentCollection components for the DeltaLorentz model at given Q values.</p>
+        <p>Create ComponentCollections  for the DeltaLorentz model at given Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -69262,7 +69280,7 @@ value.</p>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create ComponentCollection components for the DeltaLorentz model at given Q values.</span>
+<span class="sd">    Create ComponentCollections  for the DeltaLorentz model at given Q values.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -69480,7 +69498,10 @@ values will be included.</p>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a list of all variables (Parameters and Descriptors) in the model.</span>
 
@@ -69515,6 +69536,9 @@ values will be included.</p>
             <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">Q_index</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_width</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">component_collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_collections</span><span class="p">:</span>
+        <span class="n">variables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">component_collection</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">variables</span>
 </code></pre></div></td></tr></table></div>
@@ -69568,10 +69592,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1002</span>
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
@@ -69584,7 +69605,10 @@ values will be included.</p>
 <span class="normal">1012</span>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
-<span class="normal">1015</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the DeltaLorentz model.</span>
 
