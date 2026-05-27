@@ -564,9 +564,27 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         list[DescriptorNumber]
             List of all variables in the model.
+
+        Raises
+        ------
+        ValueError
+            If Q_index is not None and is not a valid index for the Q values in the model.
         """
 
+        if Q_index is not None and (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or Q_index >= len(self._component_collections)
+        ):
+            raise ValueError(
+                f'Index must be an integer between 0 and '
+                f'{len(self._component_collections) - 1}, or None.'
+            )
+
+        # Global variables of the model
         variables = [self.scale, self.mean_u_squared]
+
+        # Lists of variables or single variables depending on whether Q variation is allowed
         if self._allow_Q_variation['A_0'] is True:
             if Q_index is None:
                 variables.extend(self._A_0_list)
@@ -586,6 +604,7 @@ class DeltaLorentz(DiffusionModelBase):
         else:
             variables.append(self.lorentzian_width)
 
+        # Also add all dependent variables from the component collections
         for component_collection in self._component_collections:
             variables.extend(component_collection.get_all_variables())
 

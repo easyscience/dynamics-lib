@@ -275,8 +275,128 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._on_Q_change()
 
     # ------------------------------------------------------------------
-    # private methods
+    # Methods
     # ------------------------------------------------------------------
+    def get_global_variables(self) -> list[Parameter]:
+        """
+        Get all global variables from the diffusion model.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all global variables from the diffusion model.
+        """
+        return super().get_all_variables()
+
+    def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all variables from the diffusion model.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the ComponentCollection to get variables from. If None, all variables from
+            all ComponentCollections are returned, in addition to the global variables.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all Parameters from the diffusion model.
+
+        Raises
+        ------
+        ValueError
+            If Q_index is out of bounds for the number of ComponentCollections.
+        """
+
+        if Q_index is not None and (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or Q_index >= len(self._component_collections)
+        ):
+            raise ValueError(
+                f'Index must be an integer between 0 and '
+                f'{len(self._component_collections) - 1}, or None.'
+            )
+
+        variables = super().get_all_variables()
+        if Q_index is None:
+            for component_collection in self._component_collections:
+                variables.extend(component_collection.get_all_variables())
+        else:
+            variables.extend(self._component_collections[Q_index].get_all_variables())
+        return variables
+
+    def get_all_parameters(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all Parameters from the diffusion model.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the ComponentCollection to get parameters from. If None, all parameters
+            from all ComponentCollections are returned.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all Parameters from the diffusion model.
+        """
+        return [param for param in self.get_all_variables(Q_index) if isinstance(param, Parameter)]
+
+    def get_fittable_parameters(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all fittable Parameters from the diffusion model.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the ComponentCollection to get fittable parameters from. If None, all
+            fittable parameters from all ComponentCollections are returned.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all fittable Parameters from the diffusion model.
+        """
+        return [
+            param
+            for param in self.get_all_parameters(Q_index)
+            if param.independent and not param.fixed
+        ]
+
+    def get_free_parameters(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all free Parameters from the diffusion model.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the ComponentCollection to get free parameters from. If None, all free
+            parameters from all ComponentCollections are returned.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all free Parameters from the diffusion model.
+        """
+        return [param for param in self.get_fittable_parameters(Q_index) if not param.fixed]
+
+    def get_fit_parameters(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all fit Parameters from the diffusion model. This is an alias for get_free_parameters.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the ComponentCollection to get fit parameters from. If None, all fit
+            parameters from all ComponentCollections are returned.
+        Returns
+        -------
+        list[Parameter]
+            A list of all fit Parameters from the diffusion model.
+        """
+        return self.get_free_parameters(Q_index)
 
     def create_component_collections(self) -> list[ComponentCollection]:
         """
@@ -331,26 +451,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
-
-    def get_all_variables(
-        self,
-        Q_index: int | None = None,  # noqa ARG002
-    ) -> list[Parameter]:
-        """
-        Get all Parameters from the ComponentCollection at the given Q index.
-
-        Parameters
-        ----------
-        Q_index : int | None, default=None
-            Unused parameter for compatibility with SampleModel.
-
-
-        Returns
-        -------
-        list[Parameter]
-            A list of all Parameters from the specified ComponentCollection(s).
-        """
-        return super().get_all_variables()
 
     # ------------------------------------------------------------------
     # private methods
