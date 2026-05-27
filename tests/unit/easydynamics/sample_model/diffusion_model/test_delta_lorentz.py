@@ -502,3 +502,54 @@ class TestDeltaLorentz:
                 'scale * exp(-mean_u_squared.value *' in collection[1].area.dependency_expression
             )
             assert 'A_0' in collection[1].area.dependency_expression
+
+    def test_get_all_variables_no_Q_index(self, delta_lorentz_model_with_Q):
+        # WHEN
+
+        # THEN
+        variables = delta_lorentz_model_with_Q.get_all_variables()
+
+        # EXPECT
+        # scale, mean_u_squared, + Q-dependent A_0, A_1 and
+        # lorentzian_width + 3 Lorentzian and 2 DeltaFunction parameters
+        # for each Q
+        assert len(variables) == 2 + (3 + 3 + 2) * len(delta_lorentz_model_with_Q.Q)
+
+    def test_get_all_variables_with_Q_index(self, delta_lorentz_model_with_Q):
+        # WHEN
+
+        # THEN
+        variables = delta_lorentz_model_with_Q.get_all_variables(Q_index=0)
+
+        # EXPECT
+        # scale, mean_u_squared, + A_0, A_1 and
+        # lorentzian_width + 3 Lorentzian and 2 DeltaFunction parameters
+
+        assert len(variables) == 2 + (3 + 3 + 2)
+
+    def test_get_all_variables_no_Q_index_no_Q_variation(
+        self, delta_lorentz_model_with_Q_no_variation
+    ):
+        # WHEN
+
+        # THEN
+        variables = delta_lorentz_model_with_Q_no_variation.get_all_variables()
+
+        # EXPECT
+        # scale, mean_u_squared, + Q-independent A_0, A_1 and lorentzian_width
+        # + 3 Lorentzian and 2 DeltaFunction parameters for each Q
+        assert len(variables) == 2 + 3 + (3 + 2) * len(delta_lorentz_model_with_Q_no_variation.Q)
+
+    def test_get_all_variables_with_Q_index_no_Q_variation(
+        self, delta_lorentz_model_with_Q_no_variation
+    ):
+        # WHEN
+
+        # THEN
+        variables = delta_lorentz_model_with_Q_no_variation.get_all_variables(Q_index=0)
+
+        # EXPECT
+        # scale, mean_u_squared, + A_0, A_1 and lorentzian_width
+        # + 3 Lorentzian and 2 DeltaFunction parameters
+
+        assert len(variables) == 2 + (3 + 3 + 2)
