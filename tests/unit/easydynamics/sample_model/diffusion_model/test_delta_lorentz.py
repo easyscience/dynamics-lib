@@ -652,3 +652,160 @@ class TestDeltaLorentz:
             match=r'Unknown keys in allow_Q_variation',
         ):
             delta_lorentz_model._create_Q_variation_dict(allow_Q_variation)
+
+    def test_create_mean_u_squared_parameter(self, delta_lorentz_model):
+        # WHEN
+
+        # THEN
+        mean_u_squared_param = delta_lorentz_model._create_mean_u_squared_parameter(2.0)
+
+        # THEN EXPECT
+        assert isinstance(mean_u_squared_param, Parameter)
+        assert mean_u_squared_param.value == pytest.approx(2.0)
+        assert mean_u_squared_param.independent is True
+        assert mean_u_squared_param.fixed is False
+        assert mean_u_squared_param.min == pytest.approx(0.0)
+        assert mean_u_squared_param.unit == 'Å^2'
+
+    def test_create_mean_u_squared_parameter_invalid(self, delta_lorentz_model):
+        with pytest.raises(ValueError, match=r'mean_u_squared must be non-negative.'):
+            delta_lorentz_model._create_mean_u_squared_parameter(-1.0)
+
+        with pytest.raises(TypeError, match=r'mean_u_squared must be a number.'):
+            delta_lorentz_model._create_mean_u_squared_parameter('invalid')
+
+    def test_create_A0_A1_parameters(self, delta_lorentz_model):
+        # WHEN
+        # THEN
+        A_0_param, A_1_param = delta_lorentz_model._create_A0_A1_parameters(0.75)
+
+        # THEN EXPECT
+        assert isinstance(A_0_param, Parameter)
+        assert A_0_param.value == pytest.approx(0.75)
+        assert A_0_param.independent is True
+        assert A_0_param.fixed is False
+        assert A_0_param.min == pytest.approx(0.0)
+        assert A_0_param.max == pytest.approx(1.0)
+
+        assert isinstance(A_1_param, Parameter)
+        assert A_1_param.value == pytest.approx(0.25)
+        assert A_1_param.independent is False
+        assert A_1_param.fixed is False
+        assert A_1_param.dependency_expression == '1 - A_0'
+
+    def test_create_A0_A1_parameters_invalid(self, delta_lorentz_model):
+        with pytest.raises(ValueError, match=r'A_0 must be between 0 and 1.'):
+            delta_lorentz_model._create_A0_A1_parameters(-0.1)
+
+        with pytest.raises(ValueError, match=r'A_0 must be between 0 and 1.'):
+            delta_lorentz_model._create_A0_A1_parameters(1.1)
+
+        with pytest.raises(TypeError, match=r'A_0 must be a number.'):
+            delta_lorentz_model._create_A0_A1_parameters('invalid')
+
+    def test_create_lorentzian_width_parameter(self, delta_lorentz_model):
+        # WHEN
+
+        # THEN
+        width_param = delta_lorentz_model._create_lorentzian_width_parameter(0.5)
+
+        # THEN EXPECT
+        assert isinstance(width_param, Parameter)
+        assert width_param.value == pytest.approx(0.5)
+        assert width_param.independent is True
+        assert width_param.fixed is False
+        assert width_param.unit == 'meV'
+
+    def test_create_lorentzian_width_parameter_invalid(self, delta_lorentz_model):
+        with pytest.raises(ValueError, match=r'lorentzian_width must be '):
+            delta_lorentz_model._create_lorentzian_width_parameter(-0.1)
+
+        with pytest.raises(TypeError, match=r'lorentzian_width must be a number.'):
+            delta_lorentz_model._create_lorentzian_width_parameter('invalid')
+
+    def test_create_A0_A1_parameter_lists(self, delta_lorentz_model_with_Q):
+        # WHEN
+        A_0 = delta_lorentz_model_with_Q.A_0
+        A_0.value = 0.75
+
+        # THEN
+        A_0_list, A_1_list = delta_lorentz_model_with_Q._create_A0_A1_parameter_lists(A_0)
+
+        # THEN EXPECT
+        assert isinstance(A_0_list, list)
+        assert isinstance(A_1_list, list)
+        assert len(A_0_list) == len(delta_lorentz_model_with_Q.Q)
+        assert len(A_1_list) == len(delta_lorentz_model_with_Q.Q)
+
+        for A_0_param in A_0_list:
+            assert isinstance(A_0_param, Parameter)
+            assert A_0_param.value == pytest.approx(0.75)
+            assert A_0_param.independent is True
+            assert A_0_param.fixed is False
+            assert A_0_param.min == pytest.approx(0.0)
+            assert A_0_param.max == pytest.approx(1.0)
+
+        for A_1_param in A_1_list:
+            assert isinstance(A_1_param, Parameter)
+            assert A_1_param.value == pytest.approx(0.25)
+            assert A_1_param.independent is False
+            assert A_1_param.fixed is False
+            assert A_1_param.dependency_expression == '1 - A_0'
+
+    def test_create_lorentzian_width_parameter_list(self, delta_lorentz_model_with_Q):
+        # WHEN
+        width = delta_lorentz_model_with_Q.lorentzian_width
+        width.value = 0.5
+
+        # THEN
+        width_list = delta_lorentz_model_with_Q._create_lorentzian_width_parameter_list(width)
+
+        # EXPECT
+        assert isinstance(width_list, list)
+        assert len(width_list) == len(delta_lorentz_model_with_Q.Q)
+
+        for width_param in width_list:
+            assert isinstance(width_param, Parameter)
+            assert width_param.value == pytest.approx(0.5)
+            assert width_param.independent is True
+            assert width_param.fixed is False
+            assert width_param.unit == 'meV'
+
+    def test_on_Q_change_Q_set(self, delta_lorentz_model_with_Q):
+        # WHEN
+
+        # THEN
+
+        # This calls on_Q_change
+        delta_lorentz_model_with_Q.clear_Q(confirm=True)
+
+        # EXPECT
+        assert delta_lorentz_model_with_Q.Q is None
+        assert delta_lorentz_model_with_Q._A_0_list == []
+        assert delta_lorentz_model_with_Q._A_1_list == []
+        assert delta_lorentz_model_with_Q._lorentzian_width_list == []
+
+        # THEN
+        new_Q = np.linspace(0.5, 2, 7)
+
+        delta_lorentz_model_with_Q.Q = new_Q
+
+        # EXPECT
+        assert len(delta_lorentz_model_with_Q._A_0_list) == len(new_Q)
+        assert len(delta_lorentz_model_with_Q._lorentzian_width_list) == len(new_Q)
+        assert all(pytest.approx(a.value) == 0.5 for a in delta_lorentz_model_with_Q._A_0_list)
+        assert all(
+            pytest.approx(lw.value) == 0.0015
+            for lw in delta_lorentz_model_with_Q._lorentzian_width_list
+        )
+
+    def test_repr(self, delta_lorentz_model):
+        # WHEN THEN
+        repr_str = repr(delta_lorentz_model)
+
+        # EXPECT
+        assert 'DeltaLorentz' in repr_str
+        assert 'scale' in repr_str
+        assert 'mean_u_squared' in repr_str
+        assert 'A_0' in repr_str
+        assert 'lorentzian_width' in repr_str
