@@ -496,6 +496,8 @@ class TestSampleModel:
         for var in template_vars:
             assert var not in all_vars
 
+        assert len(set(all_vars)) == len(all_vars)  # all variables should be unique
+
     def test_repr(self, sample_model):
         # WHEN
         repr_str = repr(sample_model)

@@ -550,6 +550,26 @@ class DeltaLorentz(DiffusionModelBase):
 
         return component_collection_list
 
+    def get_global_variables(self) -> list[Parameter]:
+        """
+        Get all global variables from the diffusion model.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all global variables from the diffusion model.
+        """
+        variables = [self.scale, self.mean_u_squared]
+
+        if self._allow_Q_variation['lorentzian_width'] is False:
+            variables.append(self.lorentzian_width)
+
+        if self._allow_Q_variation['A_0'] is False:
+            variables.append(self.A_0)
+            variables.append(self.A_1)
+
+        return variables
+
     def get_all_variables(self, Q_index: int | None = None) -> list[DescriptorNumber]:
         """
         Get a list of all variables (Parameters and Descriptors) in the model.
@@ -581,10 +601,8 @@ class DeltaLorentz(DiffusionModelBase):
                 f'{len(self._component_collections) - 1}, or None.'
             )
 
-        # Global variables of the model
-        variables = [self.scale, self.mean_u_squared]
+        variables = self.get_global_variables()
 
-        # Lists of variables or single variables depending on whether Q variation is allowed
         if self._allow_Q_variation['A_0'] is True:
             if Q_index is None:
                 variables.extend(self._A_0_list)
@@ -592,17 +610,6 @@ class DeltaLorentz(DiffusionModelBase):
             else:
                 variables.append(self._A_0_list[Q_index])
                 variables.append(self._A_1_list[Q_index])
-        else:
-            variables.append(self.A_0)
-            variables.append(self.A_1)
-
-        if self._allow_Q_variation['lorentzian_width'] is True:
-            if Q_index is None:
-                variables.extend(self._lorentzian_width_list)
-            else:
-                variables.append(self._lorentzian_width_list[Q_index])
-        else:
-            variables.append(self.lorentzian_width)
 
         # Also add all dependent variables from the component collections
         if Q_index is None:

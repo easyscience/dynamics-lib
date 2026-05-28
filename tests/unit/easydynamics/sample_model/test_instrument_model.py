@@ -308,6 +308,7 @@ class TestInstrumentModel:
 
         assert expected_var_names == retrieved_var_names
         assert len(all_vars) == 18
+        assert len(all_vars) == len(set(all_vars))
 
     def test_get_all_variables_no_Q(self, instrument_model):
         # WHEN

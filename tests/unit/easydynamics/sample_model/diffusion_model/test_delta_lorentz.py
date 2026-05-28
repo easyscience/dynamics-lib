@@ -510,10 +510,11 @@ class TestDeltaLorentz:
         variables = delta_lorentz_model_with_Q.get_all_variables()
 
         # EXPECT
-        # scale, mean_u_squared, + Q-dependent A_0, A_1 and
-        # lorentzian_width + 3 Lorentzian and 2 DeltaFunction parameters
+        # scale, mean_u_squared, + Q-dependent A_0, A_1
+        # + 3 Lorentzian and 2 DeltaFunction parameters
         # for each Q
-        assert len(variables) == 2 + (3 + 3 + 2) * len(delta_lorentz_model_with_Q.Q)
+        assert len(variables) == 2 + (2 + 3 + 2) * len(delta_lorentz_model_with_Q.Q)
+        assert len(variables) == len(set(variables))
 
     def test_get_all_variables_with_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN
@@ -522,10 +523,11 @@ class TestDeltaLorentz:
         variables = delta_lorentz_model_with_Q.get_all_variables(Q_index=0)
 
         # EXPECT
-        # scale, mean_u_squared, + A_0, A_1 and
-        # lorentzian_width + 3 Lorentzian and 2 DeltaFunction parameters
+        # scale, mean_u_squared, + A_0, A_1
+        # + 3 Lorentzian and 2 DeltaFunction parameters
 
-        assert len(variables) == 2 + (3 + 3 + 2)
+        assert len(variables) == 2 + (2 + 3 + 2)
+        assert len(variables) == len(set(variables))
 
     def test_get_all_variables_no_Q_index_no_Q_variation(
         self, delta_lorentz_model_with_Q_no_variation
@@ -539,6 +541,7 @@ class TestDeltaLorentz:
         # scale, mean_u_squared, + Q-independent A_0, A_1 and lorentzian_width
         # + 3 Lorentzian and 2 DeltaFunction parameters for each Q
         assert len(variables) == 2 + 3 + (3 + 2) * len(delta_lorentz_model_with_Q_no_variation.Q)
+        assert len(variables) == len(set(variables))
 
     def test_get_all_variables_with_Q_index_no_Q_variation(
         self, delta_lorentz_model_with_Q_no_variation
@@ -553,6 +556,7 @@ class TestDeltaLorentz:
         # + 3 Lorentzian and 2 DeltaFunction parameters
 
         assert len(variables) == 2 + (3 + 3 + 2)
+        assert len(variables) == len(set(variables))
 
     def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
@@ -798,6 +802,32 @@ class TestDeltaLorentz:
             pytest.approx(lw.value) == 0.0015
             for lw in delta_lorentz_model_with_Q._lorentzian_width_list
         )
+
+    # def test_on_Q_change_Q_set_no_variation(
+    #     self, delta_lorentz_model_with_Q_no_variation
+    # ):
+    #     # WHEN
+
+    #     # THEN
+
+    #     # This calls on_Q_change
+    #     delta_lorentz_model_with_Q_no_variation.clear_Q(confirm=True)
+
+    #     # EXPECT
+    #     assert delta_lorentz_model_with_Q_no_variation.Q is None
+    #     assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
+    #     assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
+    #     assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
+
+    #     # THEN
+    #     new_Q = np.linspace(0.5, 2, 7)
+
+    #     delta_lorentz_model_with_Q_no_variation.Q = new_Q
+
+    #     # EXPECT
+    #     assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
+    #     assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
+    #     assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
 
     def test_repr(self, delta_lorentz_model):
         # WHEN THEN

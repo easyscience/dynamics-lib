@@ -228,6 +228,7 @@ class TestAnalysis1d:
         extra_vars = [extra_par1, extra_par2]
         expected_vars = sample_vars + instrument_vars + extra_vars
         assert Counter(variables) == Counter(expected_vars)
+        assert len(variables) == len(set(variables))
 
     def test_plot_raises_if_no_data(self, analysis1d):
         # WHEN THEN
