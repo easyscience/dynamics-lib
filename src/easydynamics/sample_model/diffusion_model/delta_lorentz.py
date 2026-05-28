@@ -577,7 +577,7 @@ class DeltaLorentz(DiffusionModelBase):
             or Q_index >= len(self._component_collections)
         ):
             raise ValueError(
-                f'Index must be an integer between 0 and '
+                f'Q_index must be an integer between 0 and '
                 f'{len(self._component_collections) - 1}, or None.'
             )
 

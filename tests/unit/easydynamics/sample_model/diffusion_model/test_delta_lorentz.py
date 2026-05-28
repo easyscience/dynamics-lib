@@ -553,3 +553,102 @@ class TestDeltaLorentz:
         # + 3 Lorentzian and 2 DeltaFunction parameters
 
         assert len(variables) == 2 + (3 + 3 + 2)
+
+    def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+            delta_lorentz_model_with_Q.get_all_variables(Q_index=-1)
+
+        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+            delta_lorentz_model_with_Q.get_all_variables(Q_index=len(delta_lorentz_model_with_Q.Q))
+
+    @pytest.mark.parametrize(
+        ('allow_Q_variation', 'expected'),
+        [
+            (
+                None,
+                {
+                    'A_0': False,
+                    'lorentzian_width': False,
+                },
+            ),
+            (
+                {},
+                {
+                    'A_0': False,
+                    'lorentzian_width': False,
+                },
+            ),
+            (
+                {'A_0': True},
+                {
+                    'A_0': True,
+                    'lorentzian_width': False,
+                },
+            ),
+            (
+                {'lorentzian_width': True},
+                {
+                    'A_0': False,
+                    'lorentzian_width': True,
+                },
+            ),
+            (
+                {
+                    'A_0': True,
+                    'lorentzian_width': True,
+                },
+                {
+                    'A_0': True,
+                    'lorentzian_width': True,
+                },
+            ),
+        ],
+    )
+    def test_create_Q_variation_dict_valid(
+        self,
+        delta_lorentz_model,
+        allow_Q_variation,
+        expected,
+    ):
+        result = delta_lorentz_model._create_Q_variation_dict(allow_Q_variation)
+
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        'allow_Q_variation',
+        [
+            1,
+            'invalid',
+            [1, 2, 3],
+            1.5,
+        ],
+    )
+    def test_create_Q_variation_dict_raises_type_error(
+        self,
+        delta_lorentz_model,
+        allow_Q_variation,
+    ):
+        with pytest.raises(
+            TypeError,
+            match=r'allow_Q_variation must be a dict or None.',
+        ):
+            delta_lorentz_model._create_Q_variation_dict(allow_Q_variation)
+
+    @pytest.mark.parametrize(
+        'allow_Q_variation',
+        [
+            {'invalid_key': True},
+            {'A_0': True, 'bad_key': False},
+        ],
+    )
+    def test_create_Q_variation_dict_raises_value_error(
+        self,
+        delta_lorentz_model,
+        allow_Q_variation,
+    ):
+        with pytest.raises(
+            ValueError,
+            match=r'Unknown keys in allow_Q_variation',
+        ):
+            delta_lorentz_model._create_Q_variation_dict(allow_Q_variation)
