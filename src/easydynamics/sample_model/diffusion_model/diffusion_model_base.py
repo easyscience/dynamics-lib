@@ -37,11 +37,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Scale factor for the diffusion model. Must be a non-negative number.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DiffusionModel'
+        name : str, default="DiffusionModel"
             Name of the diffusion model.
-        display_name : str | None, default='DiffusionModel'
+        display_name : str | None, default="DiffusionModel"
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -288,6 +288,40 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         return super().get_all_variables()
 
+    def get_independent_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get the independent variables from the diffusion model. If Q_index is provided, only the
+        independent variables for the specified Q value will be returned. If Q_index is None,
+        independent variables for all Q values will be returned.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value for which to get the independent variables. If None,
+            independent variables for all Q values will be included.
+
+        Returns
+        -------
+        list[Parameter]
+            List of independent variables in the model.
+
+        Raises
+        ------
+        ValueError
+            If Q_index is not None and is not a valid index for the Q values in the model.
+        """
+        if Q_index is not None and (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or Q_index >= len(self._component_collections)
+        ):
+            raise ValueError(
+                f'Q_index must be an integer between 0 and '
+                f'{len(self._component_collections) - 1}, or None.'
+            )
+
+        return []
+
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
         Get all variables from the diffusion model.
@@ -319,7 +353,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 f'{len(self._component_collections) - 1}, or None.'
             )
 
-        variables = super().get_all_variables()
+        variables = self.get_global_variables()
+        variables.extend(self.get_independent_variables(Q_index))
+
         if Q_index is None:
             for component_collection in self._component_collections:
                 variables.extend(component_collection.get_all_variables())
