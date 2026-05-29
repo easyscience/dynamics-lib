@@ -8,7 +8,7 @@ from easyscience.variable.parameter import Parameter
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 
 
-class TestDiffusionModel:
+class TestDiffusionModelBase:
     @pytest.fixture
     def diffusion_model(self):
         return DiffusionModelBase()
@@ -147,9 +147,6 @@ class TestDiffusionModel:
         # EXPECT
         assert diffusion_model.Q is None
 
-    # def test_create_component_collections(self, diffusion_model):
-    #     # WHEN
-
     def test_repr(self, diffusion_model):
         # WHEN THEN
         repr_str = repr(diffusion_model)
@@ -157,3 +154,125 @@ class TestDiffusionModel:
         # EXPECT
         assert 'DiffusionModelBase' in repr_str
         assert 'unit=meV' in repr_str
+
+    def test_get_independent_variables(self, diffusion_model):
+        # WHEN THEN EXPECT
+        independent_vars = diffusion_model.get_independent_variables()
+
+        # EXPECT
+        assert independent_vars == []
+
+    @pytest.mark.parametrize(
+        'Q_index',
+        [
+            -1,
+            100,
+            'string',
+        ],
+        ids=[
+            'negative index',
+            'index too large',
+            'non-integer index',
+        ],
+    )
+    def test_get_independent_variables_raises(self, diffusion_model, Q_index):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+            diffusion_model.get_independent_variables(Q_index=Q_index)
+
+    @pytest.mark.parametrize(
+        'Q_index',
+        [
+            -1,
+            100,
+            'string',
+        ],
+        ids=[
+            'negative index',
+            'index too large',
+            'non-integer index',
+        ],
+    )
+    def test_get_all_variables_raises(self, diffusion_model, Q_index):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+            diffusion_model.get_all_variables(Q_index=Q_index)
+
+    def test_create_component_collections_no_Q(self, diffusion_model):
+        # WHEN
+
+        # THEN
+        collections = diffusion_model.create_component_collections()
+
+        # EXPECT
+        assert collections == []
+        assert diffusion_model._component_collections == []
+
+    def test_create_component_collections_with_Q(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0, 3.0]
+
+        # THEN
+        collections = diffusion_model.create_component_collections()
+
+        # EXPECT
+        assert len(collections) == 3
+        for collection in collections:
+            assert collection.is_empty
+        assert diffusion_model._component_collections == collections
+
+    def test_get_component_collections(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0]
+
+        # THEN
+        collections = diffusion_model.get_component_collections()
+
+        # EXPECT
+        assert len(collections) == 2
+        assert diffusion_model._component_collections == collections
+
+    def test_get_component_collections_Q_index(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0]
+
+        # THEN
+        collection = diffusion_model.get_component_collections(Q_index=0)
+
+        # EXPECT
+        assert collection == diffusion_model._component_collections[0]
+
+    def test_get_component_collections_Q_index_raises(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0]
+
+        # THEN EXPECT
+        with pytest.raises(IndexError, match=r'out of bounds'):
+            diffusion_model.get_component_collections(Q_index=100)
+
+    def test_ensure_Q_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(
+            ValueError,
+            match=r'Q must be provided either as an argument or set in the model',
+        ):
+            diffusion_model._ensure_Q(Q=None)
+
+    def test_ensure_Q_uses_stored_Q(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0, 3.0]
+
+        # THEN
+        Q = diffusion_model._ensure_Q(Q=None)
+
+        # EXPECT
+        np.testing.assert_allclose(Q, [1.0, 2.0, 3.0])
+
+    def test_ensure_Q_uses_argument(self, diffusion_model):
+        # WHEN
+
+        # THEN
+        Q = diffusion_model._ensure_Q(Q=[1.0, 2.0])
+
+        # EXPECT
+        np.testing.assert_allclose(Q, [1.0, 2.0])

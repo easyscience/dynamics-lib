@@ -37,11 +37,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Scale factor for the diffusion model. Must be a non-negative number.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default="DiffusionModel"
+        name : str, default='DiffusionModel'
             Name of the diffusion model.
-        display_name : str | None, default="DiffusionModel"
+        display_name : str | None, default='DiffusionModel'
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -292,7 +292,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         Get the independent variables from the diffusion model. If Q_index is provided, only the
         independent variables for the specified Q value will be returned. If Q_index is None,
-        independent variables for all Q values will be returned.
+        independent variables for all Q values will be returned. These are variables that are not
+        global but also not part of the component collections.
 
         Parameters
         ----------
@@ -317,7 +318,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ):
             raise ValueError(
                 f'Q_index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
+                f'{max(len(self._component_collections) - 1, 0)}, or None.'
             )
 
         return []
@@ -349,8 +350,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             or Q_index >= len(self._component_collections)
         ):
             raise ValueError(
-                f'Index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
+                f'Q_index must be an integer between 0 and '
+                f'{max(len(self._component_collections) - 1, 0)}, or None.'
             )
 
         variables = self.get_global_variables()
@@ -494,6 +495,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
+        self.create_component_collections()
 
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """

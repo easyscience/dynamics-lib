@@ -503,6 +503,24 @@ class TestDeltaLorentz:
             )
             assert 'A_0' in collection[1].area.dependency_expression
 
+    @pytest.mark.parametrize(
+        'Q_index',
+        [
+            -1,
+            100,
+            'string',
+        ],
+        ids=[
+            'negative index',
+            'index too large',
+            'non-integer index',
+        ],
+    )
+    def test_get_independent_variables_raises(self, delta_lorentz_model_with_Q, Q_index):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+            delta_lorentz_model_with_Q.get_independent_variables(Q_index=Q_index)
+
     def test_get_all_variables_no_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN
 
@@ -803,31 +821,30 @@ class TestDeltaLorentz:
             for lw in delta_lorentz_model_with_Q._lorentzian_width_list
         )
 
-    # def test_on_Q_change_Q_set_no_variation(
-    #     self, delta_lorentz_model_with_Q_no_variation
-    # ):
-    #     # WHEN
+    def test_on_Q_change_Q_set_no_variation(self, delta_lorentz_model_with_Q_no_variation):
+        # WHEN
 
-    #     # THEN
+        # THEN
 
-    #     # This calls on_Q_change
-    #     delta_lorentz_model_with_Q_no_variation.clear_Q(confirm=True)
+        # This calls on_Q_change
+        delta_lorentz_model_with_Q_no_variation.clear_Q(confirm=True)
 
-    #     # EXPECT
-    #     assert delta_lorentz_model_with_Q_no_variation.Q is None
-    #     assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
-    #     assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
-    #     assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
+        # EXPECT
+        assert delta_lorentz_model_with_Q_no_variation.Q is None
+        assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
+        assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
+        assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
 
-    #     # THEN
-    #     new_Q = np.linspace(0.5, 2, 7)
+        # THEN
+        # This calls on_Q_change
+        new_Q = np.linspace(0.5, 2, 7)
 
-    #     delta_lorentz_model_with_Q_no_variation.Q = new_Q
+        delta_lorentz_model_with_Q_no_variation.Q = new_Q
 
-    #     # EXPECT
-    #     assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
-    #     assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
-    #     assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
+        # EXPECT
+        assert delta_lorentz_model_with_Q_no_variation._A_0_list == []
+        assert delta_lorentz_model_with_Q_no_variation._A_1_list == []
+        assert delta_lorentz_model_with_Q_no_variation._lorentzian_width_list == []
 
     def test_repr(self, delta_lorentz_model):
         # WHEN THEN

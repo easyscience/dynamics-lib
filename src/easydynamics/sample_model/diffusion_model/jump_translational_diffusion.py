@@ -39,8 +39,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     ...     scale=scale,
     ...     diffusion_coefficient=diffusion_coefficient,
     ...     relaxation_time=relaxation_time,
+    ...     Q=Q,
     ... )
-    >>> component_collections = diffusion_model.create_component_collections(Q)
+    >>> component_collections = diffusion_model.create_component_collections()
 
     See also the tutorials..
     """
