@@ -140,6 +140,7 @@ class TestModelBase:
 
         assert expected_var_display_names == retrieved_var_display_names
         assert len(all_vars) == 18
+        assert len(all_vars) == len(set(all_vars))
 
     def test_get_all_variables_with_Q_index(self, model_base):
         # WHEN
@@ -159,6 +160,7 @@ class TestModelBase:
 
         assert expected_var_display_names == retrieved_var_display_names
         assert len(all_vars) == 6
+        assert len(all_vars) == len(set(all_vars))
 
     def test_get_all_variables_with_invalid_Q_index_raises(self, model_base):
         # WHEN / THEN / EXPECT

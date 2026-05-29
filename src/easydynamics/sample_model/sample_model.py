@@ -15,6 +15,7 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import _validate_and_convert_Q
 
 
 class SampleModel(ModelBase):
@@ -73,6 +74,7 @@ class SampleModel(ModelBase):
         ValueError
             If temperature is negative.
         """
+
         if diffusion_models is None:
             self._diffusion_models = []
         elif isinstance(diffusion_models, DiffusionModelBase):
@@ -86,6 +88,10 @@ class SampleModel(ModelBase):
                     'a list of DiffusionModelBase or None'
                 )
             self._diffusion_models = diffusion_models
+
+        Q = _validate_and_convert_Q(Q)
+        for dm in self.diffusion_models:
+            dm.Q = Q  # Ensure diffusion models have the same Q as the SampleModel
 
         super().__init__(
             display_name=display_name,
@@ -142,7 +148,7 @@ class SampleModel(ModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
             )
-
+        diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
         self._generate_component_collections()
 
@@ -160,19 +166,19 @@ class SampleModel(ModelBase):
         ValueError
             If no DiffusionModel with the given name is found.
         """
-        for i, dm in enumerate(self._diffusion_models):
+        for i, dm in enumerate(self.diffusion_models):
             if dm.name == name:
-                del self._diffusion_models[i]
+                del self.diffusion_models[i]
                 self._generate_component_collections()
                 return
         raise ValueError(
             f'No DiffusionModel with name {name} found. \n'
-            f'The available names are: {[dm.name for dm in self._diffusion_models]}'
+            f'The available names are: {[dm.name for dm in self.diffusion_models]}'
         )
 
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""
-        self._diffusion_models.clear()
+        self.diffusion_models = []
         self._generate_component_collections()
 
     # ------------------------------------------------------------------
@@ -212,9 +218,12 @@ class SampleModel(ModelBase):
 
         if value is None:
             self._diffusion_models = []
+            self._on_diffusion_models_change()
             return
         if isinstance(value, DiffusionModelBase):
+            value.Q = self.Q
             self._diffusion_models = [value]
+            self._on_diffusion_models_change()
             return
         if not isinstance(value, list) or not all(
             isinstance(dm, DiffusionModelBase) for dm in value
@@ -223,6 +232,8 @@ class SampleModel(ModelBase):
                 'diffusion_models must be a DiffusionModelBase, a list of DiffusionModelBase, '
                 'or None'
             )
+        for dm in value:
+            dm.Q = self.Q
         self._diffusion_models = value
         self._on_diffusion_models_change()
 
@@ -492,8 +503,9 @@ class SampleModel(ModelBase):
         if self.temperature is not None:
             all_vars.append(self.temperature)
 
-        for diffusion_model in self._diffusion_models:
-            all_vars.extend(diffusion_model.get_all_variables())
+        for diffusion_model in self.diffusion_models:
+            all_vars.extend(diffusion_model.get_global_variables())
+            all_vars.extend(diffusion_model.get_independent_variables(Q_index=Q_index))
 
         return all_vars
 
@@ -512,11 +524,8 @@ class SampleModel(ModelBase):
             return
         # Generate components from diffusion models
         # and add to component collections
-        for diffusion_model in self._diffusion_models:
-            diffusion_collections = diffusion_model.create_component_collections(
-                Q=self.Q,
-                component_name=diffusion_model.name,
-            )
+        for diffusion_model in self.diffusion_models:
+            diffusion_collections = diffusion_model.get_component_collections()
             for target, source in zip(
                 self._component_collections,
                 diffusion_collections,
@@ -527,6 +536,18 @@ class SampleModel(ModelBase):
 
     def _on_diffusion_models_change(self) -> None:
         """Handle changes to the diffusion models."""
+        for diffusion_model in self.diffusion_models:
+            diffusion_model.Q = self.Q
+
+        self._generate_component_collections()
+
+    def _on_Q_change(self) -> None:
+        """Handle changes to the Q values."""
+
+        for diffusion_model in self.diffusion_models:
+            # This may be too aggressive
+            diffusion_model.clear_Q(confirm=True)
+            diffusion_model.Q = self.Q
         self._generate_component_collections()
 
     # ------------------------------------------------------------------

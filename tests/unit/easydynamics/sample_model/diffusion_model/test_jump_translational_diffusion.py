@@ -67,11 +67,31 @@ class TestJumpTranslationalDiffusion:
                 {
                     'unit': 'meV',
                     'scale': 1.0,
+                    'diffusion_coefficient': -1.0,
+                    'relaxation_time': 1.0,
+                },
+                ValueError,
+                'diffusion_coefficient must be non-negative',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 'invalid',
                 },
                 TypeError,
                 'relaxation_time must be a number',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
+                    'diffusion_coefficient': 1.0,
+                    'relaxation_time': -1.0,
+                },
+                ValueError,
+                'relaxation_time must be non-negative',
             ),
         ],
     )
@@ -190,9 +210,10 @@ class TestJumpTranslationalDiffusion:
     )
     def test_create_component_collections(self, jump_diffusion_model, Q):
         # WHEN
+        jump_diffusion_model.Q = Q
 
         # THEN
-        component_collections = jump_diffusion_model.create_component_collections(Q=Q)
+        component_collections = jump_diffusion_model.create_component_collections()
 
         # EXPECT
         expected_widths = jump_diffusion_model.calculate_width(Q)
@@ -203,36 +224,6 @@ class TestJumpTranslationalDiffusion:
             assert component.width.unit == jump_diffusion_model.unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
-
-    def test_create_component_collections_component_name_must_be_string(
-        self, jump_diffusion_model
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_name must be a string.'):
-            jump_diffusion_model.create_component_collections(
-                Q=np.array([0.1, 0.2, 0.3]), component_name=123
-            )
-
-    def test_create_component_collections_component_display_name_must_be_string(
-        self, jump_diffusion_model
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_display_name must be a string.'):
-            jump_diffusion_model.create_component_collections(
-                Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
-            )
-
-    def test_create_component_collections_Q_type_error(self, jump_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Q must be a '):
-            jump_diffusion_model.create_component_collections(Q='invalid')  # Invalid type
-
-    def test_create_component_collections_Q_1dimensional_error(self, jump_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q must be a 1-dimensional array.'):
-            jump_diffusion_model.create_component_collections(
-                Q=np.array([[0.1, 0.2], [0.3, 0.4]])
-            )  # Invalid shape
 
     def test_write_width_dependency_expression(self, jump_diffusion_model):
         # WHEN THEN

@@ -257,6 +257,11 @@ class FitBinding(EasyDynamicsBase):
         modes = self._get_modes()
 
         if isinstance(self.model, DiffusionModelBase):
+            # This needs to be generalised.
+            # TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003
+            if 'delta' in modes:
+                return [f'{self.parameter_name} area' for mode in modes]
+
             return [f'{self.parameter_name} {mode}' for mode in modes]
 
         return [self.parameter_name]
@@ -291,6 +296,9 @@ class FitBinding(EasyDynamicsBase):
 
         if mode == 'width':
             return lambda x, **_: model.calculate_width(x)
+
+        if mode == 'delta':
+            return lambda x, **_: model.calculate_EISF(x) * model.scale.value
 
         raise ValueError(f'Unknown diffusion mode: {mode}')
 

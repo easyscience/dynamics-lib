@@ -14,6 +14,7 @@ from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
 from easydynamics.sample_model.sample_model import SampleModel
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 
@@ -469,7 +470,6 @@ class TestSampleModel:
             assert collection[0].area.value == pytest.approx(1.0)
             assert collection[1].name == 'TestLorentzian1Name'
             assert collection[1].area.value == pytest.approx(2.0)
-            assert collection[2].name == 'DiffusionModelName'
             assert isinstance(collection[2], Lorentzian)
 
     def test_get_all_variables(self, sample_model):
@@ -496,6 +496,32 @@ class TestSampleModel:
 
         for var in template_vars:
             assert var not in all_vars
+
+        assert len(set(all_vars)) == len(all_vars)  # all variables should be unique
+
+    def test_get_all_variables_delta_lorentz(self):
+        # WHEN
+        sample_model = SampleModel(
+            Q=np.array([1.0, 2.0, 3.0]),
+        )
+        delta_lorentz = DeltaLorentz(allow_Q_variation={'A_0': True, 'lorentzian_width': True})
+        sample_model.diffusion_models = delta_lorentz
+
+        # THEN
+        variables = sample_model.get_all_variables()
+
+        # EXPECT
+        delta_lorentz_vars = delta_lorentz.get_all_variables()
+
+        assert set(variables) == set(delta_lorentz_vars)
+
+        # THEN
+        variables = sample_model.get_all_variables(Q_index=0)
+
+        # EXPECT
+        delta_lorentz_vars = delta_lorentz.get_all_variables(Q_index=0)
+
+        assert set(variables) == set(delta_lorentz_vars)
 
     def test_repr(self, sample_model):
         # WHEN
