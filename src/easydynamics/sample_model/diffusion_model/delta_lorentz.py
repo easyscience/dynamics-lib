@@ -570,6 +570,50 @@ class DeltaLorentz(DiffusionModelBase):
 
         return variables
 
+    def get_independent_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get the independent variables from the diffusion model. If Q_index is provided, only the
+        independent variables for the specified Q value will be returned. If Q_index is None,
+        independent variables for all Q values will be returned.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value for which to get the independent variables. If None,
+            independent variables for all Q values will be included.
+
+        Returns
+        -------
+        list[Parameter]
+            List of independent variables in the model.
+
+        Raises
+        ------
+        ValueError
+            If Q_index is not None and is not a valid index for the Q values in the model.
+        """
+
+        if Q_index is not None and (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or Q_index >= len(self._component_collections)
+        ):
+            raise ValueError(
+                f'Q_index must be an integer between 0 and '
+                f'{len(self._component_collections) - 1}, or None.'
+            )
+
+        variables = []
+        if self._allow_Q_variation['A_0'] is True:
+            if Q_index is None:
+                variables.extend(self._A_0_list)
+                variables.extend(self._A_1_list)
+            else:
+                variables.append(self._A_0_list[Q_index])
+                variables.append(self._A_1_list[Q_index])
+
+        return variables
+
     def get_all_variables(self, Q_index: int | None = None) -> list[DescriptorNumber]:
         """
         Get a list of all variables (Parameters and Descriptors) in the model.
@@ -602,14 +646,7 @@ class DeltaLorentz(DiffusionModelBase):
             )
 
         variables = self.get_global_variables()
-
-        if self._allow_Q_variation['A_0'] is True:
-            if Q_index is None:
-                variables.extend(self._A_0_list)
-                variables.extend(self._A_1_list)
-            else:
-                variables.append(self._A_0_list[Q_index])
-                variables.append(self._A_1_list[Q_index])
+        variables.extend(self.get_independent_variables(Q_index=Q_index))
 
         # Also add all dependent variables from the component collections
         if Q_index is None:

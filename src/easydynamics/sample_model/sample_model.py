@@ -503,6 +503,7 @@ class SampleModel(ModelBase):
 
         for diffusion_model in self.diffusion_models:
             all_vars.extend(diffusion_model.get_global_variables())
+            all_vars.extend(diffusion_model.get_independent_variables(Q_index=Q_index))
 
         return all_vars
 
