@@ -213,6 +213,8 @@ class Analysis(AnalysisBase):
         Q_index: int | None = None,
         plot_components: bool = True,
         add_background: bool = True,
+        plot_residuals: bool = False,
+        residuals_yoffset: float = 0.0,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
@@ -232,6 +234,11 @@ class Analysis(AnalysisBase):
         add_background : bool, default=True
             Whether to add background components to the sample model components when plotting.
             Default is True.
+        plot_residuals : bool, default=False
+            Whether to plot the residuals (data - model). Default is False.
+        residuals_yoffset : float, default=0.0
+            Vertical offset to apply to the residuals when plotting, to avoid overlap with the data
+            and model. Only used if plot_residuals is True. Default is 0.0.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
             experiment.
@@ -280,6 +287,12 @@ class Analysis(AnalysisBase):
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
 
+        if not isinstance(plot_residuals, bool):
+            raise TypeError('plot_residuals must be True or False.')
+
+        if not isinstance(residuals_yoffset, (int, float)):
+            raise TypeError('residuals_yoffset must be a number.')
+
         if energy is None:
             energy = self.energy
 
@@ -289,6 +302,8 @@ class Analysis(AnalysisBase):
             energy=energy,
             add_background=add_background,
             include_components=plot_components,
+            include_residuals=plot_residuals,
+            residuals_yoffset=residuals_yoffset,
         )
 
         plot_kwargs_defaults = {
@@ -313,6 +328,12 @@ class Analysis(AnalysisBase):
                 plot_kwargs_defaults['color'][key] = 'red'
                 plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
+            elif key == 'Residuals':
+                plot_kwargs_defaults['linestyle'][key] = 'none'
+                plot_kwargs_defaults['marker'][key] = 'o'
+                plot_kwargs_defaults['color'][key] = 'blue'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
+
             else:
                 plot_kwargs_defaults['linestyle'][key] = '--'
                 plot_kwargs_defaults['marker'][key] = None
@@ -334,6 +355,8 @@ class Analysis(AnalysisBase):
         energy: sc.Variable | None = None,
         add_background: bool = True,
         include_components: bool = True,
+        include_residuals: bool = False,
+        residuals_yoffset: float = 0.0,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation and optionally
@@ -350,6 +373,11 @@ class Analysis(AnalysisBase):
         include_components : bool, default=True
             Whether to include the individual components of the model in the DataGroup. If False,
             only the total model will be included.
+        include_residuals : bool, default=False
+            Whether to include the residuals (data - model) in the DataGroup.
+        residuals_yoffset : float, default=0.0
+            Vertical offset to apply to the residuals when plotting, to avoid overlap with the data
+            and model. Only used if include_residuals is True. Default is 0.0.
 
         Raises
         ------
@@ -380,6 +408,12 @@ class Analysis(AnalysisBase):
         if not isinstance(include_components, bool):
             raise TypeError('include_components must be True or False.')
 
+        if not isinstance(include_residuals, bool):
+            raise TypeError('include_residuals must be True or False.')
+
+        if not isinstance(residuals_yoffset, (int, float)):
+            raise TypeError('residuals_yoffset must be a number.')
+
         energy = self._verify_energy(energy)
 
         if energy is None:
@@ -396,6 +430,10 @@ class Analysis(AnalysisBase):
             )
             for key in components:
                 data_and_model[key] = components[key]
+
+        if include_residuals:
+            data_and_model['Residuals'] = self._create_residuals_array()
+            data_and_model['Residuals'] += residuals_yoffset
 
         return sc.DataGroup(data_and_model)
 
@@ -735,6 +773,19 @@ class Analysis(AnalysisBase):
             data=model,
             coords={'Q': self.Q, 'energy': energy},
         )
+
+    def _create_residuals_array(self) -> sc.DataArray:
+        """
+        Create a scipp array for the residuals (data - model).
+
+        Returns
+        -------
+        sc.DataArray
+            A DataArray containing the residuals, with dimensions "Q" and "energy".
+        """
+        data = self.experiment.binned_data
+        model = self._create_model_array()
+        return data.copy(deep=True) - model
 
     def _create_components_dataset(
         self,
