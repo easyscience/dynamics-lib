@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
+
 import scipp as sc
 
 from easydynamics.sample_model.component_collection import ComponentCollection
@@ -31,11 +33,11 @@ class ResolutionModel(ModelBase):
 
         Parameters
         ----------
-        display_name : str, default='MyResolutionModel'
+        display_name : str, default="MyResolutionModel"
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the model.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
@@ -100,7 +102,7 @@ class ResolutionModel(ModelBase):
 
         Returns
         -------
-        'ResolutionModel'
+        "ResolutionModel"
             ResolutionModel created from the SampleModel.
 
         Raises
@@ -126,8 +128,6 @@ class ResolutionModel(ModelBase):
             components=sample_model.components,
             Q=sample_model.Q,
         )
-
-        from copy import copy
 
         if sample_model.Q is not None:
             for index in range(len(sample_model.Q)):

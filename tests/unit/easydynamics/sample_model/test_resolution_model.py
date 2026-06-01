@@ -289,3 +289,15 @@ class TestResolutionModel:
             ResolutionModel.from_sample_model(
                 **valid_kwargs,
             )
+
+    def test_from_sample_model_invalid_components(self, sample_model):
+        # WHEN
+        invalid_component = DeltaFunction(name='InvalidDelta')
+        sample_model.append_component(invalid_component)
+
+        # THEN EXPECT
+        with pytest.raises(
+            TypeError,
+            match='cannot be a DeltaFunction',
+        ):
+            ResolutionModel.from_sample_model(sample_model)
