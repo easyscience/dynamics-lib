@@ -267,6 +267,7 @@ class Analysis(AnalysisBase):
             return self.analysis_list[Q_index].plot_data_and_model(
                 plot_components=plot_components,
                 add_background=add_background,
+                plot_residuals=plot_residuals,
                 energy=energy,
                 **kwargs,
             )

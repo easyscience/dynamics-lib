@@ -21,6 +21,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
+from easydynamics.utils.plotting import slicerplot_with_residuals
 
 
 class Analysis1d(AnalysisBase):
@@ -270,7 +271,6 @@ class Analysis1d(AnalysisBase):
         plot_components: bool = True,
         add_background: bool = True,
         plot_residuals: bool = False,
-        residuals_yoffset: float = 0.0,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
@@ -289,9 +289,6 @@ class Analysis1d(AnalysisBase):
             components.
         plot_residuals : bool, default=False
             Whether to plot the residuals (data - model).
-        residuals_yoffset : float, default=0.0
-            A y-offset to apply to the residuals when plotting, to avoid overlap with the data and
-            model. Only used if plot_residuals is True.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for plotting. If None, the energy grid from the experiment
             is used.
@@ -310,7 +307,6 @@ class Analysis1d(AnalysisBase):
             add_background=add_background,
             include_components=plot_components,
             include_residuals=plot_residuals,
-            residuals_yoffset=residuals_yoffset,
         )
 
         plot_kwargs_defaults = {
@@ -347,10 +343,20 @@ class Analysis1d(AnalysisBase):
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
 
-        return pp.plot(
-            data_and_model,
-            **plot_kwargs_defaults,
-        )
+        if plot_residuals:
+            fig = slicerplot_with_residuals(
+                data_and_model,
+                residuals_key='Residuals',
+                operation='sum',
+                **plot_kwargs_defaults,
+            )
+        else:
+            fig = pp.plot(
+                data_and_model,
+                **plot_kwargs_defaults,
+            )
+        fig.autoscale()
+        return fig
 
     def data_and_model_to_datagroup(
         self,
@@ -358,7 +364,6 @@ class Analysis1d(AnalysisBase):
         add_background: bool = True,
         include_components: bool = True,
         include_residuals: bool = False,
-        residuals_yoffset: float = 0.0,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation, and
@@ -379,9 +384,6 @@ class Analysis1d(AnalysisBase):
         include_residuals : bool, default=False
             Whether to include the residuals (data - model) in the DataGroup. If True, the
             DataGroup will include a DataArray with key 'Residuals' containing the residuals.
-        residuals_yoffset : float, default=0.0
-            A y-offset to apply to the residuals when plotting, to avoid overlap with the data and
-            model. Only used if include_residuals is True.
 
         Raises
         ------
@@ -440,7 +442,6 @@ class Analysis1d(AnalysisBase):
 
         if include_residuals:
             residuals = self._create_residuals_array()
-            residuals += residuals_yoffset
             data_and_model['Residuals'] = residuals
 
         return sc.DataGroup(data_and_model)
@@ -901,7 +902,6 @@ class Analysis1d(AnalysisBase):
         residuals = data.copy(deep=True)
         residuals.values -= model
         return residuals
-        # return self._to_scipp_array(values=residuals)
 
     def _create_components_dataset_single_Q(
         self,

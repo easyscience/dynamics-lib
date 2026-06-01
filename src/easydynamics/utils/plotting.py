@@ -25,11 +25,11 @@ def slicerplot_with_residuals(
     ----------
     dg : sc.DataGroup
         DataGroup containing the data to plot. Must include a key for residuals.
-    residuals_key : str, default="Residuals"
+    residuals_key : str, default='Residuals'
         Key in the DataGroup that contains the residuals data.
     keep : list[str] | str | None, default=None
         Dimensions to keep in the SlicerPlot. Passed to SlicerPlot.
-    operation : str, default="sum"
+    operation : str, default='sum'
         Operation to apply when reducing the residuals data. Passed to SlicerPlot.
     **kwargs : object
         Additional keyword arguments passed to SlicerPlot.
