@@ -26,7 +26,7 @@ class CreateParametersMixin:
         self,
         area: Numeric,
         name: str,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """
@@ -41,7 +41,7 @@ class CreateParametersMixin:
             The area value.
         name : str
             The name of the model component.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             The unit of the area Parameter.
         minimum_area : float, default=MINIMUM_AREA
             The minimum allowed area.
@@ -59,16 +59,16 @@ class CreateParametersMixin:
             The validated area Parameter.
         """
         if not isinstance(area, Numeric):
-            raise TypeError("area must be a number.")
+            raise TypeError('area must be a number.')
 
         if isinstance(area, Numeric):
             if not np.isfinite(area):
-                raise ValueError("area must be a finite number.")
-            area = Parameter(name=name + " area", value=float(area), unit=unit)
+                raise ValueError('area must be a finite number.')
+            area = Parameter(name=name + ' area', value=float(area), unit=unit)
 
         if area.value < 0:
             warnings.warn(
-                f"The area of {name} is negative, which may not be physically meaningful.",
+                f'The area of {name} is negative, which may not be physically meaningful.',
                 UserWarning,
                 stacklevel=3,
             )
@@ -83,7 +83,7 @@ class CreateParametersMixin:
         center: Numeric | None,
         name: str,
         fix_if_none: bool,
-        unit: str | sc.Unit = "meV",
+        unit: str | sc.Unit = 'meV',
         enforce_minimum_center: bool = False,
     ) -> Parameter:
         """
@@ -97,7 +97,7 @@ class CreateParametersMixin:
             The name of the model component.
         fix_if_none : bool
             Whether to fix the center Parameter if center is None.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             The unit of the center Parameter.
         enforce_minimum_center : bool, default=False
             Whether to enforce a minimum center value to avoid zero center in DHO.
@@ -116,20 +116,20 @@ class CreateParametersMixin:
             The validated center Parameter.
         """
         if center is not None and not isinstance(center, Numeric):
-            raise TypeError("center must be None or a number.")
+            raise TypeError('center must be None or a number.')
 
         if center is None:
             center = Parameter(
-                name=name + " center",
+                name=name + ' center',
                 value=0.0,
                 unit=unit,
                 fixed=fix_if_none,
             )
         elif isinstance(center, Numeric):
             if not np.isfinite(center):
-                raise ValueError("center must be None or a finite number.")
+                raise ValueError('center must be None or a finite number.')
 
-            center = Parameter(name=name + " center", value=float(center), unit=unit)
+            center = Parameter(name=name + ' center', value=float(center), unit=unit)
         if enforce_minimum_center and center.min < DHO_MINIMUM_CENTER:
             center.min = DHO_MINIMUM_CENTER
         return center
@@ -138,8 +138,8 @@ class CreateParametersMixin:
         self,
         width: Numeric,
         name: str,
-        param_name: str = "width",
-        unit: str | sc.Unit = "meV",
+        param_name: str = 'width',
+        unit: str | sc.Unit = 'meV',
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """
@@ -151,9 +151,9 @@ class CreateParametersMixin:
             The width value.
         name : str
             The name of the model component.
-        param_name : str, default='width'
+        param_name : str, default="width"
             The name of the width parameter.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             The unit of the width Parameter.
         minimum_width : float, default=MINIMUM_WIDTH
             The minimum allowed width.
@@ -171,18 +171,18 @@ class CreateParametersMixin:
             The validated width Parameter.
         """
         if not isinstance(width, Numeric):
-            raise TypeError(f"{param_name} must be a number.")
+            raise TypeError(f'{param_name} must be a number.')
 
         if isinstance(width, Numeric):
             if not np.isfinite(width):
-                raise ValueError(f"{param_name} must be a finite number")
+                raise ValueError(f'{param_name} must be a finite number')
 
             if float(width) < minimum_width:
                 raise ValueError(
-                    f"The {param_name} of a {self.__class__.__name__} must be greater than zero."
+                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
                 )
             width = Parameter(
-                name=name + " " + param_name,
+                name=name + ' ' + param_name,
                 value=float(width),
                 unit=unit,
                 min=minimum_width,
@@ -190,7 +190,7 @@ class CreateParametersMixin:
         else:
             if width.value <= 0:
                 raise ValueError(
-                    f"The {param_name} of a {self.__class__.__name__} must be greater than zero."
+                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
                 )
             if width.min < minimum_width:
                 width.min = minimum_width

@@ -15,12 +15,12 @@ class TestExponential:
     @pytest.fixture
     def exponential(self):
         return Exponential(
-            name="ExponentialName",
-            display_name="TestExponential",
+            name='ExponentialName',
+            display_name='TestExponential',
             amplitude=2.0,
             center=0.5,
             rate=1.2,
-            unit="meV",
+            unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -28,64 +28,64 @@ class TestExponential:
         exponential = Exponential()
 
         # THEN EXPECT
-        assert exponential.display_name == "Exponential"
+        assert exponential.display_name == 'Exponential'
         assert exponential.amplitude.value == pytest.approx(1.0)
         assert exponential.center.value == pytest.approx(0.0)
         assert exponential.rate.value == pytest.approx(1.0)
-        assert exponential.unit == "meV"
+        assert exponential.unit == 'meV'
 
     def test_initialization(self, exponential: Exponential):
         # WHEN THEN EXPECT
-        assert exponential.display_name == "TestExponential"
+        assert exponential.display_name == 'TestExponential'
         assert exponential.amplitude.value == pytest.approx(2.0)
         assert exponential.center.value == pytest.approx(0.5)
         assert exponential.rate.value == pytest.approx(1.2)
-        assert exponential.unit == "meV"
+        assert exponential.unit == 'meV'
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message",
+        'kwargs, expected_message',
         [
             (
-                {"amplitude": "invalid", "center": 0.5, "rate": 1.0, "unit": "meV"},
-                "amplitude must be a number",
+                {'amplitude': 'invalid', 'center': 0.5, 'rate': 1.0, 'unit': 'meV'},
+                'amplitude must be a number',
             ),
             (
-                {"amplitude": 2.0, "center": "invalid", "rate": 1.0, "unit": "meV"},
-                "center must be None or a number",
+                {'amplitude': 2.0, 'center': 'invalid', 'rate': 1.0, 'unit': 'meV'},
+                'center must be None or a number',
             ),
             (
-                {"amplitude": 2.0, "center": 0.5, "rate": "invalid", "unit": "meV"},
-                "rate must be a number",
+                {'amplitude': 2.0, 'center': 0.5, 'rate': 'invalid', 'unit': 'meV'},
+                'rate must be a number',
             ),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Exponential(display_name="TestExponential", **kwargs)
+            Exponential(display_name='TestExponential', **kwargs)
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message",
+        'kwargs, expected_message',
         [
             (
-                {"amplitude": np.nan, "center": 0.5, "rate": 1.0, "unit": "meV"},
-                "amplitude must be a finite number or a Parameter",
+                {'amplitude': np.nan, 'center': 0.5, 'rate': 1.0, 'unit': 'meV'},
+                'amplitude must be a finite number or a Parameter',
             ),
             (
-                {"amplitude": 2.0, "center": 0.5, "rate": np.nan, "unit": "meV"},
-                "rate must be a finite number or a Parameter",
+                {'amplitude': 2.0, 'center': 0.5, 'rate': np.nan, 'unit': 'meV'},
+                'rate must be a finite number or a Parameter',
             ),
         ],
     )
     def test_input_value_validation_raises(self, kwargs, expected_message):
         with pytest.raises(ValueError, match=expected_message):
-            Exponential(display_name="TestExponential", **kwargs)
+            Exponential(display_name='TestExponential', **kwargs)
 
     @pytest.mark.parametrize(
-        "prop, valid_value, invalid_value, invalid_message",
+        'prop, valid_value, invalid_value, invalid_message',
         [
-            ("amplitude", 3.0, "invalid", r"must be a number"),
-            ("center", 0.7, "invalid", r"must be a number"),
-            ("rate", 1.5, "invalid", r"must be a number"),
+            ('amplitude', 3.0, 'invalid', r'must be a number'),
+            ('center', 0.7, 'invalid', r'must be a number'),
+            ('rate', 1.5, 'invalid', r'must be a number'),
         ],
     )
     def test_property_setters(
@@ -135,9 +135,9 @@ class TestExponential:
         assert all(isinstance(param, Parameter) for param in params)
 
         expected_names = {
-            "ExponentialName amplitude",
-            "ExponentialName center",
-            "ExponentialName rate",
+            'ExponentialName amplitude',
+            'ExponentialName center',
+            'ExponentialName rate',
         }
 
         actual_names = {param.name for param in params}
@@ -146,39 +146,39 @@ class TestExponential:
 
     def test_convert_unit(self, exponential: Exponential):
         # WHEN
-        exponential.convert_unit("microeV")
+        exponential.convert_unit('microeV')
 
         # THEN EXPECT
-        assert exponential.unit == "microeV"
+        assert exponential.unit == 'microeV'
 
         assert exponential.amplitude.value == pytest.approx(2.0 * 1e3)
         assert exponential.center.value == pytest.approx(0.5 * 1e3)
 
         # rate should scale inversely
         assert exponential.rate.value == pytest.approx(1.2 / 1e3)
-        assert str(exponential.rate.unit) == "1/ueV"
+        assert str(exponential.rate.unit) == '1/ueV'
 
     def test_convert_unit_incorrect_unit_raises(self, exponential: Exponential):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r"unit must be a string or sc.Unit"):
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
             exponential.convert_unit(123)
 
     def test_convert_unit_rollback(self, exponential: Exponential):
         # WHEN
         with pytest.raises(
             UnitError,
-            match=r"Failed to convert unit: Conversion from `meV` to `m` is not valid.",
+            match=r'Failed to convert unit: Conversion from `meV` to `m` is not valid.',
         ):
-            exponential.convert_unit("m")
+            exponential.convert_unit('m')
 
         # THEN EXPECT - values should be unchanged
-        assert exponential.unit == "meV"
+        assert exponential.unit == 'meV'
         assert exponential.amplitude.value == pytest.approx(2.0)
-        assert exponential.amplitude.unit == "meV"
+        assert exponential.amplitude.unit == 'meV'
         assert exponential.center.value == pytest.approx(0.5)
-        assert exponential.center.unit == "meV"
+        assert exponential.center.unit == 'meV'
         assert exponential.rate.value == pytest.approx(1.2)
-        assert exponential.rate.unit == "1/meV"
+        assert exponential.rate.unit == '1/meV'
 
     def test_copy(self, exponential: Exponential):
         # WHEN
@@ -204,9 +204,9 @@ class TestExponential:
         repr_str = repr(exponential)
 
         # THEN EXPECT
-        assert "Exponential" in repr_str
-        assert "name = ExponentialName" in repr_str
-        assert "unit = meV" in repr_str
-        assert "amplitude =" in repr_str
-        assert "center =" in repr_str
-        assert "rate =" in repr_str
+        assert 'Exponential' in repr_str
+        assert 'name = ExponentialName' in repr_str
+        assert 'unit = meV' in repr_str
+        assert 'amplitude =' in repr_str
+        assert 'center =' in repr_str
+        assert 'rate =' in repr_str

@@ -15,12 +15,12 @@ class TestGaussian:
     @pytest.fixture
     def gaussian(self):
         return Gaussian(
-            name="GaussianName",
-            display_name="TestGaussian",
+            name='GaussianName',
+            display_name='TestGaussian',
             area=2.0,
             center=0.5,
             width=0.6,
-            unit="meV",
+            unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -28,82 +28,82 @@ class TestGaussian:
         gaussian = Gaussian()
 
         # EXPECT
-        assert gaussian.display_name == "Gaussian"
+        assert gaussian.display_name == 'Gaussian'
         assert gaussian.area.value == pytest.approx(1.0)
         assert gaussian.center.value == pytest.approx(0.0)
         assert gaussian.width.value == pytest.approx(1.0)
-        assert gaussian.unit == "meV"
+        assert gaussian.unit == 'meV'
         assert gaussian.center.fixed is True
 
     def test_initialization(self, gaussian: Gaussian):
         # WHEN THEN EXPECT
-        assert gaussian.display_name == "TestGaussian"
+        assert gaussian.display_name == 'TestGaussian'
         assert gaussian.area.value == pytest.approx(2.0)
         assert gaussian.center.value == pytest.approx(0.5)
         assert gaussian.width.value == pytest.approx(0.6)
-        assert gaussian.unit == "meV"
+        assert gaussian.unit == 'meV'
 
     @pytest.mark.parametrize(
-        "kwargs, expected_message",
+        'kwargs, expected_message',
         [
             (
-                {"area": "invalid", "center": 0.5, "width": 0.6, "unit": "meV"},
-                "area must be a number",
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                'area must be a number',
             ),
             (
-                {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
-                "center must be None or a number",
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
+                'center must be None or a number',
             ),
             (
-                {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
-                "width must be a number",
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                'width must be a number',
             ),
             (
-                {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
-                "unit must be None",
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
+                'unit must be None',
             ),
         ],
         ids=[
-            "invalid area",
-            "invalid center",
-            "invalid width",
-            "invalid unit",
+            'invalid area',
+            'invalid center',
+            'invalid width',
+            'invalid unit',
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Gaussian(display_name="TestGaussian", **kwargs)
+            Gaussian(display_name='TestGaussian', **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
-            ValueError, match=r"The width of a Gaussian must be greater than zero."
+            ValueError, match=r'The width of a Gaussian must be greater than zero.'
         ):
             Gaussian(
-                display_name="TestGaussian",
+                display_name='TestGaussian',
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit="meV",
+                unit='meV',
             )
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
-        with pytest.warns(UserWarning, match="may not be physically meaningful"):
+        with pytest.warns(UserWarning, match='may not be physically meaningful'):
             Gaussian(
-                display_name="TestGaussian",
+                display_name='TestGaussian',
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit="meV",
+                unit='meV',
             )
 
     @pytest.mark.parametrize(
-        "prop, valid_value, invalid_value, invalid_message",
+        'prop, valid_value, invalid_value, invalid_message',
         [
-            ("area", 3.0, "invalid", r"must be a number"),
-            ("center", 0.6, "invalid", r"must be a number"),
-            ("width", 0.7, "invalid", r"must be a number"),
+            ('area', 3.0, 'invalid', r'must be a number'),
+            ('center', 0.6, 'invalid', r'must be a number'),
+            ('width', 0.7, 'invalid', r'must be a number'),
         ],
     )
     def test_property_setters(
@@ -119,7 +119,7 @@ class TestGaussian:
 
     def test_width_must_be_positive(self, gaussian: Gaussian):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match="width must be positive"):
+        with pytest.raises(ValueError, match='width must be positive'):
             gaussian.width = -0.5
 
     def test_evaluate(self, gaussian: Gaussian):
@@ -155,9 +155,9 @@ class TestGaussian:
         assert all(isinstance(param, Parameter) for param in params)
 
         expected_names = {
-            "GaussianName area",
-            "GaussianName center",
-            "GaussianName width",
+            'GaussianName area',
+            'GaussianName center',
+            'GaussianName width',
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -179,10 +179,10 @@ class TestGaussian:
 
     def test_convert_unit(self, gaussian: Gaussian):
         # WHEN THEN
-        gaussian.convert_unit("microeV")
+        gaussian.convert_unit('microeV')
 
         # EXPECT
-        assert gaussian.unit == "microeV"
+        assert gaussian.unit == 'microeV'
         assert gaussian.area.value == pytest.approx(2 * 1e3)
         assert gaussian.center.value == pytest.approx(0.5 * 1e3)
         assert gaussian.width.value == pytest.approx(0.6 * 1e3)
@@ -222,9 +222,9 @@ class TestGaussian:
         # WHEN THEN
         repr_str = repr(gaussian)
         # EXPECT
-        assert "Gaussian" in repr_str
-        assert "name = GaussianName" in repr_str
-        assert "unit = meV" in repr_str
-        assert "area =" in repr_str
-        assert "center =" in repr_str
-        assert "width =" in repr_str
+        assert 'Gaussian' in repr_str
+        assert 'name = GaussianName' in repr_str
+        assert 'unit = meV' in repr_str
+        assert 'area =' in repr_str
+        assert 'center =' in repr_str
+        assert 'width =' in repr_str

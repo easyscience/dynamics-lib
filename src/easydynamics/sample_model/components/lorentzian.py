@@ -33,8 +33,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        unit: str | sc.Unit = "meV",
-        name: str = "Lorentzian",
+        unit: str | sc.Unit = 'meV',
+        name: str = 'Lorentzian',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -43,15 +43,15 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric , default=1.0
+        area : Numeric, default=1.0
             Area of the Lorentzian.
         center : Numeric | None, default=None
             Center of the Lorentzian. If None, defaults to 0 and is fixed.
-        width : Numeric , default=1.0
+        width : Numeric, default=1.0
             Half width at half maximum (HWHM).
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the parameters.
-        name : str, default='Lorentzian'
+        name : str, default="Lorentzian"
             Name of the component for indexing.
         display_name : str | None, default=None
             Display name for the component.
@@ -106,7 +106,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             If the value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -141,7 +141,7 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
     @property
@@ -174,15 +174,13 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number")
+            raise TypeError('width must be a number')
 
         if float(value) <= 0:
-            raise ValueError("width must be positive")
+            raise ValueError('width must be positive')
         self._width.value = value
 
-    def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
         r"""
         Evaluate the Lorentzian at the given x values.
 
@@ -222,9 +220,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             A string representation of the Lorentzian.
         """
         return (
-            f"Lorentzian(name = {self.name}, display_name = {self.display_name}, "
-            f"unit = {self._unit},\n"
-            f"    area = {self.area},\n"
-            f"    center = {self.center},\n"
-            f"    width = {self.width})"
+            f'Lorentzian(name = {self.name}, display_name = {self.display_name}, '
+            f'unit = {self._unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center},\n'
+            f'    width = {self.width})'
         )

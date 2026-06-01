@@ -88,19 +88,19 @@ class DeltaLorentz(DiffusionModelBase):
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
+        unit : str | sc.Unit, default="meV"
             Unit of the diffusion model. Must be convertible to meV.
-        name : str, default='DeltaLorentz'
+        name : str, default="DeltaLorentz"
             Name of the diffusion model.
         display_name : str | None, default=None
             Display name of the diffusion model.
-        lorentzian_name : str, default='Lorentzian'
+        lorentzian_name : str, default="Lorentzian"
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
             model.
         lorentzian_display_name : str | None, default=None
             Display name of the Lorentzian component. If None, it will be set to the display name
             of the diffusion model.
-        delta_name : str, default='Delta function'
+        delta_name : str, default="Delta function"
             Name of the delta function component.
         delta_display_name : str | None, default=None
             Display name of the delta function component. If None, it will be set to the display
@@ -486,16 +486,13 @@ class DeltaLorentz(DiffusionModelBase):
             # ------------------------------#
             # Create Lorentzian
             # ------------------------------#
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                width = self._lorentzian_width_list[i]
-            else:
-                width = 1.0
             lorentzian_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
                 unit=self.unit,
-                width=width,
             )
+            if self._allow_Q_variation['lorentzian_width'] is True:
+                lorentzian_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made
