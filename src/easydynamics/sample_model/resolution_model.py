@@ -129,10 +129,11 @@ class ResolutionModel(ModelBase):
 
         from copy import copy
 
-        for index in range(len(sample_model.Q)):
-            resolution_model._component_collections[index] = copy(
-                sample_model.get_component_collection(Q_index=index)
-            )
+        if sample_model.Q is not None:
+            for index in range(len(sample_model.Q)):
+                resolution_model._component_collections[index] = copy(
+                    sample_model.get_component_collection(Q_index=index)
+                )
         if normalize_area:
             resolution_model.normalize_area()
 

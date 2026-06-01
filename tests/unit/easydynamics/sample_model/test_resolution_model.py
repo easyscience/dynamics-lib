@@ -10,6 +10,7 @@ from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model.resolution_model import ResolutionModel
+from easydynamics.sample_model.sample_model import SampleModel
 
 
 class TestResolutionModel:
@@ -37,6 +38,36 @@ class TestResolutionModel:
             components=component_collection,
             unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
+        )
+
+    @pytest.fixture
+    def sample_model(self):
+        component1 = Gaussian(
+            name='TestGaussian1Name',
+            display_name='TestGaussian1Display',
+            area=1.0,
+            center=0.0,
+            width=1.0,
+            unit='meV',
+        )
+        component2 = Lorentzian(
+            name='TestLorentzian1Name',
+            display_name='TestLorentzian1Display',
+            area=2.0,
+            center=1.0,
+            width=0.5,
+            unit='meV',
+        )
+        component_collection = ComponentCollection()
+        component_collection.append_component(component1)
+        component_collection.append_component(component2)
+
+        return SampleModel(
+            display_name='InitModel',
+            components=component_collection,
+            unit='meV',
+            Q=np.array([1.0, 2.0, 3.0]),
+            temperature=10.0,
         )
 
     def test_init(self, resolution_model):
@@ -151,3 +182,110 @@ class TestResolutionModel:
             collection = ComponentCollection()
             collection.append_component(invalid_component)
             resolution_model.append_component(collection)
+
+    @pytest.mark.parametrize(
+        ('kwargs', 'expected_area_sum', 'all_fixed'),
+        [
+            ({}, 1.0, True),
+            (
+                {'normalize_area': False, 'fix_parameters': False},
+                3.0,
+                False,
+            ),
+        ],
+        ids=[
+            'default_kwargs',
+            'no_normalization_no_fixing',
+        ],
+    )
+    def test_from_sample_model(
+        self,
+        sample_model,
+        kwargs,
+        expected_area_sum,
+        all_fixed,
+    ):
+        # WHEN
+
+        # THEN
+        resolution_model = ResolutionModel.from_sample_model(
+            sample_model=sample_model,
+            **kwargs,
+        )
+
+        # EXPECT
+        assert resolution_model.display_name == 'InitModel'
+        assert resolution_model.unit == 'meV'
+        assert len(resolution_model.components) == 2
+        np.testing.assert_array_equal(
+            resolution_model.Q,
+            np.array([1.0, 2.0, 3.0]),
+        )
+
+        for Q_index in range(len(resolution_model.Q)):
+            assert resolution_model.get_component_collection(
+                Q_index
+            ) is not sample_model.get_component_collection(Q_index)
+
+            res_components = resolution_model.get_component_collection(Q_index)
+            assert (res_components[0].area.value + res_components[1].area.value) == pytest.approx(
+                expected_area_sum
+            )
+
+            sample_components = sample_model.get_component_collection(Q_index)
+            for res_comp, sample_comp in zip(res_components, sample_components, strict=True):
+                assert res_comp.name == sample_comp.name
+                assert res_comp.display_name == sample_comp.display_name
+                assert res_comp.center.value == sample_comp.center.value
+                assert res_comp.width.value == sample_comp.width.value
+
+        variables = resolution_model.get_all_variables()
+        assert all(var.fixed for var in variables) is all_fixed
+
+    def test_from_sample_model_with_no_Q(self, sample_model):
+        # WHEN
+        sample_model_no_Q = SampleModel(
+            components=sample_model.components,
+        )
+        resolution_model = ResolutionModel.from_sample_model(sample_model_no_Q)
+
+        # THEN / EXPECT
+        assert resolution_model.Q is None
+        assert len(resolution_model._component_collections) == 0
+
+    @pytest.mark.parametrize(
+        ('kwargs', 'match'),
+        [
+            (
+                {'sample_model': 'not_a_sample_model'},
+                r'sample_model must be an instance of SampleModel',
+            ),
+            (
+                {'normalize_area': 'not_a_bool'},
+                r'normalize_area must be True or False',
+            ),
+            (
+                {'fix_parameters': 'not_a_bool'},
+                r'fix_parameters must be True or False',
+            ),
+        ],
+    )
+    def test_from_sample_model_invalid_arguments(
+        self,
+        sample_model,
+        kwargs,
+        match,
+    ):
+        # WHEN
+        valid_kwargs = {
+            'sample_model': sample_model,
+            'normalize_area': False,
+            'fix_parameters': False,
+        }
+        valid_kwargs.update(kwargs)
+
+        # THEN EXPECT
+        with pytest.raises(TypeError, match=match):
+            ResolutionModel.from_sample_model(
+                **valid_kwargs,
+            )

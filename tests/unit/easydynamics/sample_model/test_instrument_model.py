@@ -13,6 +13,7 @@ from easydynamics.sample_model import Polynomial
 from easydynamics.sample_model.background_model import BackgroundModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
+from easydynamics.sample_model.sample_model import SampleModel
 
 
 class TestInstrumentModel:
@@ -56,6 +57,11 @@ class TestInstrumentModel:
         component = Polynomial(coefficients=[1.0, 2.0])
         return BackgroundModel(components=component)
 
+    @pytest.fixture
+    def sample_model(self):
+        component = Gaussian()
+        return SampleModel(components=component)
+
     def test_init(self, instrument_model):
         # WHEN THEN
         model = instrument_model
@@ -78,6 +84,15 @@ class TestInstrumentModel:
         assert isinstance(model.background_model, BackgroundModel)
         assert isinstance(model.resolution_model, ResolutionModel)
         assert model.Q is None
+
+    def test_init_sample_model_as_resolution_model(self, sample_model):
+        # WHEN THEN
+        model = InstrumentModel(resolution_model=sample_model)
+
+        # EXPECT
+        assert model.display_name == 'MyInstrumentModel'
+        assert isinstance(model.background_model, BackgroundModel)
+        assert isinstance(model.resolution_model, ResolutionModel)
 
     @pytest.mark.parametrize(
         'kwargs, expected_exception, expected_message',
@@ -126,6 +141,32 @@ class TestInstrumentModel:
         # EXPECT
         assert instrument_model._resolution_model is resolution_model
         instrument_model._on_resolution_model_change.assert_called_once()
+
+    def test_resolution_model_setter_converts_sample_model(
+        self,
+        instrument_model,
+    ):
+        """
+        Test that setting a SampleModel as the resolution_model calls the method to convert it to
+        a ResolutionModel, and updates the resolution_model and calls the change callback.
+        """
+        # WHEN
+        sample_model = SampleModel()
+        converted_model = ResolutionModel()
+        instrument_model._on_resolution_model_change = MagicMock()
+
+        with patch.object(
+            ResolutionModel,
+            'from_sample_model',
+            return_value=converted_model,
+        ) as mock_from_sample_model:
+            # THEN
+            instrument_model.resolution_model = sample_model
+
+        # EXPECT
+        mock_from_sample_model.assert_called_once_with(sample_model)
+        assert instrument_model._resolution_model is converted_model
+        instrument_model._on_resolution_model_change.assert_called_once_with()
 
     def test_resolution_model_setter_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
