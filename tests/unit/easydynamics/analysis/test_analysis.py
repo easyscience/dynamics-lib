@@ -238,7 +238,11 @@ class TestAnalysis:
 
         # EXPECT
         analysis.analysis_list[1].plot_data_and_model.assert_called_once_with(
-            plot_components=True, add_background=True, energy=None, **kwargs
+            plot_components=True,
+            add_background=True,
+            plot_residuals=False,
+            energy=None,
+            **kwargs,
         )
         assert result == 'plot_Q1'
 

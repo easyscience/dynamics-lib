@@ -241,8 +241,8 @@ class TestAnalysis1d:
 
     def test_plot_calls_plopp_with_correct_arguments(self, analysis1d):
         # WHEN
-        fake_fig = object()
-
+        fake_fig = MagicMock()
+        fake_fig.autoscale = MagicMock()
         with patch('plopp.plot', return_value=fake_fig) as mock_plot:
             # THEN
             result = analysis1d.plot_data_and_model()
