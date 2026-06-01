@@ -18,6 +18,7 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -341,12 +342,21 @@ class Analysis(AnalysisBase):
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
 
-        fig = pp.slicer(
-            data_and_model,
-            **plot_kwargs_defaults,
-        )
-        for widget in fig.bottom_bar[0].controls.values():
-            widget.slider_toggler.value = '-o-'
+        if plot_residuals:
+            fig = slicerplot_with_residuals(
+                data_and_model,
+                residuals_key='Residuals',
+                operation='sum',
+                **plot_kwargs_defaults,
+            )
+
+        else:
+            fig = pp.slicer(
+                data_and_model,
+                **plot_kwargs_defaults,
+            )
+            for widget in fig.bottom_bar[0].controls.values():
+                widget.slider_toggler.value = '-o-'
         fig.autoscale()
         return fig
 
