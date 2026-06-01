@@ -26,11 +26,11 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        area: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter = 1.0,
-        width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = 'meV',
-        name: str = 'DampedHarmonicOscillator',
+        area: Numeric = 1.0,
+        center: Numeric = 1.0,
+        width: Numeric = 1.0,
+        unit: str | sc.Unit = "meV",
+        name: str = "DampedHarmonicOscillator",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -39,11 +39,11 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric | Parameter, default=1.0
+        area : Numeric , default=1.0
             Area under the curve.
-        center : Numeric | Parameter, default=1.0
+        center : Numeric , default=1.0
             Resonance frequency, approximately the peak position.
-        width : Numeric | Parameter, default=1.0
+        width : Numeric , default=1.0
             Damping constant, approximately the half width at half max (HWHM) of the peaks. By
             default, 1.0.
         unit : str | sc.Unit, default='meV'
@@ -108,7 +108,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If the value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
+            raise TypeError("area must be a number")
         self._area.value = value
 
     @property
@@ -141,10 +141,10 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
 
         if float(value) <= 0:
-            raise ValueError('center must be positive')
+            raise ValueError("center must be positive")
         self._center.value = value
 
     @property
@@ -177,14 +177,16 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If the value is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('width must be a number')
+            raise TypeError("width must be a number")
 
         if float(value) <= 0:
-            raise ValueError('width must be positive')
+            raise ValueError("width must be positive")
 
         self._width.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def evaluate(
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+    ) -> np.ndarray:
         r"""
         Evaluate the Damped Harmonic Oscillator at the given x values.
 
@@ -207,7 +209,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         normalization = 2 * self.center.value**2 * self.width.value / np.pi
         # No division by zero here, width>0 enforced in setter
-        denominator = (x**2 - self.center.value**2) ** 2 + (2 * self.width.value * x) ** 2
+        denominator = (x**2 - self.center.value**2) ** 2 + (
+            2 * self.width.value * x
+        ) ** 2
 
         return self.area.value * normalization / (denominator)
 
@@ -221,9 +225,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             A string representation of the Damped Harmonic Oscillator.
         """
         return (
-            f'DampedHarmonicOscillator(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n '
-            f'    area = {self.area},\n '
-            f'    center = {self.center},\n '
-            f'    width = {self.width})'
+            f"DampedHarmonicOscillator(name = {self.name}, display_name = {self.display_name}, "
+            f"unit = {self._unit},\n "
+            f"    area = {self.area},\n "
+            f"    center = {self.center},\n "
+            f"    width = {self.width})"
         )

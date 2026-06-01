@@ -33,9 +33,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        area: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter | None = None,
-        width: Numeric | Parameter = 1.0,
+        area: Numeric = 1.0,
+        center: Numeric | None = None,
+        width: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Gaussian',
         display_name: str | None = None,
@@ -46,11 +46,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric | Parameter, default=1.0
+        area : Numeric , default=1.0
             Area of the Gaussian.
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Center of the Gaussian. If None.
-        width : Numeric | Parameter, default=1.0
+        width : Numeric , default=1.0
             Standard deviation.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.

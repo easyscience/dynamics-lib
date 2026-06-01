@@ -15,12 +15,12 @@ class TestLorentzian:
     @pytest.fixture
     def lorentzian(self):
         return Lorentzian(
-            name='LorentzianName',
-            display_name='TestLorentzian',
+            name="LorentzianName",
+            display_name="TestLorentzian",
             area=2.0,
             center=0.5,
             width=0.6,
-            unit='meV',
+            unit="meV",
         )
 
     def test_init_no_inputs(self):
@@ -28,98 +28,76 @@ class TestLorentzian:
         lorentzian = Lorentzian()
 
         # EXPECT
-        assert lorentzian.display_name == 'Lorentzian'
+        assert lorentzian.display_name == "Lorentzian"
         assert lorentzian.area.value == pytest.approx(1.0)
         assert lorentzian.center.value == pytest.approx(0.0)
         assert lorentzian.width.value == pytest.approx(1.0)
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.unit == "meV"
         assert lorentzian.center.fixed is True
 
     def test_initialization(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
-        assert lorentzian.display_name == 'TestLorentzian'
+        assert lorentzian.display_name == "TestLorentzian"
         assert lorentzian.area.value == pytest.approx(2.0)
         assert lorentzian.center.value == pytest.approx(0.5)
         assert lorentzian.width.value == pytest.approx(0.6)
-        assert lorentzian.unit == 'meV'
-
-    def test_init_with_parameters(self):
-        # WHEN
-        area_param = Parameter(name='area_param', value=3.0, unit='meV')
-        center_param = Parameter(name='center_param', value=1.0, unit='meV')
-        width_param = Parameter(name='width_param', value=0.8, unit='meV')
-
-        # THEN
-        lorentzian = Lorentzian(
-            display_name='ParamLorentzian',
-            area=area_param,
-            center=center_param,
-            width=width_param,
-            unit='meV',
-        )
-
-        # EXPECT
-        assert lorentzian.display_name == 'ParamLorentzian'
-        assert lorentzian.area is area_param
-        assert lorentzian.center is center_param
-        assert lorentzian.width is width_param
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.unit == "meV"
 
     @pytest.mark.parametrize(
-        'kwargs, expected_message',
+        "kwargs, expected_message",
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
-                'area must be a number',
+                {"area": "invalid", "center": 0.5, "width": 0.6, "unit": "meV"},
+                "area must be a number",
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
-                'center must be None',
+                {"area": 2.0, "center": "invalid", "width": 0.6, "unit": "meV"},
+                "center must be None",
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
-                'width must be a number',
+                {"area": 2.0, "center": 0.5, "width": "invalid", "unit": "meV"},
+                "width must be a number",
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
-                'unit must be None',
+                {"area": 2.0, "center": 0.5, "width": 0.6, "unit": 123},
+                "unit must be None",
             ),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
         with pytest.raises(TypeError, match=expected_message):
-            Lorentzian(display_name='TestLorentzian', **kwargs)
+            Lorentzian(display_name="TestLorentzian", **kwargs)
 
     def test_negative_width_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(
-            ValueError, match=r'The width of a Lorentzian must be greater than zero.'
+            ValueError, match=r"The width of a Lorentzian must be greater than zero."
         ):
             Lorentzian(
-                display_name='TestLorentzian',
+                display_name="TestLorentzian",
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                unit="meV",
             )
 
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
-        with pytest.warns(UserWarning, match='may not be physically meaningful'):
+        with pytest.warns(UserWarning, match="may not be physically meaningful"):
             Lorentzian(
-                display_name='TestLorentzian',
+                display_name="TestLorentzian",
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                unit="meV",
             )
 
     @pytest.mark.parametrize(
-        'prop, valid_value, invalid_value, invalid_message',
+        "prop, valid_value, invalid_value, invalid_message",
         [
-            ('area', 3.0, 'invalid', r' must be a number'),
-            ('center', 0.6, 'invalid', r' must be a number'),
-            ('width', 0.7, 'invalid', r' must be a number'),
+            ("area", 3.0, "invalid", r" must be a number"),
+            ("center", 0.6, "invalid", r" must be a number"),
+            ("width", 0.7, "invalid", r" must be a number"),
         ],
     )
     def test_property_setters(
@@ -135,7 +113,7 @@ class TestLorentzian:
 
     def test_width_must_be_positive(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='width must be positive'):
+        with pytest.raises(ValueError, match="width must be positive"):
             lorentzian.width = -0.5
 
     def test_evaluate(self, lorentzian: Lorentzian):
@@ -168,9 +146,9 @@ class TestLorentzian:
         assert len(params) == 3
         assert all(isinstance(param, Parameter) for param in params)
         expected_names = {
-            'LorentzianName area',
-            'LorentzianName center',
-            'LorentzianName width',
+            "LorentzianName area",
+            "LorentzianName center",
+            "LorentzianName width",
         }
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
@@ -190,10 +168,10 @@ class TestLorentzian:
 
     def test_convert_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
-        lorentzian.convert_unit('microeV')
+        lorentzian.convert_unit("microeV")
 
         # EXPECT
-        assert lorentzian.unit == 'microeV'
+        assert lorentzian.unit == "microeV"
         assert lorentzian.area.value == pytest.approx(2 * 1e3)
         assert lorentzian.center.value == pytest.approx(0.5 * 1e3)
         assert lorentzian.width.value == pytest.approx(0.6 * 1e3)
@@ -222,9 +200,9 @@ class TestLorentzian:
         repr_str = repr(lorentzian)
 
         # EXPECT
-        assert 'Lorentzian' in repr_str
-        assert 'name = LorentzianName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
-        assert 'width =' in repr_str
+        assert "Lorentzian" in repr_str
+        assert "name = LorentzianName" in repr_str
+        assert "unit = meV" in repr_str
+        assert "area =" in repr_str
+        assert "center =" in repr_str
+        assert "width =" in repr_str

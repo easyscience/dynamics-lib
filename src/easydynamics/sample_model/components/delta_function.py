@@ -30,10 +30,10 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        center: Numeric | Parameter | None = None,
-        area: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = 'meV',
-        name: str = 'DeltaFunction',
+        center: Numeric | None = None,
+        area: Numeric = 1.0,
+        unit: str | sc.Unit = "meV",
+        name: str = "DeltaFunction",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -42,9 +42,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Center of the delta function. If None, it will be centered at 0 and fixed.
-        area : Numeric | Parameter, default=1.0
+        area : Numeric , default=1.0
             Total area under the curve.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.
@@ -103,7 +103,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
 
         if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
+            raise TypeError("area must be a number")
         self._area.value = value
 
     @property
@@ -139,10 +139,12 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def evaluate(
+        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+    ) -> np.ndarray:
         """
         Evaluate the Delta function at the given x values.
 
@@ -200,8 +202,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'DeltaFunction(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self.unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center})'
+            f"DeltaFunction(name = {self.name}, display_name = {self.display_name}, "
+            f"unit = {self.unit},\n"
+            f"    area = {self.area},\n"
+            f"    center = {self.center})"
         )
