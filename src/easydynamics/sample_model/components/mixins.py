@@ -26,7 +26,7 @@ class CreateParametersMixin:
         self,
         area: Numeric | Parameter,
         name: str,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """
@@ -59,17 +59,17 @@ class CreateParametersMixin:
             The validated area Parameter.
         """
         if not isinstance(area, (Parameter, Numeric)):
-            raise TypeError('area must be a number or a Parameter.')
+            raise TypeError("area must be a number or a Parameter.")
 
         if isinstance(area, Numeric):
             if not np.isfinite(area):
-                raise ValueError('area must be a finite number or a Parameter')
+                raise ValueError("area must be a finite number or a Parameter")
 
-            area = Parameter(name=name + ' area', value=float(area), unit=unit)
+            area = Parameter(name=name + " area", value=float(area), unit=unit)
 
         if area.value < 0:
             warnings.warn(
-                f'The area of {name} is negative, which may not be physically meaningful.',
+                f"The area of {name} is negative, which may not be physically meaningful.",
                 UserWarning,
                 stacklevel=3,
             )
@@ -84,7 +84,7 @@ class CreateParametersMixin:
         center: Numeric | Parameter | None,
         name: str,
         fix_if_none: bool,
-        unit: str | sc.Unit = 'meV',
+        unit: str | sc.Unit = "meV",
         enforce_minimum_center: bool = False,
     ) -> Parameter:
         """
@@ -117,20 +117,20 @@ class CreateParametersMixin:
             The validated center Parameter.
         """
         if center is not None and not isinstance(center, (Numeric, Parameter)):
-            raise TypeError('center must be None, a number, or a Parameter.')
+            raise TypeError("center must be None, a number, or a Parameter.")
 
         if center is None:
             center = Parameter(
-                name=name + ' center',
+                name=name + " center",
                 value=0.0,
                 unit=unit,
                 fixed=fix_if_none,
             )
         elif isinstance(center, Numeric):
             if not np.isfinite(center):
-                raise ValueError('center must be None, a finite number or a Parameter')
+                raise ValueError("center must be None, a finite number or a Parameter")
 
-            center = Parameter(name=name + ' center', value=float(center), unit=unit)
+            center = Parameter(name=name + " center", value=float(center), unit=unit)
         if enforce_minimum_center and center.min < DHO_MINIMUM_CENTER:
             center.min = DHO_MINIMUM_CENTER
         return center
@@ -139,8 +139,8 @@ class CreateParametersMixin:
         self,
         width: Numeric | Parameter,
         name: str,
-        param_name: str = 'width',
-        unit: str | sc.Unit = 'meV',
+        param_name: str = "width",
+        unit: str | sc.Unit = "meV",
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """
@@ -172,18 +172,18 @@ class CreateParametersMixin:
             The validated width Parameter.
         """
         if not isinstance(width, (Numeric, Parameter)):
-            raise TypeError(f'{param_name} must be a number or a Parameter.')
+            raise TypeError(f"{param_name} must be a number or a Parameter.")
 
         if isinstance(width, Numeric):
             if not np.isfinite(width):
-                raise ValueError(f'{param_name} must be a finite number or a Parameter')
+                raise ValueError(f"{param_name} must be a finite number or a Parameter")
 
             if float(width) < minimum_width:
                 raise ValueError(
-                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
+                    f"The {param_name} of a {self.__class__.__name__} must be greater than zero."
                 )
             width = Parameter(
-                name=name + ' ' + param_name,
+                name=name + " " + param_name,
                 value=float(width),
                 unit=unit,
                 min=minimum_width,
@@ -191,7 +191,7 @@ class CreateParametersMixin:
         else:
             if width.value <= 0:
                 raise ValueError(
-                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
+                    f"The {param_name} of a {self.__class__.__name__} must be greater than zero."
                 )
             if width.min < minimum_width:
                 width.min = minimum_width
