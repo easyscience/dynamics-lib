@@ -835,6 +835,14 @@ class TestAnalysis1d:
         expected = analysis1d.experiment.binned_data['Q', analysis1d.Q_index] - model
         assert sc.identical(residuals, expected)
 
+    def test_create_residuals_array_no_Q_index_raises(self, analysis1d):
+        # WHEN
+        analysis1d._Q_index = None
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index must be set'):
+            analysis1d._create_residuals_array()
+
     @pytest.mark.parametrize(
         'background',
         [
