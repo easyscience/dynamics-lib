@@ -8801,9 +8801,9 @@ which would prevent normalization.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8814,11 +8814,11 @@ which would prevent normalization.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area under the curve.</span>
-<span class="sd">        center : Numeric, default=1.0</span>
+<span class="sd">        center : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Resonance frequency, approximately the peak position.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">            default, 1.0.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -9207,7 +9207,7 @@ which would prevent normalization.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9226,7 +9226,7 @@ which would prevent normalization.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9245,7 +9245,7 @@ which would prevent normalization.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9399,9 +9399,9 @@ default, None.</p>
 <span class="normal">80</span>
 <span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9412,11 +9412,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area under the curve.</span>
-<span class="sd">    center : Numeric, default=1.0</span>
+<span class="sd">    center : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Resonance frequency, approximately the peak position.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">        default, 1.0.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -9917,8 +9917,8 @@ fixed, which is typically what you want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9929,9 +9929,9 @@ fixed, which is typically what you want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -10245,7 +10245,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10264,7 +10264,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10406,8 +10406,8 @@ default, None.</p>
 <span class="normal">73</span>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -10418,9 +10418,9 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -11035,9 +11035,9 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -11048,11 +11048,11 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        amplitude : Numeric, default=1.0</span>
+<span class="sd">        amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Amplitude of the Exponential.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">        rate : Numeric, default=1.0</span>
+<span class="sd">        rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Decay or growth constant of the Exponential.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -11494,7 +11494,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>amplitude</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11513,7 +11513,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11532,7 +11532,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>rate</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11740,9 +11740,9 @@ default, None.</p>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -11753,11 +11753,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    amplitude : Numeric, default=1.0</span>
+<span class="sd">    amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Amplitude of the Exponential.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">    rate : Numeric, default=1.0</span>
+<span class="sd">    rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Decay or growth constant of the Exponential.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -14576,9 +14576,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -14589,11 +14589,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Gaussian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Gaussian. If None.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -14983,7 +14983,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15002,7 +15002,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15021,7 +15021,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15168,9 +15168,9 @@ default, None.</p>
 <span class="normal">81</span>
 <span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15181,11 +15181,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Gaussian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Gaussian. If None.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -15720,9 +15720,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15733,11 +15733,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Lorentzian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -16121,7 +16121,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16140,7 +16140,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16159,7 +16159,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16306,9 +16306,9 @@ default, None.</p>
 <span class="normal">78</span>
 <span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16319,11 +16319,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Lorentzian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -22412,7 +22412,10 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="normal">1078</span>
 <span class="normal">1079</span>
 <span class="normal">1080</span>
-<span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor. $$ I</span>
 <span class="sd">    = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]</span>
@@ -22881,13 +22884,16 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
             <span class="c1"># ------------------------------#</span>
             <span class="c1"># Create Lorentzian</span>
             <span class="c1"># ------------------------------#</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">lorentzian_component</span> <span class="o">=</span> <span class="n">Lorentzian</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_name</span><span class="p">,</span>
                 <span class="n">display_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
                 <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">lorentzian_component</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># noqa: SLF001</span>
 
             <span class="c1"># If the width is allowed to vary with Q it is independent.</span>
             <span class="c1"># If the width is not allowed to vary with Q it must be made</span>
@@ -24902,7 +24908,10 @@ value.</p>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -24939,13 +24948,16 @@ value.</p>
         <span class="c1"># ------------------------------#</span>
         <span class="c1"># Create Lorentzian</span>
         <span class="c1"># ------------------------------#</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">lorentzian_component</span> <span class="o">=</span> <span class="n">Lorentzian</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_name</span><span class="p">,</span>
             <span class="n">display_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">lorentzian_component</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># noqa: SLF001</span>
 
         <span class="c1"># If the width is allowed to vary with Q it is independent.</span>
         <span class="c1"># If the width is not allowed to vary with Q it must be made</span>
@@ -25050,10 +25062,7 @@ value.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">553</span>
 <span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
@@ -25068,7 +25077,10 @@ value.</p>
 <span class="normal">565</span>
 <span class="normal">566</span>
 <span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_global_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_global_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all global variables from the diffusion model.</span>
 
@@ -25201,10 +25213,7 @@ independent variables for all Q values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span>
 <span class="normal">576</span>
@@ -25243,7 +25252,10 @@ independent variables for all Q values will be included.</p>
 <span class="normal">609</span>
 <span class="normal">610</span>
 <span class="normal">611</span>
-<span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the independent variables from the diffusion model. If Q_index is provided, only the</span>
 <span class="sd">    independent variables for the specified Q value will be returned. If Q_index is None,</span>
@@ -25398,10 +25410,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
 <span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
@@ -25439,7 +25448,10 @@ values will be included.</p>
 <span class="normal">652</span>
 <span class="normal">653</span>
 <span class="normal">654</span>
-<span class="normal">655</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a list of all variables (Parameters and Descriptors) in the model.</span>
 
@@ -25532,10 +25544,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1068</span>
 <span class="normal">1069</span>
 <span class="normal">1070</span>
 <span class="normal">1071</span>
@@ -25548,7 +25557,10 @@ values will be included.</p>
 <span class="normal">1078</span>
 <span class="normal">1079</span>
 <span class="normal">1080</span>
-<span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the DeltaLorentz model.</span>
 
@@ -36818,9 +36830,9 @@ which would prevent normalization.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -36831,11 +36843,11 @@ which would prevent normalization.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area under the curve.</span>
-<span class="sd">        center : Numeric, default=1.0</span>
+<span class="sd">        center : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Resonance frequency, approximately the peak position.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">            default, 1.0.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -37224,7 +37236,7 @@ which would prevent normalization.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -37243,7 +37255,7 @@ which would prevent normalization.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -37262,7 +37274,7 @@ which would prevent normalization.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -37416,9 +37428,9 @@ default, None.</p>
 <span class="normal">80</span>
 <span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -37429,11 +37441,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area under the curve.</span>
-<span class="sd">    center : Numeric, default=1.0</span>
+<span class="sd">    center : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Resonance frequency, approximately the peak position.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">        default, 1.0.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -37934,8 +37946,8 @@ fixed, which is typically what you want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -37946,9 +37958,9 @@ fixed, which is typically what you want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -38262,7 +38274,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -38281,7 +38293,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -38423,8 +38435,8 @@ default, None.</p>
 <span class="normal">73</span>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -38435,9 +38447,9 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -39052,9 +39064,9 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -39065,11 +39077,11 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        amplitude : Numeric, default=1.0</span>
+<span class="sd">        amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Amplitude of the Exponential.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">        rate : Numeric, default=1.0</span>
+<span class="sd">        rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Decay or growth constant of the Exponential.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -39511,7 +39523,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>amplitude</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -39530,7 +39542,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -39549,7 +39561,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>rate</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -39757,9 +39769,9 @@ default, None.</p>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -39770,11 +39782,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    amplitude : Numeric, default=1.0</span>
+<span class="sd">    amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Amplitude of the Exponential.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">    rate : Numeric, default=1.0</span>
+<span class="sd">    rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Decay or growth constant of the Exponential.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -42593,9 +42605,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -42606,11 +42618,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Gaussian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Gaussian. If None.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -43000,7 +43012,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -43019,7 +43031,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -43038,7 +43050,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -43185,9 +43197,9 @@ default, None.</p>
 <span class="normal">81</span>
 <span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -43198,11 +43210,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Gaussian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Gaussian. If None.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -43737,9 +43749,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -43750,11 +43762,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Lorentzian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -44138,7 +44150,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -44157,7 +44169,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -44176,7 +44188,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -44323,9 +44335,9 @@ default, None.</p>
 <span class="normal">78</span>
 <span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -44336,11 +44348,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Lorentzian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -47710,9 +47722,9 @@ half width at half max lorentzian_width, centered at center, with area equal to 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -47723,11 +47735,11 @@ half width at half max lorentzian_width, centered at center, with area equal to 
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area under the curve.</span>
-<span class="sd">        center : Numeric, default=1.0</span>
+<span class="sd">        center : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Resonance frequency, approximately the peak position.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">            default, 1.0.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -48116,7 +48128,7 @@ half width at half max lorentzian_width, centered at center, with area equal to 
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -48135,7 +48147,7 @@ half width at half max lorentzian_width, centered at center, with area equal to 
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -48154,7 +48166,7 @@ half width at half max lorentzian_width, centered at center, with area equal to 
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -48308,9 +48320,9 @@ default, None.</p>
 <span class="normal">80</span>
 <span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DampedHarmonicOscillator&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -48321,11 +48333,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area under the curve.</span>
-<span class="sd">    center : Numeric, default=1.0</span>
+<span class="sd">    center : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Resonance frequency, approximately the peak position.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Damping constant, approximately the half width at half max (HWHM) of the peaks. By</span>
 <span class="sd">        default, 1.0.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
@@ -48866,8 +48878,8 @@ fixed, which is typically what you want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -48878,9 +48890,9 @@ fixed, which is typically what you want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Total area under the curve.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -49194,7 +49206,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -49213,7 +49225,7 @@ fixed, which is typically what you want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -49355,8 +49367,8 @@ default, None.</p>
 <span class="normal">73</span>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DeltaFunction&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -49367,9 +49379,9 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the delta function. If None, it will be centered at 0 and fixed.</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Total area under the curve.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -50024,9 +50036,9 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -50037,11 +50049,11 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        amplitude : Numeric, default=1.0</span>
+<span class="sd">        amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Amplitude of the Exponential.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">        rate : Numeric, default=1.0</span>
+<span class="sd">        rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Decay or growth constant of the Exponential.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -50483,7 +50495,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>amplitude</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -50502,7 +50514,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -50521,7 +50533,7 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
                 <code>rate</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -50729,9 +50741,9 @@ default, None.</p>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rate</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -50742,11 +50754,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    amplitude : Numeric, default=1.0</span>
+<span class="sd">    amplitude : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Amplitude of the Exponential.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Exponential. If None, the center is fixed at 0.</span>
-<span class="sd">    rate : Numeric, default=1.0</span>
+<span class="sd">    rate : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Decay or growth constant of the Exponential.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -53645,9 +53657,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -53658,11 +53670,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Gaussian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Gaussian. If None.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Standard deviation.</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -54052,7 +54064,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -54071,7 +54083,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -54090,7 +54102,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -54237,9 +54249,9 @@ default, None.</p>
 <span class="normal">81</span>
 <span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -54250,11 +54262,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Gaussian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Gaussian. If None.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Standard deviation.</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -54829,9 +54841,9 @@ want in QENS.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
         <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -54842,11 +54854,11 @@ want in QENS.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric, default=1.0</span>
+<span class="sd">        area : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Area of the Lorentzian.</span>
-<span class="sd">        center : Numeric | None, default=None</span>
+<span class="sd">        center : Numeric | Parameter | None, default=None</span>
 <span class="sd">            Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">        width : Numeric, default=1.0</span>
+<span class="sd">        width : Numeric | Parameter, default=1.0</span>
 <span class="sd">            Half width at half maximum (HWHM).</span>
 <span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            Unit of the parameters.</span>
@@ -55230,7 +55242,7 @@ want in QENS.</p>
                 <code>area</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -55249,7 +55261,7 @@ want in QENS.</p>
                 <code>center</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | None</code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -55268,7 +55280,7 @@ want in QENS.</p>
                 <code>width</code>
             </td>
             <td>
-                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span> | <span title="easyscience.variable.Parameter">Parameter</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -55415,9 +55427,9 @@ default, None.</p>
 <span class="normal">78</span>
 <span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
     <span class="n">display_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -55428,11 +55440,11 @@ default, None.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    area : Numeric, default=1.0</span>
+<span class="sd">    area : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Area of the Lorentzian.</span>
-<span class="sd">    center : Numeric | None, default=None</span>
+<span class="sd">    center : Numeric | Parameter | None, default=None</span>
 <span class="sd">        Center of the Lorentzian. If None, defaults to 0 and is fixed.</span>
-<span class="sd">    width : Numeric, default=1.0</span>
+<span class="sd">    width : Numeric | Parameter, default=1.0</span>
 <span class="sd">        Half width at half maximum (HWHM).</span>
 <span class="sd">    unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">        Unit of the parameters.</span>
@@ -55948,7 +55960,17 @@ width) with appropriate bounds and type checking.</p>
 <span class="normal">186</span>
 <span class="normal">187</span>
 <span class="normal">188</span>
-<span class="normal">189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CreateParametersMixin</span><span class="p">:</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CreateParametersMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides parameter creation and validation methods for model components.</span>
 
@@ -55958,7 +55980,7 @@ width) with appropriate bounds and type checking.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_area_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
         <span class="n">minimum_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MINIMUM_AREA</span><span class="p">,</span>
@@ -55971,11 +55993,11 @@ width) with appropriate bounds and type checking.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        area : Numeric</span>
-<span class="sd">            The area value.</span>
+<span class="sd">        area : Numeric | Parameter</span>
+<span class="sd">            The area value or Parameter.</span>
 <span class="sd">        name : str</span>
 <span class="sd">            The name of the model component.</span>
-<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            The unit of the area Parameter.</span>
 <span class="sd">        minimum_area : float, default=MINIMUM_AREA</span>
 <span class="sd">            The minimum allowed area.</span>
@@ -55983,36 +56005,39 @@ width) with appropriate bounds and type checking.</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
-<span class="sd">            If area is not a number.</span>
+<span class="sd">            If area is not a number or a Parameter.</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If area is not a finite number.</span>
+<span class="sd">            If area is not a finite number or if the area Parameter has a non-finite value.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Parameter</span>
 <span class="sd">            The validated area Parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;area must be a number.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;area must be a number or a Parameter.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">area</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;area must be a finite number.&#39;</span><span class="p">)</span>
-        <span class="n">area_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; area&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">area</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;area must be a finite number or a Parameter&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">area_param</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; area&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;The area of </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> is negative, which may not be physically meaningful.&#39;</span><span class="p">,</span>
                 <span class="ne">UserWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">area_param</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_area</span>
+            <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">minimum_area</span><span class="p">:</span>
+                <span class="n">area</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_area</span>
 
-        <span class="k">return</span> <span class="n">area_param</span>
+        <span class="k">return</span> <span class="n">area</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_center_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">center</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">fix_if_none</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
@@ -56023,13 +56048,13 @@ width) with appropriate bounds and type checking.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        center : Numeric | None</span>
-<span class="sd">            The center value.</span>
+<span class="sd">        center : Numeric | Parameter | None</span>
+<span class="sd">            The center value or Parameter.</span>
 <span class="sd">        name : str</span>
 <span class="sd">            The name of the model component.</span>
 <span class="sd">        fix_if_none : bool</span>
 <span class="sd">            Whether to fix the center Parameter if center is None.</span>
-<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            The unit of the center Parameter.</span>
 <span class="sd">        enforce_minimum_center : bool, default=False</span>
 <span class="sd">            Whether to enforce a minimum center value to avoid zero center in DHO.</span>
@@ -56037,37 +56062,38 @@ width) with appropriate bounds and type checking.</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
-<span class="sd">            If center is not None or a number.</span>
+<span class="sd">            If center is not None, a number, or a Parameter.</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If center is a number but not finite.</span>
+<span class="sd">            If center is a number but not finite, or if center is a Parameter but has a non-finite</span>
+<span class="sd">            value.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Parameter</span>
 <span class="sd">            The validated center Parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">center</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;center must be None or a number.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">center</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;center must be None, a number, or a Parameter.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">center</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">center_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; center&#39;</span><span class="p">,</span>
                 <span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
                 <span class="n">fixed</span><span class="o">=</span><span class="n">fix_if_none</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">center</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;center must be None or a finite number.&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;center must be None, a finite number or a Parameter&#39;</span><span class="p">)</span>
 
-            <span class="n">center_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; center&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">center</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">enforce_minimum_center</span> <span class="ow">and</span> <span class="n">center_param</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">DHO_MINIMUM_CENTER</span><span class="p">:</span>
-            <span class="n">center_param</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">DHO_MINIMUM_CENTER</span>
-        <span class="k">return</span> <span class="n">center_param</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; center&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">center</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">enforce_minimum_center</span> <span class="ow">and</span> <span class="n">center</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">DHO_MINIMUM_CENTER</span><span class="p">:</span>
+            <span class="n">center</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">DHO_MINIMUM_CENTER</span>
+        <span class="k">return</span> <span class="n">center</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_width_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">|</span> <span class="n">Parameter</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;width&#39;</span><span class="p">,</span>
         <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">=</span> <span class="s1">&#39;meV&#39;</span><span class="p">,</span>
@@ -56078,13 +56104,13 @@ width) with appropriate bounds and type checking.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        width : Numeric</span>
-<span class="sd">            The width value.</span>
+<span class="sd">        width : Numeric | Parameter</span>
+<span class="sd">            The width value or Parameter.</span>
 <span class="sd">        name : str</span>
 <span class="sd">            The name of the model component.</span>
-<span class="sd">        param_name : str, default=&quot;width&quot;</span>
+<span class="sd">        param_name : str, default=&#39;width&#39;</span>
 <span class="sd">            The name of the width parameter.</span>
-<span class="sd">        unit : str | sc.Unit, default=&quot;meV&quot;</span>
+<span class="sd">        unit : str | sc.Unit, default=&#39;meV&#39;</span>
 <span class="sd">            The unit of the width Parameter.</span>
 <span class="sd">        minimum_width : float, default=MINIMUM_WIDTH</span>
 <span class="sd">            The minimum allowed width.</span>
@@ -56092,7 +56118,7 @@ width) with appropriate bounds and type checking.</p>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
-<span class="sd">            If width is not a number.</span>
+<span class="sd">            If width is not a number or a Parameter.</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If width is non-positive.</span>
 
@@ -56101,26 +56127,32 @@ width) with appropriate bounds and type checking.</p>
 <span class="sd">        Parameter</span>
 <span class="sd">            The validated width Parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> must be a number.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="p">(</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> must be a number or a Parameter.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">width</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> must be a finite number&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">width</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> must be a finite number or a Parameter&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">minimum_width</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;The </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> of a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> must be greater than zero.&#39;</span>
+            <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">minimum_width</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;The </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> of a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> must be greater than zero.&#39;</span>
+                <span class="p">)</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">param_name</span><span class="p">,</span>
+                <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+                <span class="nb">min</span><span class="o">=</span><span class="n">minimum_width</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">width_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">param_name</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-            <span class="nb">min</span><span class="o">=</span><span class="n">minimum_width</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">width_param</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">minimum_width</span><span class="p">:</span>
-            <span class="n">width_param</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_width</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;The </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> of a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> must be greater than zero.&#39;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;</span> <span class="n">minimum_width</span><span class="p">:</span>
+                <span class="n">width</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">minimum_width</span>
 
-        <span class="k">return</span> <span class="n">width_param</span>
+        <span class="k">return</span> <span class="n">width</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -67390,7 +67422,10 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 <span class="normal">1078</span>
 <span class="normal">1079</span>
 <span class="normal">1080</span>
-<span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DeltaLorentz</span><span class="p">(</span><span class="n">DiffusionModelBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model of Delta function and Lorentzian with intensities given by the Debye-Waller factor. $$ I</span>
 <span class="sd">    = K \exp \left( \frac{-\langle u^2 \rangle Q^2}{3} \right)[A_0 \delta(E) + (A_1) L(E, \Gamma)]</span>
@@ -67859,13 +67894,16 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
             <span class="c1"># ------------------------------#</span>
             <span class="c1"># Create Lorentzian</span>
             <span class="c1"># ------------------------------#</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">lorentzian_component</span> <span class="o">=</span> <span class="n">Lorentzian</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_name</span><span class="p">,</span>
                 <span class="n">display_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
                 <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">lorentzian_component</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># noqa: SLF001</span>
 
             <span class="c1"># If the width is allowed to vary with Q it is independent.</span>
             <span class="c1"># If the width is not allowed to vary with Q it must be made</span>
@@ -69880,7 +69918,10 @@ value.</p>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_component_collections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentCollection</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -69917,13 +69958,16 @@ value.</p>
         <span class="c1"># ------------------------------#</span>
         <span class="c1"># Create Lorentzian</span>
         <span class="c1"># ------------------------------#</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">lorentzian_component</span> <span class="o">=</span> <span class="n">Lorentzian</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_name</span><span class="p">,</span>
             <span class="n">display_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lorentzian_display_name</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_Q_variation</span><span class="p">[</span><span class="s1">&#39;lorentzian_width&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">lorentzian_component</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lorentzian_width_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># noqa: SLF001</span>
 
         <span class="c1"># If the width is allowed to vary with Q it is independent.</span>
         <span class="c1"># If the width is not allowed to vary with Q it must be made</span>
@@ -70028,10 +70072,7 @@ value.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">553</span>
 <span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
@@ -70046,7 +70087,10 @@ value.</p>
 <span class="normal">565</span>
 <span class="normal">566</span>
 <span class="normal">567</span>
-<span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_global_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_global_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all global variables from the diffusion model.</span>
 
@@ -70179,10 +70223,7 @@ independent variables for all Q values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span>
 <span class="normal">576</span>
@@ -70221,7 +70262,10 @@ independent variables for all Q values will be included.</p>
 <span class="normal">609</span>
 <span class="normal">610</span>
 <span class="normal">611</span>
-<span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the independent variables from the diffusion model. If Q_index is provided, only the</span>
 <span class="sd">    independent variables for the specified Q value will be returned. If Q_index is None,</span>
@@ -70376,10 +70420,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
 <span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
@@ -70417,7 +70458,10 @@ values will be included.</p>
 <span class="normal">652</span>
 <span class="normal">653</span>
 <span class="normal">654</span>
-<span class="normal">655</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorNumber</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a list of all variables (Parameters and Descriptors) in the model.</span>
 
@@ -70510,10 +70554,7 @@ values will be included.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easydynamics/sample_model/diffusion_model/delta_lorentz.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1068</span>
 <span class="normal">1069</span>
 <span class="normal">1070</span>
 <span class="normal">1071</span>
@@ -70526,7 +70567,10 @@ values will be included.</p>
 <span class="normal">1078</span>
 <span class="normal">1079</span>
 <span class="normal">1080</span>
-<span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    String representation of the DeltaLorentz model.</span>
 
