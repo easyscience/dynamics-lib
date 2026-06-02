@@ -215,7 +215,6 @@ class Analysis(AnalysisBase):
         plot_components: bool = True,
         add_background: bool = True,
         plot_residuals: bool = False,
-        residuals_yoffset: float = 0.0,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
@@ -237,9 +236,6 @@ class Analysis(AnalysisBase):
             Default is True.
         plot_residuals : bool, default=False
             Whether to plot the residuals (data - model). Default is False.
-        residuals_yoffset : float, default=0.0
-            Vertical offset to apply to the residuals when plotting, to avoid overlap with the data
-            and model. Only used if plot_residuals is True. Default is 0.0.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
             experiment.
@@ -292,9 +288,6 @@ class Analysis(AnalysisBase):
         if not isinstance(plot_residuals, bool):
             raise TypeError('plot_residuals must be True or False.')
 
-        if not isinstance(residuals_yoffset, (int, float)):
-            raise TypeError('residuals_yoffset must be a number.')
-
         if energy is None:
             energy = self.energy
 
@@ -305,7 +298,6 @@ class Analysis(AnalysisBase):
             add_background=add_background,
             include_components=plot_components,
             include_residuals=plot_residuals,
-            residuals_yoffset=residuals_yoffset,
         )
 
         plot_kwargs_defaults = {
@@ -367,7 +359,6 @@ class Analysis(AnalysisBase):
         add_background: bool = True,
         include_components: bool = True,
         include_residuals: bool = False,
-        residuals_yoffset: float = 0.0,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation and optionally
@@ -386,9 +377,6 @@ class Analysis(AnalysisBase):
             only the total model will be included.
         include_residuals : bool, default=False
             Whether to include the residuals (data - model) in the DataGroup.
-        residuals_yoffset : float, default=0.0
-            Vertical offset to apply to the residuals when plotting, to avoid overlap with the data
-            and model. Only used if include_residuals is True. Default is 0.0.
 
         Raises
         ------
@@ -422,9 +410,6 @@ class Analysis(AnalysisBase):
         if not isinstance(include_residuals, bool):
             raise TypeError('include_residuals must be True or False.')
 
-        if not isinstance(residuals_yoffset, (int, float)):
-            raise TypeError('residuals_yoffset must be a number.')
-
         energy = self._verify_energy(energy)
 
         if energy is None:
@@ -444,7 +429,6 @@ class Analysis(AnalysisBase):
 
         if include_residuals:
             data_and_model['Residuals'] = self._create_residuals_array()
-            data_and_model['Residuals'] += residuals_yoffset
 
         return sc.DataGroup(data_and_model)
 

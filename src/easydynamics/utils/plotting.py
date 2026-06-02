@@ -25,11 +25,11 @@ def slicerplot_with_residuals(
     ----------
     dg : sc.DataGroup
         DataGroup containing the data to plot. Must include a key for residuals.
-    residuals_key : str, default='Residuals'
+    residuals_key : str, default="Residuals"
         Key in the DataGroup that contains the residuals data.
     keep : list[str] | str | None, default=None
         Dimensions to keep in the SlicerPlot. Passed to SlicerPlot.
-    operation : str, default='sum'
+    operation : str, default="sum"
         Operation to apply when reducing the residuals data. Passed to SlicerPlot.
     **kwargs : object
         Additional keyword arguments passed to SlicerPlot.
@@ -38,7 +38,23 @@ def slicerplot_with_residuals(
     -------
     InteractiveFigure
         A figure containing the SlicerPlot and the residuals subplot.
+
+    Raises
+    ------
+    TypeError
+        If dg is not a sc.DataGroup or if residuals_key is not a string.
+    ValueError
+        If residuals_key is not found in the DataGroup.
     """
+
+    if not isinstance(dg, sc.DataGroup):
+        raise TypeError(f'Expected a sc.DataGroup, got {type(dg)}')
+
+    if not isinstance(residuals_key, str):
+        raise TypeError(f'Expected residuals_key to be a string, got {type(residuals_key)}')
+
+    if residuals_key not in dg:
+        raise ValueError(f"Residuals key '{residuals_key}' not found in DataGroup")
 
     sp = SlicerPlot(
         {k: da for k, da in dg.items() if k != residuals_key},
