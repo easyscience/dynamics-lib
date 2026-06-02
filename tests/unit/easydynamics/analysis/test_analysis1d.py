@@ -281,6 +281,56 @@ class TestAnalysis1d:
         # Return value propagated
         assert result is fake_fig
 
+    def test_plot_calls_plopp_with_correct_arguments_plot_residuals(self, analysis1d):
+        # WHEN
+        fake_fig = MagicMock()
+        fake_fig.autoscale = MagicMock()
+        with patch(
+            'easydynamics.analysis.analysis1d.slicerplot_with_residuals',
+            return_value=fake_fig,
+        ) as mock_plot:
+            # THEN
+            result = analysis1d.plot_data_and_model(plot_residuals=True)
+
+        # EXPECT
+
+        # plot called once
+        mock_plot.assert_called_once()
+
+        # Extract arguments
+        args, kwargs = mock_plot.call_args
+
+        datagroup = args[0]
+
+        # Basic structure
+        assert isinstance(datagroup, sc.DataGroup)
+
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+        assert 'Residuals' in datagroup
+
+        # Gaussian sample component should also be included
+        # because plot_components=True by default
+        component_names = set(datagroup.keys()) - {'Data', 'Model'}
+        assert len(component_names) > 0
+
+        # Check plotting defaults
+        assert kwargs['title'] == analysis1d.display_name
+
+        assert kwargs['linestyle']['Data'] == 'none'
+        assert kwargs['marker']['Data'] == 'o'
+        assert kwargs['color']['Data'] == 'black'
+
+        assert kwargs['linestyle']['Model'] == '-'
+        assert kwargs['color']['Model'] == 'red'
+
+        assert kwargs['linestyle']['Residuals'] == 'none'
+        assert kwargs['marker']['Residuals'] == 'o'
+        assert kwargs['color']['Residuals'] == 'blue'
+
+        # Return value propagated
+        assert result is fake_fig
+
     @pytest.mark.parametrize(
         'include_residuals',
         [True, False],
@@ -349,6 +399,14 @@ class TestAnalysis1d:
             match=r'include_components must be True or False',
         ):
             analysis1d.data_and_model_to_datagroup(include_components='not_a_boolean')
+
+    def test_data_and_model_to_datagroup_include_residuals_not_bool_raises(self, analysis1d):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'include_residuals must be True or False',
+        ):
+            analysis1d.data_and_model_to_datagroup(include_residuals='not_a_boolean')
 
     def test_plot_data_and_model_no_Q_index_raises(self, analysis1d):
         # WHEN
