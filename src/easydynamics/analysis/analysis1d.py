@@ -891,17 +891,12 @@ class Analysis1d(AnalysisBase):
             If no data is available in the experiment to calculate residuals. If Q_index is not set
             to calculate residuals.
         """
-        if self.experiment.binned_data is None:
-            raise ValueError('No data to calculate residuals. Please load data first.')
-
         if self.Q_index is None:
             raise ValueError('Q_index must be set to calculate residuals.')
 
         data = self.experiment.binned_data['Q', self.Q_index]
-        model = self.calculate()
-        residuals = data.copy(deep=True)
-        residuals.values -= model
-        return residuals
+        model = self._create_model_array()
+        return data.copy(deep=True) - model
 
     def _create_components_dataset_single_Q(
         self,

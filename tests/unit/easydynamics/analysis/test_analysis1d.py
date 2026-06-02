@@ -281,12 +281,19 @@ class TestAnalysis1d:
         # Return value propagated
         assert result is fake_fig
 
-    def test_data_and_model_to_datagroup(self, analysis1d):
+    @pytest.mark.parametrize(
+        'include_residuals',
+        [True, False],
+        ids=['Include residuals', 'Do not include residuals'],
+    )
+    def test_data_and_model_to_datagroup(self, analysis1d, include_residuals):
         # WHEN
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
 
         # THEN
-        datagroup = analysis1d.data_and_model_to_datagroup(energy=energy)
+        datagroup = analysis1d.data_and_model_to_datagroup(
+            energy=energy, include_residuals=include_residuals
+        )
 
         # EXPECT
         assert isinstance(datagroup, sc.DataGroup)
@@ -297,6 +304,14 @@ class TestAnalysis1d:
             analysis1d.experiment.binned_data['Q', analysis1d.Q_index],
         )
         assert sc.identical(datagroup['Model'], analysis1d._create_model_array(energy=energy))
+        if include_residuals:
+            assert 'Residuals' in datagroup
+            assert sc.identical(
+                datagroup['Residuals'],
+                datagroup['Data'] - analysis1d._create_model_array(),
+            )
+        else:
+            assert 'Residuals' not in datagroup
 
     def test_data_and_model_to_datagroup_no_data_raises(self, analysis1d):
         # WHEN
@@ -742,6 +757,25 @@ class TestAnalysis1d:
     #############
     # Private methods: create scipp arrays for plotting
     #############
+
+    def test_create_residuals_array(self, analysis1d):
+        # WHEN
+        # Mock the _create_model_array method to return a specific model array
+        model = analysis1d.experiment.binned_data.copy(deep=True)
+        model = model['Q', analysis1d.Q_index]
+        model.values *= 0.5
+
+        with patch.object(
+            analysis1d,
+            '_create_model_array',
+            return_value=model,
+        ):
+            # THEN
+            residuals = analysis1d._create_residuals_array()
+
+        # EXPECT
+        expected = analysis1d.experiment.binned_data['Q', analysis1d.Q_index] - model
+        assert sc.identical(residuals, expected)
 
     @pytest.mark.parametrize(
         'background',
