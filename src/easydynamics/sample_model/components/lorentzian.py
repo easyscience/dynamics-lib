@@ -49,9 +49,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             Center of the Lorentzian. If None, defaults to 0 and is fixed.
         width : Numeric, default=1.0
             Half width at half maximum (HWHM).
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        name : str, default="Lorentzian"
+        name : str, default='Lorentzian'
             Name of the component for indexing.
         display_name : str | None, default=None
             Display name for the component.

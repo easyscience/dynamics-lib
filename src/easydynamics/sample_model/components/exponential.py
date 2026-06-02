@@ -44,9 +44,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
             Center of the Exponential. If None, the center is fixed at 0.
         rate : Numeric, default=1.0
             Decay or growth constant of the Exponential.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        name : str, default="Exponential"
+        name : str, default='Exponential'
             Name of the component for indexing.
         display_name : str | None, default=None
             Display name of the component.

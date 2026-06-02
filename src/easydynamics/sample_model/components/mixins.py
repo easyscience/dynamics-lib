@@ -61,22 +61,20 @@ class CreateParametersMixin:
         if not isinstance(area, Numeric):
             raise TypeError('area must be a number.')
 
-        if isinstance(area, Numeric):
-            if not np.isfinite(area):
-                raise ValueError('area must be a finite number.')
-            area = Parameter(name=name + ' area', value=float(area), unit=unit)
+        if not np.isfinite(area):
+            raise ValueError('area must be a finite number.')
+        area_param = Parameter(name=name + ' area', value=float(area), unit=unit)
 
-        if area.value < 0:
+        if area_param.value < 0:
             warnings.warn(
                 f'The area of {name} is negative, which may not be physically meaningful.',
                 UserWarning,
                 stacklevel=3,
             )
         else:
-            if area.min < minimum_area:
-                area.min = minimum_area
+            area_param.min = minimum_area
 
-        return area
+        return area_param
 
     def _create_center_parameter(
         self,
@@ -109,7 +107,6 @@ class CreateParametersMixin:
         ValueError
             If center is a number but not finite.
 
-
         Returns
         -------
         Parameter
@@ -119,20 +116,20 @@ class CreateParametersMixin:
             raise TypeError('center must be None or a number.')
 
         if center is None:
-            center = Parameter(
+            center_param = Parameter(
                 name=name + ' center',
                 value=0.0,
                 unit=unit,
                 fixed=fix_if_none,
             )
-        elif isinstance(center, Numeric):
+        else:
             if not np.isfinite(center):
                 raise ValueError('center must be None or a finite number.')
 
-            center = Parameter(name=name + ' center', value=float(center), unit=unit)
-        if enforce_minimum_center and center.min < DHO_MINIMUM_CENTER:
-            center.min = DHO_MINIMUM_CENTER
-        return center
+            center_param = Parameter(name=name + ' center', value=float(center), unit=unit)
+        if enforce_minimum_center and center_param.min < DHO_MINIMUM_CENTER:
+            center_param.min = DHO_MINIMUM_CENTER
+        return center_param
 
     def _create_width_parameter(
         self,
@@ -173,26 +170,20 @@ class CreateParametersMixin:
         if not isinstance(width, Numeric):
             raise TypeError(f'{param_name} must be a number.')
 
-        if isinstance(width, Numeric):
-            if not np.isfinite(width):
-                raise ValueError(f'{param_name} must be a finite number')
+        if not np.isfinite(width):
+            raise ValueError(f'{param_name} must be a finite number')
 
-            if float(width) < minimum_width:
-                raise ValueError(
-                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
-                )
-            width = Parameter(
-                name=name + ' ' + param_name,
-                value=float(width),
-                unit=unit,
-                min=minimum_width,
+        if float(width) < minimum_width:
+            raise ValueError(
+                f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
             )
-        else:
-            if width.value <= 0:
-                raise ValueError(
-                    f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
-                )
-            if width.min < minimum_width:
-                width.min = minimum_width
+        width_param = Parameter(
+            name=name + ' ' + param_name,
+            value=float(width),
+            unit=unit,
+            min=minimum_width,
+        )
+        if width_param.min < minimum_width:
+            width_param.min = minimum_width
 
-        return width
+        return width_param

@@ -46,9 +46,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         width : Numeric, default=1.0
             Damping constant, approximately the half width at half max (HWHM) of the peaks. By
             default, 1.0.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the parameters.
-        name : str, default="DampedHarmonicOscillator"
+        name : str, default='DampedHarmonicOscillator'
             Name of the component for indexing.
         display_name : str | None, default=None
             Display name of the component.
