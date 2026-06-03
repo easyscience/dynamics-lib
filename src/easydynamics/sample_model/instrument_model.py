@@ -10,6 +10,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.background_model import BackgroundModel
 from easydynamics.sample_model.resolution_model import ResolutionModel
+from easydynamics.sample_model.sample_model import SampleModel
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -29,7 +30,7 @@ class InstrumentModel(NewBase):
         display_name: str = 'MyInstrumentModel',
         unique_name: str | None = None,
         Q: Q_type | None = None,
-        resolution_model: ResolutionModel | None = None,
+        resolution_model: ResolutionModel | SampleModel | None = None,
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
         unit: str | sc.Unit = 'meV',
@@ -45,9 +46,10 @@ class InstrumentModel(NewBase):
             The unique name of the InstrumentModel.
         Q : Q_type | None, default=None
             The Q values where the instrument is modelled.
-        resolution_model : ResolutionModel | None, default=None
-            The resolution model of the instrument. If None, an empty resolution model is created
-            and no resolution convolution is carried out.
+        resolution_model : ResolutionModel | SampleModel | None, default=None
+            The resolution model of the instrument. If a SampleModel it will be converted to a
+            ResolutionModel. If None, an empty resolution model is created and no resolution
+            convolution is carried out.
         background_model : BackgroundModel | None, default=None
             The background model of the instrument. If None, an empty background model is created,
             and the background evaluates to 0.
@@ -73,11 +75,13 @@ class InstrumentModel(NewBase):
         if resolution_model is None:
             self._resolution_model = ResolutionModel()
         else:
-            if not isinstance(resolution_model, ResolutionModel):
+            if not isinstance(resolution_model, (ResolutionModel, SampleModel)):
                 raise TypeError(
-                    f'resolution_model must be a ResolutionModel or None, '
+                    f'resolution_model must be a ResolutionModel, a SampleModel or None, '
                     f'got {type(resolution_model).__name__}'
                 )
+            if isinstance(resolution_model, SampleModel):
+                resolution_model = ResolutionModel.from_sample_model(resolution_model)
             self._resolution_model = resolution_model
 
         if background_model is None:
@@ -122,24 +126,27 @@ class InstrumentModel(NewBase):
         return self._resolution_model
 
     @resolution_model.setter
-    def resolution_model(self, value: ResolutionModel) -> None:
+    def resolution_model(self, value: ResolutionModel | SampleModel) -> None:
         """
         Set the resolution model of the instrument.
 
         Parameters
         ----------
-        value : ResolutionModel
+        value : ResolutionModel | SampleModel
             The new resolution model of the instrument.
 
         Raises
         ------
         TypeError
-            If value is not a ResolutionModel.
+            If value is not a ResolutionModel or SampleModel.
         """
-        if not isinstance(value, ResolutionModel):
+        if not isinstance(value, (ResolutionModel, SampleModel)):
             raise TypeError(
-                f'resolution_model must be a ResolutionModel, got {type(value).__name__}'
+                f'resolution_model must be a ResolutionModel or SampleModel, '
+                f'got {type(value).__name__}'
             )
+        if isinstance(value, SampleModel):
+            value = ResolutionModel.from_sample_model(value)
         self._resolution_model = value
         self._on_resolution_model_change()
 
