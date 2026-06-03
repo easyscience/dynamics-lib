@@ -25,9 +25,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        amplitude: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter | None = None,
-        rate: Numeric | Parameter = 1.0,
+        amplitude: Numeric = 1.0,
+        center: Numeric | None = None,
+        rate: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Exponential',
         display_name: str | None = None,
@@ -38,11 +38,11 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        amplitude : Numeric | Parameter, default=1.0
+        amplitude : Numeric, default=1.0
             Amplitude of the Exponential.
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Center of the Exponential. If None, the center is fixed at 0.
-        rate : Numeric | Parameter, default=1.0
+        rate : Numeric, default=1.0
             Decay or growth constant of the Exponential.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.

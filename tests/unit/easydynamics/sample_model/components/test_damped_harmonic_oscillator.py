@@ -42,28 +42,6 @@ class TestDampedHarmonicOscillator:
         assert dho.width.value == pytest.approx(0.3)
         assert dho.unit == 'meV'
 
-    def test_init_with_parameters(self):
-        # WHEN
-        area_param = Parameter(name='area_param', value=3.0, unit='meV')
-        center_param = Parameter(name='center_param', value=1.0, unit='meV')
-        width_param = Parameter(name='width_param', value=0.8, unit='meV')
-
-        # THEN
-        dho = DampedHarmonicOscillator(
-            display_name='Paramdho',
-            area=area_param,
-            center=center_param,
-            width=width_param,
-            unit='meV',
-        )
-
-        # EXPECT
-        assert dho.display_name == 'Paramdho'
-        assert dho.area is area_param
-        assert dho.center is center_param
-        assert dho.width is width_param
-        assert dho.unit == 'meV'
-
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [

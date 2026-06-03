@@ -30,9 +30,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        area: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter | None = None,
-        width: Numeric | Parameter = 1.0,
+        area: Numeric = 1.0,
+        center: Numeric | None = None,
+        width: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'Lorentzian',
         display_name: str | None = None,
@@ -43,11 +43,11 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric | Parameter, default=1.0
+        area : Numeric, default=1.0
             Area of the Lorentzian.
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Center of the Lorentzian. If None, defaults to 0 and is fixed.
-        width : Numeric | Parameter, default=1.0
+        width : Numeric, default=1.0
             Half width at half maximum (HWHM).
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.

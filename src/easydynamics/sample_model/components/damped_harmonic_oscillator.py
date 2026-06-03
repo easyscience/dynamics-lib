@@ -26,9 +26,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        area: Numeric | Parameter = 1.0,
-        center: Numeric | Parameter = 1.0,
-        width: Numeric | Parameter = 1.0,
+        area: Numeric = 1.0,
+        center: Numeric = 1.0,
+        width: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'DampedHarmonicOscillator',
         display_name: str | None = None,
@@ -39,11 +39,11 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        area : Numeric | Parameter, default=1.0
+        area : Numeric, default=1.0
             Area under the curve.
-        center : Numeric | Parameter, default=1.0
+        center : Numeric, default=1.0
             Resonance frequency, approximately the peak position.
-        width : Numeric | Parameter, default=1.0
+        width : Numeric, default=1.0
             Damping constant, approximately the half width at half max (HWHM) of the peaks. By
             default, 1.0.
         unit : str | sc.Unit, default='meV'

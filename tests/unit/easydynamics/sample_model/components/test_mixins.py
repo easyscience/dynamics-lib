@@ -28,20 +28,9 @@ class TestCreateParametersMixin:
         assert not area_param.fixed
         assert area_param.min == pytest.approx(0.0)
 
-    def test_create_area_parameter_from_parameter(self, dummy_model):
-        # WHEN
-        area_input = Parameter(name='input_area', value=3.0, unit='meV', fixed=True)
-
-        # THEN
-        area_param = dummy_model._create_area_parameter(area_input, 'TestModel')
-
-        # EXPECT
-        assert area_param is area_input  # Should be the same object
-        assert area_param.min == pytest.approx(0.0)
-
     def test_create_area_parameter_invalid_type_raises(self, dummy_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='area must be a number or a Parameter'):
+        with pytest.raises(TypeError, match='area must be a number'):
             dummy_model._create_area_parameter('invalid', 'TestModel')
 
     @pytest.mark.parametrize(
@@ -54,7 +43,7 @@ class TestCreateParametersMixin:
     )
     def test_create_area_parameter_invalid_numeric_raises(self, dummy_model, non_finite_area):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='area must be a finite number or a Parameter'):
+        with pytest.raises(ValueError, match='area must be a finite number'):
             dummy_model._create_area_parameter(non_finite_area, 'TestModel')
 
     def test_negative_area_warns(self, dummy_model):
@@ -92,21 +81,9 @@ class TestCreateParametersMixin:
         assert center_param.unit == 'meV'
         assert center_param.fixed == fix_if_none
 
-    def test_create_center_parameter_from_parameter(self, dummy_model):
-        # WHEN
-        center_input = Parameter(name='input_center', value=1.0, unit='meV', fixed=True)
-
-        # THEN
-        center_param = dummy_model._create_center_parameter(
-            center_input, 'TestModel', fix_if_none=False
-        )
-
-        # EXPECT
-        assert center_param is center_input  # Should be the same object
-
     def test_create_center_parameter_invalid_type_raises(self, dummy_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='center must be None, a number, or a Parameter'):
+        with pytest.raises(TypeError, match='center must be None or a number'):
             dummy_model._create_center_parameter('invalid', 'TestModel', fix_if_none=False)
 
     @pytest.mark.parametrize(
@@ -119,9 +96,7 @@ class TestCreateParametersMixin:
     )
     def test_create_center_parameter_invalid_numeric_raises(self, dummy_model, non_finite_center):
         # WHEN THEN EXPECT
-        with pytest.raises(
-            ValueError, match='center must be None, a finite number or a Parameter'
-        ):
+        with pytest.raises(ValueError, match='center must be None or a finite number'):
             dummy_model._create_center_parameter(non_finite_center, 'TestModel', fix_if_none=False)
 
     @pytest.mark.parametrize('unit', ['meV', 'eV'])
@@ -138,29 +113,9 @@ class TestCreateParametersMixin:
         assert width_param.unit == unit
         assert not width_param.fixed
 
-    def test_create_width_parameter_from_parameter(self, dummy_model):
-        # WHEN
-        width_input = Parameter(name='input_width', value=3.0, unit='meV', fixed=True)
-
-        # THEN
-        width_param = dummy_model._create_width_parameter(
-            width_input, 'TestModel', param_name='width'
-        )
-
-        # EXPECT
-        assert width_param is width_input  # Should be the same object
-
-    def test_create_width_parameter_from_parameter_negative_raises(self, dummy_model):
-        # WHEN
-        width_input = Parameter(name='input_width', value=-1.0, unit='meV', fixed=True)
-
-        # THEN EXPECT
-        with pytest.raises(ValueError, match=' must be greater than zero'):
-            dummy_model._create_width_parameter(width_input, 'TestModel', param_name='width')
-
     def test_create_width_parameter_invalid_type_raises(self, dummy_model):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='width must be a number or a Parameter'):
+        with pytest.raises(TypeError, match='width must be a number'):
             dummy_model._create_width_parameter('invalid', 'TestModel', param_name='width')
 
     def test_create_width_parameter_negative_raises(self, dummy_model):
@@ -178,5 +133,5 @@ class TestCreateParametersMixin:
     )
     def test_create_width_parameter_invalid_numeric_raises(self, dummy_model, non_finite_center):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='width must be a finite number or a Parameter'):
+        with pytest.raises(ValueError, match='width must be a finite number'):
             dummy_model._create_width_parameter(non_finite_center, 'TestModel')

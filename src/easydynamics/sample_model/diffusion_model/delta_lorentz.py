@@ -486,16 +486,13 @@ class DeltaLorentz(DiffusionModelBase):
             # ------------------------------#
             # Create Lorentzian
             # ------------------------------#
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                width = self._lorentzian_width_list[i]
-            else:
-                width = 1.0
             lorentzian_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
                 unit=self.unit,
-                width=width,
             )
+            if self._allow_Q_variation['lorentzian_width'] is True:
+                lorentzian_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made
