@@ -177,13 +177,9 @@ class CreateParametersMixin:
             raise ValueError(
                 f'The {param_name} of a {self.__class__.__name__} must be greater than zero.'
             )
-        width_param = Parameter(
+        return Parameter(
             name=name + ' ' + param_name,
             value=float(width),
             unit=unit,
             min=minimum_width,
         )
-        if width_param.min < minimum_width:
-            width_param.min = minimum_width
-
-        return width_param
