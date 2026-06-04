@@ -156,7 +156,18 @@ plugins:
             show_root_heading: true
             show_root_full_path: false
             show_submodules: true
-            show_source: true
+            show_source: false
+            show_bases: false
+            # Uncomment when the project depends on `easyscience` and inherited
+            # EasyScience base-class members should be shown in the API docs.
+            # preload_modules:
+            #   - easyscience
+            inherited_members: true
+            show_category_heading: true
+            merge_init_into_class: true
+            docstring_options:
+              ignore_init_summary: true
+            summary: true
   - search
 
 # Determines additional directories to watch when running mkdocs serve
