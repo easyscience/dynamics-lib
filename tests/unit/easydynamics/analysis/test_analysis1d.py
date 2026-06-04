@@ -241,8 +241,8 @@ class TestAnalysis1d:
 
     def test_plot_calls_plopp_with_correct_arguments(self, analysis1d):
         # WHEN
-        fake_fig = object()
-
+        fake_fig = MagicMock()
+        fake_fig.autoscale = MagicMock()
         with patch('plopp.plot', return_value=fake_fig) as mock_plot:
             # THEN
             result = analysis1d.plot_data_and_model()
@@ -281,12 +281,69 @@ class TestAnalysis1d:
         # Return value propagated
         assert result is fake_fig
 
-    def test_data_and_model_to_datagroup(self, analysis1d):
+    def test_plot_calls_plopp_with_correct_arguments_plot_residuals(self, analysis1d):
+        # WHEN
+        fake_fig = MagicMock()
+        fake_fig.autoscale = MagicMock()
+        with patch(
+            'easydynamics.analysis.analysis1d.slicerplot_with_residuals',
+            return_value=fake_fig,
+        ) as mock_plot:
+            # THEN
+            result = analysis1d.plot_data_and_model(plot_residuals=True)
+
+        # EXPECT
+
+        # plot called once
+        mock_plot.assert_called_once()
+
+        # Extract arguments
+        args, kwargs = mock_plot.call_args
+
+        datagroup = args[0]
+
+        # Basic structure
+        assert isinstance(datagroup, sc.DataGroup)
+
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+        assert 'Residuals' in datagroup
+
+        # Gaussian sample component should also be included
+        # because plot_components=True by default
+        component_names = set(datagroup.keys()) - {'Data', 'Model'}
+        assert len(component_names) > 0
+
+        # Check plotting defaults
+        assert kwargs['title'] == analysis1d.display_name
+
+        assert kwargs['linestyle']['Data'] == 'none'
+        assert kwargs['marker']['Data'] == 'o'
+        assert kwargs['color']['Data'] == 'black'
+
+        assert kwargs['linestyle']['Model'] == '-'
+        assert kwargs['color']['Model'] == 'red'
+
+        assert kwargs['linestyle']['Residuals'] == 'none'
+        assert kwargs['marker']['Residuals'] == 'o'
+        assert kwargs['color']['Residuals'] == 'blue'
+
+        # Return value propagated
+        assert result is fake_fig
+
+    @pytest.mark.parametrize(
+        'include_residuals',
+        [True, False],
+        ids=['Include residuals', 'Do not include residuals'],
+    )
+    def test_data_and_model_to_datagroup(self, analysis1d, include_residuals):
         # WHEN
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
 
         # THEN
-        datagroup = analysis1d.data_and_model_to_datagroup(energy=energy)
+        datagroup = analysis1d.data_and_model_to_datagroup(
+            energy=energy, include_residuals=include_residuals
+        )
 
         # EXPECT
         assert isinstance(datagroup, sc.DataGroup)
@@ -297,6 +354,14 @@ class TestAnalysis1d:
             analysis1d.experiment.binned_data['Q', analysis1d.Q_index],
         )
         assert sc.identical(datagroup['Model'], analysis1d._create_model_array(energy=energy))
+        if include_residuals:
+            assert 'Residuals' in datagroup
+            assert sc.identical(
+                datagroup['Residuals'],
+                datagroup['Data'] - analysis1d._create_model_array(),
+            )
+        else:
+            assert 'Residuals' not in datagroup
 
     def test_data_and_model_to_datagroup_no_data_raises(self, analysis1d):
         # WHEN
@@ -334,6 +399,14 @@ class TestAnalysis1d:
             match=r'include_components must be True or False',
         ):
             analysis1d.data_and_model_to_datagroup(include_components='not_a_boolean')
+
+    def test_data_and_model_to_datagroup_include_residuals_not_bool_raises(self, analysis1d):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'include_residuals must be True or False',
+        ):
+            analysis1d.data_and_model_to_datagroup(include_residuals='not_a_boolean')
 
     def test_plot_data_and_model_no_Q_index_raises(self, analysis1d):
         # WHEN
@@ -742,6 +815,33 @@ class TestAnalysis1d:
     #############
     # Private methods: create scipp arrays for plotting
     #############
+
+    def test_create_residuals_array(self, analysis1d):
+        # WHEN
+        # Mock the _create_model_array method to return a specific model array
+        model = analysis1d.experiment.binned_data.copy(deep=True)
+        model = model['Q', analysis1d.Q_index]
+        model.values *= 0.5
+
+        with patch.object(
+            analysis1d,
+            '_create_model_array',
+            return_value=model,
+        ):
+            # THEN
+            residuals = analysis1d._create_residuals_array()
+
+        # EXPECT
+        expected = analysis1d.experiment.binned_data['Q', analysis1d.Q_index] - model
+        assert sc.identical(residuals, expected)
+
+    def test_create_residuals_array_no_Q_index_raises(self, analysis1d):
+        # WHEN
+        analysis1d._Q_index = None
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Q_index must be set'):
+            analysis1d._create_residuals_array()
 
     @pytest.mark.parametrize(
         'background',

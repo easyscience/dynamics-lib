@@ -238,7 +238,11 @@ class TestAnalysis:
 
         # EXPECT
         analysis.analysis_list[1].plot_data_and_model.assert_called_once_with(
-            plot_components=True, add_background=True, energy=None, **kwargs
+            plot_components=True,
+            add_background=True,
+            plot_residuals=False,
+            energy=None,
+            **kwargs,
         )
         assert result == 'plot_Q1'
 
@@ -275,6 +279,17 @@ class TestAnalysis:
             ),
         ):
             analysis.plot_data_and_model(add_background='not_a_boolean')
+
+    def test_plot_data_and_model_invalid_plot_residuals_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with (
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+            pytest.raises(
+                TypeError,
+                match='plot_residuals must be True or False',
+            ),
+        ):
+            analysis.plot_data_and_model(plot_residuals='not_a_boolean')
 
     @pytest.mark.parametrize(
         'plot_components, expect_components',
@@ -353,10 +368,60 @@ class TestAnalysis:
         # Widget toggler updated
         assert fake_widget.slider_toggler.value == '-o-'
 
-    def test_data_and_model_to_datagroup(self, analysis):
+    def test_plot_data_and_model_with_residuals(
+        self,
+        analysis,
+    ):
+        # WHEN
+        fake_widget = MagicMock()
+        fake_widget.slider_toggler = MagicMock()
+
+        fake_fig = MagicMock()
+        fake_fig.bottom_bar = [MagicMock()]
+        fake_fig.bottom_bar[0].controls = {'test': fake_widget}
+
+        with (
+            patch(
+                'easydynamics.analysis.analysis.slicerplot_with_residuals',
+                return_value=fake_fig,
+            ) as mock_residuals,
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=True),
+        ):
+            # THEN
+            fig = analysis.plot_data_and_model(
+                plot_components=True,
+                plot_residuals=True,
+            )
+
+        # EXPECT
+        assert fig is fake_fig
+        mock_residuals.assert_called_once()
+
+        args, kwargs = mock_residuals.call_args
+        datagroup = args[0]
+
+        assert isinstance(datagroup, sc.DataGroup)
+        assert 'Data' in datagroup
+        assert 'Model' in datagroup
+        assert 'Residuals' in datagroup
+
+        # residual styling
+        assert kwargs['linestyle']['Residuals'] == 'none'
+        assert kwargs['marker']['Residuals'] == 'o'
+        assert kwargs['color']['Residuals'] == 'blue'
+        assert kwargs['markerfacecolor']['Residuals'] == 'none'
+
+        # still respects global metadata
+        assert kwargs['title'] == analysis.display_name
+        assert kwargs['keep'] == 'energy'
+
+    @pytest.mark.parametrize('include_residuals', [True, False])
+    def test_data_and_model_to_datagroup(self, analysis, include_residuals):
         # WHEN
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
-        datagroup = analysis.data_and_model_to_datagroup(energy=energy)
+        datagroup = analysis.data_and_model_to_datagroup(
+            energy=energy, include_residuals=include_residuals
+        )
 
         # EXPECT
         assert isinstance(datagroup, sc.DataGroup)
@@ -364,6 +429,12 @@ class TestAnalysis:
         assert 'Model' in datagroup
         assert sc.identical(datagroup['Data'], analysis.experiment.binned_data)
         assert sc.identical(datagroup['Model'], analysis._create_model_array(energy=energy))
+        if include_residuals:
+            assert 'Residuals' in datagroup
+            assert sc.identical(
+                datagroup['Residuals'],
+                analysis.experiment.binned_data - analysis._create_model_array(),
+            )
 
     def test_data_and_model_to_datagroup_no_data_raises(self, analysis):
         # WHEN
@@ -401,6 +472,14 @@ class TestAnalysis:
             match=r'include_components must be True or False',
         ):
             analysis.data_and_model_to_datagroup(include_components='not_a_boolean')
+
+    def test_data_and_model_to_datagroup_include_residuals_not_bool_raises(self, analysis):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(
+            TypeError,
+            match=r'include_residuals must be True or False',
+        ):
+            analysis.data_and_model_to_datagroup(include_residuals='not_a_boolean')
 
     def test_parameters_to_dataset(self, analysis):
         # WHEN
@@ -770,6 +849,24 @@ class TestAnalysis:
             model_array.values,
             np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
         )
+
+    def test_create_residuals_array(self, analysis):
+        # WHEN
+        # Mock the _create_model_array method to return a specific model array
+        model = analysis.experiment.binned_data.copy(deep=True)
+        model.values *= 0.5
+
+        with patch.object(
+            analysis,
+            '_create_model_array',
+            return_value=model,
+        ):
+            # THEN
+            residuals = analysis._create_residuals_array()
+
+        # EXPECT
+        expected = analysis.experiment.binned_data - model
+        assert sc.identical(residuals, expected)
 
     def test_create_components_dataset_raises(self, analysis):
         # WHEN / THEN / EXPECT

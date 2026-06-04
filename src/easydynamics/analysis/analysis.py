@@ -18,6 +18,7 @@ from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -213,6 +214,7 @@ class Analysis(AnalysisBase):
         Q_index: int | None = None,
         plot_components: bool = True,
         add_background: bool = True,
+        plot_residuals: bool = False,
         energy: sc.Variable | None = None,
         **kwargs: dict[str, Any],
     ) -> InteractiveFigure:
@@ -232,6 +234,8 @@ class Analysis(AnalysisBase):
         add_background : bool, default=True
             Whether to add background components to the sample model components when plotting.
             Default is True.
+        plot_residuals : bool, default=False
+            Whether to plot the residuals (data - model). Default is False.
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the model. If None, uses the energy from the
             experiment.
@@ -259,6 +263,7 @@ class Analysis(AnalysisBase):
             return self.analysis_list[Q_index].plot_data_and_model(
                 plot_components=plot_components,
                 add_background=add_background,
+                plot_residuals=plot_residuals,
                 energy=energy,
                 **kwargs,
             )
@@ -280,6 +285,9 @@ class Analysis(AnalysisBase):
         if not isinstance(add_background, bool):
             raise TypeError('add_background must be True or False.')
 
+        if not isinstance(plot_residuals, bool):
+            raise TypeError('plot_residuals must be True or False.')
+
         if energy is None:
             energy = self.energy
 
@@ -289,6 +297,7 @@ class Analysis(AnalysisBase):
             energy=energy,
             add_background=add_background,
             include_components=plot_components,
+            include_residuals=plot_residuals,
         )
 
         plot_kwargs_defaults = {
@@ -313,6 +322,12 @@ class Analysis(AnalysisBase):
                 plot_kwargs_defaults['color'][key] = 'red'
                 plot_kwargs_defaults['markerfacecolor'][key] = 'none'
 
+            elif key == 'Residuals':
+                plot_kwargs_defaults['linestyle'][key] = 'none'
+                plot_kwargs_defaults['marker'][key] = 'o'
+                plot_kwargs_defaults['color'][key] = 'blue'
+                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
+
             else:
                 plot_kwargs_defaults['linestyle'][key] = '--'
                 plot_kwargs_defaults['marker'][key] = None
@@ -320,12 +335,21 @@ class Analysis(AnalysisBase):
         # Overwrite defaults with any user-provided kwargs
         plot_kwargs_defaults.update(kwargs)
 
-        fig = pp.slicer(
-            data_and_model,
-            **plot_kwargs_defaults,
-        )
-        for widget in fig.bottom_bar[0].controls.values():
-            widget.slider_toggler.value = '-o-'
+        if plot_residuals:
+            fig = slicerplot_with_residuals(
+                data_and_model,
+                residuals_key='Residuals',
+                operation='sum',
+                **plot_kwargs_defaults,
+            )
+
+        else:
+            fig = pp.slicer(
+                data_and_model,
+                **plot_kwargs_defaults,
+            )
+            for widget in fig.bottom_bar[0].controls.values():
+                widget.slider_toggler.value = '-o-'
         fig.autoscale()
         return fig
 
@@ -334,6 +358,7 @@ class Analysis(AnalysisBase):
         energy: sc.Variable | None = None,
         add_background: bool = True,
         include_components: bool = True,
+        include_residuals: bool = False,
     ) -> sc.DataGroup:
         """
         Create a scipp DataGroup containing the experimental data, model calculation and optionally
@@ -350,6 +375,8 @@ class Analysis(AnalysisBase):
         include_components : bool, default=True
             Whether to include the individual components of the model in the DataGroup. If False,
             only the total model will be included.
+        include_residuals : bool, default=False
+            Whether to include the residuals (data - model) in the DataGroup.
 
         Raises
         ------
@@ -380,6 +407,9 @@ class Analysis(AnalysisBase):
         if not isinstance(include_components, bool):
             raise TypeError('include_components must be True or False.')
 
+        if not isinstance(include_residuals, bool):
+            raise TypeError('include_residuals must be True or False.')
+
         energy = self._verify_energy(energy)
 
         if energy is None:
@@ -396,6 +426,9 @@ class Analysis(AnalysisBase):
             )
             for key in components:
                 data_and_model[key] = components[key]
+
+        if include_residuals:
+            data_and_model['Residuals'] = self._create_residuals_array()
 
         return sc.DataGroup(data_and_model)
 
@@ -735,6 +768,19 @@ class Analysis(AnalysisBase):
             data=model,
             coords={'Q': self.Q, 'energy': energy},
         )
+
+    def _create_residuals_array(self) -> sc.DataArray:
+        """
+        Create a scipp array for the residuals (data - model).
+
+        Returns
+        -------
+        sc.DataArray
+            A DataArray containing the residuals, with dimensions "Q" and "energy".
+        """
+        data = self.experiment.binned_data
+        model = self._create_model_array()
+        return data.copy(deep=True) - model
 
     def _create_components_dataset(
         self,
