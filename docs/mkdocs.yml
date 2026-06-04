@@ -203,6 +203,7 @@ nav:
           - Component collection: tutorials/component_collection.ipynb
           - Convolution: tutorials/convolution.ipynb
           - Detailed balance: tutorials/detailed_balance.ipynb
+          - DeltaLorentz: tutorials/delta_lorentz.ipynb
           - Diffusion model: tutorials/diffusion_model.ipynb
           - Sample model: tutorials/sample_model.ipynb
           - Instrument model: tutorials/instrument_model.ipynb
