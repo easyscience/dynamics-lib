@@ -42,28 +42,6 @@ class TestExponential:
         assert exponential.rate.value == pytest.approx(1.2)
         assert exponential.unit == 'meV'
 
-    def test_init_with_parameters(self):
-        # WHEN
-        amplitude_param = Parameter(name='amp_param', value=3.0, unit='meV')
-        center_param = Parameter(name='center_param', value=1.0, unit='meV')
-        rate_param = Parameter(name='rate_param', value=0.5, unit='1/meV')
-
-        # THEN
-        exponential = Exponential(
-            display_name='ParamExponential',
-            amplitude=amplitude_param,
-            center=center_param,
-            rate=rate_param,
-            unit='meV',
-        )
-
-        # EXPECT
-        assert exponential.display_name == 'ParamExponential'
-        assert exponential.amplitude is amplitude_param
-        assert exponential.center is center_param
-        assert exponential.rate is rate_param
-        assert exponential.unit == 'meV'
-
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
@@ -73,11 +51,11 @@ class TestExponential:
             ),
             (
                 {'amplitude': 2.0, 'center': 'invalid', 'rate': 1.0, 'unit': 'meV'},
-                'center must be None, a number',
+                'center must be None or a number',
             ),
             (
                 {'amplitude': 2.0, 'center': 0.5, 'rate': 'invalid', 'unit': 'meV'},
-                'rate must be a number or a Parameter',
+                'rate must be a number',
             ),
         ],
     )

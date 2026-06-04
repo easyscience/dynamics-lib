@@ -43,7 +43,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 123,
+                    'unit': 'meV',
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
                 },
@@ -52,12 +52,30 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 123,
+                    'unit': 'meV',
+                    'scale': -123.4,
+                    'diffusion_coefficient': 1.0,
+                },
+                ValueError,
+                'scale must be non-negative',
+            ),
+            (
+                {
+                    'unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 'invalid',
                 },
                 TypeError,
                 'diffusion_coefficient must be a number',
+            ),
+            (
+                {
+                    'unit': 'meV',
+                    'scale': 1.0,
+                    'diffusion_coefficient': -123.4,
+                },
+                ValueError,
+                'diffusion_coefficient must be non-negative',
             ),
         ],
     )
@@ -152,9 +170,9 @@ class TestBrownianTranslationalDiffusion:
     )
     def test_create_component_collections(self, brownian_diffusion_model, Q):
         # WHEN
-
+        brownian_diffusion_model.Q = Q
         # THEN
-        component_collections = brownian_diffusion_model.create_component_collections(Q=Q)
+        component_collections = brownian_diffusion_model.create_component_collections()
 
         # EXPECT
         expected_widths = brownian_diffusion_model.calculate_width(Q)
@@ -165,36 +183,6 @@ class TestBrownianTranslationalDiffusion:
             assert component.width.unit == brownian_diffusion_model.unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
-
-    def test_create_component_collections_component_name_must_be_string(
-        self, brownian_diffusion_model
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_name must be a string.'):
-            brownian_diffusion_model.create_component_collections(
-                Q=np.array([0.1, 0.2, 0.3]), component_name=123
-            )
-
-    def test_create_component_collections_component_display_name_must_be_string(
-        self, brownian_diffusion_model
-    ):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'component_display_name must be a string.'):
-            brownian_diffusion_model.create_component_collections(
-                Q=np.array([0.1, 0.2, 0.3]), component_display_name=123
-            )
-
-    def test_create_component_collections_Q_type_error(self, brownian_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match='Q must be a '):
-            brownian_diffusion_model.create_component_collections(Q='invalid')  # Invalid type
-
-    def test_create_component_collections_Q_1dimensional_error(self, brownian_diffusion_model):
-        # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q must be a 1-dimensional array.'):
-            brownian_diffusion_model.create_component_collections(
-                Q=np.array([[0.1, 0.2], [0.3, 0.4]])
-            )  # Invalid shape
 
     def test_write_width_dependency_expression(self, brownian_diffusion_model):
         # WHEN THEN

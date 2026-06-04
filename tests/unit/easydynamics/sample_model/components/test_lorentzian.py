@@ -43,28 +43,6 @@ class TestLorentzian:
         assert lorentzian.width.value == pytest.approx(0.6)
         assert lorentzian.unit == 'meV'
 
-    def test_init_with_parameters(self):
-        # WHEN
-        area_param = Parameter(name='area_param', value=3.0, unit='meV')
-        center_param = Parameter(name='center_param', value=1.0, unit='meV')
-        width_param = Parameter(name='width_param', value=0.8, unit='meV')
-
-        # THEN
-        lorentzian = Lorentzian(
-            display_name='ParamLorentzian',
-            area=area_param,
-            center=center_param,
-            width=width_param,
-            unit='meV',
-        )
-
-        # EXPECT
-        assert lorentzian.display_name == 'ParamLorentzian'
-        assert lorentzian.area is area_param
-        assert lorentzian.center is center_param
-        assert lorentzian.width is width_param
-        assert lorentzian.unit == 'meV'
-
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [

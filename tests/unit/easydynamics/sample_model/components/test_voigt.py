@@ -47,31 +47,6 @@ class TestVoigt:
         assert voigt.lorentzian_width.value == pytest.approx(0.7)
         assert voigt.unit == 'meV'
 
-    def test_init_with_parameters(self):
-        # WHEN
-        area_param = Parameter(name='area_param', value=3.0, unit='meV')
-        center_param = Parameter(name='center_param', value=1.0, unit='meV')
-        gaussian_width_param = Parameter(name='gaussian_width_param', value=0.8, unit='meV')
-        lorentzian_width_param = Parameter(name='lorentzian_width_param', value=0.9, unit='meV')
-
-        # THEN
-        voigt = Voigt(
-            display_name='ParamVoigt',
-            area=area_param,
-            center=center_param,
-            gaussian_width=gaussian_width_param,
-            lorentzian_width=lorentzian_width_param,
-            unit='meV',
-        )
-
-        # EXPECT
-        assert voigt.display_name == 'ParamVoigt'
-        assert voigt.area is area_param
-        assert voigt.center is center_param
-        assert voigt.gaussian_width is gaussian_width_param
-        assert voigt.lorentzian_width is lorentzian_width_param
-        assert voigt.unit == 'meV'
-
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [

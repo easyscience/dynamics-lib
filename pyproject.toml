@@ -187,7 +187,6 @@ preview = true    # Enable new rules that are not yet stable, like DOC
 docstring-code-format = true    # Whether to format code snippets in docstrings
 docstring-code-line-length = 99 # Line length for code snippets in docstrings
 indent-style = 'space'          # PEP 8 recommends using spaces over tabs
-line-ending = 'lf'              # Line endings will be converted to \n
 quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 257)
 
 # Linting rules to use with Ruff

@@ -12,7 +12,6 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
-from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 
@@ -42,9 +41,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         self,
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
+        Q: Q_type | None = None,
         unit: str | sc.Unit = 'meV',
         name: str = 'BrownianTranslationalDiffusion',
         display_name: str | None = 'BrownianTranslationalDiffusion',
+        lorentzian_name: str | None = None,
+        lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -56,12 +58,20 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Scale factor for the diffusion model. Must be a non-negative number.
         diffusion_coefficient : Numeric, default=1.0
             Diffusion coefficient D in m^2/s.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set.
         unit : str | sc.Unit, default='meV'
             Unit of the diffusion model. Must be convertible to meV.
         name : str, default='BrownianTranslationalDiffusion'
             Name of the diffusion model.
         display_name : str | None, default='BrownianTranslationalDiffusion'
             Display name of the diffusion model.
+        lorentzian_name : str | None, default=None
+            Name of the Lorentzian component. If None, it will be set to the name of the diffusion
+            model.
+        lorentzian_display_name : str | None, default=None
+            Display name of the Lorentzian component. If None, it will be set to the
+            lorentzian_name.
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
@@ -70,12 +80,26 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         ------
         TypeError
             If scale or diffusion_coefficient is not a number.
+
+        ValueError
+            If scale or diffusion_coefficient is negative.
         """
-        if not isinstance(scale, Numeric):
-            raise TypeError('scale must be a number.')
+        super().__init__(
+            Q=Q,
+            unit=unit,
+            scale=scale,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+            lorentzian_name=lorentzian_name,
+            lorentzian_display_name=lorentzian_display_name,
+        )
 
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
+
+        if float(diffusion_coefficient) < 0:
+            raise ValueError('diffusion_coefficient must be non-negative.')
 
         diffusion_coefficient = Parameter(
             name='diffusion_coefficient',
@@ -84,16 +108,12 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             unit='m**2/s',
             min=0.0,
         )
-        super().__init__(
-            unit=unit,
-            scale=scale,
-            name=name,
-            display_name=display_name,
-            unique_name=unique_name,
-        )
+
         self._hbar = hbar
         self._angstrom = angstrom
         self._diffusion_coefficient = diffusion_coefficient
+
+        self._component_collections = self.create_component_collections()
 
     # ------------------------------------------------------------------
     # Properties
@@ -139,13 +159,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # Other methods
     # ------------------------------------------------------------------
 
-    def calculate_width(self, Q: Q_type) -> np.ndarray:
+    def calculate_width(self, Q: Q_type | None = None) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the diffusion model.
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type | None, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -153,21 +173,20 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             HWHM values in the unit of the model (e.g., meV).
         """
-
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
 
         unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         unit_conversion_factor.convert_unit(self.unit)
         return Q**2 * unit_conversion_factor.value
 
-    def calculate_EISF(self, Q: Q_type) -> np.ndarray:
+    def calculate_EISF(self, Q: Q_type | None = None) -> np.ndarray:
         """
         Calculate the Elastic Incoherent Structure Factor (EISF) for the Brownian translational
         diffusion model.
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type | None, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -175,16 +194,17 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
+
         return np.zeros_like(Q)
 
-    def calculate_QISF(self, Q: Q_type) -> np.ndarray:
+    def calculate_QISF(self, Q: Q_type | None = None) -> np.ndarray:
         """
         Calculate the Quasi-Elastic Incoherent Structure Factor (QISF).
 
         Parameters
         ----------
-        Q : Q_type
+        Q : Q_type | None, default=None
             Scattering vector in 1/angstrom.
 
         Returns
@@ -192,33 +212,16 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             QISF values (dimensionless).
         """
+        Q = self._ensure_Q(Q)
 
-        Q = _validate_and_convert_Q(Q)
         return np.ones_like(Q)
 
     def create_component_collections(
         self,
-        Q: Q_type,
-        component_name: str = 'Brownian diffusion',
-        component_display_name: str | None = None,
     ) -> list[ComponentCollection]:
         r"""
         Create ComponentCollection components for the Brownian translational diffusion model at
         given Q values.
-
-        Parameters
-        ----------
-        Q : Q_type
-            Scattering vector values.
-        component_name : str, default='Brownian diffusion'
-            Name of the Brownian diffusion component.
-        component_display_name : str | None, default=None
-            Display name of the Brownian diffusion component.
-
-        Raises
-        ------
-        TypeError
-            If component_display_name is not a string. If component_name is not a string.
 
         Returns
         -------
@@ -227,16 +230,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Lorentzian has a width given by $D*Q^2$ and an area given by the scale parameter
             multiplied by the QISF (which is 1 for this model).
         """
-        Q = _validate_and_convert_Q(Q)
-
-        if not isinstance(component_name, str):
-            raise TypeError('component_name must be a string.')
-
-        if component_display_name is None:
-            component_display_name = component_name
-
-        if not isinstance(component_display_name, str):
-            raise TypeError('component_display_name must be a string.')
+        Q = self.Q
+        if Q is None:
+            self._component_collections = []
+            return self._component_collections
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -254,8 +251,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             )
 
             lorentzian_component = Lorentzian(
-                name=component_name,
-                display_name=component_display_name,
+                name=self.lorentzian_name,
+                display_name=self.lorentzian_display_name,
                 unit=self.unit,
             )
 
@@ -283,6 +280,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _on_Q_change(self) -> None:
+        """
+        Update the component collections when Q changes. This is called automatically when the Q
+        property is set. It regenerates the component collections based on the new Q values.
+        """
+        self._component_collections = self.create_component_collections()
 
     def _write_width_dependency_expression(self, Q: float) -> str:
         """

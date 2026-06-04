@@ -30,8 +30,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     def __init__(
         self,
-        center: Numeric | Parameter | None = None,
-        area: Numeric | Parameter = 1.0,
+        center: Numeric | None = None,
+        area: Numeric = 1.0,
         unit: str | sc.Unit = 'meV',
         name: str = 'DeltaFunction',
         display_name: str | None = None,
@@ -42,9 +42,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        center : Numeric | Parameter | None, default=None
+        center : Numeric | None, default=None
             Center of the delta function. If None, it will be centered at 0 and fixed.
-        area : Numeric | Parameter, default=1.0
+        area : Numeric, default=1.0
             Total area under the curve.
         unit : str | sc.Unit, default='meV'
             Unit of the parameters.

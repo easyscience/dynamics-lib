@@ -76,7 +76,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         Raises
         ------
         TypeError
-            If unit is not a string or sc.Unit, or if components is not a list of ModelComponent.
+            If components is not a list of ModelComponent.
         """
         if components is None:
             components = []
@@ -340,29 +340,6 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # Dunder methods
     # ------------------------------------------------------------------
 
-    def __contains__(self, item: str | ModelComponent) -> bool:
-        """
-        Check if a component with the given name or instance exists in the ComponentCollection.
-
-        Parameters
-        ----------
-        item : str | ModelComponent
-            The component name or instance to check for.
-
-        Returns
-        -------
-        bool
-            True if the component exists, False otherwise.
-        """
-
-        if isinstance(item, str):
-            # Check by component name
-            return any(comp.name == item for comp in self)
-        if isinstance(item, ModelComponent):
-            # Check by component instance
-            return any(comp is item for comp in self)
-        return False
-
     def __repr__(self) -> str:
         """
         Return a string representation of the ComponentCollection.
@@ -374,7 +351,10 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         """
         comp_names = ', '.join(c.name for c in self) or 'No components'
 
-        return f"<ComponentCollection name='{self.name}' | Components: {comp_names}>"
+        return (
+            f"ComponentCollection(name='{self.name}', unit='{self.unit}', \n"
+            f'Components: {comp_names})'
+        )
 
     def to_dict(self) -> dict:
         return {

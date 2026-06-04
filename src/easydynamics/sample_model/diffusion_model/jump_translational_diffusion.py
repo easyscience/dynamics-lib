@@ -12,7 +12,6 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
-from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import hbar
 
@@ -40,8 +39,9 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     ...     scale=scale,
     ...     diffusion_coefficient=diffusion_coefficient,
     ...     relaxation_time=relaxation_time,
+    ...     Q=Q,
     ... )
-    >>> component_collections = diffusion_model.create_component_collections(Q)
+    >>> component_collections = diffusion_model.create_component_collections()
 
     See also the tutorials..
     """
@@ -51,9 +51,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         relaxation_time: Numeric = 1.0,
+        Q: Q_type | None = None,
         unit: str | sc.Unit = 'meV',
         name: str = 'JumpTranslationalDiffusion',
         display_name: str | None = 'JumpTranslationalDiffusion',
+        lorentzian_name: str | None = None,
+        lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
@@ -67,12 +70,20 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Diffusion coefficient D in m^2/s.
         relaxation_time : Numeric, default=1.0
             Relaxation time t in ps.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set.
         unit : str | sc.Unit, default='meV'
             Unit of the diffusion model. Must be convertible to meV.
         name : str, default='JumpTranslationalDiffusion'
             Name of the diffusion model.
         display_name : str | None, default='JumpTranslationalDiffusion'
             Display name of the diffusion model.
+        lorentzian_name : str | None, default=None
+            Name of the Lorentzian component. If None, it will be set to the name of the diffusion
+            model with '_Lorentzian' appended. By default, None.
+        lorentzian_display_name : str | None, default=None
+            Display name of the Lorentzian component. If None, it will be set to the display name
+            of the diffusion model with '_Lorentzian' appended. By default, None
         unique_name : str | None, default=None
             Unique name of the diffusion model. If None, a unique name will be generated. By
             default, None.
@@ -81,26 +92,38 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         ------
         TypeError
             If scale, diffusion_coefficient, or relaxation_time  are not numbers.
+        ValueError
+            If scale, diffusion_coefficient, or relaxation_time are negative.
         """
         super().__init__(
-            name=name,
-            display_name=display_name,
-            unique_name=unique_name,
+            Q=Q,
             unit=unit,
             scale=scale,
+            name=name,
+            display_name=display_name,
+            lorentzian_name=lorentzian_name,
+            lorentzian_display_name=lorentzian_display_name,
+            unique_name=unique_name,
         )
 
         if not isinstance(diffusion_coefficient, Numeric):
             raise TypeError('diffusion_coefficient must be a number.')
 
+        if float(diffusion_coefficient) < 0:
+            raise ValueError('diffusion_coefficient must be non-negative.')
+
         if not isinstance(relaxation_time, Numeric):
             raise TypeError('relaxation_time must be a number.')
+
+        if float(relaxation_time) < 0:
+            raise ValueError('relaxation_time must be non-negative.')
 
         diffusion_coefficient = Parameter(
             name='diffusion_coefficient',
             value=float(diffusion_coefficient),
             fixed=False,
             unit='m**2/s',
+            min=0.0,
         )
 
         relaxation_time = Parameter(
@@ -108,12 +131,15 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             value=float(relaxation_time),
             fixed=False,
             unit='ps',
+            min=0.0,
         )
 
         self._hbar = hbar
         self._angstrom = angstrom
         self._diffusion_coefficient = diffusion_coefficient
         self._relaxation_time = relaxation_time
+
+        self._component_collections = self.create_component_collections()
 
     ################################
     # Properties
@@ -194,15 +220,16 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     # Other methods
     ################################
 
-    def calculate_width(self, Q: Q_type) -> np.ndarray:
+    def calculate_width(self, Q: Q_type | None = None) -> np.ndarray:
         r"""
         Calculate the half-width at half-maximum (HWHM) for the diffusion model. $\Gamma(Q) =
         Q^2/(1+D t Q^2)$, where $D$ is the diffusion coefficient and $t$ is the relaxation time.
 
         Parameters
         ----------
-        Q : Q_type
-            Scattering vector in 1/angstrom. Can be a single value or an array of values.
+        Q : Q_type | None, default=None
+            Scattering vector in 1/angstrom. Can be a single value or an array of values. If None,
+            Q values stored in the model are used.
 
         Returns
         -------
@@ -210,7 +237,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             HWHM values in the unit of the model (e.g., meV).
         """
 
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
 
         unit_conversion_factor_numerator = (
             self._hbar * self.diffusion_coefficient / (self._angstrom**2)
@@ -242,7 +269,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             EISF values (dimensionless).
         """
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
+
         return np.zeros_like(Q)
 
     def calculate_QISF(self, Q: Q_type) -> np.ndarray:
@@ -259,44 +287,27 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         np.ndarray
             QISF values (dimensionless).
         """
-        Q = _validate_and_convert_Q(Q)
+        Q = self._ensure_Q(Q)
+
         return np.ones_like(Q)
 
     def create_component_collections(
         self,
-        Q: Q_type,
-        component_name: str = 'Jump translational diffusion',
-        component_display_name: str = 'Jump translational diffusion',
     ) -> list[ComponentCollection]:
         """
         Create ComponentCollection components for the diffusion model at given Q values.
 
-        Parameters
-        ----------
-        Q : Q_type
-            Scattering vector in 1/angstrom. Can be a single value or an array of values.
-        component_name : str, default='Jump translational diffusion'
-            Name of the Jump Diffusion Lorentzian component.
-        component_display_name : str, default='Jump translational diffusion'
-            Name of the Jump Diffusion Lorentzian component.
-
-        Raises
-        ------
-        TypeError
-            If component_display_name is not a string. If component_name is not a string.
+        TypeError If component_display_name is not a string. If component_name is not a string.
 
         Returns
         -------
         list[ComponentCollection]
             List of ComponentCollections with Jump Diffusion Lorentzian components.
         """
-        Q = _validate_and_convert_Q(Q)
-
-        if not isinstance(component_display_name, str):
-            raise TypeError('component_display_name must be a string.')
-
-        if not isinstance(component_name, str):
-            raise TypeError('component_name must be a string.')
+        Q = self.Q
+        if Q is None:
+            self._component_collections = []
+            return self._component_collections
 
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
@@ -314,8 +325,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             )
 
             lorentzian_component = Lorentzian(
-                name=component_name,
-                display_name=component_display_name,
+                name=self.lorentzian_name,
+                display_name=self.lorentzian_display_name,
                 unit=self.unit,
             )
 
@@ -343,6 +354,12 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
     ################################
     # Private methods
     ################################
+    def _on_Q_change(self) -> None:
+        """
+        Update the component collections when Q changes. This is called automatically when the Q
+        property is set. It regenerates the component collections based on the new Q values.
+        """
+        self._component_collections = self.create_component_collections()
 
     def _write_width_dependency_expression(self, Q: float) -> str:
         """
@@ -380,8 +397,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dependency map for the width.
         """
         return {
-            'D': self._diffusion_coefficient,
-            't': self._relaxation_time,
+            'D': self.diffusion_coefficient,
+            't': self.relaxation_time,
             'hbar': self._hbar,
             'angstrom': self._angstrom,
         }
@@ -421,7 +438,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             Dependency map for the area.
         """
         return {
-            'scale': self._scale,
+            'scale': self.scale,
         }
 
     ################################
@@ -439,6 +456,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """
         return (
             f'JumpTranslationalDiffusion(name={self.name}, display_name={self.display_name},\n '
-            f'    diffusion_coefficient={self._diffusion_coefficient}, \n'
-            f'    scale={self._scale})'
+            f'    diffusion_coefficient={self.diffusion_coefficient}, \n'
+            f'    scale={self.scale})'
         )
