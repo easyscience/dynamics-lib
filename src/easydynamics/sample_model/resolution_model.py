@@ -33,11 +33,11 @@ class ResolutionModel(ModelBase):
 
         Parameters
         ----------
-        display_name : str, default="MyResolutionModel"
+        display_name : str, default='MyResolutionModel'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             Unit of the model.
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
@@ -102,7 +102,7 @@ class ResolutionModel(ModelBase):
 
         Returns
         -------
-        "ResolutionModel"
+        'ResolutionModel'
             ResolutionModel created from the SampleModel.
 
         Raises
