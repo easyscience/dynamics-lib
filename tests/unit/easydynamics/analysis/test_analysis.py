@@ -612,6 +612,115 @@ class TestAnalysis:
         # and that we return the figure
         assert result is fake_fig
 
+    def test_chi2_to_dataset_returns_nan_for_unfitted_Q(self, analysis):
+        # WHEN THEN - no fit performed
+
+        # THEN
+        ds = analysis.chi2_to_dataset()
+
+        # EXPECT
+        assert isinstance(ds, sc.Dataset)
+        assert 'chi2' in ds
+        assert 'reduced_chi2' in ds
+        assert 'Q' in ds['chi2'].dims
+        assert 'Q' in ds['reduced_chi2'].dims
+        assert np.all(np.isnan(ds['chi2'].values))
+        assert np.all(np.isnan(ds['reduced_chi2'].values))
+
+    def test_chi2_to_dataset_after_fit(self, analysis):
+        # WHEN - mock fit_result on each Analysis1d
+        fake_chi2 = 3.5
+        fake_reduced_chi2 = 0.7
+        fake_fit_result = MagicMock()
+        fake_fit_result.chi2 = fake_chi2
+        fake_fit_result.reduced_chi2 = fake_reduced_chi2
+
+        for a in analysis.analysis_list:
+            a._fit_result = fake_fit_result
+
+        # THEN
+        ds = analysis.chi2_to_dataset()
+
+        # EXPECT
+        assert isinstance(ds, sc.Dataset)
+        np.testing.assert_array_equal(ds['chi2'].values, [fake_chi2] * len(analysis.analysis_list))
+        np.testing.assert_array_equal(
+            ds['reduced_chi2'].values, [fake_reduced_chi2] * len(analysis.analysis_list)
+        )
+
+    def test_chi2_to_dataset_partial_fit(self, analysis):
+        # WHEN - only fit Q_index=1
+        fake_fit_result = MagicMock()
+        fake_fit_result.chi2 = 5.0
+        fake_fit_result.reduced_chi2 = 1.0
+
+        analysis.analysis_list[1]._fit_result = fake_fit_result
+
+        # THEN
+        ds = analysis.chi2_to_dataset()
+
+        # EXPECT
+        assert np.isnan(ds['chi2'].values[0])
+        assert ds['chi2'].values[1] == pytest.approx(5.0)
+        assert np.isnan(ds['chi2'].values[2])
+
+    def test_plot_chi2_calls_plot_with_chi2_key(self, analysis):
+        # WHEN
+        fake_fig = object()
+        fake_chi2_var = object()
+        fake_dataset = MagicMock()
+        fake_dataset.__getitem__ = MagicMock(return_value=fake_chi2_var)
+
+        analysis.chi2_to_dataset = MagicMock(return_value=fake_dataset)
+
+        with patch('plopp.plot', return_value=fake_fig) as mock_plot:
+            # THEN
+            result = analysis.plot_chi2()
+
+        # EXPECT
+        mock_plot.assert_called_once()
+        args, kwargs = mock_plot.call_args
+        assert args[0] == {'chi2': fake_chi2_var}
+        assert kwargs['linestyle'] == {'chi2': 'none'}
+        assert kwargs['marker'] == {'chi2': 'o'}
+        assert kwargs['markerfacecolor'] == {'chi2': 'none'}
+        assert result is fake_fig
+
+    def test_plot_chi2_calls_plot_with_reduced_chi2_key(self, analysis):
+        # WHEN
+        fake_fig = object()
+        fake_reduced_chi2_var = object()
+        fake_dataset = MagicMock()
+        fake_dataset.__getitem__ = MagicMock(return_value=fake_reduced_chi2_var)
+
+        analysis.chi2_to_dataset = MagicMock(return_value=fake_dataset)
+
+        with patch('plopp.plot', return_value=fake_fig) as mock_plot:
+            # THEN
+            result = analysis.plot_chi2(reduced=True)
+
+        # EXPECT
+        mock_plot.assert_called_once()
+        args, kwargs = mock_plot.call_args
+        assert args[0] == {'reduced_chi2': fake_reduced_chi2_var}
+        assert kwargs['linestyle'] == {'reduced_chi2': 'none'}
+        assert result is fake_fig
+
+    def test_plot_chi2_user_kwargs_override_defaults(self, analysis):
+        # WHEN
+        fake_dataset = MagicMock()
+        fake_dataset.__getitem__ = MagicMock(return_value=object())
+        analysis.chi2_to_dataset = MagicMock(return_value=fake_dataset)
+
+        with patch('plopp.plot', return_value=object()) as mock_plot:
+            # THEN
+            analysis.plot_chi2(color='blue', marker={'chi2': 'x'})
+
+        # EXPECT
+        _, kwargs = mock_plot.call_args
+        assert kwargs['color'] == 'blue'
+        assert kwargs['marker'] == {'chi2': 'x'}
+
     def test_fix_and_free_energy_offset(self, analysis):
         # EXPECT
         offsets = analysis.instrument_model.get_energy_offset()

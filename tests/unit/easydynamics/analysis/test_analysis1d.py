@@ -192,6 +192,35 @@ class TestAnalysis1d:
         assert analysis1d._fit_result is fake_fit_result
         assert result is fake_fit_result
 
+    def test_fit_result_is_none_before_fit(self, analysis1d):
+        # WHEN THEN
+
+        # EXPECT
+        assert analysis1d.fit_result is None
+
+    def test_fit_result_is_set_after_fit(self, analysis1d):
+        # WHEN
+        fake_fit_result = object()
+        fake_fitter_instance = MagicMock()
+        fake_fitter_instance.fit.return_value = fake_fit_result
+
+        analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            return_value=(np.array([1, 2, 3]), np.array([1, 2, 3]), np.array([1, 1, 1]), None)
+        )
+        analysis1d._create_convolver = MagicMock(return_value='fake_convolver')
+        analysis1d.as_fit_function = MagicMock(return_value='fit_func')
+
+        with patch(
+            'easydynamics.analysis.analysis1d.EasyScienceFitter',
+            return_value=fake_fitter_instance,
+        ):
+            # THEN
+            result = analysis1d.fit()
+
+        # EXPECT
+        assert analysis1d.fit_result is fake_fit_result
+        assert result is analysis1d.fit_result
+
     def test_as_fit_function_calls_calculate(self, analysis1d):
         # WHEN
         expected = np.array([1.0, 2.0, 3.0])

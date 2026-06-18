@@ -127,6 +127,19 @@ class Analysis1d(AnalysisBase):
         self._Q_index = self._verify_Q_index(value)
         self._on_Q_index_changed()
 
+    @property
+    def fit_result(self) -> FitResults | None:
+        """
+        Get the fit result from the most recent fit.
+
+        Returns
+        -------
+        FitResults | None
+            The result of the most recent fit, or None if no fit has been performed.
+        """
+
+        return self._fit_result
+
     #############
     # Other methods
     #############

@@ -500,6 +500,70 @@ class Analysis(AnalysisBase):
 
         return ds
 
+    def chi2_to_dataset(self) -> sc.Dataset:
+        """
+        Creates a scipp dataset with chi-squared values from the fits.
+
+        Returns
+        -------
+        sc.Dataset
+            A dataset with dimensions "Q" containing chi2 and reduced_chi2 variables. Q indices
+            that have not been fitted are represented as NaN.
+        """
+
+        ds = sc.Dataset(coords={'Q': self.Q})
+        chi2_values = []
+        reduced_chi2_values = []
+        for analysis in self.analysis_list:
+            if analysis.fit_result is not None:
+                chi2_values.append(analysis.fit_result.chi2)
+                reduced_chi2_values.append(analysis.fit_result.reduced_chi2)
+            else:
+                chi2_values.append(np.nan)
+                reduced_chi2_values.append(np.nan)
+
+        ds['chi2'] = sc.Variable(dims=['Q'], values=np.asarray(chi2_values, dtype=float))
+        ds['reduced_chi2'] = sc.Variable(
+            dims=['Q'], values=np.asarray(reduced_chi2_values, dtype=float)
+        )
+
+        return ds
+
+    def plot_chi2(
+        self,
+        reduced: bool = False,
+        **kwargs: dict[str, Any],
+    ) -> InteractiveFigure:
+        """
+        Plot chi-squared as a function of Q.
+
+        Parameters
+        ----------
+        reduced : bool, default=False
+            If True, plot the reduced chi-squared instead of chi-squared.
+        **kwargs : dict[str, Any]
+            Additional keyword arguments passed to plopp.plot for customizing the plot (e.g.,
+            title, color).
+
+        Returns
+        -------
+        InteractiveFigure
+            A Plopp InteractiveFigure containing the plot of chi-squared vs Q.
+        """
+
+        ds = self.chi2_to_dataset()
+        key = 'reduced_chi2' if reduced else 'chi2'
+        plot_kwargs_defaults = {
+            'linestyle': {key: 'none'},
+            'marker': {key: 'o'},
+            'markerfacecolor': {key: 'none'},
+        }
+        plot_kwargs_defaults.update(kwargs)
+
+        import plopp as pp
+
+        return pp.plot({key: ds[key]}, **plot_kwargs_defaults)
+
     def plot_parameters(
         self,
         names: str | list[str] | None = None,
