@@ -443,13 +443,6 @@ class AnalysisBase(EasyDynamicsModelBase):
         -------
         list[Parameter]
             A list of parameters that are near their bounds.
-
-        Raises
-        ------
-        TypeError
-            If rtol or atol is not a float.
-        ValueError
-            If rtol or atol is negative.
         """
 
         self._verify_nonneg_float(rtol, 'rtol')

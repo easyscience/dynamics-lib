@@ -847,7 +847,9 @@ class TestAnalysis1d:
             assert analysis1d._evaluate_direct.call_count == 1
 
         # _evaluate_with_convolution called once for the sample component
-        analysis1d._evaluate_with_convolution.assert_called_once_with(sample_component, analysis1d._masked_energy)
+        analysis1d._evaluate_with_convolution.assert_called_once_with(
+            sample_component, analysis1d._masked_energy
+        )
 
         # Dataset content
         assert isinstance(dataset, sc.Dataset)

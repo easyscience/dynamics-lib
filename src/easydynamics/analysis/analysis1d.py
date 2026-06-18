@@ -366,8 +366,6 @@ class Analysis1d(AnalysisBase):
             If no data is available in the experiment to include in the DataGroup. If no Q values
             are available in the experiment to create the DataGroup. If Q_index is not set to
             create the DataGroup.
-        TypeError
-            If add_background is not a boolean. If include_components is not a boolean.
 
         Returns
         -------
@@ -515,9 +513,9 @@ class Analysis1d(AnalysisBase):
         """
         Evaluate sample components, applying convolution and detailed balance as appropriate.
 
-        Uses the pre-built convolver when provided (fit path, for performance). If no convolver
-        is given, creates a temporary one per call (plot path for individual components). Falls
-        back to direct evaluation with detailed balance if there is no resolution model.
+        Uses the pre-built convolver when provided (fit path, for performance). If no convolver is
+        given, creates a temporary one per call (plot path for individual components). Falls back
+        to direct evaluation with detailed balance if there is no resolution model.
 
         Parameters
         ----------

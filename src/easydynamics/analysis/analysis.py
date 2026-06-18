@@ -249,8 +249,6 @@ class Analysis(AnalysisBase):
             values available for plotting.
         RuntimeError
             If not in a Jupyter notebook environment.
-        TypeError
-            If plot_components or add_background is not True or False.
 
         Returns
         -------
@@ -348,9 +346,6 @@ class Analysis(AnalysisBase):
             If there is no data to include in the DataGroup, or if there are no Q values available
             for creating the DataGroup.
 
-        TypeError
-            If add_background is not True or False. If include_components is not True or False.
-
         Returns
         -------
         sc.DataGroup
@@ -401,6 +396,8 @@ class Analysis(AnalysisBase):
         ------
         UnitError
             If there are inconsistent units for the same parameter across different Q values.
+        ValueError
+            If duplicate parameter names exist for the same Q index.
 
         Returns
         -------
@@ -761,11 +758,6 @@ class Analysis(AnalysisBase):
         energy : sc.Variable | None, default=None
             The energy values to use for calculating the components. If None, uses the energy from
             the experiment.
-
-        Raises
-        ------
-        TypeError
-            If add_background is not True or False.
 
         Returns
         -------
