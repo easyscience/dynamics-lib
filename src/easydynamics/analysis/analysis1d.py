@@ -171,11 +171,17 @@ class Analysis1d(AnalysisBase):
             The calculated model prediction.
         """
 
-        sample_intensity = self._evaluate_sample(energy=energy)
-
-        background_intensity = self._evaluate_background(energy=energy)
-
-        return sample_intensity + background_intensity
+        Q_index = self._require_Q_index()
+        sample = self._evaluate_with_convolution(
+            self.sample_model.get_component_collection(Q_index),
+            energy,
+            convolver=self._convolver,
+        )
+        background = self._evaluate_direct(
+            self.instrument_model.background_model.get_component_collection(Q_index),
+            energy,
+        )
+        return sample + background
 
     def fit(self) -> FitResults:
         """
@@ -496,122 +502,27 @@ class Analysis1d(AnalysisBase):
     # Private methods: evaluation
     #############
 
-    def _evaluate_components(
+    def _evaluate_with_convolution(
         self,
         components: ComponentCollection | ModelComponent,
+        energy: sc.Variable | None,
         convolver: Convolution | None = None,
-        convolve: bool = True,
-        energy: sc.Variable | None = None,
-        apply_detailed_balance: bool = False,
     ) -> np.ndarray:
         """
-        Calculate the contribution of a set of components, optionally convolving with the
-        resolution.
+        Evaluate sample components, applying convolution and detailed balance as appropriate.
 
-        If convolve is True and a Convolution object is provided (for full model evaluation), we
-        use it to perform the convolution of the components with the resolution. If convolve is
-        True but no Convolution object is provided, create a new Convolution object for the given
-        components (for individual components). If convolve is False, evaluate the components
-        directly without convolution (for background).
+        Uses the pre-built convolver when provided (fit path, for performance). If no convolver
+        is given, creates a temporary one per call (plot path for individual components). Falls
+        back to direct evaluation with detailed balance if there is no resolution model.
 
         Parameters
         ----------
         components : ComponentCollection | ModelComponent
-            The components to evaluate.
+            The sample components to evaluate.
+        energy : sc.Variable | None
+            Energy grid to use. If None, uses the masked energy from the experiment.
         convolver : Convolution | None, default=None
-            An optional Convolution object to use for convolution. If None, a new Convolution
-            object will be created if convolve is True.
-        convolve : bool, default=True
-            Whether to perform convolution with the resolution.
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
-        apply_detailed_balance : bool, default=False
-            Whether to apply detailed balance correction.
-
-
-        Returns
-        -------
-        np.ndarray
-            The evaluated contribution of the components.
-        """
-
-        Q_index = self._require_Q_index()
-        if energy is None:
-            energy = self._masked_energy
-
-        energy_offset = self.instrument_model.get_energy_offset(Q_index)
-        energy_with_offset = self._calculate_energy_with_offset(
-            energy=energy,
-            energy_offset=energy_offset,
-        )
-
-        # If there are no components, return zero
-        if isinstance(components, ComponentCollection) and components.is_empty:
-            return np.zeros_like(energy.values)
-
-        # If a convolver is provided, we use it. This allows reusing the
-        # same convolver for multiple evaluations during fitting for
-        # performance reasons.
-        if convolver is not None:
-            return convolver.convolution()
-
-        # No convolution can happen for multiple reasons:
-        #   Case 1: convolve=False, used for evaluating background components, where we don't want
-        #       to convolve with the resolution. In this case, apply_detailed_balance is False,
-        #       and we evaluate the components without DBF regardles of the settings
-        #   Case 2: convolve=True but there is no resolution_model. In this case,
-        #       apply_detailed_balance is True. We apply DBF if temperature is provided and
-        #       the settings say to use detailed balance.
-
-        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
-        if not convolve or resolution.is_empty:
-            result_no_convolution = components.evaluate(energy_with_offset)
-            if (
-                apply_detailed_balance
-                and self.temperature is not None
-                and self.detailed_balance_settings.use_detailed_balance
-            ):
-                DBF = detailed_balance_factor(
-                    energy=energy_with_offset,
-                    temperature=self.temperature,
-                    divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
-                    energy_unit=self.unit,
-                )
-                result_no_convolution *= DBF
-            return result_no_convolution
-
-        # If no convolver is provided, we create a new one. This is for
-        # evaluating individual components for plotting, where
-        # performance is not important. We already handled the case of
-        # background components above, so we know that this is for sample components,
-        # where detailed balance settings should be applied.
-
-        conv = Convolution(
-            energy=energy,
-            sample_components=components,
-            resolution_components=resolution,
-            energy_offset=energy_offset,
-            convolution_settings=self.convolution_settings,
-            temperature=self.temperature,
-            detailed_balance_settings=self.detailed_balance_settings,
-        )
-        return conv.convolution()
-
-    def _evaluate_sample(
-        self,
-        energy: sc.Variable | None = None,
-    ) -> np.ndarray:
-        """
-        Evaluate the sample contribution for a given Q index.
-
-        Assumes that self._convolver is up to date.
-
-        Parameters
-        ----------
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
+            Pre-built Convolution to reuse. If None, a new one is created if needed.
 
         Returns
         -------
@@ -619,53 +530,57 @@ class Analysis1d(AnalysisBase):
             The evaluated sample contribution.
         """
         Q_index = self._require_Q_index()
-        components = self.sample_model.get_component_collection(Q_index=Q_index)
-        return self._evaluate_components(
-            components=components,
-            convolver=self._convolver,
-            convolve=True,
-            energy=energy,
-            apply_detailed_balance=True,
-        )
+        if energy is None:
+            energy = self._masked_energy
 
-    def _evaluate_sample_component(
+        if isinstance(components, ComponentCollection) and components.is_empty:
+            return np.zeros_like(energy.values)
+
+        if convolver is not None:
+            return convolver.convolution()
+
+        energy_offset = self.instrument_model.get_energy_offset(Q_index)
+        energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
+        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
+
+        if resolution.is_empty:
+            result = components.evaluate(energy_with_offset)
+            if (
+                self.temperature is not None
+                and self.detailed_balance_settings.use_detailed_balance
+            ):
+                result *= detailed_balance_factor(
+                    energy=energy_with_offset,
+                    temperature=self.temperature,
+                    divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
+                    energy_unit=self.unit,
+                )
+            return result
+
+        return Convolution(
+            energy=energy,
+            sample_components=components,
+            resolution_components=resolution,
+            energy_offset=energy_offset,
+            convolution_settings=self.convolution_settings,
+            temperature=self.temperature,
+            detailed_balance_settings=self.detailed_balance_settings,
+        ).convolution()
+
+    def _evaluate_direct(
         self,
-        component: ModelComponent,
-        energy: sc.Variable | None = None,
+        components: ComponentCollection | ModelComponent,
+        energy: sc.Variable | None,
     ) -> np.ndarray:
         """
-        Evaluate a single sample component for the chosen Q index.
+        Evaluate background components directly — no convolution, no detailed balance factor.
 
         Parameters
         ----------
-        component : ModelComponent
-            The sample component to evaluate.
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
-
-        Returns
-        -------
-        np.ndarray
-            The evaluated sample component contribution.
-        """
-        return self._evaluate_components(
-            components=component,
-            convolver=None,
-            convolve=True,
-            energy=energy,
-            apply_detailed_balance=True,
-        )
-
-    def _evaluate_background(self, energy: sc.Variable | None = None) -> np.ndarray:
-        """
-        Evaluate the background contribution for the chosen Q index.
-
-        Parameters
-        ----------
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
+        components : ComponentCollection | ModelComponent
+            The background components to evaluate.
+        energy : sc.Variable | None
+            Energy grid to use. If None, uses the masked energy from the experiment.
 
         Returns
         -------
@@ -673,46 +588,15 @@ class Analysis1d(AnalysisBase):
             The evaluated background contribution.
         """
         Q_index = self._require_Q_index()
-        background_components = self.instrument_model.background_model.get_component_collection(
-            Q_index=Q_index
-        )
-        return self._evaluate_components(
-            components=background_components,
-            convolver=None,
-            convolve=False,
-            energy=energy,
-            apply_detailed_balance=False,
-        )
+        if energy is None:
+            energy = self._masked_energy
 
-    def _evaluate_background_component(
-        self,
-        component: ModelComponent,
-        energy: sc.Variable | None = None,
-    ) -> np.ndarray:
-        """
-        Evaluate a single background component for the chosen Q index.
+        if isinstance(components, ComponentCollection) and components.is_empty:
+            return np.zeros_like(energy.values)
 
-        Parameters
-        ----------
-        component : ModelComponent
-            The background component to evaluate.
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
-
-        Returns
-        -------
-        np.ndarray
-            The evaluated background component contribution.
-        """
-
-        return self._evaluate_components(
-            components=component,
-            convolver=None,
-            convolve=False,
-            energy=energy,
-            apply_detailed_balance=False,
-        )
+        energy_offset = self.instrument_model.get_energy_offset(Q_index)
+        energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
+        return components.evaluate(energy_with_offset)
 
     def _create_convolver(
         self,
@@ -762,66 +646,6 @@ class Analysis1d(AnalysisBase):
     # Private methods: create scipp arrays for plotting
     #############
 
-    def _create_component_scipp_array(
-        self,
-        component: ModelComponent,
-        background: np.ndarray | None = None,
-        energy: sc.Variable | None = None,
-    ) -> sc.DataArray:
-        """
-        Create a scipp DataArray for a single component.
-
-        Adds the background if it is not None.
-
-        Parameters
-        ----------
-        component : ModelComponent
-            The component to evaluate.
-        background : np.ndarray | None, default=None
-            Optional background to add to the component.
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
-
-        Returns
-        -------
-        sc.DataArray
-            The model calculation of the component.
-        """
-
-        values = self._evaluate_sample_component(component=component, energy=energy)
-        if background is not None:
-            values += background
-        return self._to_scipp_array(values=values, energy=energy)
-
-    def _create_background_component_scipp_array(
-        self,
-        component: ModelComponent,
-        energy: sc.Variable | None = None,
-    ) -> sc.DataArray:
-        """
-        Create a scipp DataArray for a single background component.
-
-        Parameters
-        ----------
-        component : ModelComponent
-            The component to evaluate.
-        energy : sc.Variable | None, default=None
-            Optional energy grid to use for evaluation. If None, the energy grid from the
-            experiment is used.
-
-        Returns
-        -------
-        sc.DataArray
-            The model calculation of the component.
-        """
-
-        values = self._evaluate_background_component(
-            component=component,
-            energy=energy,
-        )
-        return self._to_scipp_array(values=values, energy=energy)
-
     def _create_model_array(self, energy: sc.Variable | None = None) -> sc.DataArray:
         """
         Create a scipp DataArray for the full sample model including background.
@@ -866,44 +690,47 @@ class Analysis1d(AnalysisBase):
         self,
         add_background: bool = True,
         energy: sc.Variable | None = None,
-    ) -> dict[str, sc.DataArray]:
+    ) -> sc.Dataset:
         """
         Create sc.DataArrays for all sample and background components.
 
         Parameters
         ----------
         add_background : bool, default=True
-            Whether to add background components.
+            Whether to add the background to each sample component.
         energy : sc.Variable | None, default=None
             Optional energy grid to use for evaluation. If None, the energy grid from the
             experiment is used.
 
         Returns
         -------
-        dict[str, sc.DataArray]
-            A dictionary of component names to their corresponding sc.DataArrays.
+        sc.Dataset
+            A Dataset of component names to their corresponding sc.DataArrays.
         """
-        scipp_arrays = {}
-        sample_components = self.sample_model.get_component_collection(Q_index=self.Q_index)
-
-        background_components = self.instrument_model.background_model.get_component_collection(
-            Q_index=self.Q_index
-        )
-
+        Q_index = self.Q_index
         if energy is None:
             energy = self._masked_energy
 
-        background = self._evaluate_background(energy=energy) if add_background else None
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
+        )
+        background_values = (
+            self._evaluate_direct(background_components, energy) if add_background else None
+        )
 
-        for component in sample_components:
-            scipp_arrays[component.display_name] = self._create_component_scipp_array(
-                component=component, background=background, energy=energy
-            )
+        result: dict[str, sc.DataArray] = {}
+        for component in self.sample_model.get_component_collection(Q_index=Q_index):
+            values = self._evaluate_with_convolution(component, energy)
+            if background_values is not None:
+                values = values + background_values
+            result[component.display_name] = self._to_scipp_array(values, energy)
+
         for component in background_components:
-            scipp_arrays[component.display_name] = self._create_background_component_scipp_array(
-                component=component, energy=energy
+            result[component.display_name] = self._to_scipp_array(
+                self._evaluate_direct(component, energy), energy
             )
-        return sc.Dataset(scipp_arrays)
+
+        return sc.Dataset(result)
 
     def _to_scipp_array(
         self,

@@ -121,15 +121,15 @@ class TestAnalysis1d:
         sample = np.array([1.0, 2.0, 3.0])
         background = np.array([0.5, 0.5, 0.5])
 
-        analysis1d._evaluate_sample = MagicMock(return_value=sample)
-        analysis1d._evaluate_background = MagicMock(return_value=background)
+        analysis1d._evaluate_with_convolution = MagicMock(return_value=sample)
+        analysis1d._evaluate_direct = MagicMock(return_value=background)
 
         result = analysis1d._calculate()
 
         np.testing.assert_array_equal(result, sample + background)
 
-        analysis1d._evaluate_sample.assert_called_once()
-        analysis1d._evaluate_background.assert_called_once()
+        analysis1d._evaluate_with_convolution.assert_called_once()
+        analysis1d._evaluate_direct.assert_called_once()
 
     def test_fit_raises_if_no_experiment(self, analysis1d):
         # WHEN THEN
@@ -533,61 +533,59 @@ class TestAnalysis1d:
     # Private methods: evaluation
     #############
 
-    def test_evaluate_components_no_components(self, analysis1d):
+    def test_evaluate_direct_no_components(self, analysis1d):
         # WHEN
         components = ComponentCollection()
 
         # THEN
-        result = analysis1d._evaluate_components(components=components)
+        result = analysis1d._evaluate_direct(components=components, energy=None)
 
         # EXPECT
         assert isinstance(result, np.ndarray)
         assert result.shape == (len(analysis1d.experiment.energy),)
         assert np.all(result == pytest.approx(0.0))
 
-    def test_evaluate_components_no_convolution(self, analysis1d):
+    def test_evaluate_direct(self, analysis1d):
         # WHEN
         components = Polynomial(coefficients=[1.0])
+
         # THEN
-        result = analysis1d._evaluate_components(
-            components=components, convolver=None, convolve=False
-        )
+        result = analysis1d._evaluate_direct(components=components, energy=None)
+
         # EXPECT
         assert np.array_equal(result, np.array([1.0, 1.0, 1.0]))
 
-    def test_evaluate_components_convolution(self, analysis1d):
+    def test_evaluate_with_convolution_uses_convolver(self, analysis1d):
         # WHEN
         components = Gaussian()
         convolver = MagicMock()
         convolver.convolution = MagicMock(return_value=np.array([1, 2, 3]))
 
         # THEN
-        result = analysis1d._evaluate_components(
-            components=components, convolver=convolver, convolve=True
+        result = analysis1d._evaluate_with_convolution(
+            components=components, energy=None, convolver=convolver
         )
 
         # EXPECT
         convolver.convolution.assert_called_once()
         assert result is convolver.convolution.return_value
 
-    def test_evaluate_components_empty_resolution(self, analysis1d):
+    def test_evaluate_with_convolution_no_resolution(self, analysis1d):
         # WHEN
         components = MagicMock()
         components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
 
         # The default analysis1d has no resolution model components, so
-        # no convolution should be applied even if convolve=True
+        # evaluate is called directly even though we want convolution.
 
         # THEN
-        result = analysis1d._evaluate_components(
-            components=components, convolver=None, convolve=True
-        )
+        result = analysis1d._evaluate_with_convolution(components=components, energy=None)
 
         # EXPECT
         components.evaluate.assert_called_once()
         assert np.array_equal(result, np.array([1.0, 2.0, 3.0]))
 
-    def test_evaluate_components_empty_resolution_DBF(self, analysis1d):
+    def test_evaluate_with_convolution_no_resolution_DBF(self, analysis1d):
         # WHEN
         components = MagicMock()
         components.evaluate = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
@@ -596,19 +594,16 @@ class TestAnalysis1d:
         analysis1d.sample_model.temperature = 10
         mock_dbf = np.array([10.0, 10.0, 10.0])
 
-        # The default analysis1d has no resolution model components, so
-        # no convolution should be applied even if convolve=True
+        # The default analysis1d has no resolution model components
 
         with patch(
             'easydynamics.analysis.analysis1d.detailed_balance_factor',
             return_value=mock_dbf,
         ) as dbf_mock:
-            # WHEN
-            result = analysis1d._evaluate_components(
+            # THEN
+            result = analysis1d._evaluate_with_convolution(
                 components=components,
-                convolver=None,
-                convolve=True,
-                apply_detailed_balance=True,
+                energy=None,
             )
 
         # EXPECT
@@ -620,18 +615,13 @@ class TestAnalysis1d:
         assert np.array_equal(result, expected)
 
     def test_evaluate_with_resolution(self, analysis1d):
-        # WHEN (set up the resolution model and create a component to
-        # evaluate)
+        # WHEN (set up the resolution model and create a component to evaluate)
         analysis1d.instrument_model.resolution_model.components = Gaussian()
         components = Gaussian()
 
         with patch('easydynamics.analysis.analysis1d.Convolution') as MockConvolution:
             # THEN
-            analysis1d._evaluate_components(
-                components=components,
-                convolver=None,
-                convolve=True,
-            )
+            analysis1d._evaluate_with_convolution(components=components, energy=None)
 
             # EXPECT
             # Ensure constructor called once
@@ -660,98 +650,6 @@ class TestAnalysis1d:
 
             # and check that convolution() was called
             MockConvolution.return_value.convolution.assert_called_once_with()
-
-    def test_evaluate_sample(self, analysis1d):
-        # WHEN
-        analysis1d.sample_model.get_component_collection = MagicMock()
-        analysis1d._evaluate_components = MagicMock()
-
-        # THEN
-        analysis1d._evaluate_sample()
-
-        # EXPECT
-
-        # The correct component collection is requested with the correct
-        # Q_index
-        analysis1d.sample_model.get_component_collection.assert_called_once_with(
-            Q_index=analysis1d.Q_index
-        )
-
-        # The components are evaluated with the correct convolver and
-        # convolve=True
-        analysis1d._evaluate_components.assert_called_once_with(
-            components=analysis1d.sample_model.get_component_collection(),
-            convolver=analysis1d._convolver,
-            convolve=True,
-            energy=None,
-            apply_detailed_balance=True,
-        )
-
-    def test_evaluate_sample_component(self, analysis1d):
-        # WHEN
-        analysis1d._evaluate_components = MagicMock()
-        component = object()
-
-        # THEN
-        analysis1d._evaluate_sample_component(component=component)
-
-        # EXPECT
-
-        # The components are evaluated with the correct convolver and
-        # convolve=True
-        analysis1d._evaluate_components.assert_called_once_with(
-            components=component,
-            convolver=None,
-            convolve=True,
-            energy=None,
-            apply_detailed_balance=True,
-        )
-
-    def test_evaluate_background(self, analysis1d):
-        # WHEN
-        analysis1d.instrument_model.background_model.get_component_collection = MagicMock()
-        analysis1d._evaluate_components = MagicMock()
-
-        # THEN
-        analysis1d._evaluate_background()
-
-        # EXPECT
-
-        # The correct component collection is requested with the correct
-        # Q_index
-        analysis1d.instrument_model.background_model.get_component_collection.assert_called_once_with(
-            Q_index=analysis1d.Q_index
-        )
-
-        # The components are evaluated with the correct convolver and
-        # convolve=True
-        analysis1d._evaluate_components.assert_called_once_with(
-            components=analysis1d.instrument_model.background_model.get_component_collection(),
-            convolver=None,
-            convolve=False,
-            energy=None,
-            apply_detailed_balance=False,
-        )
-
-    def test_evaluate_background_component(self, analysis1d):
-        # WHEN
-        analysis1d._evaluate_components = MagicMock()
-        component = object()
-
-        # THEN
-        analysis1d._evaluate_background_component(component=component)
-
-        # EXPECT
-
-        # The components are evaluated with the correct convolver and
-        # convolve=True
-        analysis1d._evaluate_components.assert_called_once_with(
-            components=component,
-            convolver=None,
-            convolve=False,
-            energy=None,
-            apply_detailed_balance=False,
-        )
 
     def test_create_convolver(self, analysis1d):
         # WHEN
@@ -843,88 +741,6 @@ class TestAnalysis1d:
         with pytest.raises(ValueError, match='Q_index must be set'):
             analysis1d._create_residuals_array()
 
-    @pytest.mark.parametrize(
-        'background',
-        [
-            None,
-            np.array([0.5, 0.5, 0.5]),
-        ],
-        ids=[
-            'No background',
-            'With background',
-        ],
-    )
-    def test_create_component_scipp_array(self, analysis1d, background):
-        """
-        Test that _create_component_scipp_array correctly evaluates
-        the component, adds the background and calls _to_scipp_array
-        with the correct values.
-        """
-        # WHEN
-
-        # Mock the functions that will be called.
-        analysis1d._evaluate_sample_component = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
-
-        analysis1d._to_scipp_array = MagicMock()
-
-        component = object()
-
-        # THEN
-        analysis1d._create_component_scipp_array(component=component, background=background)
-
-        # EXPECT
-        analysis1d._evaluate_sample_component.assert_called_once_with(
-            component=component, energy=None
-        )
-
-        expected_values = np.array([1.0, 2.0, 3.0])
-        if background is not None:
-            expected_values += background
-
-        analysis1d._to_scipp_array.assert_called_once()
-
-        # Extract the actual call
-        _, kwargs = analysis1d._to_scipp_array.call_args
-
-        np.testing.assert_array_equal(
-            kwargs['values'],
-            expected_values,
-        )
-
-    def test_create_background_component_scipp_array(self, analysis1d):
-        """Test that _create_background_component_scipp_array correctly
-        evaluates the component, adds the background and calls
-        _to_scipp_array with the correct values."""
-
-        # WHEN
-
-        # Mock the functions that will be called.
-        analysis1d._evaluate_background_component = MagicMock(
-            return_value=np.array([1.0, 2.0, 3.0])
-        )
-        analysis1d._to_scipp_array = MagicMock()
-
-        component = object()
-
-        # THEN
-        analysis1d._create_background_component_scipp_array(component=component)
-
-        # EXPECT
-        analysis1d._evaluate_background_component.assert_called_once_with(
-            component=component,
-            energy=None,
-        )
-
-        analysis1d._to_scipp_array.assert_called_once()
-
-        # Extract the actual call
-        _, kwargs = analysis1d._to_scipp_array.call_args
-
-        np.testing.assert_array_equal(
-            kwargs['values'],
-            np.array([1.0, 2.0, 3.0]),
-        )
-
     def test_create_model_array(self, analysis1d):
         """Test that _create_model_array correctly
         evaluates the full model and calls _to_scipp_array with the
@@ -996,65 +812,42 @@ class TestAnalysis1d:
             return_value=background_collection
         )
 
-        # ---- Background evaluation ----
+        # ---- Evaluation mocks ----
         background_value = np.array([11.0, 21.0, 31.0])
-        analysis1d._evaluate_background = MagicMock(return_value=background_value)
+        sample_value = np.array([1.0, 2.0, 3.0])
+
+        analysis1d._evaluate_direct = MagicMock(return_value=background_value)
+        analysis1d._evaluate_with_convolution = MagicMock(return_value=sample_value)
 
         # ---- Return scipp DataArrays ----
-        fake_sample_da = sc.DataArray(data=sc.array(dims=['energy'], values=[1.0, 2.0, 3.0]))
-
-        analysis1d._create_component_scipp_array = MagicMock(return_value=fake_sample_da)
-
-        fake_background_da = sc.DataArray(data=sc.array(dims=['energy'], values=[4.0, 5.0, 6.0]))
-
-        analysis1d._create_background_component_scipp_array = MagicMock(
-            return_value=fake_background_da
-        )
+        fake_da = sc.DataArray(data=sc.array(dims=['energy'], values=[1.0, 2.0, 3.0]))
+        analysis1d._to_scipp_array = MagicMock(return_value=fake_da)
 
         # THEN
         dataset = analysis1d._create_components_dataset_single_Q(add_background=add_background)
 
         # EXPECT
 
-        # The correct component collections are requested with the
-        # correct Q_index
+        # The correct component collections are requested with the correct Q_index
         analysis1d.sample_model.get_component_collection.assert_called_once_with(
             Q_index=analysis1d.Q_index
         )
-
         analysis1d.instrument_model.background_model.get_component_collection.assert_called_once_with(
             Q_index=analysis1d.Q_index
         )
 
-        # Background is evaluated if add_background=True, and not
-        # evaluated if False
+        # _evaluate_direct is called once for the background collection (for add_background),
+        # and once for the background component — if add_background=False only the component call.
         if add_background:
-            analysis1d._evaluate_background.assert_called_once()
-            expected_background = background_value
+            # First call: background_collection to get total background value
+            # Second call: background_component for its individual array
+            assert analysis1d._evaluate_direct.call_count == 2
         else:
-            analysis1d._evaluate_background.assert_not_called()
-            expected_background = None
+            # Only called for the background component
+            assert analysis1d._evaluate_direct.call_count == 1
 
-        # The sample component scipp array is created with the correct
-        # component and background
-        analysis1d._create_component_scipp_array.assert_called_once()
-        _, kwargs = analysis1d._create_component_scipp_array.call_args
-
-        assert kwargs['component'] is sample_component
-
-        if expected_background is None:
-            assert kwargs['background'] is None
-        else:
-            np.testing.assert_array_equal(
-                kwargs['background'],
-                expected_background,
-            )
-
-        # Background component creation
-        analysis1d._create_background_component_scipp_array.assert_called_once()
-        _, kwargs = analysis1d._create_background_component_scipp_array.call_args
-        assert kwargs['component'] is background_component
-        assert sc.identical(kwargs['energy'], analysis1d.energy)
+        # _evaluate_with_convolution called once for the sample component
+        analysis1d._evaluate_with_convolution.assert_called_once_with(sample_component, analysis1d._masked_energy)
 
         # Dataset content
         assert isinstance(dataset, sc.Dataset)
