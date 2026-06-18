@@ -279,14 +279,9 @@ class Analysis(AnalysisBase):
                 'No Q values available for plotting. Please check the experiment data.'
             )
 
-        if not isinstance(plot_components, bool):
-            raise TypeError('plot_components must be True or False.')
-
-        if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
-
-        if not isinstance(plot_residuals, bool):
-            raise TypeError('plot_residuals must be True or False.')
+        self._verify_bool(plot_components, 'plot_components')
+        self._verify_bool(add_background, 'add_background')
+        self._verify_bool(plot_residuals, 'plot_residuals')
 
         if energy is None:
             energy = self.energy
@@ -300,39 +295,8 @@ class Analysis(AnalysisBase):
             include_residuals=plot_residuals,
         )
 
-        plot_kwargs_defaults = {
-            'title': self.display_name,
-            'linestyle': {},
-            'marker': {},
-            'color': {},
-            'markerfacecolor': {},
-            'keep': 'energy',
-        }
-
-        for key in data_and_model:
-            if key == 'Data':
-                plot_kwargs_defaults['linestyle'][key] = 'none'
-                plot_kwargs_defaults['marker'][key] = 'o'
-                plot_kwargs_defaults['color'][key] = 'black'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            elif key == 'Model':
-                plot_kwargs_defaults['linestyle'][key] = '-'
-                plot_kwargs_defaults['marker'][key] = None
-                plot_kwargs_defaults['color'][key] = 'red'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            elif key == 'Residuals':
-                plot_kwargs_defaults['linestyle'][key] = 'none'
-                plot_kwargs_defaults['marker'][key] = 'o'
-                plot_kwargs_defaults['color'][key] = 'blue'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            else:
-                plot_kwargs_defaults['linestyle'][key] = '--'
-                plot_kwargs_defaults['marker'][key] = None
-
-        # Overwrite defaults with any user-provided kwargs
+        plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
+        plot_kwargs_defaults['keep'] = 'energy'
         plot_kwargs_defaults.update(kwargs)
 
         if plot_residuals:
@@ -401,14 +365,9 @@ class Analysis(AnalysisBase):
                 'No Q values available for creating DataGroup. Please check the experiment data.'
             )
 
-        if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
-
-        if not isinstance(include_components, bool):
-            raise TypeError('include_components must be True or False.')
-
-        if not isinstance(include_residuals, bool):
-            raise TypeError('include_residuals must be True or False.')
+        self._verify_bool(add_background, 'add_background')
+        self._verify_bool(include_components, 'include_components')
+        self._verify_bool(include_residuals, 'include_residuals')
 
         energy = self._verify_energy(energy)
 
@@ -809,8 +768,7 @@ class Analysis(AnalysisBase):
         sc.Dataset
             A scipp Dataset where each entry is a component of the model, with dimensions "Q".
         """
-        if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
+        self._verify_bool(add_background, 'add_background')
 
         if energy is None:
             energy = self.energy

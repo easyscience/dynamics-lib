@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from collections.abc import Iterable
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -266,7 +268,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         Returns
         -------
         sc.Variable | None
-            The energy values from the associated.
+            The energy values from the associated Experiment, if available, and None if not.
         """
 
         return self.experiment.energy
@@ -460,17 +462,8 @@ class AnalysisBase(EasyDynamicsModelBase):
             If rtol or atol is negative.
         """
 
-        if not isinstance(rtol, (int, float)):
-            raise TypeError(f'rtol must be a float. Got {type(rtol)}.')
-
-        if rtol < 0:
-            raise ValueError(f'rtol must be non-negative. Got {rtol}.')
-
-        if not isinstance(atol, (int, float)):
-            raise TypeError(f'atol must be a float. Got {type(atol)}.')
-
-        if atol < 0:
-            raise ValueError(f'atol must be non-negative. Got {atol}.')
+        self._verify_nonneg_float(rtol, 'rtol')
+        self._verify_nonneg_float(atol, 'atol')
 
         parameters = self.get_all_parameters()
         at_bounds = []
@@ -573,6 +566,53 @@ class AnalysisBase(EasyDynamicsModelBase):
             raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
         return energy
 
+    @staticmethod
+    def _verify_bool(value: object, name: str) -> None:
+        """Raise TypeError if value is not a bool."""
+        if not isinstance(value, bool):
+            raise TypeError(f'{name} must be True or False.')
+
+    @staticmethod
+    def _verify_nonneg_float(value: object, name: str) -> None:
+        """Raise TypeError/ValueError if value is not a non-negative number."""
+        if not isinstance(value, (int, float)):
+            raise TypeError(f'{name} must be a float. Got {type(value)}.')
+        if value < 0:
+            raise ValueError(f'{name} must be non-negative. Got {value}.')
+
+    def _build_plot_style_defaults(self, keys: Iterable[str]) -> dict:
+        """Build default plot style kwargs for the given DataGroup keys."""
+        linestyle: dict = {}
+        marker: dict = {}
+        color: dict = {}
+        markerfacecolor: dict = {}
+        for key in keys:
+            if key == 'Data':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'black'
+                markerfacecolor[key] = 'none'
+            elif key == 'Model':
+                linestyle[key] = '-'
+                marker[key] = None
+                color[key] = 'red'
+                markerfacecolor[key] = 'none'
+            elif key == 'Residuals':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'blue'
+                markerfacecolor[key] = 'none'
+            else:
+                linestyle[key] = '--'
+                marker[key] = None
+        return {
+            'title': self.display_name,
+            'linestyle': linestyle,
+            'marker': marker,
+            'color': color,
+            'markerfacecolor': markerfacecolor,
+        }
+
     #############
     # Dunder methods
     #############
@@ -587,6 +627,6 @@ class AnalysisBase(EasyDynamicsModelBase):
             A string representation of the Analysis.
         """
         return (
-            f' {self.__class__.__name__} (display_name={self.display_name}, '
+            f'{self.__class__.__name__} (display_name={self.display_name}, '
             f'unique_name={self.unique_name})'
         )

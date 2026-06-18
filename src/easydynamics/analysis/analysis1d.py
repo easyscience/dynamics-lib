@@ -309,38 +309,7 @@ class Analysis1d(AnalysisBase):
             include_residuals=plot_residuals,
         )
 
-        plot_kwargs_defaults = {
-            'title': self.display_name,
-            'linestyle': {},
-            'marker': {},
-            'color': {},
-            'markerfacecolor': {},
-        }
-
-        for key in data_and_model:
-            if key == 'Data':
-                plot_kwargs_defaults['linestyle'][key] = 'none'
-                plot_kwargs_defaults['marker'][key] = 'o'
-                plot_kwargs_defaults['color'][key] = 'black'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            elif key == 'Model':
-                plot_kwargs_defaults['linestyle'][key] = '-'
-                plot_kwargs_defaults['marker'][key] = None
-                plot_kwargs_defaults['color'][key] = 'red'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            elif key == 'Residuals':
-                plot_kwargs_defaults['linestyle'][key] = 'none'
-                plot_kwargs_defaults['marker'][key] = 'o'
-                plot_kwargs_defaults['color'][key] = 'blue'
-                plot_kwargs_defaults['markerfacecolor'][key] = 'none'
-
-            else:
-                plot_kwargs_defaults['linestyle'][key] = '--'
-                plot_kwargs_defaults['marker'][key] = None
-
-        # Overwrite defaults with any user-provided kwargs
+        plot_kwargs_defaults = self._build_plot_style_defaults(data_and_model)
         plot_kwargs_defaults.update(kwargs)
 
         if plot_residuals:
@@ -409,14 +378,9 @@ class Analysis1d(AnalysisBase):
                 'No Q values available for creating DataGroup. Please check the experiment data.'
             )
 
-        if not isinstance(add_background, bool):
-            raise TypeError('add_background must be True or False.')
-
-        if not isinstance(include_components, bool):
-            raise TypeError('include_components must be True or False.')
-
-        if not isinstance(include_residuals, bool):
-            raise TypeError('include_residuals must be True or False.')
+        self._verify_bool(add_background, 'add_background')
+        self._verify_bool(include_components, 'include_components')
+        self._verify_bool(include_residuals, 'include_residuals')
 
         if self.Q_index is None:
             raise ValueError('Q_index must be set to create DataGroup.')
