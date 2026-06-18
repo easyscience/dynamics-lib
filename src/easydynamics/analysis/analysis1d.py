@@ -424,6 +424,10 @@ class Analysis1d(AnalysisBase):
         """Free the energy offset parameter for the current Q index."""
         self.instrument_model.free_energy_offset(Q_index=self._require_Q_index())
 
+    def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
+        """Refresh the pre-built Convolution object for the current Q index."""
+        self._convolver = self._create_convolver(energy=energy)
+
     #############
     # Private methods: small utilities
     #############

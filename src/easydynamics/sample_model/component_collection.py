@@ -106,6 +106,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             unique_name=unique_name,
         )
 
+        self._warn_if_duplicate_names()
+
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
@@ -196,6 +198,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             self.extend(component)
         else:
             self.append(component)
+        self._warn_if_duplicate_names()
 
     def list_component_names(self) -> list[str]:
         """
@@ -335,6 +338,27 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         """Free all fixed parameters in the model."""
         for param in self.get_fittable_parameters():
             param.fixed = False
+
+    # ------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------
+
+    def _warn_if_duplicate_names(self) -> None:
+        """Warn if any two components share the same name."""
+        names = [c.name for c in self]
+        seen: set[str] = set()
+        dups: set[str] = set()
+        for name in names:
+            if name in seen:
+                dups.add(name)
+            seen.add(name)
+        if dups:
+            warnings.warn(
+                f'Duplicate component names in ComponentCollection: {sorted(dups)}. '
+                'Components with the same name will produce duplicate parameter names.',
+                UserWarning,
+                stacklevel=3,
+            )
 
     # ------------------------------------------------------------------
     # Dunder methods

@@ -532,6 +532,15 @@ class TestAnalysis:
             assert parameter_name in parameters_dataset
             assert 'Q' in parameters_dataset[parameter_name].dims
 
+    def test_parameters_to_dataset_raises_on_duplicate_names(self, analysis):
+        # Add a second Gaussian with the same parameter names as the first
+        analysis.sample_model.append_component(
+            Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
+        )
+
+        with pytest.raises(ValueError, match='Duplicate parameter names'):
+            analysis.parameters_to_dataset()
+
     @pytest.mark.parametrize(
         'parameter_names',
         [
@@ -750,7 +759,7 @@ class TestAnalysis:
             IndexError,
             match='must be a valid index',
         ):
-            analysis._fit_single_Q(Q_index=3)
+            analysis.fit(Q_index=3)
 
     def test_fit_all_Q_independently(self, analysis):
         # WHEN

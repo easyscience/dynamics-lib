@@ -411,12 +411,12 @@ class Analysis(AnalysisBase):
 
         ds = sc.Dataset(coords={'Q': self.Q})
 
-        # Collect all parameter names
-        all_names = {
+        # Collect all parameter names in first-seen order
+        all_names = dict.fromkeys(
             param.name
             for analysis in self.analysis_list
             for param in analysis.get_all_parameters()
-        }
+        )
 
         # Storage
         values = {name: [] for name in all_names}
@@ -424,7 +424,15 @@ class Analysis(AnalysisBase):
         units = {}
 
         for analysis in self.analysis_list:
-            pars = {p.name: p for p in analysis.get_all_parameters()}
+            all_params = analysis.get_all_parameters()
+            param_names = [p.name for p in all_params]
+            if len(param_names) != len(set(param_names)):
+                dups = sorted({n for n in param_names if param_names.count(n) > 1})
+                raise ValueError(
+                    f'Duplicate parameter names at Q_index {analysis.Q_index}: {dups}. '
+                    'Rename components so all parameters have unique names.'
+                )
+            pars = {p.name: p for p in all_params}
 
             for name in all_names:
                 if name in pars:
@@ -611,7 +619,7 @@ class Analysis(AnalysisBase):
         for Q_index in range(len(self.Q)):
             analysis = Analysis1d(
                 display_name=f'{self.display_name}_Q{Q_index}',
-                unique_name=(f'{self.unique_name}_Q{Q_index}'),
+                unique_name=f'{self.unique_name}_Q{Q_index}',
                 experiment=self.experiment,
                 sample_model=self.sample_model,
                 instrument_model=self.instrument_model,
@@ -640,8 +648,6 @@ class Analysis(AnalysisBase):
         FitResults
             The results of the fit for the specified Q index.
         """
-
-        Q_index = self._verify_Q_index(Q_index)
 
         return self.analysis_list[Q_index].fit()
 
@@ -679,9 +685,7 @@ class Analysis(AnalysisBase):
             ws.append(weight)
 
             # Make sure the convolver is up to date for this Q index
-            analysis1d._convolver = analysis1d._create_convolver(  # noqa: SLF001
-                energy=x
-            )
+            analysis1d.refresh_convolver(energy=x)
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,

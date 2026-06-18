@@ -105,17 +105,7 @@ class AnalysisBase(EasyDynamicsModelBase):
                 'convolution_settings must be an instance of ConvolutionSettings or None.'
             )
 
-        if extra_parameters is not None:
-            if isinstance(extra_parameters, Parameter):
-                self._extra_parameters = [extra_parameters]
-            elif isinstance(extra_parameters, list) and all(
-                isinstance(p, Parameter) for p in extra_parameters
-            ):
-                self._extra_parameters = extra_parameters
-            else:
-                raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
-        else:
-            self._extra_parameters = []
+        self.extra_parameters = extra_parameters
 
         if detailed_balance_settings is None:
             self._detailed_balance_settings = DetailedBalanceSettings()
