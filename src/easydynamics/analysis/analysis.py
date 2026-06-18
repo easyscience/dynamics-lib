@@ -66,9 +66,8 @@ class Analysis(AnalysisBase):
             parameters are added.
         """
 
-        # Avoid triggering updates before the object is fully
-        # initialized
-        self._call_updaters = False
+        self._analysis_list: list[Analysis1d] = []
+        self._analysis_list_is_dirty = True
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -79,13 +78,6 @@ class Analysis(AnalysisBase):
             detailed_balance_settings=detailed_balance_settings,
             extra_parameters=extra_parameters,
         )
-
-        self._analysis_list = []
-        if self.Q is not None:
-            self._create_analysis_list()
-
-        # Now we can allow updates to trigger recalculations
-        self._call_updaters = True
 
     #############
     # Properties
@@ -101,6 +93,7 @@ class Analysis(AnalysisBase):
         list[Analysis1d]
             A list of Analysis1d objects, one for each Q index.
         """
+        self._ensure_analysis_list_current()
         return self._analysis_list
 
     @analysis_list.setter
@@ -567,45 +560,37 @@ class Analysis(AnalysisBase):
     def _on_experiment_changed(self) -> None:
         """
         Update the Q values in the sample and instrument models when the experiment changes.
-
-        Also update all the Analysis1d objects with the new experiment.
         """
-        if self._call_updaters:
-            super()._on_experiment_changed()
-            for analysis in self.analysis_list:
-                analysis.experiment = self.experiment
+        super()._on_experiment_changed()
+        self._analysis_list_is_dirty = True
 
     def _on_sample_model_changed(self) -> None:
         """
         Update the Q values in the sample model when the sample model changes.
-
-        Also update all the Analysis1d objects with the new sample model.
         """
-        if self._call_updaters:
-            super()._on_sample_model_changed()
-            for analysis in self.analysis_list:
-                analysis.sample_model = self.sample_model
+        super()._on_sample_model_changed()
+        self._analysis_list_is_dirty = True
 
     def _on_instrument_model_changed(self) -> None:
         """
         Update the Q values in the instrument model when the instrument model changes.
-
-        Also update all the Analysis1d objects with the new instrument model.
         """
-        if self._call_updaters:
-            super()._on_instrument_model_changed()
-            for analysis in self.analysis_list:
-                analysis.instrument_model = self.instrument_model
+        super()._on_instrument_model_changed()
+        self._analysis_list_is_dirty = True
 
     def _on_convolution_settings_changed(self) -> None:
         """
-        Update the convolution settings in all Analysis1d objects when the convolution settings
-        change.
+        Update the convolution settings when they change.
         """
-        if self._call_updaters:
-            super()._on_convolution_settings_changed()
-            for analysis1d in self.analysis_list:
-                analysis1d.convolution_settings = self.convolution_settings
+        super()._on_convolution_settings_changed()
+        self._analysis_list_is_dirty = True
+
+    def _ensure_analysis_list_current(self) -> None:
+        """Rebuild the analysis list if any dependency has changed since it was last built."""
+        if self._analysis_list_is_dirty:
+            if self.Q is not None:
+                self._create_analysis_list()
+            self._analysis_list_is_dirty = False
 
     def _create_analysis_list(self) -> None:
         """

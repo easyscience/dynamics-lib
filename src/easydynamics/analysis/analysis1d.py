@@ -91,10 +91,8 @@ class Analysis1d(AnalysisBase):
             self._masked_energy = None
 
         self._fit_result = None
-        if self._Q_index is not None:
-            self._convolver = self._create_convolver()
-        else:
-            self._convolver = None
+        self._convolver = None
+        self._convolver_is_dirty = True
 
     #############
     # Properties
@@ -150,6 +148,7 @@ class Analysis1d(AnalysisBase):
         """
         energy = self._verify_energy(energy)
         self._convolver = self._create_convolver(energy=energy)
+        self._convolver_is_dirty = True
 
         return self._calculate(energy=energy)
 
@@ -203,8 +202,7 @@ class Analysis1d(AnalysisBase):
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
 
-        # Create convolver once to reuse during fitting
-        self._convolver = self._create_convolver()
+        self._ensure_convolver_current()
 
         fitter = EasyScienceFitter(
             fit_object=self,
@@ -454,12 +452,38 @@ class Analysis1d(AnalysisBase):
         """
         Handle changes to the Q index.
 
-        This method is called whenever the Q index is changed. It updates the Convolution object
-        for the new Q index and the masked energy from the experiment for the new Q index.
+        This method is called whenever the Q index is changed. It updates the masked energy from
+        the experiment for the new Q index and marks the convolver as dirty.
         """
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
-        self._convolver = self._create_convolver()
+        self._convolver_is_dirty = True
+
+    def _on_experiment_changed(self) -> None:
+        """Mark the convolver as dirty when the experiment changes."""
+        super()._on_experiment_changed()
+        self._convolver_is_dirty = True
+
+    def _on_sample_model_changed(self) -> None:
+        """Mark the convolver as dirty when the sample model changes."""
+        super()._on_sample_model_changed()
+        self._convolver_is_dirty = True
+
+    def _on_instrument_model_changed(self) -> None:
+        """Mark the convolver as dirty when the instrument model changes."""
+        super()._on_instrument_model_changed()
+        self._convolver_is_dirty = True
+
+    def _on_convolution_settings_changed(self) -> None:
+        """Mark the convolver as dirty when the convolution settings change."""
+        super()._on_convolution_settings_changed()
+        self._convolver_is_dirty = True
+
+    def _ensure_convolver_current(self) -> None:
+        """Rebuild the convolver if any dependency has changed since it was last built."""
+        if self._convolver_is_dirty:
+            self._convolver = self._create_convolver()
+            self._convolver_is_dirty = False
 
     def _calculate_energy_with_offset(
         self,

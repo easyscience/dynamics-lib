@@ -277,6 +277,8 @@ class TestInstrumentModel:
         new_unit = 'eV'
 
         # THEN
+        # Ensure energy offsets are built before mocking
+        instrument_model._ensure_energy_offsets_current()
         # Mock downstream convert_unit calls
         instrument_model._background_model.convert_unit = MagicMock()
         instrument_model._resolution_model.convert_unit = MagicMock()
@@ -432,14 +434,13 @@ class TestInstrumentModel:
 
     def test_Q_setter(self, instrument_model_without_Q):
         # WHEN
-        instrument_model_without_Q._generate_energy_offsets = MagicMock()
         first_new_Q = np.array([1.0, 2.0, 3.0])
 
         # THEN
         instrument_model_without_Q.Q = first_new_Q
 
         # EXPECT
-        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        assert instrument_model_without_Q._energy_offsets_is_dirty is True
         np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
         np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
 
@@ -455,17 +456,16 @@ class TestInstrumentModel:
         instrument_model_without_Q.Q = new_Q
 
         # EXPECT
-        # No new calls to _generate_energy_offsets, and Q values remain unchanged
-        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        # Q values remain unchanged
         np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
         np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
 
-        # THEN
+        # THEN - set Q to an equivalent scipp Variable; values match so should be accepted
         new_Q = sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom')
+        instrument_model_without_Q.Q = new_Q
 
-        # EXPECT
-        # No new calls to _generate_energy_offsets, and Q values remain unchanged
-        instrument_model_without_Q._generate_energy_offsets.assert_called_once()
+        # EXPECT - Q propagated to child models, offsets marked dirty again
+        assert instrument_model_without_Q._energy_offsets_is_dirty is True
         np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
         np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
 

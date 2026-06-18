@@ -455,13 +455,13 @@ class TestAnalysis1d:
 
     def test_on_Q_index_changed(self, analysis1d):
         # WHEN
-        analysis1d._create_convolver = MagicMock()
+        analysis1d._convolver_is_dirty = False
 
         # THEN
         analysis1d._on_Q_index_changed()
 
         # EXPECT
-        analysis1d._create_convolver.assert_called_once()
+        assert analysis1d._convolver_is_dirty is True
 
     def test_verify_energy(self, analysis1d):
         # WHEN

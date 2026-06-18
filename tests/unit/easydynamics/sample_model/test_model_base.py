@@ -72,6 +72,7 @@ class TestModelBase:
         collection2.evaluate.return_value = np.array([4.0, 5.0, 6.0])
 
         model_base._component_collections = [collection1, collection2]
+        model_base._component_collections_is_dirty = False
 
         # THEN
         result = model_base.evaluate(x)
@@ -88,6 +89,7 @@ class TestModelBase:
         x = np.array([0.0, 1.0, 2.0])
 
         model_base._component_collections = []
+        model_base._component_collections_is_dirty = False
 
         # THEN / EXPECT
         with pytest.raises(ValueError, match='No components'):

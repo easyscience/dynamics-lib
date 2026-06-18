@@ -68,10 +68,10 @@ class ModelBase(EasyDynamicsModelBase):
             )
 
         self._components = ComponentCollection()
+        self._component_collections: list[ComponentCollection] = []
+        self._component_collections_is_dirty = True
         if isinstance(components, (ModelComponent, ComponentCollection)):
             self.append_component(components)
-
-        self._generate_component_collections()
 
     def evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
@@ -98,11 +98,9 @@ class ModelBase(EasyDynamicsModelBase):
             the list will match the number of Q values in the model.
         """
 
+        self._ensure_component_collections_current()
         if not self._component_collections:
-            raise ValueError(
-                'No components in the model to evaluate. '
-                'Run generate_component_collections() first'
-            )
+            raise ValueError('No components in the model to evaluate.')
         return [collection.evaluate(x) for collection in self._component_collections]
 
     # ------------------------------------------------------------------
@@ -318,6 +316,7 @@ class ModelBase(EasyDynamicsModelBase):
             ModelBase.
         """
 
+        self._ensure_component_collections_current()
         if Q_index is None:
             all_vars = [
                 var
@@ -356,6 +355,7 @@ class ModelBase(EasyDynamicsModelBase):
         ComponentCollection
             The ComponentCollection at the.
         """
+        self._ensure_component_collections_current()
         if not isinstance(Q_index, int):
             raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
         if Q_index < 0 or Q_index >= len(self._component_collections):
@@ -367,12 +367,21 @@ class ModelBase(EasyDynamicsModelBase):
 
     def normalize_area(self) -> None:
         """Normalize the area of the model across all Q values."""
+        self._ensure_component_collections_current()
         for collection in self._component_collections:
             collection.normalize_area()
 
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
+
+    def _ensure_component_collections_current(self) -> None:
+        """
+        Rebuild component collections if any dependency has changed since they were last built.
+        """
+        if self._component_collections_is_dirty:
+            self._generate_component_collections()
+            self._component_collections_is_dirty = False
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
@@ -387,11 +396,11 @@ class ModelBase(EasyDynamicsModelBase):
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     def _on_components_change(self) -> None:
         """Handle changes to the components."""
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     # ------------------------------------------------------------------
     # dunder methods

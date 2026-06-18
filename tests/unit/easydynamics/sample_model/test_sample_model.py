@@ -389,6 +389,7 @@ class TestSampleModel:
         collection2.evaluate.return_value = np.array([4.0, 5.0, 6.0])
 
         sample_model._component_collections = [collection1, collection2]
+        sample_model._component_collections_is_dirty = False
 
         with patch('easydynamics.sample_model.sample_model.detailed_balance_factor') as mock_dbf:
             mock_dbf.return_value = np.array([10.0, 10.0, 10.0])  # simplified DBF
@@ -436,6 +437,7 @@ class TestSampleModel:
         collection2.evaluate.return_value = np.array([4.0, 5.0, 6.0])
 
         sample_model._component_collections = [collection1, collection2]
+        sample_model._component_collections_is_dirty = False
 
         sample_model.temperature = temperature
         sample_model.use_detailed_balance = use_detailed_balance
