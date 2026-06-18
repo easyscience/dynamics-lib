@@ -116,6 +116,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         # When upsample_factor>1, we evaluate on this grid and
         # interpolate back to the original values at the end
         self._energy_grid = self._create_energy_grid()
+        self._convolution_settings.convolution_plan_is_valid = True
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -179,30 +180,13 @@ class NumericalConvolutionBase(ConvolutionBase):
     @upsample_factor.setter
     def upsample_factor(self, factor: Numeric | None) -> None:
         """
-        Set the upsample factor and recreate the dense grid.
+        Set the upsample factor.
 
         Parameters
         ----------
         factor : Numeric | None
             The new upsample factor.
-
-        Raises
-        ------
-        TypeError
-            If factor is not a number or None.
-        ValueError
-            If factor is not greater than 1.
         """
-        if factor is None:
-            self.convolution_settings.upsample_factor = factor
-            return
-
-        if not isinstance(factor, Numeric):
-            raise TypeError('Upsample factor must be a numerical value or None.')
-        factor = float(factor)
-        if factor <= 1.0:
-            raise ValueError('Upsample factor must be greater than 1.')
-
         self.convolution_settings.upsample_factor = factor
 
     @property
@@ -224,7 +208,7 @@ class NumericalConvolutionBase(ConvolutionBase):
     @extension_factor.setter
     def extension_factor(self, factor: Numeric) -> None:
         """
-        Set the extension factor and recreate the dense grid.
+        Set the extension factor.
 
         The extension factor determines how much the energy range is extended on both sides before
         convolution. 0.2 means extending by 20% of the original energy span on each side.
@@ -233,21 +217,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         ----------
         factor : Numeric
             The new extension factor.
-
-        Raises
-        ------
-        TypeError
-            If factor is not a number.
-        ValueError
-            If factor is negative.
         """
-
-        if not isinstance(factor, Numeric):
-            raise TypeError('Extension factor must be a number.')
-        if factor < 0.0:
-            raise ValueError('Extension factor must be non-negative.')
-
-        self.convolution_settings.extension_factor = float(factor)
+        self.convolution_settings.extension_factor = factor
 
     @property
     def temperature(self) -> Parameter | None:
@@ -397,16 +368,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        energy_grid = EnergyGrid(
+        return EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
-        self._energy_grid = energy_grid
-        self.convolution_settings.convolution_plan_is_valid = True
-        return energy_grid
 
     def _check_width_thresholds(
         self,

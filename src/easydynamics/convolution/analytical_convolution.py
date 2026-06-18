@@ -4,8 +4,6 @@
 from typing import ClassVar
 
 import numpy as np
-import scipp as sc
-from easyscience.variable import Parameter
 from scipy.special import voigt_profile
 
 from easydynamics.convolution.convolution_base import ConvolutionBase
@@ -15,7 +13,6 @@ from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.utils import Numeric
 
 
 class AnalyticalConvolution(ConvolutionBase):
@@ -36,46 +33,6 @@ class AnalyticalConvolution(ConvolutionBase):
         ('Lorentzian', 'Voigt'): '_convolute_lorentzian_voigt',
         ('Voigt', 'Voigt'): '_convolute_voigt_voigt',
     }
-
-    def __init__(
-        self,
-        energy: np.ndarray | sc.Variable,
-        unit: str | sc.Unit = 'meV',
-        sample_components: ComponentCollection | ModelComponent | None = None,
-        resolution_components: ComponentCollection | ModelComponent | None = None,
-        energy_offset: Numeric | Parameter = 0.0,
-        display_name: str | None = 'MyConvolution',
-        unique_name: str | None = None,
-    ) -> None:
-        """
-        Initialize an AnalyticalConvolution.
-
-        Parameters
-        ----------
-        energy : np.ndarray | sc.Variable
-            1D array of energy values where the convolution is evaluated.
-        unit : str | sc.Unit, default='meV'
-            The unit of the energy.
-        sample_components : ComponentCollection | ModelComponent | None, default=None
-            The sample model to be convolved.
-        resolution_components : ComponentCollection | ModelComponent | None, default=None
-            The resolution model to convolve with.
-        energy_offset : Numeric | Parameter, default=0.0
-            An offset to shift the energy values by.
-        display_name : str | None, default='MyConvolution'
-            Display name of the model.
-        unique_name : str | None, default=None
-            Unique name of the model. If None, a unique name will be generated.
-        """
-        super().__init__(
-            energy=energy,
-            unit=unit,
-            sample_components=sample_components,
-            resolution_components=resolution_components,
-            energy_offset=energy_offset,
-            display_name=display_name,
-            unique_name=unique_name,
-        )
 
     def convolution(
         self,

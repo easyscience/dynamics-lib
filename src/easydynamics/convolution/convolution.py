@@ -38,7 +38,6 @@ class Convolution(NumericalConvolutionBase):
     # When these attributes are changed, the convolution plan
     # needs to be rebuilt
     _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
-        'energy',
         '_energy',
         '_energy_grid',
         '_sample_components',
@@ -180,26 +179,13 @@ class Convolution(NumericalConvolutionBase):
         Raises
         ------
         TypeError
-            If either component is not a ModelComponent, or if the resolution component is a
-            DeltaFunction.
+            If the resolution component is a DeltaFunction.
 
         Returns
         -------
         bool
             True if the component pair can be handled analytically, False otherwise.
         """
-
-        if not isinstance(sample_component, ModelComponent):
-            raise TypeError(
-                f'`sample_component` is an instance of {type(sample_component).__name__}, \
-                but must be a ModelComponent.'
-            )
-
-        if not isinstance(resolution_component, ModelComponent):
-            raise TypeError(
-                f'`resolution_component` is an instance of {type(resolution_component).__name__}, \
-                    but must be a ModelComponent.'
-            )
 
         if isinstance(resolution_component, DeltaFunction):
             raise TypeError(

@@ -392,40 +392,6 @@ class TestConvolution:
             )
 
     @pytest.mark.parametrize(
-        'sample_component,resolution_component',
-        [
-            (
-                'NotAModelComponent',
-                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
-            ),
-            (
-                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
-                'NotAModelComponent',
-            ),
-        ],
-        ids=['invalid_sample_component', 'invalid_resolution_component'],
-    )
-    def test_check_if_pair_is_analytic_raises_with_invalid_types(
-        self, default_convolution, sample_component, resolution_component
-    ):
-        """
-        Test that _check_if_pair_is_analytic raises TypeError when given
-        invalid component types.
-        """
-        # WHEN
-        conv = default_convolution
-
-        # THEN EXPECT
-        with pytest.raises(
-            TypeError,
-            match='must be a ModelComponent',
-        ):
-            conv._check_if_pair_is_analytic(
-                sample_component=sample_component,
-                resolution_component=resolution_component,
-            )
-
-    @pytest.mark.parametrize(
         'analytical_component',
         [True, False],
         ids=['with_analytical', 'without_analytical'],
