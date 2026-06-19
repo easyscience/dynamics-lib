@@ -981,6 +981,38 @@ class TestAnalysis1d:
         # (no data loaded, so rebin would raise from experiment, just test the branch)
         assert analysis1d._masked_energy is None
 
+    def test_on_sample_model_changed_marks_convolver_dirty(self, analysis1d):
+        # WHEN - clear the dirty flag first
+        analysis1d._convolver_is_dirty = False
+
+        # THEN - replace the sample model via the public setter
+        analysis1d.sample_model = SampleModel(components=Gaussian(name='NewGaussian'))
+
+        # EXPECT
+        assert analysis1d._convolver_is_dirty is True
+
+    def test_on_instrument_model_changed_marks_convolver_dirty(self, analysis1d):
+        # WHEN - clear the dirty flag first
+        analysis1d._convolver_is_dirty = False
+
+        # THEN - replace the instrument model via the public setter
+        analysis1d.instrument_model = InstrumentModel()
+
+        # EXPECT
+        assert analysis1d._convolver_is_dirty is True
+
+    def test_evaluate_with_convolution_returns_zeros_for_empty_collection(self, analysis1d):
+        # WHEN
+        empty_collection = ComponentCollection()
+        energy = analysis1d._masked_energy
+
+        # THEN
+        result = analysis1d._evaluate_with_convolution(empty_collection, energy)
+
+        # EXPECT
+        assert result.shape == energy.values.shape
+        np.testing.assert_array_equal(result, 0.0)
+
     def test_fit_marks_convolver_dirty_when_resolution_model_components_change(self, analysis1d):
         """Issue #68: fit() should detect resolution_model component changes."""
         # WHEN - simulate state after a previous fit

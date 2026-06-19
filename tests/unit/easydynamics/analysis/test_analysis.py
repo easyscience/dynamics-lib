@@ -923,6 +923,22 @@ class TestAnalysis:
         assert components_dataset.sizes['Q'] == 1
         assert components_dataset.coords['Q'].ndim == 1
 
+    def test_ensure_analysis_list_current_clears_dirty_when_Q_is_none(self):
+        # An Analysis with no experiment has Q=None; _ensure_analysis_list_current should still
+        # clear the dirty flag without attempting to build the list.
+
+        # WHEN
+        analysis = Analysis(display_name='NoQ')
+        assert analysis._analysis_list_is_dirty is True
+        assert analysis.Q is None
+
+        # THEN
+        result = analysis.analysis_list
+
+        # EXPECT - dirty flag cleared, list stays empty
+        assert analysis._analysis_list_is_dirty is False
+        assert result == []
+
     def test_rebin_marks_analysis_list_dirty(self, analysis):
         # WHEN - force build of analysis_list so it is no longer dirty
         _ = analysis.analysis_list
