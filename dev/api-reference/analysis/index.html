@@ -3765,9 +3765,9 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Rebin the experiment data along specified dimensions and update the analysis.</p>
-<p>If the number of Q values would change, <code>confirm=True</code> is required. This clears Q from
-<code>sample_model</code> and <code>instrument_model</code> (including resolution and background sub-models)
-so they can accept the new Q dimension when the analysis list is next rebuilt.</p>
+<p>If Q values change (in count or magnitude), <code>confirm=True</code> is required. This clears Q
+from <code>sample_model</code> and <code>instrument_model</code> (including resolution and background
+sub-models) so they can accept the new Q values when the analysis list is next rebuilt.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3813,8 +3813,8 @@ so they can accept the new Q dimension when the analysis list is next rebuilt.</
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Must be <code>True</code> when rebinning would change the number of Q values, since this clears
-Q from all models. Raises <code>ValueError</code> otherwise.</p>
+                <p>Must be <code>True</code> when rebinning changes the Q values (count or magnitude), since this
+clears Q from all models. Raises <code>ValueError</code> otherwise.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3843,7 +3843,7 @@ Q from all models. Raises <code>ValueError</code> otherwise.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If rebinning would change the number of Q values and <code>confirm</code> is not <code>True</code>.</p>
+                <p>If rebinning changes Q and <code>confirm</code> is not <code>True</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7827,9 +7827,9 @@ parameters are added.</p>
     <div class="doc doc-contents ">
 
         <p>Rebin the experiment data along specified dimensions and update the analysis.</p>
-<p>If the number of Q values would change, <code>confirm=True</code> is required. This clears Q from
-<code>sample_model</code> and <code>instrument_model</code> (including resolution and background sub-models)
-so they can accept the new Q dimension when the analysis list is next rebuilt.</p>
+<p>If Q values change (in count or magnitude), <code>confirm=True</code> is required. This clears Q
+from <code>sample_model</code> and <code>instrument_model</code> (including resolution and background
+sub-models) so they can accept the new Q values when the analysis list is next rebuilt.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7875,8 +7875,8 @@ so they can accept the new Q dimension when the analysis list is next rebuilt.</
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Must be <code>True</code> when rebinning would change the number of Q values, since this clears
-Q from all models. Raises <code>ValueError</code> otherwise.</p>
+                <p>Must be <code>True</code> when rebinning changes the Q values (count or magnitude), since this
+clears Q from all models. Raises <code>ValueError</code> otherwise.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7905,7 +7905,7 @@ Q from all models. Raises <code>ValueError</code> otherwise.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If rebinning would change the number of Q values and <code>confirm</code> is not <code>True</code>.</p>
+                <p>If rebinning changes Q and <code>confirm</code> is not <code>True</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
