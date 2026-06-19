@@ -3432,9 +3432,8 @@ notebooks.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-Parameters Ignores the Parameters and Descriptors in self._components as these are just
-templates.</p>
+        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4199,7 +4198,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4728,6 +4727,32 @@ associated Parameters.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Return a string representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ComponentCollection.to_dict">to_dict</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Serialise the ComponentCollection to a dictionary.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;from_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-classmethod&quot;&gt;&lt;code&gt;classmethod&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.ComponentCollection.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.ComponentCollection.from_dict">from_dict</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Deserialise a ComponentCollection from its dictionary representation.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6371,6 +6396,138 @@ which would prevent normalization.</p>
             <td>
               <div class="doc-md-description">
                 <p>String representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.ComponentCollection.to_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_dict</span><span class="p">()</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Serialise the ComponentCollection to a dictionary.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.ComponentCollection.from_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_dict</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Deserialise a ComponentCollection from its dictionary representation.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>obj_dict</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary representation of the ComponentCollection, as produced by to_dict().</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ComponentCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ComponentCollection&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The deserialised ComponentCollection.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11863,7 +12020,7 @@ want in QENS.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Center of the Gaussian. If None.</p>
+                <p>Center of the Gaussian. If None, defaults to 0 and is fixed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24676,7 +24833,6 @@ Q values stored in the model are used.</p>
     <div class="doc doc-contents ">
 
         <p>Create ComponentCollection components for the diffusion model at given Q values.</p>
-<p>TypeError If component_display_name is not a string. If component_name is not a string.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27333,9 +27489,8 @@ notebooks.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-Parameters Ignores the Parameters and Descriptors in self._components as these are just
-templates.</p>
+        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28045,7 +28200,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -30339,7 +30494,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -31876,9 +32031,8 @@ notebooks.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-Parameters Ignores the Parameters and Descriptors in self._components as these are just
-templates.</p>
+        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -32643,7 +32797,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -33076,6 +33230,32 @@ associated Parameters.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Return a string representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection.to_dict&lt;/code&gt;)" href="#easydynamics.sample_model.component_collection.ComponentCollection.to_dict">to_dict</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Serialise the ComponentCollection to a dictionary.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;from_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-classmethod&quot;&gt;&lt;code&gt;classmethod&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection.from_dict&lt;/code&gt;)" href="#easydynamics.sample_model.component_collection.ComponentCollection.from_dict">from_dict</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Deserialise a ComponentCollection from its dictionary representation.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -34197,6 +34377,138 @@ which would prevent normalization.</p>
             <td>
               <div class="doc-md-description">
                 <p>String representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.component_collection.ComponentCollection.to_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_dict</span><span class="p">()</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Serialise the ComponentCollection to a dictionary.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary representation of the ComponentCollection.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.component_collection.ComponentCollection.from_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_dict</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Deserialise a ComponentCollection from its dictionary representation.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>obj_dict</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary representation of the ComponentCollection, as produced by to_dict().</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ComponentCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ComponentCollection&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.component_collection.ComponentCollection&lt;/code&gt;)" href="#easydynamics.sample_model.component_collection.ComponentCollection">ComponentCollection</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The deserialised ComponentCollection.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -40615,7 +40927,7 @@ want in QENS.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Center of the Gaussian. If None.</p>
+                <p>Center of the Gaussian. If None, defaults to 0 and is fixed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -51667,7 +51979,7 @@ want in QENS.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Center of the Gaussian. If None.</p>
+                <p>Center of the Gaussian. If None, defaults to 0 and is fixed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -63254,7 +63566,6 @@ Q values stored in the model are used.</p>
     <div class="doc doc-contents ">
 
         <p>Create ComponentCollection components for the diffusion model at given Q values.</p>
-<p>TypeError If component_display_name is not a string. If component_name is not a string.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -72219,7 +72530,6 @@ Q values stored in the model are used.</p>
     <div class="doc doc-contents ">
 
         <p>Create ComponentCollection components for the diffusion model at given Q values.</p>
-<p>TypeError If component_display_name is not a string. If component_name is not a string.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -76243,9 +76553,8 @@ associated Parameters.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-Parameters Ignores the Parameters and Descriptors in self._components as these are just
-templates.</p>
+        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -76461,7 +76770,7 @@ ModelBase.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77998,9 +78307,8 @@ notebooks.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-Parameters Ignores the Parameters and Descriptors in self._components as these are just
-templates.</p>
+        <p>Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.</p>
+<p>Ignores the Parameters and Descriptors in self._components as these are just templates.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78710,7 +79018,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -81331,7 +81639,7 @@ associated Parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The ComponentCollection at the.</p>
+                <p>The ComponentCollection at the given Q index.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
