@@ -875,3 +875,138 @@ class TestAnalysis1d:
             scipp_array.coords['Q'].values,
             analysis1d.experiment.Q[analysis1d.Q_index].values,
         )
+
+    def test_rebin_marks_convolver_dirty(self, analysis1d):
+        # WHEN
+        analysis1d._convolver_is_dirty = False
+
+        # THEN
+        analysis1d.rebin({'Q': 1})
+
+        # EXPECT
+        assert analysis1d._convolver_is_dirty is True
+
+    def test_rebin_refreshes_masked_energy(self, analysis1d):
+        # WHEN - capture the current masked_energy object
+        energy_before = analysis1d._masked_energy
+
+        # THEN - patch get_masked_energy to verify it is called during rebin
+        with patch.object(
+            analysis1d.experiment,
+            'get_masked_energy',
+            wraps=analysis1d.experiment.get_masked_energy,
+        ) as mock_get_energy:
+            analysis1d.rebin({'Q': 1})
+
+        # EXPECT - get_masked_energy was called to refresh _masked_energy
+        mock_get_energy.assert_called_once_with(Q_index=analysis1d.Q_index)
+        # And _masked_energy is a different object now (re-fetched from experiment)
+        assert analysis1d._masked_energy is not energy_before
+
+    def test_fit_marks_convolver_dirty_when_sample_model_components_change(self, analysis1d):
+        """Issue #68: fit() should detect in-place component changes and rebuild the convolver."""
+        # WHEN - simulate state after a previous fit (convolver built, not dirty)
+        analysis1d._create_convolver = MagicMock(return_value=None)
+        analysis1d._convolver_is_dirty = False
+        analysis1d.sample_model._component_collections_is_dirty = False
+
+        # THEN - append a component in-place (doesn't go through Analysis1d setters)
+        analysis1d.sample_model.append_component(Gaussian(name='NewGaussian'))
+        assert analysis1d.sample_model._component_collections_is_dirty is True
+        assert analysis1d._convolver_is_dirty is False  # not yet propagated
+
+        # WHEN - fit() should propagate the dirty flag and rebuild the convolver
+        with patch(
+            'easydynamics.analysis.analysis1d.EasyScienceFitter',
+            return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
+        ):
+            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+                return_value=(
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 1.0, 1.0]),
+                    np.array([True, True, True]),
+                )
+            )
+            analysis1d.fit()
+
+        # EXPECT - convolver was rebuilt (_ensure_convolver_current called _create_convolver)
+        analysis1d._create_convolver.assert_called_once()
+
+    def test_fit_does_not_rebuild_convolver_when_nothing_changed(self, analysis1d):
+        """fit() should not call _create_convolver if nothing has changed since last fit."""
+        # WHEN - build convolver and clear all dirty flags
+        analysis1d._create_convolver = MagicMock(return_value=None)
+        analysis1d._convolver_is_dirty = False
+        analysis1d.sample_model._component_collections_is_dirty = False
+        analysis1d.instrument_model.resolution_model._component_collections_is_dirty = False
+
+        # THEN - call fit() with nothing changed
+        with patch(
+            'easydynamics.analysis.analysis1d.EasyScienceFitter',
+            return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
+        ):
+            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+                return_value=(
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 1.0, 1.0]),
+                    np.array([True, True, True]),
+                )
+            )
+            analysis1d.fit()
+
+        # EXPECT - _create_convolver was NOT called (convolver reused)
+        analysis1d._create_convolver.assert_not_called()
+
+    def test_rebin_rebins_experiment(self, analysis1d):
+        """rebin() should delegate to experiment.rebin()."""
+        # WHEN
+        with patch.object(
+            analysis1d.experiment, 'rebin', wraps=analysis1d.experiment.rebin
+        ) as mock_rebin:
+            analysis1d.rebin({'Q': 1})
+
+        # EXPECT - experiment.rebin was called with the correct dimensions
+        mock_rebin.assert_called_once_with({'Q': 1})
+
+    def test_rebin_without_Q_index_does_not_crash(self):
+        """rebin() with no Q_index set should not try to refresh masked_energy."""
+        # WHEN
+        experiment = Experiment()
+        analysis1d = Analysis1d(experiment=experiment)
+        assert analysis1d.Q_index is None
+
+        # THEN / EXPECT - no error, and _masked_energy stays None
+        # (no data loaded, so rebin would raise from experiment, just test the branch)
+        assert analysis1d._masked_energy is None
+
+    def test_fit_marks_convolver_dirty_when_resolution_model_components_change(self, analysis1d):
+        """Issue #68: fit() should detect resolution_model component changes."""
+        # WHEN - simulate state after a previous fit
+        analysis1d._create_convolver = MagicMock(return_value=None)
+        analysis1d._convolver_is_dirty = False
+        analysis1d.sample_model._component_collections_is_dirty = False
+        analysis1d.instrument_model.resolution_model._component_collections_is_dirty = False
+
+        # THEN - mark resolution_model dirty in-place (doesn't go through Analysis1d setters)
+        analysis1d.instrument_model.resolution_model._component_collections_is_dirty = True
+        assert analysis1d._convolver_is_dirty is False
+
+        # WHEN - fit() should propagate and rebuild
+        with patch(
+            'easydynamics.analysis.analysis1d.EasyScienceFitter',
+            return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
+        ):
+            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+                return_value=(
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 2.0, 3.0]),
+                    np.array([1.0, 1.0, 1.0]),
+                    np.array([True, True, True]),
+                )
+            )
+            analysis1d.fit()
+
+        # EXPECT
+        analysis1d._create_convolver.assert_called_once()

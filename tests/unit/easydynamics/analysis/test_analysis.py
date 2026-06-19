@@ -922,3 +922,66 @@ class TestAnalysis:
         assert components_dataset.coords['Q'].dims == ('Q',)
         assert components_dataset.sizes['Q'] == 1
         assert components_dataset.coords['Q'].ndim == 1
+
+    def test_rebin_marks_analysis_list_dirty(self, analysis):
+        # WHEN - force build of analysis_list so it is no longer dirty
+        _ = analysis.analysis_list
+        assert analysis._analysis_list_is_dirty is False
+
+        # THEN - rebin without changing Q count (no confirm required)
+        analysis.rebin({'Q': 3})
+
+        # EXPECT
+        assert analysis._analysis_list_is_dirty is True
+
+    def test_rebin_rebuilds_analysis_list(self, analysis):
+        # WHEN - 3 Q values → 3 Analysis1d objects; rebin to 1 Q value (confirm required)
+        assert len(analysis.analysis_list) == 3
+        analysis.rebin({'Q': 1}, confirm=True)
+
+        # THEN
+        result = analysis.analysis_list
+
+        # EXPECT - list rebuilt with 1 Analysis1d for the single remaining Q
+        assert len(result) == 1
+        assert result[0].Q_index == 0
+
+    def test_rebin_raises_without_confirm_when_Q_count_changes(self, analysis):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(ValueError, match='confirm=True'):
+            analysis.rebin({'Q': 1})
+
+    def test_rebin_without_Q_count_change_does_not_require_confirm(self, analysis):
+        # WHEN - rebin to same number of Q bins: no confirm required
+        # THEN / EXPECT - no error raised
+        analysis.rebin({'Q': 3})
+
+    def test_rebin_clears_Q_from_models_when_Q_count_changes(self, analysis):
+        # WHEN
+        assert analysis.sample_model.Q is not None
+        assert analysis.instrument_model.Q is not None
+
+        # THEN
+        analysis.rebin({'Q': 1}, confirm=True)
+
+        # EXPECT - Q has been propagated back to models with the new single-Q dimension
+        # (cleared then repopulated when analysis_list is rebuilt)
+        # At this point (before accessing analysis_list), models have Q=None
+        assert analysis.sample_model.Q is None
+        assert analysis.instrument_model.Q is None
+
+        # After rebuild, models get the new Q
+        _ = analysis.analysis_list
+        assert len(analysis.sample_model.Q) == 1
+        assert len(analysis.instrument_model.Q) == 1
+
+    def test_direct_experiment_rebin_does_not_update_analysis_list(self, analysis):
+        # WHEN - force build so the list is clean
+        _ = analysis.analysis_list
+        assert analysis._analysis_list_is_dirty is False
+
+        # THEN - rebinning via experiment directly (the old broken pattern)
+        analysis.experiment.rebin({'Q': 1})
+
+        # EXPECT - analysis_list is NOT marked dirty (demonstrating the original issue)
+        assert analysis._analysis_list_is_dirty is False

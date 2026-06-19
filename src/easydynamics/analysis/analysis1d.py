@@ -202,6 +202,12 @@ class Analysis1d(AnalysisBase):
         if self._experiment is None:
             raise ValueError('No experiment is associated with this Analysis.')
 
+        if (
+            self.sample_model._component_collections_is_dirty  # noqa: SLF001
+            or self.instrument_model.resolution_model._component_collections_is_dirty  # noqa: SLF001
+        ):
+            self._convolver_is_dirty = True
+
         self._ensure_convolver_current()
 
         fitter = EasyScienceFitter(
@@ -419,6 +425,21 @@ class Analysis1d(AnalysisBase):
     def free_energy_offset(self) -> None:
         """Free the energy offset parameter for the current Q index."""
         self.instrument_model.free_energy_offset(Q_index=self._require_Q_index())
+
+    def rebin(self, dimensions: dict[str, int | sc.Variable]) -> None:
+        """
+        Rebin the experiment data along specified dimensions and update the analysis.
+
+        Parameters
+        ----------
+        dimensions : dict[str, int | sc.Variable]
+            A dictionary mapping dimension names to number of bins (int) or bin edges
+            (sc.Variable).
+        """
+        self.experiment.rebin(dimensions)
+        if self._Q_index is not None and self.experiment is not None:
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
+        self._convolver_is_dirty = True
 
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
         """Refresh the pre-built Convolution object for the current Q index."""
