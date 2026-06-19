@@ -1011,12 +1011,15 @@ class TestAnalysis:
         assert len(analysis.instrument_model.Q) == 1
 
     def test_direct_experiment_rebin_does_not_update_analysis_list(self, analysis):
+        # This test documents a known limitation: calling experiment.rebin() directly bypasses
+        # Analysis and leaves the analysis list stale. Always use Analysis.rebin() instead.
+
         # WHEN - force build so the list is clean
         _ = analysis.analysis_list
         assert analysis._analysis_list_is_dirty is False
 
-        # THEN - rebinning via experiment directly (the old broken pattern)
+        # THEN - rebinning via experiment directly (bypasses Analysis)
         analysis.experiment.rebin({'Q': 1})
 
-        # EXPECT - analysis_list is NOT marked dirty (demonstrating the original issue)
+        # EXPECT - analysis_list is NOT marked dirty (callers must use Analysis.rebin())
         assert analysis._analysis_list_is_dirty is False

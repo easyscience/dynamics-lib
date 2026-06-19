@@ -148,6 +148,8 @@ class Analysis1d(AnalysisBase):
         """
         energy = self._verify_energy(energy)
         self._convolver = self._create_convolver(energy=energy)
+        # Mark dirty so the next fit() call rebuilds the convolver with the standard
+        # (unmasked) energy grid rather than reusing this plot-path grid.
         self._convolver_is_dirty = True
 
         return self._calculate(energy=energy)
@@ -444,6 +446,7 @@ class Analysis1d(AnalysisBase):
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
         """Refresh the pre-built Convolution object for the current Q index."""
         self._convolver = self._create_convolver(energy=energy)
+        self._convolver_is_dirty = False
 
     #############
     # Private methods: small utilities
