@@ -174,6 +174,18 @@ class ModelBase(EasyDynamicsModelBase):
             self.append_component(value)
 
     @property
+    def component_collections_is_dirty(self) -> bool:
+        """
+        Return whether component collections need to be rebuilt before use.
+
+        Returns
+        -------
+        bool
+            ``True`` if component collections have not been built yet or are stale.
+        """
+        return self._component_collections_is_dirty
+
+    @property
     def Q(self) -> np.ndarray | None:
         """
         Get the Q values of the SampleModel.

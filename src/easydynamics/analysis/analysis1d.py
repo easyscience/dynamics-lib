@@ -203,8 +203,8 @@ class Analysis1d(AnalysisBase):
             raise ValueError('No experiment is associated with this Analysis.')
 
         if (
-            self.sample_model._component_collections_is_dirty  # noqa: SLF001
-            or self.instrument_model.resolution_model._component_collections_is_dirty  # noqa: SLF001
+            self.sample_model.component_collections_is_dirty
+            or self.instrument_model.resolution_model.component_collections_is_dirty
         ):
             self._convolver_is_dirty = True
 

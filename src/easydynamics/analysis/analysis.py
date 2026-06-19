@@ -132,9 +132,9 @@ class Analysis(AnalysisBase):
         """
         Rebin the experiment data along specified dimensions and update the analysis.
 
-        If the number of Q values would change, ``confirm=True`` is required. This clears Q from
-        ``sample_model`` and ``instrument_model`` (including resolution and background sub-models)
-        so they can accept the new Q dimension when the analysis list is next rebuilt.
+        If Q values change (in count or magnitude), ``confirm=True`` is required. This clears Q
+        from ``sample_model`` and ``instrument_model`` (including resolution and background
+        sub-models) so they can accept the new Q values when the analysis list is next rebuilt.
 
         Parameters
         ----------
@@ -142,44 +142,39 @@ class Analysis(AnalysisBase):
             A dictionary mapping dimension names to number of bins (int) or bin edges
             (sc.Variable).
         confirm : bool, default=False
-            Must be ``True`` when rebinning would change the number of Q values, since this clears
-            Q from all models. Raises ``ValueError`` otherwise.
+            Must be ``True`` when rebinning changes the Q values (count or magnitude), since this
+            clears Q from all models. Raises ``ValueError`` otherwise.
 
         Raises
         ------
         ValueError
-            If rebinning would change the number of Q values and ``confirm`` is not ``True``.
+            If rebinning changes Q and ``confirm`` is not ``True``.
         """
-        old_Q_len = len(self.Q) if self.Q is not None else 0
-        prospective_Q_len = self._prospective_Q_len(dimensions, old_Q_len)
-
-        if prospective_Q_len != old_Q_len and not confirm:
-            raise ValueError(
-                f'Rebinning Q from {old_Q_len} to {prospective_Q_len} values will clear Q '
-                'from sample_model and instrument_model (including resolution and background '
-                'sub-models). Pass confirm=True to proceed.'
-            )
+        old_Q = np.asarray(self.Q.values) if self.Q is not None else None
+        old_binned_data = self.experiment._binned_data  # noqa: SLF001
 
         self.experiment.rebin(dimensions)
-        new_Q_len = len(self.Q) if self.Q is not None else 0
+        new_Q = np.asarray(self.Q.values) if self.Q is not None else None
 
-        if old_Q_len != new_Q_len:
+        q_changed = (
+            old_Q is not None
+            and new_Q is not None
+            and (len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q))
+        )
+
+        if q_changed and not confirm:
+            self.experiment._binned_data = old_binned_data  # noqa: SLF001
+            raise ValueError(
+                'Rebinning changed Q values, which requires clearing Q from sample_model and '
+                'instrument_model (including resolution and background sub-models). '
+                'Pass confirm=True to proceed.'
+            )
+
+        if q_changed:
             self.sample_model.clear_Q(confirm=True)
             self.instrument_model.clear_Q(confirm=True)
 
         self._analysis_list_is_dirty = True
-
-    @staticmethod
-    def _prospective_Q_len(dimensions: dict[str, int | sc.Variable], current: int) -> int:
-        """Estimate the Q count after rebinning without modifying the experiment."""
-        if 'Q' not in dimensions:
-            return current
-        q_spec = dimensions['Q']
-        if isinstance(q_spec, (int, float)):
-            return int(q_spec)
-        if isinstance(q_spec, sc.Variable):
-            return len(q_spec) - 1
-        return current
 
     def calculate(
         self,

@@ -928,8 +928,9 @@ class TestAnalysis:
         _ = analysis.analysis_list
         assert analysis._analysis_list_is_dirty is False
 
-        # THEN - rebin without changing Q count (no confirm required)
-        analysis.rebin({'Q': 3})
+        # THEN - energy rebin leaves Q unchanged, so no confirm required
+        with patch.object(analysis.experiment, 'rebin'):
+            analysis.rebin({'energy': 2})
 
         # EXPECT
         assert analysis._analysis_list_is_dirty is True
@@ -947,14 +948,48 @@ class TestAnalysis:
         assert result[0].Q_index == 0
 
     def test_rebin_raises_without_confirm_when_Q_count_changes(self, analysis):
-        # WHEN / THEN / EXPECT
+        # WHEN - rebin Q from 3 to 1 (count changes) without confirm
+        # THEN / EXPECT
         with pytest.raises(ValueError, match='confirm=True'):
             analysis.rebin({'Q': 1})
 
-    def test_rebin_without_Q_count_change_does_not_require_confirm(self, analysis):
-        # WHEN - rebin to same number of Q bins: no confirm required
+    def test_rebin_raises_without_confirm_when_Q_values_change_same_count(self, analysis):
+        # WHEN - simulate a rebin that keeps count but shifts Q values
+        # (e.g. Q=[1,2,3] → Q=[2,3,4] via non-uniform binning)
+        old_Q = analysis.Q
+        new_Q = sc.array(dims=['Q'], values=[2.0, 3.0, 4.0], unit='1/Angstrom')
+
+        def fake_rebin(_dims: dict) -> None:
+            analysis.experiment._binned_data = analysis.experiment._binned_data.assign_coords(
+                Q=new_Q
+            )
+
+        # THEN / EXPECT - raises without confirm and rolls back
+        with (
+            patch.object(analysis.experiment, 'rebin', side_effect=fake_rebin),
+            pytest.raises(ValueError, match='confirm=True'),
+        ):
+            analysis.rebin({'Q': 3})
+
+        # EXPECT - experiment Q was rolled back to original
+        assert sc.allclose(analysis.Q, old_Q)
+
+    def test_rebin_rolls_back_experiment_on_failed_confirm(self, analysis):
+        # WHEN - rebin Q without confirm (would change count)
+        old_Q = analysis.Q
+
+        with pytest.raises(ValueError, match='confirm=True'):
+            analysis.rebin({'Q': 1})
+
+        # EXPECT - experiment Q was rolled back; analysis is unchanged
+        assert sc.allclose(analysis.Q, old_Q)
+        assert len(analysis.analysis_list) == 3
+
+    def test_rebin_without_Q_change_does_not_require_confirm(self, analysis):
+        # WHEN - energy rebin leaves Q unchanged, so no confirm required
         # THEN / EXPECT - no error raised
-        analysis.rebin({'Q': 3})
+        with patch.object(analysis.experiment, 'rebin'):
+            analysis.rebin({'energy': 2})
 
     def test_rebin_clears_Q_from_models_when_Q_count_changes(self, analysis):
         # WHEN
