@@ -293,8 +293,8 @@ class ModelBase(EasyDynamicsModelBase):
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
         Get all Parameters and Descriptors from all ComponentCollections in the ModelBase.
-        Parameters Ignores the Parameters and Descriptors in self._components as these are just
-        templates.
+
+        Ignores the Parameters and Descriptors in self._components as these are just templates.
 
         Parameters
         ----------
@@ -353,7 +353,7 @@ class ModelBase(EasyDynamicsModelBase):
         Returns
         -------
         ComponentCollection
-            The ComponentCollection at the.
+            The ComponentCollection at the given Q index.
         """
         self._ensure_component_collections_current()
         if not isinstance(Q_index, int):

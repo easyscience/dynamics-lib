@@ -381,6 +381,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         )
 
     def to_dict(self) -> dict:
+        """
+        Serialise the ComponentCollection to a dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the ComponentCollection.
+        """
         return {
             '@module': self.__class__.__module__,
             '@class': self.__class__.__name__,
@@ -392,6 +400,19 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     @classmethod
     def from_dict(cls, obj_dict: dict) -> ComponentCollection:
+        """
+        Deserialise a ComponentCollection from its dictionary representation.
+
+        Parameters
+        ----------
+        obj_dict : dict
+            Dictionary representation of the ComponentCollection, as produced by to_dict().
+
+        Returns
+        -------
+        ComponentCollection
+            The deserialised ComponentCollection.
+        """
 
         def deserialise_component(d: dict) -> ModelComponent:
             """

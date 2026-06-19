@@ -551,20 +551,64 @@ class AnalysisBase(EasyDynamicsModelBase):
 
     @staticmethod
     def _verify_bool(value: object, name: str) -> None:
-        """Raise TypeError if value is not a bool."""
+        """
+        Raise TypeError if value is not a bool.
+
+        Parameters
+        ----------
+        value : object
+            The object to verify.
+        name : str
+            The name of the object for use in the error message.
+
+        Raises
+        ------
+        TypeError
+            If value is not a bool.
+        """
         if not isinstance(value, bool):
             raise TypeError(f'{name} must be True or False.')
 
     @staticmethod
     def _verify_nonneg_float(value: object, name: str) -> None:
-        """Raise TypeError/ValueError if value is not a non-negative number."""
+        """
+        Raise TypeError or ValueError if value is not a non-negative number.
+
+        Parameters
+        ----------
+        value : object
+            The object to verify.
+        name : str
+            The name of the object for use in the error message.
+
+        Raises
+        ------
+        TypeError
+            If value is not an int or float.
+        ValueError
+            If value is negative.
+        """
         if not isinstance(value, (int, float)):
             raise TypeError(f'{name} must be a float. Got {type(value)}.')
         if value < 0:
             raise ValueError(f'{name} must be non-negative. Got {value}.')
 
     def _build_plot_style_defaults(self, keys: Iterable[str]) -> dict:
-        """Build default plot style kwargs for the given DataGroup keys."""
+        """
+        Build default plot style kwargs for the given DataGroup keys.
+
+        Parameters
+        ----------
+        keys : Iterable[str]
+            The DataGroup keys to build plot style defaults for. Recognized values are ``"Data"``,
+            ``"Model"``, and ``"Residuals"``; any other key gets a dashed line style.
+
+        Returns
+        -------
+        dict
+            A dict of plot style kwargs including ``title``, ``linestyle``, ``marker``, ``color``,
+            and ``markerfacecolor``.
+        """
         linestyle: dict = {}
         marker: dict = {}
         color: dict = {}

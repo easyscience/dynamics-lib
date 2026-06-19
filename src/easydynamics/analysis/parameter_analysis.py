@@ -529,6 +529,14 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # Dunder methods
     #############
     def __repr__(self) -> str:
+        """
+        Return a string representation of the ParameterAnalysis.
+
+        Returns
+        -------
+        str
+            A string representation of the ParameterAnalysis.
+        """
         cls = self.__class__.__name__
 
         n_params = len(self._parameters) if isinstance(self._parameters, sc.Dataset) else 0

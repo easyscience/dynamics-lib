@@ -166,7 +166,7 @@ class AnalyticalConvolution(ConvolutionBase):
         sample_component : DeltaFunction
             The sample component to be convolved.
         resolution_components : ComponentCollection | ModelComponent
-            : The resolution model to convolve with.
+            The resolution model to convolve with.
 
         Returns
         -------
