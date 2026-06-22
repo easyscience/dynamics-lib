@@ -34,9 +34,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
     fixed at 0:
     ```python
     import numpy as np
-    from easydynamics.sample_model.components import Voigt
+    import easydynamics.sample_model as sm
 
-    v = Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
+    v = sm.Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
     x = np.linspace(-2, 2, 100)
     values = v.evaluate(x)
     ```
@@ -46,9 +46,9 @@ class Voigt(CreateParametersMixin, ModelComponent):
     Pass a numeric value for ``center`` to leave it free during fitting, and use the property
     setters to adjust the two width components after construction:
     ```python
-    from easydynamics.sample_model.components import Voigt
+    import easydynamics.sample_model as sm
 
-    v = Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
+    v = sm.Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
     v.gaussian_width = 0.1
     v.lorentzian_width = 0.2
     ```

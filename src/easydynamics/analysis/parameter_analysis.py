@@ -27,6 +27,46 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
     simultaneously, and the fit functions can be customized for each parameter. For diffusion
     models, the area and width can be fitted separately (or not at all) by specifying fit settings.
+
+    Examples
+    --------
+    **Fitting Lorentzian widths to a diffusion model**
+
+    After a full Analysis fit, pass the Analysis directly and bind each parameter to a fit function
+    using a ``FitBinding``:
+    ```python
+    import easydynamics as edyn
+    import easydynamics.sample_model as sm
+
+    # analysis is an edyn.Analysis object with previously fitted parameters
+    diffusion_model = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
+    binding = edyn.FitBinding(
+        parameter_name='Lorentzian width',
+        model=diffusion_model,
+        modes=['width'],
+    )
+
+    param_analysis = edyn.ParameterAnalysis(
+        parameters=analysis,
+        bindings=binding,
+    )
+    param_analysis.fit()
+    param_analysis.plot()
+    ```
+
+    **Fitting multiple parameters with separate bindings**
+
+    ```python
+    area_binding = edyn.FitBinding(
+        parameter_name='Lorentzian area',
+        model=sm.Polynomial(coefficients=[0.5, 0.0]),
+    )
+    param_analysis = edyn.ParameterAnalysis(
+        parameters=analysis,
+        bindings=[binding, area_binding],
+    )
+    param_analysis.fit()
+    ```
     """
 
     def __init__(

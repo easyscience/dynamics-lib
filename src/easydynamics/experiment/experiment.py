@@ -20,6 +20,32 @@ class Experiment(EasyDynamicsBase):
     Holds data from an experiment as a sc.DataArray along with metadata.
 
     This is a minimal implementation that will be extended in the future.
+
+    Examples
+    --------
+    **Loading experimental data from the repository**
+
+    Use ``pooch`` to download the example vanadium dataset directly from the repository:
+    ```python
+    import pooch
+    import easydynamics as edyn
+
+    file_path = pooch.retrieve(
+        url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
+        known_hash='16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873',
+    )
+
+    experiment = edyn.Experiment(display_name='Vanadium')
+    experiment.load_hdf5(filename=file_path)
+    ```
+
+    **Rebinning and plotting**
+
+    After loading, rebin to reduce the number of bins along each dimension before plotting:
+    ```python
+    experiment.rebin({'Q': 5, 'energy': 50})
+    experiment.plot_data()
+    ```
     """
 
     def __init__(

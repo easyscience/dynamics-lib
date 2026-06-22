@@ -33,6 +33,47 @@ class Convolution(NumericalConvolutionBase):
     balance correction. Includes optional upsampling and extended range to improve accuracy of the
     numerical convolutions. Also warns about numerical instabilities if peaks are very wide or very
     narrow.
+
+    Examples
+    --------
+    **Convolving a sample model with a resolution function**
+
+    Analytical convolution is used automatically when both components are ``DeltaFunction``,
+    ``Gaussian``, ``Lorentzian``, or ``Voigt``:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+    from easydynamics.convolution import Convolution
+
+    sample_components = sm.ComponentCollection(
+        components=[sm.DeltaFunction(area=0.5), sm.Lorentzian(area=1.0, width=0.3)]
+    )
+    resolution_components = sm.ComponentCollection(components=[sm.Gaussian(width=0.05)])
+    energy = np.linspace(-2, 2, 100)
+
+    convolver = Convolution(
+        sample_components=sample_components,
+        resolution_components=resolution_components,
+        energy=energy,
+    )
+    y = convolver.convolution()
+    ```
+
+    **Including detailed balance and improving numerical accuracy**
+
+    Providing ``temperature`` switches to numerical convolution with detailed balance applied.
+    Increase ``upsample_factor`` and ``extension_factor`` for better accuracy with narrow peaks:
+    ```python
+    convolver = Convolution(
+        sample_components=sample_components,
+        resolution_components=resolution_components,
+        energy=energy,
+        temperature=10.0,
+    )
+    convolver.upsample_factor = 5
+    convolver.extension_factor = 0.5
+    y = convolver.convolution()
+    ```
     """
 
     # When these attributes are changed, the convolution plan

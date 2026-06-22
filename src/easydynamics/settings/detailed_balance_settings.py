@@ -8,6 +8,31 @@ from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 class DetailedBalanceSettings(EasyDynamicsBase):
     """
     Class to manage detailed balance settings for a SampleModel or Analysis.
+
+    Detailed balance describes the asymmetry between energy gain and energy loss scattering. When
+    ``use_detailed_balance`` is ``True`` and a temperature is provided, the scattering function is
+    multiplied by the detailed balance factor $E(1+n(E))$. Setting
+    ``normalize_detailed_balance=True`` further divides by $k_B T$, making the factor dimensionless
+    with value 1 at $E=0$.
+
+    Examples
+    --------
+    **Enabling detailed balance without temperature normalisation**
+
+    ```python
+    import easydynamics as edyn
+
+    settings = edyn.DetailedBalanceSettings(
+        use_detailed_balance=True,
+        normalize_detailed_balance=False,
+    )
+    ```
+
+    **Passing custom settings to an Analysis**
+
+    ```python
+    analysis = edyn.Analysis(detailed_balance_settings=settings)
+    ```
     """
 
     def __init__(

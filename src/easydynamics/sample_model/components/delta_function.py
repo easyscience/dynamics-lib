@@ -35,9 +35,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     convolutions, making it useful for modelling the elastic line in QENS:
     ```python
     import numpy as np
-    from easydynamics.sample_model.components import DeltaFunction
+    import easydynamics.sample_model as sm
 
-    delta = DeltaFunction(area=1.0)
+    delta = sm.DeltaFunction(area=1.0)
     x = np.linspace(-2, 2, 100)
     values = delta.evaluate(x)  # all zeros except at the bin nearest to center
     ```
@@ -46,9 +46,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     Pass a numeric value for ``center`` to place the elastic line at a specific energy transfer:
     ```python
-    from easydynamics.sample_model.components import DeltaFunction
+    import easydynamics.sample_model as sm
 
-    delta = DeltaFunction(area=0.7, center=0.5)
+    delta = sm.DeltaFunction(area=0.7, center=0.5)
     delta.area = 0.5
     ```
     """

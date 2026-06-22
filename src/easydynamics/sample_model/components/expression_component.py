@@ -35,9 +35,9 @@ class ExpressionComponent(ModelComponent):
     construction:
     ```python
     import numpy as np
-    from easydynamics.sample_model.components import ExpressionComponent
+    import easydynamics.sample_model as sm
 
-    expr = ExpressionComponent(
+    expr = sm.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
         parameters={'A': 10, 'x0': 0, 'sigma': 1},
         unit='meV',

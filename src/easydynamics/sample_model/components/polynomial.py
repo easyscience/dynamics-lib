@@ -32,9 +32,9 @@ class Polynomial(ModelComponent):
 
     ```python
     import numpy as np
-    from easydynamics.sample_model.components import Polynomial
+    import easydynamics.sample_model as sm
 
-    poly = Polynomial(coefficients=[1.5])
+    poly = sm.Polynomial(coefficients=[1.5])
     x = np.linspace(-5, 5, 100)
     values = poly.evaluate(x)
     ```
@@ -43,9 +43,9 @@ class Polynomial(ModelComponent):
 
     Coefficients are ordered as ``[c0, c1, ...]``, where ``c0`` is the constant term:
     ```python
-    from easydynamics.sample_model.components import Polynomial
+    import easydynamics.sample_model as sm
 
-    poly = Polynomial(coefficients=[2.0, 0.1], name='Background')
+    poly = sm.Polynomial(coefficients=[2.0, 0.1], name='Background')
     poly.coefficients = [1.5, 0.05]
     ```
     """
