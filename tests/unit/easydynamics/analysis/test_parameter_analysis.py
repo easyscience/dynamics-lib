@@ -878,8 +878,8 @@ class TestParameterAnalysis:
         # THEN EXPECT
         assert isinstance(repr_str, str)
         assert 'ParameterAnalysis' in repr_str
-        assert f'display_name={parameter_analysis.display_name}' in repr_str
-        assert f'unique_name={parameter_analysis.unique_name}' in repr_str
+        assert f"display_name='{parameter_analysis.display_name}'" in repr_str
+        assert f"unique_name='{parameter_analysis.unique_name}'" in repr_str
         assert f'n_parameters={len(parameter_analysis.parameters)}' in repr_str
         assert 'parameter_names=' in repr_str
         assert 'bindings=' in repr_str

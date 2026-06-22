@@ -562,9 +562,10 @@ class SampleModel(ModelBase):
         """
 
         return (
-            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), '
-            f'Q = {self.Q}, \n '
-            f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
-            f'temperature = {self.temperature}, '
-            f'detailed_balance_settings = {self.detailed_balance_settings}'
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, unit={self.unit},\n'
+            f'    Q={self.Q},\n'
+            f'    components={self.components}, diffusion_models={self.diffusion_models},\n'
+            f'    temperature={self.temperature},\n'
+            f'    detailed_balance_settings={self.detailed_balance_settings})'
         )

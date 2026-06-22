@@ -265,9 +265,10 @@ class Voigt(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Voigt(name = {self.name}, display_name = {self.display_name}, unit = {self._unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center},\n'
-            f'    gaussian_width = {self.gaussian_width},\n'
-            f'    lorentzian_width = {self.lorentzian_width})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, unit={self._unit},\n'
+            f'    area={self.area},\n'
+            f'    center={self.center},\n'
+            f'    gaussian_width={self.gaussian_width},\n'
+            f'    lorentzian_width={self.lorentzian_width})'
         )

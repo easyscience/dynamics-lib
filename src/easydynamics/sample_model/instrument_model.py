@@ -581,6 +581,5 @@ class InstrumentModel(NewBase):
             f'unit={self.unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'resolution_model={self._resolution_model!r}, '
-            f'background_model={self._background_model!r}'
-            f')'
+            f'background_model={self._background_model!r})'
         )

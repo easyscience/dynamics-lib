@@ -293,9 +293,9 @@ class TestVoigt:
 
         # EXPECT
         assert 'Voigt' in repr_str
-        assert 'name = VoigtName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
-        assert 'gaussian_width =' in repr_str
-        assert 'lorentzian_width =' in repr_str
+        assert "name='VoigtName'" in repr_str
+        assert 'unit=meV' in repr_str
+        assert 'area=' in repr_str
+        assert 'center=' in repr_str
+        assert 'gaussian_width=' in repr_str
+        assert 'lorentzian_width=' in repr_str

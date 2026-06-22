@@ -232,4 +232,4 @@ class ModelComponent(EasyDynamicsModelBase):
             A string representation of the ModelComponent.
         """
 
-        return f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self._unit})'
+        return f'{self.__class__.__name__}(unique_name={self.unique_name!r}, unit={self._unit})'

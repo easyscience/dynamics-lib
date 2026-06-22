@@ -284,6 +284,6 @@ class TestFitBinding:
 
         # THEN EXPECT
         assert 'FitBinding' in repr_str
-        assert 'parameter_name=parameter1' in repr_str
-        assert 'model=Gaussian' in repr_str
+        assert "parameter_name='parameter1'" in repr_str
+        assert "model='Gaussian'" in repr_str
         assert 'modes=None' in repr_str

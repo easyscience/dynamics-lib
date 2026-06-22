@@ -485,3 +485,12 @@ class AnalyticalConvolution(ConvolutionBase):
         return area * voigt_profile(
             self.energy_with_offset.values - center, gaussian_width, lorentzian_width
         )
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'unit={self._unit}, '
+            f'energy_len={len(self.energy)})'
+        )

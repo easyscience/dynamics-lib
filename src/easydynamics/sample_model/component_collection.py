@@ -376,8 +376,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         comp_names = ', '.join(c.name for c in self) or 'No components'
 
         return (
-            f"ComponentCollection(name='{self.name}', unit='{self.unit}', \n"
-            f'Components: {comp_names})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, unit={self.unit},\n'
+            f'    components=[{comp_names}])'
         )
 
     def to_dict(self) -> dict:

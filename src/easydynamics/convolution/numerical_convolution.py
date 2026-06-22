@@ -84,3 +84,13 @@ class NumericalConvolution(NumericalConvolutionBase):
             )
 
         return convolved
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'unit={self.unit}, '
+            f'energy_len={len(self.energy)}, '
+            f'temperature={self.temperature})'
+        )

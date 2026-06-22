@@ -556,10 +556,9 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         return (
             f'{cls}(\n'
-            f'display_name={self.display_name},\n'
-            f'unique_name={self.unique_name},\n'
-            f'n_parameters={n_params},\n'
-            f'parameter_names={param_names},\n'
-            f'bindings={binding_info}\n'
-            f')'
+            f'    display_name={self.display_name!r},\n'
+            f'    unique_name={self.unique_name!r},\n'
+            f'    n_parameters={n_params},\n'
+            f'    parameter_names={param_names},\n'
+            f'    bindings={binding_info})'
         )

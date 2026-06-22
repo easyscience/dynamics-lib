@@ -229,9 +229,10 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Gaussian(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center},\n'
-            f'    width = {self.width})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    area={self.area},\n'
+            f'    center={self.center},\n'
+            f'    width={self.width})'
         )

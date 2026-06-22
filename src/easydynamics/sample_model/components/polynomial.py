@@ -272,7 +272,8 @@ class Polynomial(ModelComponent):
 
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
         return (
-            f'Polynomial(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n'
-            f'    coefficients = [{coeffs_str}])'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    coefficients=[{coeffs_str}])'
         )

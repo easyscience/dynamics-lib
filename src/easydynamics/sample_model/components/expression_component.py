@@ -370,8 +370,9 @@ class ExpressionComponent(ModelComponent):
         """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
-            f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
             f'unit={self._unit},\n'
-            f"    expr='{self._expression_str}',\n"
-            f'    parameters={{ {param_str} }} )'
+            f'    expr={self._expression_str!r},\n'
+            f'    parameters={{{param_str}}})'
         )

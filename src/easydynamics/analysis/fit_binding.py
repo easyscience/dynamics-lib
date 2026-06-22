@@ -327,9 +327,10 @@ class FitBinding(EasyDynamicsBase):
             A string representation of the FitBinding.
         """
         return (
-            f'FitBinding(parameter_name={self.parameter_name},\n '
-            f'model={self.model.display_name},\n '
-            f'modes={self.modes},\n '
-            f'display_name={self.display_name},\n '
-            f'unique_name={self.unique_name})'
+            f'{self.__class__.__name__}('
+            f'parameter_name={self.parameter_name!r},\n'
+            f'    model={self.model.display_name!r},\n'
+            f'    modes={self.modes},\n'
+            f'    display_name={self.display_name!r},\n'
+            f'    unique_name={self.unique_name!r})'
         )

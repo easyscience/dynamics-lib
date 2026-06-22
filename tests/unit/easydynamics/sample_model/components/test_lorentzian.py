@@ -201,8 +201,8 @@ class TestLorentzian:
 
         # EXPECT
         assert 'Lorentzian' in repr_str
-        assert 'name = LorentzianName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
-        assert 'width =' in repr_str
+        assert "name='LorentzianName'" in repr_str
+        assert 'unit=meV' in repr_str
+        assert 'area=' in repr_str
+        assert 'center=' in repr_str
+        assert 'width=' in repr_str

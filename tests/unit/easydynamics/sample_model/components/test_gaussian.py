@@ -223,8 +223,8 @@ class TestGaussian:
         repr_str = repr(gaussian)
         # EXPECT
         assert 'Gaussian' in repr_str
-        assert 'name = GaussianName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
-        assert 'width =' in repr_str
+        assert "name='GaussianName'" in repr_str
+        assert 'unit=meV' in repr_str
+        assert 'area=' in repr_str
+        assert 'center=' in repr_str
+        assert 'width=' in repr_str

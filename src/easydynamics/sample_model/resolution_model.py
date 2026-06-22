@@ -142,3 +142,12 @@ class ResolutionModel(ModelBase):
             resolution_model.fix_all_parameters()
 
         return resolution_model
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, '
+            f'unit={self.unit}, '
+            f'Q_len={None if self._Q is None else len(self._Q)}, '
+            f'components={self.components})'
+        )

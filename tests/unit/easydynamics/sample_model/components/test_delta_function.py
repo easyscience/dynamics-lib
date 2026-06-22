@@ -221,7 +221,7 @@ class TestDeltaFunction:
 
         # EXPECT
         assert 'DeltaFunction' in repr_str
-        assert 'name = DeltaFunctionName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'area =' in repr_str
-        assert 'center =' in repr_str
+        assert "name='DeltaFunctionName'" in repr_str
+        assert 'unit=meV' in repr_str
+        assert 'area=' in repr_str
+        assert 'center=' in repr_str

@@ -303,3 +303,13 @@ class Convolution(NumericalConvolutionBase):
         # avoid issues during __init__
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
             self.convolution_settings.convolution_plan_is_valid = False
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'unit={self.unit}, '
+            f'energy_len={len(self.energy)}, '
+            f'temperature={self.temperature})'
+        )

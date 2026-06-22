@@ -814,3 +814,11 @@ class Analysis1d(AnalysisBase):
                 'Q': self.Q[self.Q_index],
             },
         )
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'Q_index={self._Q_index})'
+        )

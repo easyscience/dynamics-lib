@@ -453,7 +453,8 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             String representation of the JumpTranslationalDiffusion model.
         """
         return (
-            f'JumpTranslationalDiffusion(name={self.name}, display_name={self.display_name},\n '
-            f'    diffusion_coefficient={self.diffusion_coefficient}, \n'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r},\n'
+            f'    diffusion_coefficient={self.diffusion_coefficient},\n'
             f'    scale={self.scale})'
         )

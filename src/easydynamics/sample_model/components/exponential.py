@@ -273,9 +273,10 @@ class Exponential(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Exponential(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n '
-            f'    amplitude = {self.amplitude},\n '
-            f'    center = {self.center},\n '
-            f'    rate = {self.rate})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    amplitude={self.amplitude},\n'
+            f'    center={self.center},\n'
+            f'    rate={self.rate})'
         )

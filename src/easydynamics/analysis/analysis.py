@@ -818,3 +818,11 @@ class Analysis(AnalysisBase):
     #############
     # Dunder methods
     #############
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'n_analyses={len(self._analysis_list)})'
+        )
