@@ -2338,21 +2338,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polynomial</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.sample_model.background_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">BackgroundModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.sample_model.instrument_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstrumentModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.sample_model.resolution_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolutionModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
 
 <span class="o">%</span><span class="n">matplotlib</span> <span class="n">widget</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">import numpy as np
 
-from easydynamics.sample_model import Gaussian
-from easydynamics.sample_model import Polynomial
-from easydynamics.sample_model.background_model import BackgroundModel
-from easydynamics.sample_model.instrument_model import InstrumentModel
-from easydynamics.sample_model.resolution_model import ResolutionModel
+import easydynamics.sample_model as sm
 
 %matplotlib widget</div>
 </div>
@@ -2384,13 +2376,13 @@ from easydynamics.sample_model.resolution_model import ResolutionModel
 
 <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
-<span class="n">background_model</span> <span class="o">=</span> <span class="n">BackgroundModel</span><span class="p">()</span>
-<span class="n">background_model</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">])</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">()</span>
+<span class="n">background_model</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">])</span>
 
-<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">ResolutionModel</span><span class="p">()</span>
-<span class="n">resolution_model</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">()</span>
+<span class="n">resolution_model</span><span class="o">.</span><span class="n">append_component</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
 
-<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">InstrumentModel</span><span class="p">(</span>
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
     <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
     <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
     <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
@@ -2401,13 +2393,13 @@ from easydynamics.sample_model.resolution_model import ResolutionModel
 
 Q = np.linspace(0.1, 2.0, 5)
 
-background_model = BackgroundModel()
-background_model.components = Polynomial(coefficients=[1, 0.1, 0.01])
+background_model = sm.BackgroundModel()
+background_model.components = sm.Polynomial(coefficients=[1, 0.1, 0.01])
 
-resolution_model = ResolutionModel()
-resolution_model.append_component(Gaussian(width=0.05))
+resolution_model = sm.ResolutionModel()
+resolution_model.append_component(sm.Gaussian(width=0.05))
 
-instrument_model = InstrumentModel(
+instrument_model = sm.InstrumentModel(
     Q=Q,
     resolution_model=resolution_model,
     background_model=background_model,

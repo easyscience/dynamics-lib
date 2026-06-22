@@ -1961,6 +1961,51 @@
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Fitting vanadium data for instrument calibration</strong></p>
+<p>The standard workflow builds a sample model, resolution model, background model, and instrument
+model, then combines them into an Analysis before fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">file_path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5&#39;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s1">&#39;16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="s1">&#39;Vanadium&#39;</span><span class="p">)</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
+
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]))</span>
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
+    <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
+    <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Vanadium Analysis&#39;</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+    <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
+    <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_data_and_model</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Inspecting fitted parameters and fitting a single Q first</strong></p>
+<p>Use <code>Q_index</code> to fit and plot a single Q slice before fitting all Q:
+<div class="language-python highlight"><pre><span></span><code><span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">,</span> <span class="n">Q_index</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_data_and_model</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gaussian width&#39;</span><span class="p">])</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -4845,6 +4890,44 @@ models, the area and width can be fitted separately (or not at all) by specifyin
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Fitting Lorentzian widths to a diffusion model</strong></p>
+<p>After a full Analysis fit, pass the Analysis directly and bind each parameter to a fit function
+using a <code>FitBinding</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="c1"># analysis is an edyn.Analysis object with previously fitted parameters</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
+    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian width&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">diffusion_model</span><span class="p">,</span>
+    <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+    <span class="n">bindings</span><span class="o">=</span><span class="n">binding</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Fitting multiple parameters with separate bindings</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">area_binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
+    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian area&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+    <span class="n">bindings</span><span class="o">=</span><span class="p">[</span><span class="n">binding</span><span class="p">,</span> <span class="n">area_binding</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</code></pre></div>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -6340,6 +6423,51 @@ names are found for the fit functions.</p>
 
         <p>For analysing two-dimensional data, i.e. intensity as function of energy and Q.</p>
 <p>Supports independent fits of each Q value and simultaneous fits of all Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Fitting vanadium data for instrument calibration</strong></p>
+<p>The standard workflow builds a sample model, resolution model, background model, and instrument
+model, then combines them into an Analysis before fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">file_path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5&#39;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s1">&#39;16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="s1">&#39;Vanadium&#39;</span><span class="p">)</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
+
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]))</span>
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
+    <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
+    <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Vanadium Analysis&#39;</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+    <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
+    <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_data_and_model</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Inspecting fitted parameters and fitting a single Q first</strong></p>
+<p>Use <code>Q_index</code> to fit and plot a single Q slice before fitting all Q:
+<div class="language-python highlight"><pre><span></span><code><span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">,</span> <span class="n">Q_index</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_data_and_model</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fit_method</span><span class="o">=</span><span class="s1">&#39;independent&#39;</span><span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_parameters</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gaussian width&#39;</span><span class="p">])</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9289,6 +9417,44 @@ can be changed.</p>
 
         <p>For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.</p>
 <p>Is used primarily in the Analysis class, but can also be used on its own for simpler analyses.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Fitting a single Q slice</strong></p>
+<p>Select a Q index with <code>Q_index</code> to fit only that slice of the dataset:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.analysis.analysis1d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analysis1d</span>
+
+<span class="n">file_path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5&#39;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s1">&#39;16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="s1">&#39;Vanadium&#39;</span><span class="p">)</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
+
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]))</span>
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
+    <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
+    <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">analysis</span> <span class="o">=</span> <span class="n">Analysis1d</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Vanadium 1D Analysis&#39;</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+    <span class="n">sample_model</span><span class="o">=</span><span class="n">sample_model</span><span class="p">,</span>
+    <span class="n">instrument_model</span><span class="o">=</span><span class="n">instrument_model</span><span class="p">,</span>
+    <span class="n">Q_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">analysis</span><span class="o">.</span><span class="n">plot_data_and_model</span><span class="p">(</span><span class="n">plot_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13618,6 +13784,33 @@ fit function callable.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Basic usage with a ModelComponent</strong></p>
+<p>Bind a fit parameter name to any <code>ModelComponent</code> or <code>ComponentCollection</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">fit_func</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">3.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Straight line&#39;</span><span class="p">)</span>
+<span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span><span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Gaussian area&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">fit_func</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Usage with a DiffusionModelBase and specific modes</strong></p>
+<p>For diffusion models, use <code>modes</code> to select which parameter arrays are fitted:
+<div class="language-python highlight"><pre><span></span><code><span class="n">brownian</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Brownian Translational Diffusion&#39;</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
+    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">brownian</span><span class="p">,</span>
+    <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -13760,42 +13953,6 @@ strings, or None.</p>
           </tr>
       </tbody>
     </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <ol>
-<li>Basic usage with a ModelComponent:</li>
-</ol>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit_func</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">3.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Straight line&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span><span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Gaussian area&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">fit_func</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span>
-<span class="go">FitBinding(parameter_name=&#39;Gaussian area&#39;, model=Polynomial(unique_name = Polynomial_1,</span>
-<span class="go">unit = meV, coefficients = [Straight line_c0=3.7, Straight line_c1=-0.5]), modes=None)</span>
-</code></pre></div>
-    <ol>
-<li>Usage with a DiffusionModelBase and specific modes:</li>
-</ol>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">brownian_diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Brownian Translational Diffusion&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">model</span><span class="o">=</span><span class="n">brownian_diffusion_model</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">],</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="go">FitBinding(parameter_name=Lorentzian, model=Brownian Translational Diffusion,</span>
-<span class="go">modes=[&#39;area&#39;, &#39;width&#39;], display_name=FitBinding_1, unique_name=FitBinding_1)</span>
-</code></pre></div>
 
 
 
@@ -14703,6 +14860,44 @@ objects, and to plot the parameters and fit results. The parameters to be analyz
 provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
 simultaneously, and the fit functions can be customized for each parameter. For diffusion
 models, the area and width can be fitted separately (or not at all) by specifying fit settings.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Fitting Lorentzian widths to a diffusion model</strong></p>
+<p>After a full Analysis fit, pass the Analysis directly and bind each parameter to a fit function
+using a <code>FitBinding</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="c1"># analysis is an edyn.Analysis object with previously fitted parameters</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
+    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian width&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">diffusion_model</span><span class="p">,</span>
+    <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+    <span class="n">bindings</span><span class="o">=</span><span class="n">binding</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Fitting multiple parameters with separate bindings</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">area_binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
+    <span class="n">parameter_name</span><span class="o">=</span><span class="s1">&#39;Lorentzian area&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+    <span class="n">bindings</span><span class="o">=</span><span class="p">[</span><span class="n">binding</span><span class="p">,</span> <span class="n">area_binding</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

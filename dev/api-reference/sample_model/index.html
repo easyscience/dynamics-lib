@@ -2455,7 +2455,7 @@
             <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ResolutionModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyResolutionModel&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.ResolutionModel&lt;/code&gt;)" href="#easydynamics.sample_model.ResolutionModel">ResolutionModel</a></code></td>
             <td>
               <div class="doc-md-description">
-                <p>ResolutionModel represents a model of the instrment resolution in an experiment at various Q.</p>
+                <p>ResolutionModel represents a model of the instrument resolution in an experiment at various Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2507,6 +2507,33 @@
 
 
         <p>BackgroundModel represents a model of the background in an experiment at various Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a flat background</strong></p>
+<p>A constant background independent of Q:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]),</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">background</span> <span class="o">=</span> <span class="n">background_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a quadratic background</strong></p>
+<p>Higher-order polynomials can model a sloping or curved baseline:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span>
+<span class="p">)</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4274,43 +4301,27 @@ associated Parameters.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <p>Create a ComponentCollection with two components:</p>
+    <p><strong>Creating a ComponentCollection with multiple components</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">component1</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">component2</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Lorentzian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">component1</span><span class="p">,</span> <span class="n">component2</span><span class="p">])</span>
+</code></pre></div>
+<p><strong>Evaluating, appending, and removing components</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="n">component3</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian2&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component3</span><span class="p">)</span>
+
+<span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">)</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">list_component_names</span><span class="p">()</span>  <span class="c1"># [&#39;Lorentzian1&#39;, &#39;Gaussian2&#39;]</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component1</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component2</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Lorentzian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">component1</span><span class="p">,</span> <span class="n">component2</span><span class="p">])</span>
-</code></pre></div>
-    <p>Append a component to the collection:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">component3</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian2&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component3</span><span class="p">)</span>
-</code></pre></div>
-    <p>Evaluate the collection at a given energy axis:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div>
-    <p>Remove a component by name:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">)</span>
-</code></pre></div>
-    <p>List component names:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">list_component_names</span><span class="p">()</span>
-<span class="go">[&#39;Lorentzian1&#39;, &#39;Gaussian2&#39;]</span>
-</code></pre></div>
 
 
 
@@ -6630,6 +6641,30 @@ which would prevent normalization.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Damped Harmonic Oscillator</strong></p>
+<p>The <code>center</code> parameter is the resonance frequency, which must be positive. Both phonon peaks
+(at ±center) are captured by the model:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">dho</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameters after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Phonon&#39;</span><span class="p">)</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.3</span>
+</code></pre></div>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -7946,6 +7981,29 @@ fixed, which is typically what you want in QENS.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a DeltaFunction (elastic line)</strong></p>
+<p>The DeltaFunction evaluates to zero everywhere when called directly. It acts as an identity in
+convolutions, making it useful for modelling the elastic line in QENS:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># all zeros except at the bin nearest to center</span>
+</code></pre></div></p>
+<p><strong>Creating a DeltaFunction with a free center</strong></p>
+<p>Pass a numeric value for <code>center</code> to place the elastic line at a specific energy transfer:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">delta</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -9165,6 +9223,29 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 <p>The intensity is given by</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)}, \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> describes the rate of decay or growth.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating an Exponential with a fixed center</strong></p>
+<p>By default the center is fixed at 0. A negative <code>rate</code> gives a decaying exponential:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating an Exponential with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10516,6 +10597,36 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
 
         <p>Model component defined by a symbolic expression.</p>
+<p>The expression must contain <code>x</code> as the independent variable. All other symbols are treated as
+free parameters, which can be accessed and set as attributes after construction. Supported
+functions include <code>exp</code>, <code>sin</code>, <code>cos</code>, <code>sqrt</code>, <code>erf</code>, and others — see the
+<code>_ALLOWED_FUNCS</code> class variable for the full list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Defining a custom Gaussian expression</strong></p>
+<p>Parameters are given as a dictionary of initial values and can be accessed as attributes after
+construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">expr</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ExpressionComponent</span><span class="p">(</span>
+    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameter values after construction</strong></p>
+<p>Parameters can be set directly as attributes:
+<div class="language-python highlight"><pre><span></span><code><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">expr</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10688,19 +10799,6 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
           </tr>
       </tbody>
     </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span> <span class="o">=</span> <span class="n">ExpressionComponent</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-</code></pre></div>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div>
 
 
 
@@ -11981,11 +12079,35 @@ can be changed.</p>
 
         <p>Model of a Gaussian function.</p>
 <p>The intensity is given by</p>
-<p>$$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
- x_0}{\sigma}\right)^2 \right) $$</p>
+<div class="arithmatex">\[ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+x_0}{\sigma}\right)^2 \right) \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the area, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(\sigma\)</span> is the width.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Gaussian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Gaussian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to update parameter values after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">g</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13309,6 +13431,29 @@ want in QENS.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Lorentzian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Lorentzian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;QE peak&#39;</span><span class="p">)</span>
+<span class="n">l</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">l</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -14625,6 +14770,27 @@ the coefficients.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a constant background (degree 0)</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.5</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Creating a linear background (degree 1)</strong></p>
+<p>Coefficients are ordered as <code>[c0, c1, ...]</code>, where <code>c0</code> is the constant term:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -15935,6 +16101,31 @@ can be changed.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
 <p>Use scipy.special.voigt_profile to evaluate the Voigt profile.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Voigt profile with a fixed center (typical QENS use)</strong></p>
+<p>The Voigt profile is a convolution of a Gaussian and a Lorentzian. By default the center is
+fixed at 0:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Setting the Gaussian and Lorentzian widths independently</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to adjust the two width components after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">v</span><span class="o">.</span><span class="n">gaussian_width</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">v</span><span class="o">.</span><span class="n">lorentzian_width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -17348,14 +17539,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span> <span class="o">&gt;&gt;&gt;</span><span class="n">energy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span><span class="o">=</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;DiffusionModel&quot;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">diffusion_coefficient</span><span class="o">=</span> <span class="n">diffusion_coefficient</span><span class="p">,)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
-</code></pre></div>
-    <p>See also the tutorials.</p>
+    <p><strong>Creating a BrownianTranslationalDiffusion model</strong></p>
+<p>The model creates one Lorentzian per Q-value, with width <span class="arithmatex">\(D Q^2\)</span>. Pass <code>Q</code> values at
+construction or later via <code>create_component_collections</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -19706,23 +19904,24 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_u_squared</span> <span class="o">=</span> <span class="mf">0.02</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">A_0</span> <span class="o">=</span> <span class="mf">0.7</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lorentzian_width</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DeltaLorentz</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">mean_u_squared</span><span class="o">=</span><span class="n">mean_u_squared</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">A_0</span><span class="o">=</span><span class="n">A_0</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">lorentzian_width</span><span class="o">=</span><span class="n">lorentzian_width</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">allow_Q_variation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A_0&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;lorentzian_width&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-</code></pre></div>
-    <p>See also the tutorials.</p>
+    <p><strong>Creating a DeltaLorentz model with Q-dependent parameters</strong></p>
+<p>Set <code>allow_Q_variation</code> to allow individual parameters to vary with Q:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaLorentz</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">mean_u_squared</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">A_0</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">allow_Q_variation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A_0&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;lorentzian_width&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -22510,20 +22709,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">relaxation_time</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># ps</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="n">diffusion_coefficient</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">relaxation_time</span><span class="o">=</span><span class="n">relaxation_time</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
-</code></pre></div>
-    <p>See also the tutorials..</p>
+    <p><strong>Creating a JumpTranslationalDiffusion model</strong></p>
+<p>Pass the diffusion coefficient (in m²/s) and relaxation time (in ps) along with Q values:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">relaxation_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24956,6 +25156,31 @@ offset in the energy axis.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating an InstrumentModel with resolution and background</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]))</span>
+
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+    <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
+    <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Fixing resolution parameters after calibration</strong></p>
+<p>After fitting a vanadium run, fix the resolution parameters before fitting the sample:
+<div class="language-python highlight"><pre><span></span><code><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_resolution_parameters</span><span class="p">()</span>
+<span class="n">instrument_model</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -26559,7 +26784,32 @@ for all Q values.</p>
 
 
 
-        <p>ResolutionModel represents a model of the instrment resolution in an experiment at various Q.</p>
+        <p>ResolutionModel represents a model of the instrument resolution in an experiment at various Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Gaussian resolution model</strong></p>
+<p>A single Gaussian is the most common resolution model. Note that <code>DeltaFunction</code>,
+<code>Polynomial</code>, and <code>Exponential</code> components are not allowed in a ResolutionModel:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Building a resolution model from a fitted SampleModel</strong></p>
+<p>After fitting vanadium data with a SampleModel, use <code>from_sample_model</code> to convert it
+directly into a ResolutionModel:
+<div class="language-python highlight"><pre><span></span><code><span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="o">.</span><span class="n">from_sample_model</span><span class="p">(</span><span class="n">fitted_sample_model</span><span class="p">)</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -28517,6 +28767,39 @@ bool.</p>
 by Q and optionally temperature. Generates ComponentCollections for each Q value, combining
 components from the base model and diffusion models.</p>
 <p>Applies detailed balancing based on temperature if provided.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a SampleModel with a static component</strong></p>
+<p>A single component is copied to each Q value automatically:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Elastic&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;QE&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">intensity</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Adding a diffusion model and enabling detailed balance</strong></p>
+<p>Pass <code>temperature</code> to apply the detailed balance factor automatically:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">btd</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span><span class="n">diffusion_models</span><span class="o">=</span><span class="n">btd</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">intensity</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -31202,6 +31485,33 @@ from diffusion models.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a flat background</strong></p>
+<p>A constant background independent of Q:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]),</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">background</span> <span class="o">=</span> <span class="n">background_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a quadratic background</strong></p>
+<p>Higher-order polynomials can model a sloping or curved baseline:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -33033,43 +33343,27 @@ associated Parameters.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <p>Create a ComponentCollection with two components:</p>
+    <p><strong>Creating a ComponentCollection with multiple components</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">component1</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">component2</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Lorentzian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">component1</span><span class="p">,</span> <span class="n">component2</span><span class="p">])</span>
+</code></pre></div>
+<p><strong>Evaluating, appending, and removing components</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="n">component3</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian2&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component3</span><span class="p">)</span>
+
+<span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">)</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">list_component_names</span><span class="p">()</span>  <span class="c1"># [&#39;Lorentzian1&#39;, &#39;Gaussian2&#39;]</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component1</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component2</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Lorentzian1&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">component1</span><span class="p">,</span> <span class="n">component2</span><span class="p">])</span>
-</code></pre></div>
-    <p>Append a component to the collection:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">component3</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Gaussian2&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component3</span><span class="p">)</span>
-</code></pre></div>
-    <p>Evaluate the collection at a given energy axis:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div>
-    <p>Remove a component by name:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Gaussian1&#39;</span><span class="p">)</span>
-</code></pre></div>
-    <p>List component names:</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">list_component_names</span><span class="p">()</span>
-<span class="go">[&#39;Lorentzian1&#39;, &#39;Gaussian2&#39;]</span>
-</code></pre></div>
 
 
 
@@ -35628,6 +35922,30 @@ provided.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Damped Harmonic Oscillator</strong></p>
+<p>The <code>center</code> parameter is the resonance frequency, which must be positive. Both phonon peaks
+(at ±center) are captured by the model:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">dho</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameters after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Phonon&#39;</span><span class="p">)</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.3</span>
+</code></pre></div>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -36944,6 +37262,29 @@ fixed, which is typically what you want in QENS.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a DeltaFunction (elastic line)</strong></p>
+<p>The DeltaFunction evaluates to zero everywhere when called directly. It acts as an identity in
+convolutions, making it useful for modelling the elastic line in QENS:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># all zeros except at the bin nearest to center</span>
+</code></pre></div></p>
+<p><strong>Creating a DeltaFunction with a free center</strong></p>
+<p>Pass a numeric value for <code>center</code> to place the elastic line at a specific energy transfer:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">delta</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -38163,6 +38504,29 @@ integral is equal to the area. It acts as an identity in convolutions.</p>
 <p>The intensity is given by</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)}, \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> describes the rate of decay or growth.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating an Exponential with a fixed center</strong></p>
+<p>By default the center is fixed at 0. A negative <code>rate</code> gives a decaying exponential:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating an Exponential with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -39514,6 +39878,36 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
 
 
         <p>Model component defined by a symbolic expression.</p>
+<p>The expression must contain <code>x</code> as the independent variable. All other symbols are treated as
+free parameters, which can be accessed and set as attributes after construction. Supported
+functions include <code>exp</code>, <code>sin</code>, <code>cos</code>, <code>sqrt</code>, <code>erf</code>, and others — see the
+<code>_ALLOWED_FUNCS</code> class variable for the full list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Defining a custom Gaussian expression</strong></p>
+<p>Parameters are given as a dictionary of initial values and can be accessed as attributes after
+construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">expr</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ExpressionComponent</span><span class="p">(</span>
+    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameter values after construction</strong></p>
+<p>Parameters can be set directly as attributes:
+<div class="language-python highlight"><pre><span></span><code><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">expr</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -39686,19 +40080,6 @@ intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$</p>
           </tr>
       </tbody>
     </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span> <span class="o">=</span> <span class="n">ExpressionComponent</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-</code></pre></div>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div>
 
 
 
@@ -40979,11 +41360,35 @@ can be changed.</p>
 
         <p>Model of a Gaussian function.</p>
 <p>The intensity is given by</p>
-<p>$$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
- x_0}{\sigma}\right)^2 \right) $$</p>
+<div class="arithmatex">\[ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+x_0}{\sigma}\right)^2 \right) \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the area, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(\sigma\)</span> is the width.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Gaussian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Gaussian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to update parameter values after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">g</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42307,6 +42712,29 @@ want in QENS.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Lorentzian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Lorentzian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;QE peak&#39;</span><span class="p">)</span>
+<span class="n">l</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">l</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -43623,6 +44051,27 @@ the coefficients.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a constant background (degree 0)</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.5</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Creating a linear background (degree 1)</strong></p>
+<p>Coefficients are ordered as <code>[c0, c1, ...]</code>, where <code>c0</code> is the constant term:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -44933,6 +45382,31 @@ can be changed.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
 <p>Use scipy.special.voigt_profile to evaluate the Voigt profile.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Voigt profile with a fixed center (typical QENS use)</strong></p>
+<p>The Voigt profile is a convolution of a Gaussian and a Lorentzian. By default the center is
+fixed at 0:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Setting the Gaussian and Lorentzian widths independently</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to adjust the two width components after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">v</span><span class="o">.</span><span class="n">gaussian_width</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">v</span><span class="o">.</span><span class="n">lorentzian_width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -46404,6 +46878,30 @@ half width at half max lorentzian_width, centered at center, with area equal to 
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Damped Harmonic Oscillator</strong></p>
+<p>The <code>center</code> parameter is the resonance frequency, which must be positive. Both phonon peaks
+(at ±center) are captured by the model:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">dho</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameters after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">dho</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DampedHarmonicOscillator</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Phonon&#39;</span><span class="p">)</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">dho</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.3</span>
+</code></pre></div>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -47789,6 +48287,29 @@ fixed, which is typically what you want in QENS.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a DeltaFunction (elastic line)</strong></p>
+<p>The DeltaFunction evaluates to zero everywhere when called directly. It acts as an identity in
+convolutions, making it useful for modelling the elastic line in QENS:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># all zeros except at the bin nearest to center</span>
+</code></pre></div></p>
+<p><strong>Creating a DeltaFunction with a free center</strong></p>
+<p>Pass a numeric value for <code>center</code> to place the elastic line at a specific energy transfer:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">delta</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -49077,6 +49598,29 @@ can be changed.</p>
 <p>The intensity is given by</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)}, \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> describes the rate of decay or growth.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating an Exponential with a fixed center</strong></p>
+<p>By default the center is fixed at 0. A negative <code>rate</code> gives a decaying exponential:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating an Exponential with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">amplitude</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rate</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50497,6 +51041,36 @@ can be changed.</p>
 
 
         <p>Model component defined by a symbolic expression.</p>
+<p>The expression must contain <code>x</code> as the independent variable. All other symbols are treated as
+free parameters, which can be accessed and set as attributes after construction. Supported
+functions include <code>exp</code>, <code>sin</code>, <code>cos</code>, <code>sqrt</code>, <code>erf</code>, and others — see the
+<code>_ALLOWED_FUNCS</code> class variable for the full list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Defining a custom Gaussian expression</strong></p>
+<p>Parameters are given as a dictionary of initial values and can be accessed as attributes after
+construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">expr</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ExpressionComponent</span><span class="p">(</span>
+    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Modifying parameter values after construction</strong></p>
+<p>Parameters can be set directly as attributes:
+<div class="language-python highlight"><pre><span></span><code><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">expr</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.5</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -50669,19 +51243,6 @@ can be changed.</p>
           </tr>
       </tbody>
     </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span> <span class="o">=</span> <span class="n">ExpressionComponent</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;A * exp(-(x - x0)**2 / (2*sigma**2))&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Gaussian Peak&#39;</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-</code></pre></div>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">expr</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div>
 
 
 
@@ -52031,11 +52592,35 @@ can be changed.</p>
 
         <p>Model of a Gaussian function.</p>
 <p>The intensity is given by</p>
-<p>$$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
- x_0}{\sigma}\right)^2 \right) $$</p>
+<div class="arithmatex">\[ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+x_0}{\sigma}\right)^2 \right) \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the area, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(\sigma\)</span> is the width.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Gaussian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Gaussian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to update parameter values after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">g</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -53423,6 +54008,29 @@ where <span class="arithmatex">\(A\)</span> is the area, <span class="arithmatex
 (HWHM).</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Lorentzian with a fixed center (typical QENS use)</strong></p>
+<p>By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Creating a Lorentzian with a free center and modifying parameters</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;QE peak&#39;</span><span class="p">)</span>
+<span class="n">l</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">l</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -56054,6 +56662,27 @@ the coefficients.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a constant background (degree 0)</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">1.5</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Creating a linear background (degree 1)</strong></p>
+<p>Coefficients are ordered as <code>[c0, c1, ...]</code>, where <code>c0</code> is the constant term:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -57433,6 +58062,31 @@ can be changed.</p>
 <p>If the center is not provided, it will be centered at 0 and fixed, which is typically what you
 want in QENS.</p>
 <p>Use scipy.special.voigt_profile to evaluate the Voigt profile.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Voigt profile with a fixed center (typical QENS use)</strong></p>
+<p>The Voigt profile is a convolution of a Gaussian and a Lorentzian. By default the center is
+fixed at 0:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Setting the Gaussian and Lorentzian widths independently</strong></p>
+<p>Pass a numeric value for <code>center</code> to leave it free during fitting, and use the property
+setters to adjust the two width components after construction:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Voigt</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">gaussian_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">)</span>
+<span class="n">v</span><span class="o">.</span><span class="n">gaussian_width</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">v</span><span class="o">.</span><span class="n">lorentzian_width</span> <span class="o">=</span> <span class="mf">0.2</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -58978,14 +59632,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span> <span class="o">&gt;&gt;&gt;</span><span class="n">energy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span><span class="o">=</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;DiffusionModel&quot;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">diffusion_coefficient</span><span class="o">=</span> <span class="n">diffusion_coefficient</span><span class="p">,)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
-</code></pre></div>
-    <p>See also the tutorials.</p>
+    <p><strong>Creating a BrownianTranslationalDiffusion model</strong></p>
+<p>The model creates one Lorentzian per Q-value, with width <span class="arithmatex">\(D Q^2\)</span>. Pass <code>Q</code> values at
+construction or later via <code>create_component_collections</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -61334,20 +61995,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">relaxation_time</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># ps</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="n">diffusion_coefficient</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">relaxation_time</span><span class="o">=</span><span class="n">relaxation_time</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
-</code></pre></div>
-    <p>See also the tutorials..</p>
+    <p><strong>Creating a JumpTranslationalDiffusion model</strong></p>
+<p>Pass the diffusion coefficient (in m²/s) and relaxation time (in ps) along with Q values:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">relaxation_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -63846,14 +64508,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span> <span class="o">&gt;&gt;&gt;</span><span class="n">energy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span><span class="o">=</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;DiffusionModel&quot;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">diffusion_coefficient</span><span class="o">=</span> <span class="n">diffusion_coefficient</span><span class="p">,)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
-</code></pre></div>
-    <p>See also the tutorials.</p>
+    <p><strong>Creating a BrownianTranslationalDiffusion model</strong></p>
+<p>The model creates one Lorentzian per Q-value, with width <span class="arithmatex">\(D Q^2\)</span>. Pass <code>Q</code> values at
+construction or later via <code>create_component_collections</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -66273,23 +66942,24 @@ the same at all <span class="arithmatex">\(Q\)</span> or be allowed to vary with
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_u_squared</span> <span class="o">=</span> <span class="mf">0.02</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">A_0</span> <span class="o">=</span> <span class="mf">0.7</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lorentzian_width</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DeltaLorentz</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">mean_u_squared</span><span class="o">=</span><span class="n">mean_u_squared</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">A_0</span><span class="o">=</span><span class="n">A_0</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">lorentzian_width</span><span class="o">=</span><span class="n">lorentzian_width</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">allow_Q_variation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A_0&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;lorentzian_width&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-<span class="gp">... </span>    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-</code></pre></div>
-    <p>See also the tutorials.</p>
+    <p><strong>Creating a DeltaLorentz model with Q-dependent parameters</strong></p>
+<p>Set <code>allow_Q_variation</code> to allow individual parameters to vary with Q:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">DeltaLorentz</span><span class="p">(</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;DiffusionModel&#39;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">mean_u_squared</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">A_0</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">lorentzian_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">allow_Q_variation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A_0&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;lorentzian_width&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -71195,20 +71865,21 @@ Q-values.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">501</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="mf">2.4e-9</span>  <span class="c1"># m^2/s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">relaxation_time</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># ps</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="n">diffusion_coefficient</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">relaxation_time</span><span class="o">=</span><span class="n">relaxation_time</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
-</code></pre></div>
-    <p>See also the tutorials..</p>
+    <p><strong>Creating a JumpTranslationalDiffusion model</strong></p>
+<p>Pass the diffusion coefficient (in m²/s) and relaxation time (in ps) along with Q values:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">diffusion_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">JumpTranslationalDiffusion</span><span class="p">(</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span>
+    <span class="n">relaxation_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">component_collections</span> <span class="o">=</span> <span class="n">diffusion_model</span><span class="o">.</span><span class="n">create_component_collections</span><span class="p">()</span>
+</code></pre></div></p>
+<p>See also the tutorials.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -73712,6 +74383,31 @@ ComponentCollections is returned.</p>
         <p>InstrumentModel represents a model of the instrument in an experiment at various Q.</p>
 <p>It can contain a model of the resolution function for convolutions, of the background and an
 offset in the energy axis.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating an InstrumentModel with resolution and background</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="n">background_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BackgroundModel</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">]))</span>
+
+<span class="n">instrument_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">InstrumentModel</span><span class="p">(</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+    <span class="n">resolution_model</span><span class="o">=</span><span class="n">resolution_model</span><span class="p">,</span>
+    <span class="n">background_model</span><span class="o">=</span><span class="n">background_model</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Fixing resolution parameters after calibration</strong></p>
+<p>After fitting a vanadium run, fix the resolution parameters before fitting the sample:
+<div class="language-python highlight"><pre><span></span><code><span class="n">instrument_model</span><span class="o">.</span><span class="n">fix_resolution_parameters</span><span class="p">()</span>
+<span class="n">instrument_model</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">(</span><span class="n">Q_index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77264,7 +77960,7 @@ can be changed.</p>
             <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ResolutionModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyResolutionModel&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;meV&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;components&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.resolution_model.ResolutionModel&lt;/code&gt;)" href="#easydynamics.sample_model.resolution_model.ResolutionModel">ResolutionModel</a></code></td>
             <td>
               <div class="doc-md-description">
-                <p>ResolutionModel represents a model of the instrment resolution in an experiment at various Q.</p>
+                <p>ResolutionModel represents a model of the instrument resolution in an experiment at various Q.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77304,7 +78000,32 @@ can be changed.</p>
 
 
 
-        <p>ResolutionModel represents a model of the instrment resolution in an experiment at various Q.</p>
+        <p>ResolutionModel represents a model of the instrument resolution in an experiment at various Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a Gaussian resolution model</strong></p>
+<p>A single Gaussian is the most common resolution model. Note that <code>DeltaFunction</code>,
+<code>Polynomial</code>, and <code>Exponential</code> components are not allowed in a ResolutionModel:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Building a resolution model from a fitted SampleModel</strong></p>
+<p>After fitting vanadium data with a SampleModel, use <code>from_sample_model</code> to convert it
+directly into a ResolutionModel:
+<div class="language-python highlight"><pre><span></span><code><span class="n">resolution_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ResolutionModel</span><span class="o">.</span><span class="n">from_sample_model</span><span class="p">(</span><span class="n">fitted_sample_model</span><span class="p">)</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -79331,6 +80052,39 @@ associated Parameters.</p>
 by Q and optionally temperature. Generates ComponentCollections for each Q value, combining
 components from the base model and diffusion models.</p>
 <p>Applies detailed balancing based on temperature if provided.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating a SampleModel with a static component</strong></p>
+<p>A single component is copied to each Q value automatically:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Elastic&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;QE&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">intensity</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Adding a diffusion model and enabling detailed balance</strong></p>
+<p>Pass <code>temperature</code> to apply the detailed balance factor automatically:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">btd</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">BrownianTranslationalDiffusion</span><span class="p">(</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="mf">2.4e-9</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sample_model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SampleModel</span><span class="p">(</span><span class="n">diffusion_models</span><span class="o">=</span><span class="n">btd</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="n">Q</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">intensity</span> <span class="o">=</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

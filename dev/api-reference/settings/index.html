@@ -1865,6 +1865,24 @@
 
 
         <p>Settings for numerical convolutions.</p>
+<p>These settings are passed to an <code>Analysis</code> to control how the numerical convolution is
+performed. Increasing <code>upsample_factor</code> and <code>extension_factor</code> improves accuracy at the
+cost of computation time.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating custom convolution settings and passing to an Analysis</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ConvolutionSettings</span><span class="p">(</span><span class="n">upsample_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span><span class="n">convolution_settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Suppressing warnings about peak widths</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ConvolutionSettings</span><span class="p">(</span><span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2749,6 +2767,28 @@ notebooks.</p>
 
 
         <p>Class to manage detailed balance settings for a SampleModel or Analysis.</p>
+<p>Detailed balance describes the asymmetry between energy gain and energy loss scattering. When
+<code>use_detailed_balance</code> is <code>True</code> and a temperature is provided, the scattering function is
+multiplied by the detailed balance factor <span class="arithmatex">\(E(1+n(E))\)</span>. Setting
+<code>normalize_detailed_balance=True</code> further divides by <span class="arithmatex">\(k_B T\)</span>, making the factor dimensionless
+with value 1 at <span class="arithmatex">\(E=0\)</span>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Enabling detailed balance without temperature normalisation</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">DetailedBalanceSettings</span><span class="p">(</span>
+    <span class="n">use_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Passing custom settings to an Analysis</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span><span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3520,6 +3560,24 @@ notebooks.</p>
 
 
         <p>Settings for numerical convolutions.</p>
+<p>These settings are passed to an <code>Analysis</code> to control how the numerical convolution is
+performed. Increasing <code>upsample_factor</code> and <code>extension_factor</code> improves accuracy at the
+cost of computation time.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Creating custom convolution settings and passing to an Analysis</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ConvolutionSettings</span><span class="p">(</span><span class="n">upsample_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">extension_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span><span class="n">convolution_settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Suppressing warnings about peak widths</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ConvolutionSettings</span><span class="p">(</span><span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4473,6 +4531,28 @@ notebooks.</p>
 
 
         <p>Class to manage detailed balance settings for a SampleModel or Analysis.</p>
+<p>Detailed balance describes the asymmetry between energy gain and energy loss scattering. When
+<code>use_detailed_balance</code> is <code>True</code> and a temperature is provided, the scattering function is
+multiplied by the detailed balance factor <span class="arithmatex">\(E(1+n(E))\)</span>. Setting
+<code>normalize_detailed_balance=True</code> further divides by <span class="arithmatex">\(k_B T\)</span>, making the factor dimensionless
+with value 1 at <span class="arithmatex">\(E=0\)</span>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Enabling detailed balance without temperature normalisation</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">DetailedBalanceSettings</span><span class="p">(</span>
+    <span class="n">use_detailed_balance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">normalize_detailed_balance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Passing custom settings to an Analysis</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="n">analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">Analysis</span><span class="p">(</span><span class="n">detailed_balance_settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

@@ -1965,6 +1965,45 @@ narrow.</p>
 <!-- prettier-ignore-end -->
 
 
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Convolving a sample model with a resolution function</strong></p>
+<p>Analytical convolution is used automatically when both components are <code>DeltaFunction</code>,
+<code>Gaussian</code>, <code>Lorentzian</code>, or <code>Voigt</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.convolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convolution</span>
+
+<span class="n">sample_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
+<span class="p">)</span>
+<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+    <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
+    <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Including detailed balance and improving numerical accuracy</strong></p>
+<p>Providing <code>temperature</code> switches to numerical convolution with detailed balance applied.
+Increase <code>upsample_factor</code> and <code>extension_factor</code> for better accuracy with narrow peaks:
+<div class="language-python highlight"><pre><span></span><code><span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+    <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
+    <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">convolver</span><span class="o">.</span><span class="n">upsample_factor</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">convolver</span><span class="o">.</span><span class="n">extension_factor</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
+</code></pre></div></p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -5235,6 +5274,45 @@ case, all convolutions are handled numerically. Includes a setting to normalize 
 balance correction. Includes optional upsampling and extended range to improve accuracy of the
 numerical convolutions. Also warns about numerical instabilities if peaks are very wide or very
 narrow.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p><strong>Convolving a sample model with a resolution function</strong></p>
+<p>Analytical convolution is used automatically when both components are <code>DeltaFunction</code>,
+<code>Gaussian</code>, <code>Lorentzian</code>, or <code>Voigt</code>:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easydynamics.convolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Convolution</span>
+
+<span class="n">sample_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span>
+    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">DeltaFunction</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">sm</span><span class="o">.</span><span class="n">Lorentzian</span><span class="p">(</span><span class="n">area</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)]</span>
+<span class="p">)</span>
+<span class="n">resolution_components</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">ComponentCollection</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="n">sm</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)])</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+    <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
+    <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
+</code></pre></div></p>
+<p><strong>Including detailed balance and improving numerical accuracy</strong></p>
+<p>Providing <code>temperature</code> switches to numerical convolution with detailed balance applied.
+Increase <code>upsample_factor</code> and <code>extension_factor</code> for better accuracy with narrow peaks:
+<div class="language-python highlight"><pre><span></span><code><span class="n">convolver</span> <span class="o">=</span> <span class="n">Convolution</span><span class="p">(</span>
+    <span class="n">sample_components</span><span class="o">=</span><span class="n">sample_components</span><span class="p">,</span>
+    <span class="n">resolution_components</span><span class="o">=</span><span class="n">resolution_components</span><span class="p">,</span>
+    <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">convolver</span><span class="o">.</span><span class="n">upsample_factor</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">convolver</span><span class="o">.</span><span class="n">extension_factor</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">convolver</span><span class="o">.</span><span class="n">convolution</span><span class="p">()</span>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8810,7 +8888,7 @@ applied to the sample model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;K&#34;</code>
+                  <code>&#39;K&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8848,7 +8926,7 @@ applied to the sample model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;meV&#34;</code>
+                  <code>&#39;meV&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8867,7 +8945,7 @@ applied to the sample model.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;MyConvolution&#34;</code>
+                  <code>&#39;MyConvolution&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -10629,7 +10707,7 @@ class has no convolution functionality.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;K&#34;</code>
+                  <code>&#39;K&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -10667,7 +10745,7 @@ class has no convolution functionality.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;meV&#34;</code>
+                  <code>&#39;meV&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -10686,7 +10764,7 @@ class has no convolution functionality.</p>
               </div>
             </td>
             <td>
-                  <code>&#34;MyConvolution&#34;</code>
+                  <code>&#39;MyConvolution&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
