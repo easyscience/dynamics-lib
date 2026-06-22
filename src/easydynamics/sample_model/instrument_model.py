@@ -106,6 +106,8 @@ class InstrumentModel(NewBase):
             unit=self.unit,
             fixed=False,
         )
+        self._energy_offsets: list = []
+        self._energy_offsets_is_dirty = True
         self._Q = _validate_and_convert_Q(Q)
         self._on_Q_change()
 
@@ -350,6 +352,7 @@ class InstrumentModel(NewBase):
         self._background_model.convert_unit(unit)
         self._resolution_model.convert_unit(unit)
         self._energy_offset.convert_unit(unit)
+        self._ensure_energy_offsets_current()
         for offset in self._energy_offsets:
             offset.convert_unit(unit)
 
@@ -382,6 +385,7 @@ class InstrumentModel(NewBase):
         if self._Q is None:
             return []
 
+        self._ensure_energy_offsets_current()
         if Q_index is None:
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
@@ -441,6 +445,7 @@ class InstrumentModel(NewBase):
         if self._Q is None:
             raise ValueError('No Q values are set in the InstrumentModel.')
 
+        self._ensure_energy_offsets_current()
         if Q_index is None:
             return self._energy_offsets
 
@@ -508,6 +513,7 @@ class InstrumentModel(NewBase):
             If Q_index is out of bounds for the Q values in the InstrumentModel.
         """
 
+        self._ensure_energy_offsets_current()
         if Q_index is None:
             for offset in self._energy_offsets:
                 offset.fixed = fixed
@@ -521,6 +527,12 @@ class InstrumentModel(NewBase):
                 )
             self._energy_offsets[Q_index].fixed = fixed
 
+    def _ensure_energy_offsets_current(self) -> None:
+        """Rebuild energy offset Parameters if Q has changed since they were last built."""
+        if self._energy_offsets_is_dirty:
+            self._generate_energy_offsets()
+            self._energy_offsets_is_dirty = False
+
     def _generate_energy_offsets(self) -> None:
         """Generate energy offset Parameters for each Q value."""
         if self._Q is None:
@@ -531,12 +543,13 @@ class InstrumentModel(NewBase):
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
-        self._generate_energy_offsets()
+        self._energy_offsets_is_dirty = True
         self.resolution_model.Q = self.Q
         self.background_model.Q = self.Q
 
     def _on_energy_offset_change(self) -> None:
         """Handle changes to the energy offset."""
+        self._ensure_energy_offsets_current()
         for offset in self._energy_offsets:
             offset.value = self._energy_offset.value
 

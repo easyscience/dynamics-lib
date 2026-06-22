@@ -151,25 +151,6 @@ class ConvolutionBase(EasyDynamicsModelBase):
         energy_with_offset.values = self.energy.values - self.energy_offset.value
         return energy_with_offset
 
-    @energy_with_offset.setter
-    def energy_with_offset(self, _value: sc.Variable) -> None:
-        """
-        Energy with offset is a read-only property derived from energy and energy_offset.
-
-        Parameters
-        ----------
-        _value : sc.Variable
-            The value to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always raised since energy_with_offset is read-only.
-        """
-        raise AttributeError(
-            'Energy with offset is a read-only property derived from energy and energy_offset.'
-        )
-
     @property
     def energy(self) -> sc.Variable:
         """

@@ -106,6 +106,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             unique_name=unique_name,
         )
 
+        self._warn_if_duplicate_names()
+
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
@@ -196,6 +198,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             self.extend(component)
         else:
             self.append(component)
+        self._warn_if_duplicate_names()
 
     def list_component_names(self) -> list[str]:
         """
@@ -337,6 +340,27 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             param.fixed = False
 
     # ------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------
+
+    def _warn_if_duplicate_names(self) -> None:
+        """Warn if any two components share the same name."""
+        names = [c.name for c in self]
+        seen: set[str] = set()
+        dups: set[str] = set()
+        for name in names:
+            if name in seen:
+                dups.add(name)
+            seen.add(name)
+        if dups:
+            warnings.warn(
+                f'Duplicate component names in ComponentCollection: {sorted(dups)}. '
+                'Components with the same name will produce duplicate parameter names.',
+                UserWarning,
+                stacklevel=3,
+            )
+
+    # ------------------------------------------------------------------
     # Dunder methods
     # ------------------------------------------------------------------
 
@@ -357,6 +381,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         )
 
     def to_dict(self) -> dict:
+        """
+        Serialise the ComponentCollection to a dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the ComponentCollection.
+        """
         return {
             '@module': self.__class__.__module__,
             '@class': self.__class__.__name__,
@@ -368,6 +400,19 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     @classmethod
     def from_dict(cls, obj_dict: dict) -> ComponentCollection:
+        """
+        Deserialise a ComponentCollection from its dictionary representation.
+
+        Parameters
+        ----------
+        obj_dict : dict
+            Dictionary representation of the ComponentCollection, as produced by to_dict().
+
+        Returns
+        -------
+        ComponentCollection
+            The deserialised ComponentCollection.
+        """
 
         def deserialise_component(d: dict) -> ModelComponent:
             """

@@ -465,3 +465,25 @@ class TestComponentCollection:
                 assert param_copy.min == param_orig.min
                 assert param_copy.max == param_orig.max
                 assert param_copy.fixed == param_orig.fixed
+
+    def test_warns_on_duplicate_names_at_init(self):
+        g1 = Gaussian(name='SameName', display_name='Display1', area=1.0)
+        g2 = Gaussian(name='SameName', display_name='Display2', area=2.0)
+
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            ComponentCollection(components=[g1, g2])
+
+    def test_warns_on_duplicate_names_on_append(self):
+        g1 = Gaussian(name='SameName', display_name='Display1', area=1.0)
+        g2 = Gaussian(name='SameName', display_name='Display2', area=2.0)
+        collection = ComponentCollection(components=[g1])
+
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            collection.append_component(g2)
+
+    def test_no_warning_with_unique_names(self, recwarn):
+        g1 = Gaussian(name='Name1', display_name='Display1', area=1.0)
+        g2 = Gaussian(name='Name2', display_name='Display2', area=2.0)
+        ComponentCollection(components=[g1, g2])
+        user_warnings = [w for w in recwarn.list if issubclass(w.category, UserWarning)]
+        assert not user_warnings

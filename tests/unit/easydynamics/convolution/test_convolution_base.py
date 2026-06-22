@@ -252,10 +252,7 @@ class TestConvolutionBase:
 
     def test_energy_with_offset_setter_raises(self, convolution_base):
         # WHEN THEN EXPECT
-        with pytest.raises(
-            AttributeError,
-            match='is a read-only property',
-        ):
+        with pytest.raises(AttributeError):
             convolution_base.energy_with_offset = 5
 
     def test_sample_components_property(self, convolution_base):

@@ -297,8 +297,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         """
         Create ComponentCollection components for the diffusion model at given Q values.
 
-        TypeError If component_display_name is not a string. If component_name is not a string.
-
         Returns
         -------
         list[ComponentCollection]

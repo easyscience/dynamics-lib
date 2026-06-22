@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from collections.abc import Iterable
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -103,17 +105,7 @@ class AnalysisBase(EasyDynamicsModelBase):
                 'convolution_settings must be an instance of ConvolutionSettings or None.'
             )
 
-        if extra_parameters is not None:
-            if isinstance(extra_parameters, Parameter):
-                self._extra_parameters = [extra_parameters]
-            elif isinstance(extra_parameters, list) and all(
-                isinstance(p, Parameter) for p in extra_parameters
-            ):
-                self._extra_parameters = extra_parameters
-            else:
-                raise TypeError('extra_parameters must be a Parameter or a list of Parameters.')
-        else:
-            self._extra_parameters = []
+        self.extra_parameters = extra_parameters
 
         if detailed_balance_settings is None:
             self._detailed_balance_settings = DetailedBalanceSettings()
@@ -266,7 +258,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         Returns
         -------
         sc.Variable | None
-            The energy values from the associated.
+            The energy values from the associated Experiment, if available, and None if not.
         """
 
         return self.experiment.energy
@@ -451,26 +443,10 @@ class AnalysisBase(EasyDynamicsModelBase):
         -------
         list[Parameter]
             A list of parameters that are near their bounds.
-
-        Raises
-        ------
-        TypeError
-            If rtol or atol is not a float.
-        ValueError
-            If rtol or atol is negative.
         """
 
-        if not isinstance(rtol, (int, float)):
-            raise TypeError(f'rtol must be a float. Got {type(rtol)}.')
-
-        if rtol < 0:
-            raise ValueError(f'rtol must be non-negative. Got {rtol}.')
-
-        if not isinstance(atol, (int, float)):
-            raise TypeError(f'atol must be a float. Got {type(atol)}.')
-
-        if atol < 0:
-            raise ValueError(f'atol must be non-negative. Got {atol}.')
+        self._verify_nonneg_float(rtol, 'rtol')
+        self._verify_nonneg_float(atol, 'atol')
 
         parameters = self.get_all_parameters()
         at_bounds = []
@@ -573,6 +549,97 @@ class AnalysisBase(EasyDynamicsModelBase):
             raise TypeError(f'Energy must be a sc.Variable or None. Got {type(energy)}.')
         return energy
 
+    @staticmethod
+    def _verify_bool(value: object, name: str) -> None:
+        """
+        Raise TypeError if value is not a bool.
+
+        Parameters
+        ----------
+        value : object
+            The object to verify.
+        name : str
+            The name of the object for use in the error message.
+
+        Raises
+        ------
+        TypeError
+            If value is not a bool.
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{name} must be True or False.')
+
+    @staticmethod
+    def _verify_nonneg_float(value: object, name: str) -> None:
+        """
+        Raise TypeError or ValueError if value is not a non-negative number.
+
+        Parameters
+        ----------
+        value : object
+            The object to verify.
+        name : str
+            The name of the object for use in the error message.
+
+        Raises
+        ------
+        TypeError
+            If value is not an int or float.
+        ValueError
+            If value is negative.
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError(f'{name} must be a float. Got {type(value)}.')
+        if value < 0:
+            raise ValueError(f'{name} must be non-negative. Got {value}.')
+
+    def _build_plot_style_defaults(self, keys: Iterable[str]) -> dict:
+        """
+        Build default plot style kwargs for the given DataGroup keys.
+
+        Parameters
+        ----------
+        keys : Iterable[str]
+            The DataGroup keys to build plot style defaults for. Recognized values are ``"Data"``,
+            ``"Model"``, and ``"Residuals"``; any other key gets a dashed line style.
+
+        Returns
+        -------
+        dict
+            A dict of plot style kwargs including ``title``, ``linestyle``, ``marker``, ``color``,
+            and ``markerfacecolor``.
+        """
+        linestyle: dict = {}
+        marker: dict = {}
+        color: dict = {}
+        markerfacecolor: dict = {}
+        for key in keys:
+            if key == 'Data':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'black'
+                markerfacecolor[key] = 'none'
+            elif key == 'Model':
+                linestyle[key] = '-'
+                marker[key] = None
+                color[key] = 'red'
+                markerfacecolor[key] = 'none'
+            elif key == 'Residuals':
+                linestyle[key] = 'none'
+                marker[key] = 'o'
+                color[key] = 'blue'
+                markerfacecolor[key] = 'none'
+            else:
+                linestyle[key] = '--'
+                marker[key] = None
+        return {
+            'title': self.display_name,
+            'linestyle': linestyle,
+            'marker': marker,
+            'color': color,
+            'markerfacecolor': markerfacecolor,
+        }
+
     #############
     # Dunder methods
     #############
@@ -587,6 +654,6 @@ class AnalysisBase(EasyDynamicsModelBase):
             A string representation of the Analysis.
         """
         return (
-            f' {self.__class__.__name__} (display_name={self.display_name}, '
+            f'{self.__class__.__name__} (display_name={self.display_name}, '
             f'unique_name={self.unique_name})'
         )

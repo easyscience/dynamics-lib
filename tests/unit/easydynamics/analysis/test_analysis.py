@@ -532,6 +532,15 @@ class TestAnalysis:
             assert parameter_name in parameters_dataset
             assert 'Q' in parameters_dataset[parameter_name].dims
 
+    def test_parameters_to_dataset_raises_on_duplicate_names(self, analysis):
+        # Add a second Gaussian with the same parameter names as the first
+        analysis.sample_model.append_component(
+            Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
+        )
+
+        with pytest.raises(ValueError, match='Duplicate parameter names'):
+            analysis.parameters_to_dataset()
+
     @pytest.mark.parametrize(
         'parameter_names',
         [
@@ -750,7 +759,7 @@ class TestAnalysis:
             IndexError,
             match='must be a valid index',
         ):
-            analysis._fit_single_Q(Q_index=3)
+            analysis.fit(Q_index=3)
 
     def test_fit_all_Q_independently(self, analysis):
         # WHEN
@@ -913,3 +922,120 @@ class TestAnalysis:
         assert components_dataset.coords['Q'].dims == ('Q',)
         assert components_dataset.sizes['Q'] == 1
         assert components_dataset.coords['Q'].ndim == 1
+
+    def test_ensure_analysis_list_current_clears_dirty_when_Q_is_none(self):
+        # An Analysis with no experiment has Q=None; _ensure_analysis_list_current should still
+        # clear the dirty flag without attempting to build the list.
+
+        # WHEN
+        analysis = Analysis(display_name='NoQ')
+        assert analysis._analysis_list_is_dirty is True
+        assert analysis.Q is None
+
+        # THEN
+        result = analysis.analysis_list
+
+        # EXPECT - dirty flag cleared, list stays empty
+        assert analysis._analysis_list_is_dirty is False
+        assert result == []
+
+    def test_rebin_marks_analysis_list_dirty(self, analysis):
+        # WHEN - force build of analysis_list so it is no longer dirty
+        _ = analysis.analysis_list
+        assert analysis._analysis_list_is_dirty is False
+
+        # THEN - energy rebin leaves Q unchanged, so no confirm required
+        with patch.object(analysis.experiment, 'rebin'):
+            analysis.rebin({'energy': 2})
+
+        # EXPECT
+        assert analysis._analysis_list_is_dirty is True
+
+    def test_rebin_rebuilds_analysis_list(self, analysis):
+        # WHEN - 3 Q values → 3 Analysis1d objects; rebin to 1 Q value (confirm required)
+        assert len(analysis.analysis_list) == 3
+        analysis.rebin({'Q': 1}, confirm=True)
+
+        # THEN
+        result = analysis.analysis_list
+
+        # EXPECT - list rebuilt with 1 Analysis1d for the single remaining Q
+        assert len(result) == 1
+        assert result[0].Q_index == 0
+
+    def test_rebin_raises_without_confirm_when_Q_count_changes(self, analysis):
+        # WHEN - rebin Q from 3 to 1 (count changes) without confirm
+        # THEN / EXPECT
+        with pytest.raises(ValueError, match='confirm=True'):
+            analysis.rebin({'Q': 1})
+
+    def test_rebin_raises_without_confirm_when_Q_values_change_same_count(self, analysis):
+        # WHEN - simulate a rebin that keeps count but shifts Q values
+        # (e.g. Q=[1,2,3] → Q=[2,3,4] via non-uniform binning)
+        old_Q = analysis.Q
+        new_Q = sc.array(dims=['Q'], values=[2.0, 3.0, 4.0], unit='1/Angstrom')
+
+        def fake_rebin(_dims: dict) -> None:
+            analysis.experiment._binned_data = analysis.experiment._binned_data.assign_coords(
+                Q=new_Q
+            )
+
+        # THEN / EXPECT - raises without confirm and rolls back
+        with (
+            patch.object(analysis.experiment, 'rebin', side_effect=fake_rebin),
+            pytest.raises(ValueError, match='confirm=True'),
+        ):
+            analysis.rebin({'Q': 3})
+
+        # EXPECT - experiment Q was rolled back to original
+        assert sc.allclose(analysis.Q, old_Q)
+
+    def test_rebin_rolls_back_experiment_on_failed_confirm(self, analysis):
+        # WHEN - rebin Q without confirm (would change count)
+        old_Q = analysis.Q
+
+        with pytest.raises(ValueError, match='confirm=True'):
+            analysis.rebin({'Q': 1})
+
+        # EXPECT - experiment Q was rolled back; analysis is unchanged
+        assert sc.allclose(analysis.Q, old_Q)
+        assert len(analysis.analysis_list) == 3
+
+    def test_rebin_without_Q_change_does_not_require_confirm(self, analysis):
+        # WHEN - energy rebin leaves Q unchanged, so no confirm required
+        # THEN / EXPECT - no error raised
+        with patch.object(analysis.experiment, 'rebin'):
+            analysis.rebin({'energy': 2})
+
+    def test_rebin_clears_Q_from_models_when_Q_count_changes(self, analysis):
+        # WHEN
+        assert analysis.sample_model.Q is not None
+        assert analysis.instrument_model.Q is not None
+
+        # THEN
+        analysis.rebin({'Q': 1}, confirm=True)
+
+        # EXPECT - Q has been propagated back to models with the new single-Q dimension
+        # (cleared then repopulated when analysis_list is rebuilt)
+        # At this point (before accessing analysis_list), models have Q=None
+        assert analysis.sample_model.Q is None
+        assert analysis.instrument_model.Q is None
+
+        # After rebuild, models get the new Q
+        _ = analysis.analysis_list
+        assert len(analysis.sample_model.Q) == 1
+        assert len(analysis.instrument_model.Q) == 1
+
+    def test_direct_experiment_rebin_does_not_update_analysis_list(self, analysis):
+        # This test documents a known limitation: calling experiment.rebin() directly bypasses
+        # Analysis and leaves the analysis list stale. Always use Analysis.rebin() instead.
+
+        # WHEN - force build so the list is clean
+        _ = analysis.analysis_list
+        assert analysis._analysis_list_is_dirty is False
+
+        # THEN - rebinning via experiment directly (bypasses Analysis)
+        analysis.experiment.rebin({'Q': 1})
+
+        # EXPECT - analysis_list is NOT marked dirty (callers must use Analysis.rebin())
+        assert analysis._analysis_list_is_dirty is False

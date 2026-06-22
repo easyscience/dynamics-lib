@@ -150,7 +150,7 @@ class SampleModel(ModelBase):
             )
         diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     def remove_diffusion_model(self, name: str) -> None:
         """
@@ -169,7 +169,7 @@ class SampleModel(ModelBase):
         for i, dm in enumerate(self.diffusion_models):
             if dm.name == name:
                 del self.diffusion_models[i]
-                self._generate_component_collections()
+                self._component_collections_is_dirty = True
                 return
         raise ValueError(
             f'No DiffusionModel with name {name} found. \n'
@@ -179,7 +179,7 @@ class SampleModel(ModelBase):
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""
         self.diffusion_models = []
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     # ------------------------------------------------------------------
     # Properties
@@ -538,17 +538,14 @@ class SampleModel(ModelBase):
         """Handle changes to the diffusion models."""
         for diffusion_model in self.diffusion_models:
             diffusion_model.Q = self.Q
-
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
-
         for diffusion_model in self.diffusion_models:
-            # This may be too aggressive
             diffusion_model.clear_Q(confirm=True)
             diffusion_model.Q = self.Q
-        self._generate_component_collections()
+        self._component_collections_is_dirty = True
 
     # ------------------------------------------------------------------
     # dunder methods

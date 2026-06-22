@@ -140,12 +140,12 @@ class TestAnalysisBase:
             (
                 {'extra_parameters': 123},
                 TypeError,
-                'extra_parameters must be a Parameter or a list of Parameters.',
+                'extra_parameters must be a Parameter, a list of Parameters, or None.',
             ),
             (
                 {'extra_parameters': [123]},
                 TypeError,
-                'extra_parameters must be a Parameter or a list of Parameters.',
+                'extra_parameters must be a Parameter, a list of Parameters, or None.',
             ),
         ],
         ids=[

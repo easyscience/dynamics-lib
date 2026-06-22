@@ -169,7 +169,9 @@ class TestNumericalConvolutionBase:
 
         # THEN
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT
         assert default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == round(
@@ -204,7 +206,9 @@ class TestNumericalConvolutionBase:
         )
 
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT: correct factor + grid size
         assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
@@ -257,7 +261,9 @@ class TestNumericalConvolutionBase:
 
         # THEN
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT
         assert default_numerical_convolution_base.extension_factor == new_extension_factor
