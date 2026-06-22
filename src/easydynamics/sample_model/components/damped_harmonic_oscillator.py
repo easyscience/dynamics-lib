@@ -22,6 +22,32 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     The intensity is given by $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2
     \gamma x)^2 \right)}, $$ where $A$ is the area, $x_0$ is the center, and $\gamma$ is the width.
+
+    Examples
+    --------
+    **Creating a Damped Harmonic Oscillator**
+
+    The ``center`` parameter is the resonance frequency, which must be positive. Both phonon peaks
+    (at ±center) are captured by the model:
+    ```python
+    import numpy as np
+    from easydynamics.sample_model.components import DampedHarmonicOscillator
+
+    dho = DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
+    x = np.linspace(-20, 20, 200)
+    values = dho.evaluate(x)
+    ```
+
+    **Modifying parameters after construction**
+
+    ```python
+    from easydynamics.sample_model.components import DampedHarmonicOscillator
+
+    dho = DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
+    dho.area = 3.0
+    dho.center = 8.0
+    dho.width = 0.3
+    ```
     """
 
     def __init__(

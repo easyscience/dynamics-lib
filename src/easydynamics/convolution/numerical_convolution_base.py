@@ -64,13 +64,13 @@ class NumericalConvolutionBase(ConvolutionBase):
              The settings for the convolution. If None, default settings will be used.
         temperature : Parameter | Numeric | None, default=None
             The temperature to use for detailed balance correction.
-        temperature_unit : str | sc.Unit, default="K"
+        temperature_unit : str | sc.Unit, default='K'
             The unit of the temperature parameter.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
             The settings for detailed balance. If None, default settings will be used.
-        unit : str | sc.Unit, default="meV"
+        unit : str | sc.Unit, default='meV'
             The unit of the energy.
-        display_name : str | None, default="MyConvolution"
+        display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.

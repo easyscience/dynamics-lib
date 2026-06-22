@@ -26,6 +26,31 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is
     handled by the Convolution method. If the center is not provided, it will be centered at 0 and
     fixed, which is typically what you want in QENS.
+
+    Examples
+    --------
+    **Creating a DeltaFunction (elastic line)**
+
+    The DeltaFunction evaluates to zero everywhere when called directly. It acts as an identity in
+    convolutions, making it useful for modelling the elastic line in QENS:
+    ```python
+    import numpy as np
+    from easydynamics.sample_model.components import DeltaFunction
+
+    delta = DeltaFunction(area=1.0)
+    x = np.linspace(-2, 2, 100)
+    values = delta.evaluate(x)  # all zeros except at the bin nearest to center
+    ```
+
+    **Creating a DeltaFunction with a free center**
+
+    Pass a numeric value for ``center`` to place the elastic line at a specific energy transfer:
+    ```python
+    from easydynamics.sample_model.components import DeltaFunction
+
+    delta = DeltaFunction(area=0.7, center=0.5)
+    delta.area = 0.5
+    ```
     """
 
     def __init__(

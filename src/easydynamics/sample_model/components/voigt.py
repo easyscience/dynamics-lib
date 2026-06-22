@@ -25,6 +25,33 @@ class Voigt(CreateParametersMixin, ModelComponent):
     want in QENS.
 
     Use scipy.special.voigt_profile to evaluate the Voigt profile.
+
+    Examples
+    --------
+    **Creating a Voigt profile with a fixed center (typical QENS use)**
+
+    The Voigt profile is a convolution of a Gaussian and a Lorentzian. By default the center is
+    fixed at 0:
+    ```python
+    import numpy as np
+    from easydynamics.sample_model.components import Voigt
+
+    v = Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
+    x = np.linspace(-2, 2, 100)
+    values = v.evaluate(x)
+    ```
+
+    **Setting the Gaussian and Lorentzian widths independently**
+
+    Pass a numeric value for ``center`` to leave it free during fitting, and use the property
+    setters to adjust the two width components after construction:
+    ```python
+    from easydynamics.sample_model.components import Voigt
+
+    v = Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
+    v.gaussian_width = 0.1
+    v.lorentzian_width = 0.2
+    ```
     """
 
     def __init__(

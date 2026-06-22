@@ -25,6 +25,29 @@ class Polynomial(ModelComponent):
 
     The intensity is given by $$ I(x) = c_0 + c_1 x + c_2 x^2 + ... + c_N x^N, $$ where $C_i$ are
     the coefficients.
+
+    Examples
+    --------
+    **Creating a constant background (degree 0)**
+
+    ```python
+    import numpy as np
+    from easydynamics.sample_model.components import Polynomial
+
+    poly = Polynomial(coefficients=[1.5])
+    x = np.linspace(-5, 5, 100)
+    values = poly.evaluate(x)
+    ```
+
+    **Creating a linear background (degree 1)**
+
+    Coefficients are ordered as ``[c0, c1, ...]``, where ``c0`` is the constant term:
+    ```python
+    from easydynamics.sample_model.components import Polynomial
+
+    poly = Polynomial(coefficients=[2.0, 0.1], name='Background')
+    poly.coefficients = [1.5, 0.05]
+    ```
     """
 
     def __init__(

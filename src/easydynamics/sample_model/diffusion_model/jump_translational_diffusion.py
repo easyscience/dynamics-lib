@@ -30,20 +30,24 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
 
     Examples
     --------
-    >>> Q = np.linspace(0.5, 2, 7)
-    >>> energy = np.linspace(-2, 2, 501)
-    >>> scale = 1.0
-    >>> diffusion_coefficient = 2.4e-9  # m^2/s
-    >>> relaxation_time = 1.0  # ps
-    >>> diffusion_model = JumpTranslationalDiffusion(
-    ...     scale=scale,
-    ...     diffusion_coefficient=diffusion_coefficient,
-    ...     relaxation_time=relaxation_time,
-    ...     Q=Q,
-    ... )
-    >>> component_collections = diffusion_model.create_component_collections()
+    **Creating a JumpTranslationalDiffusion model**
 
-    See also the tutorials..
+    Pass the diffusion coefficient (in m²/s) and relaxation time (in ps) along with Q values:
+    ```python
+    import numpy as np
+    from easydynamics.sample_model.diffusion_model import JumpTranslationalDiffusion
+
+    Q = np.linspace(0.5, 2, 7)
+    diffusion_model = JumpTranslationalDiffusion(
+        scale=1.0,
+        diffusion_coefficient=2.4e-9,
+        relaxation_time=1.0,
+        Q=Q,
+    )
+    component_collections = diffusion_model.create_component_collections()
+    ```
+
+    See also the tutorials.
     """
 
     def __init__(
