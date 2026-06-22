@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
 
 import numpy as np
 import scipp as sc
@@ -15,8 +15,7 @@ from scipp import UnitError
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+_CoefficientsInput = Sequence[Numeric | Parameter] | dict[int, Numeric]
 
 
 class Polynomial(ModelComponent):
@@ -50,11 +49,30 @@ class Polynomial(ModelComponent):
     poly = sm.Polynomial(coefficients=[2.0, 0.1], name='Background')
     poly.coefficients = [1.5, 0.05]
     ```
+
+    **Creating a sparse polynomial from a dict**
+
+    Powers that are not listed are filled with coefficients fixed to zero:
+    ```python
+    import easydynamics.sample_model as sm
+
+    poly = sm.Polynomial(coefficients={2: 1.5})  # 1.5*x^2, with c0 and c1 fixed at 0
+    ```
+
+    **Changing the degree after construction**
+
+    ```python
+    import easydynamics.sample_model as sm
+
+    poly = sm.Polynomial(coefficients=[2.0, 0.1])
+    poly.add_coefficient(0.05)  # now 2.0 + 0.1*x + 0.05*x^2
+    removed = poly.remove_coefficient()  # returns 0.05, back to 2.0 + 0.1*x
+    ```
     """
 
     def __init__(
         self,
-        coefficients: Sequence[Numeric | Parameter] = (0.0,),
+        coefficients: _CoefficientsInput = (0.0,),
         x_unit: str | sc.Unit = 'meV',
         y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Polynomial',
@@ -65,11 +83,15 @@ class Polynomial(ModelComponent):
         """
         Parameters
         ----------
-        coefficients : Sequence[Numeric | Parameter], default=(0.0,)
-            Ordered list of polynomial coefficients ``[c0, c1, ..., cN]`` where the polynomial is
-            ``c0 + c1*x + c2*x^2 + ... + cN*x^N``.  Each element may be a plain numeric value
-            (wrapped into a dimensionless :class:`Parameter`) or an existing :class:`Parameter`
-            instance. Must contain at least one element.
+        coefficients : _CoefficientsInput, default=(0.0,)
+            Either an ordered sequence of polynomial coefficients ``[c0, c1, ..., cN]`` where the
+            polynomial is ``c0 + c1*x + c2*x^2 + ... + cN*x^N``, or a sparse ``dict`` mapping
+            integer powers to numeric values (e.g. ``{2: 1.5}`` for ``1.5*x^2``).
+
+            For a sequence, each element may be a plain numeric value (wrapped into a dimensionless
+            :class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
+            present are filled with fixed-to-zero Parameters, and the degree is taken from the
+            largest key.  Must contain at least one element.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  When the x_unit is changed via :meth:`convert_x_unit`, coefficient
             values are rescaled by power-law factors so the evaluated output remains unchanged.
@@ -87,10 +109,11 @@ class Polynomial(ModelComponent):
         Raises
         ------
         TypeError
-            If *coefficients* is not a list, tuple, or ndarray, or if any element is neither
-            numeric nor a :class:`Parameter`.
+            If *coefficients* is not a list, tuple, ndarray, or dict, if any sequence element is
+            neither numeric nor a :class:`Parameter`, or if any dict key is not an integer or dict
+            value is not numeric.
         ValueError
-            If *coefficients* is empty.
+            If *coefficients* is empty, or if any dict key is negative.
         """
         super().__init__(
             x_unit=x_unit,
@@ -100,10 +123,10 @@ class Polynomial(ModelComponent):
             unique_name=unique_name,
         )
 
-        if not isinstance(coefficients, (list, tuple, np.ndarray)):
+        if not isinstance(coefficients, (list, tuple, np.ndarray, dict)):
             raise TypeError(
                 'coefficients must be a sequence (list/tuple/ndarray) '
-                'of numbers or Parameter objects.'
+                'of numbers or Parameter objects, or a dict mapping powers to numbers.'
             )
 
         if len(coefficients) == 0:
@@ -111,14 +134,32 @@ class Polynomial(ModelComponent):
 
         self._coefficients: list[Parameter] = []
 
-        for i, coef in enumerate(coefficients):
-            if isinstance(coef, Parameter):
-                param = coef
-            elif isinstance(coef, Numeric):
-                param = Parameter(name=f'{name}_c{i}', value=float(coef))
-            else:
-                raise TypeError('Each coefficient must be either a numeric value or a Parameter.')
-            self._coefficients.append(param)
+        if isinstance(coefficients, dict):
+            for key in coefficients:
+                # bool is a subclass of int, so reject it explicitly
+                if not isinstance(key, int) or isinstance(key, bool):
+                    raise TypeError('Dict keys must be integers representing polynomial powers.')
+                if key < 0:
+                    raise ValueError('Dict keys (powers) must be non-negative integers.')
+            for i in range(max(coefficients) + 1):
+                if i not in coefficients:
+                    param = Parameter(name=f'{name}_c{i}', value=0.0, fixed=True)
+                elif isinstance(coefficients[i], Numeric):
+                    param = Parameter(name=f'{name}_c{i}', value=float(coefficients[i]))
+                else:
+                    raise TypeError('Each coefficient value must be a number.')
+                self._coefficients.append(param)
+        else:
+            for i, coef in enumerate(coefficients):
+                if isinstance(coef, Parameter):
+                    param = coef
+                elif isinstance(coef, Numeric):
+                    param = Parameter(name=f'{name}_c{i}', value=float(coef))
+                else:
+                    raise TypeError(
+                        'Each coefficient must be either a numeric value or a Parameter.'
+                    )
+                self._coefficients.append(param)
 
         # Tracks the current x_unit scale for convert_x_unit power-law rescaling
         self._x_unit_helper = sc.scalar(value=1.0, unit=x_unit)
@@ -211,6 +252,50 @@ class Polynomial(ModelComponent):
             'The degree of the polynomial is determined by the number of coefficients '
             'and cannot be set directly.'
         )
+
+    def add_coefficient(self, value: Numeric = 0.0, fixed: bool = False) -> None:
+        """
+        Add a new coefficient at the next highest power, increasing the degree by one.
+
+        Parameters
+        ----------
+        value : Numeric, default=0.0
+            The numeric value of the new coefficient.
+        fixed : bool, default=False
+            If True, the new coefficient is fixed (not free for fitting).
+
+        Raises
+        ------
+        TypeError
+            If *value* is not a numeric value.
+        """
+        if not isinstance(value, Numeric):
+            raise TypeError('value must be a numeric value.')
+        new_power = len(self._coefficients)
+        self._coefficients.append(
+            Parameter(name=f'{self.name}_c{new_power}', value=float(value), fixed=fixed)
+        )
+
+    def remove_coefficient(self) -> float:
+        """
+        Remove the highest-power coefficient, decreasing the degree by one.
+
+        Returns
+        -------
+        float
+            The value of the removed coefficient.
+
+        Raises
+        ------
+        ValueError
+            If only one coefficient remains; a Polynomial must always keep at least one.
+        """
+        if len(self._coefficients) == 1:
+            raise ValueError(
+                'Cannot remove the last coefficient. The Polynomial must have at least one '
+                'coefficient.'
+            )
+        return self._coefficients.pop().value
 
     @property
     def suppress_warnings(self) -> bool:

@@ -61,7 +61,6 @@ class TestPolynomial:
                 {'coefficients': None},
                 'coefficients must be ',
             ),
-            ({'coefficients': {}}, 'coefficients must be '),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
@@ -299,6 +298,240 @@ class TestPolynomial:
         assert p.y_unit == 'dimensionless'
         assert np.isclose(p.coefficients[0].value, 1.0)
         assert np.isclose(p.coefficients[1].value, 2.0)
+
+    # --- Serialization ---
+
+    def test_to_dict(self, polynomial: Polynomial):
+        # WHEN
+        d = polynomial.to_dict()
+
+        # EXPECT: base-class serialisation format
+        assert d['@class'] == 'Polynomial'
+        assert d['name'] == 'PolynomialName'
+        assert d['x_unit'] == 'meV'
+        assert d['y_unit'] == 'dimensionless'
+        coeffs = d['coefficients']
+        assert len(coeffs) == 3
+        assert coeffs[0]['@class'] == 'Parameter'
+        assert coeffs[0]['value'] == pytest.approx(1.0)
+        assert coeffs[1]['value'] == pytest.approx(-2.0)
+        assert coeffs[2]['value'] == pytest.approx(3.0)
+
+    def test_from_dict_round_trip(self, polynomial: Polynomial):
+        # WHEN
+        d = polynomial.to_dict()
+        restored = Polynomial.from_dict(d)
+
+        # EXPECT
+        assert restored.name == polynomial.name
+        assert restored.display_name == polynomial.display_name
+        assert restored.x_unit == polynomial.x_unit
+        assert restored.y_unit == polynomial.y_unit
+        assert restored.degree == polynomial.degree
+        np.testing.assert_allclose(
+            restored.coefficient_values(), polynomial.coefficient_values(), rtol=1e-10
+        )
+
+    def test_from_dict_preserves_fixed(self):
+        # WHEN: sparse polynomial where c0 and c1 are fixed to zero
+        p = Polynomial(name='Sparse', coefficients={2: 1.5})
+        d = p.to_dict()
+        restored = Polynomial.from_dict(d)
+
+        # EXPECT
+        assert restored.coefficients[0].fixed is True
+        assert np.isclose(restored.coefficients[0].value, 0.0)
+        assert restored.coefficients[1].fixed is True
+        assert np.isclose(restored.coefficients[1].value, 0.0)
+        assert restored.coefficients[2].fixed is False
+        assert np.isclose(restored.coefficients[2].value, 1.5)
+
+    def test_from_dict_wrong_class_raises(self, polynomial: Polynomial):
+        # WHEN
+        d = polynomial.to_dict()
+        d['@class'] = 'NotAPolynomial'
+
+        # EXPECT
+        with pytest.raises(ValueError, match='Class name in dictionary does not match'):
+            Polynomial.from_dict(d)
+
+    def test_from_dict_invalid_dict_raises(self):
+        with pytest.raises(ValueError, match='must be a dictionary representing'):
+            Polynomial.from_dict({'not': 'valid'})
+
+    # --- Sparse dict initialization ---
+
+    def test_sparse_dict_single_term(self):
+        # WHEN
+        p = Polynomial(coefficients={2: 1.5})
+
+        # THEN EXPECT
+        assert p.degree == 2
+        assert np.isclose(p.coefficients[0].value, 0.0)
+        assert p.coefficients[0].fixed is True
+        assert np.isclose(p.coefficients[1].value, 0.0)
+        assert p.coefficients[1].fixed is True
+        assert np.isclose(p.coefficients[2].value, 1.5)
+        assert p.coefficients[2].fixed is False
+
+    def test_sparse_dict_evaluate(self):
+        # WHEN
+        p = Polynomial(coefficients={2: 1.5})
+        x = np.array([0.0, 1.0, 2.0, 3.0])
+
+        # THEN
+        result = p.evaluate(x)
+
+        # EXPECT
+        np.testing.assert_allclose(result, 1.5 * x**2, rtol=1e-5)
+
+    def test_sparse_dict_multiple_powers(self):
+        # WHEN
+        p = Polynomial(coefficients={0: 1.0, 2: 3.0})
+
+        # THEN EXPECT: c1 (power 1) is fixed to zero, c0 and c2 are free
+        assert np.isclose(p.coefficients[0].value, 1.0)
+        assert p.coefficients[0].fixed is False
+        assert np.isclose(p.coefficients[1].value, 0.0)
+        assert p.coefficients[1].fixed is True
+        assert np.isclose(p.coefficients[2].value, 3.0)
+        assert p.coefficients[2].fixed is False
+
+    def test_sparse_dict_empty_raises(self):
+        with pytest.raises(ValueError, match='At least one coefficient'):
+            Polynomial(coefficients={})
+
+    def test_sparse_dict_non_int_key_raises(self):
+        with pytest.raises(TypeError, match='Dict keys must be integers'):
+            Polynomial(coefficients={'a': 1.0})
+
+    def test_sparse_dict_negative_key_raises(self):
+        with pytest.raises(ValueError, match='non-negative'):
+            Polynomial(coefficients={-1: 1.0})
+
+    def test_sparse_dict_invalid_value_raises(self):
+        with pytest.raises(TypeError, match='Each coefficient'):
+            Polynomial(coefficients={2: 'bad'})
+
+    def test_sparse_dict_preserves_x_unit(self):
+        # WHEN
+        p = Polynomial(coefficients={2: 1.5}, x_unit='ueV', y_unit='counts')
+
+        # THEN EXPECT
+        assert p.x_unit == 'ueV'
+        assert p.y_unit == 'counts'
+
+    # --- add_coefficient ---
+
+    def test_add_coefficient_increases_degree(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.add_coefficient(5.0)
+
+        # THEN EXPECT
+        assert polynomial.degree == 3
+        assert np.isclose(polynomial.coefficients[3].value, 5.0)
+
+    def test_add_coefficient_default_value(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.add_coefficient()
+
+        # THEN EXPECT
+        assert polynomial.degree == 3
+        assert np.isclose(polynomial.coefficients[3].value, 0.0)
+        assert polynomial.coefficients[3].fixed is False
+
+    def test_add_coefficient_fixed(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.add_coefficient(0.0, fixed=True)
+
+        # THEN EXPECT
+        assert polynomial.coefficients[3].fixed is True
+
+    def test_add_coefficient_invalid_type_raises(self, polynomial: Polynomial):
+        with pytest.raises(TypeError, match='value must be'):
+            polynomial.add_coefficient('invalid')
+
+    def test_add_coefficient_evaluate(self, polynomial: Polynomial):
+        # WHEN: polynomial is 1 - 2x + 3x^2; add coefficient 2.0 for x^3
+        polynomial.add_coefficient(2.0)
+        x = np.array([1.0, 2.0])
+
+        # THEN
+        result = polynomial.evaluate(x)
+
+        # EXPECT
+        expected = 1.0 - 2.0 * x + 3.0 * x**2 + 2.0 * x**3
+        np.testing.assert_allclose(result, expected, rtol=1e-5)
+
+    def test_add_coefficient_appears_in_all_variables(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.add_coefficient(5.0)
+
+        # THEN EXPECT: the new coefficient is fittable
+        assert len(polynomial.get_all_variables()) == 4
+
+    # --- remove_coefficient ---
+
+    def test_remove_coefficient_decreases_degree(self, polynomial: Polynomial):
+        # WHEN
+        removed = polynomial.remove_coefficient()
+
+        # THEN EXPECT
+        assert polynomial.degree == 1
+        assert np.isclose(removed, 3.0)
+
+    def test_remove_coefficient_returns_float(self, polynomial: Polynomial):
+        # WHEN
+        removed = polynomial.remove_coefficient()
+
+        # THEN EXPECT
+        assert isinstance(removed, float)
+
+    def test_remove_only_coefficient_raises(self):
+        # WHEN
+        p = Polynomial(coefficients=[5.0])
+
+        # THEN EXPECT
+        with pytest.raises(ValueError, match='Cannot remove the last coefficient'):
+            p.remove_coefficient()
+
+    def test_remove_coefficient_evaluate(self, polynomial: Polynomial):
+        # WHEN: polynomial is 1 - 2x + 3x^2; remove x^2 term
+        polynomial.remove_coefficient()
+        x = np.array([0.0, 1.0, 2.0])
+
+        # THEN
+        result = polynomial.evaluate(x)
+
+        # EXPECT: only 1 - 2x remains
+        expected = 1.0 - 2.0 * x
+        np.testing.assert_allclose(result, expected, rtol=1e-5)
+
+    def test_add_then_remove_round_trip(self, polynomial: Polynomial):
+        # WHEN
+        polynomial.add_coefficient(4.0)
+        assert polynomial.degree == 3
+
+        polynomial.remove_coefficient()
+
+        # THEN EXPECT: back to original degree
+        assert polynomial.degree == 2
+        assert np.isclose(polynomial.coefficients[2].value, 3.0)
+
+    def test_add_coefficient_then_convert_x_unit(self, polynomial: Polynomial):
+        # WHEN: a coefficient is added and then the x unit is converted
+        polynomial.add_coefficient(2.0)
+        x = np.array([1.0, 2.0])
+        before = polynomial.evaluate(sc.array(dims=['x'], values=x, unit='meV'))
+
+        polynomial.convert_x_unit('ueV')
+
+        # THEN
+        after = polynomial.evaluate(sc.array(dims=['x'], values=x, unit='meV'))
+
+        # EXPECT: the added coefficient is rescaled like any other, output unchanged
+        assert polynomial.x_unit == 'ueV'
+        np.testing.assert_allclose(after, before, rtol=1e-8)
 
 
 def test_suppress_warnings_setter_raises_for_non_bool():
