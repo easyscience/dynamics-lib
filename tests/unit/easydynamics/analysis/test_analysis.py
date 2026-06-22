@@ -512,7 +512,7 @@ class TestAnalysis:
         )
 
         # Convert the unit of a component to eV.
-        analysis.sample_model.get_component_collection(Q_index=1)[0].convert_unit('eV')
+        analysis.sample_model.get_component_collection(Q_index=1)[0].convert_x_unit('eV')
 
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()

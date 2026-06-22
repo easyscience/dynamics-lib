@@ -59,7 +59,8 @@ class DeltaLorentz(DiffusionModelBase):
         lorentzian_width: Numeric = 1.0,
         allow_Q_variation: dict | None = None,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'DeltaLorentz',
         display_name: str | None = None,
         lorentzian_name: str = 'Lorentzian',
@@ -88,8 +89,10 @@ class DeltaLorentz(DiffusionModelBase):
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy/frequency). Must be convertible to meV.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
         name : str, default='DeltaLorentz'
             Name of the diffusion model.
         display_name : str | None, default=None
@@ -116,7 +119,8 @@ class DeltaLorentz(DiffusionModelBase):
         """
         super().__init__(
             scale=scale,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             Q=Q,
             lorentzian_name=lorentzian_name,
             lorentzian_display_name=lorentzian_display_name,
@@ -480,7 +484,8 @@ class DeltaLorentz(DiffusionModelBase):
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
                 display_name=f'{self.display_name}_Q{Q_value:.2f}',
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             # ------------------------------#
@@ -489,7 +494,8 @@ class DeltaLorentz(DiffusionModelBase):
             lorentzian_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
             if self._allow_Q_variation['lorentzian_width'] is True:
                 lorentzian_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
@@ -503,7 +509,7 @@ class DeltaLorentz(DiffusionModelBase):
                 lorentzian_component.width.make_dependent_on(
                     dependency_expression=self._write_lorz_width_dependency_expression(Q_value),
                     dependency_map=dependency_map,
-                    desired_unit=self.unit,
+                    desired_unit=self.x_unit,
                 )
             # The area is always a dependent parameter in this model, as
             # it depends on the scale, mean_u_squared and A_1 parameters
@@ -530,7 +536,8 @@ class DeltaLorentz(DiffusionModelBase):
             delta_component = DeltaFunction(
                 name=self.delta_name,
                 display_name=self.delta_display_name,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             if self._allow_Q_variation['A_0'] is True:
@@ -810,7 +817,7 @@ class DeltaLorentz(DiffusionModelBase):
             value=float(lorentzian_width),
             fixed=False,
             min=MINIMUM_WIDTH,
-            unit=self.unit,
+            unit=self.x_unit,
         )
 
     def _create_A0_A1_parameter_lists(
@@ -877,7 +884,7 @@ class DeltaLorentz(DiffusionModelBase):
                 value=float(lorentzian_width.value),
                 fixed=False,
                 min=MINIMUM_WIDTH,
-                unit=self.unit,
+                unit=self.x_unit,
             )
             for _ in self.Q
         ]
@@ -1073,7 +1080,7 @@ class DeltaLorentz(DiffusionModelBase):
         """
         return (
             f'DeltaLorentz(display_name={self.display_name},'
-            f'unit={self.unit}, \n'
+            f'x_unit={self.x_unit}, \n'
             f'    mean_u_squared={self.mean_u_squared}, \n'
             f'    A_0={self.A_0}, A_1={self.A_1}, \n'
             f'    lorentzian_width={self.lorentzian_width}, \n'

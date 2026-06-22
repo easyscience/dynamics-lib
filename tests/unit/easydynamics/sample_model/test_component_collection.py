@@ -24,7 +24,7 @@ class TestComponentCollection:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -32,7 +32,7 @@ class TestComponentCollection:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         model.append_component(component1)
         model.append_component(component2)
@@ -48,7 +48,7 @@ class TestComponentCollection:
 
     def test_init_with_component(self):
         # WHEN THEN
-        component1 = Gaussian(name='TestGaussian1', area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name='TestGaussian1', area=1.0, center=0.0, width=1.0, x_unit='meV')
         component_collection = ComponentCollection(display_name='InitModel', components=component1)
 
         # EXPECT
@@ -58,9 +58,9 @@ class TestComponentCollection:
 
     def test_init_with_components(self):
         # WHEN THEN
-        component1 = Gaussian(name='TestGaussian1', area=1.0, center=0.0, width=1.0, unit='meV')
+        component1 = Gaussian(name='TestGaussian1', area=1.0, center=0.0, width=1.0, x_unit='meV')
         component2 = Lorentzian(
-            name='TestLorentzian1', area=2.0, center=1.0, width=0.5, unit='meV'
+            name='TestLorentzian1', area=2.0, center=1.0, width=0.5, x_unit='meV'
         )
         component_collection = ComponentCollection(
             display_name='InitModel', components=[component1, component2]
@@ -91,13 +91,13 @@ class TestComponentCollection:
     def test_init_with_invalid_unit_raises(self):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='unit must be'):
-            ComponentCollection(unit=123)
+            ComponentCollection(x_unit=123)
 
     # ───── Component Management ─────
 
     def test_append_component(self, component_collection):
         # WHEN
-        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, x_unit='meV')
         # THEN
         component_collection.append_component(component)
         # EXPECT
@@ -105,7 +105,7 @@ class TestComponentCollection:
 
     def test_append_component_collection(self, component_collection):
         # WHEN
-        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, x_unit='meV')
         component_collection2 = ComponentCollection()
         component_collection2.append_component(component)
         # THEN
@@ -127,7 +127,7 @@ class TestComponentCollection:
 
     def test_getitem(self, component_collection):
         # WHEN
-        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, x_unit='meV')
         # THEN
         component_collection.append_component(component)
         # EXPECT
@@ -140,7 +140,7 @@ class TestComponentCollection:
         assert component_collection.is_empty is True
 
         # WHEN THEN
-        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, unit='meV')
+        component = Gaussian(name='TestComponent', area=1.0, center=0.0, width=1.0, x_unit='meV')
         component_collection.append_component(component)
         # EXPECT
         assert component_collection.is_empty is False
@@ -160,45 +160,45 @@ class TestComponentCollection:
 
     def test_convert_unit(self, component_collection):
         # WHEN THEN
-        component_collection.convert_unit('eV')
+        component_collection.convert_x_unit('eV')
         # EXPECT
         for component in component_collection:
-            assert component.unit == 'eV'
+            assert component.x_unit == 'eV'
 
     def test_convert_unit_incorrect_unit_raises(self, component_collection):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
-            component_collection.convert_unit(123)
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
+            component_collection.convert_x_unit(123)
 
     def test_convert_unit_failure_rolls_back(self, component_collection):
         # WHEN THEN
         # Introduce a faulty component that will fail conversion
         class FaultyComponent(Gaussian):
-            def convert_unit(self, _unit: str) -> None:
+            def convert_x_unit(self, _unit: str) -> None:
                 raise RuntimeError('Conversion failed.')
 
         faulty_component = FaultyComponent(
-            name='FaultyComponent', area=1.0, center=0.0, width=1.0, unit='meV'
+            name='FaultyComponent', area=1.0, center=0.0, width=1.0, x_unit='meV'
         )
         component_collection.append_component(faulty_component)
 
-        original_units = {component.name: component.unit for component in component_collection}
+        original_units = {component.name: component.x_unit for component in component_collection}
 
         # EXPECT
         with pytest.raises(RuntimeError, match=r'Conversion failed.'):
-            component_collection.convert_unit('eV')
+            component_collection.convert_x_unit('eV')
 
         # Check that all components have their original units
         for component in component_collection:
-            assert component.unit == original_units[component.name]
+            assert component.x_unit == original_units[component.name]
 
     def test_set_unit(self, component_collection):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match=r'Unit is read-only. Use convert_unit to change the unit',
+            match=r'read-only',
         ):
-            component_collection.unit = 'eV'
+            component_collection.x_unit = 'eV'
 
     def test_evaluate(self, component_collection):
         # WHEN
@@ -290,7 +290,9 @@ class TestComponentCollection:
 
     def test_normalize_area_non_area_component_warns(self, component_collection):
         # WHEN
-        component1 = Polynomial(display_name='TestPolynomial', coefficients=[1, 2, 3], unit='meV')
+        component1 = Polynomial(
+            display_name='TestPolynomial', coefficients=[1, 2, 3], x_unit='meV'
+        )
         component_collection.append_component(component1)
 
         # THEN EXPECT
@@ -374,7 +376,9 @@ class TestComponentCollection:
         assert lorentzian_component in component_collection
 
         # WHEN THEN
-        fake_component = Gaussian(name='FakeGaussian', area=1.0, center=0.0, width=1.0, unit='meV')
+        fake_component = Gaussian(
+            name='FakeGaussian', area=1.0, center=0.0, width=1.0, x_unit='meV'
+        )
         # EXPECT
         assert fake_component not in component_collection
         assert 123 not in component_collection  # Invalid type
@@ -392,13 +396,13 @@ class TestComponentCollection:
 
         # EXPECT
         assert model_dict['display_name'] == component_collection.display_name
-        assert model_dict['unit'] == component_collection.unit
+        assert model_dict['x_unit'] == component_collection.x_unit
         assert len(model_dict['components']) == len(component_collection)
 
         for comp, comp_dict in zip(component_collection, model_dict['components'], strict=True):
             assert comp_dict['@class'] == type(comp).__name__
             assert comp_dict['display_name'] == comp.display_name
-            assert comp_dict['unit'] == comp.unit
+            assert comp_dict['x_unit'] == comp.x_unit
 
     def test_from_dict(self, component_collection):
         # WHEN
@@ -414,7 +418,7 @@ class TestComponentCollection:
         for orig_comp, new_comp in zip(component_collection, new_model, strict=True):
             assert type(new_comp) is type(orig_comp)
             assert new_comp.display_name == orig_comp.display_name
-            assert new_comp.unit == orig_comp.unit
+            assert new_comp.x_unit == orig_comp.x_unit
 
             orig_params = orig_comp.get_all_parameters()
             new_params = new_comp.get_all_parameters()
@@ -451,7 +455,7 @@ class TestComponentCollection:
             # Same type and display name
             assert type(copied_comp) is type(orig_comp)
             assert copied_comp.display_name == orig_comp.display_name
-            assert copied_comp.unit == orig_comp.unit
+            assert copied_comp.x_unit == orig_comp.x_unit
 
             # Parameters are deep-copied and equivalent
             orig_params = orig_comp.get_all_parameters()

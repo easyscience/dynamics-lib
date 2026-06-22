@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
@@ -23,16 +24,11 @@ class ExpressionComponent(ModelComponent):
     Model component defined by a symbolic expression.
     """
 
-    # -------------------------
-    # Allowed symbolic functions
-    # -------------------------
     _ALLOWED_FUNCS: ClassVar[dict[str, object]] = {
-        # Exponentials & logs
         'exp': sp.exp,
         'log': sp.log,
         'ln': sp.log,
         'sqrt': sp.sqrt,
-        # Trigonometric
         'sin': sp.sin,
         'cos': sp.cos,
         'tan': sp.tan,
@@ -43,22 +39,16 @@ class ExpressionComponent(ModelComponent):
         'asin': sp.asin,
         'acos': sp.acos,
         'atan': sp.atan,
-        # Hyperbolic
         'sinh': sp.sinh,
         'cosh': sp.cosh,
         'tanh': sp.tanh,
-        # Misc
         'abs': sp.Abs,
         'sign': sp.sign,
         'floor': sp.floor,
         'ceil': sp.ceiling,
-        # Special functions
         'erf': sp.erf,
     }
 
-    # -------------------------
-    # Allowed constants
-    # -------------------------
     _ALLOWED_CONSTANTS: ClassVar[dict[str, object]] = {
         'pi': sp.pi,
         'E': sp.E,
@@ -70,49 +60,19 @@ class ExpressionComponent(ModelComponent):
         self,
         expression: str,
         parameters: dict[str, Numeric] | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Expression',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
-        """
-        Initialize the ExpressionComponent.
-
-        Parameters
-        ----------
-        expression : str
-            The symbolic expression as a string. Must contain 'x' as the independent variable.
-        parameters : dict[str, Numeric] | None, default=None
-            Dictionary of parameter names and their initial values.
-        unit : str | sc.Unit, default='meV'
-            Unit of the output.
-        name : str, default='Expression'
-            Name of the component for indexing.
-        display_name : str | None, default=None
-            Display name for the component.
-        unique_name : str | None, default=None
-            Unique name for the component.
-
-        Raises
-        ------
-        ValueError
-            If the expression is invalid or does not contain 'x'.
-        TypeError
-            If any parameter value is not numeric.
-
-        Examples
-        --------
-        >>> expr = ExpressionComponent(
-        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
-        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
-        ...     unit='meV',
-        ...     display_name='Gaussian Peak',
-        ... )
-
-        >>> expr.A = 5
-        >>> y = expr.evaluate(x)
-        """
-        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            x_unit=x_unit,
+            y_unit=y_unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
         if 'np.' in expression:
             raise ValueError(
@@ -131,21 +91,16 @@ class ExpressionComponent(ModelComponent):
         except Exception as e:
             raise ValueError(f'Invalid expression: {expression}') from e
 
-        # Extract symbols from the expression
         symbols = self._expr.free_symbols
         symbol_names = sorted(str(s) for s in symbols)
 
         if 'x' not in symbol_names:
             raise ValueError("Expression must contain 'x' as independent variable")
 
-        # Reject unknown functions early so invalid expressions fail at init,
-        # not later during numerical evaluation.
         allowed_function_names = set(self._ALLOWED_FUNCS) | {
             func.__name__ for func in self._ALLOWED_FUNCS.values()
         }
 
-        # Walk all function-call nodes in the parsed expression (e.g. sin(x), foo(x)).
-        # Keep only function names that are not in our allowlist.
         unknown_function_names: set[str] = set()
         function_atoms = self._expr.atoms(sp.Function)
         for function_atom in function_atoms:
@@ -154,13 +109,11 @@ class ExpressionComponent(ModelComponent):
                 unknown_function_names.add(function_name)
 
         unknown_functions = sorted(unknown_function_names)
-
         if unknown_functions:
             raise ValueError(
                 f'Unsupported function(s) in expression: {", ".join(unknown_functions)}'
             )
 
-        # Create parameters
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 f'Parameters must be None or a dictionary, got {type(parameters).__name__}'
@@ -184,194 +137,98 @@ class ExpressionComponent(ModelComponent):
             value = parameters.get(name, 1.0)
             if isinstance(value, Parameter):
                 self._parameters[name] = value
-
             elif isinstance(value, dict) and value.get('@class') == 'Parameter':
                 self._parameters[name] = Parameter.from_dict(value)
             else:
                 self._parameters[name] = Parameter(
                     name=name,
                     value=value,
-                    unit=self._unit,
+                    unit=self._x_unit,
                 )
 
-        # Create numerical function
         ordered_symbols = [sp.Symbol(name) for name in self._symbol_names]
-
         self._func = sp.lambdify(
             ordered_symbols,
             self._expr,
             modules=[{'erf': erf}, 'numpy'],
         )
 
-        # -------------------------
-        # Properties
-        # -------------------------
-
     @property
     def expression(self) -> str:
-        """
-        Return the original expression string.
-
-        Returns
-        -------
-        str
-             The original expression string provided at initialization.
-        """
         return self._expression_str
 
     @expression.setter
     def expression(self, _new_expr: str) -> None:
-        """
-        Prevent changing the expression after initialization.
-
-        Parameters
-        ----------
-        _new_expr : str
-            New expression string (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always raised to prevent changing the expression.
-        """
         raise AttributeError('Expression cannot be changed after initialization')
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-    ) -> np.ndarray:
+        output: str = 'numpy',
+    ) -> np.ndarray | sc.Variable:
         """
         Evaluate the expression for given x values.
 
-        Parameters
-        ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input values for the independent variable.
-
-        Returns
-        -------
-        np.ndarray
-            Evaluated results.
+        Unit conversion of parameters is not supported for ExpressionComponent. If x has a
+        different unit than x_unit, a warning is issued and x values are used as-is.
         """
-        x = self._prepare_x_for_evaluate(x)
+        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+
+        if detected_unit is not None and detected_unit != str(self._x_unit):
+            warnings.warn(
+                f'Input x has unit {detected_unit} but {self.__class__.__name__} has '
+                f'x_unit {self._x_unit}. ExpressionComponent cannot auto-convert parameters. '
+                'x values are used as-is.',
+                UserWarning,
+                stacklevel=2,
+            )
 
         args = []
         for name in self._symbol_names:
             if name == 'x':
-                args.append(x)
+                args.append(x_vals)
             else:
                 args.append(self._parameters[name].value)
 
-        return self._func(*args)
+        result = self._func(*args)
+
+        if output == 'scipp':
+            import scipp as sc
+
+            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+        return result
 
     def get_all_variables(self) -> list[Parameter]:
-        """
-        Return all parameters.
-
-        Returns
-        -------
-        list[Parameter]
-            List of all parameters in the expression.
-        """
         return list(self._parameters.values())
 
-    def convert_unit(self, _new_unit: str | sc.Unit) -> None:
-        """
-        Convert the unit of the expression.
-
-        Unit conversion is not implemented for ExpressionComponent.
-
-        Parameters
-        ----------
-        _new_unit : str | sc.Unit
-            The new unit to convert to (ignored).
-
-        Raises
-        ------
-        NotImplementedError
-            Always raised to indicate unit conversion is not supported.
-        """
-
+    def convert_x_unit(self, _new_unit: str | sc.Unit) -> None:
         raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
-    # -------------------------
-    # dunder methods
-    # -------------------------
+    def convert_y_unit(self, _new_unit: str | sc.Unit) -> None:
+        raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
     def __getattr__(self, name: str) -> Parameter:
-        """
-        Allow access to parameters as attributes.
-
-        Parameters
-        ----------
-        name : str
-            Name of the parameter to access.
-
-        Raises
-        ------
-        AttributeError
-            If the parameter does not exist.
-
-        Returns
-        -------
-        Parameter
-            The parameter with the given name.
-        """
         if '_parameters' in self.__dict__ and name in self._parameters:
             return self._parameters[name]
         raise AttributeError(f"{self.__class__.__name__} has no attribute '{name}'")
 
     def __setattr__(self, name: str, value: Numeric) -> None:
-        """
-        Allow setting parameter values as attributes.
-
-        Parameters
-        ----------
-        name : str
-            Name of the parameter to set.
-        value : Numeric
-            New value for the parameter.
-
-        Raises
-        ------
-        TypeError
-            If the value is not numeric.
-        """
         if '_parameters' in self.__dict__ and name in self._parameters:
             param = self._parameters[name]
-
             if not isinstance(value, Numeric):
                 raise TypeError(f'{name} must be numeric')
-
             param.value = value
         else:
-            # For other attributes, use default behavior
             super().__setattr__(name, value)
 
     def __dir__(self) -> list[str]:
-        """
-        Include parameter names in dir() output for better IDE support.
-
-        Returns
-        -------
-        list[str]
-            List of attribute names, including parameters.
-        """
         return super().__dir__() + list(self._parameters.keys())
 
     def __repr__(self) -> str:
-        """
-        Return a string representation of the ExpressionComponent.
-
-        Returns
-        -------
-        str
-            String representation of the ExpressionComponent.
-        """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
             f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '
-            f'unit={self._unit},\n'
+            f'x_unit={self._x_unit}, y_unit={self._y_unit},\n'
             f"    expr='{self._expression_str}',\n"
             f'    parameters={{ {param_str} }} )'
         )

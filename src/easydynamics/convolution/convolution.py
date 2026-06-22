@@ -276,7 +276,7 @@ class Convolution(NumericalConvolutionBase):
                 temperature=self.temperature,
                 temperature_unit=self._temperature_unit,
                 detailed_balance_settings=self.detailed_balance_settings,
-                unit=self.unit,
+                unit=self.x_unit,
             )
         else:
             self._numerical_convolver = None

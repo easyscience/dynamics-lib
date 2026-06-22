@@ -440,7 +440,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             f'energy=array of shape {self.energy.values.shape},\n '
             f'sample_components={self.sample_components!r}, \n'
             f'resolution_components={self.resolution_components!r},\n '
-            f'unit={self.unit}, '
+            f'unit={self.x_unit}, '
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '
             f'temperature={self.temperature}, '

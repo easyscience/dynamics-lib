@@ -28,7 +28,7 @@ class TestSampleModel:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -36,7 +36,7 @@ class TestSampleModel:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -50,7 +50,7 @@ class TestSampleModel:
             display_name='InitModel',
             components=component_collection,
             diffusion_models=diffusion_model,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
             temperature=10.0,
         )
@@ -62,7 +62,7 @@ class TestSampleModel:
 
         # EXPECT
         assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
+        assert model.x_unit == 'meV'
         assert len(model.components) == 2
         assert isinstance(model.diffusion_models, list)
         assert len(model.diffusion_models) == 1
@@ -402,12 +402,12 @@ class TestSampleModel:
                 energy=x,
                 temperature=sample_model.temperature,
                 divide_by_temperature=sample_model.normalize_detailed_balance,
-                energy_unit=sample_model.unit,
+                energy_unit=sample_model.x_unit,
             )
 
             # Check that evaluate was called on each component
-            collection1.evaluate.assert_called_once_with(x)
-            collection2.evaluate.assert_called_once_with(x)
+            collection1.evaluate.assert_called_once_with(x, output='numpy')
+            collection2.evaluate.assert_called_once_with(x, output='numpy')
 
             # Check that DBF was applied elementwise
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]) * 10.0)
@@ -452,8 +452,8 @@ class TestSampleModel:
             mock_dbf.assert_not_called()
 
             # Check that evaluate was called on each component
-            collection1.evaluate.assert_called_once_with(x)
-            collection2.evaluate.assert_called_once_with(x)
+            collection1.evaluate.assert_called_once_with(x, output='numpy')
+            collection2.evaluate.assert_called_once_with(x, output='numpy')
 
             # Check that results were not modified by DBF
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
@@ -531,7 +531,7 @@ class TestSampleModel:
 
         # THEN / EXPECT
         assert 'SampleModel' in repr_str
-        assert 'unit=' in repr_str
+        assert 'x_unit=' in repr_str
         assert 'Q = ' in repr_str
         assert 'components' in repr_str
         assert 'diffusion_models' in repr_str

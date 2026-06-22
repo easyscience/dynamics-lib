@@ -42,7 +42,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'BrownianTranslationalDiffusion',
         display_name: str | None = 'BrownianTranslationalDiffusion',
         lorentzian_name: str | None = None,
@@ -60,8 +61,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Diffusion coefficient D in m^2/s.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy/frequency). Must be convertible to meV.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
         name : str, default='BrownianTranslationalDiffusion'
             Name of the diffusion model.
         display_name : str | None, default='BrownianTranslationalDiffusion'
@@ -86,7 +89,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
         super().__init__(
             Q=Q,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             scale=scale,
             name=name,
             display_name=display_name,
@@ -176,7 +180,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         Q = self._ensure_Q(Q)
 
         unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
-        unit_conversion_factor.convert_unit(self.unit)
+        unit_conversion_factor.convert_unit(self.x_unit)
         return Q**2 * unit_conversion_factor.value
 
     def calculate_EISF(self, Q: Q_type | None = None) -> np.ndarray:
@@ -247,13 +251,15 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             component_collection_list[i] = ComponentCollection(
                 name=f'{self.name}_Q{Q_value:.2f}',
                 display_name=f'{self.display_name}_Q{Q_value:.2f}',
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             lorentzian_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             # Make the width dependent on Q
@@ -263,7 +269,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             lorentzian_component.width.make_dependent_on(
                 dependency_expression=dependency_expression,
                 dependency_map=dependency_map,
-                desired_unit=self.unit,
+                desired_unit=self.x_unit,
             )
 
             # Make the area dependent on Q

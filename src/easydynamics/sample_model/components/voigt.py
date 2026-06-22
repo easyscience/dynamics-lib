@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import scipp as sc
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
@@ -13,18 +14,14 @@ from easydynamics.utils.utils import Numeric
 
 if TYPE_CHECKING:
     import numpy as np
-    import scipp as sc
     from easyscience.variable import Parameter
 
 
 class Voigt(CreateParametersMixin, ModelComponent):
     r"""
-    Voigt profile, a convolution of Gaussian and Lorentzian.
+    Voigt profile — convolution of Gaussian and Lorentzian.
 
-    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
-    want in QENS.
-
-    Use scipy.special.voigt_profile to evaluate the Voigt profile.
+    area has unit = x_unit * y_unit; center, gaussian_width, lorentzian_width have unit = x_unit.
     """
 
     def __init__(
@@ -33,91 +30,78 @@ class Voigt(CreateParametersMixin, ModelComponent):
         center: Numeric | Parameter | None = None,
         gaussian_width: Numeric | Parameter = 1.0,
         lorentzian_width: Numeric | Parameter = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Voigt',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
-        Initialize a Voigt component.
-
         Parameters
         ----------
         area : Numeric | Parameter, default=1.0
-            Total area under the curve.
+            Integrated area under the Voigt profile.  Unit is ``x_unit * y_unit``.
         center : Numeric | Parameter | None, default=None
-            Center of the Voigt profile.
+            Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
         gaussian_width : Numeric | Parameter, default=1.0
-            Standard deviation of the Gaussian part.
+            Gaussian component standard deviation (sigma) in x_unit.  Must be strictly positive.
         lorentzian_width : Numeric | Parameter, default=1.0
-            Half width at half max (HWHM) of the Lorentzian part.
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Lorentzian component HWHM (gamma) in x_unit.  Must be strictly positive.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center, gaussian_width, and lorentzian_width are stored in this
+            unit.  area_unit = x_unit * y_unit.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         name : str, default='Voigt'
-            Name of the component for indexing.
+            Internal name used for parameter labelling.
         display_name : str | None, default=None
-            Display name of the component.
+            Human-readable name.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. If None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
         """
-
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        self._area = self._create_area_parameter(
+            area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
         )
-        gaussian_width = self._create_width_parameter(
-            width=gaussian_width,
-            name=name,
-            param_name='gaussian_width',
-            unit=self._unit,
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
         )
-        lorentzian_width = self._create_width_parameter(
-            width=lorentzian_width,
-            name=name,
-            param_name='lorentzian_width',
-            unit=self._unit,
+        self._gaussian_width = self._create_width_parameter(
+            width=gaussian_width, name=name, param_name='gaussian_width', x_unit=self._x_unit
         )
-
-        self._area = area
-        self._center = center
-        self._gaussian_width = gaussian_width
-        self._lorentzian_width = lorentzian_width
+        self._lorentzian_width = self._create_width_parameter(
+            width=lorentzian_width, name=name, param_name='lorentzian_width', x_unit=self._x_unit
+        )
 
     @property
     def area(self) -> Parameter:
         """
-        Get the area parameter.
-
         Returns
         -------
         Parameter
-            The area parameter.
+            The area Parameter with unit ``x_unit * y_unit``.
         """
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
         """
-        Set the value of the area parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the area parameter.
+            New area value (in current area unit = x_unit * y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
@@ -126,29 +110,26 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
-        Get the center parameter.
-
         Returns
         -------
         Parameter
-            The center parameter.
+            The center Parameter with unit ``x_unit``.
         """
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the value of the center parameter.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None, defaults to 0 and is fixed.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not None and not a numeric type.
         """
         if value is None:
             value = 0.0
@@ -160,31 +141,27 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def gaussian_width(self) -> Parameter:
         """
-        Get the Gaussian width parameter.
-
         Returns
         -------
         Parameter
-            The Gaussian width parameter.
+            The Gaussian component width (sigma) Parameter with unit ``x_unit``.
         """
         return self._gaussian_width
 
     @gaussian_width.setter
     def gaussian_width(self, value: Numeric) -> None:
         """
-        Set the width parameter value.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the width parameter.
+            New Gaussian width (sigma) in x_unit.  Must be strictly positive.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         ValueError
-            If the value is not positive.
+            If *value* is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('gaussian_width must be a number')
@@ -195,31 +172,27 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def lorentzian_width(self) -> Parameter:
         """
-        Get the Lorentzian width parameter (HWHM).
-
         Returns
         -------
         Parameter
-            The Lorentzian width parameter.
+            The Lorentzian component HWHM (gamma) Parameter with unit ``x_unit``.
         """
         return self._lorentzian_width
 
     @lorentzian_width.setter
     def lorentzian_width(self, value: Numeric) -> None:
         """
-        Set the value of the Lorentzian width parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the Lorentzian width parameter.
+            New Lorentzian HWHM (gamma) in x_unit.  Must be strictly positive.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         ValueError
-            If the value is not positive.
+            If *value* is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('lorentzian_width must be a number')
@@ -227,45 +200,117 @@ class Voigt(CreateParametersMixin, ModelComponent):
             raise ValueError('lorentzian_width must be positive')
         self._lorentzian_width.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
-        r"""
-        Evaluate the Voigt at the given x values.
-
-        If x is a scipp Variable, the unit of the Voigt will be converted to match x. The Voigt
-        evaluates to the convolution of a Gaussian with sigma gaussian_width and a Lorentzian with
-        half width at half max lorentzian_width, centered at center, with area equal to area.
+    def evaluate(
+        self,
+        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
+        output: str = 'numpy',
+    ) -> np.ndarray | sc.Variable:
+        """
+        Evaluate the Voigt at x. Model is never mutated for unit differences.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Voigt.
+            Input x values.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
         -------
-        np.ndarray
-            The intensity of the Voigt at the given x values.
+        np.ndarray | sc.Variable
+            Evaluated Voigt profile values at x.
         """
+        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+        eval_unit = detected_unit or self._x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
 
-        x = self._prepare_x_for_evaluate(x)
+        center = self._resolve_param_value(self._center, eval_unit)
+        gw = self._resolve_param_value(self._gaussian_width, eval_unit)
+        lw = self._resolve_param_value(self._lorentzian_width, eval_unit)
+        area = self._resolve_param_value(self._area, eval_area_unit)
 
-        return self.area.value * voigt_profile(
-            x - self.center.value,
-            self.gaussian_width.value,
-            self.lorentzian_width.value,
-        )
+        result = area * voigt_profile(x_vals - center, gw, lw)
+
+        if output == 'scipp':
+            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+        return result
+
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert x-axis parameters (center, widths) and area to new_x_unit.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+
+        Raises
+        ------
+        TypeError
+            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the unit conversion fails.  On failure the component is rolled back to its original
+            units.
+        """
+        if not isinstance(new_x_unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+        old_x_unit = self._x_unit
+        new_area_unit = str(sc.Unit(new_x_unit) * sc.Unit(self._y_unit))
+        try:
+            self._center.convert_unit(new_x_unit)
+            self._gaussian_width.convert_unit(new_x_unit)
+            self._lorentzian_width.convert_unit(new_x_unit)
+            self._area.convert_unit(new_area_unit)
+            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
+                self._center.convert_unit(old_x_unit)
+                self._gaussian_width.convert_unit(old_x_unit)
+                self._lorentzian_width.convert_unit(old_x_unit)
+                self._area.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit by rescaling the area parameter.
+
+        The area is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the unit conversion fails.  On failure the component is rolled back to its original
+            units.
+        """
+        if not isinstance(new_y_unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
+        old_y_unit = self._y_unit
+        new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
+        try:
+            self._area.convert_unit(new_area_unit)
+            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
+                self._area.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
 
     def __repr__(self) -> str:
-        """
-        Return a string representation of the Voigt.
-
-        Returns
-        -------
-        str
-            A string representation of the Voigt.
-        """
-
         return (
-            f'Voigt(name = {self.name}, display_name = {self.display_name}, unit = {self._unit},\n'
+            f'Voigt(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center},\n'
             f'    gaussian_width = {self.gaussian_width},\n'

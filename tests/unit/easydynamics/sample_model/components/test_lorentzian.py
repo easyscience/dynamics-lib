@@ -20,7 +20,7 @@ class TestLorentzian:
             area=2.0,
             center=0.5,
             width=0.6,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -32,7 +32,7 @@ class TestLorentzian:
         assert lorentzian.area.value == pytest.approx(1.0)
         assert lorentzian.center.value == pytest.approx(0.0)
         assert lorentzian.width.value == pytest.approx(1.0)
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.x_unit == 'meV'
         assert lorentzian.center.fixed is True
 
     def test_initialization(self, lorentzian: Lorentzian):
@@ -41,25 +41,25 @@ class TestLorentzian:
         assert lorentzian.area.value == pytest.approx(2.0)
         assert lorentzian.center.value == pytest.approx(0.5)
         assert lorentzian.width.value == pytest.approx(0.6)
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
                 'center must be None',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
                 'unit must be None',
             ),
         ],
@@ -78,7 +78,7 @@ class TestLorentzian:
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -89,7 +89,7 @@ class TestLorentzian:
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -168,10 +168,10 @@ class TestLorentzian:
 
     def test_convert_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
-        lorentzian.convert_unit('microeV')
+        lorentzian.convert_x_unit('microeV')
 
         # EXPECT
-        assert lorentzian.unit == 'microeV'
+        assert lorentzian.x_unit == 'microeV'
         assert lorentzian.area.value == pytest.approx(2 * 1e3)
         assert lorentzian.center.value == pytest.approx(0.5 * 1e3)
         assert lorentzian.width.value == pytest.approx(0.6 * 1e3)
@@ -193,7 +193,7 @@ class TestLorentzian:
         assert lorentzian_copy.width.value == lorentzian.width.value
         assert lorentzian_copy.width.fixed == lorentzian.width.fixed
 
-        assert lorentzian_copy.unit == lorentzian.unit
+        assert lorentzian_copy.x_unit == lorentzian.x_unit
 
     def test_repr(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -202,7 +202,7 @@ class TestLorentzian:
         # EXPECT
         assert 'Lorentzian' in repr_str
         assert 'name = LorentzianName' in repr_str
-        assert 'unit = meV' in repr_str
+        assert 'x_unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str
         assert 'width =' in repr_str

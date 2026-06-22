@@ -14,7 +14,8 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
     def __init__(
         self,
         *args: object,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'MyEasyDynamicsModel',
         display_name: str | None = None,
         unique_name: str | None = None,
@@ -27,8 +28,10 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         ----------
         *args : object
             Positional arguments to pass to the parent class.
-        unit : str | sc.Unit, default='meV'
-            Unit of the model.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy, Q, etc.).
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity).
         name : str, default='MyEasyDynamicsModel'
             Name of the model.
         display_name : str | None, default=None
@@ -58,37 +61,29 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
             **kwargs,
         )
 
-        self._unit = _validate_unit(unit)
+        self._x_unit = _validate_unit(x_unit)
+        self._y_unit = _validate_unit(y_unit)
 
     @property
-    def unit(self) -> str | sc.Unit | None:
-        """
-        Get the unit of the model.
+    def x_unit(self) -> str | sc.Unit | None:
+        """Unit of the x-axis."""
+        return self._x_unit
 
-        Returns
-        -------
-        str | sc.Unit | None
-             The unit of the model.
-        """
-
-        return self._unit
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        Unit is read-only and cannot be set directly.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit to set (ignored).
-
-        Raises
-        ------
-        AttributeError
-            Always raised to indicate that the unit is read-only.
-        """
+    @x_unit.setter
+    def x_unit(self, _: str) -> None:
         raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'x_unit is read-only. Use convert_x_unit to change the unit '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
+        )
+
+    @property
+    def y_unit(self) -> str | sc.Unit | None:
+        """Unit of the model output."""
+        return self._y_unit
+
+    @y_unit.setter
+    def y_unit(self, _: str) -> None:
+        raise AttributeError(
+            f'y_unit is read-only. Use convert_y_unit to change the unit '
             f'or create a new {self.__class__.__name__} with the desired unit.'
         )

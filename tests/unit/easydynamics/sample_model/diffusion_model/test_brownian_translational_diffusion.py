@@ -25,8 +25,10 @@ class TestBrownianTranslationalDiffusion:
     def test_init_default(self, brownian_diffusion_model):
         # WHEN THEN EXPECT
         assert brownian_diffusion_model.display_name == 'BrownianTranslationalDiffusion'
-        assert brownian_diffusion_model.unit == 'meV'
+        assert brownian_diffusion_model.x_unit == 'meV'
+        assert brownian_diffusion_model.y_unit == 'dimensionless'
         assert brownian_diffusion_model.scale.value == pytest.approx(1.0)
+        assert brownian_diffusion_model.scale.unit == 'meV'
         assert brownian_diffusion_model.diffusion_coefficient.value == pytest.approx(1.0)
 
     @pytest.mark.parametrize(
@@ -34,7 +36,7 @@ class TestBrownianTranslationalDiffusion:
         [
             (
                 {
-                    'unit': 123,
+                    'x_unit': 123,
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                 },
@@ -43,7 +45,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
                 },
@@ -52,7 +54,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': -123.4,
                     'diffusion_coefficient': 1.0,
                 },
@@ -61,7 +63,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 'invalid',
                 },
@@ -70,7 +72,7 @@ class TestBrownianTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': -123.4,
                 },
@@ -180,9 +182,11 @@ class TestBrownianTranslationalDiffusion:
             model = component_collections[model_index]
             assert len(model) == 1
             component = model[0]
-            assert component.width.unit == brownian_diffusion_model.unit
+            assert component.width.unit == brownian_diffusion_model.x_unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
+            # area.unit = area_unit = x_unit * y_unit
+            assert component.area.unit == 'meV'
 
     def test_write_width_dependency_expression(self, brownian_diffusion_model):
         # WHEN THEN

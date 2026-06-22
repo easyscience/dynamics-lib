@@ -603,7 +603,7 @@ class Analysis1d(AnalysisBase):
                     energy=energy_with_offset,
                     temperature=self.temperature,
                     divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
-                    energy_unit=self.unit,
+                    energy_unit=self.x_unit,
                 )
             return result
 

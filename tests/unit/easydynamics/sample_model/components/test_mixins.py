@@ -18,7 +18,7 @@ class TestCreateParametersMixin:
     @pytest.mark.parametrize('area_input', [2, 2.0])
     def test_create_area_parameter_from_numeric(self, dummy_model, area_input, unit):
         # WHEN THEN
-        area_param = dummy_model._create_area_parameter(area_input, 'TestModel', unit=unit)
+        area_param = dummy_model._create_area_parameter(area_input, 'TestModel', x_unit=unit)
 
         # EXPECT
         assert isinstance(area_param, Parameter)
@@ -59,7 +59,7 @@ class TestCreateParametersMixin:
     def test_create_center_parameter_from_numeric(self, dummy_model, center_input, unit):
         # WHEN THEN
         center_param = dummy_model._create_center_parameter(
-            center_input, 'TestModel', fix_if_none=False, unit=unit
+            center_input, 'TestModel', fix_if_none=False, x_unit=unit
         )
         # EXPECT
         assert isinstance(center_param, Parameter)
@@ -104,7 +104,7 @@ class TestCreateParametersMixin:
     def test_create_width_parameter_from_numeric(self, dummy_model, width_input, unit):
         # WHEN THEN
         width_param = dummy_model._create_width_parameter(
-            width_input, 'TestModel', param_name='width', unit=unit
+            width_input, 'TestModel', param_name='width', x_unit=unit
         )
         # EXPECT
         assert isinstance(width_param, Parameter)

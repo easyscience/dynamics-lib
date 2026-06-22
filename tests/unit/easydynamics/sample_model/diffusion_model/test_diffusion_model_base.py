@@ -19,7 +19,10 @@ class TestDiffusionModelBase:
         assert diffusion_model.name == 'DiffusionModel'
         assert diffusion_model.lorentzian_name == 'DiffusionModel'
         assert diffusion_model.lorentzian_display_name == 'DiffusionModel'
-        assert diffusion_model.unit == 'meV'
+        assert diffusion_model.x_unit == 'meV'
+        assert diffusion_model.y_unit == 'dimensionless'
+        # scale.unit = area_unit = x_unit * y_unit = meV * dimensionless = meV
+        assert diffusion_model.scale.unit == 'meV'
 
     def test_init_raises(self):
         # WHEN THEN EXPECT
@@ -33,9 +36,9 @@ class TestDiffusionModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match=r'Unit is read-only. Use convert_unit to change the unit between allowed types',
+            match=r'read-only',
         ):
-            diffusion_model.unit = 'eV'
+            diffusion_model.x_unit = 'eV'
 
     @pytest.mark.parametrize(
         ('attribute', 'value', 'expected'),
@@ -153,7 +156,7 @@ class TestDiffusionModelBase:
 
         # EXPECT
         assert 'DiffusionModelBase' in repr_str
-        assert 'unit=meV' in repr_str
+        assert 'x_unit=meV' in repr_str
 
     def test_get_independent_variables(self, diffusion_model):
         # WHEN THEN EXPECT

@@ -18,14 +18,14 @@ class TestBackgroundModel:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             display_name='TestLorentzian1',
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -33,7 +33,7 @@ class TestBackgroundModel:
         return BackgroundModel(
             display_name='InitModel',
             components=component_collection,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
 
@@ -43,7 +43,7 @@ class TestBackgroundModel:
 
         # EXPECT
         assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
+        assert model.x_unit == 'meV'
         assert len(model.components) == 2
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 

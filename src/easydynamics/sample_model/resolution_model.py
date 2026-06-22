@@ -24,32 +24,16 @@ class ResolutionModel(ModelBase):
         self,
         display_name: str = 'MyResolutionModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
-        """
-        Initialize a ResolutionModel.
-
-        Parameters
-        ----------
-        display_name : str, default='MyResolutionModel'
-            Display name of the model.
-        unique_name : str | None, default=None
-            Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default='meV'
-            Unit of the model.
-        components : ModelComponent | ComponentCollection | None, default=None
-            Template components of the model. If None, no components are added. These components
-            are copied into ComponentCollections for each Q value.
-        Q : Q_type | None, default=None
-            Q values for the model. If None, Q is not set.
-        """
-
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             components=components,
             Q=Q,
         )
@@ -58,18 +42,7 @@ class ResolutionModel(ModelBase):
         """
         Append a component to the ResolutionModel.
 
-        Does not allow DeltaFunction or Polynomial components, as these are not physical resolution
-        components.
-
-        Parameters
-        ----------
-        component : ModelComponent | ComponentCollection
-            Component(s) to append.
-
-        Raises
-        ------
-        TypeError
-            If the component is a DeltaFunction or Polynomial.
+        Does not allow DeltaFunction, Polynomial, or Exponential components.
         """
         components = component if isinstance(component, ComponentCollection) else (component,)
 
@@ -88,29 +61,7 @@ class ResolutionModel(ModelBase):
         normalize_area: bool = True,
         fix_parameters: bool = True,
     ) -> 'ResolutionModel':
-        """
-        Create a ResolutionModel from a SampleModel.
-
-        Parameters
-        ----------
-        sample_model : SampleModel
-            SampleModel to create the ResolutionModel from.
-        normalize_area : bool, default=True
-            Whether to normalize the components in the ResolutionModel to have area 1.
-        fix_parameters : bool, default=True
-            Whether to fix the parameters in the ResolutionModel.
-
-        Returns
-        -------
-        'ResolutionModel'
-            ResolutionModel created from the SampleModel.
-
-        Raises
-        ------
-        TypeError
-            If sample_model is not a SampleModel, or if normalize_area or fix_parameters are not
-            bool.
-        """
+        """Create a ResolutionModel from a SampleModel."""
         if not isinstance(sample_model, SampleModel):
             raise TypeError(
                 f'sample_model must be an instance of SampleModel. Got {type(sample_model)}.'
@@ -124,7 +75,8 @@ class ResolutionModel(ModelBase):
 
         resolution_model = cls(
             display_name=sample_model.display_name,
-            unit=sample_model.unit,
+            x_unit=sample_model.x_unit,
+            y_unit=sample_model.y_unit,
             components=sample_model.components,
             Q=sample_model.Q,
         )

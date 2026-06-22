@@ -21,7 +21,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self,
         scale: Numeric = 1.0,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'DiffusionModel',
         display_name: str | None = 'DiffusionModel',
         lorentzian_name: str | None = None,
@@ -34,11 +35,14 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         Parameters
         ----------
         scale : Numeric, default=1.0
-            Scale factor for the diffusion model. Must be a non-negative number.
+            Scale factor for the diffusion model. Must be a non-negative number. Its unit equals
+            area_unit = x_unit * y_unit because scale * QISF/EISF (dimensionless) = component area.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy/frequency). Must be convertible to meV.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity). Together with x_unit determines area_unit.
         name : str, default='DiffusionModel'
             Name of the diffusion model.
         display_name : str | None, default='DiffusionModel'
@@ -58,7 +62,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         TypeError
             If scale is not a number.
         UnitError
-            If unit is not a string or scipp Unit, or if it cannot be converted to meV.
+            If x_unit is not a string or scipp Unit, or if it cannot be converted to meV.
         ValueError
             If scale is negative.
         """
@@ -66,11 +70,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._Q = _validate_and_convert_Q(Q)
 
         try:
-            test = DescriptorNumber(name='test', value=1, unit=unit)
+            test = DescriptorNumber(name='test', value=1, unit=x_unit)
             test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f'Invalid unit: {x_unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
@@ -79,10 +83,17 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if float(scale) < 0:
             raise ValueError('scale must be non-negative.')
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
+        area_unit = str(sc.Unit(x_unit) * sc.Unit(y_unit))
+        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=area_unit)
         self._scale = scale
 
-        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            x_unit=x_unit,
+            y_unit=y_unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
         if lorentzian_name is None:
             lorentzian_name = name
@@ -102,7 +113,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if self.Q is None:
             self._component_collections = []
         else:
-            self._component_collections = [ComponentCollection()] * len(self.Q)
+            self._component_collections = [
+                ComponentCollection(y_unit=self.y_unit) for _ in range(len(self.Q))
+            ]
 
     # ------------------------------------------------------------------
     # Properties
@@ -448,7 +461,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             self._component_collections = []
             return self._component_collections
 
-        self._component_collections = [ComponentCollection()] * len(self.Q)
+        self._component_collections = [
+            ComponentCollection(y_unit=self.y_unit) for _ in range(len(self.Q))
+        ]
 
         return self._component_collections
 
@@ -539,6 +554,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         return (
             f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'unit={self.unit}), \n'
+            f'x_unit={self.x_unit}), \n'
             f'    scale={self.scale})'
         )

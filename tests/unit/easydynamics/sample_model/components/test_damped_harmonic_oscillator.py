@@ -20,7 +20,7 @@ class TestDampedHarmonicOscillator:
             area=2.0,
             center=1.5,
             width=0.3,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -32,7 +32,7 @@ class TestDampedHarmonicOscillator:
         assert dho.area.value == pytest.approx(1.0)
         assert dho.center.value == pytest.approx(1.0)
         assert dho.width.value == pytest.approx(1.0)
-        assert dho.unit == 'meV'
+        assert dho.x_unit == 'meV'
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
@@ -40,25 +40,25 @@ class TestDampedHarmonicOscillator:
         assert dho.area.value == pytest.approx(2.0)
         assert dho.center.value == pytest.approx(1.5)
         assert dho.width.value == pytest.approx(0.3)
-        assert dho.unit == 'meV'
+        assert dho.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
                 'center must be ',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
                 'unit must be None',
             ),
         ],
@@ -78,7 +78,7 @@ class TestDampedHarmonicOscillator:
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -89,7 +89,7 @@ class TestDampedHarmonicOscillator:
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -169,10 +169,10 @@ class TestDampedHarmonicOscillator:
 
     def test_convert_unit(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
-        dho.convert_unit('microeV')
+        dho.convert_x_unit('microeV')
 
         # EXPECT
-        assert dho.unit == 'microeV'
+        assert dho.x_unit == 'microeV'
         assert dho.area.value == pytest.approx(2 * 1e3)
         assert dho.center.value == pytest.approx(1.5 * 1e3)
         assert dho.width.value == pytest.approx(0.3 * 1e3)
@@ -194,7 +194,7 @@ class TestDampedHarmonicOscillator:
         assert dho_copy.width.value == dho.width.value
         assert dho_copy.width.fixed == dho.width.fixed
 
-        assert dho_copy.unit == dho.unit
+        assert dho_copy.x_unit == dho.x_unit
 
     def test_repr(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
@@ -203,7 +203,7 @@ class TestDampedHarmonicOscillator:
         # EXPECT
         assert 'DampedHarmonicOscillator' in repr_str
         assert 'name = TestDHOName' in repr_str
-        assert 'unit = meV' in repr_str
+        assert 'x_unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str
         assert 'width =' in repr_str

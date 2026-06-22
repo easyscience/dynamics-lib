@@ -18,52 +18,54 @@ class CreateParametersMixin:
     """
     Provides parameter creation and validation methods for model components.
 
-    This mixin provides methods to create and validate common physics parameters (area, center,
-    width) with appropriate bounds and type checking.
+    area_unit = x_unit * y_unit, so when y_unit='dimensionless', area_unit = x_unit.
     """
 
     def _create_area_parameter(
         self,
         area: Numeric,
         name: str,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         minimum_area: float = MINIMUM_AREA,
     ) -> Parameter:
         """
-        Validate and convert a number to a Parameter describing the area of a function.
-
-        If the area is negative, a warning is raised. If the area is non-negative, its minimum is
-        set to 0 to avoid it accidentally becoming negative during fitting.
+        Create a Parameter for the area with unit = x_unit * y_unit.
 
         Parameters
         ----------
         area : Numeric
-            The area value.
+            Initial area value.
         name : str
-            The name of the model component.
-        unit : str | sc.Unit, default='meV'
-            The unit of the area Parameter.
+            Base name used to label the Parameter (``name + ' area'``).
+        x_unit : str | sc.Unit, default='meV'
+            X-axis unit.  The resulting area unit is ``x_unit * y_unit``.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Y-axis unit.  The resulting area unit is ``x_unit * y_unit``.
         minimum_area : float, default=MINIMUM_AREA
-            The minimum allowed area.
-
-        Raises
-        ------
-        TypeError
-            If area is not a number.
-        ValueError
-            If area is not a finite number.
+            Lower bound applied to the Parameter when the area is non-negative. When *area* is
+            negative no lower bound is set and a :class:`UserWarning` is issued.
 
         Returns
         -------
         Parameter
-            The validated area Parameter.
+            Configured area Parameter with ``unit = x_unit * y_unit``.
+
+        Raises
+        ------
+        TypeError
+            If *area* is not a numeric type.
+        ValueError
+            If *area* is not finite.
         """
         if not isinstance(area, Numeric):
             raise TypeError('area must be a number.')
 
         if not np.isfinite(area):
             raise ValueError('area must be a finite number.')
-        area_param = Parameter(name=name + ' area', value=float(area), unit=unit)
+
+        area_unit = str(sc.Unit(x_unit) * sc.Unit(y_unit))
+        area_param = Parameter(name=name + ' area', value=float(area), unit=area_unit)
 
         if area_param.value < 0:
             warnings.warn(
@@ -81,36 +83,38 @@ class CreateParametersMixin:
         center: Numeric | None,
         name: str,
         fix_if_none: bool,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
         enforce_minimum_center: bool = False,
     ) -> Parameter:
         """
-        Validate and convert a number to a Parameter describing the center of a function.
+        Create a Parameter for the center with unit = x_unit.
 
         Parameters
         ----------
         center : Numeric | None
-            The center value.
+            Initial center value.  If None, the center is set to 0.0 and ``fixed`` is controlled by
+            *fix_if_none*.
         name : str
-            The name of the model component.
+            Base name used to label the Parameter (``name + ' center'``).
         fix_if_none : bool
-            Whether to fix the center Parameter if center is None.
-        unit : str | sc.Unit, default='meV'
-            The unit of the center Parameter.
+            Whether to fix the Parameter when *center* is None.
+        x_unit : str | sc.Unit, default='meV'
+            X-axis unit, applied to the center Parameter.
         enforce_minimum_center : bool, default=False
-            Whether to enforce a minimum center value to avoid zero center in DHO.
-
-        Raises
-        ------
-        TypeError
-            If center is not None or a number.
-        ValueError
-            If center is a number but not finite.
+            If True, the Parameter's lower bound is raised to ``DHO_MINIMUM_CENTER`` (1e-10) to
+            prevent a zero center.
 
         Returns
         -------
         Parameter
-            The validated center Parameter.
+            Configured center Parameter with ``unit = x_unit``.
+
+        Raises
+        ------
+        TypeError
+            If *center* is not None and not a numeric type.
+        ValueError
+            If *center* is not None and not finite.
         """
         if center is not None and not isinstance(center, Numeric):
             raise TypeError('center must be None or a number.')
@@ -119,14 +123,14 @@ class CreateParametersMixin:
             center_param = Parameter(
                 name=name + ' center',
                 value=0.0,
-                unit=unit,
+                unit=x_unit,
                 fixed=fix_if_none,
             )
         else:
             if not np.isfinite(center):
                 raise ValueError('center must be None or a finite number.')
+            center_param = Parameter(name=name + ' center', value=float(center), unit=x_unit)
 
-            center_param = Parameter(name=name + ' center', value=float(center), unit=unit)
         if enforce_minimum_center and center_param.min < DHO_MINIMUM_CENTER:
             center_param.min = DHO_MINIMUM_CENTER
         return center_param
@@ -136,36 +140,37 @@ class CreateParametersMixin:
         width: Numeric,
         name: str,
         param_name: str = 'width',
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
         minimum_width: float = MINIMUM_WIDTH,
     ) -> Parameter:
         """
-        Validate and convert a number to a Parameter describing the width of a function.
+        Create a Parameter for the width with unit = x_unit.
 
         Parameters
         ----------
         width : Numeric
-            The width value.
+            Initial width value.  Must be strictly positive (>= *minimum_width*).
         name : str
-            The name of the model component.
+            Base name used to label the Parameter (``name + ' ' + param_name``).
         param_name : str, default='width'
-            The name of the width parameter.
-        unit : str | sc.Unit, default='meV'
-            The unit of the width Parameter.
+            Logical name of the parameter used in the label and error messages (e.g.
+            ``'gaussian_width'``, ``'lorentzian_width'``).
+        x_unit : str | sc.Unit, default='meV'
+            X-axis unit, applied to the width Parameter.
         minimum_width : float, default=MINIMUM_WIDTH
-            The minimum allowed width.
-
-        Raises
-        ------
-        TypeError
-            If width is not a number.
-        ValueError
-            If width is non-positive.
+            Absolute lower bound for the width to prevent division-by-zero.
 
         Returns
         -------
         Parameter
-            The validated width Parameter.
+            Configured width Parameter with ``unit = x_unit`` and ``min = minimum_width``.
+
+        Raises
+        ------
+        TypeError
+            If *width* is not a numeric type.
+        ValueError
+            If *width* is not finite or is smaller than *minimum_width*.
         """
         if not isinstance(width, Numeric):
             raise TypeError(f'{param_name} must be a number.')
@@ -180,6 +185,6 @@ class CreateParametersMixin:
         return Parameter(
             name=name + ' ' + param_name,
             value=float(width),
-            unit=unit,
+            unit=x_unit,
             min=minimum_width,
         )

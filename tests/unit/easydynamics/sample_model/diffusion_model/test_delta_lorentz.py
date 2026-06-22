@@ -38,7 +38,7 @@ class TestDeltaLorentz:
     def test_init_default(self, delta_lorentz_model):
         # WHEN THEN EXPECT
         assert delta_lorentz_model.display_name == 'DeltaLorentz'
-        assert delta_lorentz_model.unit == 'meV'
+        assert delta_lorentz_model.x_unit == 'meV'
         assert delta_lorentz_model.scale.value == pytest.approx(1.0)
         assert delta_lorentz_model.mean_u_squared.value == pytest.approx(0.0)
         assert delta_lorentz_model.A_0.value == pytest.approx(1.0)
@@ -47,7 +47,7 @@ class TestDeltaLorentz:
     def test_init_with_Q(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
         assert delta_lorentz_model_with_Q.display_name == 'DeltaLorentz'
-        assert delta_lorentz_model_with_Q.unit == 'meV'
+        assert delta_lorentz_model_with_Q.x_unit == 'meV'
         assert delta_lorentz_model_with_Q.scale.value == pytest.approx(1.0)
         assert delta_lorentz_model_with_Q.mean_u_squared.value == pytest.approx(0.0)
         assert delta_lorentz_model_with_Q.A_0.value == pytest.approx(0.5)

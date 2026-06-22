@@ -65,8 +65,8 @@ class FitBinding(EasyDynamicsBase):
         >>> fit_func = sm.Polynomial(coefficients=[3.7, -0.5], display_name='Straight line')
         >>> binding = edyn.FitBinding(parameter_name='Gaussian area', model=fit_func)
         >>> print(binding)
-        FitBinding(parameter_name='Gaussian area', model=Polynomial(unique_name = Polynomial_1,
-        unit = meV, coefficients = [Straight line_c0=3.7, Straight line_c1=-0.5]), modes=None)
+        FitBinding(parameter_name=Gaussian area, model=Straight line, modes=None,
+        display_name=FitBinding_1, unique_name=FitBinding_1)
 
         2. Usage with a DiffusionModelBase and specific modes:
         >>> brownian_diffusion_model = sm.BrownianTranslationalDiffusion(

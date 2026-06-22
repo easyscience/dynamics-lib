@@ -6,13 +6,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+import scipp as sc
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
 if TYPE_CHECKING:
-    import scipp as sc
     from easyscience.variable import Parameter
 
 
@@ -20,15 +20,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     r"""
     Model of a Gaussian function.
 
-     The intensity is given by
+    $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+    x_0}{\sigma}\right)^2 \right) $$
 
-     $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
-     x_0}{\sigma}\right)^2 \right) $$
-
-     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
-
-    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
-    want in QENS.
+    where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width. area has unit = x_unit *
+    y_unit; center and width have unit = x_unit.
     """
 
     def __init__(
@@ -36,80 +32,72 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Gaussian',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
-        Initialize the Gaussian component.
-
         Parameters
         ----------
         area : Numeric, default=1.0
-            Area of the Gaussian.
+            Integrated area under the Gaussian.  Unit is ``x_unit * y_unit``.
         center : Numeric | None, default=None
-            Center of the Gaussian. If None, defaults to 0 and is fixed.
+            Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
         width : Numeric, default=1.0
-            Standard deviation.
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Standard deviation (sigma) in x_unit.  Must be strictly positive.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
+            y_unit.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         name : str, default='Gaussian'
-            Name of the component for indexing.
+            Internal name used for parameter labelling.
         display_name : str | None, default=None
-            Name of the component.
+            Human-readable name.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. if None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
         """
-        # Validate inputs and create Parameters if not given
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        self._area = self._create_area_parameter(
+            area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
         )
-        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
-
-        self._area = area
-        self._center = center
-        self._width = width
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
+        )
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self._x_unit)
 
     @property
     def area(self) -> Parameter:
         """
-        Get the area parameter.
-
         Returns
         -------
         Parameter
-            The area parameter.
+            The area Parameter with unit ``x_unit * y_unit``.
         """
-
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
         """
-        Set the value of the area parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the area parameter.
+            New area value (in current area unit = x_unit * y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
-
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
         self._area.value = value
@@ -117,32 +105,27 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
-        Get the center parameter.
-
         Returns
         -------
         Parameter
-            The center parameter.
+            The center Parameter with unit ``x_unit``.
         """
-
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the center parameter value.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None, defaults to 0 and is fixed.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not None and not a numeric type.
         """
-
         if value is None:
             value = 0.0
             self._center.fixed = True
@@ -153,84 +136,146 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     @property
     def width(self) -> Parameter:
         """
-        Get the width parameter (standard deviation).
-
         Returns
         -------
         Parameter
-            The width parameter.
+            The width (sigma) Parameter with unit ``x_unit``.
         """
         return self._width
 
     @width.setter
     def width(self, value: Numeric) -> None:
         """
-        Set the width parameter value.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the width parameter.
+            New width value in x_unit.  Must be strictly positive.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not a numeric type.
         ValueError
-            If the value is not positive.
+            If *value* is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
-
         if float(value) <= 0:
             raise ValueError('width must be positive')
-
         self._width.value = value
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-    ) -> np.ndarray:
+        output: str = 'numpy',
+    ) -> np.ndarray | sc.Variable:
         r"""
-        Evaluate the Gaussian at the given x values.
+        Evaluate the Gaussian at x.
 
-        If x is a scipp Variable, the unit of the Gaussian will be converted to match x. The
-        intensity is given by $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2}
-        \left(\frac{x - x_0}{\sigma}\right)^2 \right) $$
-
-        where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
+        Parameters in the model's own units are temporarily converted to x's unit for the
+        computation — the model is never mutated.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Gaussian.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
         -------
-        np.ndarray
-            The intensity of the Gaussian at the given x values.
+        np.ndarray | sc.Variable
+            Evaluated Gaussian values at x.
         """
+        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+        eval_unit = detected_unit or self._x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
 
-        x = self._prepare_x_for_evaluate(x)
+        center = self._resolve_param_value(self._center, eval_unit)
+        width = self._resolve_param_value(self._width, eval_unit)
+        area = self._resolve_param_value(self._area, eval_area_unit)
 
-        normalization = 1 / (np.sqrt(2 * np.pi) * self.width.value)
-        exponent = -0.5 * ((x - self.center.value) / self.width.value) ** 2
+        normalization = 1 / (np.sqrt(2 * np.pi) * width)
+        exponent = -0.5 * ((x_vals - center) / width) ** 2
+        result = area * normalization * np.exp(exponent)
 
-        return self.area.value * normalization * np.exp(exponent)
+        if output == 'scipp':
+            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+        return result
+
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert x-axis parameters (center, width) and area to new_x_unit.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+
+        Raises
+        ------
+        TypeError
+            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the unit conversion fails.  On failure the component is rolled back to its original
+            units.
+        """
+        if not isinstance(new_x_unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+        old_x_unit = self._x_unit
+        new_area_unit = str(sc.Unit(new_x_unit) * sc.Unit(self._y_unit))
+        try:
+            self._center.convert_unit(new_x_unit)
+            self._width.convert_unit(new_x_unit)
+            self._area.convert_unit(new_area_unit)
+            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
+                self._center.convert_unit(old_x_unit)
+                self._width.convert_unit(old_x_unit)
+                self._area.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis (output) unit by rescaling the area parameter.
+
+        The area is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the unit conversion fails.  On failure the component is rolled back to its original
+            units.
+        """
+        if not isinstance(new_y_unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
+        old_y_unit = self._y_unit
+        new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
+        try:
+            self._area.convert_unit(new_area_unit)
+            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
+                self._area.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
 
     def __repr__(self) -> str:
-        """
-        Return a string representation of the Gaussian.
-
-        Returns
-        -------
-        str
-            A string representation of the Gaussian.
-        """
-
         return (
             f'Gaussian(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n'
+            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center},\n'
             f'    width = {self.width})'

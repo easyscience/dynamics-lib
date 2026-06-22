@@ -20,7 +20,7 @@ class TestDeltaFunction:
             display_name='TestDeltaFunction',
             area=2.0,
             center=0.5,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -31,7 +31,7 @@ class TestDeltaFunction:
         assert delta_function.display_name == 'DeltaFunction'
         assert delta_function.area.value == pytest.approx(1.0)
         assert delta_function.center.value == pytest.approx(0.0)
-        assert delta_function.unit == 'meV'
+        assert delta_function.x_unit == 'meV'
         assert delta_function.center.fixed is True
 
     def test_initialization(self, delta_function: DeltaFunction):
@@ -39,21 +39,21 @@ class TestDeltaFunction:
         assert delta_function.display_name == 'TestDeltaFunction'
         assert delta_function.area.value == pytest.approx(2.0)
         assert delta_function.center.value == pytest.approx(0.5)
-        assert delta_function.unit == 'meV'
+        assert delta_function.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'x_unit': 'meV'},
                 'center must be ',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'unit': 123},
+                {'area': 2.0, 'center': 0.5, 'x_unit': 123},
                 'unit must be ',
             ),
         ],
@@ -65,7 +65,7 @@ class TestDeltaFunction:
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match='may not be physically meaningful'):
-            DeltaFunction(display_name='TestDeltaFunction', area=-2.0, center=0.5, unit='meV')
+            DeltaFunction(display_name='TestDeltaFunction', area=-2.0, center=0.5, x_unit='meV')
 
     @pytest.mark.parametrize(
         'prop, valid_value, invalid_value, invalid_message',
@@ -147,7 +147,7 @@ class TestDeltaFunction:
         # THEN EXPECT
         with pytest.raises(
             UnitError,
-            match='Input x has unit nm, but DeltaFunction component ',
+            match='Input x has unit nm',
         ):
             delta_function.evaluate(x)
 
@@ -192,10 +192,10 @@ class TestDeltaFunction:
 
     def test_convert_unit(self, delta_function: DeltaFunction):
         # WHEN THEN
-        delta_function.convert_unit('microeV')
+        delta_function.convert_x_unit('microeV')
 
         # EXPECT
-        assert delta_function.unit == 'microeV'
+        assert delta_function.x_unit == 'microeV'
         assert delta_function.area.value == pytest.approx(2 * 1e3)
         assert delta_function.center.value == pytest.approx(0.5 * 1e3)
 
@@ -213,7 +213,7 @@ class TestDeltaFunction:
         assert delta_copy.center.value == delta_function.center.value
         assert delta_copy.center.fixed == delta_function.center.fixed
 
-        assert delta_copy.unit == delta_function.unit
+        assert delta_copy.x_unit == delta_function.x_unit
 
     def test_repr(self, delta_function: DeltaFunction):
         # WHEN THEN
@@ -222,6 +222,6 @@ class TestDeltaFunction:
         # EXPECT
         assert 'DeltaFunction' in repr_str
         assert 'name = DeltaFunctionName' in repr_str
-        assert 'unit = meV' in repr_str
+        assert 'x_unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str

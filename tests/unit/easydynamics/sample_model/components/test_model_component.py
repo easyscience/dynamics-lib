@@ -15,7 +15,7 @@ class DummyComponent(ModelComponent):
         self.area = Parameter(name='area', value=1.0, unit='meV', fixed=False)
         self.center = Parameter(name='center', value=2.0, unit='meV', fixed=True)
         self.width = Parameter(name='width', value=3.0, unit='meV', fixed=True)
-        self._unit = 'meV'
+        self._x_unit = 'meV'
 
     def get_all_parameters(self):
         return [self.area, self.center, self.width]
@@ -31,23 +31,23 @@ class TestModelComponent:
 
     def test_unit_cannot_be_set_directly(self, dummy: ModelComponent):
         # WHEN THEN EXPECT
-        with pytest.raises(AttributeError, match='Unit is read-only'):
-            dummy.unit = 'K'
+        with pytest.raises(AttributeError, match='read-only'):
+            dummy.x_unit = 'K'
 
     def test_convert_unit(self, dummy: DummyComponent):
         # WHEN THEN
-        dummy.convert_unit('microeV')
+        dummy.convert_x_unit('microeV')
 
         # EXPECT
-        assert dummy.unit == 'microeV'
+        assert dummy.x_unit == 'microeV'
         assert dummy.area.value == pytest.approx(1 * 1e3)
         assert dummy.center.value == pytest.approx(2 * 1e3)
         assert dummy.width.value == pytest.approx(3 * 1e3)
 
     def test_convert_unit_incorrect_unit_raises(self, dummy: DummyComponent):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
-            dummy.convert_unit(123)
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
+            dummy.convert_x_unit(123)
 
     def test_free_and_fix_all_parameters(self, dummy):
         # WHEN THEN EXPECT
@@ -92,7 +92,8 @@ class TestModelComponent:
         ],
     )
     def test_prepare_x_for_evaluate_various_inputs(self, dummy, x_input, expected_array):
-        x_prepared = dummy._prepare_x_for_evaluate(x_input)
+        result = dummy._prepare_x_for_evaluate(x_input)
+        x_prepared, _detected_unit, _dim = result
 
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == expected_array.shape
@@ -137,26 +138,23 @@ class TestModelComponent:
         # THEN EXPECT
         with pytest.raises(
             Exception,
-            match='Input x has unit nm, but DummyComponent component ',
+            match='Input x has unit nm',
         ):
             dummy._prepare_x_for_evaluate(x)
 
-    def test_prepare_x_for_evaluate_with_different_unit_warns(self, dummy):
+    def test_prepare_x_for_evaluate_with_different_unit_no_warn(self, dummy):
         # WHEN
         x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='microeV')
 
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match='Input x has unit [µμ]eV, but DummyComponent component ',
-        ):
-            x_prepared = dummy._prepare_x_for_evaluate(x)
+        # THEN EXPECT: compatible units are accepted without warning;
+        # the component's x_unit is NOT mutated and x values are returned as-is.
+        x_prepared, _detected_unit, _dim = dummy._prepare_x_for_evaluate(x)
 
         # EXPECT
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == (3,)
         np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-        assert dummy.unit == 'µeV'  # noqa: RUF001
-        assert dummy.area.value == pytest.approx(1.0 * 1e3)
-        assert dummy.center.value == pytest.approx(2.0 * 1e3)
-        assert dummy.width.value == pytest.approx(3.0 * 1e3)
+        assert dummy.x_unit == 'meV'  # component unit unchanged
+        assert dummy.area.value == pytest.approx(1.0)  # parameter values unchanged
+        assert dummy.center.value == pytest.approx(2.0)
+        assert dummy.width.value == pytest.approx(3.0)

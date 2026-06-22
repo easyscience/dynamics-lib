@@ -20,7 +20,7 @@ class TestGaussian:
             area=2.0,
             center=0.5,
             width=0.6,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -32,7 +32,7 @@ class TestGaussian:
         assert gaussian.area.value == pytest.approx(1.0)
         assert gaussian.center.value == pytest.approx(0.0)
         assert gaussian.width.value == pytest.approx(1.0)
-        assert gaussian.unit == 'meV'
+        assert gaussian.x_unit == 'meV'
         assert gaussian.center.fixed is True
 
     def test_initialization(self, gaussian: Gaussian):
@@ -41,25 +41,25 @@ class TestGaussian:
         assert gaussian.area.value == pytest.approx(2.0)
         assert gaussian.center.value == pytest.approx(0.5)
         assert gaussian.width.value == pytest.approx(0.6)
-        assert gaussian.unit == 'meV'
+        assert gaussian.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
                 'center must be None or a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
                 'unit must be None',
             ),
         ],
@@ -84,7 +84,7 @@ class TestGaussian:
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -95,7 +95,7 @@ class TestGaussian:
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -179,10 +179,10 @@ class TestGaussian:
 
     def test_convert_unit(self, gaussian: Gaussian):
         # WHEN THEN
-        gaussian.convert_unit('microeV')
+        gaussian.convert_x_unit('microeV')
 
         # EXPECT
-        assert gaussian.unit == 'microeV'
+        assert gaussian.x_unit == 'microeV'
         assert gaussian.area.value == pytest.approx(2 * 1e3)
         assert gaussian.center.value == pytest.approx(0.5 * 1e3)
         assert gaussian.width.value == pytest.approx(0.6 * 1e3)
@@ -216,7 +216,7 @@ class TestGaussian:
         assert gaussian_copy.width.min == gaussian.width.min
         assert gaussian_copy.width.max == gaussian.width.max
 
-        assert gaussian_copy.unit == gaussian.unit
+        assert gaussian_copy.x_unit == gaussian.x_unit
 
     def test_repr(self, gaussian: Gaussian):
         # WHEN THEN
@@ -224,7 +224,7 @@ class TestGaussian:
         # EXPECT
         assert 'Gaussian' in repr_str
         assert 'name = GaussianName' in repr_str
-        assert 'unit = meV' in repr_str
+        assert 'x_unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str
         assert 'width =' in repr_str

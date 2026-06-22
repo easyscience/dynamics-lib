@@ -48,7 +48,7 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution_base.temperature is None
-        assert default_numerical_convolution_base.unit == 'meV'
+        assert default_numerical_convolution_base.x_unit == 'meV'
         assert (
             default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -87,7 +87,7 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.extension_factor == pytest.approx(0.5)
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
-        assert numerical_convolution_base.unit == unit
+        assert numerical_convolution_base.x_unit == unit
         assert (
             numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is False

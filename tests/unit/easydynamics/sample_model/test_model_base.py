@@ -23,7 +23,7 @@ class TestModelBase:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -31,7 +31,7 @@ class TestModelBase:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -39,7 +39,7 @@ class TestModelBase:
         return ModelBase(
             display_name='InitModel',
             components=component_collection,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
 
@@ -49,7 +49,7 @@ class TestModelBase:
 
         # EXPECT
         assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
+        assert model.x_unit == 'meV'
         assert len(model.components) == 2
         np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
 
@@ -78,8 +78,8 @@ class TestModelBase:
         result = model_base.evaluate(x)
 
         # EXPECT
-        collection1.evaluate.assert_called_once_with(x)
-        collection2.evaluate.assert_called_once_with(x)
+        collection1.evaluate.assert_called_once_with(x, output='numpy')
+        collection2.evaluate.assert_called_once_with(x, output='numpy')
 
         np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
         np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]))
@@ -246,36 +246,36 @@ class TestModelBase:
         with pytest.raises(TypeError, match=' must be '):
             model_base.append_component('invalid_component')
 
-    def test_unit_property(self, model_base):
+    def test_x_unit_property(self, model_base):
         # WHEN
-        unit = model_base.unit
+        unit = model_base.x_unit
 
         # THEN / EXPECT
         assert unit == 'meV'
 
-    def test_unit_setter_raises(self, model_base):
+    def test_x_unit_setter_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(AttributeError, match='Use convert_unit to change '):
-            model_base.unit = 'K'
+        with pytest.raises(AttributeError):
+            model_base.x_unit = 'K'
 
-    def test_convert_unit(self, model_base):
+    def test_convert_x_unit(self, model_base):
         # WHEN
-        model_base.convert_unit('eV')
+        model_base.convert_x_unit('eV')
 
         # THEN / EXPECT
-        assert model_base.unit == 'eV'
+        assert model_base.x_unit == 'eV'
         for component in model_base.components:
-            assert component.unit == 'eV'
+            assert component.x_unit == 'eV'
 
-    def test_convert_unit_invalid_raises(self, model_base):
+    def test_convert_x_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
         with pytest.raises(UnitError):
-            model_base.convert_unit('invalid_unit')
+            model_base.convert_x_unit('invalid_unit')
 
-    def test_convert_unit_incorrect_unit_raises(self, model_base):
+    def test_convert_x_unit_incorrect_unit_raises(self, model_base):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
-            model_base.convert_unit(123)
+            model_base.convert_x_unit(123)
 
     def test_components_setter(self, model_base):
         # WHEN

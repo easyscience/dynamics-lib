@@ -58,7 +58,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
 
         super().__init__(
-            unit=unit,
+            x_unit=unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -191,9 +191,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
 
         if isinstance(energy, sc.Variable):
             self._energy = energy
-            self._unit = energy.unit
+            self._x_unit = energy.unit
 
-    def convert_unit(self, unit: str | sc.Unit) -> None:
+    def convert_x_unit(self, unit: str | sc.Unit) -> None:
         """
         Convert the energy and energy_offset to the specified unit.
 
@@ -226,7 +226,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             self.energy_offset = old_energy_offset
             raise e
 
-        self._unit = unit
+        self._x_unit = unit
 
     @property
     def sample_components(self) -> ComponentCollection | ModelComponent:

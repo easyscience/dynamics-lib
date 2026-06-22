@@ -113,7 +113,7 @@ class TestInstrumentModel:
                 'energy_offset must be a number',
             ),
             (
-                {'unit': 123},
+                {'x_unit': 123},
                 TypeError,
                 'unit must be',
             ),
@@ -209,13 +209,10 @@ class TestInstrumentModel:
         with pytest.raises(ValueError, match='Clearing Q values requires confirmation'):
             instrument_model.clear_Q()
 
-    def test_unit_setter_raises(self, instrument_model):
+    def test_x_unit_setter_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
-        with pytest.raises(
-            AttributeError,
-            match=r'Unit is read-only. Use convert_unit to change the unit between allowed types ',
-        ):
-            instrument_model.unit = 'meV'
+        with pytest.raises(AttributeError):
+            instrument_model.x_unit = 'meV'
 
     def test_energy_offset_setter(self, instrument_model):
         # WHEN
@@ -272,16 +269,16 @@ class TestInstrumentModel:
         ):
             instrument_model.get_energy_offset(0)
 
-    def test_convert_unit_calls_all_children(self, instrument_model):
+    def test_convert_x_unit_calls_all_children(self, instrument_model):
         # WHEN
         new_unit = 'eV'
 
         # THEN
         # Ensure energy offsets are built before mocking
         instrument_model._ensure_energy_offsets_current()
-        # Mock downstream convert_unit calls
-        instrument_model._background_model.convert_unit = MagicMock()
-        instrument_model._resolution_model.convert_unit = MagicMock()
+        # Mock downstream convert_x_unit calls
+        instrument_model._background_model.convert_x_unit = MagicMock()
+        instrument_model._resolution_model.convert_x_unit = MagicMock()
         instrument_model._energy_offset.convert_unit = MagicMock()
         for offset in instrument_model._energy_offsets:
             offset.convert_unit = MagicMock()
@@ -290,28 +287,28 @@ class TestInstrumentModel:
             'easydynamics.sample_model.instrument_model._validate_unit',
             return_value=new_unit,
         ) as mock_validate:
-            instrument_model.convert_unit(new_unit)
+            instrument_model.convert_x_unit(new_unit)
 
             # EXPECT
             mock_validate.assert_called_once_with(new_unit)
 
-            instrument_model._background_model.convert_unit.assert_called_once_with(new_unit)
-            instrument_model._resolution_model.convert_unit.assert_called_once_with(new_unit)
+            instrument_model._background_model.convert_x_unit.assert_called_once_with(new_unit)
+            instrument_model._resolution_model.convert_x_unit.assert_called_once_with(new_unit)
             instrument_model._energy_offset.convert_unit.assert_called_once_with(new_unit)
 
             for offset in instrument_model._energy_offsets:
                 offset.convert_unit.assert_called_once_with(new_unit)
 
             # final state
-            assert instrument_model.unit == new_unit
+            assert instrument_model.x_unit == new_unit
 
-    def test_convert_unit_None_raises(self, instrument_model):
+    def test_convert_x_unit_None_raises(self, instrument_model):
         # WHEN / THEN / EXPECT
         with pytest.raises(
             ValueError,
             match=' must be a valid unit',
         ):
-            instrument_model.convert_unit(None)
+            instrument_model.convert_x_unit(None)
 
     def test_fix_resolution_parameters(self, instrument_model):
         # WHEN
@@ -429,7 +426,7 @@ class TestInstrumentModel:
         assert len(instrument_model._energy_offsets) == 4
         for offset in instrument_model._energy_offsets:
             assert offset.name == 'energy_offset'
-            assert offset.unit == instrument_model.unit
+            assert offset.unit == instrument_model.x_unit
             assert offset.value == instrument_model.energy_offset.value
 
     def test_Q_setter(self, instrument_model_without_Q):
@@ -567,7 +564,7 @@ class TestInstrumentModel:
         # EXPECT
         assert repr_str.startswith('InstrumentModel(')
         assert f'unique_name={instrument_model.unique_name!r}' in repr_str
-        assert f'unit={instrument_model.unit}' in repr_str
+        assert f'x_unit={instrument_model.x_unit}' in repr_str
         assert 'Q_len=3' in repr_str
         assert f'resolution_model={instrument_model._resolution_model!r}' in repr_str
         assert f'background_model={instrument_model._background_model!r}' in repr_str

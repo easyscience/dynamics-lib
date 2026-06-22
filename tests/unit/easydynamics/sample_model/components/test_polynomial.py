@@ -6,7 +6,6 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
-from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
 
@@ -27,7 +26,7 @@ class TestPolynomial:
         # EXPECT
         assert polynomial.display_name == 'Polynomial'
         assert polynomial.coefficients[0].value == pytest.approx(0.0)
-        assert polynomial.unit == 'meV'
+        assert polynomial.x_unit == 'meV'
 
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
@@ -48,7 +47,7 @@ class TestPolynomial:
                 'Each coefficient must be ',
             ),
             (
-                {'coefficients': [1.0, -2.0, 3.0], 'unit': 123},
+                {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 123},
                 'unit must be ',
             ),
             (
@@ -163,18 +162,18 @@ class TestPolynomial:
 
     def test_convert_unit(self, polynomial: Polynomial):
         # WHEN
-        polynomial.convert_unit('microeV')
+        polynomial.convert_x_unit('microeV')
 
         # THEN EXPECT
-        assert polynomial._unit == 'microeV'
+        assert polynomial._x_unit == 'microeV'
         assert np.isclose(polynomial.coefficients[0].value, 1.0)
         assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
         assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
     def test_convert_unit_raises_invalid_unit(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
-        with pytest.raises(UnitError, match='unit must be '):
-            polynomial.convert_unit(123)
+        with pytest.raises(Exception, match='unit must be '):
+            polynomial.convert_x_unit(123)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN

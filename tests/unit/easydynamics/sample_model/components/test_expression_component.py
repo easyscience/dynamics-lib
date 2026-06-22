@@ -16,14 +16,14 @@ class TestExpressionComponent:
         return ExpressionComponent(
             'A * exp(-(x - x0)**2 / (2*sigma**2))',
             parameters={'A': 2.0, 'x0': 0.5, 'sigma': 0.6},
-            unit='meV',
+            x_unit='meV',
             display_name='TestExpression',
         )
 
     def test_init_valid(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
         assert expr.display_name == 'TestExpression'
-        assert expr.unit == 'meV'
+        assert expr.x_unit == 'meV'
 
         assert expr.A.value == pytest.approx(2.0)
         assert expr.x0.value == pytest.approx(0.5)
@@ -134,7 +134,7 @@ class TestExpressionComponent:
     def test_convert_unit_not_implemented(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
         with pytest.raises(NotImplementedError, match='not implemented'):
-            expr.convert_unit('microeV')
+            expr.convert_x_unit('microeV')
 
     def test_missing_parameter_defaults(self):
         # WHEN THEN
@@ -191,7 +191,7 @@ class TestExpressionComponent:
         assert expr_copy is not expr
         assert isinstance(expr_copy, ExpressionComponent)
         assert expr_copy.expression == expr.expression
-        assert expr_copy.unit == expr.unit
+        assert expr_copy.x_unit == expr.x_unit
         assert expr_copy.display_name == expr.display_name
 
         assert expr_copy.A.value == pytest.approx(expr.A.value)

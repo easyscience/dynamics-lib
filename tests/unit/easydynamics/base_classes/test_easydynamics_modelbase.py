@@ -13,7 +13,7 @@ class TestEasyDynamicsModelBase:
     def easy_dynamics_modelbase(self):
         """Fixture for creating an instance of EasyDynamicsModelBase."""
 
-        return EasyDynamicsModelBase(name='TestModel', unit='meV')
+        return EasyDynamicsModelBase(name='TestModel', x_unit='meV')
 
     def test_initialization(self, easy_dynamics_modelbase):
         """Test that the EasyDynamicsModelBase is initialized correctly."""
@@ -68,9 +68,9 @@ class TestEasyDynamicsModelBase:
     def test_unit_property(self, easy_dynamics_modelbase):
         # WHEN THEN EXPECT
 
-        assert easy_dynamics_modelbase.unit == 'meV'
+        assert easy_dynamics_modelbase.x_unit == 'meV'
 
     def test_unit_setter_raises(self, easy_dynamics_modelbase):
         # WHEN / THEN / EXPECT
-        with pytest.raises(AttributeError, match='Use convert_unit to change '):
-            easy_dynamics_modelbase.unit = 'K'
+        with pytest.raises(AttributeError, match='read-only'):
+            easy_dynamics_modelbase.x_unit = 'K'
