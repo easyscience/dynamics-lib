@@ -832,14 +832,14 @@ class TestParameterAnalysis:
             parameter_analysis._get_xyweight_from_dataset('nonexistent_parameter')
 
     @pytest.mark.parametrize(
-        'non_finite_variance',
-        [np.inf, -np.inf, np.nan, -1.0, 0.0],
-        ids=['inf', '-inf', 'nan', 'negative', 'zero'],
+        'bad_variance',
+        [np.inf, -np.inf, -1.0, 0.0],
+        ids=['inf', '-inf', 'negative', 'zero'],
     )
     def test_get_xyweight_from_dataset_non_finite_weights_raises(
-        self, parameter_analysis, non_finite_variance
+        self, parameter_analysis, bad_variance
     ):
-        # WHEN
+        # Non-NaN invalid variances (inf, negative, zero) should still raise.
         Q = sc.array(dims=['Q'], values=[0.1, 0.2])
         parameter_analysis.parameters = sc.Dataset(
             data={
@@ -847,7 +847,7 @@ class TestParameterAnalysis:
                     data=sc.array(
                         dims=['Q'],
                         values=[1.0, 2.0],
-                        variances=[1.0, non_finite_variance],
+                        variances=[1.0, bad_variance],
                         unit='meV',
                     ),
                     coords={'Q': Q},
@@ -860,6 +860,29 @@ class TestParameterAnalysis:
             ValueError, match="Non-finite variances found for parameter 'parameter1'"
         ):
             parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+    def test_get_xyweight_from_dataset_nan_variance_filters_row(self, parameter_analysis):
+        # NaN variances arise when a parameter is absent for a given Q; those rows are filtered.
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2])
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(
+                        dims=['Q'],
+                        values=[1.0, np.nan],
+                        variances=[0.25, np.nan],
+                        unit='meV',
+                    ),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+        np.testing.assert_allclose(x, [0.1])
+        np.testing.assert_allclose(y, [1.0])
+        np.testing.assert_allclose(w, [1 / np.sqrt(0.25)])
 
     def test_get_xyweight_from_dataset_valid(self, parameter_analysis):
         # WHEN THEN

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
+import scipp as sc
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
@@ -46,18 +47,26 @@ class NumericalConvolution(NumericalConvolutionBase):
                 model_name='resolution model',
             )
 
+        # Unit-convert the energy offset to match the energy grid unit.
+        offset_value = self.energy_offset.value
+        if str(self.energy_offset.unit) != str(self.energy.unit):
+            offset_value = sc.to_unit(
+                sc.scalar(offset_value, unit=str(self.energy_offset.unit)),
+                str(self.energy.unit),
+            ).value
+
         # Evaluate sample model. If called via the Convolution class,
         # delta functions are already filtered out.
         sample_vals = self.sample_components.evaluate(
             self._energy_grid.energy_dense
             - self._energy_grid.energy_even_length_offset
-            - self.energy_offset.value
+            - offset_value
         )
 
         # Detailed balance correction
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense - self.energy_offset.value,
+                energy=self._energy_grid.energy_dense - offset_value,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,

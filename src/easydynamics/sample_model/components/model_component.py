@@ -196,7 +196,7 @@ class ModelComponent(EasyDynamicsModelBase):
         if any(np.isinf(x_in)):
             raise ValueError('Input x contains infinite values.')
 
-        return np.sort(x_in), detected_unit, dim
+        return x_in, detected_unit, dim
 
     def _resolve_param_value(self, param: Parameter, target_unit: str | None) -> float:
         """

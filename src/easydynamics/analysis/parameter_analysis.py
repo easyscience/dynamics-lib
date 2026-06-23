@@ -549,21 +549,29 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             raise ValueError(f"Parameter name '{parameter_name}' not found in parameters Dataset.")
 
         variances = self._parameters[parameter_name].variances
+        values = self._parameters[parameter_name].values
+        q_values = self._parameters[parameter_name].coords['Q'].values
+
         if variances is None:
-            weight = np.ones_like(self._parameters[parameter_name].values)
-        elif np.any(~np.isfinite(variances)) or np.any(variances <= 0):
+            return q_values, values, np.ones_like(values)
+
+        # NaN variances arise when a parameter is absent for a given Q (parameters_to_dataset
+        # fills np.nan for missing parameters). Filter those rows silently; other non-finite or
+        # non-positive variances are errors.
+        nan_mask = np.isnan(variances)
+        if np.any(~nan_mask & (~np.isfinite(variances) | (variances <= 0))):
             raise ValueError(
                 f"Non-finite variances found for parameter '{parameter_name}', "
                 f'cannot compute weights.'
             )
-        else:
-            weight = 1 / np.sqrt(variances)
+        valid_mask = ~nan_mask
+        if not np.any(valid_mask):
+            raise ValueError(
+                f"No finite positive variances found for parameter '{parameter_name}', "
+                f'cannot compute weights.'
+            )
 
-        return (
-            self._parameters[parameter_name].coords['Q'].values,
-            self._parameters[parameter_name].values,
-            weight,
-        )
+        return q_values[valid_mask], values[valid_mask], 1 / np.sqrt(variances[valid_mask])
 
     #############
     # Dunder methods

@@ -111,10 +111,10 @@ class TestAnalysis1d:
         result = analysis1d.calculate()
 
         # EXPECT
-
         analysis1d._create_convolver.assert_called_once()
-        assert analysis1d._convolver is fake_convolver
-        analysis1d._calculate.assert_called_once()
+        # calculate() passes the convolver directly to _calculate without storing it on self
+        _, call_kwargs = analysis1d._calculate.call_args
+        assert call_kwargs['convolver'] is fake_convolver
         np.testing.assert_array_equal(result, expected_result)
 
     def test__calculate_adds_sample_and_background(self, analysis1d):

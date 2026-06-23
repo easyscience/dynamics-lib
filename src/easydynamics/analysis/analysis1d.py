@@ -184,14 +184,12 @@ class Analysis1d(AnalysisBase):
             The calculated model prediction.
         """
         energy = self._verify_energy(energy)
-        self._convolver = self._create_convolver(energy=energy)
-        # Mark dirty so the next fit() call rebuilds the convolver with the standard
-        # (unmasked) energy grid rather than reusing this plot-path grid.
-        self._convolver_is_dirty = True
+        convolver = self._create_convolver(energy=energy)
+        return self._calculate(energy=energy, convolver=convolver)
 
-        return self._calculate(energy=energy)
-
-    def _calculate(self, energy: sc.Variable | None = None) -> np.ndarray:
+    def _calculate(
+        self, energy: sc.Variable | None = None, convolver: object | None = None
+    ) -> np.ndarray:
         """
         Calculate the model prediction for the chosen Q index.
 
@@ -202,18 +200,21 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for calculation. If None, the energy grid from the
             experiment is used.
+        convolver : object | None, default=None
+            Optional convolver to use. If None, uses self._convolver.
 
         Returns
         -------
         np.ndarray
             The calculated model prediction.
         """
-
+        if convolver is None:
+            convolver = self._convolver
         Q_index = self._require_Q_index()
         sample = self._evaluate_with_convolution(
             self.sample_model.get_component_collection(Q_index),
             energy,
-            convolver=self._convolver,
+            convolver=convolver,
         )
         background = self._evaluate_direct(
             self.instrument_model.background_model.get_component_collection(Q_index),
@@ -516,6 +517,10 @@ class Analysis1d(AnalysisBase):
         This method is called whenever the Q index is changed. It updates the masked energy from
         the experiment for the new Q index and marks the convolver as dirty.
         """
+        if self._Q_index is None:
+            self._masked_energy = None
+            self._convolver_is_dirty = True
+            return
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver_is_dirty = True

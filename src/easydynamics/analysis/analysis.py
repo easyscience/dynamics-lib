@@ -457,10 +457,7 @@ class Analysis(AnalysisBase):
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
 
-        energy = self._verify_energy(energy)
-
-        if energy is None:
-            energy = self.energy
+        energy = self._verify_energy(energy) if energy is not None else self.energy
 
         data_and_model = {
             'Data': self.experiment.binned_data,
@@ -688,9 +685,8 @@ class Analysis(AnalysisBase):
 
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
-        if self._analysis_list_is_dirty:
-            if self.Q is not None:
-                self._create_analysis_list()
+        if self._analysis_list_is_dirty and self.Q is not None:
+            self._create_analysis_list()
             self._analysis_list_is_dirty = False
 
     def _create_analysis_list(self) -> None:
