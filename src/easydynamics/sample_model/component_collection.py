@@ -460,14 +460,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             klass = getattr(module, d['@class'])
             return klass.from_dict(d)
 
-        components = [deserialise_component(c) for c in obj_dict.get('components', [])]
+        components = [deserialise_component(c) for c in obj_dict['components']]
 
         return cls(
             components=components,
-            x_unit=obj_dict.get('x_unit', 'meV'),
-            y_unit=obj_dict.get('y_unit', 'dimensionless'),
-            name=obj_dict.get('name', 'ComponentCollection'),
-            display_name=obj_dict.get('display_name'),
+            x_unit=obj_dict['x_unit'],
+            y_unit=obj_dict['y_unit'],
+            name=obj_dict['name'],
+            display_name=obj_dict['display_name'],
         )
 
     def __copy__(self) -> ComponentCollection:

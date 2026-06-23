@@ -397,12 +397,14 @@ class TestComponentCollection:
         # EXPECT
         assert model_dict['display_name'] == component_collection.display_name
         assert model_dict['x_unit'] == component_collection.x_unit
+        assert model_dict['y_unit'] == component_collection.y_unit
         assert len(model_dict['components']) == len(component_collection)
 
         for comp, comp_dict in zip(component_collection, model_dict['components'], strict=True):
             assert comp_dict['@class'] == type(comp).__name__
             assert comp_dict['display_name'] == comp.display_name
             assert comp_dict['x_unit'] == comp.x_unit
+            assert comp_dict['y_unit'] == comp.y_unit
 
     def test_from_dict(self, component_collection):
         # WHEN
@@ -413,12 +415,15 @@ class TestComponentCollection:
 
         # EXPECT
         assert new_model.display_name == component_collection.display_name
+        assert new_model.x_unit == component_collection.x_unit
+        assert new_model.y_unit == component_collection.y_unit
         assert len(new_model) == len(component_collection)
 
         for orig_comp, new_comp in zip(component_collection, new_model, strict=True):
             assert type(new_comp) is type(orig_comp)
             assert new_comp.display_name == orig_comp.display_name
             assert new_comp.x_unit == orig_comp.x_unit
+            assert new_comp.y_unit == orig_comp.y_unit
 
             orig_params = orig_comp.get_all_parameters()
             new_params = new_comp.get_all_parameters()
@@ -429,6 +434,13 @@ class TestComponentCollection:
                 assert param_new.name == param_orig.name
                 assert param_new.value == param_orig.value
                 assert param_new.fixed == param_orig.fixed
+
+    @pytest.mark.parametrize('missing_key', ['x_unit', 'y_unit', 'components', 'name'])
+    def test_from_dict_requires_all_keys(self, component_collection, missing_key):
+        model_dict = component_collection.to_dict()
+        del model_dict[missing_key]
+        with pytest.raises(KeyError):
+            ComponentCollection.from_dict(model_dict)
 
     def test_copy(self, component_collection):
         # WHEN
