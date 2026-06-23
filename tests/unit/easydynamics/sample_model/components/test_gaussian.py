@@ -228,3 +228,62 @@ class TestGaussian:
         assert 'area =' in repr_str
         assert 'center =' in repr_str
         assert 'width =' in repr_str
+
+    def test_y_unit_default(self, gaussian: Gaussian):
+        # EXPECT
+        assert gaussian.y_unit == 'dimensionless'
+
+    def test_y_unit_custom(self):
+        # WHEN
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert gaussian.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, gaussian: Gaussian):
+        # EXPECT
+        with pytest.raises(AttributeError):
+            gaussian.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # GIVEN: x_unit='meV', y_unit='1/meV' → area_unit ≈ dimensionless
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+
+        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        gaussian.convert_y_unit('1/eV')
+
+        # EXPECT: unit updated and area value rescaled (1/eV = 1e-3/meV, so value x 1e3)
+        assert gaussian.y_unit == '1/eV'
+        assert gaussian.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, gaussian: Gaussian):
+        # EXPECT
+        with pytest.raises(TypeError):
+            gaussian.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, gaussian: Gaussian):
+        import numpy as np
+        import scipp as sc
+
+        x = np.linspace(-5, 5, 100)
+
+        # WHEN
+        result = gaussian.evaluate(x, output='scipp')
+
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 100
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        import numpy as np
+        import scipp as sc
+
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 100)
+
+        # WHEN
+        result = gaussian.evaluate(x, output='scipp')
+
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')

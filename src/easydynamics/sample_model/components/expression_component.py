@@ -66,6 +66,45 @@ class ExpressionComponent(ModelComponent):
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
+        """
+        Initialize the ExpressionComponent.
+
+        Parameters
+        ----------
+        expression : str
+            The symbolic expression as a string. Must contain 'x' as the independent variable.
+        parameters : dict[str, Numeric] | None, default=None
+            Dictionary of parameter names and their initial values.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
+        name : str, default='Expression'
+            Name of the component for indexing.
+        display_name : str | None, default=None
+            Display name for the component.
+        unique_name : str | None, default=None
+            Unique name for the component.
+
+        Raises
+        ------
+        ValueError
+            If the expression is invalid or does not contain 'x'.
+        TypeError
+            If any parameter value is not numeric.
+
+        Examples
+        --------
+        >>> expr = ExpressionComponent(
+        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
+        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
+        ...     x_unit='meV',
+        ...     display_name='Gaussian Peak',
+        ... )
+
+        >>> expr.A = 5
+        >>> y = expr.evaluate(x)
+        """
         super().__init__(
             x_unit=x_unit,
             y_unit=y_unit,

@@ -22,7 +22,31 @@ if TYPE_CHECKING:
 
 class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     """
-    Collection of model components whose evaluate() results are summed.
+    Collection of model components.
+
+    Examples
+    --------
+    Create a ComponentCollection with two components:
+    >>> import easydynamics.sample_model as sm
+    >>> component1 = sm.Gaussian(name='Gaussian1', area=1.0, width=1.0)
+    >>> component2 = sm.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
+    >>> collection = sm.ComponentCollection(components=[component1, component2])
+
+    Append a component to the collection:
+    >>> component3 = sm.Gaussian(name='Gaussian2', area=0.5, width=0.8)
+    >>> collection.append(component3)
+
+    Evaluate the collection at a given energy axis:
+    >>> import numpy as np
+    >>> x = np.linspace(-5, 5, 100)
+    >>> values = collection.evaluate(x)
+
+    Remove a component by name:
+    >>> collection.remove('Gaussian1')
+
+    List component names:
+    >>> collection.list_component_names()
+    ['Lorentzian1', 'Gaussian2']
     """
 
     def __init__(
@@ -34,6 +58,29 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
+        """
+        Initialize a new ComponentCollection.
+
+        Parameters
+        ----------
+        components : ModelComponent | list[ModelComponent] | None, default=None
+            Initial model components to add to the ComponentCollection.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy, Q, etc.).
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity).
+        name : str, default='ComponentCollection'
+            Name of the collection.
+        display_name : str | None, default=None
+            Display name of the collection.
+        unique_name : str | None, default=None
+            Unique name of the collection.
+
+        Raises
+        ------
+        TypeError
+            If components is not a list of ModelComponent.
+        """
         if components is None:
             components = []
         if isinstance(components, ModelComponent):
@@ -73,18 +120,56 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     @property
     def is_empty(self) -> bool:
+        """
+        Check if the ComponentCollection has no components.
+
+        Returns
+        -------
+        bool
+            True if the collection has no components, False otherwise.
+        """
         return not self
 
     @is_empty.setter
     def is_empty(self, _value: bool) -> None:
-        raise AttributeError('is_empty is a read-only property.')
+        """
+        Is_empty is a read-only property that indicates whether the collection has components.
+
+        Parameters
+        ----------
+        _value : bool
+            The value to set (ignored).
+
+        Raises
+        ------
+        AttributeError
+            Always raised since is_empty is read-only.
+        """
+        raise AttributeError(
+            'is_empty is a read-only property that indicates '
+            'whether the collection has components.'
+        )
 
     # ------------------------------------------------------------------
     # Unit conversion
     # ------------------------------------------------------------------
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
-        """Convert x-axis unit on all contained components."""
+        """
+        Convert the x-axis unit of the ComponentCollection and all its components.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            The target x-axis unit to convert to.
+
+        Raises
+        ------
+        TypeError
+            If new_x_unit is not a string or sc.Unit.
+        Exception
+            If any component cannot be converted to the specified unit.
+        """
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
@@ -102,7 +187,21 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             raise e
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
-        """Convert y-axis unit on all contained components."""
+        """
+        Convert the y-axis unit of the ComponentCollection and all its components.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            The target y-axis unit to convert to.
+
+        Raises
+        ------
+        TypeError
+            If new_y_unit is not a string or sc.Unit.
+        Exception
+            If any component cannot be converted to the specified unit.
+        """
         if not isinstance(new_y_unit, (str, sc.Unit)):
             raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
 
@@ -124,6 +223,16 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     def append_component(self, component: ModelComponent | ComponentCollection) -> None:
+        """
+        Append a model component or the components from another ComponentCollection to this
+        ComponentCollection.
+
+        Parameters
+        ----------
+        component : ModelComponent | ComponentCollection
+            The component to append. If a ComponentCollection is provided, all of its components
+            will be appended.
+        """
         if isinstance(component, ComponentCollection):
             self.extend(component)
         else:
@@ -131,10 +240,28 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         self._warn_if_duplicate_names()
 
     def list_component_names(self) -> list[str]:
+        """
+        List the names of all components in the model.
+
+        Returns
+        -------
+        list[str]
+            List of names of the components in the collection.
+        """
         return [component.name for component in self]
 
     def normalize_area(self) -> None:
-        """Normalize areas of all components so they sum to 1."""
+        """
+        Normalize the areas of all components so they sum to 1.
+
+        This is useful for convolutions.
+
+        Raises
+        ------
+        ValueError
+            If there are no components in the model or if the total area is zero or not finite,
+            which would prevent normalization.
+        """
         if not self:
             raise ValueError('No components in the model to normalize.')
 
@@ -167,6 +294,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     def get_all_variables(self) -> list[DescriptorBase]:
+        """
+        Get all parameters from all model components.
+
+        Returns
+        -------
+        list[DescriptorBase]
+            List of parameters in the collection.
+        """
         return [var for component in self for var in component.get_all_variables()]
 
     def evaluate(
@@ -174,7 +309,21 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
         output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
-        """Evaluate the sum of all component outputs at x."""
+        """
+        Evaluate the sum of all components.
+
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Energy axis.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+
+        Returns
+        -------
+        np.ndarray | sc.Variable
+            Evaluated model values.
+        """
         if not self:
             return np.zeros_like(x)
         return sum(component.evaluate(x, output=output) for component in self)
@@ -185,7 +334,32 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         name: str,
         output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
-        """Evaluate a single component by name."""
+        """
+        Evaluate a single component by name.
+
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Energy axis.
+        name : str
+            Component name.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+
+        Raises
+        ------
+        ValueError
+            If there are no components in the model.
+        TypeError
+            If name is not a string.
+        KeyError
+            If no component with the given name exists in the collection.
+
+        Returns
+        -------
+        np.ndarray | sc.Variable
+            Evaluated values for the specified component.
+        """
         if not self:
             raise ValueError('No components in the model to evaluate.')
         if not isinstance(name, str):
@@ -196,10 +370,12 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         return matches[0].evaluate(x, output=output)
 
     def fix_all_parameters(self) -> None:
+        """Fix all free parameters in the model."""
         for param in self.get_fittable_parameters():
             param.fixed = True
 
     def free_all_parameters(self) -> None:
+        """Free all fixed parameters in the model."""
         for param in self.get_fittable_parameters():
             param.fixed = False
 
@@ -208,6 +384,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     def _warn_if_duplicate_names(self) -> None:
+        """Warn if any two components share the same name."""
         names = [c.name for c in self]
         seen: set[str] = set()
         dups: set[str] = set()
@@ -228,6 +405,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the ComponentCollection.
+
+        Returns
+        -------
+        str
+            String representation of the ComponentCollection.
+        """
         comp_names = ', '.join(c.name for c in self) or 'No components'
         return (
             f"ComponentCollection(name='{self.name}', "
@@ -236,6 +421,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         )
 
     def to_dict(self) -> dict:
+        """
+        Serialise the ComponentCollection to a dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the ComponentCollection.
+        """
         return {
             '@module': self.__class__.__module__,
             '@class': self.__class__.__name__,
@@ -248,6 +441,20 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     @classmethod
     def from_dict(cls, obj_dict: dict) -> ComponentCollection:
+        """
+        Deserialise a ComponentCollection from its dictionary representation.
+
+        Parameters
+        ----------
+        obj_dict : dict
+            Dictionary representation of the ComponentCollection, as produced by to_dict().
+
+        Returns
+        -------
+        ComponentCollection
+            The deserialised ComponentCollection.
+        """
+
         def deserialise_component(d: dict) -> ModelComponent:
             module = importlib.import_module(d['@module'])
             klass = getattr(module, d['@class'])
@@ -264,4 +471,12 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         )
 
     def __copy__(self) -> ComponentCollection:
+        """
+        Create a deep copy of the ComponentCollection.
+
+        Returns
+        -------
+        ComponentCollection
+            A deep copy of the ComponentCollection.
+        """
         return self.from_dict(self.to_dict())

@@ -35,6 +35,36 @@ class InstrumentModel(NewBase):
         energy_offset: Numeric | None = None,
         x_unit: str | sc.Unit = 'meV',
     ) -> None:
+        """
+        Initialize an InstrumentModel.
+
+        Parameters
+        ----------
+        display_name : str, default='MyInstrumentModel'
+            The display name of the InstrumentModel.
+        unique_name : str | None, default=None
+            The unique name of the InstrumentModel.
+        Q : Q_type | None, default=None
+            The Q values where the instrument is modelled.
+        resolution_model : ResolutionModel | SampleModel | None, default=None
+            The resolution model of the instrument. If a SampleModel it will be converted to a
+            ResolutionModel. If None, an empty resolution model is created and no resolution
+            convolution is carried out.
+        background_model : BackgroundModel | None, default=None
+            The background model of the instrument. If None, an empty background model is created,
+            and the background evaluates to 0.
+        energy_offset : Numeric | None, default=None
+            Template energy offset of the instrument. Will be copied to each Q value. If None, the
+            energy offset will be 0.
+        x_unit : str | sc.Unit, default='meV'
+            The unit of the energy axis.
+
+        Raises
+        ------
+        TypeError
+            If resolution_model is not a ResolutionModel or None, or if background_model is not a
+            BackgroundModel or None, or if energy_offset is not a number or None.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -87,10 +117,31 @@ class InstrumentModel(NewBase):
 
     @property
     def resolution_model(self) -> ResolutionModel:
+        """
+        Get the resolution model of the instrument.
+
+        Returns
+        -------
+        ResolutionModel
+            The resolution model of the instrument.
+        """
         return self._resolution_model
 
     @resolution_model.setter
     def resolution_model(self, value: ResolutionModel | SampleModel) -> None:
+        """
+        Set the resolution model of the instrument.
+
+        Parameters
+        ----------
+        value : ResolutionModel | SampleModel
+            The new resolution model of the instrument.
+
+        Raises
+        ------
+        TypeError
+            If value is not a ResolutionModel or SampleModel.
+        """
         if not isinstance(value, (ResolutionModel, SampleModel)):
             raise TypeError(
                 f'resolution_model must be a ResolutionModel or SampleModel, '
@@ -103,10 +154,31 @@ class InstrumentModel(NewBase):
 
     @property
     def background_model(self) -> BackgroundModel:
+        """
+        Get the background model of the instrument.
+
+        Returns
+        -------
+        BackgroundModel
+            The background model of the instrument.
+        """
         return self._background_model
 
     @background_model.setter
     def background_model(self, value: BackgroundModel) -> None:
+        """
+        Set the background model of the instrument.
+
+        Parameters
+        ----------
+        value : BackgroundModel
+            The new background model of the instrument.
+
+        Raises
+        ------
+        TypeError
+            If value is not a BackgroundModel.
+        """
         if not isinstance(value, BackgroundModel):
             raise TypeError(
                 f'background_model must be a BackgroundModel, got {type(value).__name__}'
@@ -116,10 +188,35 @@ class InstrumentModel(NewBase):
 
     @property
     def Q(self) -> np.ndarray | None:
+        """
+        Get the Q values of the InstrumentModel.
+
+        Returns
+        -------
+        np.ndarray | None
+            The Q values of the InstrumentModel, or None if not set.
+        """
         return self._Q
 
     @Q.setter
     def Q(self, value: Q_type | None) -> None:
+        """
+        Set the Q values of the InstrumentModel.
+
+        If Q is already set, it raises an error if the new Q values are not similar to the old ones
+        to prevent accidental changes to the background and resolution models. To change Q values,
+        first run clear_Q().
+
+        Parameters
+        ----------
+        value : Q_type | None
+            The new Q values to set. If None, Q values are not changed.
+
+        Raises
+        ------
+        ValueError
+            If the new Q values are not similar to the old ones when Q is not None.
+        """
         if value is None:
             return
         old_Q = self._Q
@@ -138,10 +235,29 @@ class InstrumentModel(NewBase):
 
     @property
     def x_unit(self) -> str | sc.Unit:
+        """
+        Get the x-axis unit of the InstrumentModel.
+
+        Returns
+        -------
+        str | sc.Unit
+            The x-axis unit of the InstrumentModel.
+        """
         return self._x_unit
 
     @x_unit.setter
     def x_unit(self, _: str) -> None:
+        """
+        x_unit is read-only and cannot be set directly.
+
+        Use convert_x_unit to change the unit between allowed types or create a new InstrumentModel
+        with the desired unit.
+
+        Raises
+        ------
+        AttributeError
+            Always, as x_unit is read-only.
+        """
         raise AttributeError(
             f'x_unit is read-only. Use convert_x_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'
@@ -149,10 +265,31 @@ class InstrumentModel(NewBase):
 
     @property
     def energy_offset(self) -> Parameter:
+        """
+        Get the template energy offset of the instrument.
+
+        Returns
+        -------
+        Parameter
+            The energy offset Parameter. Each Q value gets its own copy via get_energy_offset().
+        """
         return self._energy_offset
 
     @energy_offset.setter
     def energy_offset(self, value: Numeric) -> None:
+        """
+        Set the template energy offset value, propagating to all Q-specific offsets.
+
+        Parameters
+        ----------
+        value : Numeric
+            The new energy offset value in x_unit.
+
+        Raises
+        ------
+        TypeError
+            If value is not a number.
+        """
         if not isinstance(value, Numeric):
             raise TypeError(f'energy_offset must be a number, got {type(value).__name__}')
         self._energy_offset.value = value

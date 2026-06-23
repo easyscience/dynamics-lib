@@ -60,7 +60,7 @@ class Convolution(NumericalConvolutionBase):
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -85,8 +85,8 @@ class Convolution(NumericalConvolutionBase):
             The unit of the temperature parameter.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
             The settings for detailed balance. If None, default settings will be used.
-        unit : str | sc.Unit, default='meV'
-            The unit of the energy.
+        x_unit : str | sc.Unit, default='meV'
+            The unit of the energy axis.
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -103,7 +103,7 @@ class Convolution(NumericalConvolutionBase):
             temperature=temperature,
             temperature_unit=temperature_unit,
             detailed_balance_settings=detailed_balance_settings,
-            unit=unit,
+            x_unit=x_unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -276,7 +276,7 @@ class Convolution(NumericalConvolutionBase):
                 temperature=self.temperature,
                 temperature_unit=self._temperature_unit,
                 detailed_balance_settings=self.detailed_balance_settings,
-                unit=self.x_unit,
+                x_unit=self.x_unit,
             )
         else:
             self._numerical_convolver = None

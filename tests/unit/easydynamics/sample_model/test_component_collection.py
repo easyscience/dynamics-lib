@@ -491,3 +491,26 @@ class TestComponentCollection:
         ComponentCollection(components=[g1, g2])
         user_warnings = [w for w in recwarn.list if issubclass(w.category, UserWarning)]
         assert not user_warnings
+
+    def test_y_unit_default(self, component_collection):
+        # EXPECT
+        assert component_collection.y_unit == 'dimensionless'
+
+    def test_convert_y_unit(self):
+        # GIVEN: components with y_unit='1/meV' so area_unit ≈ dimensionless
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        cc = ComponentCollection(components=[g, lor])
+
+        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        cc.convert_y_unit('1/eV')
+
+        # EXPECT
+        assert cc.y_unit == '1/eV'
+        for component in cc:
+            assert component.y_unit == '1/eV'
+
+    def test_convert_y_unit_invalid_type_raises(self, component_collection):
+        # EXPECT
+        with pytest.raises(TypeError):
+            component_collection.convert_y_unit(123)

@@ -79,7 +79,7 @@ class TestNumericalConvolutionBase:
             detailed_balance_settings=detailed_balance_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            unit=unit,
+            x_unit=unit,
         )
 
         # EXPECT
@@ -643,7 +643,7 @@ class TestNumericalConvolutionBase:
         assert 'resolution_components=' in repr_str
 
         # Important parameters
-        assert 'unit=meV' in repr_str
+        assert 'x_unit=meV' in repr_str
         assert 'upsample_factor=5' in repr_str
         assert 'extension_factor=0.2' in repr_str
         assert 'temperature=None' in repr_str

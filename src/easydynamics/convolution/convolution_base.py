@@ -23,7 +23,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         energy: np.ndarray | sc.Variable,
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
         energy_offset: Numeric | Parameter = 0.0,
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
@@ -39,8 +39,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
             The sample model to be convolved.
         resolution_components : ComponentCollection | ModelComponent | None, default=None
             The resolution model to convolve with.
-        unit : str | sc.Unit, default='meV'
-            The unit of the energy.
+        x_unit : str | sc.Unit, default='meV'
+            The unit of the energy axis.
         energy_offset : Numeric | Parameter, default=0.0
             The energy offset applied to the convolution.
         display_name : str | None, default='MyConvolution'
@@ -58,7 +58,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
 
         super().__init__(
-            x_unit=unit,
+            x_unit=x_unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -70,10 +70,12 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
 
         if isinstance(energy, np.ndarray):
-            energy = sc.array(dims=['energy'], values=energy, unit=unit)
+            energy = sc.array(dims=['energy'], values=energy, unit=x_unit)
 
         if isinstance(energy_offset, Numeric):
-            energy_offset = Parameter(name='energy_offset', value=float(energy_offset), unit=unit)
+            energy_offset = Parameter(
+                name='energy_offset', value=float(energy_offset), unit=x_unit
+            )
 
         if not isinstance(energy_offset, Parameter):
             raise TypeError('Energy_offset must be a number or a Parameter.')
