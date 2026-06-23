@@ -72,14 +72,25 @@ def detailed_balance_factor(
 
     Examples
     --------
-    >>> detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
-    >>> detailed_balance_factor(
-    ...     energy=[1.0, 2.0],
-    ...     temperature=300,
-    ...     energy_unit='microeV',
-    ...     temperature_unit='K',
-    ...     divide_by_temperature=False,
-    ... )
+    **Basic usage**
+
+    ```python
+    from easydynamics.utils.detailed_balance import detailed_balance_factor
+
+    dbf = detailed_balance_factor(1.0, 300)  # 1 meV at 300 K
+    ```
+
+    **Specifying units and disabling temperature normalisation**
+
+    ```python
+    dbf = detailed_balance_factor(
+        energy=[1.0, 2.0],
+        temperature=300,
+        energy_unit='microeV',
+        temperature_unit='K',
+        divide_by_temperature=False,
+    )
+    ```
     """
 
     # Input validation

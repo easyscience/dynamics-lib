@@ -22,6 +22,39 @@ if TYPE_CHECKING:
 class ExpressionComponent(ModelComponent):
     """
     Model component defined by a symbolic expression.
+
+    The expression must contain ``x`` as the independent variable. All other symbols are treated as
+    free parameters, which can be accessed and set as attributes after construction. Supported
+    functions include ``exp``, ``sin``, ``cos``, ``sqrt``, ``erf``, and others — see the
+    ``_ALLOWED_FUNCS`` class variable for the full list.
+
+    Examples
+    --------
+    **Defining a custom Gaussian expression**
+
+    Parameters are given as a dictionary of initial values and can be accessed as attributes after
+    construction:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    expr = sm.ExpressionComponent(
+        'A * exp(-(x - x0)**2 / (2*sigma**2))',
+        parameters={'A': 10, 'x0': 0, 'sigma': 1},
+        x_unit='meV',
+        display_name='Gaussian Peak',
+    )
+    x = np.linspace(-3, 3, 100)
+    values = expr.evaluate(x)
+    ```
+
+    **Modifying parameter values after construction**
+
+    Parameters can be set directly as attributes:
+    ```python
+    expr.A = 5
+    expr.sigma = 0.5
+    ```
     """
 
     _ALLOWED_FUNCS: ClassVar[dict[str, object]] = {
@@ -92,18 +125,6 @@ class ExpressionComponent(ModelComponent):
             If the expression is invalid or does not contain 'x'.
         TypeError
             If any parameter value is not numeric.
-
-        Examples
-        --------
-        >>> expr = ExpressionComponent(
-        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
-        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
-        ...     x_unit='meV',
-        ...     display_name='Gaussian Peak',
-        ... )
-
-        >>> expr.A = 5
-        >>> y = expr.evaluate(x)
         """
         super().__init__(
             x_unit=x_unit,

@@ -27,6 +27,53 @@ class Analysis(AnalysisBase):
     For analysing two-dimensional data, i.e. intensity as function of energy and Q.
 
     Supports independent fits of each Q value and simultaneous fits of all Q.
+
+    Examples
+    --------
+    **Fitting vanadium data for instrument calibration**
+
+    The standard workflow builds a sample model, resolution model, background model, and instrument
+    model, then combines them into an Analysis before fitting:
+    ```python
+    import pooch
+    import easydynamics as edyn
+    import easydynamics.sample_model as sm
+
+    file_path = pooch.retrieve(
+        url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
+        known_hash='16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873',
+    )
+    experiment = edyn.Experiment('Vanadium')
+    experiment.load_hdf5(filename=file_path)
+
+    sample_model = sm.SampleModel(components=sm.DeltaFunction(area=1))
+    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.1))
+    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
+    instrument_model = sm.InstrumentModel(
+        resolution_model=resolution_model,
+        background_model=background_model,
+    )
+
+    analysis = edyn.Analysis(
+        display_name='Vanadium Analysis',
+        experiment=experiment,
+        sample_model=sample_model,
+        instrument_model=instrument_model,
+    )
+    analysis.fit(fit_method='independent')
+    analysis.plot_data_and_model()
+    ```
+
+    **Inspecting fitted parameters and fitting a single Q first**
+
+    Use ``Q_index`` to fit and plot a single Q slice before fitting all Q:
+    ```python
+    analysis.fit(fit_method='independent', Q_index=5)
+    analysis.plot_data_and_model(Q_index=5)
+
+    analysis.fit(fit_method='independent')
+    analysis.plot_parameters(names=['Gaussian width'])
+    ```
     """
 
     def __init__(
@@ -827,3 +874,11 @@ class Analysis(AnalysisBase):
     #############
     # Dunder methods
     #############
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'n_analyses={len(self._analysis_list)})'
+        )

@@ -29,6 +29,43 @@ class Analysis1d(AnalysisBase):
     For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.
 
     Is used primarily in the Analysis class, but can also be used on its own for simpler analyses.
+
+    Examples
+    --------
+    **Fitting a single Q slice**
+
+    Select a Q index with ``Q_index`` to fit only that slice of the dataset:
+    ```python
+    import pooch
+    import easydynamics as edyn
+    import easydynamics.sample_model as sm
+    from easydynamics.analysis.analysis1d import Analysis1d
+
+    file_path = pooch.retrieve(
+        url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
+        known_hash='16cc1b327c303feeb88fb9dda5390dc4880b62396b1793f98c6fef0b27c7b873',
+    )
+    experiment = edyn.Experiment('Vanadium')
+    experiment.load_hdf5(filename=file_path)
+
+    sample_model = sm.SampleModel(components=sm.DeltaFunction(area=1))
+    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.1))
+    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
+    instrument_model = sm.InstrumentModel(
+        resolution_model=resolution_model,
+        background_model=background_model,
+    )
+
+    analysis = Analysis1d(
+        display_name='Vanadium 1D Analysis',
+        experiment=experiment,
+        sample_model=sample_model,
+        instrument_model=instrument_model,
+        Q_index=5,
+    )
+    analysis.fit()
+    analysis.plot_data_and_model(plot_residuals=True)
+    ```
     """
 
     def __init__(
@@ -820,4 +857,12 @@ class Analysis1d(AnalysisBase):
                 'energy': energy,
                 'Q': self.Q[self.Q_index],
             },
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'Q_index={self._Q_index})'
         )

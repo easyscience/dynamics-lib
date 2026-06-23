@@ -12,6 +12,35 @@ from easydynamics.utils.utils import Q_type
 class BackgroundModel(ModelBase):
     """
     BackgroundModel represents a model of the background in an experiment at various Q.
+
+    Examples
+    --------
+    **Creating a flat background**
+
+    A constant background independent of Q:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    background_model = sm.BackgroundModel(
+        components=sm.Polynomial(coefficients=[0.001]),
+        Q=Q,
+    )
+    energy = np.linspace(-2, 2, 100)
+    background = background_model.evaluate(energy)
+    ```
+
+    **Creating a quadratic background**
+
+    Higher-order polynomials can model a sloping or curved baseline:
+    ```python
+    import easydynamics.sample_model as sm
+
+    background_model = sm.BackgroundModel(
+        components=sm.Polynomial(coefficients=[1.0, 0.1, 0.01]),
+    )
+    ```
     """
 
     def __init__(
@@ -49,4 +78,13 @@ class BackgroundModel(ModelBase):
             y_unit=y_unit,
             components=components,
             Q=Q,
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, '
+            f'unit={self.unit}, '
+            f'Q_len={None if self._Q is None else len(self._Q)}, '
+            f'components={self.components})'
         )

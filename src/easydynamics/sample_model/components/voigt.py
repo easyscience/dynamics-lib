@@ -26,6 +26,33 @@ class Voigt(CreateParametersMixin, ModelComponent):
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
+
+    Examples
+    --------
+    **Creating a Voigt profile with a fixed center (typical QENS use)**
+
+    The Voigt profile is a convolution of a Gaussian and a Lorentzian. By default the center is
+    fixed at 0:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    v = sm.Voigt(area=1.0, gaussian_width=0.1, lorentzian_width=0.3)
+    x = np.linspace(-2, 2, 100)
+    values = v.evaluate(x)
+    ```
+
+    **Setting the Gaussian and Lorentzian widths independently**
+
+    Pass a numeric value for ``center`` to leave it free during fitting, and use the property
+    setters to adjust the two width components after construction:
+    ```python
+    import easydynamics.sample_model as sm
+
+    v = sm.Voigt(area=2.0, center=0.5, gaussian_width=0.2, lorentzian_width=0.4, name='Peak')
+    v.gaussian_width = 0.1
+    v.lorentzian_width = 0.2
+    ```
     """
 
     def __init__(

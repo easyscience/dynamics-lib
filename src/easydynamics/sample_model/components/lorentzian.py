@@ -27,6 +27,31 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
+
+    Examples
+    --------
+    **Creating a Lorentzian with a fixed center (typical QENS use)**
+
+    By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    l = sm.Lorentzian(area=1.0, width=0.3)
+    x = np.linspace(-2, 2, 100)
+    values = l.evaluate(x)
+    ```
+
+    **Creating a Lorentzian with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting:
+    ```python
+    import easydynamics.sample_model as sm
+
+    l = sm.Lorentzian(area=2.0, center=0.5, width=0.3, name='QE peak')
+    l.area = 3.0
+    l.width = 0.2
+    ```
     """
 
     def __init__(

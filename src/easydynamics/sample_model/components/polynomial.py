@@ -27,6 +27,29 @@ class Polynomial(ModelComponent):
 
     Coefficients are stored as dimensionless Parameters. When x_unit changes, the coefficient
     values are rescaled so the evaluated result stays the same. The output unit is y_unit.
+
+    Examples
+    --------
+    **Creating a constant background (degree 0)**
+
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    poly = sm.Polynomial(coefficients=[1.5])
+    x = np.linspace(-5, 5, 100)
+    values = poly.evaluate(x)
+    ```
+
+    **Creating a linear background (degree 1)**
+
+    Coefficients are ordered as ``[c0, c1, ...]``, where ``c0`` is the constant term:
+    ```python
+    import easydynamics.sample_model as sm
+
+    poly = sm.Polynomial(coefficients=[2.0, 0.1], name='Background')
+    poly.coefficients = [1.5, 0.05]
+    ```
     """
 
     def __init__(

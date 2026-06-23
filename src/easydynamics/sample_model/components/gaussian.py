@@ -28,6 +28,32 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
+
+    Examples
+    --------
+    **Creating a Gaussian with a fixed center (typical QENS use)**
+
+    By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=1.0, width=0.5)
+    x = np.linspace(-2, 2, 100)
+    values = g.evaluate(x)
+    ```
+
+    **Creating a Gaussian with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting, and use the property
+    setters to update parameter values after construction:
+    ```python
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=2.0, center=0.5, width=0.3, name='Peak')
+    g.area = 3.0
+    g.width = 0.2
+    ```
     """
 
     def __init__(

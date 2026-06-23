@@ -20,6 +20,31 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     where $A$ is the amplitude, $x_0$ is the center, and $B$ is the rate. amplitude has unit =
     x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.
+
+    Examples
+    --------
+    **Creating an Exponential with a fixed center**
+
+    By default the center is fixed at 0. A negative ``rate`` gives a decaying exponential:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=1.0, rate=-0.5)
+    x = np.linspace(0, 5, 100)
+    values = exp.evaluate(x)
+    ```
+
+    **Creating an Exponential with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting:
+    ```python
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=2.0, center=1.0, rate=-1.0, name='Background')
+    exp.amplitude = 3.0
+    exp.rate = -0.5
+    ```
     """
 
     def __init__(
