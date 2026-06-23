@@ -84,7 +84,7 @@ class BackgroundModel(ModelBase):
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'components={self.components})'
         )

@@ -638,7 +638,7 @@ class TestNumericalConvolutionBase:
 
         # Sample and resolution models
         assert 'ComponentCollection' in repr_str
-        assert 'components=[No components]' in repr_str
+        assert 'Components: No components' in repr_str
         assert 'sample_components=' in repr_str
         assert 'resolution_components=' in repr_str
 

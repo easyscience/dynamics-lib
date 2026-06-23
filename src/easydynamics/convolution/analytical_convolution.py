@@ -491,6 +491,6 @@ class AnalyticalConvolution(ConvolutionBase):
             f'{self.__class__.__name__}('
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
-            f'unit={self._unit}, '
+            f'x_unit={self.x_unit}, '
             f'energy_len={len(self.energy)})'
         )

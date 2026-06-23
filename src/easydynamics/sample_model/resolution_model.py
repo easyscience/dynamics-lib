@@ -56,6 +56,24 @@ class ResolutionModel(ModelBase):
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
+        """
+        Initialize the ResolutionModel.
+
+        Parameters
+        ----------
+        display_name : str, default='MyResolutionModel'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
+        components : ModelComponent | ComponentCollection | None, default=None
+            Template components. DeltaFunction, Polynomial, and Exponential are not allowed.
+        Q : Q_type | None, default=None
+            Q values for the model. If None, Q is not set.
+        """
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -126,7 +144,7 @@ class ResolutionModel(ModelBase):
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'components={self.components})'
         )

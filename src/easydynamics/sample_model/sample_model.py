@@ -75,6 +75,40 @@ class SampleModel(ModelBase):
         temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
     ) -> None:
+        """
+        Initialize the SampleModel.
+
+        Parameters
+        ----------
+        display_name : str, default='MySampleModel'
+            Display name of the model.
+        unique_name : str | None, default=None
+            Unique name of the model. If None, a unique name will be generated.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
+        components : ModelComponent | ComponentCollection | None, default=None
+            Template components copied into each Q's ComponentCollection.
+        Q : Q_type | None, default=None
+            Q values. If None, Q is not set.
+        diffusion_models : DiffusionModelBase | list[DiffusionModelBase] | None, default=None
+            Diffusion models to include. Each must be a DiffusionModelBase.
+        temperature : float | None, default=None
+            Sample temperature in temperature_unit. If provided, detailed balance is applied.
+        temperature_unit : str | sc.Unit, default='K'
+            Unit for the temperature parameter.
+        detailed_balance_settings : DetailedBalanceSettings | None, default=None
+            Detailed balance settings. If None, default settings are used.
+
+        Raises
+        ------
+        TypeError
+            If diffusion_models contains non-DiffusionModelBase items, temperature is not numeric,
+            or detailed_balance_settings is not a DetailedBalanceSettings instance.
+        ValueError
+            If temperature is negative.
+        """
         if diffusion_models is None:
             self._diffusion_models = []
         elif isinstance(diffusion_models, DiffusionModelBase):
