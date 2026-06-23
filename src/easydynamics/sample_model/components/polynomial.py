@@ -271,10 +271,11 @@ class Polynomial(ModelComponent):
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """
-        Scale c0 by the y-unit ratio (c0 carries the output dimension).
+        Rescale all coefficients so the evaluated output remains the same physical value.
 
-        Only the constant term ``c0`` is rescaled; higher-order coefficients are dimensionless
-        relative to x_unit and are unaffected.
+        All coefficients are multiplied by the conversion factor from ``old_y_unit`` to
+        ``new_y_unit`` so that ``I(x) [new_y_unit]`` represents the same physical quantity as
+        ``I(x) [old_y_unit]``.
 
         Parameters
         ----------
@@ -293,12 +294,13 @@ class Polynomial(ModelComponent):
         old_y_unit = str(self._y_unit) if self._y_unit is not None else 'dimensionless'
         new_y_str = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
 
-        # Compute conversion factor using a temporary scipp scalar
+        # Compute conversion factor: 1 old_y_unit expressed in new_y_unit
         y_helper = sc.scalar(1.0, unit=old_y_unit)
         y_helper_new = sc.to_unit(y_helper, new_y_str)
-        scale = y_helper.value / y_helper_new.value
+        scale = y_helper_new.value / y_helper.value
 
-        self._coefficients[0].value *= scale
+        for param in self._coefficients:
+            param.value *= scale
         self._y_unit = new_y_str
 
     def __repr__(self) -> str:

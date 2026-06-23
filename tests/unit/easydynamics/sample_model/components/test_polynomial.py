@@ -191,6 +191,21 @@ class TestPolynomial:
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed
 
+    def test_convert_y_unit_scales_all_coefficients(self):
+        # Polynomial with two non-zero coefficients and a physical y_unit
+        p = Polynomial(coefficients=[3.0, 1.0], x_unit='meV', y_unit='meV^-1')
+        x = np.array([2.0])
+        val_before = p.evaluate(x)[0]  # 3.0 + 1.0*2.0 = 5.0 [meV^-1]
+
+        p.convert_y_unit('eV^-1')
+
+        assert p.y_unit == 'eV^-1'
+        # Both coefficients must be rescaled by 1000 (1 meV^-1 = 1000 eV^-1)
+        assert np.isclose(p.coefficients[0].value, 3000.0)
+        assert np.isclose(p.coefficients[1].value, 1000.0)
+        # Evaluated result must represent the same physical value
+        assert np.isclose(p.evaluate(x)[0], val_before * 1000.0)
+
     def test_repr(self, polynomial: Polynomial):
         # WHEN THEN
         repr_str = repr(polynomial)
