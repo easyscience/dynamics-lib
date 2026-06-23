@@ -26,27 +26,29 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
     Examples
     --------
-    Create a ComponentCollection with two components:
-    >>> import easydynamics.sample_model as sm
-    >>> component1 = sm.Gaussian(name='Gaussian1', area=1.0, width=1.0)
-    >>> component2 = sm.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
-    >>> collection = sm.ComponentCollection(components=[component1, component2])
+    **Creating a ComponentCollection with multiple components**
 
-    Append a component to the collection:
-    >>> component3 = sm.Gaussian(name='Gaussian2', area=0.5, width=0.8)
-    >>> collection.append(component3)
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
 
-    Evaluate the collection at a given energy axis:
-    >>> import numpy as np
-    >>> x = np.linspace(-5, 5, 100)
-    >>> values = collection.evaluate(x)
+    component1 = sm.Gaussian(name='Gaussian1', area=1.0, width=1.0)
+    component2 = sm.Lorentzian(name='Lorentzian1', area=2.0, width=0.5)
+    collection = sm.ComponentCollection(components=[component1, component2])
+    ```
 
-    Remove a component by name:
-    >>> collection.remove('Gaussian1')
+    **Evaluating, appending, and removing components**
 
-    List component names:
-    >>> collection.list_component_names()
-    ['Lorentzian1', 'Gaussian2']
+    ```python
+    x = np.linspace(-5, 5, 100)
+    values = collection.evaluate(x)
+
+    component3 = sm.Gaussian(name='Gaussian2', area=0.5, width=0.8)
+    collection.append(component3)
+
+    collection.remove('Gaussian1')
+    collection.list_component_names()  # ['Lorentzian1', 'Gaussian2']
+    ```
     """
 
     def __init__(
@@ -376,8 +378,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         comp_names = ', '.join(c.name for c in self) or 'No components'
 
         return (
-            f"ComponentCollection(name='{self.name}', unit='{self.unit}', \n"
-            f'Components: {comp_names})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, unit={self.unit},\n'
+            f'    components=[{comp_names}])'
         )
 
     def to_dict(self) -> dict:

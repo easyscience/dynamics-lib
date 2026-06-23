@@ -556,5 +556,5 @@ class TestAnalysisBase:
 
         # THEN EXPECT
         assert 'AnalysisBase' in repr_str
-        assert 'display_name=TestAnalysis' in repr_str
+        assert "display_name='TestAnalysis'" in repr_str
         assert 'unique_name=' in repr_str

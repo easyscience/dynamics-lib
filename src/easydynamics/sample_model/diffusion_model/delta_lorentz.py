@@ -32,21 +32,25 @@ class DeltaLorentz(DiffusionModelBase):
 
     Examples
     --------
-    >>> Q = np.linspace(0.5, 2, 7)
-    >>> energy = np.linspace(-2, 2, 501)
-    >>> scale = 1.0
-    >>> mean_u_squared = 0.02
-    >>> A_0 = 0.7
-    >>> lorentzian_width = 1.0
-    >>> model = DeltaLorentz(
-    ...     display_name='DiffusionModel',
-    ...     scale=scale,
-    ...     mean_u_squared=mean_u_squared,
-    ...     A_0=A_0,
-    ...     lorentzian_width=lorentzian_width,
-    ...     allow_Q_variation={'A_0': True, 'lorentzian_width': True},
-    ...     Q=Q,
-    ... )
+    **Creating a DeltaLorentz model with Q-dependent parameters**
+
+    Set ``allow_Q_variation`` to allow individual parameters to vary with Q:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    model = sm.DeltaLorentz(
+        display_name='DiffusionModel',
+        scale=1.0,
+        mean_u_squared=0.02,
+        A_0=0.7,
+        lorentzian_width=1.0,
+        allow_Q_variation={'A_0': True, 'lorentzian_width': True},
+        Q=Q,
+    )
+    component_collections = model.create_component_collections()
+    ```
 
     See also the tutorials.
     """
@@ -1072,10 +1076,10 @@ class DeltaLorentz(DiffusionModelBase):
             String representation of the DeltaLorentz model.
         """
         return (
-            f'DeltaLorentz(display_name={self.display_name},'
-            f'unit={self.unit}, \n'
-            f'    mean_u_squared={self.mean_u_squared}, \n'
-            f'    A_0={self.A_0}, A_1={self.A_1}, \n'
-            f'    lorentzian_width={self.lorentzian_width}, \n'
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, unit={self.unit},\n'
+            f'    mean_u_squared={self.mean_u_squared},\n'
+            f'    A_0={self.A_0}, A_1={self.A_1},\n'
+            f'    lorentzian_width={self.lorentzian_width},\n'
             f'    scale={self.scale})'
         )

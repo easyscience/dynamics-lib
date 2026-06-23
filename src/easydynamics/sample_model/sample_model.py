@@ -25,6 +25,41 @@ class SampleModel(ModelBase):
     components from the base model and diffusion models.
 
     Applies detailed balancing based on temperature if provided.
+
+    Examples
+    --------
+    **Creating a SampleModel with a static component**
+
+    A single component is copied to each Q value automatically:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    energy = np.linspace(-2, 2, 100)
+
+    sample_model = sm.SampleModel(
+        components=[
+            sm.DeltaFunction(display_name='Elastic', area=0.5),
+            sm.Lorentzian(display_name='QE', area=0.5, width=0.3),
+        ],
+        Q=Q,
+    )
+    intensity = sample_model.evaluate(energy)
+    ```
+
+    **Adding a diffusion model and enabling detailed balance**
+
+    Pass ``temperature`` to apply the detailed balance factor automatically:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    btd = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
+    sample_model = sm.SampleModel(diffusion_models=btd, Q=Q, temperature=10)
+    intensity = sample_model.evaluate(np.linspace(-2, 2, 100))
+    ```
     """
 
     def __init__(
@@ -562,9 +597,10 @@ class SampleModel(ModelBase):
         """
 
         return (
-            f'{self.__class__.__name__}(unique_name={self.unique_name}, unit={self.unit}), '
-            f'Q = {self.Q}, \n '
-            f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
-            f'temperature = {self.temperature}, '
-            f'detailed_balance_settings = {self.detailed_balance_settings}'
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, unit={self.unit},\n'
+            f'    Q={self.Q},\n'
+            f'    components={self.components}, diffusion_models={self.diffusion_models},\n'
+            f'    temperature={self.temperature},\n'
+            f'    detailed_balance_settings={self.detailed_balance_settings})'
         )

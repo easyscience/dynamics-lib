@@ -21,6 +21,31 @@ class Exponential(CreateParametersMixin, ModelComponent):
     $$ I(x) = A e^{B (x-x_0)}, $$
 
     where $A$ is the amplitude, $x_0$ is the center, and $B$ describes the rate of decay or growth.
+
+    Examples
+    --------
+    **Creating an Exponential with a fixed center**
+
+    By default the center is fixed at 0. A negative ``rate`` gives a decaying exponential:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=1.0, rate=-0.5)
+    x = np.linspace(0, 5, 100)
+    values = exp.evaluate(x)
+    ```
+
+    **Creating an Exponential with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting:
+    ```python
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=2.0, center=1.0, rate=-1.0, name='Background')
+    exp.amplitude = 3.0
+    exp.rate = -0.5
+    ```
     """
 
     def __init__(
@@ -273,9 +298,10 @@ class Exponential(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Exponential(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n '
-            f'    amplitude = {self.amplitude},\n '
-            f'    center = {self.center},\n '
-            f'    rate = {self.rate})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    amplitude={self.amplitude},\n'
+            f'    center={self.center},\n'
+            f'    rate={self.rate})'
         )

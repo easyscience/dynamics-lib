@@ -437,12 +437,12 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         return (
             f'{self.__class__.__name__}('
-            f'energy=array of shape {self.energy.values.shape},\n '
-            f'sample_components={self.sample_components!r}, \n'
-            f'resolution_components={self.resolution_components!r},\n '
-            f'unit={self.unit}, '
-            f'upsample_factor={self.upsample_factor}, '
-            f'extension_factor={self.extension_factor}, '
-            f'temperature={self.temperature}, '
-            f'detailed_balance={self.detailed_balance_settings!r})'
+            f'    energy=array of shape {self.energy.values.shape},\n'
+            f'    sample_components={self.sample_components!r},\n'
+            f'    resolution_components={self.resolution_components!r},\n'
+            f'    unit={self.unit}, '
+            f'    upsample_factor={self.upsample_factor}, '
+            f'    extension_factor={self.extension_factor}, '
+            f'    temperature={self.temperature}, '
+            f'    detailed_balance={self.detailed_balance_settings!r})'
         )

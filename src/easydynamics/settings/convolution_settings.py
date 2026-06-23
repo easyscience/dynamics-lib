@@ -9,6 +9,27 @@ from easydynamics.utils.utils import Numeric
 class ConvolutionSettings(EasyDynamicsBase):
     """
     Settings for numerical convolutions.
+
+    These settings are passed to an ``Analysis`` to control how the numerical convolution is
+    performed. Increasing ``upsample_factor`` and ``extension_factor`` improves accuracy at the
+    cost of computation time.
+
+    Examples
+    --------
+    **Creating custom convolution settings and passing to an Analysis**
+
+    ```python
+    import easydynamics as edyn
+
+    settings = edyn.ConvolutionSettings(upsample_factor=10, extension_factor=0.5)
+    analysis = edyn.Analysis(convolution_settings=settings)
+    ```
+
+    **Suppressing warnings about peak widths**
+
+    ```python
+    settings = edyn.ConvolutionSettings(suppress_warnings=True)
+    ```
     """
 
     def __init__(

@@ -197,5 +197,5 @@ class TestPolynomial:
         repr_str = repr(polynomial)
 
         # EXPECT
-        assert 'name = PolynomialName' in repr_str
-        assert 'coefficients =' in repr_str
+        assert "name='PolynomialName'" in repr_str
+        assert 'coefficients=' in repr_str

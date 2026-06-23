@@ -23,6 +23,33 @@ class InstrumentModel(NewBase):
 
     It can contain a model of the resolution function for convolutions, of the background and an
     offset in the energy axis.
+
+    Examples
+    --------
+    **Creating an InstrumentModel with resolution and background**
+
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.05))
+    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
+
+    instrument_model = sm.InstrumentModel(
+        Q=Q,
+        resolution_model=resolution_model,
+        background_model=background_model,
+    )
+    ```
+
+    **Fixing resolution parameters after calibration**
+
+    After fitting a vanadium run, fix the resolution parameters before fitting the sample:
+    ```python
+    instrument_model.fix_resolution_parameters()
+    instrument_model.get_all_variables(Q_index=0)
+    ```
     """
 
     def __init__(
@@ -581,6 +608,5 @@ class InstrumentModel(NewBase):
             f'unit={self.unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'resolution_model={self._resolution_model!r}, '
-            f'background_model={self._background_model!r}'
-            f')'
+            f'background_model={self._background_model!r})'
         )

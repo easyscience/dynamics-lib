@@ -20,15 +20,41 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     r"""
     Model of a Gaussian function.
 
-     The intensity is given by
+    The intensity is given by
 
-     $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
-     x_0}{\sigma}\right)^2 \right) $$
+    $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+    x_0}{\sigma}\right)^2 \right) $$
 
-     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
+    where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
+
+    Examples
+    --------
+    **Creating a Gaussian with a fixed center (typical QENS use)**
+
+    By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=1.0, width=0.5)
+    x = np.linspace(-2, 2, 100)
+    values = g.evaluate(x)
+    ```
+
+    **Creating a Gaussian with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting, and use the property
+    setters to update parameter values after construction:
+    ```python
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=2.0, center=0.5, width=0.3, name='Peak')
+    g.area = 3.0
+    g.width = 0.2
+    ```
     """
 
     def __init__(
@@ -229,9 +255,10 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         """
 
         return (
-            f'Gaussian(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center},\n'
-            f'    width = {self.width})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    area={self.area},\n'
+            f'    center={self.center},\n'
+            f'    width={self.width})'
         )

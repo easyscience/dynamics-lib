@@ -22,6 +22,32 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     The intensity is given by $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2
     \gamma x)^2 \right)}, $$ where $A$ is the area, $x_0$ is the center, and $\gamma$ is the width.
+
+    Examples
+    --------
+    **Creating a Damped Harmonic Oscillator**
+
+    The ``center`` parameter is the resonance frequency, which must be positive. Both phonon peaks
+    (at ±center) are captured by the model:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    dho = sm.DampedHarmonicOscillator(area=1.0, center=10.0, width=1.0)
+    x = np.linspace(-20, 20, 200)
+    values = dho.evaluate(x)
+    ```
+
+    **Modifying parameters after construction**
+
+    ```python
+    import easydynamics.sample_model as sm
+
+    dho = sm.DampedHarmonicOscillator(area=2.0, center=5.0, width=0.5, name='Phonon')
+    dho.area = 3.0
+    dho.center = 8.0
+    dho.width = 0.3
+    ```
     """
 
     def __init__(
@@ -221,9 +247,10 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             A string representation of the Damped Harmonic Oscillator.
         """
         return (
-            f'DampedHarmonicOscillator(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n '
-            f'    area = {self.area},\n '
-            f'    center = {self.center},\n '
-            f'    width = {self.width})'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self._unit},\n'
+            f'    area={self.area},\n'
+            f'    center={self.center},\n'
+            f'    width={self.width})'
         )

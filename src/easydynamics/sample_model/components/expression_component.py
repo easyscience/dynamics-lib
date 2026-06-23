@@ -21,6 +21,39 @@ if TYPE_CHECKING:
 class ExpressionComponent(ModelComponent):
     """
     Model component defined by a symbolic expression.
+
+    The expression must contain ``x`` as the independent variable. All other symbols are treated as
+    free parameters, which can be accessed and set as attributes after construction. Supported
+    functions include ``exp``, ``sin``, ``cos``, ``sqrt``, ``erf``, and others — see the
+    ``_ALLOWED_FUNCS`` class variable for the full list.
+
+    Examples
+    --------
+    **Defining a custom Gaussian expression**
+
+    Parameters are given as a dictionary of initial values and can be accessed as attributes after
+    construction:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    expr = sm.ExpressionComponent(
+        'A * exp(-(x - x0)**2 / (2*sigma**2))',
+        parameters={'A': 10, 'x0': 0, 'sigma': 1},
+        unit='meV',
+        display_name='Gaussian Peak',
+    )
+    x = np.linspace(-3, 3, 100)
+    values = expr.evaluate(x)
+    ```
+
+    **Modifying parameter values after construction**
+
+    Parameters can be set directly as attributes:
+    ```python
+    expr.A = 5
+    expr.sigma = 0.5
+    ```
     """
 
     # -------------------------
@@ -99,18 +132,6 @@ class ExpressionComponent(ModelComponent):
             If the expression is invalid or does not contain 'x'.
         TypeError
             If any parameter value is not numeric.
-
-        Examples
-        --------
-        >>> expr = ExpressionComponent(
-        ...     'A * exp(-(x - x0)**2 / (2*sigma**2))',
-        ...     parameters={'A': 10, 'x0': 0, 'sigma': 1},
-        ...     unit='meV',
-        ...     display_name='Gaussian Peak',
-        ... )
-
-        >>> expr.A = 5
-        >>> y = expr.evaluate(x)
         """
         super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
 
@@ -370,8 +391,9 @@ class ExpressionComponent(ModelComponent):
         """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
-            f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
             f'unit={self._unit},\n'
-            f"    expr='{self._expression_str}',\n"
-            f'    parameters={{ {param_str} }} )'
+            f'    expr={self._expression_str!r},\n'
+            f'    parameters={{{param_str}}})'
         )

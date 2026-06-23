@@ -27,12 +27,22 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
 
     Examples
     --------
-    >>> Q=np.linspace(0.5,2,7) >>>energy=np.linspace(-2, 2, 501)
-    >>> scale = 1.0
-    >>> diffusion_coefficient = 2.4e-9  # m^2/s
-    >>> diffusion_model=BrownianTranslationalDiffusion(name="DiffusionModel",
-    >>> scale=scale, diffusion_coefficient= diffusion_coefficient,)
-    >>> component_collections = diffusion_model.create_component_collections(Q)
+    **Creating a BrownianTranslationalDiffusion model**
+
+    The model creates one Lorentzian per Q-value, with width $D Q^2$. Pass ``Q`` values at
+    construction or later via ``create_component_collections``:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    Q = np.linspace(0.5, 2, 7)
+    diffusion_model = sm.BrownianTranslationalDiffusion(
+        scale=1.0,
+        diffusion_coefficient=2.4e-9,
+        Q=Q,
+    )
+    component_collections = diffusion_model.create_component_collections()
+    ```
 
     See also the tutorials.
     """
@@ -380,8 +390,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             String representation of the BrownianTranslationalDiffusion model.
         """
         return (
-            f'BrownianTranslationalDiffusion(name={self.name}, '
-            f'display_name={self.display_name}, \n'
-            f'    diffusion_coefficient={self.diffusion_coefficient}, \n'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r},\n'
+            f'    diffusion_coefficient={self.diffusion_coefficient},\n'
             f'    scale={self.scale})'
         )

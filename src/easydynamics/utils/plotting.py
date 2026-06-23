@@ -21,6 +21,26 @@ def slicerplot_with_residuals(
     """
     Create a SlicerPlot with an additional subplot for residuals.
 
+    This function is called internally by ``Analysis.plot_data_and_model`` and
+    ``Analysis1d.plot_data_and_model``. It can also be used directly with any ``sc.DataGroup`` that
+    contains a residuals array.
+
+    Examples
+    --------
+    **Plotting data, model, and residuals from a DataGroup**
+
+    ```python
+    import scipp as sc
+    from easydynamics.utils.plotting import slicerplot_with_residuals
+
+    dg = sc.DataGroup({
+        'Data': my_data,
+        'Model': my_model,
+        'Residuals': my_residuals,
+    })
+    fig = slicerplot_with_residuals(dg, residuals_key='Residuals', keep='energy')
+    ```
+
     Parameters
     ----------
     dg : sc.DataGroup

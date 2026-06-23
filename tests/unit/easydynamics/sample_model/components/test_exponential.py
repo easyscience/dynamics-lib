@@ -205,8 +205,8 @@ class TestExponential:
 
         # THEN EXPECT
         assert 'Exponential' in repr_str
-        assert 'name = ExponentialName' in repr_str
-        assert 'unit = meV' in repr_str
-        assert 'amplitude =' in repr_str
-        assert 'center =' in repr_str
-        assert 'rate =' in repr_str
+        assert "name='ExponentialName'" in repr_str
+        assert 'unit=meV' in repr_str
+        assert 'amplitude=' in repr_str
+        assert 'center=' in repr_str
+        assert 'rate=' in repr_str

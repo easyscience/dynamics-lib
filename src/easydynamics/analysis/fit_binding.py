@@ -19,6 +19,35 @@ class FitBinding(EasyDynamicsBase):
     Contract between dataset, model, and fit function for ParameterAnalysis. This class
     encapsulates the necessary information to bind a dataset key to a model and convert it into a
     fit function callable.
+
+    Examples
+    --------
+    **Basic usage with a ModelComponent**
+
+    Bind a fit parameter name to any ``ModelComponent`` or ``ComponentCollection``:
+    ```python
+    import easydynamics as edyn
+    import easydynamics.sample_model as sm
+
+    fit_func = sm.Polynomial(coefficients=[3.7, -0.5], display_name='Straight line')
+    binding = edyn.FitBinding(parameter_name='Gaussian area', model=fit_func)
+    ```
+
+    **Usage with a DiffusionModelBase and specific modes**
+
+    For diffusion models, use ``modes`` to select which parameter arrays are fitted:
+    ```python
+    brownian = sm.BrownianTranslationalDiffusion(
+        display_name='Brownian Translational Diffusion',
+        diffusion_coefficient=2.4e-9,
+        scale=0.5,
+    )
+    binding = edyn.FitBinding(
+        parameter_name='Lorentzian',
+        model=brownian,
+        modes=['area', 'width'],
+    )
+    ```
     """
 
     def __init__(
@@ -56,31 +85,6 @@ class FitBinding(EasyDynamicsBase):
             If parameter_name is not a string, if model is not a ModelComponent,
             ComponentCollection or DiffusionModelBase, or if modes is not a string, list of
             strings, or None.
-
-        Examples
-        --------
-        1. Basic usage with a ModelComponent:
-        >>> import easydynamics.sample_model as sm
-        >>> import easydynamics as edyn
-        >>> fit_func = sm.Polynomial(coefficients=[3.7, -0.5], display_name='Straight line')
-        >>> binding = edyn.FitBinding(parameter_name='Gaussian area', model=fit_func)
-        >>> print(binding)
-        FitBinding(parameter_name='Gaussian area', model=Polynomial(unique_name = Polynomial_1,
-        unit = meV, coefficients = [Straight line_c0=3.7, Straight line_c1=-0.5]), modes=None)
-
-        2. Usage with a DiffusionModelBase and specific modes:
-        >>> brownian_diffusion_model = sm.BrownianTranslationalDiffusion(
-        ...     display_name='Brownian Translational Diffusion',
-        ...     diffusion_coefficient=2.4e-9,
-        ...     scale=0.5,
-        ... )
-        >>> binding = edyn.FitBinding(
-        ...     parameter_name='Lorentzian',
-        ...     model=brownian_diffusion_model,
-        ...     modes=['area', 'width'],
-        ... )
-        FitBinding(parameter_name=Lorentzian, model=Brownian Translational Diffusion,
-        modes=['area', 'width'], display_name=FitBinding_1, unique_name=FitBinding_1)
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
@@ -327,9 +331,10 @@ class FitBinding(EasyDynamicsBase):
             A string representation of the FitBinding.
         """
         return (
-            f'FitBinding(parameter_name={self.parameter_name},\n '
-            f'model={self.model.display_name},\n '
-            f'modes={self.modes},\n '
-            f'display_name={self.display_name},\n '
-            f'unique_name={self.unique_name})'
+            f'{self.__class__.__name__}('
+            f'parameter_name={self.parameter_name!r},\n'
+            f'    model={self.model.display_name!r},\n'
+            f'    modes={self.modes},\n'
+            f'    display_name={self.display_name!r},\n'
+            f'    unique_name={self.unique_name!r})'
         )

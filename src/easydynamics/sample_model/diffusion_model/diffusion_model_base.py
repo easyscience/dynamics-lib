@@ -538,7 +538,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'unit={self.unit}), \n'
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r}, '
+            f'unit={self.unit},\n'
             f'    scale={self.scale})'
         )
