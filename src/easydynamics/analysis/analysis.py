@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from typing import Any
 
 import numpy as np
@@ -532,6 +533,7 @@ class Analysis(AnalysisBase):
                         units[name] = p.unit
                     elif units[name] != p.unit:
                         try:
+                            p = copy(p)
                             p.convert_unit(units[name])
                         except Exception as e:
                             raise UnitError(
@@ -587,7 +589,7 @@ class Analysis(AnalysisBase):
 
         ds = self.parameters_to_dataset()
 
-        if not names:
+        if names is None:
             names = list(ds.keys())
 
         if isinstance(names, str):
@@ -700,11 +702,7 @@ class Analysis(AnalysisBase):
         for Q_index in range(len(self.Q)):
             # Each Analysis1d gets its own ConvolutionSettings so that
             # convolution_plan_is_valid is tracked independently per Q index.
-            per_q_settings = ConvolutionSettings(
-                upsample_factor=self.convolution_settings.upsample_factor,
-                extension_factor=self.convolution_settings.extension_factor,
-                suppress_warnings=self.convolution_settings.suppress_warnings,
-            )
+            per_q_settings = copy(self.convolution_settings)
             analysis = Analysis1d(
                 display_name=f'{self.display_name}_Q{Q_index}',
                 experiment=self.experiment,

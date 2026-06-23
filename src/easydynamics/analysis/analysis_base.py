@@ -521,7 +521,9 @@ class AnalysisBase(EasyDynamicsModelBase):
         if not isinstance(Q_index, int):
             raise TypeError('Q_index must be an integer or None.')
 
-        if Q_index < 0 or (self.Q is not None and Q_index >= len(self.Q)):
+        if Q_index < 0:
+            raise IndexError('Q_index must be a valid index for the Q values.')
+        if self.Q is None or Q_index >= len(self.Q):
             raise IndexError('Q_index must be a valid index for the Q values.')
         return Q_index
 

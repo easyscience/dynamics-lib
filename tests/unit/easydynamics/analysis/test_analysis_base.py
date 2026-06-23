@@ -532,12 +532,12 @@ class TestAnalysisBase:
             analysis_base._on_instrument_model_changed()
             np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
 
-    def test_verify_Q_index_valid(self, analysis_base):
+    def test_verify_Q_index_valid(self, analysis_base_with_components):
         # WHEN
         valid_Q_index = 0
 
         # THEN
-        result = analysis_base._verify_Q_index(valid_Q_index)
+        result = analysis_base_with_components._verify_Q_index(valid_Q_index)
 
         # EXPECT
         assert result == valid_Q_index
@@ -549,6 +549,14 @@ class TestAnalysisBase:
         # THEN / EXPECT
         with pytest.raises(IndexError, match='Q_index must be a valid index'):
             analysis_base._verify_Q_index(invalid_Q_index)
+
+    def test_verify_Q_index_invalid_when_Q_is_none(self, analysis_base):
+        # WHEN
+        positive_Q_index = 0
+
+        # THEN / EXPECT
+        with pytest.raises(IndexError, match='Q_index must be a valid index'):
+            analysis_base._verify_Q_index(positive_Q_index)
 
     def test_repr(self, analysis_base):
         # WHEN

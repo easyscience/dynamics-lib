@@ -80,7 +80,7 @@ class Convolution(NumericalConvolutionBase):
     # needs to be rebuilt.
     # Note: the public 'energy' property setter always writes to '_energy', so '_energy' alone
     # is sufficient — listing 'energy' separately would cause a double invalidation.
-    _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
+    _invalidate_plan_on_change: ClassVar[set[str]] = {
         '_energy',
         '_energy_grid',
         '_sample_components',

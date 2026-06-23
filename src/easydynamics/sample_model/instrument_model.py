@@ -411,6 +411,7 @@ class InstrumentModel(NewBase):
     def _fix_or_free_energy_offset(self, Q_index: int | None = None, fixed: bool = True) -> None:
         self._ensure_energy_offsets_current()
         if Q_index is None:
+            self._energy_offset.fixed = fixed
             for offset in self._energy_offsets:
                 offset.fixed = fixed
         else:

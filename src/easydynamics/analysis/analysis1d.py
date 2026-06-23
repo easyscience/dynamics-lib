@@ -651,14 +651,11 @@ class Analysis1d(AnalysisBase):
                 )
             return result
 
-        return Convolution(
-            energy=energy,
+        return self._build_convolution(
             sample_components=components,
             resolution_components=resolution,
+            energy=energy,
             energy_offset=energy_offset,
-            convolution_settings=self.convolution_settings,
-            temperature=self.temperature,
-            detailed_balance_settings=self.detailed_balance_settings,
         ).convolution()
 
     def _evaluate_direct(
@@ -726,11 +723,25 @@ class Analysis1d(AnalysisBase):
         if resolution_components.is_empty:
             return None
 
+        return self._build_convolution(
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            energy=energy,
+            energy_offset=self.instrument_model.get_energy_offset(Q_index),
+        )
+
+    def _build_convolution(
+        self,
+        sample_components: ComponentCollection | ModelComponent,
+        resolution_components: ComponentCollection,
+        energy: sc.Variable,
+        energy_offset: Parameter,
+    ) -> Convolution:
         return Convolution(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            energy_offset=self.instrument_model.get_energy_offset(Q_index),
+            energy_offset=energy_offset,
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
             detailed_balance_settings=self.detailed_balance_settings,

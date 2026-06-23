@@ -103,6 +103,9 @@ class FitBinding(EasyDynamicsBase):
         if isinstance(modes, list) and not all(isinstance(mode, str) for mode in modes):
             raise TypeError('All modes in the list must be strings')
 
+        if isinstance(modes, str):
+            modes = [modes]
+
         self._parameter_name = parameter_name
         self._model = model
         self._modes = modes
@@ -261,11 +264,7 @@ class FitBinding(EasyDynamicsBase):
         modes = self._get_modes()
 
         if isinstance(self.model, DiffusionModelBase):
-            # This needs to be generalised.
             # TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003
-            if 'delta' in modes:
-                return [f'{self.parameter_name} area' for mode in modes]
-
             return [f'{self.parameter_name} {mode}' for mode in modes]
 
         return [self.parameter_name]

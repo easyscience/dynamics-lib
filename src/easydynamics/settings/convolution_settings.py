@@ -173,6 +173,11 @@ class ConvolutionSettings(EasyDynamicsBase):
             If factor is negative.
         """
 
+        if factor is None:
+            self._extension_factor = factor
+            self.convolution_plan_is_valid = False
+            return
+
         if not isinstance(factor, Numeric):
             raise TypeError('Extension factor must be a number.')
         if factor < 0.0:
@@ -242,6 +247,13 @@ class ConvolutionSettings(EasyDynamicsBase):
         if not isinstance(suppress, bool):
             raise TypeError('suppress_warnings must be True or False.')
         self._suppress_warnings = suppress
+
+    def __copy__(self) -> 'ConvolutionSettings':
+        return ConvolutionSettings(
+            upsample_factor=self._upsample_factor,
+            extension_factor=self._extension_factor,
+            suppress_warnings=self._suppress_warnings,
+        )
 
     def __repr__(self) -> str:
         """
