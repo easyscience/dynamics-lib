@@ -96,6 +96,19 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def append_diffusion_model(self, diffusion_model: DiffusionModelBase) -> None:
+        """
+        Append a DiffusionModel to the SampleModel.
+
+        Parameters
+        ----------
+        diffusion_model : DiffusionModelBase
+            The DiffusionModel to append.
+
+        Raises
+        ------
+        TypeError
+            If the diffusion_model is not a DiffusionModelBase.
+        """
         if not isinstance(diffusion_model, DiffusionModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
@@ -105,6 +118,19 @@ class SampleModel(ModelBase):
         self._component_collections_is_dirty = True
 
     def remove_diffusion_model(self, name: str) -> None:
+        """
+        Remove a DiffusionModel from the SampleModel by name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the DiffusionModel to remove.
+
+        Raises
+        ------
+        ValueError
+            If no DiffusionModel with the given name is found.
+        """
         for i, dm in enumerate(self.diffusion_models):
             if dm.name == name:
                 del self.diffusion_models[i]
@@ -116,6 +142,7 @@ class SampleModel(ModelBase):
         )
 
     def clear_diffusion_models(self) -> None:
+        """Clear all DiffusionModels from the SampleModel."""
         self.diffusion_models = []
         self._component_collections_is_dirty = True
 
@@ -125,12 +152,34 @@ class SampleModel(ModelBase):
 
     @property
     def diffusion_models(self) -> list[DiffusionModelBase]:
+        """
+        Get the diffusion models of the SampleModel.
+
+        Returns
+        -------
+        list[DiffusionModelBase]
+            The diffusion models of the SampleModel.
+        """
         return self._diffusion_models
 
     @diffusion_models.setter
     def diffusion_models(
         self, value: DiffusionModelBase | list[DiffusionModelBase] | None
     ) -> None:
+        """
+        Set the diffusion models of the SampleModel.
+
+        Parameters
+        ----------
+        value : DiffusionModelBase | list[DiffusionModelBase] | None
+            The diffusion model(s) to set. Can be a single DiffusionModelBase, a list of
+            DiffusionModelBase, or None to clear all diffusion models.
+
+        Raises
+        ------
+        TypeError
+            If value is not a DiffusionModelBase, a list of DiffusionModelBase, or None.
+        """
         if value is None:
             self._diffusion_models = []
             self._on_diffusion_models_change()
@@ -154,10 +203,33 @@ class SampleModel(ModelBase):
 
     @property
     def temperature(self) -> Parameter | None:
+        """
+        Get the temperature of the SampleModel.
+
+        Returns
+        -------
+        Parameter | None
+            The temperature Parameter of the SampleModel, or None if not set.
+        """
         return self._temperature
 
     @temperature.setter
     def temperature(self, value: Numeric | None) -> None:
+        """
+        Set the temperature of the SampleModel.
+
+        Parameters
+        ----------
+        value : Numeric | None
+            The temperature value. If None, temperature is cleared (no detailed balance).
+
+        Raises
+        ------
+        TypeError
+            If value is not a number or None.
+        ValueError
+            If value is negative.
+        """
         if value is None:
             self._temperature = None
             return
@@ -181,6 +253,14 @@ class SampleModel(ModelBase):
 
     @property
     def temperature_unit(self) -> str | sc.Unit:
+        """
+        Get the temperature unit.
+
+        Returns
+        -------
+        str | sc.Unit
+            The unit of the temperature parameter.
+        """
         return self._temperature_unit
 
     @temperature_unit.setter
@@ -206,6 +286,14 @@ class SampleModel(ModelBase):
 
     @property
     def normalize_detailed_balance(self) -> bool:
+        """
+        Get whether to divide the detailed balance factor by temperature.
+
+        Returns
+        -------
+        bool
+            True if the detailed balance factor is normalized by temperature.
+        """
         return self.detailed_balance_settings.normalize_detailed_balance
 
     @normalize_detailed_balance.setter
@@ -216,6 +304,14 @@ class SampleModel(ModelBase):
 
     @property
     def use_detailed_balance(self) -> bool:
+        """
+        Get whether detailed balance correction is applied.
+
+        Returns
+        -------
+        bool
+            True if detailed balance is applied during evaluation.
+        """
         return self.detailed_balance_settings.use_detailed_balance
 
     @use_detailed_balance.setter
@@ -226,6 +322,14 @@ class SampleModel(ModelBase):
 
     @property
     def detailed_balance_settings(self) -> DetailedBalanceSettings:
+        """
+        Get the detailed balance settings.
+
+        Returns
+        -------
+        DetailedBalanceSettings
+            The detailed balance settings object.
+        """
         return self._detailed_balance_settings
 
     @detailed_balance_settings.setter

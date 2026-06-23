@@ -24,6 +24,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the HWHM. area has unit = x_unit *
     y_unit; center and width have unit = x_unit.
+
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
     """
 
     def __init__(
@@ -38,6 +41,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         unique_name: str | None = None,
     ) -> None:
         """
+        Initialize the Lorentzian component.
+
         Parameters
         ----------
         area : Numeric, default=1.0
@@ -77,6 +82,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     @property
     def area(self) -> Parameter:
         """
+        Get the area parameter.
+
         Returns
         -------
         Parameter
@@ -104,6 +111,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
+        Get the center parameter.
+
         Returns
         -------
         Parameter
@@ -135,6 +144,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     @property
     def width(self) -> Parameter:
         """
+        Get the width parameter (HWHM).
+
         Returns
         -------
         Parameter

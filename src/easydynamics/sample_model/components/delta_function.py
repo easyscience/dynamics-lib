@@ -22,8 +22,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     """
     Delta function.
 
-    Evaluates to zero everywhere; acts as an identity in convolutions. area has unit = x_unit *
-    y_unit; center has unit = x_unit.
+    Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is
+    handled by the Convolution method. area has unit = x_unit * y_unit; center has unit = x_unit.
+
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
     """
 
     def __init__(
@@ -37,6 +40,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         unique_name: str | None = None,
     ) -> None:
         """
+        Initialize the Delta function.
+
         Parameters
         ----------
         center : Numeric | None, default=None
@@ -73,6 +78,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     @property
     def area(self) -> Parameter:
         """
+        Get the area parameter.
+
         Returns
         -------
         Parameter
@@ -100,6 +107,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
+        Get the center parameter.
+
         Returns
         -------
         Parameter

@@ -316,8 +316,8 @@ class InstrumentModel(NewBase):
 
         self._background_model.convert_x_unit(unit)
         self._resolution_model.convert_x_unit(unit)
-        self._energy_offset.convert_unit(unit)
         self._ensure_energy_offsets_current()
+        self._energy_offset.convert_unit(unit)
         for offset in self._energy_offsets:
             offset.convert_unit(unit)
 

@@ -34,6 +34,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
         unique_name: str | None = None,
     ) -> None:
         """
+        Initialize the Exponential component.
+
         Parameters
         ----------
         amplitude : Numeric, default=1.0
@@ -100,6 +102,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
     @property
     def amplitude(self) -> Parameter:
         """
+        Get the amplitude parameter.
+
         Returns
         -------
         Parameter
@@ -127,6 +131,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
+        Get the center parameter.
+
         Returns
         -------
         Parameter
@@ -158,6 +164,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
     @property
     def rate(self) -> Parameter:
         """
+        Get the rate parameter.
+
         Returns
         -------
         Parameter

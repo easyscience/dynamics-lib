@@ -254,8 +254,7 @@ class ModelComponent(EasyDynamicsModelBase):
         except Exception as e:
             try:
                 for p in pars:
-                    if hasattr(p, 'convert_unit'):
-                        p.convert_unit(old_unit)
+                    p.convert_unit(old_unit)
             except Exception:  # noqa: S110
                 pass
             raise e

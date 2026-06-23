@@ -197,7 +197,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
 
     def convert_x_unit(self, unit: str | sc.Unit) -> None:
         """
-        Convert the energy and energy_offset to the specified unit.
+        Convert the energy axis, energy_offset, and all components to the specified unit.
 
         Parameters
         ----------
@@ -227,6 +227,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
         except Exception as e:
             self.energy_offset = old_energy_offset
             raise e
+
+        if self._sample_components is not None:
+            self._sample_components.convert_x_unit(unit)
+        if self._resolution_components is not None:
+            self._resolution_components.convert_x_unit(unit)
 
         self._x_unit = unit
 

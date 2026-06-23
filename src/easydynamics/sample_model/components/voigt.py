@@ -21,7 +21,11 @@ class Voigt(CreateParametersMixin, ModelComponent):
     r"""
     Voigt profile — convolution of Gaussian and Lorentzian.
 
-    area has unit = x_unit * y_unit; center, gaussian_width, lorentzian_width have unit = x_unit.
+    Uses ``scipy.special.voigt_profile`` to evaluate the profile. area has unit = x_unit * y_unit;
+    center, gaussian_width, and lorentzian_width have unit = x_unit.
+
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
     """
 
     def __init__(
@@ -37,6 +41,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
         unique_name: str | None = None,
     ) -> None:
         """
+        Initialize a Voigt component.
+
         Parameters
         ----------
         area : Numeric | Parameter, default=1.0
@@ -83,6 +89,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def area(self) -> Parameter:
         """
+        Get the area parameter.
+
         Returns
         -------
         Parameter
@@ -110,6 +118,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def center(self) -> Parameter:
         """
+        Get the center parameter.
+
         Returns
         -------
         Parameter
@@ -141,6 +151,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def gaussian_width(self) -> Parameter:
         """
+        Get the Gaussian width parameter (sigma).
+
         Returns
         -------
         Parameter
@@ -172,6 +184,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
     @property
     def lorentzian_width(self) -> Parameter:
         """
+        Get the Lorentzian width parameter (HWHM).
+
         Returns
         -------
         Parameter

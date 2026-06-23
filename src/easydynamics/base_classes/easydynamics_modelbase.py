@@ -66,7 +66,14 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
 
     @property
     def x_unit(self) -> str | sc.Unit | None:
-        """Unit of the x-axis."""
+        """
+        Get the unit of the x-axis.
+
+        Returns
+        -------
+        str | sc.Unit | None
+            The unit of the x-axis (energy, Q, etc.).
+        """
         return self._x_unit
 
     @x_unit.setter
@@ -78,7 +85,14 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
 
     @property
     def y_unit(self) -> str | sc.Unit | None:
-        """Unit of the model output."""
+        """
+        Get the unit of the model output.
+
+        Returns
+        -------
+        str | sc.Unit | None
+            The unit of the model output (intensity).
+        """
         return self._y_unit
 
     @y_unit.setter

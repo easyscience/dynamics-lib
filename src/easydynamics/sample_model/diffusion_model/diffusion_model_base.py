@@ -114,7 +114,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             self._component_collections = []
         else:
             self._component_collections = [
-                ComponentCollection(y_unit=self.y_unit) for _ in range(len(self.Q))
+                ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+                for _ in range(len(self.Q))
             ]
 
     # ------------------------------------------------------------------
@@ -462,7 +463,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             return self._component_collections
 
         self._component_collections = [
-            ComponentCollection(y_unit=self.y_unit) for _ in range(len(self.Q))
+            ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit) for _ in range(len(self.Q))
         ]
 
         return self._component_collections
