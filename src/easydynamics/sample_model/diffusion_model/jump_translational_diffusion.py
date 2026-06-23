@@ -407,44 +407,6 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             'angstrom': self._angstrom,
         }
 
-    def _write_area_dependency_expression(self, QISF: float) -> str:
-        """
-        Write the dependency expression for the area to make dependent Parameters.
-
-        Parameters
-        ----------
-        QISF : float
-            Q-dependent intermediate scattering function.
-
-        Raises
-        ------
-        TypeError
-            If QISF is not a float.
-
-        Returns
-        -------
-        str
-            Dependency expression for the area.
-        """
-
-        if not isinstance(QISF, (float)):
-            raise TypeError('QISF must be a float.')
-
-        return f'{QISF} * scale'
-
-    def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
-        """
-        Write the dependency map expression to make dependent Parameters.
-
-        Returns
-        -------
-        dict[str, DescriptorNumber]
-            Dependency map for the area.
-        """
-        return {
-            'scale': self.scale,
-        }
-
     ################################
     # dunder methods
     ################################

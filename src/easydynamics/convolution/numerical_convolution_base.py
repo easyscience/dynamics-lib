@@ -162,6 +162,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
+        self._energy_grid = self._create_energy_grid()
         self.convolution_settings.convolution_plan_is_valid = False
 
     @property

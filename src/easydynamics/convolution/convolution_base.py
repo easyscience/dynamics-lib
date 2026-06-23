@@ -150,7 +150,13 @@ class ConvolutionBase(EasyDynamicsModelBase):
             The energy values with the offset applied.
         """
         energy_with_offset = self.energy.copy()
-        energy_with_offset.values = self.energy.values - self.energy_offset.value
+        offset_value = self._energy_offset.value
+        if str(self._energy_offset.unit) != str(self._energy.unit):
+            offset_value = sc.to_unit(
+                sc.scalar(offset_value, unit=str(self._energy_offset.unit)),
+                str(self._energy.unit),
+            ).value
+        energy_with_offset.values = self._energy.values - offset_value
         return energy_with_offset
 
     @property
@@ -215,23 +221,21 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise TypeError('Energy unit must be a string or scipp unit.')
 
         old_energy = self.energy.copy()
+        old_offset_unit = str(self._energy_offset.unit)
+
         try:
             self.energy = sc.to_unit(self.energy, unit)
-        except Exception as e:
+            self._energy_offset.convert_unit(unit)
+            if self._sample_components is not None:
+                self._sample_components.convert_x_unit(unit)
+            if self._resolution_components is not None:
+                self._resolution_components.convert_x_unit(unit)
+        except Exception:
             self.energy = old_energy
-            raise e
-
-        old_energy_offset = self.energy_offset
-        try:
-            self.energy_offset.convert_unit(unit)
-        except Exception as e:
-            self.energy_offset = old_energy_offset
-            raise e
-
-        if self._sample_components is not None:
-            self._sample_components.convert_x_unit(unit)
-        if self._resolution_components is not None:
-            self._resolution_components.convert_x_unit(unit)
+            # Roll back energy_offset if it was already converted to the new unit.
+            if str(self._energy_offset.unit) != old_offset_unit:
+                self._energy_offset.convert_unit(old_offset_unit)
+            raise
 
         self._x_unit = unit
 

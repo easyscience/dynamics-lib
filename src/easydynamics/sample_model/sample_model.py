@@ -131,15 +131,19 @@ class SampleModel(ModelBase):
         ValueError
             If no DiffusionModel with the given name is found.
         """
-        for i, dm in enumerate(self.diffusion_models):
-            if dm.name == name:
-                del self.diffusion_models[i]
-                self._component_collections_is_dirty = True
-                return
-        raise ValueError(
-            f'No DiffusionModel with name {name} found. \n'
-            f'The available names are: {[dm.name for dm in self.diffusion_models]}'
-        )
+        matches = [i for i, dm in enumerate(self.diffusion_models) if dm.name == name]
+        if len(matches) == 0:
+            raise ValueError(
+                f'No DiffusionModel with name {name!r} found. '
+                f'Available names are: {[dm.name for dm in self.diffusion_models]}'
+            )
+        if len(matches) > 1:
+            raise ValueError(
+                f'Multiple DiffusionModels share the name {name!r}. '
+                f'Rename them to have unique names before removing.'
+            )
+        del self.diffusion_models[matches[0]]
+        self._component_collections_is_dirty = True
 
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""

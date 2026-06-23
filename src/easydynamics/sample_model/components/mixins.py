@@ -133,6 +133,8 @@ class CreateParametersMixin:
 
         if enforce_minimum_center and center_param.min < DHO_MINIMUM_CENTER:
             center_param.min = DHO_MINIMUM_CENTER
+            if center_param.value < DHO_MINIMUM_CENTER:
+                center_param.value = DHO_MINIMUM_CENTER
         return center_param
 
     def _create_width_parameter(

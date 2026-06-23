@@ -508,15 +508,19 @@ class TestAnalysis1d:
         # WHEN
         energy = analysis1d.experiment.energy
         energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
-        energy_offset.value = 1.0  # override with a simple value for testing
-        energy_offset.convert_unit('eV')
+        energy_offset.value = 1.0  # set to 1.0 in original unit (meV)
+        energy_offset.convert_unit('eV')  # now 0.001 eV, still represents 1 meV
 
         # THEN
         result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
 
-        # EXPECT
-        expected = energy.values - energy_offset.value
-        np.testing.assert_array_equal(result.values, expected)
+        # EXPECT: offset must be converted to energy's unit before subtraction
+        offset_in_energy_unit = sc.to_unit(
+            sc.scalar(energy_offset.value, unit=str(energy_offset.unit)),
+            str(energy.unit),
+        ).value
+        expected = energy.values - offset_in_energy_unit
+        np.testing.assert_array_almost_equal(result.values, expected)
 
     def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
         # WHEN

@@ -486,6 +486,9 @@ class Analysis1d(AnalysisBase):
     def _on_experiment_changed(self) -> None:
         """Mark the convolver as dirty when the experiment changes."""
         super()._on_experiment_changed()
+        # Refresh masked energy if Q_index is already set (i.e. post-init experiment swap).
+        if getattr(self, '_Q_index', None) is not None and self.experiment is not None:
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
 
     def _on_sample_model_changed(self) -> None:
@@ -535,9 +538,13 @@ class Analysis1d(AnalysisBase):
             The energy grid with the offset applied.
         """
 
+        offset_value = energy_offset.value
         if energy.unit != energy_offset.unit:
             try:
-                energy_offset.convert_unit(str(energy.unit))
+                offset_value = sc.to_unit(
+                    sc.scalar(energy_offset.value, unit=str(energy_offset.unit)),
+                    str(energy.unit),
+                ).value
             except Exception as e:
                 raise sc.UnitError(
                     f'Energy and energy offset must have compatible units. '
@@ -545,7 +552,7 @@ class Analysis1d(AnalysisBase):
                 ) from e
 
         energy_with_offset = energy.copy(deep=True)
-        energy_with_offset.values -= energy_offset.value
+        energy_with_offset.values -= offset_value
         return energy_with_offset
 
     #############

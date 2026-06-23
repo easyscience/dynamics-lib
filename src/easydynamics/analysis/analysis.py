@@ -651,12 +651,19 @@ class Analysis(AnalysisBase):
         """
         self._analysis_list = []
         for Q_index in range(len(self.Q)):
+            # Each Analysis1d gets its own ConvolutionSettings so that
+            # convolution_plan_is_valid is tracked independently per Q index.
+            per_q_settings = ConvolutionSettings(
+                upsample_factor=self.convolution_settings.upsample_factor,
+                extension_factor=self.convolution_settings.extension_factor,
+                suppress_warnings=self.convolution_settings.suppress_warnings,
+            )
             analysis = Analysis1d(
                 display_name=f'{self.display_name}_Q{Q_index}',
                 experiment=self.experiment,
                 sample_model=self.sample_model,
                 instrument_model=self.instrument_model,
-                convolution_settings=self.convolution_settings,
+                convolution_settings=per_q_settings,
                 detailed_balance_settings=self.detailed_balance_settings,
                 extra_parameters=self._extra_parameters,
                 Q_index=Q_index,
@@ -717,8 +724,10 @@ class Analysis(AnalysisBase):
             ys.append(y)
             ws.append(weight)
 
-            # Make sure the convolver is up to date for this Q index
-            analysis1d.refresh_convolver(energy=x)
+            # Make sure the convolver is up to date for this Q index.
+            # Wrap x in a sc.Variable so refresh_convolver carries the correct unit.
+            energy_sc = sc.array(dims=['energy'], values=x, unit=self.experiment.energy.unit)
+            analysis1d.refresh_convolver(energy=energy_sc)
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,

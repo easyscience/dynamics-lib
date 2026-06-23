@@ -732,15 +732,18 @@ class TestAnalysis:
 
     def test_on_convolution_settings_changed(self, analysis):
         # WHEN
-        new_convolution_settings = ConvolutionSettings()
+        new_convolution_settings = ConvolutionSettings(upsample_factor=7, extension_factor=0.3)
 
         # THEN (this calls _on_convolution_settings_changed internally)
         analysis.convolution_settings = new_convolution_settings
 
-        # EXPECT
+        # EXPECT: the parent holds the new settings object
         assert analysis.convolution_settings is new_convolution_settings
+        # Each Analysis1d gets its own copy of the settings (so plan_is_valid is
+        # tracked independently per Q), but all values are propagated from the parent.
         for analysis1d in analysis.analysis_list:
-            assert analysis1d.convolution_settings is new_convolution_settings
+            assert analysis1d.convolution_settings.upsample_factor == 7
+            assert analysis1d.convolution_settings.extension_factor == pytest.approx(0.3)
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
