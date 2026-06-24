@@ -10,6 +10,7 @@ from easyscience.variable import Parameter
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import ComponentCollection
+from easydynamics.sample_model import ExpressionComponent
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Polynomial
@@ -527,6 +528,40 @@ class TestComponentCollection:
         # EXPECT
         with pytest.raises(TypeError):
             component_collection.convert_y_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self):
+        # GIVEN: collection whose first Gaussian converts fine, but second has an
+        # ExpressionComponent that raises NotImplementedError for convert_x_unit.
+        g = Gaussian(area=1.0, x_unit='meV')
+        expr = ExpressionComponent('A * x', parameters={'A': 1.0}, x_unit='meV')
+        cc = ComponentCollection(components=[g, expr])
+        original_area = g.area.value
+
+        # WHEN: attempt a unit conversion that will fail on the ExpressionComponent
+        with pytest.raises(NotImplementedError):
+            cc.convert_x_unit('microeV')
+
+        # EXPECT: Gaussian is rolled back to its original state
+        assert cc.x_unit == 'meV'
+        assert g.x_unit == 'meV'
+        assert g.area.value == pytest.approx(original_area)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # GIVEN: collection where first Gaussian converts successfully but second
+        # ExpressionComponent always raises NotImplementedError for convert_y_unit.
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        expr = ExpressionComponent('A * x', parameters={'A': 1.0}, x_unit='meV')
+        cc = ComponentCollection(components=[g, expr], y_unit='1/meV')
+        original_area = g.area.value
+
+        # WHEN: attempt y_unit conversion that will fail on the ExpressionComponent
+        with pytest.raises(NotImplementedError):
+            cc.convert_y_unit('1/eV')
+
+        # EXPECT: collection y_unit and Gaussian are both rolled back
+        assert cc.y_unit == '1/meV'
+        assert g.y_unit == '1/meV'
+        assert g.area.value == pytest.approx(original_area)
 
     # ───── Regression tests ─────
 

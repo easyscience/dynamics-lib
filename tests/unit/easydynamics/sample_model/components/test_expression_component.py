@@ -136,6 +136,19 @@ class TestExpressionComponent:
         with pytest.raises(NotImplementedError, match='not implemented'):
             expr.convert_x_unit('microeV')
 
+    def test_convert_y_unit_not_implemented(self, expr: ExpressionComponent):
+        with pytest.raises(NotImplementedError, match='not implemented'):
+            expr.convert_y_unit('1/meV')
+
+    def test_evaluate_scipp_output(self, expr: ExpressionComponent):
+        import scipp as sc
+
+        x = np.linspace(-2, 2, 30)
+        result = expr.evaluate(x, output='scipp')
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 30
+
     def test_missing_parameter_defaults(self):
         # WHEN THEN
         expr = ExpressionComponent('A * x + B', parameters={'A': 2.0})

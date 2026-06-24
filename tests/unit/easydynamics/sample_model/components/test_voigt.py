@@ -299,3 +299,35 @@ class TestVoigt:
         assert 'center =' in repr_str
         assert 'gaussian_width =' in repr_str
         assert 'lorentzian_width =' in repr_str
+
+    def test_y_unit_default(self, voigt: Voigt):
+        assert voigt.y_unit == 'dimensionless'
+
+    def test_convert_y_unit(self):
+        # GIVEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        v = Voigt(
+            area=1.0,
+            center=0.0,
+            gaussian_width=0.5,
+            lorentzian_width=0.3,
+            x_unit='meV',
+            y_unit='1/meV',
+        )
+        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        v.convert_y_unit('1/eV')
+        # EXPECT: y_unit updated and area value rescaled (1e3 factor)
+        assert v.y_unit == '1/eV'
+        assert v.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, voigt: Voigt):
+        with pytest.raises(TypeError):
+            voigt.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, voigt: Voigt):
+        import scipp as sc
+
+        x = np.linspace(-5, 5, 50)
+        result = voigt.evaluate(x, output='scipp')
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 50

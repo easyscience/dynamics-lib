@@ -206,6 +206,18 @@ class TestPolynomial:
         # Evaluated result must represent the same physical value
         assert np.isclose(p.evaluate(x)[0], val_before * 1000.0)
 
+    def test_evaluate_scipp_output(self):
+        import scipp as sc
+
+        from easydynamics.sample_model import Polynomial
+
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+        x = np.linspace(-3, 3, 40)
+        result = p.evaluate(x, output='scipp')
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 40
+
     def test_repr(self, polynomial: Polynomial):
         # WHEN THEN
         repr_str = repr(polynomial)

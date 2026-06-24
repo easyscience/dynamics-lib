@@ -159,6 +159,50 @@ class TestModelComponent:
         assert dummy.center.value == pytest.approx(2.0)
         assert dummy.width.value == pytest.approx(3.0)
 
+    def test_resolve_param_value_same_unit_returns_raw_value(self, dummy):
+        # WHEN: target unit matches parameter unit
+        result = dummy._resolve_param_value(dummy.area, 'meV')
+        # EXPECT: raw value returned without conversion
+        assert result == pytest.approx(dummy.area.value)
+
+    def test_resolve_param_value_none_target_returns_raw_value(self, dummy):
+        # WHEN: target unit is None
+        result = dummy._resolve_param_value(dummy.area, None)
+        # EXPECT: raw value returned without conversion
+        assert result == pytest.approx(dummy.area.value)
+
+    def test_resolve_param_value_converts_without_mutating(self, dummy):
+        # WHEN: target unit differs from parameter unit
+        result = dummy._resolve_param_value(dummy.area, 'eV')
+        # EXPECT: converted value (1.0 meV → 0.001 eV)
+        assert result == pytest.approx(0.001)
+        # EXPECT: parameter itself is not mutated
+        assert dummy.area.value == pytest.approx(1.0)
+        assert str(dummy.area.unit) == 'meV'
+
+    def test_evaluate_with_compatible_unit_gives_correct_result(self):
+        # GIVEN: Gaussian in meV and a physically equivalent Gaussian in eV
+        from easydynamics.sample_model.components.gaussian import Gaussian
+
+        g_mev = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        g_ev = Gaussian(area=0.001, center=0.0, width=0.0005, x_unit='eV')
+
+        x_ev = sc.array(
+            dims=['energy'], values=np.array([-0.002, -0.001, 0.0, 0.001, 0.002]), unit='eV'
+        )
+        x_ev_np = np.array([-0.002, -0.001, 0.0, 0.001, 0.002])
+
+        # WHEN: evaluate meV-Gaussian with x in eV
+        result_mev = g_mev.evaluate(x_ev)
+        result_ev = g_ev.evaluate(x_ev_np)
+
+        # EXPECT: physically identical outputs
+        np.testing.assert_allclose(result_mev, result_ev, rtol=1e-10)
+        # EXPECT: model state is unchanged
+        assert g_mev.x_unit == 'meV'
+        assert g_mev.width.value == pytest.approx(0.5)
+        assert g_mev.area.value == pytest.approx(1.0)
+
     # ───── Regression tests ─────
 
     def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
