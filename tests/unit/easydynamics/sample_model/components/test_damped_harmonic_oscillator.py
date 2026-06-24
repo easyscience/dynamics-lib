@@ -6,6 +6,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import DampedHarmonicOscillator
@@ -234,3 +235,22 @@ class TestDampedHarmonicOscillator:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+
+    def test_convert_x_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            dho.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, dho: DampedHarmonicOscillator):
+        with pytest.raises(UnitError):
+            dho.convert_x_unit('m')
+        assert dho.x_unit == 'meV'
+        assert dho.area.value == pytest.approx(2.0)
+        assert dho.center.value == pytest.approx(1.5)
+        assert dho.width.value == pytest.approx(0.3)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        dho = DampedHarmonicOscillator(area=1.0, center=1.0, width=0.3, x_unit='meV')
+        with pytest.raises(UnitError):
+            dho.convert_y_unit('K')
+        assert dho.y_unit == 'dimensionless'
+        assert dho.area.value == pytest.approx(1.0)

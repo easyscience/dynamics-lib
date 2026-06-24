@@ -6,6 +6,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian
@@ -287,3 +288,22 @@ class TestGaussian:
         # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('1/meV')
+
+    def test_convert_x_unit_invalid_type_raises(self, gaussian: Gaussian):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            gaussian.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, gaussian: Gaussian):
+        with pytest.raises(UnitError):
+            gaussian.convert_x_unit('m')
+        assert gaussian.x_unit == 'meV'
+        assert gaussian.area.value == pytest.approx(2.0)
+        assert gaussian.center.value == pytest.approx(0.5)
+        assert gaussian.width.value == pytest.approx(0.6)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        gaussian = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        with pytest.raises(UnitError):
+            gaussian.convert_y_unit('K')
+        assert gaussian.y_unit == 'dimensionless'
+        assert gaussian.area.value == pytest.approx(1.0)

@@ -6,6 +6,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Lorentzian
@@ -231,3 +232,22 @@ class TestLorentzian:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+
+    def test_convert_x_unit_invalid_type_raises(self, lorentzian: Lorentzian):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            lorentzian.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, lorentzian: Lorentzian):
+        with pytest.raises(UnitError):
+            lorentzian.convert_x_unit('m')
+        assert lorentzian.x_unit == 'meV'
+        assert lorentzian.area.value == pytest.approx(2.0)
+        assert lorentzian.center.value == pytest.approx(0.5)
+        assert lorentzian.width.value == pytest.approx(0.6)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        lor = Lorentzian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        with pytest.raises(UnitError):
+            lor.convert_y_unit('K')
+        assert lor.y_unit == 'dimensionless'
+        assert lor.area.value == pytest.approx(1.0)

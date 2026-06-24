@@ -255,6 +255,18 @@ class TestConvolutionBase:
         with pytest.raises(AttributeError):
             convolution_base.energy_with_offset = 5
 
+    def test_energy_with_offset_unit_conversion(self, convolution_base):
+        # When energy_offset has a different but compatible unit, the property converts it
+        convolution_base.energy_offset = Parameter(
+            name='energy_offset',
+            value=0.001,
+            unit='eV',  # 0.001 eV = 1 meV
+        )
+        result = convolution_base.energy_with_offset
+        # energy is in meV, offset 0.001 eV = 1 meV → shifted by -1 meV
+        expected = convolution_base.energy.values - 1.0
+        np.testing.assert_allclose(result.values, expected, rtol=1e-5)
+
     def test_sample_components_property(self, convolution_base):
         # WHEN THEN EXPECT
         assert isinstance(convolution_base.sample_components, ComponentCollection)

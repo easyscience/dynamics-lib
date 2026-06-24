@@ -236,6 +236,23 @@ class TestNumericalConvolution:
         else:
             assert result.shape == dense.shape
 
+    def test_convolution_with_energy_offset_in_different_unit(self, default_numerical_convolution):
+        # Setting energy_offset as a Parameter in eV when energy grid is in meV exercises the
+        # unit-conversion branch (line 53 in numerical_convolution.py)
+        from easyscience.variable import Parameter
+
+        conv = default_numerical_convolution
+        # energy is in meV; set offset as Parameter in eV → unit != energy unit → sc.to_unit called
+        conv.energy_offset = Parameter(name='energy_offset', value=0.001, unit='eV')
+        result = conv.convolution()
+        # With default upsample_factor=5 the result is interpolated back to the original grid
+        assert result.shape == conv.energy.values.shape
+
+    def test_repr(self, default_numerical_convolution):
+        r = repr(default_numerical_convolution)
+        assert 'NumericalConvolution' in r
+        assert 'energy_len=' in r
+
     # ───── Regression tests ─────
 
     def test_detailed_balance_energy_includes_even_length_offset(self):

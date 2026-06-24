@@ -6,6 +6,7 @@ from copy import copy
 import numpy as np
 import pytest
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 from scipy.special import voigt_profile
 
@@ -331,3 +332,23 @@ class TestVoigt:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+
+    def test_convert_x_unit_invalid_type_raises(self, voigt: Voigt):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            voigt.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, voigt: Voigt):
+        with pytest.raises(UnitError):
+            voigt.convert_x_unit('m')
+        assert voigt.x_unit == 'meV'
+        assert voigt.area.value == pytest.approx(2.0)
+        assert voigt.center.value == pytest.approx(0.5)
+        assert voigt.gaussian_width.value == pytest.approx(0.6)
+        assert voigt.lorentzian_width.value == pytest.approx(0.7)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        v = Voigt(area=1.0, center=0.0, gaussian_width=0.5, lorentzian_width=0.3, x_unit='meV')
+        with pytest.raises(UnitError):
+            v.convert_y_unit('K')
+        assert v.y_unit == 'dimensionless'
+        assert v.area.value == pytest.approx(1.0)

@@ -235,3 +235,25 @@ class TestExponential:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+
+    @pytest.mark.parametrize(
+        'amplitude_unit, rate_unit',
+        [
+            ('meV', '1/meV'),
+        ],
+        ids=['parameter_amplitude_and_rate'],
+    )
+    def test_init_with_parameter_amplitude_and_rate(self, amplitude_unit, rate_unit):
+        # Passing Parameter objects exercises the isinstance(amplitude, Numeric) is False branch
+        amplitude_param = Parameter(name='amp', value=3.0, unit=amplitude_unit)
+        rate_param = Parameter(name='rate', value=0.5, unit=rate_unit)
+        exp = Exponential(amplitude=amplitude_param, rate=rate_param, x_unit='meV')
+        assert exp.amplitude.value == pytest.approx(3.0)
+        assert exp.rate.value == pytest.approx(0.5)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        exp = Exponential(amplitude=1.0, center=0.0, rate=1.0, x_unit='meV')
+        with pytest.raises(UnitError):
+            exp.convert_y_unit('K')
+        assert exp.y_unit == 'dimensionless'
+        assert exp.amplitude.value == pytest.approx(1.0)

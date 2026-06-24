@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 
@@ -204,6 +205,20 @@ class TestModelComponent:
         assert g_mev.area.value == pytest.approx(1.0)
 
     # ───── Regression tests ─────
+
+    def test_convert_x_unit_rollback_on_failure(self, dummy: DummyComponent):
+        # Conversion to 'm' (length) is incompatible with 'meV' (energy) → triggers rollback
+        with pytest.raises(UnitError):
+            dummy.convert_x_unit('m')
+        # Parameters should be restored to original values after rollback
+        assert dummy.x_unit == 'meV'
+        assert dummy.area.value == pytest.approx(1.0)
+        assert dummy.center.value == pytest.approx(2.0)
+        assert dummy.width.value == pytest.approx(3.0)
+
+    def test_convert_y_unit_not_implemented(self, dummy: DummyComponent):
+        with pytest.raises(NotImplementedError, match='does not support convert_y_unit'):
+            dummy.convert_y_unit('1/meV')
 
     def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
         # GIVEN: a Gaussian and a DataArray where the coord key ('energy') differs

@@ -277,6 +277,31 @@ class TestModelBase:
         with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
             model_base.convert_x_unit(123)
 
+    def test_components_setter_none(self, model_base):
+        # Setting components to None clears all components
+        model_base.components = None
+        assert len(model_base.components) == 0
+
+    def test_convert_x_unit_rollback_when_old_unit_none(self):
+        # When _x_unit is None, the rollback block is skipped (292->298 branch)
+        component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
+        model = ModelBase(display_name='M', x_unit=None, components=component)
+        model._x_unit = None
+        with pytest.raises(UnitError):
+            model.convert_x_unit('m')  # incompatible unit triggers failure
+
+    def test_convert_x_unit_rollback_on_failure(self, model_base):
+        with pytest.raises(UnitError):
+            model_base.convert_x_unit('m')
+        assert model_base.x_unit == 'meV'
+        for component in model_base.components:
+            assert component.x_unit == 'meV'
+
+    def test_convert_y_unit_rollback_on_failure(self, model_base):
+        with pytest.raises(UnitError):
+            model_base.convert_y_unit('K')
+        assert model_base.y_unit == 'dimensionless'
+
     def test_components_setter(self, model_base):
         # WHEN
         new_component = Lorentzian(name='NewLorentzian')

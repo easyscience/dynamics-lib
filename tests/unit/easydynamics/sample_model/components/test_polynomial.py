@@ -225,3 +225,22 @@ class TestPolynomial:
         # EXPECT
         assert 'name = PolynomialName' in repr_str
         assert 'coefficients =' in repr_str
+
+    def test_evaluate_with_scipp_x_different_compatible_unit(self):
+        import scipp as sc
+
+        # Polynomial with x_unit='meV', coefficients [1.0, 1.0] → f(x) = 1 + x
+        p = Polynomial(coefficients=[1.0, 1.0], x_unit='meV')
+        # Evaluate with x in eV (different but compatible unit) — triggers unit-rescaling branch
+        x_eV = sc.array(dims=['x'], values=np.array([0.001, 0.002]), unit='eV')
+        result = p.evaluate(x_eV)
+        # 0.001 eV = 1 meV, 0.002 eV = 2 meV → f(1)=2, f(2)=3
+        np.testing.assert_allclose(result, [2.0, 3.0], rtol=1e-5)
+        # Component state is NOT mutated
+        assert p.x_unit == 'meV'
+
+    def test_convert_y_unit_invalid_type_raises(self, polynomial: Polynomial):
+        from scipp import UnitError
+
+        with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):
+            polynomial.convert_y_unit(123)

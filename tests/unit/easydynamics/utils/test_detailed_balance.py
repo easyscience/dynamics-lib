@@ -305,3 +305,37 @@ class TestDetailedBalanceFactor:
                 energy_unit=energy_unit,
                 temperature_unit=temperature_unit,
             )
+
+
+class TestConvertToScippVariable:
+    """Tests for _convert_to_scipp_variable internal helper."""
+
+    @pytest.fixture(autouse=True)
+    def _import(self):
+        from easydynamics.utils.detailed_balance import _convert_to_scipp_variable
+
+        self._fn = _convert_to_scipp_variable
+
+    @pytest.mark.parametrize(
+        'name, expected_match',
+        [
+            ('energy', 'energy must be a number'),
+            ('temperature', 'temperature must be a number'),
+        ],
+        ids=['energy_name', 'other_name'],
+    )
+    def test_invalid_type_raises_type_error(self, name, expected_match):
+        with pytest.raises(TypeError, match=expected_match):
+            self._fn({'invalid': 'type'}, name=name, unit='meV')
+
+    def test_invalid_unit_scalar_raises_unit_error(self):
+        from scipp import UnitError as ScippUnitError
+
+        with pytest.raises(ScippUnitError, match='Invalid unit string'):
+            self._fn(1.0, name='energy', unit='not_a_real_unit_xyz')
+
+    def test_invalid_unit_array_raises_unit_error(self):
+        from scipp import UnitError as ScippUnitError
+
+        with pytest.raises(ScippUnitError, match='Invalid unit string'):
+            self._fn([1.0, 2.0], name='energy', unit='not_a_real_unit_xyz')

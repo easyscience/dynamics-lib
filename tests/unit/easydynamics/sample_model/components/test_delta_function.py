@@ -250,3 +250,43 @@ class TestDeltaFunction:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+
+    @pytest.mark.parametrize(
+        'x, center, expected_idx',
+        [
+            (np.array([0.5, 1.0, 2.0]), 0.5, 0),  # center at first element (line 202)
+            (np.array([0.0, 1.0, 1.5]), 1.5, 2),  # center at last element (line 207)
+        ],
+        ids=['center_at_first', 'center_at_last'],
+    )
+    def test_evaluate_center_at_boundary(self, x, center, expected_idx):
+        area = 1.0
+        delta = DeltaFunction(area=area, center=center, x_unit='meV')
+        result = delta.evaluate(x)
+        # All elements except the boundary one should be zero
+        assert result[expected_idx] > 0.0
+        other_indices = [i for i in range(len(x)) if i != expected_idx]
+        assert all(result[i] == pytest.approx(0.0) for i in other_indices)
+        # Boundary bin width: both left and right are set to the single adjacent spacing
+        bin_width = x[1] - x[0] if expected_idx == 0 else x[-1] - x[-2]
+        assert np.isclose(result[expected_idx], area / bin_width, rtol=1e-10)
+
+    def test_convert_x_unit_invalid_type_raises(self, delta_function: DeltaFunction):
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            delta_function.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, delta_function: DeltaFunction):
+        with pytest.raises(UnitError):
+            delta_function.convert_x_unit('m')
+        # Parameters should be unchanged after rollback
+        assert delta_function.x_unit == 'meV'
+        assert delta_function.area.value == pytest.approx(2.0)
+        assert delta_function.center.value == pytest.approx(0.5)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        delta = DeltaFunction(area=1.0, center=0.0, x_unit='meV', y_unit='dimensionless')
+        with pytest.raises(UnitError):
+            delta.convert_y_unit('K')
+        # State should be unchanged after rollback
+        assert delta.y_unit == 'dimensionless'
+        assert delta.area.value == pytest.approx(1.0)
