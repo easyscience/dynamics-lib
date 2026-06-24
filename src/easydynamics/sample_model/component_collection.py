@@ -328,7 +328,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         """
         if not self:
             return np.zeros_like(x)
-        return sum(component.evaluate(x, output=output) for component in self)
+        gen = (component.evaluate(x, output=output) for component in self)
+        first = next(gen)
+        return sum(gen, first)
 
     def evaluate_component(
         self,

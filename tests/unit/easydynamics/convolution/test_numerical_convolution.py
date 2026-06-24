@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -233,3 +235,41 @@ class TestNumericalConvolution:
             assert result.shape == conv.energy.values.shape
         else:
             assert result.shape == dense.shape
+
+    # ───── Regression tests ─────
+
+    def test_detailed_balance_energy_includes_even_length_offset(self):
+        # GIVEN: even-length energy grid and non-zero temperature (triggers DBF)
+        energy = np.linspace(-10, 10, 100)  # 100 points = even length
+        sample_components = ComponentCollection(display_name='Sample')
+        sample_components.append_component(Gaussian(name='G', area=1.0, center=0.0, width=1.0))
+        resolution_components = ComponentCollection(display_name='Resolution')
+        resolution_components.append_component(Gaussian(name='R', area=1.0, center=0.0, width=0.5))
+        nc = NumericalConvolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+        nc.temperature = 300.0
+
+        captured_energy = []
+
+        original_dbf = detailed_balance_factor
+
+        def capturing_dbf(**kwargs):
+            captured_energy.append(kwargs['energy'].copy())
+            return original_dbf(**kwargs)
+
+        with patch(
+            'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
+            capturing_dbf,
+        ):
+            nc.convolution()
+
+        assert len(captured_energy) == 1
+        # The energy passed to DBF must include energy_even_length_offset.
+        # Before the fix it was energy_dense - offset_value (missing the offset),
+        # which for an even-length grid differs from energy_dense by half a bin step.
+        grid = nc._energy_grid
+        expected = grid.energy_dense - grid.energy_even_length_offset
+        np.testing.assert_allclose(captured_energy[0], expected, atol=1e-12)

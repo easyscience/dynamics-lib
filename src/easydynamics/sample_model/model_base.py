@@ -289,11 +289,12 @@ class ModelBase(EasyDynamicsModelBase):
                 component.convert_x_unit(unit)
             self._x_unit = str(unit) if isinstance(unit, sc.Unit) else unit
         except Exception as e:
-            try:
-                for component in self.components:
-                    component.convert_x_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass
+            if old_unit is not None:
+                try:
+                    for component in self.components:
+                        component.convert_x_unit(old_unit)
+                except Exception:  # noqa: S110
+                    pass
             raise e
         self._on_components_change()
 

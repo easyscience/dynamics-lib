@@ -155,6 +155,7 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         detected_unit: str | None = None
         dim: str = 'x'
+        dim_from_dataarray: bool = False
 
         if isinstance(x, sc.DataArray):
             coords = dict(x.coords)
@@ -167,10 +168,12 @@ class ModelComponent(EasyDynamicsModelBase):
                 )
             dim, coord_obj = next(iter(coords.items()))
             x = coord_obj
+            dim_from_dataarray = True
 
         if isinstance(x, sc.Variable):
             detected_unit = str(x.unit)
-            dim = x.dims[0] if x.dims else 'x'
+            if not dim_from_dataarray:
+                dim = x.dims[0] if x.dims else 'x'
             x_in = x.value if x.sizes == {} else x.values
 
             # Validate that x's unit is compatible with model's x_unit

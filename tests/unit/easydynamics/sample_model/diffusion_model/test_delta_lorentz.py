@@ -856,3 +856,20 @@ class TestDeltaLorentz:
         assert 'mean_u_squared' in repr_str
         assert 'A_0' in repr_str
         assert 'lorentzian_width' in repr_str
+
+    # ───── Regression tests ─────
+
+    def test_calculate_width_raises_after_clear_Q_when_allow_Q_variation(
+        self, delta_lorentz_model_with_Q
+    ):
+        # GIVEN: model with Q-variation enabled for lorentzian_width
+        assert delta_lorentz_model_with_Q._allow_Q_variation['lorentzian_width'] is True
+        assert len(delta_lorentz_model_with_Q._lorentzian_width_list) > 0
+
+        # WHEN: clear Q (empties _lorentzian_width_list)
+        delta_lorentz_model_with_Q.clear_Q(confirm=True)
+        assert len(delta_lorentz_model_with_Q._lorentzian_width_list) == 0
+
+        # THEN: before the fix, calculate_width() silently returned [] instead of raising.
+        with pytest.raises(ValueError, match='Lorentzian width Q-variation list is empty'):
+            delta_lorentz_model_with_Q.calculate_width()

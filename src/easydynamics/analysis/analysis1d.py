@@ -438,8 +438,10 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
 
+        mask = self.experiment.get_finite_energy_mask(Q_index=self.Q_index)
+        mask_var = sc.array(dims=['energy'], values=mask)
         data_and_model = {
-            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Data': self.experiment.binned_data['Q', self.Q_index][mask_var],
             'Model': self._create_model_array(energy=energy),
         }
 
@@ -792,7 +794,9 @@ class Analysis1d(AnalysisBase):
         if self.Q_index is None:
             raise ValueError('Q_index must be set to calculate residuals.')
 
-        data = self.experiment.binned_data['Q', self.Q_index]
+        mask = self.experiment.get_finite_energy_mask(Q_index=self.Q_index)
+        mask_var = sc.array(dims=['energy'], values=mask)
+        data = self.experiment.binned_data['Q', self.Q_index][mask_var]
         model = self._create_model_array()
         return data.copy(deep=True) - model
 

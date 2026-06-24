@@ -402,8 +402,18 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         np.ndarray
             HWHM values in the unit of the model (e.g., meV).
+
+        Raises
+        ------
+        ValueError
+            If Q-variation is enabled but Q has not been set on the model yet.
         """
         if self._allow_Q_variation['lorentzian_width'] is True:
+            if not self._lorentzian_width_list:
+                raise ValueError(
+                    'Lorentzian width Q-variation list is empty. '
+                    'Set Q before calling calculate_width.'
+                )
             widths = [lorentzian_width.value for lorentzian_width in self._lorentzian_width_list]
             return np.array(widths)
 

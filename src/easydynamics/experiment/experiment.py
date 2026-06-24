@@ -265,6 +265,38 @@ class Experiment(EasyDynamicsBase):
         mask_var = sc.array(dims=['energy'], values=mask)
         return energy[mask_var]
 
+    def get_finite_energy_mask(self, Q_index: int) -> np.ndarray | None:
+        """
+        Get a boolean mask selecting energy points with finite intensity at the given Q index.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to get the mask for.
+
+        Raises
+        ------
+        IndexError
+            If Q_index is not a valid index for the Q values.
+
+        Returns
+        -------
+        np.ndarray | None
+            Boolean array of length n_energy, or None if no data is loaded.
+        """
+        if self.binned_data is None:
+            return None
+
+        if (
+            not isinstance(Q_index, int)
+            or Q_index < 0
+            or (self.Q is not None and Q_index >= len(self.Q))
+        ):
+            raise IndexError('Q_index must be a valid index for the Q values.')
+
+        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
+        return mask
+
     ###########
     # Handle data
     ###########

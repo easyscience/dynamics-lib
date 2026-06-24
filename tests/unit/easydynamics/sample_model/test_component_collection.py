@@ -5,6 +5,7 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 from scipy.integrate import simpson
 
@@ -526,3 +527,18 @@ class TestComponentCollection:
         # EXPECT
         with pytest.raises(TypeError):
             component_collection.convert_y_unit(123)
+
+    # ───── Regression tests ─────
+
+    def test_evaluate_scipp_output_multi_component_does_not_raise(self, component_collection):
+        # GIVEN: collection with two components (Gaussian + Lorentzian)
+        x = sc.Variable(dims=['energy'], values=np.linspace(-5.0, 5.0, 100), unit='meV')
+        # WHEN: evaluate with scipp output
+        # Before the fix, sum() started from int 0 → '0 + sc.Variable' raised TypeError.
+        result = component_collection.evaluate(x, output='scipp')
+        # EXPECT: returns a Variable whose values are the sum of both components
+        assert isinstance(result, sc.Variable)
+        expected = component_collection[0].evaluate(x, output='scipp') + component_collection[
+            1
+        ].evaluate(x, output='scipp')
+        assert sc.allclose(result, expected)

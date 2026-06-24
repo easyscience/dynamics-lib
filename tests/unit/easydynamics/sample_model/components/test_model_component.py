@@ -158,3 +158,23 @@ class TestModelComponent:
         assert dummy.area.value == pytest.approx(1.0)  # parameter values unchanged
         assert dummy.center.value == pytest.approx(2.0)
         assert dummy.width.value == pytest.approx(3.0)
+
+    # ───── Regression tests ─────
+
+    def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
+        # GIVEN: a Gaussian and a DataArray where the coord key ('energy') differs
+        # from the coord Variable's internal dim name ('x').  This is a valid scipp
+        # non-dimension coordinate: the data's dimension is 'x' and the coord is
+        # labelled 'energy' but lives on the same 'x' axis.
+        from easydynamics.sample_model.components.gaussian import Gaussian
+
+        g = Gaussian(name='G', area=1.0, center=0.0, width=1.0, x_unit='meV')
+        coord = sc.Variable(dims=['x'], values=np.linspace(-5.0, 5.0, 10), unit='meV')
+        data = sc.Variable(dims=['x'], values=np.ones(10))
+        da = sc.DataArray(data=data, coords={'energy': coord})
+        # WHEN: evaluate with scipp output
+        # Before the fix, dim was overwritten with coord.dims[0] = 'x', so the
+        # output Variable had dim 'x' instead of the coord key 'energy'.
+        result = g.evaluate(da, output='scipp')
+        # EXPECT: output dim must be the coord key 'energy', not the Variable dim 'x'.
+        assert result.dims == ('energy',)

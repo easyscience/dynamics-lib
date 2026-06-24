@@ -1046,3 +1046,51 @@ class TestAnalysis1d:
 
         # EXPECT
         analysis1d._create_convolver.assert_called_once()
+
+    # ───── Regression tests ─────
+
+    @pytest.fixture
+    def analysis1d_with_nan(self):
+        """analysis1d fixture whose data contains a NaN at the second energy point."""
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, float('nan'), 3.0]],
+            variances=[[0.1, 0.2, 0.3]],
+        )
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+        experiment = Experiment(data=data_array)
+        sample_model = SampleModel(components=Gaussian())
+        instrument_model = InstrumentModel()
+        return Analysis1d(
+            display_name='TestNaN',
+            experiment=experiment,
+            sample_model=sample_model,
+            instrument_model=instrument_model,
+            Q_index=0,
+        )
+
+    def test_create_residuals_array_with_nan_data_does_not_crash(self, analysis1d_with_nan):
+        # Before the fix, residuals subtracted a 2-point model from 3-point data
+        # (including NaN) which caused a dimension mismatch crash.
+        result = analysis1d_with_nan._create_residuals_array()
+        assert isinstance(result, sc.DataArray)
+        # Only the 2 finite energy points survive the mask.
+        assert result.sizes['energy'] == 2
+
+    def test_data_and_model_to_datagroup_with_nan_excludes_nan_from_data(
+        self, analysis1d_with_nan
+    ):
+        # Before the fix, 'Data' contained the full 3-point grid (including NaN)
+        # and computing Residuals crashed on the dimension mismatch.
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+        datagroup = analysis1d_with_nan.data_and_model_to_datagroup(
+            energy=energy, include_residuals=True
+        )
+        assert isinstance(datagroup, sc.DataGroup)
+        # 'Data' must contain only the 2 finite points.
+        assert datagroup['Data'].sizes['energy'] == 2
+        # Residuals must be present and have matching size.
+        assert 'Residuals' in datagroup
+        assert datagroup['Residuals'].sizes['energy'] == 2

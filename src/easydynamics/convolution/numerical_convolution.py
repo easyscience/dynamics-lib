@@ -66,7 +66,9 @@ class NumericalConvolution(NumericalConvolutionBase):
         # Detailed balance correction
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense - offset_value,
+                energy=self._energy_grid.energy_dense
+                - self._energy_grid.energy_even_length_offset
+                - offset_value,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
