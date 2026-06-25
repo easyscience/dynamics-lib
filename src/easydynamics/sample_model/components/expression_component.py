@@ -7,16 +7,16 @@ import warnings
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
+import scipp as sc
 import sympy as sp
 from easyscience.variable import Parameter
 from scipy.special import erf
 
-from easydynamics.sample_model.components.model_component import ModelComponent
-from easydynamics.utils.utils import Numeric
-
 if TYPE_CHECKING:
     import numpy as np
-    import scipp as sc
+
+from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.utils import Numeric
 
 
 class ExpressionComponent(ModelComponent):
@@ -113,9 +113,9 @@ class ExpressionComponent(ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Expression'
-            Name of the component for indexing.
+            Name used for parameter labelling and serialization.
         display_name : str | None, default=None
-            Display name for the component.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Unique name for the component.
 
@@ -253,8 +253,6 @@ class ExpressionComponent(ModelComponent):
         result = self._func(*args)
 
         if output == 'scipp':
-            import scipp as sc
-
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
         return result
 

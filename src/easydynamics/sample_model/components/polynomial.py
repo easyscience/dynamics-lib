@@ -75,9 +75,9 @@ class Polynomial(ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Polynomial'
-            Internal name used for parameter labelling.
+            Name used for parameter labelling and serialization.
         display_name : str | None, default=None
-            Human-readable name.  Falls back to *name* if None.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Globally unique identifier.  Auto-generated if None.
 
@@ -329,7 +329,7 @@ class Polynomial(ModelComponent):
     def __repr__(self) -> str:
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
         return (
-            f'Polynomial(name = {self.name}, display_name = {self.display_name}, '
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
             f'    coefficients = [{coeffs_str}])'
         )

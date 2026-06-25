@@ -22,7 +22,8 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2\gamma x)^2 \right)} $$
 
-    area has unit = x_unit * y_unit; center and width have unit = x_unit.
+    where *A* is ``area``, *x*₀ is ``center``, and *gamma* is ``width``. area has unit = x_unit *
+    y_unit; center and width have unit = x_unit.
 
     Examples
     --------
@@ -73,16 +74,17 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             Resonance frequency (x_0) in x_unit.  Must be strictly positive; a minimum of
             ``DHO_MINIMUM_CENTER`` (1e-10) is enforced.
         width : Numeric, default=1.0
-            Damping coefficient (gamma) in x_unit.  Must be strictly positive.
+            Damping coefficient (gamma) in x_unit.  Must be strictly positive. Approximately equal
+            to the HWHM of each peak.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
             y_unit.
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='DampedHarmonicOscillator'
-            Internal name used for parameter labelling.
+            Name used for parameter labelling and serialization.
         display_name : str | None, default=None
-            Human-readable name.  Falls back to *name* if None.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Globally unique identifier.  Auto-generated if None.
         """
@@ -94,6 +96,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             y_unit=y_unit,
         )
 
+        # Parameters — getters/setters are defined below
         self._area = self._create_area_parameter(
             area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
         )
@@ -209,8 +212,8 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         r"""
         Evaluate the DHO at x.
 
-        Parameters in the model's own units are temporarily converted to x's unit for the
-        computation — the model is never mutated.
+        Here *I* is the scattered intensity. Parameters in the model's own units are temporarily
+        converted to x's unit for the computation — the model is never mutated.
 
         Parameters
         ----------
@@ -234,7 +237,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         normalization = 2 * center**2 * width / np.pi
         denominator = (x_vals**2 - center**2) ** 2 + (2 * width * x_vals) ** 2
-        result = area * normalization / denominator
+        result = (
+            area * normalization / denominator
+        )  # denominator → 0 when x=0; guarded by DHO_MINIMUM_CENTER on center
 
         if output == 'scipp':
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
@@ -312,7 +317,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     def __repr__(self) -> str:
         return (
-            f'DampedHarmonicOscillator(name = {self.name}, display_name = {self.display_name}, '
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '
             f'    area = {self.area},\n '
             f'    center = {self.center},\n '

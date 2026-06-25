@@ -9,6 +9,7 @@ from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import energy_to_scipp
 
 
 class ConvolutionBase(EasyDynamicsModelBase):
@@ -24,6 +25,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         sample_components: ComponentCollection | ModelComponent | None = None,
         resolution_components: ComponentCollection | ModelComponent | None = None,
         x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         energy_offset: Numeric | Parameter = 0.0,
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
@@ -41,6 +43,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
             The resolution model to convolve with.
         x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            The unit of the model output (intensity).
         energy_offset : Numeric | Parameter, default=0.0
             The energy offset applied to the convolution.
         display_name : str | None, default='MyConvolution'
@@ -59,6 +63,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
 
         super().__init__(
             x_unit=x_unit,
+            y_unit=y_unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -70,7 +75,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise TypeError(f'Energy must be a numpy ndarray or a scipp Variable. Got {energy}')
 
         if isinstance(energy, np.ndarray):
-            energy = sc.array(dims=['energy'], values=energy, unit=x_unit)
+            energy = energy_to_scipp(energy, x_unit)
 
         if isinstance(energy_offset, Numeric):
             energy_offset = Parameter(
@@ -149,13 +154,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         sc.Variable
             The energy values with the offset applied.
         """
+        offset_value = sc.to_unit(self._energy_offset.full_value, self._energy.unit).value
         energy_with_offset = self.energy.copy()
-        offset_value = self._energy_offset.value
-        if str(self._energy_offset.unit) != str(self._energy.unit):
-            offset_value = sc.to_unit(
-                sc.scalar(offset_value, unit=str(self._energy_offset.unit)),
-                str(self._energy.unit),
-            ).value
         energy_with_offset.values = self._energy.values - offset_value
         return energy_with_offset
 
@@ -195,7 +195,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise TypeError('Energy must be a Number, a numpy ndarray or a scipp Variable.')
 
         if isinstance(energy, np.ndarray):
-            self._energy = sc.array(dims=['energy'], values=energy, unit=self._energy.unit)
+            self._energy = energy_to_scipp(energy, self._energy.unit)
 
         if isinstance(energy, sc.Variable):
             self._energy = energy
@@ -226,10 +226,10 @@ class ConvolutionBase(EasyDynamicsModelBase):
         try:
             self.energy = sc.to_unit(self.energy, unit)
             self._energy_offset.convert_unit(unit)
-            if self._sample_components is not None:
-                self._sample_components.convert_x_unit(unit)
-            if self._resolution_components is not None:
-                self._resolution_components.convert_x_unit(unit)
+            if self.sample_components is not None:
+                self.sample_components.convert_x_unit(unit)
+            if self.resolution_components is not None:
+                self.resolution_components.convert_x_unit(unit)
         except Exception:
             self.energy = old_energy
             # Roll back energy_offset if it was already converted to the new unit.
@@ -238,6 +238,28 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise
 
         self._x_unit = unit
+
+    def convert_y_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit of the sample components.
+
+        Only propagates to sample components (resolution is normalised and unit-independent).
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new y-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If unit is not a string or scipp unit.
+        """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError('y_unit must be a string or scipp unit.')
+        if self.sample_components is not None:
+            self.sample_components.convert_y_unit(unit)
+        self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
 
     @property
     def sample_components(self) -> ComponentCollection | ModelComponent:

@@ -76,16 +76,16 @@ class Exponential(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Exponential'
-            Internal name used for parameter labelling.
+            Name used for parameter labelling and serialization.
         display_name : str | None, default=None
-            Human-readable name.  Falls back to *name* if None.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Globally unique identifier.  Auto-generated if None.
 
         Raises
         ------
         TypeError
-            If *amplitude* or *rate* is not numeric or a :class:`Parameter`.
+            If *amplitude* or *rate* is not numeric.
         ValueError
             If *amplitude* or *rate* is not finite.
         """
@@ -100,25 +100,23 @@ class Exponential(CreateParametersMixin, ModelComponent):
         x_unit_str = str(x_unit) if isinstance(x_unit, sc.Unit) else x_unit
         amplitude_unit = str(sc.Unit(x_unit_str) * sc.Unit(self._y_unit))
 
-        if not isinstance(amplitude, (Parameter, Numeric)):
-            raise TypeError('amplitude must be a number or a Parameter.')
-        if isinstance(amplitude, Numeric):
-            if not np.isfinite(amplitude):
-                raise ValueError('amplitude must be a finite number or a Parameter')
-            amplitude = Parameter(
-                name=name + ' amplitude', value=float(amplitude), unit=amplitude_unit
-            )
+        if not isinstance(amplitude, Numeric):
+            raise TypeError('amplitude must be a number.')
+        if not np.isfinite(amplitude):
+            raise ValueError('amplitude must be finite.')
+        amplitude = Parameter(
+            name=name + ' amplitude', value=float(amplitude), unit=amplitude_unit
+        )
 
         center = self._create_center_parameter(
             center=center, name=name, fix_if_none=True, x_unit=self._x_unit
         )
 
-        if not isinstance(rate, (Parameter, Numeric)):
-            raise TypeError('rate must be a number or a Parameter.')
-        if isinstance(rate, Numeric):
-            if not np.isfinite(rate):
-                raise ValueError('rate must be a finite number or a Parameter')
-            rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
+        if not isinstance(rate, Numeric):
+            raise TypeError('rate must be a number.')
+        if not np.isfinite(rate):
+            raise ValueError('rate must be finite.')
+        rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
 
         self._amplitude = amplitude
         self._center = center
@@ -328,7 +326,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
     def __repr__(self) -> str:
         return (
-            f'Exponential(name = {self.name}, display_name = {self.display_name}, '
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '
             f'    amplitude = {self.amplitude},\n '
             f'    center = {self.center},\n '

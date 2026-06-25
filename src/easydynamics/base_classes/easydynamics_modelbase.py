@@ -29,7 +29,7 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         *args : object
             Positional arguments to pass to the parent class.
         x_unit : str | sc.Unit, default='meV'
-            Unit of the x-axis (energy, Q, etc.).
+            Unit of the x-axis.
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the model output (intensity).
         name : str, default='MyEasyDynamicsModel'
@@ -72,7 +72,7 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         Returns
         -------
         str | sc.Unit | None
-            The unit of the x-axis (energy, Q, etc.).
+            The unit of the x-axis.
         """
         return self._x_unit
 

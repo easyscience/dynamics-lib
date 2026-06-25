@@ -48,12 +48,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             )
 
         # Unit-convert the energy offset to match the energy grid unit.
-        offset_value = self.energy_offset.value
-        if str(self.energy_offset.unit) != str(self.energy.unit):
-            offset_value = sc.to_unit(
-                sc.scalar(offset_value, unit=str(self.energy_offset.unit)),
-                str(self.energy.unit),
-            ).value
+        offset_value = sc.to_unit(self.energy_offset.full_value, self.energy.unit).value
 
         # Evaluate sample model. If called via the Convolution class,
         # delta functions are already filtered out.

@@ -16,6 +16,35 @@ hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
 angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
 
+def verify_Q_index(Q_index: int, Q: np.ndarray | None) -> None:
+    """
+    Verify that Q_index is a valid integer index into Q.
+
+    Parameters
+    ----------
+    Q_index : int
+        Index to validate.
+    Q : np.ndarray | None
+        The Q values array (may be None if no data is loaded).
+
+    Raises
+    ------
+    TypeError
+        If Q_index is not an integer.
+    IndexError
+        If Q_index is out of range.
+    """
+    if not isinstance(Q_index, int):
+        raise TypeError('Q_index must be an integer.')
+    if Q is None or not (0 <= Q_index < len(Q)):
+        raise IndexError('Q_index must be a valid index for the Q values.')
+
+
+def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:
+    """Convert a numpy energy array to a scipp Variable with dimension 'energy'."""
+    return sc.array(dims=['energy'], values=energy, unit=unit)
+
+
 def _validate_and_convert_Q(
     Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
 ) -> np.ndarray | None:

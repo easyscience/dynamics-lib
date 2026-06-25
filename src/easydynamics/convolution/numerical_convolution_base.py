@@ -44,6 +44,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
         x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -70,6 +71,8 @@ class NumericalConvolutionBase(ConvolutionBase):
             The settings for detailed balance. If None, default settings will be used.
         x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            The unit of the model output (intensity).
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -86,6 +89,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             sample_components=sample_components,
             resolution_components=resolution_components,
             x_unit=x_unit,
+            y_unit=y_unit,
             energy_offset=energy_offset,
             display_name=display_name,
             unique_name=unique_name,

@@ -13,6 +13,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
+from easydynamics.utils.utils import verify_Q_index
 
 
 class AnalysisBase(EasyDynamicsModelBase):
@@ -503,13 +504,6 @@ class AnalysisBase(EasyDynamicsModelBase):
         Q_index : int | None
             The Q index to verify.
 
-        Raises
-        ------
-        TypeError
-            If Q_index is not an integer or None.
-        IndexError
-            If the Q index is not valid.
-
         Returns
         -------
         int | None
@@ -517,14 +511,7 @@ class AnalysisBase(EasyDynamicsModelBase):
         """
         if Q_index is None:
             return None
-
-        if not isinstance(Q_index, int):
-            raise TypeError('Q_index must be an integer or None.')
-
-        if Q_index < 0:
-            raise IndexError('Q_index must be a valid index for the Q values.')
-        if self.Q is None or Q_index >= len(self.Q):
-            raise IndexError('Q_index must be a valid index for the Q values.')
+        verify_Q_index(Q_index, self.Q)
         return Q_index
 
     def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:

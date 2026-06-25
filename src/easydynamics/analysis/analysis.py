@@ -758,7 +758,7 @@ class Analysis(AnalysisBase):
         ws = []
 
         for analysis1d in self.analysis_list:
-            x, y, weight, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+            x, y, weight, mask = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
                 analysis1d.Q_index
             )
             xs.append(x)
@@ -766,9 +766,8 @@ class Analysis(AnalysisBase):
             ws.append(weight)
 
             # Make sure the convolver is up to date for this Q index.
-            # Wrap x in a sc.Variable so refresh_convolver carries the correct unit.
-            energy_sc = sc.array(dims=['energy'], values=x, unit=self.experiment.energy.unit)
-            analysis1d.refresh_convolver(energy=energy_sc)
+            # Use the experiment's energy scipp Variable directly, masked to finite values.
+            analysis1d.refresh_convolver(energy=self.experiment.energy[mask])
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,

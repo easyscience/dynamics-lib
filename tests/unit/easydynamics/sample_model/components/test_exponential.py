@@ -68,11 +68,11 @@ class TestExponential:
         [
             (
                 {'amplitude': np.nan, 'center': 0.5, 'rate': 1.0, 'x_unit': 'meV'},
-                'amplitude must be a finite number or a Parameter',
+                'amplitude must be finite',
             ),
             (
                 {'amplitude': 2.0, 'center': 0.5, 'rate': np.nan, 'x_unit': 'meV'},
-                'rate must be a finite number or a Parameter',
+                'rate must be finite',
             ),
         ],
     )
@@ -236,20 +236,15 @@ class TestExponential:
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
 
-    @pytest.mark.parametrize(
-        'amplitude_unit, rate_unit',
-        [
-            ('meV', '1/meV'),
-        ],
-        ids=['parameter_amplitude_and_rate'],
-    )
-    def test_init_with_parameter_amplitude_and_rate(self, amplitude_unit, rate_unit):
-        # Passing Parameter objects exercises the isinstance(amplitude, Numeric) is False branch
-        amplitude_param = Parameter(name='amp', value=3.0, unit=amplitude_unit)
-        rate_param = Parameter(name='rate', value=0.5, unit=rate_unit)
-        exp = Exponential(amplitude=amplitude_param, rate=rate_param, x_unit='meV')
-        assert exp.amplitude.value == pytest.approx(3.0)
-        assert exp.rate.value == pytest.approx(0.5)
+    def test_init_rejects_parameter_amplitude(self):
+        amplitude_param = Parameter(name='amp', value=3.0, unit='meV')
+        with pytest.raises(TypeError, match='amplitude must be a number'):
+            Exponential(amplitude=amplitude_param, x_unit='meV')
+
+    def test_init_rejects_parameter_rate(self):
+        rate_param = Parameter(name='rate', value=0.5, unit='1/meV')
+        with pytest.raises(TypeError, match='rate must be a number'):
+            Exponential(rate=rate_param, x_unit='meV')
 
     def test_convert_y_unit_rollback_on_failure(self):
         exp = Exponential(amplitude=1.0, center=0.0, rate=1.0, x_unit='meV')

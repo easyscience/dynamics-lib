@@ -12,7 +12,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-EPSILON = 1e-8
+EPSILON = 1e-8  # tolerance for bin-edge comparisons
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
@@ -79,9 +79,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='DeltaFunction'
-            Internal name used for parameter labelling.
+            Name used for parameter labelling and serialization.
         display_name : str | None, default=None
-            Human-readable name.  Falls back to *name* if None.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Globally unique identifier.  Auto-generated if None.
         """
@@ -168,7 +168,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         """
-        Evaluate the Delta function at x (zero everywhere, except used in convolutions).
+        Evaluate the Delta function at x.
 
         Parameters in the model's own units are temporarily converted to x's unit for the
         computation — the model is never mutated.
@@ -183,8 +183,13 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Returns
         -------
         np.ndarray | sc.Variable
-            Evaluated delta function values at x (zero everywhere, with a single non-zero bin
-            nearest the center when center falls within the x range).
+            Zero everywhere, with a single non-zero bin nearest the center when center falls within
+            the x range.
+
+        Notes
+        -----
+        The DeltaFunction evaluates to zero everywhere when called directly.  In convolutions it
+        acts as an identity element (handled by the Convolution class).
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
         eval_unit = detected_unit or self._x_unit
@@ -285,7 +290,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
     def __repr__(self) -> str:
         return (
-            f'DeltaFunction(name = {self.name}, display_name = {self.display_name}, '
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center})'
