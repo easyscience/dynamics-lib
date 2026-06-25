@@ -225,6 +225,94 @@ class ModelComponent(EasyDynamicsModelBase):
             return param.value
         return sc.to_unit(sc.scalar(param.value, unit=str(param.unit)), target_unit).value
 
+    def _convert_x_unit_area_based(
+        self,
+        new_x_unit: str | sc.Unit,
+        x_params: list,
+        area_param: Parameter,
+    ) -> None:
+        """
+        Shared convert_x_unit logic for components with an area parameter (area = x_unit * y_unit).
+
+        Validates the input type, converts all x-axis parameters and the area parameter to the new
+        unit, and updates ``_x_unit``.  Rolls back all conversions if any step fails.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.
+        x_params : list
+            Parameters whose unit equals *x_unit* (e.g. center, width).
+        area_param : Parameter
+            The parameter whose unit equals ``x_unit * y_unit``.
+
+        Raises
+        ------
+        TypeError
+            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the conversion fails; all parameters are rolled back to their original units.
+        """
+        if not isinstance(new_x_unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+        old_x_unit = self._x_unit
+        new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
+        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self._y_unit))
+        try:
+            for p in x_params:
+                p.convert_unit(new_x_unit)
+            area_param.convert_unit(new_area_unit)
+            self._x_unit = new_x_str
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
+                for p in x_params:
+                    p.convert_unit(old_x_unit)
+                area_param.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
+
+    def _convert_y_unit_area_based(
+        self,
+        new_y_unit: str | sc.Unit,
+        area_param: Parameter,
+    ) -> None:
+        """
+        Shared convert_y_unit logic for components with an area parameter (area = x_unit * y_unit).
+
+        Validates the input type, rescales the area parameter from ``x_unit * old_y_unit`` to
+        ``x_unit * new_y_unit``, and updates ``_y_unit``.  Rolls back on failure.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        area_param : Parameter
+            The parameter whose unit equals ``x_unit * y_unit``.
+
+        Raises
+        ------
+        TypeError
+            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
+        Exception
+            If the conversion fails; the area parameter is rolled back to its original unit.
+        """
+        if not isinstance(new_y_unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
+        old_y_unit = self._y_unit
+        new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
+        try:
+            area_param.convert_unit(new_area_unit)
+            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+        except Exception as e:
+            try:
+                old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
+                area_param.convert_unit(old_area_unit)
+            except Exception:  # noqa: S110
+                pass
+            raise e
+
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
         Convert the x-axis unit of the component.

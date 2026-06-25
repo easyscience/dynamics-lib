@@ -309,20 +309,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             If the unit conversion fails.  On failure the component is rolled back to its original
             units.
         """
-        if not isinstance(new_y_unit, (str, sc.Unit)):
-            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
-        old_y_unit = self._y_unit
-        new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
-        try:
-            self._amplitude.convert_unit(new_area_unit)
-            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
-        except Exception as e:
-            try:
-                old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
-                self._amplitude.convert_unit(old_area_unit)
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        self._convert_y_unit_area_based(new_y_unit, self._amplitude)
 
     def __repr__(self) -> str:
         return (
