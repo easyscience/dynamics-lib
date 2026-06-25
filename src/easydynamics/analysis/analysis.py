@@ -765,9 +765,9 @@ class Analysis(AnalysisBase):
             ys.append(y)
             ws.append(weight)
 
-            # Make sure the convolver is up to date for this Q index.
-            # Use the experiment's energy scipp Variable directly, masked to finite values.
-            analysis1d.refresh_convolver(energy=self.experiment.energy[mask])
+            # Slice the scipp energy Variable to finite points only.
+            mask_sc = sc.array(dims=['energy'], values=mask)
+            analysis1d.refresh_convolver(energy=self.experiment.energy[mask_sc])
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,

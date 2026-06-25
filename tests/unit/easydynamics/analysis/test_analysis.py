@@ -827,6 +827,47 @@ class TestAnalysis:
         # And that the result from the fit method is returned
         assert result == fake_fit_result
 
+    def test_fit_all_Q_simultaneously_with_nan_data(self):
+        # Regression test: energy must be sliced via sc.array(dims=['energy'], values=mask),
+        # NOT via energy[numpy_bool_array].  The bug: numpy booleans are treated as integer
+        # indices by scipp (True→1, False→0), so energy[[True,False,True]] returns 3 elements
+        # with wrong values instead of filtering to the 2 finite points.
+        # GIVEN: data with a NaN at index 1; finite energies are -1.0 and 1.0
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[-1.0, 0.0, 1.0], unit='meV')
+        values = np.array([[1.0, np.nan, 2.0]])
+        variances = np.array([[0.1, 0.1, 0.1]])
+        data = sc.array(dims=['Q', 'energy'], values=values, variances=variances)
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+        experiment = Experiment(data=data_array)
+        sample_model = SampleModel(components=Gaussian(name='G'))
+        analysis = Analysis(experiment=experiment, sample_model=sample_model)
+
+        captured_energy = []
+        original_refresh = analysis.analysis_list[0].refresh_convolver
+
+        def capture_refresh(energy, **kwargs):
+            captured_energy.append(energy)
+            return original_refresh(energy=energy, **kwargs)
+
+        analysis.analysis_list[0].refresh_convolver = capture_refresh
+        analysis.get_fit_functions = MagicMock(return_value=['fit_fn'])
+
+        fake_fitter_instance = MagicMock()
+        fake_fitter_instance.fit.return_value = object()
+
+        # WHEN
+        with patch(
+            'easydynamics.analysis.analysis.MultiFitter',
+            return_value=fake_fitter_instance,
+        ):
+            analysis._fit_all_Q_simultaneously()
+
+        # EXPECT: only the 2 finite energy points (-1.0, 1.0) were passed, not all 3
+        assert len(captured_energy) == 1
+        assert len(captured_energy[0]) == 2
+        np.testing.assert_array_equal(captured_energy[0].values, [-1.0, 1.0])
+
     def test_get_fit_functions(self, analysis):
         # WHEN
 
