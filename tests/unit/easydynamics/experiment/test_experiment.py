@@ -502,8 +502,8 @@ class TestExperiment:
             experiment_with_data.data.variances[Q_index],
         )
 
-    def test_extract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
-        "Test that _extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
+    def testextract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
+        "Test that extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
         # WHEN
         Q_index = 0
         invalid_data = experiment_with_data._data.copy()
@@ -513,10 +513,10 @@ class TestExperiment:
 
         # THEN EXPECT
         with pytest.raises(ValueError, match='Cannot compute weights: some variances are zero'):
-            Experiment(data=invalid_data)._extract_x_y_weights_only_finite(Q_index=Q_index)
+            Experiment(data=invalid_data).extract_x_y_weights_only_finite(Q_index=Q_index)
 
-    def test_extract_x_y_weights_only_finite(self, experiment_with_data):
-        "Test that _extract_x_y_weights_only_finite only returns finite values"
+    def testextract_x_y_weights_only_finite(self, experiment_with_data):
+        "Test that extract_x_y_weights_only_finite only returns finite values"
         # WHEN
         Q_index = 0
         invalid_data = experiment_with_data._data.copy()
@@ -524,7 +524,7 @@ class TestExperiment:
         invalid_data.data.variances[Q_index][1] = np.nan
 
         # THEN
-        x, y, weights, mask = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+        x, y, weights, mask = Experiment(data=invalid_data).extract_x_y_weights_only_finite(
             Q_index=Q_index
         )
 
@@ -539,7 +539,7 @@ class TestExperiment:
         # Mask should indicate which values were removed
         assert np.array_equal(mask, [False, False, True])
 
-    def test_extract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
+    def testextract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
         "Test getting x y and weights when variances are None"
         # WHEN
         Q_index = 0
@@ -549,9 +549,7 @@ class TestExperiment:
         experiment_with_data.data = data
 
         # THEN
-        x, y, weights, mask = experiment_with_data._extract_x_y_weights_only_finite(
-            Q_index=Q_index
-        )
+        x, y, weights, mask = experiment_with_data.extract_x_y_weights_only_finite(Q_index=Q_index)
 
         # EXPECT
         assert np.array_equal(x, experiment_with_data.energy.values)

@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import contextlib
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import Parameter
@@ -221,6 +223,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             raise TypeError('Energy unit must be a string or scipp unit.')
 
         old_energy = self.energy.copy()
+        old_x_unit = str(self._x_unit)
         old_offset_unit = str(self._energy_offset.unit)
 
         try:
@@ -235,6 +238,13 @@ class ConvolutionBase(EasyDynamicsModelBase):
             # Roll back energy_offset if it was already converted to the new unit.
             if str(self._energy_offset.unit) != old_offset_unit:
                 self._energy_offset.convert_unit(old_offset_unit)
+            # Roll back component collections that may have been partially converted.
+            if self.sample_components is not None:
+                with contextlib.suppress(Exception):
+                    self.sample_components.convert_x_unit(old_x_unit)
+            if self.resolution_components is not None:
+                with contextlib.suppress(Exception):
+                    self.resolution_components.convert_x_unit(old_x_unit)
             raise
 
         self._x_unit = unit
@@ -254,12 +264,21 @@ class ConvolutionBase(EasyDynamicsModelBase):
         ------
         TypeError
             If unit is not a string or scipp unit.
+        Exception
+            If any component raises during unit conversion.  On failure, attempts to roll back.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError('y_unit must be a string or scipp unit.')
-        if self.sample_components is not None:
-            self.sample_components.convert_y_unit(unit)
-        self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
+        old_y_unit = self._y_unit
+        try:
+            if self.sample_components is not None:
+                self.sample_components.convert_y_unit(unit)
+            self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
+        except Exception:
+            if self.sample_components is not None:
+                with contextlib.suppress(Exception):
+                    self.sample_components.convert_y_unit(old_y_unit)
+            raise
 
     @property
     def sample_components(self) -> ComponentCollection | ModelComponent:

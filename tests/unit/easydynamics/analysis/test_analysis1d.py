@@ -150,7 +150,7 @@ class TestAnalysis1d:
         fake_weights = np.array([0.1, 0.2, 0.3])
         fake_mask = np.array([True, False, True])
 
-        analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+        analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
             return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
 
@@ -180,7 +180,7 @@ class TestAnalysis1d:
             fit_function='fit_func',
         )
 
-        analysis1d.experiment._extract_x_y_weights_only_finite.assert_called_once()
+        analysis1d.experiment.extract_x_y_weights_only_finite.assert_called_once()
 
         fake_fitter_instance.fit.assert_called_once_with(
             x=fake_x,
@@ -528,9 +528,7 @@ class TestAnalysis1d:
         energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
 
         # THEN / EXPECT
-        with pytest.raises(
-            sc.UnitError, match='Energy and energy offset must have compatible units'
-        ):
+        with pytest.raises(sc.UnitError):
             analysis1d._calculate_energy_with_offset(energy, energy_offset)
 
     #############
@@ -924,7 +922,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),
@@ -950,7 +948,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),
@@ -1034,7 +1032,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),

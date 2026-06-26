@@ -31,7 +31,7 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.
         y_unit : str | sc.Unit, default='dimensionless'
-            Unit of the model output (intensity).
+            Unit of the y-axis.
         name : str, default='MyEasyDynamicsModel'
             Name of the model.
         display_name : str | None, default=None
@@ -91,7 +91,7 @@ class EasyDynamicsModelBase(NameMixin, ModelBase):
         Returns
         -------
         str | sc.Unit | None
-            The unit of the model output (intensity).
+            The unit of the y-axis.
         """
         return self._y_unit
 

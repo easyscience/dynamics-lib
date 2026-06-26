@@ -121,6 +121,30 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     return unit
 
 
+def _assert_valid_unit(unit: str | sc.Unit) -> None:
+    """
+    Assert that the given unit is recognised by scipp.
+
+    Parameters
+    ----------
+    unit : str | sc.Unit
+        The unit to validate.
+
+    Raises
+    ------
+    TypeError
+        If unit is not a string or scipp Unit.
+    ValueError
+        If the string is not a valid scipp unit.
+    """
+    if not isinstance(unit, (str, sc.Unit)):
+        raise TypeError(f'unit must be a string or sc.Unit, got {type(unit).__name__}')
+    try:
+        sc.Unit(str(unit))
+    except sc.UnitError as e:
+        raise ValueError(f"'{unit}' is not a valid scipp unit.") from e
+
+
 def _in_notebook() -> bool:
     """
     Check if the code is running in a Jupyter notebook.

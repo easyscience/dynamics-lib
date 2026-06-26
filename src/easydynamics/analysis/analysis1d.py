@@ -188,7 +188,7 @@ class Analysis1d(AnalysisBase):
         return self._calculate(energy=energy, convolver=convolver)
 
     def _calculate(
-        self, energy: sc.Variable | None = None, convolver: object | None = None
+        self, energy: sc.Variable | None = None, convolver: Convolution | None = None
     ) -> np.ndarray:
         """
         Calculate the model prediction for the chosen Q index.
@@ -200,7 +200,7 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for calculation. If None, the energy grid from the
             experiment is used.
-        convolver : object | None, default=None
+        convolver : Convolution | None, default=None
             Optional convolver to use. If None, uses self._convolver.
 
         Returns
@@ -255,7 +255,7 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
             Q_index=self._require_Q_index()
         )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
@@ -438,10 +438,8 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
 
-        mask = self.experiment.get_finite_energy_mask(Q_index=self.Q_index)
-        mask_var = sc.array(dims=['energy'], values=mask)
         data_and_model = {
-            'Data': self.experiment.binned_data['Q', self.Q_index][mask_var],
+            'Data': self.experiment.get_masked_binned_data(Q_index=self.Q_index),
             'Model': self._create_model_array(energy=energy),
         }
 
@@ -571,32 +569,15 @@ class Analysis1d(AnalysisBase):
         energy_offset : Parameter
             The energy offset to apply.
 
-        Raises
-        ------
-        sc.UnitError
-            If the energy and energy offset have incompatible units.
-
         Returns
         -------
         sc.Variable
             The energy grid with the offset applied.
         """
 
-        offset_value = energy_offset.value
-        if energy.unit != energy_offset.unit:
-            try:
-                offset_value = sc.to_unit(
-                    sc.scalar(energy_offset.value, unit=str(energy_offset.unit)),
-                    str(energy.unit),
-                ).value
-            except Exception as e:
-                raise sc.UnitError(
-                    f'Energy and energy offset must have compatible units. '
-                    f'Got {energy.unit} and {energy_offset.unit}.'
-                ) from e
-
-        energy_with_offset = energy.copy(deep=True)
-        energy_with_offset.values -= offset_value
+        offset_value = sc.to_unit(energy_offset.full_value, energy.unit).value
+        energy_with_offset = energy.copy()
+        energy_with_offset.values = energy.values - offset_value
         return energy_with_offset
 
     #############
@@ -794,9 +775,7 @@ class Analysis1d(AnalysisBase):
         if self.Q_index is None:
             raise ValueError('Q_index must be set to calculate residuals.')
 
-        mask = self.experiment.get_finite_energy_mask(Q_index=self.Q_index)
-        mask_var = sc.array(dims=['energy'], values=mask)
-        data = self.experiment.binned_data['Q', self.Q_index][mask_var]
+        data = self.experiment.get_masked_binned_data(Q_index=self.Q_index)
         model = self._create_model_array()
         return data.copy(deep=True) - model
 

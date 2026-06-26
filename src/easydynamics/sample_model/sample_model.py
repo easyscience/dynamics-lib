@@ -407,6 +407,19 @@ class SampleModel(ModelBase):
 
     @detailed_balance_settings.setter
     def detailed_balance_settings(self, value: DetailedBalanceSettings) -> None:
+        """
+        Set the DetailedBalanceSettings of the SampleModel.
+
+        Parameters
+        ----------
+        value : DetailedBalanceSettings
+            The DetailedBalanceSettings to set.
+
+        Raises
+        ------
+        TypeError
+            If value is not a DetailedBalanceSettings.
+        """
         if not isinstance(value, DetailedBalanceSettings):
             raise TypeError('detailed_balance_settings must be a DetailedBalanceSettings')
         self._detailed_balance_settings = value
@@ -420,6 +433,21 @@ class SampleModel(ModelBase):
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
         output: str = 'numpy',
     ) -> list[np.ndarray] | list[sc.Variable]:
+        """
+        Evaluate the sample model at all Q for the given x values.
+
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            The x values to evaluate the model at.
+        output : str, default='numpy'
+            'numpy' returns list of np.ndarray; 'scipp' returns list of sc.Variable.
+
+        Returns
+        -------
+        list[np.ndarray] | list[sc.Variable]
+            List of evaluated model values for each Q.
+        """
         y = super().evaluate(x, output=output)
 
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
@@ -434,6 +462,23 @@ class SampleModel(ModelBase):
         return y
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all Parameters and Descriptors from all ComponentCollections in the SampleModel.
+
+        Also includes temperature if set and all variables from diffusion models. Ignores the
+        Parameters and Descriptors in self._components as these are just templates.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            If specified, only get variables from the ComponentCollection at the given Q index. If
+            None, get variables from all ComponentCollections.
+
+        Returns
+        -------
+        list[Parameter]
+            All Parameters and Descriptors in the SampleModel.
+        """
         all_vars = super().get_all_variables(Q_index=Q_index)
         if self.temperature is not None:
             all_vars.append(self.temperature)
@@ -449,10 +494,15 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def _generate_component_collections(self) -> None:
+        """
+        Generate ComponentCollections from the DiffusionModels for each Q and add the components
+        from self._components.
+        """
         super()._generate_component_collections()
 
         if self.Q is None:
             return
+        # Generate components from diffusion models and add to component collections
         for diffusion_model in self.diffusion_models:
             diffusion_collections = diffusion_model.get_component_collections()
             for target, source in zip(
@@ -464,11 +514,13 @@ class SampleModel(ModelBase):
                     target.append_component(component)
 
     def _on_diffusion_models_change(self) -> None:
+        """Handle changes to the diffusion models."""
         for diffusion_model in self.diffusion_models:
             diffusion_model.Q = self.Q
         self._component_collections_is_dirty = True
 
     def _on_Q_change(self) -> None:
+        """Handle changes to the Q values."""
         for diffusion_model in self.diffusion_models:
             diffusion_model.clear_Q(confirm=True)
             diffusion_model.Q = self.Q
@@ -479,6 +531,14 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the SampleModel.
+
+        Returns
+        -------
+        str
+            A string representation of the SampleModel.
+        """
         return (
             f'{self.__class__.__name__}(unique_name={self.unique_name}, x_unit={self.x_unit}), '
             f'Q = {self.Q}, \n '

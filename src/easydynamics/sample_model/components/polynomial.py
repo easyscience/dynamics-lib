@@ -75,7 +75,7 @@ class Polynomial(ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Polynomial'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None

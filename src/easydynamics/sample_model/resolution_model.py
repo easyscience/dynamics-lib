@@ -87,7 +87,18 @@ class ResolutionModel(ModelBase):
         """
         Append a component to the ResolutionModel.
 
-        Does not allow DeltaFunction, Polynomial, or Exponential components.
+        Does not allow DeltaFunction, Polynomial, or Exponential components, as these are not
+        physical resolution components.
+
+        Parameters
+        ----------
+        component : ModelComponent | ComponentCollection
+            Component(s) to append.
+
+        Raises
+        ------
+        TypeError
+            If the component is a DeltaFunction, Polynomial, or Exponential.
         """
         components = component if isinstance(component, ComponentCollection) else (component,)
 
@@ -106,7 +117,29 @@ class ResolutionModel(ModelBase):
         normalize_area: bool = True,
         fix_parameters: bool = True,
     ) -> 'ResolutionModel':
-        """Create a ResolutionModel from a SampleModel."""
+        """
+        Create a ResolutionModel from a SampleModel.
+
+        Parameters
+        ----------
+        sample_model : SampleModel
+            SampleModel to create the ResolutionModel from.
+        normalize_area : bool, default=True
+            Whether to normalize the components in the ResolutionModel to have area 1.
+        fix_parameters : bool, default=True
+            Whether to fix the parameters in the ResolutionModel.
+
+        Returns
+        -------
+        'ResolutionModel'
+            ResolutionModel created from the SampleModel.
+
+        Raises
+        ------
+        TypeError
+            If sample_model is not a SampleModel, or if normalize_area or fix_parameters are not
+            bool.
+        """
         if not isinstance(sample_model, SampleModel):
             raise TypeError(
                 f'sample_model must be an instance of SampleModel. Got {type(sample_model)}.'
@@ -154,6 +187,7 @@ class ResolutionModel(ModelBase):
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
             f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'components={self.components})'
         )

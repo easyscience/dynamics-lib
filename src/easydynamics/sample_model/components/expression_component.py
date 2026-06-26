@@ -58,10 +58,12 @@ class ExpressionComponent(ModelComponent):
     """
 
     _ALLOWED_FUNCS: ClassVar[dict[str, object]] = {
+        # exponential / logarithmic
         'exp': sp.exp,
         'log': sp.log,
         'ln': sp.log,
         'sqrt': sp.sqrt,
+        # trigonometric
         'sin': sp.sin,
         'cos': sp.cos,
         'tan': sp.tan,
@@ -69,16 +71,20 @@ class ExpressionComponent(ModelComponent):
         'cot': sp.cot,
         'sec': sp.sec,
         'csc': sp.csc,
+        # inverse trigonometric
         'asin': sp.asin,
         'acos': sp.acos,
         'atan': sp.atan,
+        # hyperbolic
         'sinh': sp.sinh,
         'cosh': sp.cosh,
         'tanh': sp.tanh,
+        # rounding / sign
         'abs': sp.Abs,
         'sign': sp.sign,
         'floor': sp.floor,
         'ceil': sp.ceiling,
+        # special functions
         'erf': sp.erf,
     }
 
@@ -113,7 +119,7 @@ class ExpressionComponent(ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Expression'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
@@ -231,6 +237,18 @@ class ExpressionComponent(ModelComponent):
 
         Unit conversion of parameters is not supported for ExpressionComponent. If x has a
         different unit than x_unit, a warning is issued and x values are used as-is.
+
+        Parameters
+        ----------
+        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Input values for the independent variable.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+
+        Returns
+        -------
+        np.ndarray | sc.Variable
+            Evaluated results.
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
 
@@ -257,12 +275,52 @@ class ExpressionComponent(ModelComponent):
         return result
 
     def get_all_variables(self) -> list[Parameter]:
+        """
+        Return all parameters.
+
+        Returns
+        -------
+        list[Parameter]
+            List of all parameters in the expression.
+        """
         return list(self._parameters.values())
 
     def convert_x_unit(self, _new_unit: str | sc.Unit) -> None:
+        """
+        Convert the x-axis unit of the expression.
+
+        Unit conversion is not implemented for ExpressionComponent.
+
+        Parameters
+        ----------
+        _new_unit : str | sc.Unit
+            The new unit to convert to (ignored).
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised to indicate unit conversion is not supported.
+        """
+        # TODO: Generalize x_unit conversion for ExpressionComponent. Not tackled in this PR.  # noqa: FIX002 TD002 TD003
         raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
     def convert_y_unit(self, _new_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit of the expression.
+
+        Unit conversion is not implemented for ExpressionComponent.
+
+        Parameters
+        ----------
+        _new_unit : str | sc.Unit
+            The new unit to convert to (ignored).
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised to indicate unit conversion is not supported.
+        """
+        # TODO: Generalize y_unit conversion for ExpressionComponent. Not tackled in this PR.  # noqa: FIX002 TD002 TD003
         raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
     def __getattr__(self, name: str) -> Parameter:
@@ -283,6 +341,14 @@ class ExpressionComponent(ModelComponent):
         return super().__dir__() + list(self._parameters.keys())
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the ExpressionComponent.
+
+        Returns
+        -------
+        str
+            String representation of the ExpressionComponent.
+        """
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
             f'ExpressionComponent(name={self.name}, display_name={self.display_name}, '

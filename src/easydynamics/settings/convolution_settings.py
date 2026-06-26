@@ -249,6 +249,14 @@ class ConvolutionSettings(EasyDynamicsBase):
         self._suppress_warnings = suppress
 
     def __copy__(self) -> 'ConvolutionSettings':
+        """
+        Return a shallow copy of the ConvolutionSettings.
+
+        Returns
+        -------
+        'ConvolutionSettings'
+            A new ConvolutionSettings instance with the same parameter values.
+        """
         return ConvolutionSettings(
             upsample_factor=self._upsample_factor,
             extension_factor=self._extension_factor,

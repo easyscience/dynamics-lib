@@ -22,8 +22,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     """
     Delta function.
 
-    Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is
-    handled by the Convolution method. area has unit = x_unit * y_unit; center has unit = x_unit.
+    When called directly, returns zero everywhere except at the bin nearest to ``center``, where it
+    returns ``area / bin_width``. In convolutions it acts as an identity element (handled by the
+    ``Convolution`` class). area has unit = x_unit * y_unit; center has unit = x_unit.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
@@ -79,9 +80,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='DeltaFunction'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
-            Display name shown when plotting.  Falls back to *name* if None.
+            Display name of the component, shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
             Globally unique identifier.  Auto-generated if None.
         """
@@ -188,8 +189,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
 
         Notes
         -----
-        The DeltaFunction evaluates to zero everywhere when called directly.  In convolutions it
-        acts as an identity element (handled by the Convolution class).
+        When ``center`` falls within the x range, the bin nearest to ``center`` receives ``area /
+        bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an identity
+        element (handled by the Convolution class).
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
         eval_unit = detected_unit or self._x_unit
@@ -201,18 +203,22 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         model = np.zeros_like(x_vals, dtype=float)
 
         if x_vals.min() - EPSILON <= center <= x_vals.max() + EPSILON:
+            # nearest index
             i = np.argmin(np.abs(x_vals - center))
 
+            # left half-width
             if i == 0:
                 left = x_vals[1] - x_vals[0] if x_vals.size > 1 else 0.5
             else:
                 left = x_vals[i] - x_vals[i - 1]
 
+            # right half-width
             if i == x_vals.size - 1:
                 right = x_vals[-1] - x_vals[-2] if x_vals.size > 1 else 0.5
             else:
                 right = x_vals[i + 1] - x_vals[i]
 
+            # effective bin width: half left + half right
             bin_width = 0.5 * (left + right)
             model[i] = area / bin_width
 
@@ -228,16 +234,12 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         ----------
         new_x_unit : str | sc.Unit
             Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_x_unit_area_based(new_x_unit, [self._center], self._area)
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center],
+            area_param=self._area,
+        )
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """
@@ -249,18 +251,18 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_y_unit_area_based(new_y_unit, self._area)
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the Delta function.
+
+        Returns
+        -------
+        str
+            A string representation of the Delta function.
+        """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'

@@ -86,7 +86,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Voigt'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
@@ -284,19 +284,11 @@ class Voigt(CreateParametersMixin, ModelComponent):
         ----------
         new_x_unit : str | sc.Unit
             Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
         self._convert_x_unit_area_based(
-            new_x_unit,
-            [self._center, self._gaussian_width, self._lorentzian_width],
-            self._area,
+            new_x_unit=new_x_unit,
+            x_params=[self._center, self._gaussian_width, self._lorentzian_width],
+            area_param=self._area,
         )
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
@@ -309,18 +301,18 @@ class Voigt(CreateParametersMixin, ModelComponent):
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_y_unit_area_based(new_y_unit, self._area)
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the Voigt.
+
+        Returns
+        -------
+        str
+            A string representation of the Voigt.
+        """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'

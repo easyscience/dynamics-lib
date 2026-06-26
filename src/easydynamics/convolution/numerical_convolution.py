@@ -48,6 +48,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             )
 
         # Unit-convert the energy offset to match the energy grid unit.
+        # sc.to_unit returns a new scalar — self.energy_offset is never mutated.
         offset_value = sc.to_unit(self.energy_offset.full_value, self.energy.unit).value
 
         # Evaluate sample model. If called via the Convolution class,
@@ -97,6 +98,7 @@ class NumericalConvolution(NumericalConvolutionBase):
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
             f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'energy_len={len(self.energy)}, '
             f'temperature={self.temperature})'
         )

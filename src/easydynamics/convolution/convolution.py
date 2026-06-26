@@ -307,6 +307,8 @@ class Convolution(NumericalConvolutionBase):
                 energy_offset=self.energy_offset,
                 sample_components=self._analytical_sample_components,
                 resolution_components=self._resolution_components,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
         else:
             self._analytical_convolver = None
@@ -322,9 +324,25 @@ class Convolution(NumericalConvolutionBase):
                 temperature_unit=self._temperature_unit,
                 detailed_balance_settings=self.detailed_balance_settings,
                 x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
         else:
             self._numerical_convolver = None
+
+    def convert_y_unit(self, unit: str) -> None:
+        """
+        Convert the y-axis unit and propagate it to the analytical and numerical sub-convolvers.
+
+        Parameters
+        ----------
+        unit : str
+            The new y-axis unit.
+        """
+        super().convert_y_unit(unit)
+        if getattr(self, '_analytical_convolver', None) is not None:
+            self._analytical_convolver._y_unit = self._y_unit  # noqa: SLF001
+        if getattr(self, '_numerical_convolver', None) is not None:
+            self._numerical_convolver._y_unit = self._y_unit  # noqa: SLF001
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:
@@ -355,6 +373,7 @@ class Convolution(NumericalConvolutionBase):
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
             f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'energy_len={len(self.energy)}, '
             f'temperature={self.temperature})'
         )

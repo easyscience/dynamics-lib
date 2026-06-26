@@ -10,6 +10,7 @@ from easyscience.variable import Parameter
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import _assert_valid_unit
 
 
 class Exponential(CreateParametersMixin, ModelComponent):
@@ -76,7 +77,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='Exponential'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
@@ -264,14 +265,11 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         Raises
         ------
-        TypeError
-            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
         Exception
             If the unit conversion fails.  On failure the component is rolled back to its original
             units.
         """
-        if not isinstance(new_x_unit, (str, sc.Unit)):
-            raise TypeError('x_unit must be a string or sc.Unit')
+        _assert_valid_unit(new_x_unit)
         old_x_unit = self._x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self._y_unit))
@@ -300,18 +298,18 @@ class Exponential(CreateParametersMixin, ModelComponent):
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_y_unit_area_based(new_y_unit, self._amplitude)
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._amplitude)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the Exponential.
+
+        Returns
+        -------
+        str
+            A string representation of the Exponential.
+        """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '

@@ -757,17 +757,17 @@ class Analysis(AnalysisBase):
         ys = []
         ws = []
 
+        # TODO: consider using scipp built-in masking instead of numpy boolean masks,  # noqa: FIX002 TD002 TD003
+        # once the EasyScience fitter accepts scipp Variables directly.
         for analysis1d in self.analysis_list:
-            x, y, weight, mask = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
-                analysis1d.Q_index
-            )
+            x, y, weight, _ = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
             xs.append(x)
             ys.append(y)
             ws.append(weight)
 
-            # Slice the scipp energy Variable to finite points only.
-            mask_sc = sc.array(dims=['energy'], values=mask)
-            analysis1d.refresh_convolver(energy=self.experiment.energy[mask_sc])
+            analysis1d.refresh_convolver(
+                energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index)
+            )
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,

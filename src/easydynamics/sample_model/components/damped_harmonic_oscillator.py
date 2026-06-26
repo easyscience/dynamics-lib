@@ -82,7 +82,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
         name : str, default='DampedHarmonicOscillator'
-            Name used for parameter labelling and serialization.
+            Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
@@ -96,7 +96,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             y_unit=y_unit,
         )
 
-        # Parameters — getters/setters are defined below
+        # These methods live in CreateParametersMixin
         self._area = self._create_area_parameter(
             area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
         )
@@ -212,8 +212,12 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         r"""
         Evaluate the DHO at x.
 
-        Here *I* is the scattered intensity. Parameters in the model's own units are temporarily
-        converted to x's unit for the computation — the model is never mutated.
+        $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2\gamma x)^2 \right)} $$
+
+        where *A* is ``area``, *x*₀ is ``center`` (resonance frequency), and *gamma* is ``width``
+        (damping coefficient). Here *I* is the scattered intensity. Parameters in the model's own
+        units are temporarily converted to x's unit for the computation — the model is never
+        mutated.
 
         Parameters
         ----------
@@ -237,9 +241,8 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
         normalization = 2 * center**2 * width / np.pi
         denominator = (x_vals**2 - center**2) ** 2 + (2 * width * x_vals) ** 2
-        result = (
-            area * normalization / denominator
-        )  # denominator → 0 when x=0; guarded by DHO_MINIMUM_CENTER on center
+        # denominator cannot reach zero: center > 0 enforced by DHO_MINIMUM_CENTER
+        result = area * normalization / denominator
 
         if output == 'scipp':
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
@@ -253,16 +256,12 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         ----------
         new_x_unit : str | sc.Unit
             Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_x_unit_area_based(new_x_unit, [self._center, self._width], self._area)
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center, self._width],
+            area_param=self._area,
+        )
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """
@@ -274,18 +273,18 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
-
-        Raises
-        ------
-        TypeError
-            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        self._convert_y_unit_area_based(new_y_unit, self._area)
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the Damped Harmonic Oscillator.
+
+        Returns
+        -------
+        str
+            A string representation of the Damped Harmonic Oscillator.
+        """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
             f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '

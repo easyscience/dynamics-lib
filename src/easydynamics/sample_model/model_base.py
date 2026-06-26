@@ -465,6 +465,10 @@ class ModelBase(EasyDynamicsModelBase):
             A string representation of the ModelBase.
         """
         return (
-            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
-            f'x_unit={self.x_unit}), Q = {self.Q}, components = {self.components}'
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
+            f'Q={self.Q}, '
+            f'components={self.components})'
         )

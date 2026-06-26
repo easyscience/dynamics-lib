@@ -425,11 +425,13 @@ class InstrumentModel(NewBase):
             self._energy_offsets[Q_index].fixed = fixed
 
     def _ensure_energy_offsets_current(self) -> None:
+        """Rebuild energy offset Parameters if Q has changed since they were last built."""
         if self._energy_offsets_is_dirty:
             self._generate_energy_offsets()
             self._energy_offsets_is_dirty = False
 
     def _generate_energy_offsets(self) -> None:
+        """Generate energy offset Parameters for each Q value."""
         if self._Q is None:
             self._energy_offsets = []
             return
@@ -437,19 +439,23 @@ class InstrumentModel(NewBase):
         self._energy_offsets = [copy(self._energy_offset) for _ in self._Q]
 
     def _on_Q_change(self) -> None:
+        """Handle changes to the Q values."""
         self._energy_offsets_is_dirty = True
         self.resolution_model.Q = self.Q
         self.background_model.Q = self.Q
 
     def _on_energy_offset_change(self) -> None:
+        """Handle changes to the energy offset."""
         self._ensure_energy_offsets_current()
         for offset in self._energy_offsets:
             offset.value = self._energy_offset.value
 
     def _on_resolution_model_change(self) -> None:
+        """Handle changes to the resolution model."""
         self.resolution_model.Q = self.Q
 
     def _on_background_model_change(self) -> None:
+        """Handle changes to the background model."""
         self.background_model.Q = self.Q
 
     # -------------------------------------------------------------
@@ -457,6 +463,14 @@ class InstrumentModel(NewBase):
     # -------------------------------------------------------------
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the InstrumentModel.
+
+        Returns
+        -------
+        str
+            A string representation of the InstrumentModel.
+        """
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '

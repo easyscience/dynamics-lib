@@ -411,8 +411,8 @@ class TestModelBase:
         # THEN / EXPECT
         assert 'unique_name' in repr_str
         assert 'unit' in repr_str
-        assert 'Q = ' in repr_str
-        assert 'components = ' in repr_str
+        assert 'Q=' in repr_str
+        assert 'components=' in repr_str
 
     def test_y_unit_default(self, model_base):
         # EXPECT

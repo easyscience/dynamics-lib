@@ -251,14 +251,12 @@ class Experiment(EasyDynamicsBase):
         verify_Q_index(Q_index, self.Q)
 
         energy = self.binned_data.coords['energy']
-        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
-
-        mask_var = sc.array(dims=['energy'], values=mask)
+        mask_var = self.get_finite_energy_mask(Q_index=Q_index)
         return energy[mask_var]
 
-    def get_finite_energy_mask(self, Q_index: int) -> np.ndarray | None:
+    def get_finite_energy_mask(self, Q_index: int) -> sc.Variable | None:
         """
-        Get a boolean mask selecting energy points with finite intensity at the given Q index.
+        Get a boolean scipp Variable selecting energy points with finite intensity at the given Q.
 
         Parameters
         ----------
@@ -267,16 +265,40 @@ class Experiment(EasyDynamicsBase):
 
         Returns
         -------
-        np.ndarray | None
-            Boolean array of length n_energy, or None if no data is loaded.
+        sc.Variable | None
+            Boolean scipp Variable of length n_energy with dim ``'energy'``, or None if no data is
+            loaded.
         """
         if self.binned_data is None:
             return None
 
         verify_Q_index(Q_index, self.Q)
 
-        _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)
-        return mask
+        _, _, _, mask = self.extract_x_y_weights_only_finite(Q_index=Q_index)
+        return sc.array(dims=['energy'], values=mask)
+
+    def get_masked_binned_data(self, Q_index: int) -> sc.DataArray | None:
+        """
+        Get the binned data for a single Q slice with non-finite points masked out.
+
+        Parameters
+        ----------
+        Q_index : int
+            The Q index to extract.
+
+        Returns
+        -------
+        sc.DataArray | None
+            The binned data for the given Q index with NaN/Inf points removed, or None if no data
+            is loaded.
+        """
+        if self.binned_data is None:
+            return None
+
+        verify_Q_index(Q_index, self.Q)
+
+        mask_var = self.get_finite_energy_mask(Q_index=Q_index)
+        return self.binned_data['Q', Q_index][mask_var]
 
     ###########
     # Handle data
@@ -559,7 +581,7 @@ class Experiment(EasyDynamicsBase):
         var = data.variances
         return x, y, var
 
-    def _extract_x_y_weights_only_finite(
+    def extract_x_y_weights_only_finite(
         self, Q_index: int
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
