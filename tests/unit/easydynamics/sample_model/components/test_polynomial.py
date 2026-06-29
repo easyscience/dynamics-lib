@@ -29,6 +29,7 @@ class TestPolynomial:
         assert polynomial.display_name == 'Polynomial'
         assert polynomial.coefficients[0].value == pytest.approx(0.0)
         assert polynomial.x_unit == 'meV'
+        assert polynomial.y_unit == 'dimensionless'
 
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
@@ -50,6 +51,10 @@ class TestPolynomial:
             ),
             (
                 {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 123},
+                'unit must be ',
+            ),
+            (
+                {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
             ),
             (
@@ -163,7 +168,7 @@ class TestPolynomial:
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
 
-    def test_convert_unit(self, polynomial: Polynomial):
+    def test_convert_x_unit(self, polynomial: Polynomial):
         # WHEN
         polynomial.convert_x_unit('microeV')
 
@@ -173,7 +178,7 @@ class TestPolynomial:
         assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
         assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
-    def test_convert_unit_raises_invalid_unit(self, polynomial: Polynomial):
+    def test_convert_x_unit_raises_invalid_unit(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         with pytest.raises(Exception, match='unit must be '):
             polynomial.convert_x_unit(123)
@@ -193,6 +198,17 @@ class TestPolynomial:
         ):
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed
+
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert p.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            polynomial.y_unit = '1/meV'
 
     def test_convert_y_unit_scales_all_coefficients(self):
         # WHEN: polynomial with two non-zero coefficients and a physical y_unit
@@ -219,6 +235,17 @@ class TestPolynomial:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 40
+        np.testing.assert_allclose(result.values, p.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-3, 3, 40)
+        # THEN
+        result = p.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
 
     def test_repr(self, polynomial: Polynomial):
         # WHEN THEN
@@ -242,3 +269,14 @@ class TestPolynomial:
         # WHEN THEN EXPECT
         with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):
             polynomial.convert_y_unit(123)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+        # THEN
+        with pytest.raises(UnitError):
+            p.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert p.y_unit == 'dimensionless'
+        assert np.isclose(p.coefficients[0].value, 1.0)
+        assert np.isclose(p.coefficients[1].value, 2.0)

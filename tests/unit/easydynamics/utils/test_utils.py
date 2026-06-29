@@ -87,16 +87,20 @@ class TestValidateUnit:
         ],
     )
     def test_validate_unit_valid(self, unit_input):
+        # WHEN
         unit = _validate_unit(unit_input)
 
+        # EXPECT
         if unit_input is None:
             assert unit is None
         else:
             assert isinstance(unit, str)
 
     def test_validate_unit_string_conversion(self):
+        # WHEN
         unit = _validate_unit(sc.Unit('meV'))
 
+        # THEN EXPECT
         assert isinstance(unit, str)
         assert unit == 'meV'
 
@@ -111,6 +115,7 @@ class TestValidateUnit:
         ],
     )
     def test_validate_unit_invalid_type(self, unit_input):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='unit must be None, a string, or a scipp Unit'):
             _validate_unit(unit_input)
 

@@ -160,19 +160,19 @@ class TestComponentCollection:
         assert components[0] == 'TestGaussian1Name'
         assert components[1] == 'TestLorentzian1Name'
 
-    def test_convert_unit(self, component_collection):
+    def test_convert_x_unit(self, component_collection):
         # WHEN THEN
         component_collection.convert_x_unit('eV')
         # EXPECT
         for component in component_collection:
             assert component.x_unit == 'eV'
 
-    def test_convert_unit_incorrect_unit_raises(self, component_collection):
+    def test_convert_x_unit_incorrect_unit_raises(self, component_collection):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
             component_collection.convert_x_unit(123)
 
-    def test_convert_unit_failure_rolls_back(self, component_collection):
+    def test_convert_x_unit_failure_rolls_back(self, component_collection):
         # WHEN THEN
         # Introduce a faulty component that will fail conversion
         class FaultyComponent(Gaussian):
@@ -194,7 +194,7 @@ class TestComponentCollection:
         for component in component_collection:
             assert component.x_unit == original_units[component.name]
 
-    def test_set_unit(self, component_collection):
+    def test_set_x_unit(self, component_collection):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
@@ -205,23 +205,29 @@ class TestComponentCollection:
     def test_evaluate(self, component_collection):
         # WHEN
         x = np.linspace(-5, 5, 100)
+
+        # THEN
         result = component_collection.evaluate(x)
         # EXPECT
         expected_result = component_collection[0].evaluate(x) + component_collection[1].evaluate(x)
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
     def test_evaluate_no_components_returns_zero(self):
-        # WHEN THEN
+        # WHEN
         component_collection = ComponentCollection(display_name='EmptyModel')
         x = np.linspace(-5, 5, 100)
-        # EXPECT
+        # THEN
         result = component_collection.evaluate(x)
+
+        # EXPECT
         assert np.all(result == pytest.approx(0.0))
         assert result.shape == x.shape
 
     def test_evaluate_component(self, component_collection):
-        # WHEN  THEN
+        # WHEN
         x = np.linspace(-5, 5, 100)
+
+        # THEN
         result1 = component_collection.evaluate_component(x, 'TestGaussian1Name')
         result2 = component_collection.evaluate_component(x, 'TestLorentzian1Name')
 
@@ -470,6 +476,7 @@ class TestComponentCollection:
             assert type(copied_comp) is type(orig_comp)
             assert copied_comp.display_name == orig_comp.display_name
             assert copied_comp.x_unit == orig_comp.x_unit
+            assert copied_comp.y_unit == orig_comp.y_unit
 
             # Parameters are deep-copied and equivalent
             orig_params = orig_comp.get_all_parameters()

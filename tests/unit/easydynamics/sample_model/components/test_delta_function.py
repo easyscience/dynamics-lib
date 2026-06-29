@@ -32,6 +32,7 @@ class TestDeltaFunction:
         assert delta_function.area.value == pytest.approx(1.0)
         assert delta_function.center.value == pytest.approx(0.0)
         assert delta_function.x_unit == 'meV'
+        assert delta_function.y_unit == 'dimensionless'
         assert delta_function.center.fixed is True
 
     def test_initialization(self, delta_function: DeltaFunction):
@@ -54,6 +55,10 @@ class TestDeltaFunction:
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'x_unit': 123},
+                'unit must be ',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
             ),
         ],
@@ -191,7 +196,7 @@ class TestDeltaFunction:
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
 
-    def test_convert_unit(self, delta_function: DeltaFunction):
+    def test_convert_x_unit(self, delta_function: DeltaFunction):
         # WHEN THEN
         delta_function.convert_x_unit('microeV')
 
@@ -227,9 +232,16 @@ class TestDeltaFunction:
         assert 'area =' in repr_str
         assert 'center =' in repr_str
 
-    def test_y_unit_default(self, delta_function: DeltaFunction):
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert delta.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, delta_function: DeltaFunction):
         # WHEN THEN EXPECT
-        assert delta_function.y_unit == 'dimensionless'
+        with pytest.raises(AttributeError):
+            delta_function.y_unit = '1/meV'
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
@@ -254,6 +266,17 @@ class TestDeltaFunction:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, delta_function.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = delta.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
 
     @pytest.mark.parametrize(
         'x, center, expected_idx',

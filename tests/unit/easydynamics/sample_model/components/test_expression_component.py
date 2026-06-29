@@ -132,7 +132,7 @@ class TestExpressionComponent:
         with pytest.raises(AttributeError, match='cannot be changed'):
             expr.expression = 'x'
 
-    def test_convert_unit_not_implemented(self, expr: ExpressionComponent):
+    def test_convert_x_unit_not_implemented(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
         with pytest.raises(NotImplementedError, match='not implemented'):
             expr.convert_x_unit('microeV')
@@ -151,6 +151,7 @@ class TestExpressionComponent:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 30
+        np.testing.assert_allclose(result.values, expr.evaluate(x, output='numpy'))
 
     def test_missing_parameter_defaults(self):
         # WHEN THEN

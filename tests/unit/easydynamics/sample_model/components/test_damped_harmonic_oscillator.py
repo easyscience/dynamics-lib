@@ -35,6 +35,7 @@ class TestDampedHarmonicOscillator:
         assert dho.center.value == pytest.approx(1.0)
         assert dho.width.value == pytest.approx(1.0)
         assert dho.x_unit == 'meV'
+        assert dho.y_unit == 'dimensionless'
 
     def test_initialization(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
@@ -61,6 +62,10 @@ class TestDampedHarmonicOscillator:
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
+                'unit must be None, a string',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be None, a string',
             ),
         ],
@@ -110,9 +115,11 @@ class TestDampedHarmonicOscillator:
         invalid_value,
         invalid_message,
     ):
-        # WHEN: set a valid value
+        # WHEN
+
+        # THEN : set a valid value
         setattr(dho, prop, valid_value)
-        # THEN EXPECT
+        # EXPECT
         assert getattr(dho, prop).value == valid_value
 
         # WHEN: set an invalid value — THEN EXPECT
@@ -170,7 +177,7 @@ class TestDampedHarmonicOscillator:
         # EXPECT
         assert numerical_area == pytest.approx(dho.area.value, rel=2e-3)
 
-    def test_convert_unit(self, dho: DampedHarmonicOscillator):
+    def test_convert_x_unit(self, dho: DampedHarmonicOscillator):
         # WHEN THEN
         dho.convert_x_unit('microeV')
 
@@ -211,9 +218,18 @@ class TestDampedHarmonicOscillator:
         assert 'center =' in repr_str
         assert 'width =' in repr_str
 
-    def test_y_unit_default(self, dho: DampedHarmonicOscillator):
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        dho = DampedHarmonicOscillator(
+            area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
+        )
+        # EXPECT
+        assert dho.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT
-        assert dho.y_unit == 'dimensionless'
+        with pytest.raises(AttributeError):
+            dho.y_unit = '1/meV'
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
@@ -240,6 +256,19 @@ class TestDampedHarmonicOscillator:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, dho.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        dho = DampedHarmonicOscillator(
+            area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
+        )
+        x = np.linspace(0.5, 5.0, 50)
+        # THEN
+        result = dho.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
 
     def test_convert_x_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
         # WHEN THEN EXPECT

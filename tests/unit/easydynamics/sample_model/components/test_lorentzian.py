@@ -35,6 +35,7 @@ class TestLorentzian:
         assert lorentzian.center.value == pytest.approx(0.0)
         assert lorentzian.width.value == pytest.approx(1.0)
         assert lorentzian.x_unit == 'meV'
+        assert lorentzian.y_unit == 'dimensionless'
         assert lorentzian.center.fixed is True
 
     def test_initialization(self, lorentzian: Lorentzian):
@@ -62,6 +63,10 @@ class TestLorentzian:
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
+                'unit must be None, a string',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be None, a string',
             ),
         ],
@@ -169,7 +174,7 @@ class TestLorentzian:
         # EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
-    def test_convert_unit(self, lorentzian: Lorentzian):
+    def test_convert_x_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
         lorentzian.convert_x_unit('microeV')
 
@@ -210,9 +215,16 @@ class TestLorentzian:
         assert 'center =' in repr_str
         assert 'width =' in repr_str
 
-    def test_y_unit_default(self, lorentzian: Lorentzian):
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert lor.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT
-        assert lorentzian.y_unit == 'dimensionless'
+        with pytest.raises(AttributeError):
+            lorentzian.y_unit = '1/meV'
 
     def test_convert_y_unit(self):
         # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
@@ -237,6 +249,17 @@ class TestLorentzian:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, lorentzian.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = lor.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
 
     def test_convert_x_unit_invalid_type_raises(self, lorentzian: Lorentzian):
         # WHEN THEN EXPECT

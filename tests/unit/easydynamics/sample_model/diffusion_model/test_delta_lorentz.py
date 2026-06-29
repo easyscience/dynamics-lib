@@ -39,10 +39,16 @@ class TestDeltaLorentz:
         # WHEN THEN EXPECT
         assert delta_lorentz_model.display_name == 'DeltaLorentz'
         assert delta_lorentz_model.x_unit == 'meV'
+        assert delta_lorentz_model.y_unit == 'dimensionless'
         assert delta_lorentz_model.scale.value == pytest.approx(1.0)
         assert delta_lorentz_model.mean_u_squared.value == pytest.approx(0.0)
         assert delta_lorentz_model.A_0.value == pytest.approx(1.0)
         assert delta_lorentz_model.lorentzian_width.value == pytest.approx(1.0)
+
+    def test_y_unit_setter_raises(self, delta_lorentz_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            delta_lorentz_model.y_unit = '1/meV'
 
     def test_init_with_Q(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT

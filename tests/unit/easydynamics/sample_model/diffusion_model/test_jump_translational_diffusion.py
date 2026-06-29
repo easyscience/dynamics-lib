@@ -261,6 +261,11 @@ class TestJumpTranslationalDiffusion:
         with pytest.raises(TypeError, match='QISF must be a float'):
             jump_diffusion_model._write_area_dependency_expression('invalid')
 
+    def test_y_unit_setter_raises(self, jump_diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            jump_diffusion_model.y_unit = '1/meV'
+
     def test_repr(self, jump_diffusion_model):
         # WHEN THEN
         repr_str = repr(jump_diffusion_model)

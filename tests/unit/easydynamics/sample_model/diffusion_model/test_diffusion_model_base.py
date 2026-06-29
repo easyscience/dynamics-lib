@@ -40,6 +40,11 @@ class TestDiffusionModelBase:
         ):
             diffusion_model.x_unit = 'eV'
 
+    def test_y_unit_setter_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            diffusion_model.y_unit = '1/meV'
+
     @pytest.mark.parametrize(
         ('attribute', 'value', 'expected'),
         [

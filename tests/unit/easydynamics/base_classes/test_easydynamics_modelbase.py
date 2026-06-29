@@ -80,5 +80,6 @@ class TestEasyDynamicsModelBase:
         assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, easy_dynamics_modelbase):
+        # WHEN THEN EXPECT
         with pytest.raises(AttributeError, match='read-only'):
             easy_dynamics_modelbase.y_unit = '1/meV'

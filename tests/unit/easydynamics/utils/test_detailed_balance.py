@@ -9,6 +9,7 @@ from scipp import UnitError
 from scipp.constants import Boltzmann as kB
 
 from easydynamics.utils import detailed_balance_factor
+from easydynamics.utils.detailed_balance import _convert_to_scipp_variable
 
 kB_meV_per_K = sc.to_unit(kB, 'meV/K').value
 
@@ -310,12 +311,6 @@ class TestDetailedBalanceFactor:
 class TestConvertToScippVariable:
     """Tests for _convert_to_scipp_variable internal helper."""
 
-    @pytest.fixture(autouse=True)
-    def _import(self):
-        from easydynamics.utils.detailed_balance import _convert_to_scipp_variable
-
-        self._fn = _convert_to_scipp_variable
-
     @pytest.mark.parametrize(
         'name, expected_match',
         [
@@ -325,17 +320,16 @@ class TestConvertToScippVariable:
         ids=['energy_name', 'other_name'],
     )
     def test_invalid_type_raises_type_error(self, name, expected_match):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_match):
-            self._fn({'invalid': 'type'}, name=name, unit='meV')
+            _convert_to_scipp_variable({'invalid': 'type'}, name=name, unit='meV')
 
     def test_invalid_unit_scalar_raises_unit_error(self):
-        from scipp import UnitError as ScippUnitError
-
-        with pytest.raises(ScippUnitError, match='Invalid unit string'):
-            self._fn(1.0, name='energy', unit='not_a_real_unit_xyz')
+        # WHEN THEN EXPECT
+        with pytest.raises(UnitError, match='Invalid unit string'):
+            _convert_to_scipp_variable(1.0, name='energy', unit='not_a_real_unit_xyz')
 
     def test_invalid_unit_array_raises_unit_error(self):
-        from scipp import UnitError as ScippUnitError
-
-        with pytest.raises(ScippUnitError, match='Invalid unit string'):
-            self._fn([1.0, 2.0], name='energy', unit='not_a_real_unit_xyz')
+        # WHEN THEN EXPECT
+        with pytest.raises(UnitError, match='Invalid unit string'):
+            _convert_to_scipp_variable([1.0, 2.0], name='energy', unit='not_a_real_unit_xyz')

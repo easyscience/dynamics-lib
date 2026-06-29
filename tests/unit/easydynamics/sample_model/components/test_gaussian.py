@@ -35,6 +35,7 @@ class TestGaussian:
         assert gaussian.center.value == pytest.approx(0.0)
         assert gaussian.width.value == pytest.approx(1.0)
         assert gaussian.x_unit == 'meV'
+        assert gaussian.y_unit == 'dimensionless'
         assert gaussian.center.fixed is True
 
     def test_initialization(self, gaussian: Gaussian):
@@ -64,12 +65,17 @@ class TestGaussian:
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
                 'unit must be None, a string',
             ),
+            (
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
+                'unit must be None, a string',
+            ),
         ],
         ids=[
             'invalid area',
             'invalid center',
             'invalid width',
-            'invalid unit',
+            'invalid x_unit',
+            'invalid y_unit',
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
@@ -180,7 +186,7 @@ class TestGaussian:
         numerical_area = simpson(y, x)
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
-    def test_convert_unit(self, gaussian: Gaussian):
+    def test_convert_x_unit(self, gaussian: Gaussian):
         # WHEN THEN
         gaussian.convert_x_unit('microeV')
 
@@ -232,10 +238,6 @@ class TestGaussian:
         assert 'center =' in repr_str
         assert 'width =' in repr_str
 
-    def test_y_unit_default(self, gaussian: Gaussian):
-        # WHEN THEN EXPECT
-        assert gaussian.y_unit == 'dimensionless'
-
     def test_y_unit_custom(self):
         # WHEN THEN
         gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
@@ -274,6 +276,7 @@ class TestGaussian:
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 100
+        np.testing.assert_allclose(result.values, gaussian.evaluate(x, output='numpy'))
 
     def test_evaluate_scipp_output_with_y_unit(self):
         gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
