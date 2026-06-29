@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from unittest.mock import patch
-
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.energy_grid import EnergyGrid
@@ -51,6 +50,7 @@ class TestNumericalConvolution:
         assert default_numerical_convolution.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution.temperature is None
         assert default_numerical_convolution.x_unit == 'meV'
+        assert default_numerical_convolution.y_unit == 'dimensionless'
         assert (
             default_numerical_convolution.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -237,16 +237,17 @@ class TestNumericalConvolution:
             assert result.shape == dense.shape
 
     def test_convolution_with_energy_offset_in_different_unit(self, default_numerical_convolution):
-        # Setting energy_offset as a Parameter in eV when energy grid is in meV exercises the
-        # unit-conversion branch (line 53 in numerical_convolution.py)
-        from easyscience.variable import Parameter
-
+        # WHEN: energy grid is in meV, offset given as a Parameter in eV (0.001 eV = 1.0 meV)
         conv = default_numerical_convolution
-        # energy is in meV; set offset as Parameter in eV → unit != energy unit → sc.to_unit called
         conv.energy_offset = Parameter(name='energy_offset', value=0.001, unit='eV')
-        result = conv.convolution()
-        # With default upsample_factor=5 the result is interpolated back to the original grid
-        assert result.shape == conv.energy.values.shape
+        result_ev = conv.convolution()
+
+        # THEN: run again with the numerically equivalent offset as an explicit meV Parameter
+        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        result_mev = conv.convolution()
+
+        # EXPECT: unit conversion is transparent — results are numerically identical
+        np.testing.assert_allclose(result_ev, result_mev, rtol=1e-6)
 
     def test_repr(self, default_numerical_convolution):
         r = repr(default_numerical_convolution)
@@ -255,38 +256,34 @@ class TestNumericalConvolution:
 
     # ───── Regression tests ─────
 
-    def test_detailed_balance_energy_includes_even_length_offset(self):
-        # GIVEN: even-length energy grid and non-zero temperature (triggers DBF)
-        energy = np.linspace(-10, 10, 100)  # 100 points = even length
-        sample_components = ComponentCollection(display_name='Sample')
-        sample_components.append_component(Gaussian(name='G', area=1.0, center=0.0, width=1.0))
-        resolution_components = ComponentCollection(display_name='Resolution')
-        resolution_components.append_component(Gaussian(name='R', area=1.0, center=0.0, width=0.5))
-        nc = NumericalConvolution(
-            energy=energy,
-            sample_components=sample_components,
-            resolution_components=resolution_components,
-        )
+    def test_detailed_balance_energy_includes_even_length_offset(
+        self, default_numerical_convolution, monkeypatch
+    ):
+        # WHEN: even-length energy grid with temperature (triggers detailed balance,
+        #       which is where energy_even_length_offset must be applied)
+        nc = default_numerical_convolution
+        nc.energy = np.linspace(-10, 10, 100)  # even-length → non-zero energy_even_length_offset
         nc.temperature = 300.0
 
-        captured_energy = []
-
         original_dbf = detailed_balance_factor
+        captured_energy = None
 
         def capturing_dbf(**kwargs):
-            captured_energy.append(kwargs['energy'].copy())
+            nonlocal captured_energy
+            captured_energy = kwargs['energy'].copy()
             return original_dbf(**kwargs)
 
-        with patch(
+        monkeypatch.setattr(
             'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
             capturing_dbf,
-        ):
-            nc.convolution()
+        )
 
-        assert len(captured_energy) == 1
-        # The energy passed to DBF must include energy_even_length_offset.
-        # Before the fix it was energy_dense - offset_value (missing the offset),
-        # which for an even-length grid differs from energy_dense by half a bin step.
+        # THEN: run convolution
+        nc.convolution()
+
+        # EXPECT: DBF receives energy_dense - energy_even_length_offset
+        # Before the fix, energy_even_length_offset was omitted, causing a half-bin error.
         grid = nc._energy_grid
-        expected = grid.energy_dense - grid.energy_even_length_offset
-        np.testing.assert_allclose(captured_energy[0], expected, atol=1e-12)
+        np.testing.assert_allclose(
+            captured_energy, grid.energy_dense - grid.energy_even_length_offset, atol=1e-12
+        )

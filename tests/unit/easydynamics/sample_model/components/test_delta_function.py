@@ -230,9 +230,9 @@ class TestDeltaFunction:
         assert delta_function.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
-        # GIVEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
         delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
-        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         delta.convert_y_unit('1/eV')
         # EXPECT: y_unit updated and area value rescaled (1e3 factor)
         assert delta.y_unit == '1/eV'
@@ -243,8 +243,6 @@ class TestDeltaFunction:
             delta_function.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, delta_function: DeltaFunction):
-        import scipp as sc
-
         x = np.linspace(-5, 5, 50)
         result = delta_function.evaluate(x, output='scipp')
         assert isinstance(result, sc.Variable)

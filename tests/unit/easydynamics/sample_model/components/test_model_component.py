@@ -7,6 +7,7 @@ import scipp as sc
 from easyscience.variable import Parameter
 from scipp import UnitError
 
+from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 
@@ -93,9 +94,11 @@ class TestModelComponent:
         ],
     )
     def test_prepare_x_for_evaluate_various_inputs(self, dummy, x_input, expected_array):
+        # WHEN THEN
         result = dummy._prepare_x_for_evaluate(x_input)
         x_prepared, _detected_unit, _dim = result
 
+        # EXPECT
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == expected_array.shape
         np.testing.assert_array_equal(x_prepared, expected_array)
@@ -182,9 +185,7 @@ class TestModelComponent:
         assert str(dummy.area.unit) == 'meV'
 
     def test_evaluate_with_compatible_unit_gives_correct_result(self):
-        # GIVEN: Gaussian in meV and a physically equivalent Gaussian in eV
-        from easydynamics.sample_model.components.gaussian import Gaussian
-
+        # WHEN: Gaussian in meV and a physically equivalent Gaussian in eV
         g_mev = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
         g_ev = Gaussian(area=0.001, center=0.0, width=0.0005, x_unit='eV')
 
@@ -193,7 +194,7 @@ class TestModelComponent:
         )
         x_ev_np = np.array([-0.002, -0.001, 0.0, 0.001, 0.002])
 
-        # WHEN: evaluate meV-Gaussian with x in eV
+        # THEN: evaluate meV-Gaussian with x in eV
         result_mev = g_mev.evaluate(x_ev)
         result_ev = g_ev.evaluate(x_ev_np)
 
@@ -221,17 +222,15 @@ class TestModelComponent:
             dummy.convert_y_unit('1/meV')
 
     def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
-        # GIVEN: a Gaussian and a DataArray where the coord key ('energy') differs
+        # WHEN: a Gaussian and a DataArray where the coord key ('energy') differs
         # from the coord Variable's internal dim name ('x').  This is a valid scipp
         # non-dimension coordinate: the data's dimension is 'x' and the coord is
         # labelled 'energy' but lives on the same 'x' axis.
-        from easydynamics.sample_model.components.gaussian import Gaussian
-
         g = Gaussian(name='G', area=1.0, center=0.0, width=1.0, x_unit='meV')
         coord = sc.Variable(dims=['x'], values=np.linspace(-5.0, 5.0, 10), unit='meV')
         data = sc.Variable(dims=['x'], values=np.ones(10))
         da = sc.DataArray(data=data, coords={'energy': coord})
-        # WHEN: evaluate with scipp output
+        # THEN: evaluate with scipp output
         # Before the fix, dim was overwritten with coord.dims[0] = 'x', so the
         # output Variable had dim 'x' instead of the coord key 'energy'.
         result = g.evaluate(da, output='scipp')

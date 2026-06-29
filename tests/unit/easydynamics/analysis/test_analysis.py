@@ -832,7 +832,7 @@ class TestAnalysis:
         # NOT via energy[numpy_bool_array].  The bug: numpy booleans are treated as integer
         # indices by scipp (True→1, False→0), so energy[[True,False,True]] returns 3 elements
         # with wrong values instead of filtering to the 2 finite points.
-        # GIVEN: data with a NaN at index 1; finite energies are -1.0 and 1.0
+        # WHEN: data with a NaN at index 1; finite energies are -1.0 and 1.0
         Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
         energy = sc.array(dims=['energy'], values=[-1.0, 0.0, 1.0], unit='meV')
         values = np.array([[1.0, np.nan, 2.0]])

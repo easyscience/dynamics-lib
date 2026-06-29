@@ -5,6 +5,7 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 from scipp import UnitError
 from scipy.integrate import simpson
@@ -212,9 +213,9 @@ class TestLorentzian:
         assert lorentzian.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
-        # GIVEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
         lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
-        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         lor.convert_y_unit('1/eV')
         # EXPECT: y_unit updated and area value rescaled (1e3 factor)
         assert lor.y_unit == '1/eV'
@@ -225,8 +226,6 @@ class TestLorentzian:
             lorentzian.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, lorentzian: Lorentzian):
-        import scipp as sc
-
         x = np.linspace(-5, 5, 50)
         result = lorentzian.evaluate(x, output='scipp')
         assert isinstance(result, sc.Variable)

@@ -32,6 +32,8 @@ class TestConvolutionBase:
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
         assert isinstance(convolution_base._sample_components, ComponentCollection)
         assert isinstance(convolution_base._resolution_components, ComponentCollection)
+        assert convolution_base.x_unit == 'meV'
+        assert convolution_base.y_unit == 'dimensionless'
 
     def test_init_with_model_component(self):
         # WHEN
@@ -256,14 +258,17 @@ class TestConvolutionBase:
             convolution_base.energy_with_offset = 5
 
     def test_energy_with_offset_unit_conversion(self, convolution_base):
-        # When energy_offset has a different but compatible unit, the property converts it
+        # WHEN: energy is in meV and energy_offset given in eV (0.001 eV = 1 meV)
         convolution_base.energy_offset = Parameter(
             name='energy_offset',
             value=0.001,
             unit='eV',  # 0.001 eV = 1 meV
         )
+
+        # THEN
         result = convolution_base.energy_with_offset
-        # energy is in meV, offset 0.001 eV = 1 meV → shifted by -1 meV
+
+        # EXPECT: offset is converted to meV before subtracting → shifted by -1 meV
         expected = convolution_base.energy.values - 1.0
         np.testing.assert_allclose(result.values, expected, rtol=1e-5)
 
@@ -315,3 +320,41 @@ class TestConvolutionBase:
             ),
         ):
             convolution_base.resolution_components = 'invalid'
+
+    def test_y_unit_default(self, convolution_base):
+        # WHEN THEN EXPECT
+        assert convolution_base.y_unit == 'dimensionless'
+
+    def test_y_unit_setter_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='read-only'):
+            convolution_base.y_unit = '1/meV'
+
+    def test_convert_y_unit(self, convolution_base):
+        # WHEN: sample component with y_unit='1/meV'
+        convolution_base.sample_components.append_component(
+            Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        )
+
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        convolution_base.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit updated and propagated to sample components
+        assert convolution_base.y_unit == '1/eV'
+        for component in convolution_base.sample_components:
+            assert component.y_unit == '1/eV'
+
+    def test_convert_y_unit_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            convolution_base.convert_y_unit(123)
+
+    def test_convert_y_unit_rollback_on_failure(self, convolution_base):
+        # WHEN: sample component with default y_unit='dimensionless'
+        convolution_base.sample_components.append_component(Gaussian(area=1.0, x_unit='meV'))
+
+        # THEN EXPECT: 'K' is dimensionally incompatible → triggers rollback
+        with pytest.raises(UnitError):
+            convolution_base.convert_y_unit('K')
+
+        assert convolution_base.y_unit == 'dimensionless'

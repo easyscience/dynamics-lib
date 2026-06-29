@@ -49,6 +49,7 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution_base.temperature is None
         assert default_numerical_convolution_base.x_unit == 'meV'
+        assert default_numerical_convolution_base.y_unit == 'dimensionless'
         assert (
             default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -88,6 +89,7 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
         assert numerical_convolution_base.x_unit == unit
+        assert numerical_convolution_base.y_unit == 'dimensionless'
         assert (
             numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is False
@@ -489,9 +491,11 @@ class TestNumericalConvolutionBase:
         and non-uniform energy raises ValueError (the energy grid must
         always be uniform).
         """
-        # WHEN
+        # WHEN: non-uniform energy with upsample_factor=None
         default_numerical_convolution_base.energy = np.array([0, 1, 3, 6, 10])
         default_numerical_convolution_base.upsample_factor = None
+
+        # THEN EXPECT
         with pytest.raises(
             ValueError,
             match='Input array `energy` must be uniformly spaced if upsample_factor is not given',

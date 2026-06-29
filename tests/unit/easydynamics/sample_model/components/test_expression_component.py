@@ -5,6 +5,7 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model import ExpressionComponent
@@ -141,8 +142,6 @@ class TestExpressionComponent:
             expr.convert_y_unit('1/meV')
 
     def test_evaluate_scipp_output(self, expr: ExpressionComponent):
-        import scipp as sc
-
         x = np.linspace(-2, 2, 30)
         result = expr.evaluate(x, output='scipp')
         assert isinstance(result, sc.Variable)

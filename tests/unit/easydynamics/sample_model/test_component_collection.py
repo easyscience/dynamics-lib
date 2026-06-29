@@ -511,12 +511,12 @@ class TestComponentCollection:
         assert component_collection.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
-        # GIVEN: components with y_unit='1/meV' so area_unit ≈ dimensionless
+        # WHEN: components with y_unit='1/meV' so area_unit ≈ dimensionless
         g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
         lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
         cc = ComponentCollection(components=[g, lor])
 
-        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         cc.convert_y_unit('1/eV')
 
         # EXPECT
@@ -530,14 +530,14 @@ class TestComponentCollection:
             component_collection.convert_y_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self):
-        # GIVEN: collection whose first Gaussian converts fine, but second has an
+        # WHEN: collection whose first Gaussian converts fine, but second has an
         # ExpressionComponent that raises NotImplementedError for convert_x_unit.
         g = Gaussian(area=1.0, x_unit='meV')
         expr = ExpressionComponent('A * x', parameters={'A': 1.0}, x_unit='meV')
         cc = ComponentCollection(components=[g, expr])
         original_area = g.area.value
 
-        # WHEN: attempt a unit conversion that will fail on the ExpressionComponent
+        # THEN: attempt a unit conversion that will fail on the ExpressionComponent
         with pytest.raises(NotImplementedError):
             cc.convert_x_unit('microeV')
 
@@ -547,14 +547,14 @@ class TestComponentCollection:
         assert g.area.value == pytest.approx(original_area)
 
     def test_convert_y_unit_rollback_on_failure(self):
-        # GIVEN: collection where first Gaussian converts successfully but second
+        # WHEN: collection where first Gaussian converts successfully but second
         # ExpressionComponent always raises NotImplementedError for convert_y_unit.
         g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
         expr = ExpressionComponent('A * x', parameters={'A': 1.0}, x_unit='meV')
         cc = ComponentCollection(components=[g, expr], y_unit='1/meV')
         original_area = g.area.value
 
-        # WHEN: attempt y_unit conversion that will fail on the ExpressionComponent
+        # THEN: attempt y_unit conversion that will fail on the ExpressionComponent
         with pytest.raises(NotImplementedError):
             cc.convert_y_unit('1/eV')
 
@@ -566,9 +566,9 @@ class TestComponentCollection:
     # ───── Regression tests ─────
 
     def test_evaluate_scipp_output_multi_component_does_not_raise(self, component_collection):
-        # GIVEN: collection with two components (Gaussian + Lorentzian)
+        # WHEN: collection with two components (Gaussian + Lorentzian)
         x = sc.Variable(dims=['energy'], values=np.linspace(-5.0, 5.0, 100), unit='meV')
-        # WHEN: evaluate with scipp output
+        # THEN: evaluate with scipp output
         # Before the fix, sum() started from int 0 → '0 + sc.Variable' raised TypeError.
         result = component_collection.evaluate(x, output='scipp')
         # EXPECT: returns a Variable whose values are the sum of both components

@@ -419,13 +419,13 @@ class TestModelBase:
         assert model_base.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
-        # GIVEN: model with components where y_unit='1/meV' so area_unit ≈ dimensionless
+        # WHEN: model with components where y_unit='1/meV' so area_unit ≈ dimensionless
         g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
         lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
         cc = ComponentCollection(components=[g, lor])
         model = ModelBase(components=cc, x_unit='meV', Q=np.array([1.0]))
 
-        # WHEN: convert y_unit to '1/eV' (same dimension, different scale)
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         model.convert_y_unit('1/eV')
 
         # EXPECT: model y_unit and all template components updated

@@ -74,6 +74,7 @@ class TestConvolution:
         assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
         assert default_convolution.x_unit == 'meV'
+        assert default_convolution.y_unit == 'dimensionless'
         assert default_convolution.detailed_balance_settings.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
@@ -108,6 +109,7 @@ class TestConvolution:
         assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
         assert convolution_with_components.x_unit == 'meV'
+        assert convolution_with_components.y_unit == 'dimensionless'
         assert (
             convolution_with_components.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -577,3 +579,32 @@ class TestConvolution:
 
         # EXPECT
         assert conv.convolution_settings.convolution_plan_is_valid is False
+
+    def test_y_unit_default(self, default_convolution):
+        # WHEN THEN EXPECT
+        assert default_convolution.y_unit == 'dimensionless'
+
+    def test_convert_y_unit_propagates_to_sub_convolvers(self):
+        # WHEN: Convolution with Gaussian sample and resolution components,
+        #       both with y_unit='1/meV'
+        energy = np.linspace(-10, 10, 5001)
+        sample_components = ComponentCollection()
+        sample_components.append_component(
+            Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV', y_unit='1/meV')
+        )
+        resolution_components = ComponentCollection()
+        resolution_components.append_component(
+            Gaussian(name='R', area=1.0, center=0.0, width=0.3, x_unit='meV', y_unit='1/meV')
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+
+        # THEN: convert y_unit to '1/eV'
+        conv.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit updated and propagated to sub-convolvers via Convolution.convert_y_unit
+        assert conv.y_unit == '1/eV'
+        assert conv._analytical_convolver._y_unit == '1/eV'

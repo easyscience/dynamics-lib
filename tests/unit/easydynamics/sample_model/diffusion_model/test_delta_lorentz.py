@@ -862,11 +862,11 @@ class TestDeltaLorentz:
     def test_calculate_width_raises_after_clear_Q_when_allow_Q_variation(
         self, delta_lorentz_model_with_Q
     ):
-        # GIVEN: model with Q-variation enabled for lorentzian_width
+        # WHEN: model with Q-variation enabled for lorentzian_width
         assert delta_lorentz_model_with_Q._allow_Q_variation['lorentzian_width'] is True
         assert len(delta_lorentz_model_with_Q._lorentzian_width_list) > 0
 
-        # WHEN: clear Q (empties _lorentzian_width_list)
+        # THEN: clear Q (empties _lorentzian_width_list)
         delta_lorentz_model_with_Q.clear_Q(confirm=True)
         assert len(delta_lorentz_model_with_Q._lorentzian_width_list) == 0
 

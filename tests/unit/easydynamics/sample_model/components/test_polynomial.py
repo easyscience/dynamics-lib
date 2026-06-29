@@ -5,7 +5,9 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model import Polynomial
 
@@ -207,10 +209,6 @@ class TestPolynomial:
         assert np.isclose(p.evaluate(x)[0], val_before * 1000.0)
 
     def test_evaluate_scipp_output(self):
-        import scipp as sc
-
-        from easydynamics.sample_model import Polynomial
-
         p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
         x = np.linspace(-3, 3, 40)
         result = p.evaluate(x, output='scipp')
@@ -227,8 +225,6 @@ class TestPolynomial:
         assert 'coefficients =' in repr_str
 
     def test_evaluate_with_scipp_x_different_compatible_unit(self):
-        import scipp as sc
-
         # Polynomial with x_unit='meV', coefficients [1.0, 1.0] → f(x) = 1 + x
         p = Polynomial(coefficients=[1.0, 1.0], x_unit='meV')
         # Evaluate with x in eV (different but compatible unit) — triggers unit-rescaling branch
@@ -240,7 +236,5 @@ class TestPolynomial:
         assert p.x_unit == 'meV'
 
     def test_convert_y_unit_invalid_type_raises(self, polynomial: Polynomial):
-        from scipp import UnitError
-
         with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):
             polynomial.convert_y_unit(123)
