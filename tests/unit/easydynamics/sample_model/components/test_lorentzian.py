@@ -54,7 +54,7 @@ class TestLorentzian:
             ),
             (
                 {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
-                'center must be None',
+                'center must be None or a number',
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
@@ -62,7 +62,7 @@ class TestLorentzian:
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
-                'unit must be None',
+                'unit must be None, a string',
             ),
         ],
     )

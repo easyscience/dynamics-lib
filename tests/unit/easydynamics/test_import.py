@@ -3,7 +3,5 @@
 
 
 def test_import_easydynamics():
-    # WHEN THEN EXPECT
-    import easydynamics
-
-    assert easydynamics is not None
+    # WHEN THEN EXPECT: importing raises no error
+    import easydynamics  # noqa: F401

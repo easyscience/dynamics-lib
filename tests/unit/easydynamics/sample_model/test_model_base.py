@@ -284,13 +284,16 @@ class TestModelBase:
         assert len(model_base.components) == 0
 
     def test_convert_x_unit_rollback_when_old_unit_none(self):
-        # WHEN: model with _x_unit=None (rollback branch is skipped when old unit is None)
+        # WHEN: model with _x_unit=None (rollback branch is skipped when old_unit is None)
         component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
         model = ModelBase(display_name='M', x_unit=None, components=component)
         model._x_unit = None
-        # THEN EXPECT
+        # THEN
         with pytest.raises(UnitError):
             model.convert_x_unit('m')  # incompatible unit triggers failure
+        # EXPECT: Gaussian's own atomic rollback keeps it at 'meV' even though
+        # ModelBase's outer rollback loop is skipped when old_unit is None
+        assert component.x_unit == 'meV'
 
     def test_convert_x_unit_rollback_on_failure(self, model_base):
         # WHEN THEN

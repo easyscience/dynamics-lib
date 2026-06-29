@@ -405,7 +405,7 @@ class TestConvolution:
     )
     @pytest.mark.parametrize('delta_component', [True, False], ids=['with_delta', 'without_delta'])
     @pytest.mark.parametrize(
-        'temperature', [None, 100], ids=['with_temperature', 'without_temperature']
+        'temperature', [None, 100], ids=['without_temperature', 'with_temperature']
     )
     def test_build_convolution_plan(
         self,

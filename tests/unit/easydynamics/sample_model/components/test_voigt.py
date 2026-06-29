@@ -100,7 +100,7 @@ class TestVoigt:
                     'lorentzian_width': 0.7,
                     'x_unit': 123,
                 },
-                'unit must be None,',
+                'unit must be None, a string',
             ),
         ],
     )

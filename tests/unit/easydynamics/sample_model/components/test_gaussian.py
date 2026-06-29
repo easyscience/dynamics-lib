@@ -62,7 +62,7 @@ class TestGaussian:
             ),
             (
                 {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
-                'unit must be None',
+                'unit must be None, a string',
             ),
         ],
         ids=[
