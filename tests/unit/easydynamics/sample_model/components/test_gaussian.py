@@ -111,11 +111,12 @@ class TestGaussian:
     def test_property_setters(
         self, gaussian: Gaussian, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(gaussian, prop, valid_value)
+        # THEN EXPECT
         assert getattr(gaussian, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(gaussian, prop, invalid_value)
 
@@ -232,17 +233,17 @@ class TestGaussian:
         assert 'width =' in repr_str
 
     def test_y_unit_default(self, gaussian: Gaussian):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert gaussian.y_unit == 'dimensionless'
 
     def test_y_unit_custom(self):
-        # WHEN
+        # WHEN THEN
         gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
         # EXPECT
         assert gaussian.y_unit == '1/meV'
 
     def test_y_unit_setter_raises(self, gaussian: Gaussian):
-        # EXPECT
+        # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
             gaussian.y_unit = '1/meV'
 
@@ -258,14 +259,15 @@ class TestGaussian:
         assert gaussian.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, gaussian: Gaussian):
-        # EXPECT
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             gaussian.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, gaussian: Gaussian):
+        # WHEN
         x = np.linspace(-5, 5, 100)
 
-        # WHEN
+        # THEN
         result = gaussian.evaluate(x, output='scipp')
 
         # EXPECT
@@ -285,20 +287,26 @@ class TestGaussian:
         assert result.unit == sc.Unit('1/meV')
 
     def test_convert_x_unit_invalid_type_raises(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             gaussian.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, gaussian: Gaussian):
+        # WHEN THEN
         with pytest.raises(UnitError):
             gaussian.convert_x_unit('m')
+        # EXPECT: state rolled back
         assert gaussian.x_unit == 'meV'
         assert gaussian.area.value == pytest.approx(2.0)
         assert gaussian.center.value == pytest.approx(0.5)
         assert gaussian.width.value == pytest.approx(0.6)
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         gaussian = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        # THEN
         with pytest.raises(UnitError):
             gaussian.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert gaussian.y_unit == 'dimensionless'
         assert gaussian.area.value == pytest.approx(1.0)

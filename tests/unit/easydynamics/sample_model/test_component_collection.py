@@ -368,6 +368,7 @@ class TestComponentCollection:
             assert param.fixed is False
 
     def test_contains(self, component_collection):
+        # WHEN THEN EXPECT: membership by name and by object
         assert 'TestGaussian1Name' in component_collection
         assert 'TestLorentzian1Name' in component_collection
         assert 'NonExistentComponent' not in component_collection
@@ -377,11 +378,10 @@ class TestComponentCollection:
         assert gaussian_component in component_collection
         assert lorentzian_component in component_collection
 
-        # WHEN THEN
+        # WHEN: a component not in the collection — THEN EXPECT
         fake_component = Gaussian(
             name='FakeGaussian', area=1.0, center=0.0, width=1.0, x_unit='meV'
         )
-        # EXPECT
         assert fake_component not in component_collection
         assert 123 not in component_collection  # Invalid type
 
@@ -507,7 +507,7 @@ class TestComponentCollection:
         assert not user_warnings
 
     def test_y_unit_default(self, component_collection):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert component_collection.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -525,7 +525,7 @@ class TestComponentCollection:
             assert component.y_unit == '1/eV'
 
     def test_convert_y_unit_invalid_type_raises(self, component_collection):
-        # EXPECT
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             component_collection.convert_y_unit(123)
 

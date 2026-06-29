@@ -259,23 +259,21 @@ class TestNumericalConvolution:
     def test_detailed_balance_energy_includes_even_length_offset(
         self, default_numerical_convolution, monkeypatch
     ):
-        # WHEN: even-length energy grid with temperature (triggers detailed balance,
-        #       which is where energy_even_length_offset must be applied)
+        # WHEN: even-length energy grid with temperature
         nc = default_numerical_convolution
         nc.energy = np.linspace(-10, 10, 100)  # even-length → non-zero energy_even_length_offset
         nc.temperature = 300.0
 
-        original_dbf = detailed_balance_factor
-        captured_energy = None
+        captured = {}
 
-        def capturing_dbf(**kwargs):
-            nonlocal captured_energy
-            captured_energy = kwargs['energy'].copy()
-            return original_dbf(**kwargs)
+        # spy_dbf wraps detailed_balance_factor: captures the energy argument passed to it,
+        # then delegates to the real function so the convolution still produces a valid result.
+        def spy_dbf(**kwargs):
+            captured['energy'] = kwargs['energy']
+            return detailed_balance_factor(**kwargs)
 
         monkeypatch.setattr(
-            'easydynamics.convolution.numerical_convolution.detailed_balance_factor',
-            capturing_dbf,
+            'easydynamics.convolution.numerical_convolution.detailed_balance_factor', spy_dbf
         )
 
         # THEN: run convolution
@@ -285,5 +283,5 @@ class TestNumericalConvolution:
         # Before the fix, energy_even_length_offset was omitted, causing a half-bin error.
         grid = nc._energy_grid
         np.testing.assert_allclose(
-            captured_energy, grid.energy_dense - grid.energy_even_length_offset, atol=1e-12
+            captured['energy'], grid.energy_dense - grid.energy_even_length_offset, atol=1e-12
         )

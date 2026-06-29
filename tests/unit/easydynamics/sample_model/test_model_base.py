@@ -128,7 +128,7 @@ class TestModelBase:
         # WHEN
         all_vars = model_base.get_all_variables()
 
-        # THEN
+        # EXPECT
         expected_var_display_names = {
             'TestGaussian1Name area',
             'TestGaussian1Name center',
@@ -278,28 +278,34 @@ class TestModelBase:
             model_base.convert_x_unit(123)
 
     def test_components_setter_none(self, model_base):
-        # Setting components to None clears all components
+        # WHEN THEN
         model_base.components = None
+        # EXPECT
         assert len(model_base.components) == 0
 
     def test_convert_x_unit_rollback_when_old_unit_none(self):
-        # When _x_unit is None, the rollback block is skipped (292->298 branch)
+        # WHEN: model with _x_unit=None (rollback branch is skipped when old unit is None)
         component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
         model = ModelBase(display_name='M', x_unit=None, components=component)
         model._x_unit = None
+        # THEN EXPECT
         with pytest.raises(UnitError):
             model.convert_x_unit('m')  # incompatible unit triggers failure
 
     def test_convert_x_unit_rollback_on_failure(self, model_base):
+        # WHEN THEN
         with pytest.raises(UnitError):
             model_base.convert_x_unit('m')
+        # EXPECT: state rolled back
         assert model_base.x_unit == 'meV'
         for component in model_base.components:
             assert component.x_unit == 'meV'
 
     def test_convert_y_unit_rollback_on_failure(self, model_base):
+        # WHEN THEN
         with pytest.raises(UnitError):
             model_base.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert model_base.y_unit == 'dimensionless'
 
     def test_components_setter(self, model_base):
@@ -415,7 +421,7 @@ class TestModelBase:
         assert 'components=' in repr_str
 
     def test_y_unit_default(self, model_base):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert model_base.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -437,6 +443,6 @@ class TestModelBase:
             assert component.y_unit == '1/eV'
 
     def test_convert_y_unit_invalid_raises(self, model_base):
-        # EXPECT
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             model_base.convert_y_unit(123)

@@ -110,11 +110,12 @@ class TestDampedHarmonicOscillator:
         invalid_value,
         invalid_message,
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(dho, prop, valid_value)
+        # THEN EXPECT
         assert getattr(dho, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(dho, prop, invalid_value)
 
@@ -211,6 +212,7 @@ class TestDampedHarmonicOscillator:
         assert 'width =' in repr_str
 
     def test_y_unit_default(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
         assert dho.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -225,31 +227,41 @@ class TestDampedHarmonicOscillator:
         assert dho.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             dho.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, dho: DampedHarmonicOscillator):
+        # WHEN
         x = np.linspace(0.5, 5.0, 50)
+        # THEN
         result = dho.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
 
     def test_convert_x_unit_invalid_type_raises(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             dho.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, dho: DampedHarmonicOscillator):
+        # WHEN THEN
         with pytest.raises(UnitError):
             dho.convert_x_unit('m')
+        # EXPECT: state rolled back
         assert dho.x_unit == 'meV'
         assert dho.area.value == pytest.approx(2.0)
         assert dho.center.value == pytest.approx(1.5)
         assert dho.width.value == pytest.approx(0.3)
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         dho = DampedHarmonicOscillator(area=1.0, center=1.0, width=0.3, x_unit='meV')
+        # THEN
         with pytest.raises(UnitError):
             dho.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert dho.y_unit == 'dimensionless'
         assert dho.area.value == pytest.approx(1.0)

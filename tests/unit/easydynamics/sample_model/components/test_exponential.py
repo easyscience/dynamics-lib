@@ -97,11 +97,12 @@ class TestExponential:
         invalid_value,
         invalid_message,
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(exponential, prop, valid_value)
+        # THEN EXPECT
         assert getattr(exponential, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(exponential, prop, invalid_value)
 
@@ -213,6 +214,7 @@ class TestExponential:
         assert 'rate =' in repr_str
 
     def test_y_unit_default(self, exponential: Exponential):
+        # WHEN THEN EXPECT
         assert exponential.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -225,29 +227,38 @@ class TestExponential:
         assert exp.amplitude.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, exponential: Exponential):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             exponential.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, exponential: Exponential):
+        # WHEN
         x = np.linspace(-5, 5, 50)
+        # THEN
         result = exponential.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
 
     def test_init_rejects_parameter_amplitude(self):
+        # WHEN THEN EXPECT
         amplitude_param = Parameter(name='amp', value=3.0, unit='meV')
         with pytest.raises(TypeError, match='amplitude must be a number'):
             Exponential(amplitude=amplitude_param, x_unit='meV')
 
     def test_init_rejects_parameter_rate(self):
+        # WHEN THEN EXPECT
         rate_param = Parameter(name='rate', value=0.5, unit='1/meV')
         with pytest.raises(TypeError, match='rate must be a number'):
             Exponential(rate=rate_param, x_unit='meV')
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         exp = Exponential(amplitude=1.0, center=0.0, rate=1.0, x_unit='meV')
+        # THEN
         with pytest.raises(UnitError):
             exp.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert exp.y_unit == 'dimensionless'
         assert exp.amplitude.value == pytest.approx(1.0)

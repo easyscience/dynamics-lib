@@ -105,6 +105,7 @@ class TestVoigt:
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_message):
             Voigt(display_name='TestVoigt', **kwargs)
 
@@ -166,11 +167,12 @@ class TestVoigt:
     def test_property_setters(
         self, voigt: Voigt, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(voigt, prop, valid_value)
+        # THEN EXPECT
         assert getattr(voigt, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(voigt, prop, invalid_value)
 
@@ -303,6 +305,7 @@ class TestVoigt:
         assert 'lorentzian_width =' in repr_str
 
     def test_y_unit_default(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         assert voigt.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -322,23 +325,30 @@ class TestVoigt:
         assert v.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             voigt.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, voigt: Voigt):
+        # WHEN
         x = np.linspace(-5, 5, 50)
+        # THEN
         result = voigt.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
 
     def test_convert_x_unit_invalid_type_raises(self, voigt: Voigt):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             voigt.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, voigt: Voigt):
+        # WHEN THEN
         with pytest.raises(UnitError):
             voigt.convert_x_unit('m')
+        # EXPECT: state rolled back
         assert voigt.x_unit == 'meV'
         assert voigt.area.value == pytest.approx(2.0)
         assert voigt.center.value == pytest.approx(0.5)
@@ -346,8 +356,11 @@ class TestVoigt:
         assert voigt.lorentzian_width.value == pytest.approx(0.7)
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         v = Voigt(area=1.0, center=0.0, gaussian_width=0.5, lorentzian_width=0.3, x_unit='meV')
+        # THEN
         with pytest.raises(UnitError):
             v.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert v.y_unit == 'dimensionless'
         assert v.area.value == pytest.approx(1.0)

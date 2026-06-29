@@ -60,6 +60,7 @@ class TestPolynomial:
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name='TestPolynomial', **kwargs)
 
@@ -119,13 +120,12 @@ class TestPolynomial:
             assert np.isclose(polynomial.coefficients[i].value, expected)
 
     def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):
-        """Ensure that setting coefficients with mismatched length
-        raises an error."""
+        # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Number of coefficients'):
             polynomial.coefficients = [1.0, 2.0]  # shorter list
 
     def test_set_coefficients_invalid_type_raises(self, polynomial: Polynomial):
-        """Ensure that invalid coefficient types raise a TypeError."""
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             polynomial.coefficients = [1.0, 'invalid', 3.0]
 
@@ -138,6 +138,7 @@ class TestPolynomial:
         ],
     )
     def test_set_coefficients_raises(self, invalid_coeffs, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_message):
             polynomial = Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
             polynomial.coefficients = invalid_coeffs
@@ -194,24 +195,27 @@ class TestPolynomial:
             assert copied_coeff.fixed == original_coeff.fixed
 
     def test_convert_y_unit_scales_all_coefficients(self):
-        # Polynomial with two non-zero coefficients and a physical y_unit
+        # WHEN: polynomial with two non-zero coefficients and a physical y_unit
         p = Polynomial(coefficients=[3.0, 1.0], x_unit='meV', y_unit='meV^-1')
         x = np.array([2.0])
         val_before = p.evaluate(x)[0]  # 3.0 + 1.0*2.0 = 5.0 [meV^-1]
 
+        # THEN
         p.convert_y_unit('eV^-1')
 
+        # EXPECT: both coefficients rescaled by 1000 (1 meV^-1 = 1000 eV^-1)
         assert p.y_unit == 'eV^-1'
-        # Both coefficients must be rescaled by 1000 (1 meV^-1 = 1000 eV^-1)
         assert np.isclose(p.coefficients[0].value, 3000.0)
         assert np.isclose(p.coefficients[1].value, 1000.0)
-        # Evaluated result must represent the same physical value
         assert np.isclose(p.evaluate(x)[0], val_before * 1000.0)
 
     def test_evaluate_scipp_output(self):
+        # WHEN
         p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
         x = np.linspace(-3, 3, 40)
+        # THEN
         result = p.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 40
@@ -225,16 +229,16 @@ class TestPolynomial:
         assert 'coefficients =' in repr_str
 
     def test_evaluate_with_scipp_x_different_compatible_unit(self):
-        # Polynomial with x_unit='meV', coefficients [1.0, 1.0] → f(x) = 1 + x
+        # WHEN: polynomial with x_unit='meV', coefficients [1.0, 1.0] → f(x) = 1 + x
         p = Polynomial(coefficients=[1.0, 1.0], x_unit='meV')
-        # Evaluate with x in eV (different but compatible unit) — triggers unit-rescaling branch
+        # THEN: evaluate with x in eV (compatible unit) — triggers unit-rescaling branch
         x_eV = sc.array(dims=['x'], values=np.array([0.001, 0.002]), unit='eV')
         result = p.evaluate(x_eV)
-        # 0.001 eV = 1 meV, 0.002 eV = 2 meV → f(1)=2, f(2)=3
+        # EXPECT: 0.001 eV = 1 meV → f(1)=2, 0.002 eV = 2 meV → f(2)=3; state not mutated
         np.testing.assert_allclose(result, [2.0, 3.0], rtol=1e-5)
-        # Component state is NOT mutated
         assert p.x_unit == 'meV'
 
     def test_convert_y_unit_invalid_type_raises(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
         with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):
             polynomial.convert_y_unit(123)

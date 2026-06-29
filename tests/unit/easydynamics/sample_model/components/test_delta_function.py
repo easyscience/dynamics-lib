@@ -82,11 +82,12 @@ class TestDeltaFunction:
         invalid_value,
         invalid_message,
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(delta_function, prop, valid_value)
+        # THEN EXPECT
         assert getattr(delta_function, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(delta_function, prop, invalid_value)
 
@@ -227,6 +228,7 @@ class TestDeltaFunction:
         assert 'center =' in repr_str
 
     def test_y_unit_default(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
         assert delta_function.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -239,12 +241,16 @@ class TestDeltaFunction:
         assert delta.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             delta_function.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, delta_function: DeltaFunction):
+        # WHEN
         x = np.linspace(-5, 5, 50)
+        # THEN
         result = delta_function.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
@@ -270,21 +276,25 @@ class TestDeltaFunction:
         assert np.isclose(result[expected_idx], area / bin_width, rtol=1e-10)
 
     def test_convert_x_unit_invalid_type_raises(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             delta_function.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, delta_function: DeltaFunction):
+        # WHEN THEN
         with pytest.raises(UnitError):
             delta_function.convert_x_unit('m')
-        # Parameters should be unchanged after rollback
+        # EXPECT: state rolled back
         assert delta_function.x_unit == 'meV'
         assert delta_function.area.value == pytest.approx(2.0)
         assert delta_function.center.value == pytest.approx(0.5)
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         delta = DeltaFunction(area=1.0, center=0.0, x_unit='meV', y_unit='dimensionless')
+        # THEN
         with pytest.raises(UnitError):
             delta.convert_y_unit('K')
-        # State should be unchanged after rollback
+        # EXPECT: state rolled back
         assert delta.y_unit == 'dimensionless'
         assert delta.area.value == pytest.approx(1.0)

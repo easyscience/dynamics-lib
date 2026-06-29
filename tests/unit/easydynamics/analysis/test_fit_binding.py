@@ -74,6 +74,7 @@ class TestFitBinding:
         ],
     )
     def test_fitbinding_init_errors(self, parameter_name, model, modes, error_msg):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=error_msg):
             FitBinding(
                 parameter_name=parameter_name,
@@ -93,6 +94,7 @@ class TestFitBinding:
         assert fit_binding.parameter_name == 'new_parameter'
 
     def test_parameter_name_setter_errors(self, fit_binding):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='parameter_name must be a string'):
             fit_binding.parameter_name = 123
 
@@ -107,6 +109,7 @@ class TestFitBinding:
         assert fit_binding.model is model
 
     def test_model_setter_errors(self, fit_binding):
+        # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
             match='model must be a ModelComponent, ComponentCollection, or DiffusionModelBase',
@@ -127,6 +130,7 @@ class TestFitBinding:
         assert fit_binding.modes == ['area', 'width']
 
     def test_modes_setter_errors(self, fit_binding):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='modes must be a string, list of strings, or None'):
             fit_binding.modes = 123
 
@@ -259,6 +263,7 @@ class TestFitBinding:
         assert result_width == pytest.approx(0.5)  # Should ignore unused_arg
 
     def test_build_diffusion_callable_errors(self, diffusion_fit_binding):
+        # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Unknown diffusion mode: invalid_mode'):
             diffusion_fit_binding._build_diffusion_callable(mode='invalid_mode')
 

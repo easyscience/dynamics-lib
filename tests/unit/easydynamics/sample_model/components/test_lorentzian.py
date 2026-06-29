@@ -105,11 +105,12 @@ class TestLorentzian:
     def test_property_setters(
         self, lorentzian: Lorentzian, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(lorentzian, prop, valid_value)
+        # THEN EXPECT
         assert getattr(lorentzian, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(lorentzian, prop, invalid_value)
 
@@ -210,6 +211,7 @@ class TestLorentzian:
         assert 'width =' in repr_str
 
     def test_y_unit_default(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         assert lorentzian.y_unit == 'dimensionless'
 
     def test_convert_y_unit(self):
@@ -222,31 +224,41 @@ class TestLorentzian:
         assert lor.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             lorentzian.convert_y_unit(123)
 
     def test_evaluate_scipp_output(self, lorentzian: Lorentzian):
+        # WHEN
         x = np.linspace(-5, 5, 50)
+        # THEN
         result = lorentzian.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 50
 
     def test_convert_x_unit_invalid_type_raises(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
             lorentzian.convert_x_unit(123)
 
     def test_convert_x_unit_rollback_on_failure(self, lorentzian: Lorentzian):
+        # WHEN THEN
         with pytest.raises(UnitError):
             lorentzian.convert_x_unit('m')
+        # EXPECT: state rolled back
         assert lorentzian.x_unit == 'meV'
         assert lorentzian.area.value == pytest.approx(2.0)
         assert lorentzian.center.value == pytest.approx(0.5)
         assert lorentzian.width.value == pytest.approx(0.6)
 
     def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
         lor = Lorentzian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        # THEN
         with pytest.raises(UnitError):
             lor.convert_y_unit('K')
+        # EXPECT: state rolled back
         assert lor.y_unit == 'dimensionless'
         assert lor.area.value == pytest.approx(1.0)

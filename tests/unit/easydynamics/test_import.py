@@ -3,6 +3,7 @@
 
 
 def test_import_easydynamics():
+    # WHEN THEN EXPECT
     import easydynamics
 
     assert easydynamics is not None

@@ -138,12 +138,16 @@ class TestExpressionComponent:
             expr.convert_x_unit('microeV')
 
     def test_convert_y_unit_not_implemented(self, expr: ExpressionComponent):
+        # WHEN THEN EXPECT
         with pytest.raises(NotImplementedError, match='not implemented'):
             expr.convert_y_unit('1/meV')
 
     def test_evaluate_scipp_output(self, expr: ExpressionComponent):
+        # WHEN
         x = np.linspace(-2, 2, 30)
+        # THEN
         result = expr.evaluate(x, output='scipp')
+        # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
         assert len(result.values) == 30
@@ -178,20 +182,19 @@ class TestExpressionComponent:
     def test_evaluate_scalar_input(self, expr: ExpressionComponent):
         # WHEN
         x = 0.5
-        result = expr.evaluate(x)
-
         # THEN
+        result = expr.evaluate(x)
+        # EXPECT
         expected = 2.0 * np.exp(-((x - 0.5) ** 2) / (2 * 0.6**2))
         assert np.isclose(result, expected)
 
     def test_reserved_name_not_parameter(self):
         # WHEN
         expr = ExpressionComponent('x + A', parameters={'A': 2.0})
-
         # THEN
         params = expr.get_all_variables()
         names = {p.name for p in params}
-
+        # EXPECT
         assert 'A' in names
         assert 'x' not in names  # x is reserved
 
