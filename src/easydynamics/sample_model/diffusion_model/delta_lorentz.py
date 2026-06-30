@@ -506,14 +506,14 @@ class DeltaLorentz(DiffusionModelBase):
             # ------------------------------#
             # Create Lorentzian
             # ------------------------------#
-            lorentzian_component = Lorentzian(
+            lorz_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
                 x_unit=self.x_unit,
                 y_unit=self.y_unit,
             )
             if self._allow_Q_variation['lorentzian_width'] is True:
-                lorentzian_component._width = self._lorentzian_width_list[i]
+                lorz_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made
@@ -521,7 +521,7 @@ class DeltaLorentz(DiffusionModelBase):
             if self._allow_Q_variation['lorentzian_width'] is False:
                 dependency_map = self._write_width_dependency_map_expression()
 
-                lorentzian_component.width.make_dependent_on(
+                lorz_component.width.make_dependent_on(
                     dependency_expression=self._write_lorz_width_dependency_expression(Q_value),
                     dependency_map=dependency_map,
                     desired_unit=self.x_unit,
@@ -537,12 +537,12 @@ class DeltaLorentz(DiffusionModelBase):
             else:
                 dependency_map = self._write_lorz_area_dependency_map_expression(None)
 
-            lorentzian_component.area.make_dependent_on(
+            lorz_component.area.make_dependent_on(
                 dependency_expression=self._write_lorz_area_dependency_expression(Q_value),
                 dependency_map=dependency_map,
             )
 
-            component_collection_list[i].append_component(lorentzian_component)
+            component_collection_list[i].append_component(lorz_component)
 
             # ------------------------------#
             # Create delta function

@@ -15,6 +15,7 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -194,6 +195,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                     )
 
                 x, y, weight = self._get_xyweight_from_dataset(pname)
+                x_factor, y_factor = self._get_unit_conversions(binding, pname)
+                x = x * x_factor
+                y = y * y_factor
+                weight = weight / y_factor
 
                 xs.append(x)
                 ys.append(y)
@@ -366,8 +371,10 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                     )
                 da = self.parameters[pname]
                 x = da.coords['Q']
+                x_factor, y_factor = self._get_unit_conversions(b, pname)
 
-                y_model = func(x.values)
+                y_model = func(x.values * x_factor)
+                y_model = y_model / y_factor
 
                 arrays[mname] = sc.DataArray(
                     data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
@@ -520,6 +527,62 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     #############
     # Private methods
     #############
+
+    def _get_unit_conversions(self, binding: FitBinding, pname: str) -> tuple[float, float]:
+        """
+        Return (x_factor, y_factor) to convert dataset values into the model's declared units.
+
+        x_factor converts Q coordinate values from their stored unit to model.x_unit. y_factor
+        converts parameter values from their stored unit to model.y_unit. Both factors are 1.0 for
+        DiffusionModelBase bindings (whose callables take raw Q).
+
+        Parameters
+        ----------
+        binding : FitBinding
+            The binding whose model defines the target units.
+        pname : str
+            The parameter name in ``self.parameters`` supplying the data units.
+
+        Returns
+        -------
+        tuple[float, float]
+            ``(x_factor, y_factor)`` scale factors to apply before/after model evaluation.
+
+        Raises
+        ------
+        sc.UnitError
+            If x or y units are physically incompatible (e.g. meV vs 1/angstrom).
+        """
+        if isinstance(binding.model, DiffusionModelBase):
+            return 1.0, 1.0
+
+        da = self.parameters[pname]
+        model = binding.model
+        x_factor = 1.0
+        y_factor = 1.0
+
+        if model.x_unit is not None:
+            q_unit = str(da.coords['Q'].unit)
+            try:
+                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(model.x_unit)).value
+            except Exception as e:
+                raise sc.UnitError(
+                    f"Q coordinate unit '{q_unit}' is incompatible with "
+                    f"model '{model.display_name}' x_unit '{model.x_unit}' "
+                    f"for parameter '{pname}'."
+                ) from e
+
+        if model.y_unit is not None:
+            param_unit = str(da.unit)
+            try:
+                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(model.y_unit)).value
+            except Exception as e:
+                raise sc.UnitError(
+                    f"Parameter '{pname}' unit '{param_unit}' is incompatible with "
+                    f"model '{model.display_name}' y_unit '{model.y_unit}'."
+                ) from e
+
+        return x_factor, y_factor
 
     def _get_xyweight_from_dataset(
         self, parameter_name: str

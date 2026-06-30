@@ -22,7 +22,7 @@ from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion 
 class TestParameterAnalysis:
     @pytest.fixture
     def dataset(self):
-        Q = sc.array(dims=['Q'], values=[0.1, 0.2])
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
         return sc.Dataset(
             data={
                 'parameter1': sc.DataArray(
@@ -63,7 +63,7 @@ class TestParameterAnalysis:
 
     @pytest.fixture
     def parameter_analysis(self, dataset):
-        model = Polynomial(coefficients=[1.0, 0.5])
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
         diffusion_model = BrownianTranslationalDiffusion()
 
         fit_binding1 = FitBinding(parameter_name='parameter1', model=model)
@@ -171,6 +171,82 @@ class TestParameterAnalysis:
             match="Parameter 'nonexistent_parameter' from binding",
         ):
             parameter_analysis.fit()
+
+    def test_fit_incompatible_x_unit_raises(self, dataset):
+        # WHEN: Polynomial has x_unit='meV' but Q coordinate has unit '1/angstrom'
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='meV', y_unit='meV')
+        binding = FitBinding(parameter_name='parameter1', model=model)
+        pa = ParameterAnalysis(parameters=dataset, bindings=binding)
+
+        # THEN EXPECT
+        with pytest.raises(Exception, match=r'Q coordinate unit .* is incompatible'):
+            pa.fit()
+
+    def test_fit_incompatible_y_unit_raises(self, dataset):
+        # WHEN: Polynomial has y_unit='1/angstrom' but parameter1 has unit 'meV'
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='1/angstrom')
+        binding = FitBinding(parameter_name='parameter1', model=model)
+        pa = ParameterAnalysis(parameters=dataset, bindings=binding)
+
+        # THEN EXPECT
+        with pytest.raises(Exception, match="Parameter 'parameter1' unit 'meV' is incompatible"):
+            pa.fit()
+
+    def test_fit_converts_x_unit(self):
+        # WHEN: Q is in '1/m' but the model declares x_unit='1/angstrom'.
+        # 1 1/m = 1e-10 1/angstrom, so values [1e10, 2e10] 1/m → [1.0, 2.0] 1/angstrom.
+        Q = sc.array(dims=['Q'], values=[1e10, 2e10], unit='1/m')
+        dataset = sc.Dataset(
+            data={
+                'param': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, 2.0], variances=[0.1, 0.2], unit='meV'),
+                    coords={'Q': Q},
+                )
+            }
+        )
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
+        pa = ParameterAnalysis(
+            parameters=dataset, bindings=FitBinding(parameter_name='param', model=model)
+        )
+
+        with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
+            MockMultiFitter.return_value.fit.return_value = MagicMock()
+            pa.fit()
+            x_passed = MockMultiFitter.return_value.fit.call_args.kwargs['x'][0]
+
+        # EXPECT: x values converted from 1/m to 1/angstrom
+        np.testing.assert_allclose(x_passed, [1.0, 2.0])
+
+    def test_fit_converts_y_unit(self):
+        # WHEN: parameter is in 'eV' but model declares y_unit='meV'.
+        # 1 eV = 1000 meV, so values [0.001, 0.002] eV → [1.0, 2.0] meV.
+        # Weights (= 1/std) scale by 1/y_factor: sqrt(1e-6)=1e-3 eV^-1 → 1.0 meV^-1.
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        dataset = sc.Dataset(
+            data={
+                'param': sc.DataArray(
+                    data=sc.array(
+                        dims=['Q'], values=[0.001, 0.002], variances=[1e-6, 4e-6], unit='eV'
+                    ),
+                    coords={'Q': Q},
+                )
+            }
+        )
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
+        pa = ParameterAnalysis(
+            parameters=dataset, bindings=FitBinding(parameter_name='param', model=model)
+        )
+
+        with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
+            MockMultiFitter.return_value.fit.return_value = MagicMock()
+            pa.fit()
+            kwargs = MockMultiFitter.return_value.fit.call_args.kwargs
+            y_passed = kwargs['y'][0]
+            w_passed = kwargs['weights'][0]
+
+        # EXPECT: y values converted from eV to meV; weights scaled inversely
+        np.testing.assert_allclose(y_passed, [1.0, 2.0])
+        np.testing.assert_allclose(w_passed, [1.0, 0.5])
 
     def test_fit_success(self, parameter_analysis):
         # WHEN
@@ -613,6 +689,54 @@ class TestParameterAnalysis:
         args, kwargs = mock_callable2w.call_args
         np.testing.assert_allclose(args[0], [0.1, 0.2])
         assert kwargs == {}
+
+    def test_calculate_model_dataset_converts_x_unit(self):
+        # WHEN: Q is in '1/m' but model declares x_unit='1/angstrom'.
+        # Values [1e10, 2e10] 1/m → [1.0, 2.0] 1/angstrom passed to callable.
+        Q = sc.array(dims=['Q'], values=[1e10, 2e10], unit='1/m')
+        dataset = sc.Dataset(
+            data={
+                'param': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, 2.0], unit='meV'),
+                    coords={'Q': Q},
+                )
+            }
+        )
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
+        binding = FitBinding(parameter_name='param', model=model)
+        pa = ParameterAnalysis(parameters=dataset, bindings=binding)
+
+        mock_callable = MagicMock(return_value=np.array([10.0, 20.0]))
+        with patch.object(binding, 'build_callables', return_value=[mock_callable]):
+            pa.calculate_model_dataset([binding])
+
+        # EXPECT: callable received x in 1/angstrom, not raw 1/m values
+        args, _ = mock_callable.call_args
+        np.testing.assert_allclose(args[0], [1.0, 2.0])
+
+    def test_calculate_model_dataset_converts_y_unit(self):
+        # WHEN: parameter is in 'eV' but model declares y_unit='meV'.
+        # Callable returns [1.0, 2.0] meV → stored as [0.001, 0.002] eV in the DataArray.
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        dataset = sc.Dataset(
+            data={
+                'param': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[0.001, 0.002], unit='eV'),
+                    coords={'Q': Q},
+                )
+            }
+        )
+        model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
+        binding = FitBinding(parameter_name='param', model=model)
+        pa = ParameterAnalysis(parameters=dataset, bindings=binding)
+
+        mock_callable = MagicMock(return_value=np.array([1.0, 2.0]))  # meV
+        with patch.object(binding, 'build_callables', return_value=[mock_callable]):
+            result = pa.calculate_model_dataset([binding])
+
+        # EXPECT: model output converted from meV back to eV
+        np.testing.assert_allclose(result['Polynomial'].values, [0.001, 0.002])
+        assert result['Polynomial'].unit == sc.Unit('eV')
 
     def test_append_binding(self, parameter_analysis):
         # WHEN
