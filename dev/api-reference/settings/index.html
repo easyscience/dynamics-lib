@@ -2099,7 +2099,7 @@ None. If suppress_warnings is not a boolean.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;__copy__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.ConvolutionSettings.__copy__&lt;/code&gt;)" href="#easydynamics.settings.ConvolutionSettings.__copy__">__copy__</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Return a copy of the object.</p>
+                  <p>Return a shallow copy of the ConvolutionSettings.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2687,10 +2687,36 @@ notebooks.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return a copy of the object.</p>
+        <p>Return a shallow copy of the ConvolutionSettings.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ConvolutionSettings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upsample_factor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;extension_factor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;suppress_warnings&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyConvolutionSettings&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings">ConvolutionSettings</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new ConvolutionSettings instance with the same parameter values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
@@ -3754,6 +3780,17 @@ None. If suppress_warnings is not a boolean.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;__copy__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__">__copy__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return a shallow copy of the ConvolutionSettings.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;fm&quot;&gt;__repr__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings.__repr__&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings.__repr__">__repr__</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -3795,17 +3832,6 @@ None. If suppress_warnings is not a boolean.</p>
               <td>
                 <div class="doc-md-description">
                   <p>This creates auto-completion and helps out in iPython</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;__copy__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__">__copy__</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Return a copy of the object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4296,6 +4322,53 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
 <div class="doc doc-object doc-function">
 
 
+<h7 id="easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">__copy__</span><span class="p">()</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a shallow copy of the ConvolutionSettings.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ConvolutionSettings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;upsample_factor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;extension_factor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;suppress_warnings&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;MyConvolutionSettings&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.settings.convolution_settings.ConvolutionSettings&lt;/code&gt;)" href="#easydynamics.settings.convolution_settings.ConvolutionSettings">ConvolutionSettings</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new ConvolutionSettings instance with the same parameter values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h7 id="easydynamics.settings.convolution_settings.ConvolutionSettings.__repr__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
 
@@ -4409,27 +4482,6 @@ dictionary.</p>
 notebooks.</p>
 <p>:return: list of function and parameter names for auto-
     completion</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h7 id="easydynamics.settings.convolution_settings.ConvolutionSettings.__copy__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">__copy__</span><span class="p">()</span></code>
-
-</h7>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return a copy of the object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

@@ -2000,6 +2000,28 @@ load from. If None, no data is loaded.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_finite_energy_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.get_finite_energy_mask&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.get_finite_energy_mask">get_finite_energy_mask</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Get a boolean scipp Variable selecting energy points with finite intensity at the given Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_binned_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.get_masked_binned_data&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.get_masked_binned_data">get_masked_binned_data</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Get the binned data for a single Q slice with non-finite points masked out.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;load_hdf5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.load_hdf5&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.load_hdf5">load_hdf5</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -2048,6 +2070,17 @@ load from. If None, no data is loaded.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the dataset using plopp: https://scipp.github.io/plopp/.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extract_x_y_weights_only_finite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.extract_x_y_weights_only_finite&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.extract_x_y_weights_only_finite">extract_x_y_weights_only_finite</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2685,7 +2718,7 @@ NaN or Inf for the given Q index.</p>
     </table>
 
 
-<p><span class="doc-section-title">Raises:</span></p>
+    <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
         <tr>
@@ -2696,15 +2729,70 @@ NaN or Inf for the given Q index.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="IndexError">IndexError</span></code>
+                  <code><span title="scipp">sc</span>.<span title="scipp.Variable">Variable</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q_index is not a valid index for the Q values.</p>
+                <p>The masked energy values from the dataset, or None if no data is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.experiment.Experiment.get_finite_energy_mask" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_finite_energy_mask</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get a boolean scipp Variable selecting energy points with finite intensity at the given Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to get the mask for.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -2726,7 +2814,90 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The masked energy values from the dataset, or None if no data is loaded.</p>
+                <p>Boolean scipp Variable of length n_energy with dim <code>'energy'</code>, or None if no data is
+loaded.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.experiment.Experiment.get_masked_binned_data" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_masked_binned_data</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the binned data for a single Q slice with non-finite points masked out.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to extract.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp">sc</span>.<span title="scipp.DataArray">DataArray</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The binned data for the given Q index with NaN/Inf points removed, or None if no data
+is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3241,6 +3412,116 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
 <div class="doc doc-object doc-function">
 
 
+<h5 id="easydynamics.experiment.Experiment.extract_x_y_weights_only_finite" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing
+any NaN and Inf values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to extract the data for.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If any variances are zero after removing NaNs and Infs, since this would lead to
+infinite weights.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
+with NaNs and Infs removed.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h5 id="easydynamics.experiment.Experiment.__repr__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
 
@@ -3578,6 +3859,28 @@ load from. If None, no data is loaded.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_finite_energy_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.get_finite_energy_mask&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.get_finite_energy_mask">get_finite_energy_mask</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Get a boolean scipp Variable selecting energy points with finite intensity at the given Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_binned_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.get_masked_binned_data&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.get_masked_binned_data">get_masked_binned_data</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Get the binned data for a single Q slice with non-finite points masked out.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;load_hdf5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;display_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.load_hdf5&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.load_hdf5">load_hdf5</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -3626,6 +3929,17 @@ load from. If None, no data is loaded.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Plot the dataset using plopp: https://scipp.github.io/plopp/.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extract_x_y_weights_only_finite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.extract_x_y_weights_only_finite&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.extract_x_y_weights_only_finite">extract_x_y_weights_only_finite</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4222,7 +4536,7 @@ NaN or Inf for the given Q index.</p>
     </table>
 
 
-<p><span class="doc-section-title">Raises:</span></p>
+    <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
         <tr>
@@ -4233,15 +4547,70 @@ NaN or Inf for the given Q index.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="IndexError">IndexError</span></code>
+                  <code><span title="scipp">sc</span>.<span title="scipp.Variable">Variable</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q_index is not a valid index for the Q values.</p>
+                <p>The masked energy values from the dataset, or None if no data is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.experiment.experiment.Experiment.get_finite_energy_mask" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_finite_energy_mask</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get a boolean scipp Variable selecting energy points with finite intensity at the given Q.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to get the mask for.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -4263,7 +4632,90 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The masked energy values from the dataset, or None if no data is loaded.</p>
+                <p>Boolean scipp Variable of length n_energy with dim <code>'energy'</code>, or None if no data is
+loaded.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.experiment.experiment.Experiment.get_masked_binned_data" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_masked_binned_data</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the binned data for a single Q slice with non-finite points masked out.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to extract.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="scipp">sc</span>.<span title="scipp.DataArray">DataArray</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The binned data for the given Q index with NaN/Inf points removed, or None if no data
+is loaded.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4778,6 +5230,116 @@ plotting, so that energy is on the x-axis. This only applies when slicer=False.<
 <div class="doc doc-object doc-function">
 
 
+<h7 id="easydynamics.experiment.experiment.Experiment.extract_x_y_weights_only_finite" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">extract_x_y_weights_only_finite</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Extract the x, y, and weights arrays from the experiment for the given Q index, removing
+any NaN and Inf values.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Q index to extract the data for.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If any variances are zero after removing NaNs and Infs, since this would lead to
+infinite weights.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>, <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The x, y, weights, and mask arrays extracted from the experiment for the given Q index,
+with NaNs and Infs removed.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h7 id="easydynamics.experiment.experiment.Experiment.__repr__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
 
@@ -4954,7 +5516,7 @@ notebooks.</p>
     </div>
 
 </div>
-
+<h4 id="easydynamics.experiment.experiment-functions">Functions</h4>
 
 
 
