@@ -31,6 +31,11 @@ class TestFitBinding:
         assert isinstance(fit_binding.model, Gaussian)
         assert fit_binding.modes is None
 
+    def test_init_with_string_modes(self):
+        model = Gaussian()
+        fb = FitBinding(parameter_name='param', model=model, modes='area')
+        assert fb.modes == ['area']
+
     @pytest.mark.parametrize(
         'parameter_name, model, modes, error_msg',
         [
@@ -261,6 +266,17 @@ class TestFitBinding:
         # EXPECT
         assert result_area == pytest.approx(6.0)  # Should ignore unused_arg
         assert result_width == pytest.approx(0.5)  # Should ignore unused_arg
+
+    def test_build_diffusion_callable_delta_mode(self, diffusion_fit_binding):
+        mock_model = Mock()
+        mock_model.calculate_EISF.return_value = 0.8
+        mock_model.scale.value = 2.0
+        diffusion_fit_binding._model = mock_model
+
+        delta_callable = diffusion_fit_binding._build_diffusion_callable(mode='delta')
+
+        assert delta_callable(0) == pytest.approx(1.6)
+        mock_model.calculate_EISF.assert_called_once_with(0)
 
     def test_build_diffusion_callable_errors(self, diffusion_fit_binding):
         # WHEN THEN EXPECT

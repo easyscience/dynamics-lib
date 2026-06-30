@@ -1092,3 +1092,9 @@ class TestAnalysis1d:
         # Residuals must be present and have matching size.
         assert 'Residuals' in datagroup
         assert datagroup['Residuals'].sizes['energy'] == 2
+
+    def test_repr(self, analysis1d):
+        repr_str = repr(analysis1d)
+        assert 'Analysis1d' in repr_str
+        assert 'display_name=' in repr_str
+        assert 'Q_index=' in repr_str

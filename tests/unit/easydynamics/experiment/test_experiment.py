@@ -142,6 +142,18 @@ class TestExperiment:
         with pytest.raises(OSError):
             experiment.load_hdf5('non_existent_file.h5')
 
+    def test_load_hdf5_invalid_data_type_raises(self, experiment):
+        "Test that loading a file that returns a non-DataArray raises TypeError"
+        # WHEN THEN EXPECT
+        with (
+            patch(
+                'easydynamics.experiment.experiment.sc_load_hdf5',
+                return_value=sc.scalar(1.0),
+            ),
+            pytest.raises(TypeError, match=r'sc\.DataArray'),
+        ):
+            experiment.load_hdf5('fake_file.h5')
+
     def test_save_hdf5(self, tmp_path, experiment):
         "Test saving data to an HDF5 file. Load the saved file"
         'using scipp and compare to the original data.'
@@ -333,6 +345,36 @@ class TestExperiment:
         # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             experiment_with_data.get_masked_energy(Q_index='not an index')
+
+    def test_get_finite_energy_mask_returns_none_without_data(self):
+        "Test get_finite_energy_mask returns None when no data is loaded"
+        # WHEN THEN EXPECT
+        assert Experiment().get_finite_energy_mask(Q_index=0) is None
+
+    def test_get_masked_binned_data_returns_none_without_data(self):
+        "Test get_masked_binned_data returns None when no data is loaded"
+        # WHEN THEN EXPECT
+        assert Experiment().get_masked_binned_data(Q_index=0) is None
+
+    def test_get_finite_energy_mask_with_data(self, experiment_with_data):
+        "Test get_finite_energy_mask returns a boolean scipp variable when data is loaded"
+        # WHEN
+        mask = experiment_with_data.get_finite_energy_mask(Q_index=0)
+
+        # EXPECT
+        assert mask is not None
+        assert mask.dims == ('energy',)
+        assert len(mask) == 3
+
+    def test_get_masked_binned_data_with_data(self, experiment_with_data):
+        "Test get_masked_binned_data returns a DataArray with all-finite data loaded"
+        # WHEN
+        result = experiment_with_data.get_masked_binned_data(Q_index=0)
+
+        # EXPECT
+        assert result is not None
+        assert isinstance(result, sc.DataArray)
+        assert result.dims == ('energy',)
 
     ##############
     # test plotting

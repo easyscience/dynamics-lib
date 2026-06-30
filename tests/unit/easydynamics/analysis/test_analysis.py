@@ -1083,3 +1083,9 @@ class TestAnalysis:
 
         # EXPECT - analysis_list is NOT marked dirty (callers must use Analysis.rebin())
         assert analysis._analysis_list_is_dirty is False
+
+    def test_repr(self, analysis):
+        repr_str = repr(analysis)
+        assert 'Analysis' in repr_str
+        assert 'display_name=' in repr_str
+        assert 'n_analyses=' in repr_str

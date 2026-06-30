@@ -1018,6 +1018,64 @@ class TestParameterAnalysis:
         expected_w = 1 / np.sqrt([0.1, 0.2])
         np.testing.assert_allclose(w, expected_w)
 
+    def test_get_xyweight_from_dataset_no_variances(self, parameter_analysis):
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(dims=['Q'], values=[1.0, 2.0], unit='meV'),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+        np.testing.assert_allclose(x, [0.1, 0.2])
+        np.testing.assert_allclose(y, [1.0, 2.0])
+        np.testing.assert_allclose(w, [1.0, 1.0])
+
+    def test_get_xyweight_from_dataset_all_nan_variances_raises(self, parameter_analysis):
+        Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
+        parameter_analysis.parameters = sc.Dataset(
+            data={
+                'parameter1': sc.DataArray(
+                    data=sc.array(
+                        dims=['Q'], values=[np.nan, np.nan], variances=[np.nan, np.nan], unit='meV'
+                    ),
+                    coords={'Q': Q},
+                ),
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="No finite positive variances found for parameter 'parameter1'",
+        ):
+            parameter_analysis._get_xyweight_from_dataset('parameter1')
+
+    def test_get_unit_conversions_none_x_unit(self, parameter_analysis):
+        from types import SimpleNamespace
+
+        mock_model = SimpleNamespace(x_unit=None, y_unit='meV')
+        mock_binding = SimpleNamespace(model=mock_model)
+
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(mock_binding, 'parameter1')
+
+        assert x_factor == pytest.approx(1.0)
+        assert y_factor == pytest.approx(1.0)
+
+    def test_get_unit_conversions_none_y_unit(self, parameter_analysis):
+        from types import SimpleNamespace
+
+        mock_model = SimpleNamespace(x_unit='1/angstrom', y_unit=None)
+        mock_binding = SimpleNamespace(model=mock_model)
+
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(mock_binding, 'parameter1')
+
+        assert x_factor == pytest.approx(1.0)
+        assert y_factor == pytest.approx(1.0)
+
     def test_repr(self, parameter_analysis):
         # WHEN
         repr_str = repr(parameter_analysis)

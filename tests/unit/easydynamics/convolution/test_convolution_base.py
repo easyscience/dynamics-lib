@@ -358,3 +358,23 @@ class TestConvolutionBase:
             convolution_base.convert_y_unit('K')
 
         assert convolution_base.y_unit == 'dimensionless'
+
+    def test_convert_x_unit_without_sample_components(self):
+        cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+        cb.convert_x_unit('eV')
+        assert cb.x_unit == 'eV'
+
+    def test_convert_x_unit_without_resolution_components(self):
+        sample = ComponentCollection(display_name='Sample')
+        cb = ConvolutionBase(
+            energy=np.linspace(-10, 10, 100),
+            sample_components=sample,
+            resolution_components=None,
+        )
+        cb.convert_x_unit('eV')
+        assert cb.x_unit == 'eV'
+
+    def test_convert_y_unit_without_sample_components(self):
+        cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+        cb.convert_y_unit('1/meV')
+        assert cb.y_unit == '1/meV'
