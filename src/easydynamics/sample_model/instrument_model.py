@@ -54,13 +54,13 @@ class InstrumentModel(NewBase):
 
     def __init__(
         self,
-        display_name: str = 'MyInstrumentModel',
+        display_name: str = "MyInstrumentModel",
         unique_name: str | None = None,
         Q: Q_type | None = None,
         resolution_model: ResolutionModel | SampleModel | None = None,
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
-        x_unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = "meV",
     ) -> None:
         """
         Initialize an InstrumentModel.
@@ -104,8 +104,8 @@ class InstrumentModel(NewBase):
         else:
             if not isinstance(resolution_model, (ResolutionModel, SampleModel)):
                 raise TypeError(
-                    f'resolution_model must be a ResolutionModel, a SampleModel or None, '
-                    f'got {type(resolution_model).__name__}'
+                    f"resolution_model must be a ResolutionModel, a SampleModel or None, "
+                    f"got {type(resolution_model).__name__}"
                 )
             if isinstance(resolution_model, SampleModel):
                 resolution_model = ResolutionModel.from_sample_model(resolution_model)
@@ -116,8 +116,8 @@ class InstrumentModel(NewBase):
         else:
             if not isinstance(background_model, BackgroundModel):
                 raise TypeError(
-                    f'background_model must be a BackgroundModel or None, '
-                    f'got {type(background_model).__name__}'
+                    f"background_model must be a BackgroundModel or None, "
+                    f"got {type(background_model).__name__}"
                 )
             self._background_model = background_model
 
@@ -125,10 +125,10 @@ class InstrumentModel(NewBase):
             energy_offset = 0.0
 
         if not isinstance(energy_offset, Numeric):
-            raise TypeError('energy_offset must be a number or None')
+            raise TypeError("energy_offset must be a number or None")
 
         self._energy_offset = Parameter(
-            name='energy_offset',
+            name="energy_offset",
             value=float(energy_offset),
             unit=self.x_unit,
             fixed=False,
@@ -171,8 +171,8 @@ class InstrumentModel(NewBase):
         """
         if not isinstance(value, (ResolutionModel, SampleModel)):
             raise TypeError(
-                f'resolution_model must be a ResolutionModel or SampleModel, '
-                f'got {type(value).__name__}'
+                f"resolution_model must be a ResolutionModel or SampleModel, "
+                f"got {type(value).__name__}"
             )
         if isinstance(value, SampleModel):
             value = ResolutionModel.from_sample_model(value)
@@ -208,7 +208,7 @@ class InstrumentModel(NewBase):
         """
         if not isinstance(value, BackgroundModel):
             raise TypeError(
-                f'background_model must be a BackgroundModel, got {type(value).__name__}'
+                f"background_model must be a BackgroundModel, got {type(value).__name__}"
             )
         self._background_model = value
         self._on_background_model_change()
@@ -256,8 +256,8 @@ class InstrumentModel(NewBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                'New Q values are not similar to the old ones. '
-                'To change Q values, first run clear_Q().'
+                "New Q values are not similar to the old ones. "
+                "To change Q values, first run clear_Q()."
             )
 
     @property
@@ -286,8 +286,8 @@ class InstrumentModel(NewBase):
             Always, as x_unit is read-only.
         """
         raise AttributeError(
-            f'x_unit is read-only. Use convert_x_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
+            f"x_unit is read-only. Use convert_x_unit to change the unit between allowed types "
+            f"or create a new {self.__class__.__name__} with the desired unit."
         )
 
     @property
@@ -318,7 +318,9 @@ class InstrumentModel(NewBase):
             If value is not a number.
         """
         if not isinstance(value, Numeric):
-            raise TypeError(f'energy_offset must be a number, got {type(value).__name__}')
+            raise TypeError(
+                f"energy_offset must be a number, got {type(value).__name__}"
+            )
         self._energy_offset.value = value
         self._on_energy_offset_change()
 
@@ -327,9 +329,23 @@ class InstrumentModel(NewBase):
     # --------------------------------------------------------------
 
     def clear_Q(self, confirm: bool = False) -> None:
+        """
+        Clear the Q values of the InstrumentModel and any associated ResolutionModel and
+        BackgroundModel, removing all component collections and their associated Parameters.
+
+        Parameters
+        ----------
+        confirm : bool, default=False
+            Confirmation to clear Q values.
+
+        Raises
+        ------
+        ValueError
+            If confirm is not True.
+        """
         if not confirm:
             raise ValueError(
-                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
+                "Clearing Q values requires confirmation. Set confirm=True to proceed."
             )
         self._Q = None
         self.background_model.clear_Q(confirm=True)
@@ -337,9 +353,22 @@ class InstrumentModel(NewBase):
         self._on_Q_change()
 
     def convert_x_unit(self, x_unit: str | sc.Unit) -> None:
+        """
+        Convert the unit of the InstrumentModel.
+
+        Parameters
+        ----------
+        unit_str : str | sc.Unit
+            The unit to convert to.
+
+        Raises
+        ------
+        ValueError
+            If unit_str is not a valid unit string or scipp Unit.
+        """
         unit = _validate_unit(x_unit)
         if unit is None:
-            raise ValueError('x_unit must be a valid unit string or scipp Unit')
+            raise ValueError("x_unit must be a valid unit string or scipp Unit")
 
         self._background_model.convert_x_unit(unit)
         self._resolution_model.convert_x_unit(unit)
@@ -351,6 +380,29 @@ class InstrumentModel(NewBase):
         self._x_unit = unit
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
+        """
+        Get all variables in the InstrumentModel.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value to get variables for. If None, get variables for all Q values.
+
+
+        Raises
+        ------
+        TypeError
+            If Q_index is not an int or None.
+        IndexError
+            If Q_index is out of bounds for the Q values in the InstrumentModel.
+
+        Returns
+        -------
+        list[Parameter]
+            A list of all variables in the InstrumentModel. If Q_index is specified, only variables
+            from the ComponentCollection at the given Q index are included. Otherwise, all
+            variables in the InstrumentModel are included.
+        """
         if self._Q is None:
             return []
 
@@ -359,10 +411,12 @@ class InstrumentModel(NewBase):
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+                raise TypeError(
+                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
+                )
             if Q_index < 0 or Q_index >= len(self._Q):
                 raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
+                    f"Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}"
                 )
             variables = [self._energy_offsets[Q_index]]
 
@@ -372,43 +426,122 @@ class InstrumentModel(NewBase):
         return variables
 
     def fix_resolution_parameters(self) -> None:
+        """Fix all parameters in the resolution model."""
         self.resolution_model.fix_all_parameters()
 
     def free_resolution_parameters(self) -> None:
+        """Free all parameters in the resolution model."""
         self.resolution_model.free_all_parameters()
 
     def normalize_resolution(self) -> None:
+        """Normalize the resolution model to have area 1."""
         self.resolution_model.normalize_area()
 
     def get_energy_offset(
         self,
         Q_index: int | None = None,
     ) -> Parameter | list[Parameter]:
+        """
+        Get the energy offset Parameter at a specific Q index.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value to get the energy offset for. If None, get the energy offset
+            for all Q values.
+
+        Raises
+        ------
+        ValueError
+            If no Q values are set in the InstrumentModel.
+        IndexError
+            If Q_index is out of bounds.
+        TypeError
+            If Q_index is not an int or None.
+
+        Returns
+        -------
+        Parameter | list[Parameter]
+            The energy offset Parameter at the specified Q index, or a list of Parameters if
+            Q_index is None.
+        """
         if self._Q is None:
-            raise ValueError('No Q values are set in the InstrumentModel.')
+            raise ValueError("No Q values are set in the InstrumentModel.")
 
         self._ensure_energy_offsets_current()
         if Q_index is None:
             return self._energy_offsets
 
         if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+            raise TypeError(
+                f"Q_index must be an int or None, got {type(Q_index).__name__}"
+            )
 
         if Q_index < 0 or Q_index >= len(self._Q):
-            raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
+            raise IndexError(
+                f"Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}"
+            )
 
         return self._energy_offsets[Q_index]
 
     def fix_energy_offset(self, Q_index: int | None = None) -> None:
+        """
+        Fix energy offset parameters.
+
+        If Q_index is specified, only fix the energy offset for that Q value. If Q_index is None,
+        fix energy offsets for all Q values.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value to fix the energy offset for. If None, fix energy offsets for
+            all Q values.
+        """
         self._fix_or_free_energy_offset(Q_index, fixed=True)
 
     def free_energy_offset(self, Q_index: int | None = None) -> None:
+        """
+        Free energy offset parameters.
+
+        If Q_index is specified, only free the energy offset for that Q value. If Q_index is None,
+        free energy offsets for all Q values.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value to free the energy offset for. If None, free energy offsets
+            for all Q values.
+        """
         self._fix_or_free_energy_offset(Q_index, fixed=False)
 
     # --------------------------------------------------------------
     # Private methods
     # --------------------------------------------------------------
-    def _fix_or_free_energy_offset(self, Q_index: int | None = None, fixed: bool = True) -> None:
+    def _fix_or_free_energy_offset(
+        self, Q_index: int | None = None, fixed: bool = True
+    ) -> None:
+        """
+        Fix or free energy offset parameters.
+
+        If Q_index is specified, only fix or free the energy offset for that Q value. If Q_index is
+        None, fix or free energy offsets for all Q values.
+
+        Parameters
+        ----------
+        Q_index : int | None, default=None
+            The index of the Q value to fix or free the energy offset for. If None, fix or free
+            energy offsets for all Q values.
+        fixed : bool, default=True
+            Whether to fix (True) or free (False) the energy offset.
+
+        Raises
+        ------
+        TypeError
+            If Q_index is not an int or None.
+        IndexError
+            If Q_index is out of bounds for the Q values in the InstrumentModel.
+        """
+
         self._ensure_energy_offsets_current()
         if Q_index is None:
             self._energy_offset.fixed = fixed
@@ -416,11 +549,13 @@ class InstrumentModel(NewBase):
                 offset.fixed = fixed
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+                raise TypeError(
+                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
+                )
 
             if Q_index < 0 or Q_index >= len(self._Q):
                 raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
+                    f"Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}"
                 )
             self._energy_offsets[Q_index].fixed = fixed
 
@@ -472,10 +607,10 @@ class InstrumentModel(NewBase):
             A string representation of the InstrumentModel.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'unique_name={self.unique_name!r}, '
-            f'x_unit={self.x_unit}, '
-            f'Q_len={None if self._Q is None else len(self._Q)}, '
-            f'resolution_model={self._resolution_model!r}, '
-            f'background_model={self._background_model!r})'
+            f"{self.__class__.__name__}("
+            f"unique_name={self.unique_name!r}, "
+            f"x_unit={self.x_unit}, "
+            f"Q_len={None if self._Q is None else len(self._Q)}, "
+            f"resolution_model={self._resolution_model!r}, "
+            f"background_model={self._background_model!r})"
         )
