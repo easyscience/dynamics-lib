@@ -59,49 +59,49 @@ class ExpressionComponent(ModelComponent):
 
     _ALLOWED_FUNCS: ClassVar[dict[str, object]] = {
         # exponential / logarithmic
-        "exp": sp.exp,
-        "log": sp.log,
-        "ln": sp.log,
-        "sqrt": sp.sqrt,
+        'exp': sp.exp,
+        'log': sp.log,
+        'ln': sp.log,
+        'sqrt': sp.sqrt,
         # trigonometric
-        "sin": sp.sin,
-        "cos": sp.cos,
-        "tan": sp.tan,
-        "sinc": sp.sinc,
-        "cot": sp.cot,
-        "sec": sp.sec,
-        "csc": sp.csc,
+        'sin': sp.sin,
+        'cos': sp.cos,
+        'tan': sp.tan,
+        'sinc': sp.sinc,
+        'cot': sp.cot,
+        'sec': sp.sec,
+        'csc': sp.csc,
         # inverse trigonometric
-        "asin": sp.asin,
-        "acos": sp.acos,
-        "atan": sp.atan,
+        'asin': sp.asin,
+        'acos': sp.acos,
+        'atan': sp.atan,
         # hyperbolic
-        "sinh": sp.sinh,
-        "cosh": sp.cosh,
-        "tanh": sp.tanh,
+        'sinh': sp.sinh,
+        'cosh': sp.cosh,
+        'tanh': sp.tanh,
         # rounding / sign
-        "abs": sp.Abs,
-        "sign": sp.sign,
-        "floor": sp.floor,
-        "ceil": sp.ceiling,
+        'abs': sp.Abs,
+        'sign': sp.sign,
+        'floor': sp.floor,
+        'ceil': sp.ceiling,
         # special functions
-        "erf": sp.erf,
+        'erf': sp.erf,
     }
 
     _ALLOWED_CONSTANTS: ClassVar[dict[str, object]] = {
-        "pi": sp.pi,
-        "E": sp.E,
+        'pi': sp.pi,
+        'E': sp.E,
     }
 
-    _RESERVED_NAMES: ClassVar[dict[str, object]] = {"x"}
+    _RESERVED_NAMES: ClassVar[dict[str, object]] = {'x'}
 
     def __init__(
         self,
         expression: str,
         parameters: dict[str, Numeric] | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "Expression",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'Expression',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -114,11 +114,11 @@ class ExpressionComponent(ModelComponent):
             The symbolic expression as a string. Must contain 'x' as the independent variable.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='Expression'
+        name : str, default="Expression"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -140,9 +140,9 @@ class ExpressionComponent(ModelComponent):
             unique_name=unique_name,
         )
 
-        if "np." in expression:
+        if 'np.' in expression:
             raise ValueError(
-                "NumPy syntax (np.*) is not supported. "
+                'NumPy syntax (np.*) is not supported. '
                 "Use functions like 'exp', 'sin', etc. directly."
             )
 
@@ -155,13 +155,13 @@ class ExpressionComponent(ModelComponent):
         try:
             self._expr = sp.sympify(expression, locals=locals_dict)
         except Exception as e:
-            raise ValueError(f"Invalid expression: {expression}") from e
+            raise ValueError(f'Invalid expression: {expression}') from e
 
         # Extract symbols from the expression
         symbols = self._expr.free_symbols
         symbol_names = sorted(str(s) for s in symbols)
 
-        if "x" not in symbol_names:
+        if 'x' not in symbol_names:
             raise ValueError("Expression must contain 'x' as independent variable")
         # Reject unknown functions early so invalid expressions fail at init,
         # not later during numerical evaluation.
@@ -186,7 +186,7 @@ class ExpressionComponent(ModelComponent):
         # Create parameters
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                f"Parameters must be None or a dictionary, got {type(parameters).__name__}"
+                f'Parameters must be None or a dictionary, got {type(parameters).__name__}'
             )
 
         if parameters is not None:
@@ -194,7 +194,7 @@ class ExpressionComponent(ModelComponent):
                 if not isinstance(value, (Numeric, Parameter, dict)):
                     raise TypeError(
                         f"Parameter '{name}' must be numeric, "
-                        f"a Parameter instance, or a dictionary, got {type(value).__name__}"
+                        f'a Parameter instance, or a dictionary, got {type(value).__name__}'
                     )
         parameters = parameters or {}
         self._parameters: dict[str, Parameter] = {}
@@ -207,7 +207,7 @@ class ExpressionComponent(ModelComponent):
             value = parameters.get(name, 1.0)
             if isinstance(value, Parameter):
                 self._parameters[name] = value
-            elif isinstance(value, dict) and value.get("@class") == "Parameter":
+            elif isinstance(value, dict) and value.get('@class') == 'Parameter':
                 self._parameters[name] = Parameter.from_dict(value)
             else:
                 self._parameters[name] = Parameter(
@@ -221,7 +221,7 @@ class ExpressionComponent(ModelComponent):
         self._func = sp.lambdify(
             ordered_symbols,
             self._expr,
-            modules=[{"erf": erf}, "numpy"],
+            modules=[{'erf': erf}, 'numpy'],
         )
 
         # -------------------------
@@ -256,12 +256,12 @@ class ExpressionComponent(ModelComponent):
             Always raised to prevent changing the expression.
         """
 
-        raise AttributeError("Expression cannot be changed after initialization")
+        raise AttributeError('Expression cannot be changed after initialization')
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         """
         Evaluate the expression for given x values.
@@ -273,7 +273,7 @@ class ExpressionComponent(ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input values for the independent variable.
-        output : str, default='numpy'
+        output : str, default="numpy"
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
@@ -285,23 +285,23 @@ class ExpressionComponent(ModelComponent):
 
         if detected_unit is not None and detected_unit != str(self._x_unit):
             warnings.warn(
-                f"Input x has unit {detected_unit} but {self.__class__.__name__} has "
-                f"x_unit {self._x_unit}. ExpressionComponent cannot auto-convert parameters. "
-                "x values are used as-is.",
+                f'Input x has unit {detected_unit} but {self.__class__.__name__} has '
+                f'x_unit {self._x_unit}. ExpressionComponent cannot auto-convert parameters. '
+                'x values are used as-is.',
                 UserWarning,
                 stacklevel=2,
             )
 
         args = []
         for name in self._symbol_names:
-            if name == "x":
+            if name == 'x':
                 args.append(x_vals)
             else:
                 args.append(self._parameters[name].value)
 
         result = self._func(*args)
 
-        if output == "scipp":
+        if output == 'scipp':
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
         return result
 
@@ -333,9 +333,7 @@ class ExpressionComponent(ModelComponent):
             Always raised to indicate unit conversion is not supported.
         """
         # TODO: Generalize x_unit conversion for ExpressionComponent. Not tackled in this PR.  # noqa: FIX002 TD002 TD003
-        raise NotImplementedError(
-            "Unit conversion is not implemented for ExpressionComponent"
-        )
+        raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
     def convert_y_unit(self, _new_unit: str | sc.Unit) -> None:
         """
@@ -354,9 +352,7 @@ class ExpressionComponent(ModelComponent):
             Always raised to indicate unit conversion is not supported.
         """
         # TODO: Generalize y_unit conversion for ExpressionComponent. Not tackled in this PR.  # noqa: FIX002 TD002 TD003
-        raise NotImplementedError(
-            "Unit conversion is not implemented for ExpressionComponent"
-        )
+        raise NotImplementedError('Unit conversion is not implemented for ExpressionComponent')
 
     # -------------------------
     # dunder methods
@@ -381,7 +377,7 @@ class ExpressionComponent(ModelComponent):
         Parameter
             The parameter with the given name.
         """
-        if "_parameters" in self.__dict__ and name in self._parameters:
+        if '_parameters' in self.__dict__ and name in self._parameters:
             return self._parameters[name]
         raise AttributeError(f"{self.__class__.__name__} has no attribute '{name}'")
 
@@ -401,10 +397,10 @@ class ExpressionComponent(ModelComponent):
         TypeError
             If the value is not numeric.
         """
-        if "_parameters" in self.__dict__ and name in self._parameters:
+        if '_parameters' in self.__dict__ and name in self._parameters:
             param = self._parameters[name]
             if not isinstance(value, Numeric):
-                raise TypeError(f"{name} must be numeric")
+                raise TypeError(f'{name} must be numeric')
             param.value = value
         else:
             super().__setattr__(name, value)
@@ -429,10 +425,10 @@ class ExpressionComponent(ModelComponent):
         str
             String representation of the ExpressionComponent.
         """
-        param_str = ", ".join(f"{k}={v.value}" for k, v in self._parameters.items())
+        param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
-            f"self.__class__.__name__(name={self.name}, display_name={self.display_name}, "
-            f"x_unit={self._x_unit}, y_unit={self._y_unit},\n"
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'x_unit={self._x_unit}, y_unit={self._y_unit},\n'
             f"    expr='{self._expression_str}',\n"
-            f"    parameters={{ {param_str} }} )"
+            f'    parameters={{ {param_str} }} )'
         )

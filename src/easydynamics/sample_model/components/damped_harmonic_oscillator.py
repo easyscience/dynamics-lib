@@ -22,8 +22,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
 
     $$ I(x) = \frac{2 A x_0^2 \gamma}{\pi \left( (x^2 - x_0^2)^2 + (2\gamma x)^2 \right)} $$
 
-    where $A$ is the area (``area``), $x_0$ is the center (``center``), and $\gamma$ is the half width at half max (``width``). area has unit = x_unit *
-    y_unit; center and width have unit = x_unit.
+    where $A$ is the area (``area``), $x_0$ is the center (``center``), and $\gamma$ is the half
+    width at half max (``width``). area has unit = x_unit * y_unit; center and width have unit =
+    x_unit.
 
     Examples
     --------
@@ -57,9 +58,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric = 1.0,
         width: Numeric = 1.0,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "DampedHarmonicOscillator",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'DampedHarmonicOscillator',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -71,17 +72,17 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         area : Numeric, default=1.0
             Integrated area under the DHO profile.  Unit is ``x_unit * y_unit``.
         center : Numeric, default=1.0
-            Resonance frequency (x_0) in x_unit; approximately the peak position.  Must be strictly positive; a minimum of
-            ``DHO_MINIMUM_CENTER`` (1e-10) is enforced.
+            Resonance frequency (x_0) in x_unit; approximately the peak position.  Must be strictly
+            positive; a minimum of ``DHO_MINIMUM_CENTER`` (1e-10) is enforced.
         width : Numeric, default=1.0
             Damping coefficient (gamma) in x_unit.  Must be strictly positive. Approximately equal
             to the HWHM of each peak.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
             y_unit.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='DampedHarmonicOscillator'
+        name : str, default="DampedHarmonicOscillator"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -107,9 +108,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             x_unit=self._x_unit,
             enforce_minimum_center=True,
         )
-        self._width = self._create_width_parameter(
-            width=width, name=name, x_unit=self._x_unit
-        )
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self._x_unit)
 
     @property
     def area(self) -> Parameter:
@@ -137,7 +136,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -168,9 +167,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If *value* is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         if float(value) <= 0:
-            raise ValueError("center must be positive")
+            raise ValueError('center must be positive')
         self._center.value = value
 
     @property
@@ -201,15 +200,15 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             If *value* is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number")
+            raise TypeError('width must be a number')
         if float(value) <= 0:
-            raise ValueError("width must be positive")
+            raise ValueError('width must be positive')
         self._width.value = value
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         r"""
         Evaluate the DHO at x.
@@ -224,7 +223,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input x values.
-        output : str, default='numpy'
+        output : str, default="numpy"
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
@@ -245,7 +244,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         # denominator cannot reach zero: center > 0 enforced by DHO_MINIMUM_CENTER
         result = area * normalization / denominator
 
-        if output == "scipp":
+        if output == 'scipp':
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
         return result
 
@@ -287,9 +286,9 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
             A string representation of the Damped Harmonic Oscillator.
         """
         return (
-            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
-            f"x_unit = {self._x_unit}, y_unit = {self._y_unit},\n "
-            f"    area = {self.area},\n "
-            f"    center = {self.center},\n "
-            f"    width = {self.width})"
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '
+            f'    area = {self.area},\n '
+            f'    center = {self.center},\n '
+            f'    width = {self.width})'
         )

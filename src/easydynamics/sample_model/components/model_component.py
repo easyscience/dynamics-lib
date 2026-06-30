@@ -22,20 +22,20 @@ class ModelComponent(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "ModelComponent",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'ModelComponent',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
         Parameters
         ----------
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit for the x-axis (independent variable) of this component.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit for the y-axis (dependent variable / output) of this component.
-        name : str, default='ModelComponent'
+        name : str, default="ModelComponent"
             Internal name used for parameter labelling and logging.
         display_name : str | None, default=None
             Human-readable name shown in plots and reports. Falls back to *name* if None.
@@ -75,8 +75,8 @@ class ModelComponent(EasyDynamicsModelBase):
             Always raised when this setter is called.
         """
         raise AttributeError(
-            f"x_unit is read-only. Use convert_x_unit to change the unit "
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'x_unit is read-only. Use convert_x_unit to change the unit '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )
 
     @property
@@ -105,8 +105,8 @@ class ModelComponent(EasyDynamicsModelBase):
             Always raised when this setter is called.
         """
         raise AttributeError(
-            f"y_unit is read-only. Use convert_y_unit to change the unit "
-            f"or create a new {self.__class__.__name__} with the desired unit."
+            f'y_unit is read-only. Use convert_y_unit to change the unit '
+            f'or create a new {self.__class__.__name__} with the desired unit.'
         )
 
     def fix_all_parameters(self) -> None:
@@ -157,17 +157,17 @@ class ModelComponent(EasyDynamicsModelBase):
             If x contains NaN or infinite values, or if a DataArray has more than one coordinate.
         """
         detected_unit: str | None = None
-        dim: str = "x"
+        dim: str = 'x'
         dim_from_dataarray: bool = False
 
         if isinstance(x, sc.DataArray):
             coords = dict(x.coords)
             ncoords = len(coords)
             if ncoords != 1:
-                coord_names = ", ".join(coords.keys())
+                coord_names = ', '.join(coords.keys())
                 raise ValueError(
-                    f"scipp.DataArray must have exactly one coordinate to be used as input `x`. "
-                    f"Found {ncoords} coordinates: {coord_names}."
+                    f'scipp.DataArray must have exactly one coordinate to be used as input `x`. '
+                    f'Found {ncoords} coordinates: {coord_names}.'
                 )
             dim, coord_obj = next(iter(coords.items()))
             x = coord_obj
@@ -176,7 +176,7 @@ class ModelComponent(EasyDynamicsModelBase):
         if isinstance(x, sc.Variable):
             detected_unit = str(x.unit)
             if not dim_from_dataarray:
-                dim = x.dims[0] if x.dims else "x"
+                dim = x.dims[0] if x.dims else 'x'
             x_in = x.value if x.sizes == {} else x.values
 
             # Validate that x's unit is compatible with model's x_unit
@@ -185,8 +185,8 @@ class ModelComponent(EasyDynamicsModelBase):
                     sc.to_unit(sc.scalar(1.0, unit=detected_unit), str(self._x_unit))
                 except Exception as e:
                     raise UnitError(
-                        f"Input x has unit {detected_unit}, which is incompatible with "
-                        f"{self.__class__.__name__} x_unit {self._x_unit}."
+                        f'Input x has unit {detected_unit}, which is incompatible with '
+                        f'{self.__class__.__name__} x_unit {self._x_unit}.'
                     ) from e
         else:
             x_in = x
@@ -197,10 +197,10 @@ class ModelComponent(EasyDynamicsModelBase):
             x_in = np.array(x_in)
 
         if any(np.isnan(x_in)):
-            raise ValueError("Input x contains NaN values.")
+            raise ValueError('Input x contains NaN values.')
 
         if any(np.isinf(x_in)):
-            raise ValueError("Input x contains infinite values.")
+            raise ValueError('Input x contains infinite values.')
 
         return x_in, detected_unit, dim
 
@@ -226,9 +226,7 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         if target_unit is None or str(param.unit) == str(target_unit):
             return param.value
-        return sc.to_unit(
-            sc.scalar(param.value, unit=str(param.unit)), target_unit
-        ).value
+        return sc.to_unit(sc.scalar(param.value, unit=str(param.unit)), target_unit).value
 
     def _convert_x_unit_area_based(
         self,
@@ -259,9 +257,7 @@ class ModelComponent(EasyDynamicsModelBase):
             If the conversion fails; all parameters are rolled back to their original units.
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}"
-            )
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
         old_x_unit = self._x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self._y_unit))
@@ -306,16 +302,12 @@ class ModelComponent(EasyDynamicsModelBase):
             If the conversion fails; the area parameter is rolled back to its original unit.
         """
         if not isinstance(new_y_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}"
-            )
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
         old_y_unit = self._y_unit
         new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
         try:
             area_param.convert_unit(new_area_unit)
-            self._y_unit = (
-                str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
-            )
+            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
         except Exception as e:
             try:
                 old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
@@ -345,18 +337,14 @@ class ModelComponent(EasyDynamicsModelBase):
             component is rolled back to its original unit.
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}"
-            )
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
         old_unit = self._x_unit
         pars = self.get_all_parameters()
         try:
             for p in pars:
                 p.convert_unit(new_x_unit)
-            self._x_unit = (
-                str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-            )
+            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         except Exception as e:
             try:
                 for p in pars:
@@ -381,15 +369,13 @@ class ModelComponent(EasyDynamicsModelBase):
             (area_unit = x_unit * y_unit) must override this method to rescale the area
             appropriately.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not support convert_y_unit."
-        )
+        raise NotImplementedError(f'{self.__class__.__name__} does not support convert_y_unit.')
 
     @abstractmethod
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         """
         Evaluate the model component at input x.
@@ -397,7 +383,7 @@ class ModelComponent(EasyDynamicsModelBase):
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default='numpy'
+        output : str, default="numpy"
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
@@ -416,6 +402,6 @@ class ModelComponent(EasyDynamicsModelBase):
             A string representation of the ModelComponent.
         """
         return (
-            f"{self.__class__.__name__}(unique_name={self.unique_name}, "
-            f"x_unit={self._x_unit}, y_unit={self._y_unit})"
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'x_unit={self._x_unit}, y_unit={self._y_unit})'
         )

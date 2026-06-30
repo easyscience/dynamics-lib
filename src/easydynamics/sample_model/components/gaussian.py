@@ -61,9 +61,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "Gaussian",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'Gaussian',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -78,12 +78,12 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
         width : Numeric, default=1.0
             Standard deviation (sigma) in x_unit.  Must be strictly positive.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
             y_unit.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='Gaussian'
+        name : str, default="Gaussian"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -104,9 +104,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         self._center = self._create_center_parameter(
             center=center, name=name, fix_if_none=True, x_unit=self._x_unit
         )
-        self._width = self._create_width_parameter(
-            width=width, name=name, x_unit=self._x_unit
-        )
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self._x_unit)
 
     @property
     def area(self) -> Parameter:
@@ -134,7 +132,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("area must be a number")
+            raise TypeError('area must be a number')
         self._area.value = value
 
     @property
@@ -167,7 +165,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError("center must be a number")
+            raise TypeError('center must be a number')
         self._center.value = value
 
     @property
@@ -198,15 +196,15 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             If *value* is not positive.
         """
         if not isinstance(value, Numeric):
-            raise TypeError("width must be a number")
+            raise TypeError('width must be a number')
         if float(value) <= 0:
-            raise ValueError("width must be positive")
+            raise ValueError('width must be positive')
         self._width.value = value
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         r"""
         Evaluate the Gaussian at x.
@@ -222,7 +220,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default='numpy'
+        output : str, default="numpy"
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
@@ -242,7 +240,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         exponent = -0.5 * ((x_vals - center) / width) ** 2
         result = area * normalization * np.exp(exponent)
 
-        if output == "scipp":
+        if output == 'scipp':
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
         return result
 
@@ -284,9 +282,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             A string representation of the Gaussian.
         """
         return (
-            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
-            f"x_unit = {self._x_unit}, y_unit = {self._y_unit},\n"
-            f"    area = {self.area},\n"
-            f"    center = {self.center},\n"
-            f"    width = {self.width})"
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center},\n'
+            f'    width = {self.width})'
         )

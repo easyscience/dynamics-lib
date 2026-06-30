@@ -9,9 +9,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
-    DiffusionModelBase,
-)
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
@@ -54,10 +52,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         scale: Numeric = 1.0,
         diffusion_coefficient: Numeric = 1.0,
         Q: Q_type | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "BrownianTranslationalDiffusion",
-        display_name: str | None = "BrownianTranslationalDiffusion",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'BrownianTranslationalDiffusion',
+        display_name: str | None = 'BrownianTranslationalDiffusion',
         lorentzian_name: str | None = None,
         lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
@@ -73,13 +71,13 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Diffusion coefficient D in m^2/s.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
-        name : str, default='BrownianTranslationalDiffusion'
+        name : str, default="BrownianTranslationalDiffusion"
             Name of the diffusion model.
-        display_name : str | None, default='BrownianTranslationalDiffusion'
+        display_name : str | None, default="BrownianTranslationalDiffusion"
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -112,16 +110,16 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         )
 
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError("diffusion_coefficient must be a number.")
+            raise TypeError('diffusion_coefficient must be a number.')
 
         if float(diffusion_coefficient) < 0:
-            raise ValueError("diffusion_coefficient must be non-negative.")
+            raise ValueError('diffusion_coefficient must be non-negative.')
 
         diffusion_coefficient = Parameter(
-            name="diffusion_coefficient",
+            name='diffusion_coefficient',
             value=float(diffusion_coefficient),
             fixed=False,
-            unit="m**2/s",
+            unit='m**2/s',
             min=0.0,
         )
 
@@ -165,10 +163,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             If diffusion_coefficient is negative.
         """
         if not isinstance(diffusion_coefficient, Numeric):
-            raise TypeError("diffusion_coefficient must be a number.")
+            raise TypeError('diffusion_coefficient must be a number.')
 
         if float(diffusion_coefficient) < 0:
-            raise ValueError("diffusion_coefficient must be non-negative.")
+            raise ValueError('diffusion_coefficient must be non-negative.')
         self._diffusion_coefficient.value = float(diffusion_coefficient)
 
     # ------------------------------------------------------------------
@@ -191,9 +189,7 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         """
         Q = self._ensure_Q(Q)
 
-        unit_conversion_factor = (
-            self._hbar * self.diffusion_coefficient / (self._angstrom**2)
-        )
+        unit_conversion_factor = self._hbar * self.diffusion_coefficient / (self._angstrom**2)
         unit_conversion_factor.convert_unit(self.x_unit)
         return Q**2 * unit_conversion_factor.value
 
@@ -263,8 +259,8 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
         # No delta function, as the EISF is 0.
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                name=f"{self.name}_Q{Q_value:.2f}",
-                display_name=f"{self.display_name}_Q{Q_value:.2f}",
+                name=f'{self.name}_Q{Q_value:.2f}',
+                display_name=f'{self.display_name}_Q{Q_value:.2f}',
                 x_unit=self.x_unit,
                 y_unit=self.y_unit,
             )
@@ -329,10 +325,10 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Dependency expression for the width.
         """
         if not isinstance(Q, (float)):
-            raise TypeError("Q must be a float.")
+            raise TypeError('Q must be a float.')
 
         # Q is given as a float, so we need to add the units
-        return f"hbar * D* {Q} **2*1/(angstrom**2)"
+        return f'hbar * D* {Q} **2*1/(angstrom**2)'
 
     def _write_width_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """
@@ -344,9 +340,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Dependency map for the width.
         """
         return {
-            "D": self.diffusion_coefficient,
-            "hbar": self._hbar,
-            "angstrom": self._angstrom,
+            'D': self.diffusion_coefficient,
+            'hbar': self._hbar,
+            'angstrom': self._angstrom,
         }
 
     # ------------------------------------------------------------------
@@ -363,9 +359,9 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             String representation of the BrownianTranslationalDiffusion model.
         """
         return (
-            f"{self.__class__.__name__}("
-            f"name={self.name!r}, display_name={self.display_name!r},\n"
-            f"x_unit={self.x_unit}), y_unit={self.y_unit}, \n"
-            f"    diffusion_coefficient={self.diffusion_coefficient},\n"
-            f"    scale={self.scale})"
+            f'{self.__class__.__name__}('
+            f'name={self.name!r}, display_name={self.display_name!r},\n'
+            f'x_unit={self.x_unit}), y_unit={self.y_unit}, \n'
+            f'    diffusion_coefficient={self.diffusion_coefficient},\n'
+            f'    scale={self.scale})'
         )

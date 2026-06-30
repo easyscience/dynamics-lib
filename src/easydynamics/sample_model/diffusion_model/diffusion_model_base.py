@@ -21,10 +21,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self,
         scale: Numeric = 1.0,
         Q: Q_type | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "DiffusionModel",
-        display_name: str | None = "DiffusionModel",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'DiffusionModel',
+        display_name: str | None = 'DiffusionModel',
         lorentzian_name: str | None = None,
         lorentzian_display_name: str | None = None,
         unique_name: str | None = None,
@@ -39,13 +39,13 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             area_unit = x_unit * y_unit because scale * QISF/EISF (dimensionless) = component area.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the model output (intensity). Together with x_unit determines area_unit.
-        name : str, default='DiffusionModel'
+        name : str, default="DiffusionModel"
             Name of the diffusion model.
-        display_name : str | None, default='DiffusionModel'
+        display_name : str | None, default="DiffusionModel"
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion
@@ -70,22 +70,22 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._Q = _validate_and_convert_Q(Q)
 
         try:
-            test = DescriptorNumber(name="test", value=1, unit=x_unit)
-            test.convert_unit("meV")
+            test = DescriptorNumber(name='test', value=1, unit=x_unit)
+            test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f"Invalid unit: {x_unit}. Unit must be a string or scipp Unit and convertible to meV."  # noqa: E501
+                f'Invalid unit: {x_unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
             ) from e
 
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
         if float(scale) < 0:
-            raise ValueError("scale must be non-negative.")
+            raise ValueError('scale must be non-negative.')
 
         area_unit = str(sc.Unit(x_unit) * sc.Unit(y_unit))
         self._scale = Parameter(
-            name="scale", value=float(scale), fixed=False, min=0.0, unit=area_unit
+            name='scale', value=float(scale), fixed=False, min=0.0, unit=area_unit
         )
 
         super().__init__(
@@ -100,13 +100,13 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             lorentzian_name = name
 
         if not isinstance(lorentzian_name, str):
-            raise TypeError("lorentzian_name must be a string.")
+            raise TypeError('lorentzian_name must be a string.')
 
         if lorentzian_display_name is None:
             lorentzian_display_name = lorentzian_name
 
         if not isinstance(lorentzian_display_name, str):
-            raise TypeError("lorentzian_display_name must be a string or None.")
+            raise TypeError('lorentzian_display_name must be a string or None.')
 
         self._lorentzian_name = lorentzian_name
         self._lorentzian_display_name = lorentzian_display_name
@@ -153,10 +153,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If scale is negative.
         """
         if not isinstance(scale, Numeric):
-            raise TypeError("scale must be a number.")
+            raise TypeError('scale must be a number.')
 
         if float(scale) < 0:
-            raise ValueError("scale must be non-negative.")
+            raise ValueError('scale must be non-negative.')
         self._scale.value = float(scale)
 
     @property
@@ -201,8 +201,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                "New Q values are not similar to the old ones. "
-                "To change Q values, first run clear_Q()."
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
             )
 
     @property
@@ -233,7 +233,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If lorentzian_name is not a string.
         """
         if not isinstance(lorentzian_name, str):
-            raise TypeError("lorentzian_name must be a string.")
+            raise TypeError('lorentzian_name must be a string.')
         self._lorentzian_name = lorentzian_name
 
     @property
@@ -264,7 +264,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If lorentzian_display_name is not a string or None.
         """
         if not isinstance(lorentzian_display_name, (str, type(None))):
-            raise TypeError("lorentzian_display_name must be a string or None.")
+            raise TypeError('lorentzian_display_name must be a string or None.')
         self._lorentzian_display_name = lorentzian_display_name
 
     def clear_Q(self, confirm: bool = False) -> None:
@@ -284,7 +284,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         if not confirm:
             raise ValueError(
-                "Clearing Q values requires confirmation. Set confirm=True to proceed."
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
         self._on_Q_change()
@@ -332,8 +332,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             or Q_index >= len(self._component_collections)
         ):
             raise ValueError(
-                f"Q_index must be an integer between 0 and "
-                f"{max(len(self._component_collections) - 1, 0)}, or None."
+                f'Q_index must be an integer between 0 and '
+                f'{max(len(self._component_collections) - 1, 0)}, or None.'
             )
 
         return []
@@ -365,8 +365,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             or Q_index >= len(self._component_collections)
         ):
             raise ValueError(
-                f"Q_index must be an integer between 0 and "
-                f"{max(len(self._component_collections) - 1, 0)}, or None."
+                f'Q_index must be an integer between 0 and '
+                f'{max(len(self._component_collections) - 1, 0)}, or None.'
             )
 
         variables = self.get_global_variables()
@@ -394,11 +394,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         list[Parameter]
             A list of all Parameters from the diffusion model.
         """
-        return [
-            param
-            for param in self.get_all_variables(Q_index)
-            if isinstance(param, Parameter)
-        ]
+        return [param for param in self.get_all_variables(Q_index) if isinstance(param, Parameter)]
 
     def get_fittable_parameters(self, Q_index: int | None = None) -> list[Parameter]:
         """
@@ -436,9 +432,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         list[Parameter]
             A list of all free Parameters from the diffusion model.
         """
-        return [
-            param for param in self.get_fittable_parameters(Q_index) if not param.fixed
-        ]
+        return [param for param in self.get_fittable_parameters(Q_index) if not param.fixed]
 
     def get_fit_parameters(self, Q_index: int | None = None) -> list[Parameter]:
         """
@@ -470,8 +464,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             return self._component_collections
 
         self._component_collections = [
-            ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
-            for _ in range(len(self.Q))
+            ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit) for _ in range(len(self.Q))
         ]
 
         return self._component_collections
@@ -505,11 +498,11 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             return self._component_collections
 
         if not isinstance(Q_index, int):
-            raise TypeError(f"Q_index must be an int, got {type(Q_index).__name__}")
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
         if Q_index < 0 or Q_index >= len(self._component_collections):
             raise IndexError(
-                f"Q_index {Q_index} is out of bounds for component collections "
-                f"of length {len(self._component_collections)}"
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
 
@@ -537,8 +530,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             Dependency expression for the area.
         """
         if not isinstance(QISF, float):
-            raise TypeError("QISF must be a float.")
-        return f"{QISF} * scale"
+            raise TypeError('QISF must be a float.')
+        return f'{QISF} * scale'
 
     def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
         """
@@ -549,7 +542,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         dict[str, DescriptorNumber]
             Dependency map for the area.
         """
-        return {"scale": self.scale}
+        return {'scale': self.scale}
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
@@ -578,9 +571,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if Q is None:
             Q = self.Q
         if Q is None:
-            raise ValueError(
-                "Q must be provided either as an argument or set in the model."
-            )
+            raise ValueError('Q must be provided either as an argument or set in the model.')
 
         return _validate_and_convert_Q(Q)
 
@@ -598,7 +589,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f"{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, "
-            f"x_unit={self.x_unit}), y_unit={self.y_unit}, \n"
-            f"    scale={self.scale})"
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'x_unit={self.x_unit}), y_unit={self.y_unit}, \n'
+            f'    scale={self.scale})'
         )

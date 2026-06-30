@@ -510,11 +510,11 @@ class TestDeltaLorentz:
             assert 'A_0' in collection[1].area.dependency_expression
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError),
+            (100, IndexError),
+            ('string', TypeError),
         ],
         ids=[
             'negative index',
@@ -522,9 +522,11 @@ class TestDeltaLorentz:
             'non-integer index',
         ],
     )
-    def test_get_independent_variables_raises(self, delta_lorentz_model_with_Q, Q_index):
+    def test_get_independent_variables_raises(
+        self, delta_lorentz_model_with_Q, Q_index, expected_exception
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=r'Q_index must be an integer'):
             delta_lorentz_model_with_Q.get_independent_variables(Q_index=Q_index)
 
     def test_get_all_variables_no_Q_index(self, delta_lorentz_model_with_Q):
@@ -584,10 +586,10 @@ class TestDeltaLorentz:
 
     def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+        with pytest.raises(IndexError, match='Q_index must be an integer'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=-1)
 
-        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+        with pytest.raises(IndexError, match='Q_index must be an integer'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=len(delta_lorentz_model_with_Q.Q))
 
     @pytest.mark.parametrize(

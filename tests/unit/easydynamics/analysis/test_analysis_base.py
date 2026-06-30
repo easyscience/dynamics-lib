@@ -571,7 +571,7 @@ class TestAnalysisBase:
         invalid_Q_index = -1
 
         # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index must be a valid index'):
+        with pytest.raises(IndexError, match='Q_index must be an integer'):
             analysis_base._verify_Q_index(invalid_Q_index)
 
     def test_verify_Q_index_invalid_when_Q_is_none(self, analysis_base):
@@ -579,7 +579,7 @@ class TestAnalysisBase:
         positive_Q_index = 0
 
         # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index must be a valid index'):
+        with pytest.raises(IndexError, match='Q_index must be an integer'):
             analysis_base._verify_Q_index(positive_Q_index)
 
     def test_repr(self, analysis_base):

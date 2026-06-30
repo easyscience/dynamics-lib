@@ -152,7 +152,7 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='must be a valid index',
+            match='Q_index must be an integer',
         ):
             analysis.calculate(Q_index=3)
 
@@ -760,7 +760,7 @@ class TestAnalysis:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='must be a valid index',
+            match='Q_index must be an integer',
         ):
             analysis.fit(Q_index=3)
 
