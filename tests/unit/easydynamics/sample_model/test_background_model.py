@@ -80,3 +80,23 @@ class TestBackgroundModel:
             collection = ComponentCollection()
             collection.append_component(invalid_component)
             BackgroundModel(components=collection)
+
+    def test_y_unit_default(self, background_model):
+        # WHEN THEN EXPECT
+        assert background_model.y_unit == 'dimensionless'
+
+    def test_y_unit_setter_raises(self, background_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            background_model.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        model = BackgroundModel(components=g, x_unit='meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+        # EXPECT
+        assert model.y_unit == '1/eV'
+        assert model.components[0].y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)

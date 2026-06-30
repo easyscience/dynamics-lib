@@ -427,6 +427,11 @@ class TestModelBase:
         # WHEN THEN EXPECT
         assert model_base.y_unit == 'dimensionless'
 
+    def test_y_unit_setter_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            model_base.y_unit = '1/meV'
+
     def test_convert_y_unit(self):
         # WHEN: model with components where y_unit='1/meV' so area_unit ≈ dimensionless
         g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
@@ -441,6 +446,8 @@ class TestModelBase:
         assert model.y_unit == '1/eV'
         for component in model.components:
             assert component.y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)
+        assert lor.area.value == pytest.approx(1e3)
         # Component collections rebuilt on demand reflect the new unit
         for component in model.get_component_collection(0):
             assert component.y_unit == '1/eV'

@@ -517,6 +517,17 @@ class TestComponentCollection:
         # WHEN THEN EXPECT
         assert component_collection.y_unit == 'dimensionless'
 
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        cc = ComponentCollection(y_unit='1/meV')
+        # EXPECT
+        assert cc.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, component_collection):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            component_collection.y_unit = '1/meV'
+
     def test_convert_y_unit(self):
         # WHEN: components with y_unit='1/meV' so area_unit ≈ dimensionless
         g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
@@ -530,6 +541,8 @@ class TestComponentCollection:
         assert cc.y_unit == '1/eV'
         for component in cc:
             assert component.y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)
+        assert lor.area.value == pytest.approx(1e3)
 
     def test_convert_y_unit_invalid_type_raises(self, component_collection):
         # WHEN THEN EXPECT
@@ -569,6 +582,17 @@ class TestComponentCollection:
         assert cc.y_unit == '1/meV'
         assert g.y_unit == '1/meV'
         assert g.area.value == pytest.approx(original_area)
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        cc = ComponentCollection(components=[g], y_unit='1/meV')
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = cc.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
 
     # ───── Regression tests ─────
 

@@ -537,3 +537,23 @@ class TestSampleModel:
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
         assert 'normalize_detailed_balance' in repr_str
+
+    def test_y_unit_default(self, sample_model):
+        # WHEN THEN EXPECT
+        assert sample_model.y_unit == 'dimensionless'
+
+    def test_y_unit_setter_raises(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            sample_model.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        model = SampleModel(components=g, x_unit='meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+        # EXPECT
+        assert model.y_unit == '1/eV'
+        assert model.components[0].y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)

@@ -301,3 +301,23 @@ class TestResolutionModel:
             match='cannot be a DeltaFunction',
         ):
             ResolutionModel.from_sample_model(sample_model)
+
+    def test_y_unit_default(self, resolution_model):
+        # WHEN THEN EXPECT
+        assert resolution_model.y_unit == 'dimensionless'
+
+    def test_y_unit_setter_raises(self, resolution_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            resolution_model.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        model = ResolutionModel(components=g, x_unit='meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+        # EXPECT
+        assert model.y_unit == '1/eV'
+        assert model.components[0].y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)
