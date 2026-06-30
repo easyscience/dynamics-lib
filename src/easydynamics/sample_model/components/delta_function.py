@@ -59,9 +59,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self,
         center: Numeric | None = None,
         area: Numeric = 1.0,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'DeltaFunction',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "DeltaFunction",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -127,7 +127,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('area must be a number')
+            raise TypeError("area must be a number")
         self._area.value = value
 
     @property
@@ -160,19 +160,19 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
+        output: str = "numpy",
     ) -> np.ndarray | sc.Variable:
         """
         Evaluate the Delta function at x.
 
         Parameters in the model's own units are temporarily converted to x's unit for the
-        computation — the model is never mutated.
+        computation.
 
         Parameters
         ----------
@@ -222,7 +222,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             bin_width = 0.5 * (left + right)
             model[i] = area / bin_width
 
-        if output == 'scipp':
+        if output == "scipp":
             return sc.array(dims=[dim], values=model, unit=self._y_unit)
         return model
 
@@ -264,8 +264,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             A string representation of the Delta function.
         """
         return (
-            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
-            f'    area = {self.area},\n'
-            f'    center = {self.center})'
+            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
+            f"x_unit = {self.x_unit}, y_unit = {self.y_unit},\n"
+            f"    area = {self.area},\n"
+            f"    center = {self.center})"
         )

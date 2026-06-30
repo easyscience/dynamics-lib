@@ -53,9 +53,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
         amplitude: Numeric = 1.0,
         center: Numeric | None = None,
         rate: Numeric = 1.0,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'Exponential',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "Exponential",
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -102,26 +102,24 @@ class Exponential(CreateParametersMixin, ModelComponent):
         amplitude_unit = str(sc.Unit(x_unit_str) * sc.Unit(self._y_unit))
 
         if not isinstance(amplitude, Numeric):
-            raise TypeError('amplitude must be a number.')
+            raise TypeError("amplitude must be a number.")
         if not np.isfinite(amplitude):
-            raise ValueError('amplitude must be finite.')
-        amplitude = Parameter(
-            name=name + ' amplitude', value=float(amplitude), unit=amplitude_unit
+            raise ValueError("amplitude must be finite.")
+        self._amplitude = Parameter(
+            name=name + " amplitude", value=float(amplitude), unit=amplitude_unit
         )
 
-        center = self._create_center_parameter(
+        self._center = self._create_center_parameter(
             center=center, name=name, fix_if_none=True, x_unit=self._x_unit
         )
 
         if not isinstance(rate, Numeric):
-            raise TypeError('rate must be a number.')
+            raise TypeError("rate must be a number.")
         if not np.isfinite(rate):
-            raise ValueError('rate must be finite.')
-        rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
-
-        self._amplitude = amplitude
-        self._center = center
-        self._rate = rate
+            raise ValueError("rate must be finite.")
+        self._rate = Parameter(
+            name=name + " rate", value=float(rate), unit="1/" + x_unit_str
+        )
 
     @property
     def amplitude(self) -> Parameter:
@@ -149,7 +147,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('amplitude must be a number')
+            raise TypeError("amplitude must be a number")
         self._amplitude.value = value
 
     @property
@@ -182,7 +180,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             value = 0.0
             self._center.fixed = True
         if not isinstance(value, Numeric):
-            raise TypeError('center must be a number')
+            raise TypeError("center must be a number")
         self._center.value = value
 
     @property
@@ -211,19 +209,19 @@ class Exponential(CreateParametersMixin, ModelComponent):
             If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
-            raise TypeError('rate must be a number')
+            raise TypeError("rate must be a number")
         self._rate.value = value
 
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
+        output: str = "numpy",
     ) -> np.ndarray | sc.Variable:
         r"""
         Evaluate the Exponential at x.
 
         Parameters in the model's own units are temporarily converted to x's unit for the
-        computation — the model is never mutated.
+        computation.
 
         Parameters
         ----------
@@ -240,7 +238,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
         eval_unit = detected_unit or self._x_unit
         eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
-        eval_rate_unit = '1/' + str(eval_unit)
+        eval_rate_unit = "1/" + str(eval_unit)
 
         center = self._resolve_param_value(self._center, eval_unit)
         rate = self._resolve_param_value(self._rate, eval_rate_unit)
@@ -249,7 +247,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         exponent = rate * (x_vals - center)
         result = amplitude * np.exp(exponent)
 
-        if output == 'scipp':
+        if output == "scipp":
             return sc.array(dims=[dim], values=result, unit=self._y_unit)
         return result
 
@@ -276,14 +274,14 @@ class Exponential(CreateParametersMixin, ModelComponent):
         try:
             self._center.convert_unit(new_x_unit)
             self._amplitude.convert_unit(new_area_unit)
-            self._rate.convert_unit('1/' + new_x_str)
+            self._rate.convert_unit("1/" + new_x_str)
             self._x_unit = new_x_str
         except Exception as e:
             try:
                 old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
                 self._center.convert_unit(old_x_unit)
                 self._amplitude.convert_unit(old_area_unit)
-                self._rate.convert_unit('1/' + str(old_x_unit))
+                self._rate.convert_unit("1/" + str(old_x_unit))
             except Exception:  # noqa: S110
                 pass
             raise e
@@ -299,7 +297,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
         new_y_unit : str | sc.Unit
             Target y-axis unit.
         """
-        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._amplitude)
+        self._convert_y_unit_area_based(
+            new_y_unit=new_y_unit, area_param=self._amplitude
+        )
 
     def __repr__(self) -> str:
         """
@@ -311,9 +311,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
             A string representation of the Exponential.
         """
         return (
-            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '
-            f'    amplitude = {self.amplitude},\n '
-            f'    center = {self.center},\n '
-            f'    rate = {self.rate})'
+            f"{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, "
+            f"x_unit = {self._x_unit}, y_unit = {self._y_unit},\n "
+            f"    amplitude = {self.amplitude},\n "
+            f"    center = {self.center},\n "
+            f"    rate = {self.rate})"
         )

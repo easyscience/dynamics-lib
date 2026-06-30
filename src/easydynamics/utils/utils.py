@@ -12,11 +12,13 @@ Numeric = float | int
 Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
-hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
-angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
+hbar = DescriptorNumber.from_scipp("hbar", scipp_hbar)
+angstrom = DescriptorNumber("angstrom", 1e-10, unit="m")
 
 
-def verify_Q_index(Q_index: int, Q: np.ndarray | None) -> None:
+def verify_Q_index(
+    Q_index: int, Q: np.ndarray | None, allow_none: bool = False
+) -> None:
     """
     Verify that Q_index is a valid integer index into Q.
 
@@ -26,6 +28,8 @@ def verify_Q_index(Q_index: int, Q: np.ndarray | None) -> None:
         Index to validate.
     Q : np.ndarray | None
         The Q values array (may be None if no data is loaded).
+    allow_none : bool
+        Whether or not to allow Q_index to be None
 
     Raises
     ------
@@ -34,15 +38,30 @@ def verify_Q_index(Q_index: int, Q: np.ndarray | None) -> None:
     IndexError
         If Q_index is out of range.
     """
+    if allow_none and Q_index is None:
+        return
     if not isinstance(Q_index, int):
-        raise TypeError('Q_index must be an integer.')
+        raise TypeError("Q_index must be an integer.")
     if Q is None or not (0 <= Q_index < len(Q)):
-        raise IndexError('Q_index must be a valid index for the Q values.')
+        raise IndexError(f"Q_index must be an integer between 0 and {len(Q - 1)}")
 
 
 def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:
-    """Convert a numpy energy array to a scipp Variable with dimension 'energy'."""
-    return sc.array(dims=['energy'], values=energy, unit=unit)
+    """Convert a numpy energy array to a scipp Variable with dimension 'energy'.
+
+    Parameters
+    ----------
+    energy : np.ndarray
+        The energy array to be converted
+    unit : str | sc.Unit
+        The unit of the energy
+
+    Returns
+    -------
+    sc.Variable
+        Energy as sc.Variable.
+    """
+    return sc.array(dims=["energy"], values=energy, unit=unit)
 
 
 def _validate_and_convert_Q(
@@ -72,7 +91,7 @@ def _validate_and_convert_Q(
     if Q is None:
         return None
     if not isinstance(Q, (np.ndarray, Numeric, list, sc.Variable)):
-        raise TypeError('Q must be a number, list, numpy array, or scipp Variable.')
+        raise TypeError("Q must be a number, list, numpy array, or scipp Variable.")
 
     if isinstance(Q, Numeric):
         Q = np.array([Q])
@@ -80,14 +99,14 @@ def _validate_and_convert_Q(
         Q = np.array(Q)
     if isinstance(Q, np.ndarray):
         if Q.ndim > 1:
-            raise ValueError('Q must be a 1-dimensional array.')
+            raise ValueError("Q must be a 1-dimensional array.")
 
-        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        Q = sc.array(dims=["Q"], values=Q, unit="1/angstrom")
 
     if isinstance(Q, sc.Variable):
-        if Q.dims != ('Q',):
+        if Q.dims != ("Q",):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit='1/angstrom')
+        Q = Q.to(unit="1/angstrom")
     return Q.values
 
 
@@ -112,7 +131,9 @@ def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
     """
 
     if unit is not None and not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(f'unit must be None, a string, or a scipp Unit, got {type(unit).__name__}')
+        raise TypeError(
+            f"unit must be None, a string, or a scipp Unit, got {type(unit).__name__}"
+        )
     # if isinstance(unit, str):
     #     unit = sc.Unit(unit)
 
@@ -138,7 +159,7 @@ def _assert_valid_unit(unit: str | sc.Unit) -> None:
         If the string is not a valid scipp unit.
     """
     if not isinstance(unit, (str, sc.Unit)):
-        raise TypeError(f'unit must be a string or sc.Unit, got {type(unit).__name__}')
+        raise TypeError(f"unit must be a string or sc.Unit, got {type(unit).__name__}")
     try:
         sc.Unit(str(unit))
     except sc.UnitError as e:
@@ -158,9 +179,9 @@ def _in_notebook() -> bool:
         from IPython import get_ipython
 
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
+        if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or JupyterLab
-        if shell == 'TerminalInteractiveShell':
+        if shell == "TerminalInteractiveShell":
             return False  # Terminal IPython
         return False
     except (NameError, ImportError):

@@ -37,7 +37,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         upsample_factor: Numeric | None = 5,
         extension_factor: Numeric | None = 0.2,
         suppress_warnings: bool = False,
-        display_name: str | None = 'MyConvolutionSettings',
+        display_name: str | None = "MyConvolutionSettings",
         unique_name: str | None = None,
     ) -> None:
         """
@@ -71,22 +71,22 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         if extension_factor is not None:
             if not isinstance(extension_factor, Numeric):
-                raise TypeError('Extension factor must be a number.')
+                raise TypeError("Extension factor must be a number.")
             extension_factor = float(extension_factor)
             if extension_factor < 0.0:
-                raise ValueError('Extension factor must be non-negative.')
+                raise ValueError("Extension factor must be non-negative.")
         self._extension_factor = extension_factor
 
         if upsample_factor is not None:
             if not isinstance(upsample_factor, Numeric):
-                raise TypeError('Upsample factor must be a numerical value or None.')
+                raise TypeError("Upsample factor must be a numerical value or None.")
             upsample_factor = float(upsample_factor)
             if upsample_factor <= 1.0:
-                raise ValueError('Upsample factor must be greater than 1.')
+                raise ValueError("Upsample factor must be greater than 1.")
         self._upsample_factor = upsample_factor
 
         if not isinstance(suppress_warnings, bool):
-            raise TypeError('suppress_warnings must be True or False.')
+            raise TypeError("suppress_warnings must be True or False.")
         self._suppress_warnings = suppress_warnings
 
         self._convolution_plan_is_valid = False
@@ -127,10 +127,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             return
 
         if not isinstance(factor, Numeric):
-            raise TypeError('Upsample factor must be a numerical value or None.')
+            raise TypeError("Upsample factor must be a numerical value or None.")
         factor = float(factor)
         if factor <= 1.0:
-            raise ValueError('Upsample factor must be greater than 1.')
+            raise ValueError("Upsample factor must be greater than 1.")
 
         self._upsample_factor = factor
 
@@ -179,9 +179,9 @@ class ConvolutionSettings(EasyDynamicsBase):
             return
 
         if not isinstance(factor, Numeric):
-            raise TypeError('Extension factor must be a number.')
+            raise TypeError("Extension factor must be a number.")
         if factor < 0.0:
-            raise ValueError('Extension factor must be non-negative.')
+            raise ValueError("Extension factor must be non-negative.")
 
         self._extension_factor = float(factor)
         self.convolution_plan_is_valid = False
@@ -214,7 +214,7 @@ class ConvolutionSettings(EasyDynamicsBase):
             If is_valid is not a bool.
         """
         if not isinstance(is_valid, bool):
-            raise TypeError('convolution_plan_is_valid must be True or False.')
+            raise TypeError("convolution_plan_is_valid must be True or False.")
         self._convolution_plan_is_valid = is_valid
 
     @property
@@ -245,10 +245,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             If suppress is not a bool.
         """
         if not isinstance(suppress, bool):
-            raise TypeError('suppress_warnings must be True or False.')
+            raise TypeError("suppress_warnings must be True or False.")
         self._suppress_warnings = suppress
 
-    def __copy__(self) -> 'ConvolutionSettings':
+    def __copy__(self) -> "ConvolutionSettings":
         """
         Return a shallow copy of the ConvolutionSettings.
 
@@ -258,9 +258,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             A new ConvolutionSettings instance with the same parameter values.
         """
         return ConvolutionSettings(
-            upsample_factor=self._upsample_factor,
-            extension_factor=self._extension_factor,
-            suppress_warnings=self._suppress_warnings,
+            upsample_factor=self.upsample_factor,
+            extension_factor=self.extension_factor,
+            suppress_warnings=self.suppress_warnings,
+            display_name=self.display_name,
         )
 
     def __repr__(self) -> str:
@@ -273,8 +274,8 @@ class ConvolutionSettings(EasyDynamicsBase):
             A string representation of the ConvolutionSettings.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'upsample_factor={self.upsample_factor}, '
-            f'extension_factor={self.extension_factor}, '
-            f'suppress_warnings={self.suppress_warnings})'
+            f"{self.__class__.__name__}("
+            f"upsample_factor={self.upsample_factor}, "
+            f"extension_factor={self.extension_factor}, "
+            f"suppress_warnings={self.suppress_warnings})"
         )

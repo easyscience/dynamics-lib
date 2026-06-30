@@ -10,9 +10,12 @@ from easyscience.variable import Parameter
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DeltaFunction
 from easydynamics.sample_model.components import Lorentzian
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.sample_model.diffusion_model.diffusion_model_base import (
+    DiffusionModelBase,
+)
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
@@ -63,13 +66,13 @@ class DeltaLorentz(DiffusionModelBase):
         lorentzian_width: Numeric = 1.0,
         allow_Q_variation: dict | None = None,
         Q: Q_type | None = None,
-        x_unit: str | sc.Unit = 'meV',
-        y_unit: str | sc.Unit = 'dimensionless',
-        name: str = 'DeltaLorentz',
+        x_unit: str | sc.Unit = "meV",
+        y_unit: str | sc.Unit = "dimensionless",
+        name: str = "DeltaLorentz",
         display_name: str | None = None,
-        lorentzian_name: str = 'Lorentzian',
+        lorentzian_name: str = "Lorentzian",
         lorentzian_display_name: str | None = None,
-        delta_name: str = 'Delta function',
+        delta_name: str = "Delta function",
         delta_display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -140,19 +143,21 @@ class DeltaLorentz(DiffusionModelBase):
 
         self._A_0, self._A_1 = self._create_A0_A1_parameters(A_0)
 
-        self._lorentzian_width = self._create_lorentzian_width_parameter(lorentzian_width)
+        self._lorentzian_width = self._create_lorentzian_width_parameter(
+            lorentzian_width
+        )
 
         # --------------------------------------------------------------
         # names
         # --------------------------------------------------------------
         if not isinstance(delta_name, str):
-            raise TypeError('delta_name must be a string.')
+            raise TypeError("delta_name must be a string.")
 
         if delta_display_name is None:
             delta_display_name = delta_name
 
         if not isinstance(delta_display_name, str):
-            raise TypeError('delta_display_name must be a string or None.')
+            raise TypeError("delta_display_name must be a string or None.")
 
         self._delta_name = delta_name
         self._delta_display_name = delta_display_name
@@ -166,12 +171,16 @@ class DeltaLorentz(DiffusionModelBase):
         self._A_1_list = []
         self._lorentzian_width_list = []
         if self.Q is not None:
-            if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
+            if self._allow_Q_variation["A_0"] is True:
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(
+                    self.A_0
+                )
 
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
-                    self.lorentzian_width,
+            if self._allow_Q_variation["lorentzian_width"] is True:
+                self._lorentzian_width_list = (
+                    self._create_lorentzian_width_parameter_list(
+                        self.lorentzian_width,
+                    )
                 )
 
         self._component_collections = self.create_component_collections()
@@ -210,10 +219,10 @@ class DeltaLorentz(DiffusionModelBase):
             If mean_u_squared is negative.
         """
         if not isinstance(mean_u_squared, Numeric):
-            raise TypeError('mean_u_squared must be a number.')
+            raise TypeError("mean_u_squared must be a number.")
 
         if float(mean_u_squared) < 0:
-            raise ValueError('mean_u_squared must be non-negative.')
+            raise ValueError("mean_u_squared must be non-negative.")
         self._mean_u_squared.value = float(mean_u_squared)
 
     @property
@@ -246,10 +255,10 @@ class DeltaLorentz(DiffusionModelBase):
             If A_0 is not between 0 and 1.
         """
         if not isinstance(A_0, Numeric):
-            raise TypeError('A_0 must be a number.')
+            raise TypeError("A_0 must be a number.")
 
         if not (0 <= float(A_0) <= 1):
-            raise ValueError('A_0 must be between 0 and 1.')
+            raise ValueError("A_0 must be between 0 and 1.")
         self._A_0.value = float(A_0)
 
     @property
@@ -281,8 +290,8 @@ class DeltaLorentz(DiffusionModelBase):
             If an attempt is made to set A_1 directly.
         """
         raise AttributeError(
-            'A_1 is a dependent parameter and cannot be set directly. '
-            'Set A_0 to change A_1 accordingly.'
+            "A_1 is a dependent parameter and cannot be set directly. "
+            "Set A_0 to change A_1 accordingly."
         )
 
     @property
@@ -315,10 +324,10 @@ class DeltaLorentz(DiffusionModelBase):
             If lorentzian_width is less than the minimum allowed width.
         """
         if not isinstance(lorentzian_width, Numeric):
-            raise TypeError('lorentzian_width must be a number.')
+            raise TypeError("lorentzian_width must be a number.")
 
         if float(lorentzian_width) < MINIMUM_WIDTH:
-            raise ValueError(f'lorentzian_width must be at least {MINIMUM_WIDTH}.')
+            raise ValueError(f"lorentzian_width must be at least {MINIMUM_WIDTH}.")
         self._lorentzian_width.value = float(lorentzian_width)
 
     @property
@@ -349,7 +358,7 @@ class DeltaLorentz(DiffusionModelBase):
             If delta_name is not a string.
         """
         if not isinstance(delta_name, str):
-            raise TypeError('delta_name must be a string.')
+            raise TypeError("delta_name must be a string.")
         self._delta_name = delta_name
 
     @property
@@ -380,7 +389,7 @@ class DeltaLorentz(DiffusionModelBase):
             If delta_display_name is not a string or None.
         """
         if not isinstance(delta_display_name, (str, type(None))):
-            raise TypeError('delta_display_name must be a string or None.')
+            raise TypeError("delta_display_name must be a string or None.")
         self._delta_display_name = delta_display_name
 
     # ------------------------------------------------------------------
@@ -408,13 +417,16 @@ class DeltaLorentz(DiffusionModelBase):
         ValueError
             If Q-variation is enabled but Q has not been set on the model yet.
         """
-        if self._allow_Q_variation['lorentzian_width'] is True:
+        if self._allow_Q_variation["lorentzian_width"] is True:
             if not self._lorentzian_width_list:
                 raise ValueError(
-                    'Lorentzian width Q-variation list is empty. '
-                    'Set Q before calling calculate_width.'
+                    "Lorentzian width Q-variation list is empty. "
+                    "Set Q before calling calculate_width."
                 )
-            widths = [lorentzian_width.value for lorentzian_width in self._lorentzian_width_list]
+            widths = [
+                lorentzian_width.value
+                for lorentzian_width in self._lorentzian_width_list
+            ]
             return np.array(widths)
 
         Q = self._ensure_Q(Q)
@@ -438,7 +450,7 @@ class DeltaLorentz(DiffusionModelBase):
             EISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
-        if self._allow_Q_variation['A_0'] is True:
+        if self._allow_Q_variation["A_0"] is True:
             A_0_values = [A_0_.value for A_0_ in self._A_0_list]
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
 
@@ -460,7 +472,7 @@ class DeltaLorentz(DiffusionModelBase):
             QISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
-        if self._allow_Q_variation['A_0'] is True:
+        if self._allow_Q_variation["A_0"] is True:
             A_1_values = [A_1_.value for A_1_ in self._A_1_list]
             return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
 
@@ -483,12 +495,12 @@ class DeltaLorentz(DiffusionModelBase):
         if Q is None:
             return []
 
-        if self._allow_Q_variation['A_0'] is True:
+        if self._allow_Q_variation["A_0"] is True:
             A_0_list, A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
             self._A_0_list = A_0_list
             self._A_1_list = A_1_list
 
-        if self._allow_Q_variation['lorentzian_width'] is True:
+        if self._allow_Q_variation["lorentzian_width"] is True:
             lorentzian_width_list = self._create_lorentzian_width_parameter_list(
                 self.lorentzian_width
             )
@@ -497,7 +509,7 @@ class DeltaLorentz(DiffusionModelBase):
         component_collection_list = [None] * len(Q)
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
-                display_name=f'{self.display_name}_Q{Q_value:.2f}',
+                display_name=f"{self.display_name}_Q{Q_value:.2f}",
                 x_unit=self.x_unit,
                 y_unit=self.y_unit,
             )
@@ -511,17 +523,19 @@ class DeltaLorentz(DiffusionModelBase):
                 x_unit=self.x_unit,
                 y_unit=self.y_unit,
             )
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                lorentzian_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
+            if self._allow_Q_variation["lorentzian_width"] is True:
+                lorentzian_component._width = self._lorentzian_width_list[i]
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made
             # dependent on the width parameter of the model.
-            if self._allow_Q_variation['lorentzian_width'] is False:
+            if self._allow_Q_variation["lorentzian_width"] is False:
                 dependency_map = self._write_width_dependency_map_expression()
 
                 lorentzian_component.width.make_dependent_on(
-                    dependency_expression=self._write_lorz_width_dependency_expression(Q_value),
+                    dependency_expression=self._write_lorz_width_dependency_expression(
+                        Q_value
+                    ),
                     dependency_map=dependency_map,
                     desired_unit=self.x_unit,
                 )
@@ -531,13 +545,15 @@ class DeltaLorentz(DiffusionModelBase):
             # will also depend on the specific A_1 parameter for that Q
             # value. If A_1 is not allowed to vary with Q, the area will
             # depend on the single A_1 parameter of the model.
-            if self._allow_Q_variation['A_0'] is True:
+            if self._allow_Q_variation["A_0"] is True:
                 dependency_map = self._write_lorz_area_dependency_map_expression(i)
             else:
                 dependency_map = self._write_lorz_area_dependency_map_expression(None)
 
             lorentzian_component.area.make_dependent_on(
-                dependency_expression=self._write_lorz_area_dependency_expression(Q_value),
+                dependency_expression=self._write_lorz_area_dependency_expression(
+                    Q_value
+                ),
                 dependency_map=dependency_map,
             )
 
@@ -554,13 +570,15 @@ class DeltaLorentz(DiffusionModelBase):
                 y_unit=self.y_unit,
             )
 
-            if self._allow_Q_variation['A_0'] is True:
+            if self._allow_Q_variation["A_0"] is True:
                 dependency_map = self._write_delta_area_dependency_map_expression(i)
             else:
                 dependency_map = self._write_delta_area_dependency_map_expression(None)
 
             delta_component.area.make_dependent_on(
-                dependency_expression=self._write_delta_area_dependency_expression(Q_value),
+                dependency_expression=self._write_delta_area_dependency_expression(
+                    Q_value
+                ),
                 dependency_map=dependency_map,
             )
 
@@ -579,10 +597,10 @@ class DeltaLorentz(DiffusionModelBase):
         """
         variables = [self.scale, self.mean_u_squared]
 
-        if self._allow_Q_variation['lorentzian_width'] is False:
+        if self._allow_Q_variation["lorentzian_width"] is False:
             variables.append(self.lorentzian_width)
 
-        if self._allow_Q_variation['A_0'] is False:
+        if self._allow_Q_variation["A_0"] is False:
             variables.append(self.A_0)
             variables.append(self.A_1)
 
@@ -604,25 +622,12 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         list[Parameter]
             List of independent variables in the model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is not None and is not a valid index for the Q values in the model.
         """
 
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         variables = []
-        if self._allow_Q_variation['A_0'] is True:
+        if self._allow_Q_variation["A_0"] is True:
             if Q_index is None:
                 variables.extend(self._A_0_list)
                 variables.extend(self._A_1_list)
@@ -646,22 +651,9 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         list[DescriptorNumber]
             List of all variables in the model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is not None and is not a valid index for the Q values in the model.
         """
 
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         variables = self.get_global_variables()
         variables.extend(self.get_independent_variables(Q_index=Q_index))
@@ -704,19 +696,19 @@ class DeltaLorentz(DiffusionModelBase):
         """
 
         allow_Q_variation_default = {
-            'A_0': False,
-            'lorentzian_width': False,
+            "A_0": False,
+            "lorentzian_width": False,
         }
         allowed_keys = set(allow_Q_variation_default)
 
         if allow_Q_variation is None:
             allow_Q_variation = {}
         if not isinstance(allow_Q_variation, dict):
-            raise TypeError('allow_Q_variation must be a dict or None.')
+            raise TypeError("allow_Q_variation must be a dict or None.")
 
         unknown_keys = set(allow_Q_variation) - allowed_keys
         if unknown_keys:
-            raise ValueError(f'Unknown keys in allow_Q_variation: {unknown_keys}')
+            raise ValueError(f"Unknown keys in allow_Q_variation: {unknown_keys}")
 
         return {**allow_Q_variation_default, **allow_Q_variation}
 
@@ -743,17 +735,17 @@ class DeltaLorentz(DiffusionModelBase):
         """
 
         if not isinstance(mean_u_squared, Numeric):
-            raise TypeError('mean_u_squared must be a number.')
+            raise TypeError("mean_u_squared must be a number.")
 
         if float(mean_u_squared) < 0:
-            raise ValueError('mean_u_squared must be non-negative.')
+            raise ValueError("mean_u_squared must be non-negative.")
 
         return Parameter(
-            name='mean_u_squared',
+            name="mean_u_squared",
             value=float(mean_u_squared),
             fixed=False,
             min=0.0,
-            unit='angstrom**2',
+            unit="angstrom**2",
         )
 
     def _create_A0_A1_parameters(self, A_0: Numeric) -> tuple[Parameter, Parameter]:
@@ -778,13 +770,13 @@ class DeltaLorentz(DiffusionModelBase):
             A tuple containing the A_0 and A_1 parameters.
         """
         if not isinstance(A_0, Numeric):
-            raise TypeError('A_0 must be a number.')
+            raise TypeError("A_0 must be a number.")
 
         if float(A_0) < 0 or float(A_0) > 1:
-            raise ValueError('A_0 must be between 0 and 1.')
+            raise ValueError("A_0 must be between 0 and 1.")
 
         A_0 = Parameter(
-            name='A_0',
+            name="A_0",
             value=float(A_0),
             fixed=False,
             min=0.0,
@@ -792,13 +784,15 @@ class DeltaLorentz(DiffusionModelBase):
         )
 
         A_1 = Parameter.from_dependency(
-            name='A_1',
-            dependency_expression='1 - A_0',
-            dependency_map={'A_0': A_0},
+            name="A_1",
+            dependency_expression="1 - A_0",
+            dependency_map={"A_0": A_0},
         )
         return A_0, A_1
 
-    def _create_lorentzian_width_parameter(self, lorentzian_width: Numeric) -> Parameter:
+    def _create_lorentzian_width_parameter(
+        self, lorentzian_width: Numeric
+    ) -> Parameter:
         """
         Create the Lorentzian width parameter.
 
@@ -821,13 +815,13 @@ class DeltaLorentz(DiffusionModelBase):
         """
 
         if not isinstance(lorentzian_width, Numeric):
-            raise TypeError('lorentzian_width must be a number.')
+            raise TypeError("lorentzian_width must be a number.")
 
         if float(lorentzian_width) < MINIMUM_WIDTH:
-            raise ValueError(f'lorentzian_width must be at least {MINIMUM_WIDTH}.')
+            raise ValueError(f"lorentzian_width must be at least {MINIMUM_WIDTH}.")
 
         return Parameter(
-            name='lorentzian_width',
+            name="lorentzian_width",
             value=float(lorentzian_width),
             fixed=False,
             min=MINIMUM_WIDTH,
@@ -856,7 +850,7 @@ class DeltaLorentz(DiffusionModelBase):
         A_1_list = []
         for _ in self.Q:
             a0 = Parameter(
-                name='A_0',
+                name="A_0",
                 value=float(A_0.value),
                 fixed=False,
                 min=0.0,
@@ -864,9 +858,9 @@ class DeltaLorentz(DiffusionModelBase):
             )
 
             a1 = Parameter.from_dependency(
-                name='A_1',
-                dependency_expression='1 - A_0',
-                dependency_map={'A_0': a0},
+                name="A_1",
+                dependency_expression="1 - A_0",
+                dependency_map={"A_0": a0},
             )
 
             A_0_list.append(a0)
@@ -894,7 +888,7 @@ class DeltaLorentz(DiffusionModelBase):
         """
         return [
             Parameter(
-                name=f'{self.lorentzian_name} width',
+                name=f"{self.lorentzian_name} width",
                 value=float(lorentzian_width.value),
                 fixed=False,
                 min=MINIMUM_WIDTH,
@@ -917,15 +911,17 @@ class DeltaLorentz(DiffusionModelBase):
             self._A_1_list = []
             self._lorentzian_width_list = []
         else:
-            if self._allow_Q_variation['A_0'] is True:
-                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
+            if self._allow_Q_variation["A_0"] is True:
+                self._A_0_list, self._A_1_list = self._create_A0_A1_parameter_lists(
+                    self.A_0
+                )
             else:
                 self._A_0_list = []
                 self._A_1_list = []
 
-            if self._allow_Q_variation['lorentzian_width'] is True:
-                self._lorentzian_width_list = self._create_lorentzian_width_parameter_list(
-                    self.lorentzian_width
+            if self._allow_Q_variation["lorentzian_width"] is True:
+                self._lorentzian_width_list = (
+                    self._create_lorentzian_width_parameter_list(self.lorentzian_width)
                 )
             else:
                 self._lorentzian_width_list = []
@@ -952,9 +948,9 @@ class DeltaLorentz(DiffusionModelBase):
             Dependency expression for the width.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
-        return 'lorentzian_width'
+        return "lorentzian_width"
 
     def _write_width_dependency_map_expression(
         self,
@@ -968,7 +964,7 @@ class DeltaLorentz(DiffusionModelBase):
             Dependency map for the width.
         """
         return {
-            'lorentzian_width': self.lorentzian_width,
+            "lorentzian_width": self.lorentzian_width,
         }
 
     def _write_lorz_area_dependency_expression(self, Q: float) -> str:
@@ -991,9 +987,9 @@ class DeltaLorentz(DiffusionModelBase):
             Dependency expression for the area.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_1'
+        return f"scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_1"
 
     def _write_lorz_area_dependency_map_expression(
         self, Q_index: int | None
@@ -1014,15 +1010,15 @@ class DeltaLorentz(DiffusionModelBase):
         """
         if Q_index is None:
             return {
-                'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
-                'A_1': self.A_1,
+                "scale": self.scale,
+                "mean_u_squared": self.mean_u_squared,
+                "A_1": self.A_1,
             }
 
         return {
-            'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
-            'A_1': self._A_1_list[Q_index],
+            "scale": self.scale,
+            "mean_u_squared": self.mean_u_squared,
+            "A_1": self._A_1_list[Q_index],
         }
 
     def _write_delta_area_dependency_expression(self, Q: float) -> str:
@@ -1045,9 +1041,9 @@ class DeltaLorentz(DiffusionModelBase):
             Dependency expression for the area.
         """
         if not isinstance(Q, (float)):
-            raise TypeError('Q must be a float.')
+            raise TypeError("Q must be a float.")
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_0'
+        return f"scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_0"
 
     def _write_delta_area_dependency_map_expression(
         self,
@@ -1069,14 +1065,14 @@ class DeltaLorentz(DiffusionModelBase):
         """
         if Q_index is None:
             return {
-                'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
-                'A_0': self.A_0,
+                "scale": self.scale,
+                "mean_u_squared": self.mean_u_squared,
+                "A_0": self.A_0,
             }
         return {
-            'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
-            'A_0': self._A_0_list[Q_index],
+            "scale": self.scale,
+            "mean_u_squared": self.mean_u_squared,
+            "A_0": self._A_0_list[Q_index],
         }
 
     # ------------------------------------------------------------------
@@ -1093,10 +1089,10 @@ class DeltaLorentz(DiffusionModelBase):
             String representation of the DeltaLorentz model.
         """
         return (
-            f'DeltaLorentz(display_name={self.display_name},'
-            f'x_unit={self.x_unit}, \n'
-            f'    mean_u_squared={self.mean_u_squared}, \n'
-            f'    A_0={self.A_0}, A_1={self.A_1}, \n'
-            f'    lorentzian_width={self.lorentzian_width}, \n'
-            f'    scale={self.scale})'
+            f"DeltaLorentz(display_name={self.display_name},"
+            f"x_unit={self.x_unit}), y_unit={self.y_unit}, \n"
+            f"    mean_u_squared={self.mean_u_squared}, \n"
+            f"    A_0={self.A_0}, A_1={self.A_1}, \n"
+            f"    lorentzian_width={self.lorentzian_width}, \n"
+            f"    scale={self.scale})"
         )
