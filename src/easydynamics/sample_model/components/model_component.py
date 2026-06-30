@@ -31,11 +31,11 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         Parameters
         ----------
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit for the x-axis (independent variable) of this component.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit for the y-axis (dependent variable / output) of this component.
-        name : str, default="ModelComponent"
+        name : str, default='ModelComponent'
             Internal name used for parameter labelling and logging.
         display_name : str | None, default=None
             Human-readable name shown in plots and reports. Falls back to *name* if None.
@@ -383,7 +383,7 @@ class ModelComponent(EasyDynamicsModelBase):
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns

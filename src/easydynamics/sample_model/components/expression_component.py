@@ -114,11 +114,11 @@ class ExpressionComponent(ModelComponent):
             The symbolic expression as a string. Must contain 'x' as the independent variable.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Expression"
+        name : str, default='Expression'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -273,7 +273,7 @@ class ExpressionComponent(ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input values for the independent variable.
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns

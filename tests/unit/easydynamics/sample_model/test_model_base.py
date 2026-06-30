@@ -259,13 +259,24 @@ class TestModelBase:
             model_base.x_unit = 'K'
 
     def test_convert_x_unit(self, model_base):
+        # Build collections before conversion so we can verify in-place update
+        _ = model_base.get_component_collection(0)
+        assert model_base._component_collections_is_dirty is False
+        collection_before = model_base._component_collections[0]
+
         # WHEN
         model_base.convert_x_unit('eV')
 
-        # THEN / EXPECT
+        # THEN / EXPECT: dirty flag NOT set and same collections reused (not rebuilt)
+        assert model_base._component_collections_is_dirty is False
+        assert model_base._component_collections[0] is collection_before
+
         assert model_base.x_unit == 'eV'
         for component in model_base.components:
             assert component.x_unit == 'eV'
+        for collection in model_base._component_collections:
+            for component in collection:
+                assert component.x_unit == 'eV'
 
     def test_convert_x_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
@@ -439,17 +450,26 @@ class TestModelBase:
         cc = ComponentCollection(components=[g, lor])
         model = ModelBase(components=cc, x_unit='meV', Q=np.array([1.0]))
 
+        # Build collections before conversion so we can verify in-place update
+        _ = model.get_component_collection(0)
+        assert model._component_collections_is_dirty is False
+        collection_before = model._component_collections[0]
+
         # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         model.convert_y_unit('1/eV')
 
-        # EXPECT: model y_unit and all template components updated
+        # EXPECT: dirty flag NOT set and same collections reused (not rebuilt)
+        assert model._component_collections_is_dirty is False
+        assert model._component_collections[0] is collection_before
+
+        # EXPECT: model y_unit and template components updated
         assert model.y_unit == '1/eV'
         for component in model.components:
             assert component.y_unit == '1/eV'
         assert g.area.value == pytest.approx(1e3)
         assert lor.area.value == pytest.approx(1e3)
-        # Component collections rebuilt on demand reflect the new unit
-        for component in model.get_component_collection(0):
+        # EXPECT: component collections updated in-place (not rebuilt from templates)
+        for component in collection_before:
             assert component.y_unit == '1/eV'
 
     def test_convert_y_unit_invalid_raises(self, model_base):

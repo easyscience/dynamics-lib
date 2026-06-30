@@ -43,13 +43,13 @@ class ConvolutionBase(EasyDynamicsModelBase):
             The sample model to be convolved.
         resolution_components : ComponentCollection | ModelComponent | None, default=None
             The resolution model to convolve with.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             The unit of the model output (intensity).
         energy_offset : Numeric | Parameter, default=0.0
             The energy offset applied to the convolution.
-        display_name : str | None, default="MyConvolution"
+        display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.

@@ -70,12 +70,12 @@ class Polynomial(ModelComponent):
             ``c0 + c1*x + c2*x^2 + ... + cN*x^N``.  Each element may be a plain numeric value
             (wrapped into a dimensionless :class:`Parameter`) or an existing :class:`Parameter`
             instance. Must contain at least one element.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  When the x_unit is changed via :meth:`convert_x_unit`, coefficient
             values are rescaled by power-law factors so the evaluated output remains unchanged.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Polynomial"
+        name : str, default='Polynomial'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -252,7 +252,7 @@ class Polynomial(ModelComponent):
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns

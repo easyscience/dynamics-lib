@@ -39,13 +39,13 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             area_unit = x_unit * y_unit because scale * QISF/EISF (dimensionless) = component area.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis (energy/frequency). Must be convertible to meV.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the model output (intensity). Together with x_unit determines area_unit.
-        name : str, default="DiffusionModel"
+        name : str, default='DiffusionModel'
             Name of the diffusion model.
-        display_name : str | None, default="DiffusionModel"
+        display_name : str | None, default='DiffusionModel'
             Display name of the diffusion model.
         lorentzian_name : str | None, default=None
             Name of the Lorentzian component. If None, it will be set to the name of the diffusion

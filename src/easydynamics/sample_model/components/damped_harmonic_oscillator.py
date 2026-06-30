@@ -77,12 +77,12 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         width : Numeric, default=1.0
             Damping coefficient (gamma) in x_unit.  Must be strictly positive. Approximately equal
             to the HWHM of each peak.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
             y_unit.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="DampedHarmonicOscillator"
+        name : str, default='DampedHarmonicOscillator'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -223,7 +223,7 @@ class DampedHarmonicOscillator(CreateParametersMixin, ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input x values.
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns

@@ -51,7 +51,7 @@ class ConvolutionSettings(EasyDynamicsBase):
             The factor by which to extend the input data range before convolution.
         suppress_warnings : bool, default=False
             Whether to suppress warnings about wide or narrow peaks in the models.
-        display_name : str | None, default="MyConvolutionSettings"
+        display_name : str | None, default='MyConvolutionSettings'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
@@ -254,7 +254,7 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         Returns
         -------
-        "ConvolutionSettings"
+        'ConvolutionSettings'
             A new ConvolutionSettings instance with the same parameter values.
         """
         return ConvolutionSettings(

@@ -499,13 +499,13 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds',
+            match='Q_index must be an integer between 0 and',
         ):
             instrument_model.fix_energy_offset(Q_index=5)
 
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds',
+            match='Q_index must be an integer between 0 and',
         ):
             instrument_model.free_energy_offset(Q_index=5)
 
@@ -513,13 +513,13 @@ class TestInstrumentModel:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             TypeError,
-            match='Q_index must be an int or None, got str',
+            match='Q_index must be an integer',
         ):
             instrument_model.fix_energy_offset(Q_index='invalid_index')
 
         with pytest.raises(
             TypeError,
-            match='Q_index must be an int or None, got str',
+            match='Q_index must be an integer',
         ):
             instrument_model.free_energy_offset(Q_index='invalid_index')
 

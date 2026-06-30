@@ -70,7 +70,7 @@ class Analysis1d(AnalysisBase):
 
     def __init__(
         self,
-        display_name: str | None = "MyAnalysis",
+        display_name: str | None = 'MyAnalysis',
         unique_name: str | None = None,
         experiment: Experiment | None = None,
         sample_model: SampleModel | None = None,
@@ -240,7 +240,7 @@ class Analysis1d(AnalysisBase):
             The result of the fit.
         """
         if self._experiment is None:
-            raise ValueError("No experiment is associated with this Analysis.")
+            raise ValueError('No experiment is associated with this Analysis.')
 
         if (
             self.sample_model.component_collections_is_dirty
@@ -365,8 +365,8 @@ class Analysis1d(AnalysisBase):
         if plot_residuals:
             fig = slicerplot_with_residuals(
                 data_and_model,
-                residuals_key="Residuals",
-                operation="sum",
+                residuals_key='Residuals',
+                operation='sum',
                 **plot_kwargs_defaults,
             )
         else:
@@ -419,19 +419,19 @@ class Analysis1d(AnalysisBase):
         """
 
         if self.experiment.binned_data is None:
-            raise ValueError("No data to include in DataGroup. Please load data first.")
+            raise ValueError('No data to include in DataGroup. Please load data first.')
 
         if self.Q is None:
             raise ValueError(
-                "No Q values available for creating DataGroup. Please check the experiment data."
+                'No Q values available for creating DataGroup. Please check the experiment data.'
             )
 
-        self._verify_bool(add_background, "add_background")
-        self._verify_bool(include_components, "include_components")
-        self._verify_bool(include_residuals, "include_residuals")
+        self._verify_bool(add_background, 'add_background')
+        self._verify_bool(include_components, 'include_components')
+        self._verify_bool(include_residuals, 'include_residuals')
 
         if self.Q_index is None:
-            raise ValueError("Q_index must be set to create DataGroup.")
+            raise ValueError('Q_index must be set to create DataGroup.')
 
         energy = self._verify_energy(energy)
 
@@ -439,8 +439,8 @@ class Analysis1d(AnalysisBase):
             energy = self._masked_energy
 
         data_and_model = {
-            "Data": self.experiment.get_masked_binned_data(Q_index=self.Q_index),
-            "Model": self._create_model_array(energy=energy),
+            'Data': self.experiment.get_masked_binned_data(Q_index=self.Q_index),
+            'Model': self._create_model_array(energy=energy),
         }
 
         if include_components:
@@ -454,7 +454,7 @@ class Analysis1d(AnalysisBase):
 
         if include_residuals:
             residuals = self._create_residuals_array()
-            data_and_model["Residuals"] = residuals
+            data_and_model['Residuals'] = residuals
 
         return sc.DataGroup(data_and_model)
 
@@ -478,9 +478,7 @@ class Analysis1d(AnalysisBase):
         """
         self.experiment.rebin(dimensions)
         if self._Q_index is not None and self.experiment is not None:
-            self._masked_energy = self.experiment.get_masked_energy(
-                Q_index=self._Q_index
-            )
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
 
     def refresh_convolver(self, energy: sc.Variable | None = None) -> None:
@@ -509,7 +507,7 @@ class Analysis1d(AnalysisBase):
             The Q index.
         """
         if self._Q_index is None:
-            raise ValueError("Q_index must be set.")
+            raise ValueError('Q_index must be set.')
         return self._Q_index
 
     def _on_Q_index_changed(self) -> None:
@@ -531,10 +529,8 @@ class Analysis1d(AnalysisBase):
         """Mark the convolver as dirty when the experiment changes."""
         super()._on_experiment_changed()
         # Refresh masked energy if Q_index is already set (i.e. post-init experiment swap).
-        if getattr(self, "_Q_index", None) is not None and self.experiment is not None:
-            self._masked_energy = self.experiment.get_masked_energy(
-                Q_index=self._Q_index
-            )
+        if getattr(self, '_Q_index', None) is not None and self.experiment is not None:
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
 
     def _on_sample_model_changed(self) -> None:
@@ -627,9 +623,7 @@ class Analysis1d(AnalysisBase):
 
         energy_offset = self.instrument_model.get_energy_offset(Q_index)
         energy_with_offset = self._calculate_energy_with_offset(energy, energy_offset)
-        resolution = self.instrument_model.resolution_model.get_component_collection(
-            Q_index
-        )
+        resolution = self.instrument_model.resolution_model.get_component_collection(Q_index)
 
         if resolution.is_empty:
             result = components.evaluate(energy_with_offset)
@@ -711,8 +705,8 @@ class Analysis1d(AnalysisBase):
         if sample_components.is_empty:
             return None
 
-        resolution_components = (
-            self.instrument_model.resolution_model.get_component_collection(Q_index)
+        resolution_components = self.instrument_model.resolution_model.get_component_collection(
+            Q_index
         )
         if resolution_components.is_empty:
             return None
@@ -779,7 +773,7 @@ class Analysis1d(AnalysisBase):
             to calculate residuals.
         """
         if self.Q_index is None:
-            raise ValueError("Q_index must be set to calculate residuals.")
+            raise ValueError('Q_index must be set to calculate residuals.')
 
         data = self.experiment.get_masked_binned_data(Q_index=self.Q_index)
         model = self._create_model_array()
@@ -810,15 +804,11 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
 
-        background_components = (
-            self.instrument_model.background_model.get_component_collection(
-                Q_index=Q_index
-            )
+        background_components = self.instrument_model.background_model.get_component_collection(
+            Q_index=Q_index
         )
         background_values = (
-            self._evaluate_direct(background_components, energy)
-            if add_background
-            else None
+            self._evaluate_direct(background_components, energy) if add_background else None
         )
 
         result: dict[str, sc.DataArray] = {}
@@ -861,17 +851,17 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
         return sc.DataArray(
-            data=sc.array(dims=["energy"], values=values),
+            data=sc.array(dims=['energy'], values=values),
             coords={
-                "energy": energy,
-                "Q": self.Q[self.Q_index],
+                'energy': energy,
+                'Q': self.Q[self.Q_index],
             },
         )
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"display_name={self.display_name!r}, "
-            f"unique_name={self.unique_name!r}, "
-            f"Q_index={self._Q_index})"
+            f'{self.__class__.__name__}('
+            f'display_name={self.display_name!r}, '
+            f'unique_name={self.unique_name!r}, '
+            f'Q_index={self._Q_index})'
         )

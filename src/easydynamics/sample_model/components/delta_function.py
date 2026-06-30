@@ -75,11 +75,11 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             parameter is fixed.
         area : Numeric, default=1.0
             Integrated area (weight) of the delta function.  Unit is ``x_unit * y_unit``.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center is stored in this unit. area_unit = x_unit * y_unit.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="DeltaFunction"
+        name : str, default='DeltaFunction'
             Name of the component.
         display_name : str | None, default=None
             Display name of the component, shown when plotting.  Falls back to *name* if None.
@@ -178,7 +178,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input x values.
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns

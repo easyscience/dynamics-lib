@@ -24,10 +24,10 @@ class ModelBase(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        display_name: str = "MyModelBase",
+        display_name: str = 'MyModelBase',
         unique_name: str | None = None,
-        x_unit: str | sc.Unit | None = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
+        x_unit: str | sc.Unit | None = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
@@ -67,8 +67,8 @@ class ModelBase(EasyDynamicsModelBase):
             components, (ModelComponent, ComponentCollection)
         ):
             raise TypeError(
-                f"Components must be a ModelComponent, a ComponentCollection or None, "
-                f"got {type(components).__name__}"
+                f'Components must be a ModelComponent, a ComponentCollection or None, '
+                f'got {type(components).__name__}'
             )
 
         self._components = ComponentCollection()
@@ -80,7 +80,7 @@ class ModelBase(EasyDynamicsModelBase):
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> list[np.ndarray] | list[sc.Variable]:
         """
         Evaluate the sample model at all Q for the given x values.
@@ -105,10 +105,9 @@ class ModelBase(EasyDynamicsModelBase):
         """
         self._ensure_component_collections_current()
         if not self._component_collections:
-            raise ValueError("No components in the model to evaluate.")
+            raise ValueError('No components in the model to evaluate.')
         return [
-            collection.evaluate(x, output=output)
-            for collection in self._component_collections
+            collection.evaluate(x, output=output) for collection in self._component_collections
         ]
 
     # ------------------------------------------------------------------
@@ -175,9 +174,7 @@ class ModelBase(EasyDynamicsModelBase):
             If value is not a ModelComponent, ComponentCollection, or None.
         """
         if not isinstance(value, (ModelComponent, ComponentCollection, type(None))):
-            raise TypeError(
-                "Components must be a ModelComponent or a ComponentCollection"
-            )
+            raise TypeError('Components must be a ModelComponent or a ComponentCollection')
 
         self.clear_components()
         if value is not None:
@@ -237,8 +234,8 @@ class ModelBase(EasyDynamicsModelBase):
 
         if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
             raise ValueError(
-                "New Q values are not similar to the old ones. "
-                "To change Q values, first run clear_Q()."
+                'New Q values are not similar to the old ones. '
+                'To change Q values, first run clear_Q().'
             )
 
     def clear_Q(self, confirm: bool = False) -> None:
@@ -258,7 +255,7 @@ class ModelBase(EasyDynamicsModelBase):
         """
         if not confirm:
             raise ValueError(
-                "Clearing Q values requires confirmation. Set confirm=True to proceed."
+                'Clearing Q values requires confirmation. Set confirm=True to proceed.'
             )
         self._Q = None
         self._on_Q_change()
@@ -284,9 +281,7 @@ class ModelBase(EasyDynamicsModelBase):
             If the provided unit is not compatible with the current unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
-            )
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
         old_unit = self._x_unit
         try:
@@ -323,9 +318,7 @@ class ModelBase(EasyDynamicsModelBase):
             If the provided unit is not compatible with the current unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(
-                f"Unit must be a string or sc.Unit, got {type(unit).__name__}"
-            )
+            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
         old_unit = self._y_unit
         try:
@@ -343,7 +336,6 @@ class ModelBase(EasyDynamicsModelBase):
             except Exception:  # noqa: S110
                 pass
             raise e
-        self._on_components_change()
 
     def fix_all_parameters(self) -> None:
         """Fix all Parameters in all ComponentCollections."""
@@ -389,13 +381,11 @@ class ModelBase(EasyDynamicsModelBase):
             ]
         else:
             if not isinstance(Q_index, int):
-                raise TypeError(
-                    f"Q_index must be an int or None, got {type(Q_index).__name__}"
-                )
+                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
             if Q_index < 0 or Q_index >= len(self._component_collections):
                 raise IndexError(
-                    f"Q_index {Q_index} is out of bounds for component collections "
-                    f"of length {len(self._component_collections)}"
+                    f'Q_index {Q_index} is out of bounds for component collections '
+                    f'of length {len(self._component_collections)}'
                 )
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
@@ -423,11 +413,11 @@ class ModelBase(EasyDynamicsModelBase):
         """
         self._ensure_component_collections_current()
         if not isinstance(Q_index, int):
-            raise TypeError(f"Q_index must be an int, got {type(Q_index).__name__}")
+            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
         if Q_index < 0 or Q_index >= len(self._component_collections):
             raise IndexError(
-                f"Q_index {Q_index} is out of bounds for component collections "
-                f"of length {len(self._component_collections)}"
+                f'Q_index {Q_index} is out of bounds for component collections '
+                f'of length {len(self._component_collections)}'
             )
         return self._component_collections[Q_index]
 
@@ -481,10 +471,10 @@ class ModelBase(EasyDynamicsModelBase):
             A string representation of the ModelBase.
         """
         return (
-            f"{self.__class__.__name__}("
-            f"unique_name={self.unique_name!r}, "
-            f"x_unit={self.x_unit}, "
-            f"y_unit={self.y_unit}, "
-            f"Q={self.Q}, "
-            f"components={self.components})"
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
+            f'Q={self.Q}, '
+            f'components={self.components})'
         )

@@ -54,9 +54,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     def __init__(
         self,
         components: ModelComponent | list[ModelComponent] | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
-        name: str = "ComponentCollection",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
+        name: str = 'ComponentCollection',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
@@ -89,14 +89,14 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             components = [components]
         elif not isinstance(components, list):
             raise TypeError(
-                f"components must be a ModelComponent or a list of ModelComponent, "
-                f"got {type(components).__name__} instead."
+                f'components must be a ModelComponent or a list of ModelComponent, '
+                f'got {type(components).__name__} instead.'
             )
         for comp in components:
             if not isinstance(comp, ModelComponent):
                 raise TypeError(
-                    f"All items in components must be instances of ModelComponent, "
-                    f"got {type(comp).__name__} instead."
+                    f'All items in components must be instances of ModelComponent, '
+                    f'got {type(comp).__name__} instead.'
                 )
 
         EasyDynamicsList.__init__(
@@ -148,8 +148,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             Always raised since is_empty is read-only.
         """
         raise AttributeError(
-            "is_empty is a read-only property that indicates "
-            "whether the collection has components."
+            'is_empty is a read-only property that indicates '
+            'whether the collection has components.'
         )
 
     # ------------------------------------------------------------------
@@ -173,17 +173,13 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             If any component cannot be converted to the specified unit.
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}"
-            )
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
         old_unit = self._x_unit
         try:
             for component in self:
                 component.convert_x_unit(new_x_unit)
-            self._x_unit = (
-                str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-            )
+            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         except Exception as e:
             try:
                 for component in self:
@@ -209,17 +205,13 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             If any component cannot be converted to the specified unit.
         """
         if not isinstance(new_y_unit, (str, sc.Unit)):
-            raise TypeError(
-                f"y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}"
-            )
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
 
         old_unit = self._y_unit
         try:
             for component in self:
                 component.convert_y_unit(new_y_unit)
-            self._y_unit = (
-                str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
-            )
+            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
         except Exception as e:
             try:
                 for component in self:
@@ -273,17 +265,17 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             which would prevent normalization.
         """
         if not self:
-            raise ValueError("No components in the model to normalize.")
+            raise ValueError('No components in the model to normalize.')
 
         area_params = []
 
         for component in self:
-            if hasattr(component, "area"):
+            if hasattr(component, 'area'):
                 area_params.append(component.area)
             else:
                 warnings.warn(
                     f"Component '{component.name}' does not have an 'area' attribute "
-                    "and will be skipped in normalization.",
+                    'and will be skipped in normalization.',
                     UserWarning,
                     stacklevel=2,
                 )
@@ -291,10 +283,10 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         total_area_value = sum(p.value for p in area_params)
 
         if total_area_value == 0:
-            raise ValueError("Total area is zero; cannot normalize.")
+            raise ValueError('Total area is zero; cannot normalize.')
 
         if not np.isfinite(total_area_value):
-            raise ValueError("Total area is not finite; cannot normalize.")
+            raise ValueError('Total area is not finite; cannot normalize.')
 
         for param in area_params:
             param.value /= total_area_value
@@ -317,7 +309,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         """
         Evaluate the sum of all components.
@@ -345,7 +337,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
         name: str,
-        output: str = "numpy",
+        output: str = 'numpy',
     ) -> np.ndarray | sc.Variable:
         """
         Evaluate a single component by name.
@@ -374,11 +366,9 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             Evaluated values for the specified component.
         """
         if not self:
-            raise ValueError("No components in the model to evaluate.")
+            raise ValueError('No components in the model to evaluate.')
         if not isinstance(name, str):
-            raise TypeError(
-                f"Component name must be a string, got {type(name)} instead."
-            )
+            raise TypeError(f'Component name must be a string, got {type(name)} instead.')
         matches = [comp for comp in self if comp.name == name]
         if not matches:
             raise KeyError(f"No component named '{name}' exists.")
@@ -409,8 +399,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             seen.add(name)
         if dups:
             warnings.warn(
-                f"Duplicate component names in ComponentCollection: {sorted(dups)}. "
-                "Components with the same name will produce duplicate parameter names.",
+                f'Duplicate component names in ComponentCollection: {sorted(dups)}. '
+                'Components with the same name will produce duplicate parameter names.',
                 UserWarning,
                 stacklevel=3,
             )
@@ -428,11 +418,11 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         str
             String representation of the ComponentCollection.
         """
-        comp_names = ", ".join(c.name for c in self) or "No components"
+        comp_names = ', '.join(c.name for c in self) or 'No components'
         return (
             f"{self.__class__.__name__}(name='{self.name}', "
             f"x_unit='{self.x_unit}', y_unit='{self.y_unit}',\n"
-            f"Components: {comp_names})"
+            f'Components: {comp_names})'
         )
 
     def to_dict(self) -> dict:
@@ -445,13 +435,13 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             Dictionary representation of the ComponentCollection.
         """
         return {
-            "@module": self.__class__.__module__,
-            "@class": self.__class__.__name__,
-            "x_unit": str(self.x_unit),
-            "y_unit": str(self.y_unit),
-            "name": self.name,
-            "display_name": self.display_name,
-            "components": [c.to_dict() for c in self._data],
+            '@module': self.__class__.__module__,
+            '@class': self.__class__.__name__,
+            'x_unit': str(self.x_unit),
+            'y_unit': str(self.y_unit),
+            'name': self.name,
+            'display_name': self.display_name,
+            'components': [c.to_dict() for c in self._data],
         }
 
     @classmethod
@@ -482,18 +472,18 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             ModelComponent
                 The deserialised component.
             """
-            module = importlib.import_module(d["@module"])
-            cls = getattr(module, d["@class"])
+            module = importlib.import_module(d['@module'])
+            cls = getattr(module, d['@class'])
             return cls.from_dict(d)
 
-        components = [deserialise_component(c) for c in obj_dict["components"]]
+        components = [deserialise_component(c) for c in obj_dict['components']]
 
         return cls(
             components=components,
-            x_unit=obj_dict["x_unit"],
-            y_unit=obj_dict["y_unit"],
-            name=obj_dict["name"],
-            display_name=obj_dict["display_name"],
+            x_unit=obj_dict['x_unit'],
+            y_unit=obj_dict['y_unit'],
+            name=obj_dict['name'],
+            display_name=obj_dict['display_name'],
         )
 
     def __copy__(self) -> ComponentCollection:

@@ -45,10 +45,10 @@ class BackgroundModel(ModelBase):
 
     def __init__(
         self,
-        display_name: str | None = "MyBackgroundModel",
+        display_name: str | None = 'MyBackgroundModel',
         unique_name: str | None = None,
-        x_unit: str | sc.Unit = "meV",
-        y_unit: str | sc.Unit = "dimensionless",
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
@@ -82,9 +82,9 @@ class BackgroundModel(ModelBase):
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"unique_name={self.unique_name!r}, "
-            f"x_unit={self.x_unit}, y_unit={self.y_unit}, "
-            f"Q_len={None if self._Q is None else len(self._Q)}, "
-            f"components={self.components})"
+            f'{self.__class__.__name__}('
+            f'unique_name={self.unique_name!r}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, '
+            f'Q_len={None if self._Q is None else len(self._Q)}, '
+            f'components={self.components})'
         )

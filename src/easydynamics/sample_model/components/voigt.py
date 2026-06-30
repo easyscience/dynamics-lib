@@ -80,12 +80,12 @@ class Voigt(CreateParametersMixin, ModelComponent):
             Gaussian component standard deviation (sigma) in x_unit.  Must be strictly positive.
         lorentzian_width : Numeric | Parameter, default=1.0
             Lorentzian component HWHM (gamma) in x_unit.  Must be strictly positive.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center, gaussian_width, and lorentzian_width are stored in this
             unit.  area_unit = x_unit * y_unit.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Voigt"
+        name : str, default='Voigt'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.
@@ -261,7 +261,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Input x values.
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
 
         Returns
