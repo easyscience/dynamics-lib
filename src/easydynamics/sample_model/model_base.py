@@ -283,7 +283,7 @@ class ModelBase(EasyDynamicsModelBase):
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
-        old_unit = self._x_unit
+        old_unit = self.x_unit
         try:
             for component in self.components:
                 component.convert_x_unit(unit)
@@ -320,7 +320,7 @@ class ModelBase(EasyDynamicsModelBase):
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
-        old_unit = self._y_unit
+        old_unit = self.y_unit
         try:
             for component in self.components:
                 component.convert_y_unit(unit)

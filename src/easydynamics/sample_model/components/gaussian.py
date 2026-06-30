@@ -99,12 +99,12 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         )
 
         self._area = self._create_area_parameter(
-            area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
         self._center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
         )
-        self._width = self._create_width_parameter(width=width, name=name, x_unit=self._x_unit)
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self.x_unit)
 
     @property
     def area(self) -> Parameter:
@@ -229,8 +229,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             Evaluated Gaussian values at x.
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self._x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
+        eval_unit = detected_unit or self.x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
 
         center = self._resolve_param_value(self._center, eval_unit)
         width = self._resolve_param_value(self._width, eval_unit)
@@ -241,7 +241,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         result = area * normalization * np.exp(exponent)
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
@@ -283,7 +283,7 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center},\n'
             f'    width = {self.width})'

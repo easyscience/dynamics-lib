@@ -99,7 +99,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         )
 
         x_unit_str = str(x_unit) if isinstance(x_unit, sc.Unit) else x_unit
-        amplitude_unit = str(sc.Unit(x_unit_str) * sc.Unit(self._y_unit))
+        amplitude_unit = str(sc.Unit(x_unit_str) * sc.Unit(self.y_unit))
 
         if not isinstance(amplitude, Numeric):
             raise TypeError('amplitude must be a number.')
@@ -110,7 +110,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         )
 
         self._center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
         )
 
         if not isinstance(rate, Numeric):
@@ -234,8 +234,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
             Evaluated exponential values at x.
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self._x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
+        eval_unit = detected_unit or self.x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
         eval_rate_unit = '1/' + str(eval_unit)
 
         center = self._resolve_param_value(self._center, eval_unit)
@@ -246,7 +246,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         result = amplitude * np.exp(exponent)
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
@@ -266,9 +266,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
             units.
         """
         _assert_valid_unit(new_x_unit)
-        old_x_unit = self._x_unit
+        old_x_unit = self.x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self._y_unit))
+        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
         try:
             self._center.convert_unit(new_x_unit)
             self._amplitude.convert_unit(new_area_unit)
@@ -276,7 +276,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
             self._x_unit = new_x_str
         except Exception as e:
             try:
-                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
+                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
                 self._center.convert_unit(old_x_unit)
                 self._amplitude.convert_unit(old_area_unit)
                 self._rate.convert_unit('1/' + str(old_x_unit))
@@ -308,7 +308,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n '
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n '
             f'    amplitude = {self.amplitude},\n '
             f'    center = {self.center},\n '
             f'    rate = {self.rate})'

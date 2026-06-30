@@ -269,7 +269,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError('y_unit must be a string or scipp unit.')
-        old_y_unit = self._y_unit
+        old_y_unit = self.y_unit
         try:
             if self.sample_components is not None:
                 self.sample_components.convert_y_unit(unit)

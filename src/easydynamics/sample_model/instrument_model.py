@@ -262,13 +262,13 @@ class InstrumentModel(NewBase):
             )
 
     @property
-    def x_unit(self) -> str | sc.Unit:
+    def x_unit(self) -> str | sc.Unit | None:
         """
         Get the x-axis unit of the InstrumentModel.
 
         Returns
         -------
-        str | sc.Unit
+        str | sc.Unit | None
             The x-axis unit of the InstrumentModel.
         """
         return self._x_unit

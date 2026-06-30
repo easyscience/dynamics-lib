@@ -262,9 +262,9 @@ class Polynomial(ModelComponent):
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
 
-        if detected_unit is not None and detected_unit != str(self._x_unit):
+        if detected_unit is not None and detected_unit != self.x_unit:
             # Temporary coefficient rescaling — no mutation
-            helper = sc.scalar(1.0, unit=str(self._x_unit))
+            helper = sc.scalar(1.0, unit=self.x_unit)
             helper_in_x = sc.to_unit(helper, detected_unit)
             scale = helper.value / helper_in_x.value
             coeff_vals = [p.value * scale**i for i, p in enumerate(self._coefficients)]
@@ -284,7 +284,7 @@ class Polynomial(ModelComponent):
             )
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def get_all_variables(self) -> list[DescriptorBase]:
@@ -348,7 +348,7 @@ class Polynomial(ModelComponent):
         if not isinstance(new_y_unit, (str, sc.Unit)):
             raise UnitError('new_y_unit must be a string or a scipp unit.')
 
-        old_y_unit = str(self._y_unit) if self._y_unit is not None else 'dimensionless'
+        old_y_unit = self.y_unit or 'dimensionless'
         new_y_str = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
 
         # Compute conversion factor: 1 old_y_unit expressed in new_y_unit
@@ -364,6 +364,6 @@ class Polynomial(ModelComponent):
         coeffs_str = ', '.join(f'{param.name}={param.value}' for param in self._coefficients)
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
             f'    coefficients = [{coeffs_str}])'
         )

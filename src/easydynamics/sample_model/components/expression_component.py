@@ -213,7 +213,7 @@ class ExpressionComponent(ModelComponent):
                 self._parameters[name] = Parameter(
                     name=name,
                     value=value,
-                    unit=self._x_unit,
+                    unit=self.x_unit,
                 )
 
         # Create numerical function
@@ -283,10 +283,10 @@ class ExpressionComponent(ModelComponent):
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
 
-        if detected_unit is not None and detected_unit != str(self._x_unit):
+        if detected_unit is not None and detected_unit != self.x_unit:
             warnings.warn(
                 f'Input x has unit {detected_unit} but {self.__class__.__name__} has '
-                f'x_unit {self._x_unit}. ExpressionComponent cannot auto-convert parameters. '
+                f'x_unit {self.x_unit}. ExpressionComponent cannot auto-convert parameters. '
                 'x values are used as-is.',
                 UserWarning,
                 stacklevel=2,
@@ -302,7 +302,7 @@ class ExpressionComponent(ModelComponent):
         result = self._func(*args)
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def get_all_variables(self) -> list[Parameter]:
@@ -428,7 +428,7 @@ class ExpressionComponent(ModelComponent):
         param_str = ', '.join(f'{k}={v.value}' for k, v in self._parameters.items())
         return (
             f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'x_unit={self._x_unit}, y_unit={self._y_unit},\n'
+            f'x_unit={self.x_unit}, y_unit={self.y_unit},\n'
             f"    expr='{self._expression_str}',\n"
             f'    parameters={{ {param_str} }} )'
         )

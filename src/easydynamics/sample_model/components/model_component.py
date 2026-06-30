@@ -51,15 +51,15 @@ class ModelComponent(EasyDynamicsModelBase):
         )
 
     @property
-    def x_unit(self) -> str:
+    def x_unit(self) -> str | None:
         """
         Get the unit of the x axis.
         Returns
         -------
-        str
-            The current x-axis unit as a string.
+        str | None
+            The current x-axis unit as a string, or None if no unit is set.
         """
-        return str(self._x_unit)
+        return str(self._x_unit) if self._x_unit is not None else None
 
     @x_unit.setter
     def x_unit(self, _: str) -> None:
@@ -80,16 +80,16 @@ class ModelComponent(EasyDynamicsModelBase):
         )
 
     @property
-    def y_unit(self) -> str:
+    def y_unit(self) -> str | None:
         """
         Get the unit of the y axis
 
         Returns
         -------
-        str
-            The current y-axis unit as a string.
+        str | None
+            The current y-axis unit as a string, or None if no unit is set.
         """
-        return str(self._y_unit)
+        return str(self._y_unit) if self._y_unit is not None else None
 
     @y_unit.setter
     def y_unit(self, _: str) -> None:
@@ -180,13 +180,13 @@ class ModelComponent(EasyDynamicsModelBase):
             x_in = x.value if x.sizes == {} else x.values
 
             # Validate that x's unit is compatible with model's x_unit
-            if self._x_unit is not None and detected_unit != str(self._x_unit):
+            if self.x_unit is not None and detected_unit != self.x_unit:
                 try:
-                    sc.to_unit(sc.scalar(1.0, unit=detected_unit), str(self._x_unit))
+                    sc.to_unit(sc.scalar(1.0, unit=detected_unit), self.x_unit)
                 except Exception as e:
                     raise UnitError(
                         f'Input x has unit {detected_unit}, which is incompatible with '
-                        f'{self.__class__.__name__} x_unit {self._x_unit}.'
+                        f'{self.__class__.__name__} x_unit {self.x_unit}.'
                     ) from e
         else:
             x_in = x
@@ -258,9 +258,9 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
-        old_x_unit = self._x_unit
+        old_x_unit = self.x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self._y_unit))
+        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
         try:
             for p in x_params:
                 p.convert_unit(new_x_unit)
@@ -268,7 +268,7 @@ class ModelComponent(EasyDynamicsModelBase):
             self._x_unit = new_x_str
         except Exception as e:
             try:
-                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self._y_unit))
+                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
                 for p in x_params:
                     p.convert_unit(old_x_unit)
                 area_param.convert_unit(old_area_unit)
@@ -303,14 +303,14 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         if not isinstance(new_y_unit, (str, sc.Unit)):
             raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
-        old_y_unit = self._y_unit
-        new_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(new_y_unit))
+        old_y_unit = self.y_unit
+        new_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(new_y_unit))
         try:
             area_param.convert_unit(new_area_unit)
             self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
         except Exception as e:
             try:
-                old_area_unit = str(sc.Unit(self._x_unit) * sc.Unit(old_y_unit))
+                old_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(old_y_unit))
                 area_param.convert_unit(old_area_unit)
             except Exception:  # noqa: S110
                 pass
@@ -339,7 +339,7 @@ class ModelComponent(EasyDynamicsModelBase):
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
-        old_unit = self._x_unit
+        old_unit = self.x_unit
         pars = self.get_all_parameters()
         try:
             for p in pars:
@@ -403,5 +403,5 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         return (
             f'{self.__class__.__name__}(unique_name={self.unique_name}, '
-            f'x_unit={self._x_unit}, y_unit={self._y_unit})'
+            f'x_unit={self.x_unit}, y_unit={self.y_unit})'
         )

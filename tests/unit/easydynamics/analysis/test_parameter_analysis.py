@@ -1055,23 +1055,19 @@ class TestParameterAnalysis:
             parameter_analysis._get_xyweight_from_dataset('parameter1')
 
     def test_get_unit_conversions_none_x_unit(self, parameter_analysis):
-        from types import SimpleNamespace
+        model = Polynomial(coefficients=[1.0], x_unit=None, y_unit='meV')
+        binding = FitBinding(parameter_name='parameter1', model=model)
 
-        mock_model = SimpleNamespace(x_unit=None, y_unit='meV')
-        mock_binding = SimpleNamespace(model=mock_model)
-
-        x_factor, y_factor = parameter_analysis._get_unit_conversions(mock_binding, 'parameter1')
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
 
         assert x_factor == pytest.approx(1.0)
         assert y_factor == pytest.approx(1.0)
 
     def test_get_unit_conversions_none_y_unit(self, parameter_analysis):
-        from types import SimpleNamespace
+        model = Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit=None)
+        binding = FitBinding(parameter_name='parameter1', model=model)
 
-        mock_model = SimpleNamespace(x_unit='1/angstrom', y_unit=None)
-        mock_binding = SimpleNamespace(model=mock_model)
-
-        x_factor, y_factor = parameter_analysis._get_unit_conversions(mock_binding, 'parameter1')
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
 
         assert x_factor == pytest.approx(1.0)
         assert y_factor == pytest.approx(1.0)

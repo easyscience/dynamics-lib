@@ -175,7 +175,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
-        old_unit = self._x_unit
+        old_unit = self.x_unit
         try:
             for component in self:
                 component.convert_x_unit(new_x_unit)
@@ -207,7 +207,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         if not isinstance(new_y_unit, (str, sc.Unit)):
             raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
 
-        old_unit = self._y_unit
+        old_unit = self.y_unit
         try:
             for component in self:
                 component.convert_y_unit(new_y_unit)

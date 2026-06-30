@@ -101,22 +101,22 @@ class Voigt(CreateParametersMixin, ModelComponent):
         )
 
         self._area = self._create_area_parameter(
-            area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
         self._center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
         )
         self._gaussian_width = self._create_width_parameter(
             width=gaussian_width,
             name=name,
             param_name='gaussian_width',
-            x_unit=self._x_unit,
+            x_unit=self.x_unit,
         )
         self._lorentzian_width = self._create_width_parameter(
             width=lorentzian_width,
             name=name,
             param_name='lorentzian_width',
-            x_unit=self._x_unit,
+            x_unit=self.x_unit,
         )
 
     @property
@@ -270,8 +270,8 @@ class Voigt(CreateParametersMixin, ModelComponent):
             Evaluated Voigt profile values at x.
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self._x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
+        eval_unit = detected_unit or self.x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
 
         center = self._resolve_param_value(self._center, eval_unit)
         gw = self._resolve_param_value(self._gaussian_width, eval_unit)
@@ -281,7 +281,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         result = area * voigt_profile(x_vals - center, gw, lw)
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self._y_unit)
+            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
@@ -323,7 +323,7 @@ class Voigt(CreateParametersMixin, ModelComponent):
         """
         return (
             f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
-            f'x_unit = {self._x_unit}, y_unit = {self._y_unit},\n'
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center},\n'
             f'    gaussian_width = {self.gaussian_width},\n'

@@ -95,10 +95,10 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         )
 
         self._area = self._create_area_parameter(
-            area=area, name=name, x_unit=self._x_unit, y_unit=self._y_unit
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
         self._center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, x_unit=self._x_unit
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
         )
 
     @property
@@ -194,8 +194,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         element (handled by the Convolution class).
         """
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self._x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self._y_unit))
+        eval_unit = detected_unit or self.x_unit
+        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
 
         center = self._resolve_param_value(self._center, eval_unit)
         area = self._resolve_param_value(self._area, eval_area_unit)
@@ -223,7 +223,7 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             model[i] = area / bin_width
 
         if output == 'scipp':
-            return sc.array(dims=[dim], values=model, unit=self._y_unit)
+            return sc.array(dims=[dim], values=model, unit=self.y_unit)
         return model
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:

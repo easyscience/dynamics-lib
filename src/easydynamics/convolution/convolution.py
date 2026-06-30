@@ -340,9 +340,9 @@ class Convolution(NumericalConvolutionBase):
         """
         super().convert_y_unit(unit)
         if getattr(self, '_analytical_convolver', None) is not None:
-            self._analytical_convolver._y_unit = self._y_unit  # noqa: SLF001
+            self._analytical_convolver._y_unit = self.y_unit  # noqa: SLF001
         if getattr(self, '_numerical_convolver', None) is not None:
-            self._numerical_convolver._y_unit = self._y_unit  # noqa: SLF001
+            self._numerical_convolver._y_unit = self.y_unit  # noqa: SLF001
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:
