@@ -3128,7 +3128,7 @@ contains a residuals array.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q_index is not an integer.</p>
+                <p>If Q_index is not an int (or not an int or None when allow_none=True).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3142,6 +3142,19 @@ contains a residuals array.</p>
             <td>
               <div class="doc-md-description">
                 <p>If Q_index is out of range.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If Q is None and Q_index is not None.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
