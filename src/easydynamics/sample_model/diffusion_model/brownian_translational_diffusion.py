@@ -276,18 +276,22 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             dependency_expression = self._write_width_dependency_expression(Q[i])
             dependency_map = self._write_width_dependency_map_expression()
 
-            lorentzian_component.width.make_dependent_on(
-                dependency_expression=dependency_expression,
-                dependency_map=dependency_map,
-                desired_unit=self.x_unit,
-            )
+            # easyscience propagates inf bounds through arithmetic, producing inf/inf=nan
+            # as a transient intermediate. Python's min/max ignore nan so the final bounds
+            # are correct; suppress the spurious numpy RuntimeWarning.
+            with np.errstate(invalid='ignore'):
+                lorentzian_component.width.make_dependent_on(
+                    dependency_expression=dependency_expression,
+                    dependency_map=dependency_map,
+                    desired_unit=self.x_unit,
+                )
 
-            # Make the area dependent on Q
-            area_dependency_map = self._write_area_dependency_map_expression()
-            lorentzian_component.area.make_dependent_on(
-                dependency_expression=self._write_area_dependency_expression(QISF[i]),
-                dependency_map=area_dependency_map,
-            )
+                # Make the area dependent on Q
+                area_dependency_map = self._write_area_dependency_map_expression()
+                lorentzian_component.area.make_dependent_on(
+                    dependency_expression=self._write_area_dependency_expression(QISF[i]),
+                    dependency_map=area_dependency_map,
+                )
 
             component_collection_list[i].append_component(lorentzian_component)
 

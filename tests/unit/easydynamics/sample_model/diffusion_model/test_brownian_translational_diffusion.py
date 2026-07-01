@@ -50,7 +50,7 @@ class TestBrownianTranslationalDiffusion:
                     'diffusion_coefficient': 1.0,
                 },
                 TypeError,
-                '',
+                None,
             ),
             (
                 {
