@@ -65,7 +65,13 @@ class TestDampedHarmonicOscillator:
                 'unit must be None, a string',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
+                {
+                    'area': 2.0,
+                    'center': 0.5,
+                    'width': 0.6,
+                    'x_unit': 'meV',
+                    'y_unit': 123,
+                },
                 'unit must be None, a string',
             ),
         ],
@@ -119,6 +125,7 @@ class TestDampedHarmonicOscillator:
 
         # THEN : set a valid value
         setattr(dho, prop, valid_value)
+
         # EXPECT
         assert getattr(dho, prop).value == valid_value
 
@@ -236,8 +243,10 @@ class TestDampedHarmonicOscillator:
         dho = DampedHarmonicOscillator(
             area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
         )
+
         # THEN: convert y_unit to '1/eV' (same dimension, different scale)
         dho.convert_y_unit('1/eV')
+
         # EXPECT: y_unit updated and area value rescaled (1e3 factor)
         assert dho.y_unit == '1/eV'
         assert dho.area.value == pytest.approx(1e3)
@@ -250,8 +259,10 @@ class TestDampedHarmonicOscillator:
     def test_evaluate_scipp_output(self, dho: DampedHarmonicOscillator):
         # WHEN
         x = np.linspace(0.5, 5.0, 50)
+
         # THEN
         result = dho.evaluate(x, output='scipp')
+
         # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('dimensionless')
@@ -264,8 +275,10 @@ class TestDampedHarmonicOscillator:
             area=1.0, center=1.0, width=0.3, x_unit='meV', y_unit='1/meV'
         )
         x = np.linspace(0.5, 5.0, 50)
+
         # THEN
         result = dho.evaluate(x, output='scipp')
+
         # EXPECT
         assert isinstance(result, sc.Variable)
         assert result.unit == sc.Unit('1/meV')

@@ -122,7 +122,7 @@ class TestInstrumentModel:
             'invalid resolution_model',
             'invalid background_model',
             'invalid energy_offset',
-            'invalid unit',
+            'invalid x unit',
         ],
     )
     def test_instrument_model_init_invalid_inputs(

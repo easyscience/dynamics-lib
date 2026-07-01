@@ -22,6 +22,8 @@ class TestEasyDynamicsModelBase:
         assert easy_dynamics_modelbase.name == 'TestModel'
         assert easy_dynamics_modelbase.display_name == 'TestModel'
         assert easy_dynamics_modelbase.unique_name is not None
+        assert easy_dynamics_modelbase.x_unit == 'meV'
+        assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
     def test_init_raises_type_error_for_invalid_name(self):
         """Test that initializing with an invalid name raises a TypeError."""
@@ -69,15 +71,12 @@ class TestEasyDynamicsModelBase:
         # WHEN THEN EXPECT
 
         assert easy_dynamics_modelbase.x_unit == 'meV'
+        assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
-    def test_unit_setter_raises(self, easy_dynamics_modelbase):
+    def test_x_unit_setter_raises(self, easy_dynamics_modelbase):
         # WHEN / THEN / EXPECT
         with pytest.raises(AttributeError, match='read-only'):
             easy_dynamics_modelbase.x_unit = 'K'
-
-    def test_y_unit_default(self, easy_dynamics_modelbase):
-        # WHEN THEN EXPECT
-        assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, easy_dynamics_modelbase):
         # WHEN THEN EXPECT

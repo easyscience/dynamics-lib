@@ -580,10 +580,6 @@ class TestConvolution:
         # EXPECT
         assert conv.convolution_settings.convolution_plan_is_valid is False
 
-    def test_y_unit_default(self, default_convolution):
-        # WHEN THEN EXPECT
-        assert default_convolution.y_unit == 'dimensionless'
-
     def test_convert_y_unit_propagates_to_sub_convolvers(self):
         # WHEN: Convolution with Gaussian sample and resolution components,
         #       both with y_unit='1/meV'

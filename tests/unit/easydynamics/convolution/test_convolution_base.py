@@ -126,6 +126,16 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
+                    'y_unit': 123,
+                    'energy_offset': 0,
+                },
+                'unit must be ',
+            ),
+            (
+                {
+                    'energy': np.linspace(-10, 10, 100),
+                    'sample_components': ComponentCollection(),
+                    'resolution_components': ComponentCollection(),
                     'x_unit': 'meV',
                     'energy_offset': 'invalid',
                 },
@@ -321,10 +331,6 @@ class TestConvolutionBase:
         ):
             convolution_base.resolution_components = 'invalid'
 
-    def test_y_unit_default(self, convolution_base):
-        # WHEN THEN EXPECT
-        assert convolution_base.y_unit == 'dimensionless'
-
     def test_y_unit_setter_raises(self, convolution_base):
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError, match='read-only'):
@@ -360,21 +366,40 @@ class TestConvolutionBase:
         assert convolution_base.y_unit == 'dimensionless'
 
     def test_convert_x_unit_without_sample_components(self):
+        # WHEN
         cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+
+        # THEN
         cb.convert_x_unit('eV')
+
+        # EXPECT
+        assert cb.energy.unit == 'eV'
+        assert np.allclose(cb.energy.values, np.linspace(-0.01, 0.01, 100))
         assert cb.x_unit == 'eV'
 
     def test_convert_x_unit_without_resolution_components(self):
+        # WHEN
         sample = ComponentCollection(display_name='Sample')
         cb = ConvolutionBase(
             energy=np.linspace(-10, 10, 100),
             sample_components=sample,
             resolution_components=None,
         )
+
+        # THEN
         cb.convert_x_unit('eV')
+
+        # EXPECT
+        assert cb.energy.unit == 'eV'
+        assert np.allclose(cb.energy.values, np.linspace(-0.01, 0.01, 100))
         assert cb.x_unit == 'eV'
 
     def test_convert_y_unit_without_sample_components(self):
+        # WHEN
         cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+
+        # THEN
         cb.convert_y_unit('1/meV')
+
+        # EXPECT
         assert cb.y_unit == '1/meV'

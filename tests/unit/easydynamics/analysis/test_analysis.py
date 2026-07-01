@@ -832,6 +832,7 @@ class TestAnalysis:
         # NOT via energy[numpy_bool_array].  The bug: numpy booleans are treated as integer
         # indices by scipp (True→1, False→0), so energy[[True,False,True]] returns 3 elements
         # with wrong values instead of filtering to the 2 finite points.
+
         # WHEN: data with a NaN at index 1; finite energies are -1.0 and 1.0
         Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
         energy = sc.array(dims=['energy'], values=[-1.0, 0.0, 1.0], unit='meV')
@@ -840,12 +841,15 @@ class TestAnalysis:
         data = sc.array(dims=['Q', 'energy'], values=values, variances=variances)
         data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
         experiment = Experiment(data=data_array)
+
+        # Set up a sample model and analysis
         sample_model = SampleModel(components=Gaussian(name='G'))
         analysis = Analysis(experiment=experiment, sample_model=sample_model)
 
         captured_energy = []
         original_refresh = analysis.analysis_list[0].refresh_convolver
 
+        # Patch the refresh_convolver method to capture the energy passed to it
         def capture_refresh(energy, **kwargs):
             captured_energy.append(energy)
             return original_refresh(energy=energy, **kwargs)
@@ -856,7 +860,7 @@ class TestAnalysis:
         fake_fitter_instance = MagicMock()
         fake_fitter_instance.fit.return_value = object()
 
-        # WHEN
+        # THEN
         with patch(
             'easydynamics.analysis.analysis.MultiFitter',
             return_value=fake_fitter_instance,

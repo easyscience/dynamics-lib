@@ -88,6 +88,8 @@ class TestValidateUnit:
     )
     def test_validate_unit_valid(self, unit_input):
         # WHEN
+
+        # THEN
         unit = _validate_unit(unit_input)
 
         # EXPECT
@@ -98,9 +100,11 @@ class TestValidateUnit:
 
     def test_validate_unit_string_conversion(self):
         # WHEN
+
+        # THEN
         unit = _validate_unit(sc.Unit('meV'))
 
-        # THEN EXPECT
+        # EXPECT
         assert isinstance(unit, str)
         assert unit == 'meV'
 

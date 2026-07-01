@@ -150,7 +150,7 @@ class TestModelComponent:
         # WHEN
         x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='microeV')
 
-        # THEN EXPECT: compatible units are accepted without warning;
+        # THEN: compatible units are accepted without warning;
         # the component's x_unit is NOT mutated and x values are returned as-is.
         x_prepared, _detected_unit, _dim = dummy._prepare_x_for_evaluate(x)
 
@@ -165,22 +165,29 @@ class TestModelComponent:
 
     def test_resolve_param_value_same_unit_returns_raw_value(self, dummy):
         # WHEN: target unit matches parameter unit
+
+        # THEN
         result = dummy._resolve_param_value(dummy.area, 'meV')
         # EXPECT: raw value returned without conversion
         assert result == pytest.approx(dummy.area.value)
 
     def test_resolve_param_value_none_target_returns_raw_value(self, dummy):
         # WHEN: target unit is None
+
+        # THEN
         result = dummy._resolve_param_value(dummy.area, None)
+
         # EXPECT: raw value returned without conversion
         assert result == pytest.approx(dummy.area.value)
 
     def test_resolve_param_value_converts_without_mutating(self, dummy):
         # WHEN: target unit differs from parameter unit
+
+        # THEN
         result = dummy._resolve_param_value(dummy.area, 'eV')
         # EXPECT: converted value (1.0 meV → 0.001 eV)
         assert result == pytest.approx(0.001)
-        # EXPECT: parameter itself is not mutated
+        # parameter itself is not mutated
         assert dummy.area.value == pytest.approx(1.0)
         assert str(dummy.area.unit) == 'meV'
 
@@ -190,7 +197,9 @@ class TestModelComponent:
         g_ev = Gaussian(area=0.001, center=0.0, width=0.0005, x_unit='eV')
 
         x_ev = sc.array(
-            dims=['energy'], values=np.array([-0.002, -0.001, 0.0, 0.001, 0.002]), unit='eV'
+            dims=['energy'],
+            values=np.array([-0.002, -0.001, 0.0, 0.001, 0.002]),
+            unit='eV',
         )
         x_ev_np = np.array([-0.002, -0.001, 0.0, 0.001, 0.002])
 

@@ -208,6 +208,7 @@ class TestExpressionComponent:
         assert isinstance(expr_copy, ExpressionComponent)
         assert expr_copy.expression == expr.expression
         assert expr_copy.x_unit == expr.x_unit
+        assert expr_copy.y_unit == expr.y_unit
         assert expr_copy.display_name == expr.display_name
 
         assert expr_copy.A.value == pytest.approx(expr.A.value)

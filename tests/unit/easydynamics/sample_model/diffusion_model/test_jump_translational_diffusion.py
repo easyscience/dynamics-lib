@@ -47,6 +47,16 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
+                    'y_unit': 123,
+                    'scale': 1.0,
+                    'diffusion_coefficient': 1.0,
+                    'relaxation_time': 1.0,
+                },
+                TypeError,
+                '',
+            ),
+            (
+                {
                     'x_unit': 'meV',
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
@@ -95,6 +105,15 @@ class TestJumpTranslationalDiffusion:
                 ValueError,
                 'relaxation_time must be non-negative',
             ),
+        ],
+        ids=[
+            'invalid_x_unit',
+            'invalid_y_unit',
+            'invalid_scale_type',
+            'invalid_diffusion_coefficient_type',
+            'invalid_diffusion_coefficient_negative',
+            'invalid_relaxation_time_type',
+            'invalid_relaxation_time_negative',
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_exception, expected_message):

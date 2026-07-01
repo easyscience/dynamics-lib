@@ -32,7 +32,7 @@ class TestDiffusionModelBase:
         with pytest.raises(TypeError, match=r'lorentzian_display_name must be a string or None'):
             DiffusionModelBase(lorentzian_display_name=123)
 
-    def test_unit_setter_raises(self, diffusion_model):
+    def test_x_unit_setter_raises(self, diffusion_model):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,

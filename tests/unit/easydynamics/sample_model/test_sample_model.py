@@ -63,6 +63,7 @@ class TestSampleModel:
         # EXPECT
         assert model.display_name == 'InitModel'
         assert model.x_unit == 'meV'
+        assert model.y_unit == 'dimensionless'
         assert len(model.components) == 2
         assert isinstance(model.diffusion_models, list)
         assert len(model.diffusion_models) == 1
@@ -537,10 +538,6 @@ class TestSampleModel:
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
         assert 'normalize_detailed_balance' in repr_str
-
-    def test_y_unit_default(self, sample_model):
-        # WHEN THEN EXPECT
-        assert sample_model.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, sample_model):
         # WHEN / THEN / EXPECT

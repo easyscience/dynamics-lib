@@ -89,6 +89,7 @@ class TestDeltaFunction:
     ):
         # WHEN: set a valid value
         setattr(delta_function, prop, valid_value)
+
         # THEN EXPECT
         assert getattr(delta_function, prop).value == valid_value
 
@@ -235,6 +236,7 @@ class TestDeltaFunction:
     def test_y_unit_custom(self):
         # WHEN THEN
         delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+
         # EXPECT
         assert delta.y_unit == '1/meV'
 
@@ -287,9 +289,14 @@ class TestDeltaFunction:
         ids=['center_at_first', 'center_at_last'],
     )
     def test_evaluate_center_at_boundary(self, x, center, expected_idx):
+        # WHEN
         area = 1.0
         delta = DeltaFunction(area=area, center=center, x_unit='meV')
+
+        # THEN
         result = delta.evaluate(x)
+
+        # EXPECT
         # All elements except the boundary one should be zero
         assert result[expected_idx] > 0.0
         other_indices = [i for i in range(len(x)) if i != expected_idx]

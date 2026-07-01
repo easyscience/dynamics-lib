@@ -211,6 +211,7 @@ class TestParameterAnalysis:
 
         with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
             MockMultiFitter.return_value.fit.return_value = MagicMock()
+            # THEN
             pa.fit()
             x_passed = MockMultiFitter.return_value.fit.call_args.kwargs['x'][0]
 
@@ -226,7 +227,10 @@ class TestParameterAnalysis:
             data={
                 'param': sc.DataArray(
                     data=sc.array(
-                        dims=['Q'], values=[0.001, 0.002], variances=[1e-6, 4e-6], unit='eV'
+                        dims=['Q'],
+                        values=[0.001, 0.002],
+                        variances=[1e-6, 4e-6],
+                        unit='eV',
                     ),
                     coords={'Q': Q},
                 )
@@ -239,6 +243,7 @@ class TestParameterAnalysis:
 
         with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
             MockMultiFitter.return_value.fit.return_value = MagicMock()
+            # THEN
             pa.fit()
             kwargs = MockMultiFitter.return_value.fit.call_args.kwargs
             y_passed = kwargs['y'][0]
@@ -707,6 +712,7 @@ class TestParameterAnalysis:
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         mock_callable = MagicMock(return_value=np.array([10.0, 20.0]))
+        # THEN
         with patch.object(binding, 'build_callables', return_value=[mock_callable]):
             pa.calculate_model_dataset([binding])
 
@@ -731,6 +737,7 @@ class TestParameterAnalysis:
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         mock_callable = MagicMock(return_value=np.array([1.0, 2.0]))  # meV
+        # THEN
         with patch.object(binding, 'build_callables', return_value=[mock_callable]):
             result = pa.calculate_model_dataset([binding])
 
@@ -987,6 +994,8 @@ class TestParameterAnalysis:
 
     def test_get_xyweight_from_dataset_nan_variance_filters_row(self, parameter_analysis):
         # NaN variances arise when a parameter is absent for a given Q; those rows are filtered.
+
+        # WHEN
         Q = sc.array(dims=['Q'], values=[0.1, 0.2])
         parameter_analysis.parameters = sc.Dataset(
             data={
@@ -1002,8 +1011,10 @@ class TestParameterAnalysis:
             }
         )
 
+        # THEN
         x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
 
+        # EXPECT
         np.testing.assert_allclose(x, [0.1])
         np.testing.assert_allclose(y, [1.0])
         np.testing.assert_allclose(w, [1 / np.sqrt(0.25)])
@@ -1019,6 +1030,7 @@ class TestParameterAnalysis:
         np.testing.assert_allclose(w, expected_w)
 
     def test_get_xyweight_from_dataset_no_variances(self, parameter_analysis):
+        # WHEN
         Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
         parameter_analysis.parameters = sc.Dataset(
             data={
@@ -1029,25 +1041,32 @@ class TestParameterAnalysis:
             }
         )
 
+        # THEN
         x, y, w = parameter_analysis._get_xyweight_from_dataset('parameter1')
 
+        # EXPECT
         np.testing.assert_allclose(x, [0.1, 0.2])
         np.testing.assert_allclose(y, [1.0, 2.0])
         np.testing.assert_allclose(w, [1.0, 1.0])
 
     def test_get_xyweight_from_dataset_all_nan_variances_raises(self, parameter_analysis):
+        # WHEN
         Q = sc.array(dims=['Q'], values=[0.1, 0.2], unit='1/angstrom')
         parameter_analysis.parameters = sc.Dataset(
             data={
                 'parameter1': sc.DataArray(
                     data=sc.array(
-                        dims=['Q'], values=[np.nan, np.nan], variances=[np.nan, np.nan], unit='meV'
+                        dims=['Q'],
+                        values=[np.nan, np.nan],
+                        variances=[np.nan, np.nan],
+                        unit='meV',
                     ),
                     coords={'Q': Q},
                 ),
             }
         )
 
+        # THEN EXPECT
         with pytest.raises(
             ValueError,
             match="No finite positive variances found for parameter 'parameter1'",
@@ -1055,20 +1074,26 @@ class TestParameterAnalysis:
             parameter_analysis._get_xyweight_from_dataset('parameter1')
 
     def test_get_unit_conversions_none_x_unit(self, parameter_analysis):
+        # WHEN
         model = Polynomial(coefficients=[1.0], x_unit=None, y_unit='meV')
         binding = FitBinding(parameter_name='parameter1', model=model)
 
+        # THEN
         x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
 
+        # EXPECT
         assert x_factor == pytest.approx(1.0)
         assert y_factor == pytest.approx(1.0)
 
     def test_get_unit_conversions_none_y_unit(self, parameter_analysis):
+        # WHEN
         model = Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit=None)
         binding = FitBinding(parameter_name='parameter1', model=model)
 
+        # THEN
         x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
 
+        # EXPECT
         assert x_factor == pytest.approx(1.0)
         assert y_factor == pytest.approx(1.0)
 

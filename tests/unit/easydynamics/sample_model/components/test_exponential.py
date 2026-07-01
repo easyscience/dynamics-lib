@@ -60,7 +60,13 @@ class TestExponential:
                 'rate must be a number',
             ),
             (
-                {'amplitude': 2.0, 'center': 0.5, 'rate': 1.0, 'x_unit': 'meV', 'y_unit': 123},
+                {
+                    'amplitude': 2.0,
+                    'center': 0.5,
+                    'rate': 1.0,
+                    'x_unit': 'meV',
+                    'y_unit': 123,
+                },
                 'unit must be None, a string',
             ),
         ],
@@ -153,9 +159,11 @@ class TestExponential:
 
     def test_convert_x_unit(self, exponential: Exponential):
         # WHEN
+
+        # THEN
         exponential.convert_x_unit('microeV')
 
-        # THEN EXPECT
+        # EXPECT
         assert exponential.x_unit == 'microeV'
 
         assert exponential.amplitude.value == pytest.approx(2.0 * 1e3)
@@ -171,14 +179,14 @@ class TestExponential:
             exponential.convert_x_unit(123)
 
     def test_convert_x_unit_rollback(self, exponential: Exponential):
-        # WHEN
+        # WHEN THEN
         with pytest.raises(
             UnitError,
             match=r'Failed to convert unit: Conversion from `meV` to `m` is not valid.',
         ):
             exponential.convert_x_unit('m')
 
-        # THEN EXPECT - values should be unchanged
+        # EXPECT - values should be unchanged
         assert exponential.x_unit == 'meV'
         assert exponential.amplitude.value == pytest.approx(2.0)
         assert exponential.amplitude.unit == 'meV'
@@ -189,9 +197,11 @@ class TestExponential:
 
     def test_copy(self, exponential: Exponential):
         # WHEN
+
+        # THEN
         exponential_copy = copy(exponential)
 
-        # THEN EXPECT
+        # EXPECT
         assert exponential_copy is not exponential
         assert exponential_copy.display_name == exponential.display_name
 
@@ -205,6 +215,7 @@ class TestExponential:
         assert exponential_copy.rate.fixed == exponential.rate.fixed
 
         assert exponential_copy.x_unit == exponential.x_unit
+        assert exponential_copy.y_unit == exponential.y_unit
 
     def test_repr(self, exponential: Exponential):
         # WHEN

@@ -143,9 +143,11 @@ class TestPolynomial:
         ],
     )
     def test_set_coefficients_raises(self, invalid_coeffs, expected_message):
-        # WHEN THEN EXPECT
+        # WHEN
+        # THEN
+        polynomial = Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
         with pytest.raises(TypeError, match=expected_message):
-            polynomial = Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
+            # EXPECT
             polynomial.coefficients = invalid_coeffs
 
     def test_coefficient_values(self, polynomial: Polynomial):

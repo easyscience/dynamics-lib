@@ -39,13 +39,13 @@ class TestBackgroundModel:
 
     def test_init(self, background_model):
         # WHEN THEN
-        model = background_model
 
         # EXPECT
-        assert model.display_name == 'InitModel'
-        assert model.x_unit == 'meV'
-        assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        assert background_model.display_name == 'InitModel'
+        assert background_model.x_unit == 'meV'
+        assert background_model.y_unit == 'dimensionless'
+        assert len(background_model.components) == 2
+        np.testing.assert_array_equal(background_model.Q, np.array([1.0, 2.0, 3.0]))
 
     @pytest.mark.parametrize(
         'invalid_component, expected_error_msg',
@@ -80,10 +80,6 @@ class TestBackgroundModel:
             collection = ComponentCollection()
             collection.append_component(invalid_component)
             BackgroundModel(components=collection)
-
-    def test_y_unit_default(self, background_model):
-        # WHEN THEN EXPECT
-        assert background_model.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, background_model):
         # WHEN / THEN / EXPECT

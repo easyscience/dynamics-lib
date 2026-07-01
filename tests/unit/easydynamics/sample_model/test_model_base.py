@@ -45,13 +45,13 @@ class TestModelBase:
 
     def test_init(self, model_base):
         # WHEN THEN
-        model = model_base
 
         # EXPECT
-        assert model.display_name == 'InitModel'
-        assert model.x_unit == 'meV'
-        assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        assert model_base.display_name == 'InitModel'
+        assert model_base.x_unit == 'meV'
+        assert model_base.y_unit == 'dimensionless'
+        assert len(model_base.components) == 2
+        np.testing.assert_array_equal(model_base.Q, np.array([1.0, 2.0, 3.0]))
 
     def test_init_raises_with_invalid_components(self):
         # WHEN / THEN / EXPECT
@@ -433,10 +433,6 @@ class TestModelBase:
         assert 'unit' in repr_str
         assert 'Q=' in repr_str
         assert 'components=' in repr_str
-
-    def test_y_unit_default(self, model_base):
-        # WHEN THEN EXPECT
-        assert model_base.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, model_base):
         # WHEN / THEN / EXPECT

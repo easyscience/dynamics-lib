@@ -72,13 +72,13 @@ class TestResolutionModel:
 
     def test_init(self, resolution_model):
         # WHEN THEN
-        model = resolution_model
 
         # EXPECT
-        assert model.display_name == 'InitModel'
-        assert model.x_unit == 'meV'
-        assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        assert resolution_model.display_name == 'InitModel'
+        assert resolution_model.x_unit == 'meV'
+        assert resolution_model.y_unit == 'dimensionless'
+        assert len(resolution_model.components) == 2
+        np.testing.assert_array_equal(resolution_model.Q, np.array([1.0, 2.0, 3.0]))
 
     @pytest.mark.parametrize(
         'invalid_component, expected_error_msg',
@@ -301,10 +301,6 @@ class TestResolutionModel:
             match='cannot be a DeltaFunction',
         ):
             ResolutionModel.from_sample_model(sample_model)
-
-    def test_y_unit_default(self, resolution_model):
-        # WHEN THEN EXPECT
-        assert resolution_model.y_unit == 'dimensionless'
 
     def test_y_unit_setter_raises(self, resolution_model):
         # WHEN / THEN / EXPECT

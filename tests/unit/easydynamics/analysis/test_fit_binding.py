@@ -123,15 +123,17 @@ class TestFitBinding:
 
     def test_modes_setter(self, fit_binding):
         # WHEN
+
+        # THEN
         fit_binding.modes = 'area'
 
-        # THEN EXPECT
+        # EXPECT
         assert fit_binding.modes == ['area']
 
-        # WHEN
+        # THEN
         fit_binding.modes = ['area', 'width']
 
-        # THEN EXPECT
+        # EXPECT
         assert fit_binding.modes == ['area', 'width']
 
     def test_modes_setter_errors(self, fit_binding):
@@ -268,13 +270,16 @@ class TestFitBinding:
         assert result_width == pytest.approx(0.5)  # Should ignore unused_arg
 
     def test_build_diffusion_callable_delta_mode(self, diffusion_fit_binding):
+        # WHEN
         mock_model = Mock()
         mock_model.calculate_EISF.return_value = 0.8
         mock_model.scale.value = 2.0
         diffusion_fit_binding._model = mock_model
 
+        # THEN
         delta_callable = diffusion_fit_binding._build_diffusion_callable(mode='delta')
 
+        # EXPECT
         assert delta_callable(0) == pytest.approx(1.6)
         mock_model.calculate_EISF.assert_called_once_with(0)
 

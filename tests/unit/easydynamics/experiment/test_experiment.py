@@ -359,6 +359,8 @@ class TestExperiment:
     def test_get_finite_energy_mask_with_data(self, experiment_with_data):
         "Test get_finite_energy_mask returns a boolean scipp variable when data is loaded"
         # WHEN
+
+        # THEN
         mask = experiment_with_data.get_finite_energy_mask(Q_index=0)
 
         # EXPECT
@@ -369,6 +371,8 @@ class TestExperiment:
     def test_get_masked_binned_data_with_data(self, experiment_with_data):
         "Test get_masked_binned_data returns a DataArray with all-finite data loaded"
         # WHEN
+
+        # THEN
         result = experiment_with_data.get_masked_binned_data(Q_index=0)
 
         # EXPECT

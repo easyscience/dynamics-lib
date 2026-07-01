@@ -1072,7 +1072,12 @@ class TestAnalysis1d:
     def test_create_residuals_array_with_nan_data_does_not_crash(self, analysis1d_with_nan):
         # Before the fix, residuals subtracted a 2-point model from 3-point data
         # (including NaN) which caused a dimension mismatch crash.
+        # WHEN
+
+        # THEN
         result = analysis1d_with_nan._create_residuals_array()
+
+        # EXPECT
         assert isinstance(result, sc.DataArray)
         # Only the 2 finite energy points survive the mask.
         assert result.sizes['energy'] == 2
@@ -1082,10 +1087,15 @@ class TestAnalysis1d:
     ):
         # Before the fix, 'Data' contained the full 3-point grid (including NaN)
         # and computing Residuals crashed on the dimension mismatch.
+        # WHEN
         energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+
+        # THEN
         datagroup = analysis1d_with_nan.data_and_model_to_datagroup(
             energy=energy, include_residuals=True
         )
+
+        # EXPECT
         assert isinstance(datagroup, sc.DataGroup)
         # 'Data' must contain only the 2 finite points.
         assert datagroup['Data'].sizes['energy'] == 2

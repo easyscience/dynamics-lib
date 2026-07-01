@@ -94,8 +94,10 @@ class TestAnalysisBase:
     def test_init_extra_parameter(self):
         # WHEN
         extra_parameter = Parameter(name='param1', value=1.0)
+
+        # THEN
         analysis = AnalysisBase(extra_parameters=extra_parameter)
-        # THEN EXPECT
+        # EXPECT
         assert analysis._extra_parameters == [extra_parameter]
 
     def test_init_extra_parameters(self):
@@ -104,8 +106,10 @@ class TestAnalysisBase:
             Parameter(name='param1', value=1.0),
             Parameter(name='param2', value=2.0),
         ]
+
+        # THEN
         analysis = AnalysisBase(extra_parameters=extra_parameters)
-        # THEN EXPECT
+        # EXPECT
         assert analysis._extra_parameters == extra_parameters
 
     def test_init_calls_on_experiment_changed(self):
@@ -195,17 +199,22 @@ class TestAnalysisBase:
     def test_sample_model_setter_valid(self, analysis_base):
         # WHEN
         new_sample_model = SampleModel()
+
+        # THEN
         analysis_base.sample_model = new_sample_model
-        # THEN EXPECT
+        # EXPECT
         assert analysis_base.sample_model == new_sample_model
 
     def test_sample_model_setter_calls_on_sample_model_changed(self, analysis_base):
-        # WHEN THEN EXPECT
+        # WHEN
+        new_sample_model = SampleModel()
         with patch.object(
             analysis_base, '_on_sample_model_changed'
         ) as mock_on_sample_model_changed:
-            new_sample_model = SampleModel()
+            # THEN
             analysis_base.sample_model = new_sample_model
+
+            # EXPECT
             mock_on_sample_model_changed.assert_called_once()
 
     def test_instrument_model_setter_invalid_type(self, analysis_base):
@@ -218,17 +227,23 @@ class TestAnalysisBase:
     def test_instrument_model_setter_valid(self, analysis_base):
         # WHEN
         new_instrument_model = InstrumentModel()
+
+        # THEN
         analysis_base.instrument_model = new_instrument_model
-        # THEN EXPECT
+
+        # EXPECT
         assert analysis_base.instrument_model == new_instrument_model
 
     def test_instrument_model_setter_calls_on_instrument_model_changed(self, analysis_base):
-        # WHEN THEN EXPECT
+        # WHEN
+        new_instrument_model = InstrumentModel()
         with patch.object(
             analysis_base, '_on_instrument_model_changed'
         ) as mock_on_instrument_model_changed:
-            new_instrument_model = InstrumentModel()
+            # THEN
             analysis_base.instrument_model = new_instrument_model
+
+            # EXPECT
             mock_on_instrument_model_changed.assert_called_once()
 
     def test_Q_property(self, analysis_base):

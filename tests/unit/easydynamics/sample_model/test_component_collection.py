@@ -47,6 +47,8 @@ class TestComponentCollection:
         # EXPECT
         assert component_collection.display_name == 'InitModel'
         assert not component_collection
+        assert component_collection.x_unit == 'meV'
+        assert component_collection.y_unit == 'dimensionless'
 
     def test_init_with_component(self):
         # WHEN THEN
@@ -512,10 +514,6 @@ class TestComponentCollection:
         ComponentCollection(components=[g1, g2])
         user_warnings = [w for w in recwarn.list if issubclass(w.category, UserWarning)]
         assert not user_warnings
-
-    def test_y_unit_default(self, component_collection):
-        # WHEN THEN EXPECT
-        assert component_collection.y_unit == 'dimensionless'
 
     def test_y_unit_custom(self):
         # WHEN THEN
