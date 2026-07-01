@@ -171,11 +171,11 @@ class TestDiffusionModelBase:
         assert independent_vars == []
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, ValueError, 'Q is None'),
+            (100, ValueError, 'Q is None'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -183,17 +183,19 @@ class TestDiffusionModelBase:
             'non-integer index',
         ],
     )
-    def test_get_independent_variables_raises(self, diffusion_model, Q_index):
+    def test_get_independent_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_independent_variables(Q_index=Q_index)
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, ValueError, 'Q is None'),
+            (100, ValueError, 'Q is None'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -201,9 +203,11 @@ class TestDiffusionModelBase:
             'non-integer index',
         ],
     )
-    def test_get_all_variables_raises(self, diffusion_model, Q_index):
+    def test_get_all_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_all_variables(Q_index=Q_index)
 
     def test_create_component_collections_no_Q(self, diffusion_model):

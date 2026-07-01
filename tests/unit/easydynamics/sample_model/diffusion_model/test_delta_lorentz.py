@@ -510,11 +510,11 @@ class TestDeltaLorentz:
             assert 'A_0' in collection[1].area.dependency_expression
 
     @pytest.mark.parametrize(
-        ('Q_index', 'expected_exception'),
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            (-1, IndexError),
-            (100, IndexError),
-            ('string', TypeError),
+            (-1, IndexError, r'Q_index -1 is out of bounds'),
+            (100, IndexError, r'Q_index 100 is out of bounds'),
+            ('string', TypeError, r'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -523,10 +523,10 @@ class TestDeltaLorentz:
         ],
     )
     def test_get_independent_variables_raises(
-        self, delta_lorentz_model_with_Q, Q_index, expected_exception
+        self, delta_lorentz_model_with_Q, Q_index, expected_exception, expected_message
     ):
         # WHEN THEN EXPECT
-        with pytest.raises(expected_exception, match=r'Q_index must be an integer'):
+        with pytest.raises(expected_exception, match=expected_message):
             delta_lorentz_model_with_Q.get_independent_variables(Q_index=Q_index)
 
     def test_get_all_variables_no_Q_index(self, delta_lorentz_model_with_Q):
@@ -586,10 +586,10 @@ class TestDeltaLorentz:
 
     def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
-        with pytest.raises(IndexError, match='Q_index must be an integer'):
+        with pytest.raises(IndexError, match='Q_index -1 is out of bounds'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=-1)
 
-        with pytest.raises(IndexError, match='Q_index must be an integer'):
+        with pytest.raises(IndexError, match=r'Q_index \d+ is out of bounds'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=len(delta_lorentz_model_with_Q.Q))
 
     @pytest.mark.parametrize(

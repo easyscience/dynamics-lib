@@ -388,13 +388,6 @@ class InstrumentModel(NewBase):
             The index of the Q value to get variables for. If None, get variables for all Q values.
 
 
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int or None.
-        IndexError
-            If Q_index is out of bounds for the Q values in the InstrumentModel.
-
         Returns
         -------
         list[Parameter]
@@ -406,15 +399,10 @@ class InstrumentModel(NewBase):
             return []
 
         self._ensure_energy_offsets_current()
+        verify_Q_index(Q_index=Q_index, Q=self._Q, allow_none=True)
         if Q_index is None:
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
-            if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-            if Q_index < 0 or Q_index >= len(self._Q):
-                raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
-                )
             variables = [self._energy_offsets[Q_index]]
 
         variables.extend(self._background_model.get_all_variables(Q_index=Q_index))
@@ -451,10 +439,6 @@ class InstrumentModel(NewBase):
         ------
         ValueError
             If no Q values are set in the InstrumentModel.
-        IndexError
-            If Q_index is out of bounds.
-        TypeError
-            If Q_index is not an int or None.
 
         Returns
         -------
@@ -466,14 +450,9 @@ class InstrumentModel(NewBase):
             raise ValueError('No Q values are set in the InstrumentModel.')
 
         self._ensure_energy_offsets_current()
+        verify_Q_index(Q_index=Q_index, Q=self._Q, allow_none=True)
         if Q_index is None:
             return self._energy_offsets
-
-        if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-
-        if Q_index < 0 or Q_index >= len(self._Q):
-            raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
 
         return self._energy_offsets[Q_index]
 

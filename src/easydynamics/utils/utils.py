@@ -32,17 +32,25 @@ def verify_Q_index(Q_index: int, Q: np.ndarray | None, allow_none: bool = False)
     Raises
     ------
     TypeError
-        If Q_index is not an integer.
+        If Q_index is not an int (or not an int or None when allow_none=True).
     IndexError
         If Q_index is out of range.
+    ValueError
+        If Q is None and Q_index is not None.
     """
     if allow_none and Q_index is None:
         return
-    if not isinstance(Q_index, int):
-        raise TypeError('Q_index must be an integer.')
-    if Q is None or not (0 <= Q_index < len(Q)):
-        upper = (len(Q) - 1) if Q is not None else 'unknown'
-        raise IndexError(f'Q_index must be an integer between 0 and {upper}')
+
+    if Q_index is None or not isinstance(Q_index, int):
+        if allow_none:
+            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
+        raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
+
+    if Q is None:
+        raise ValueError('Q is None, cannot validate Q_index.')
+
+    if not (0 <= Q_index < len(Q)):
+        raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(Q)}')
 
 
 def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:

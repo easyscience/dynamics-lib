@@ -12,6 +12,7 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import verify_Q_index
 
 
 class DiffusionModelBase(EasyDynamicsModelBase):
@@ -320,21 +321,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         -------
         list[Parameter]
             List of independent variables in the model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is not None and is not a valid index for the Q values in the model.
         """
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{max(len(self._component_collections) - 1, 0)}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         return []
 
@@ -352,22 +340,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         -------
         list[Parameter]
             A list of all Parameters from the diffusion model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is out of bounds for the number of ComponentCollections.
         """
-
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{max(len(self._component_collections) - 1, 0)}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         variables = self.get_global_variables()
         variables.extend(self.get_independent_variables(Q_index))
@@ -481,29 +455,16 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             The index of the desired ComponentCollection. If None, all ComponentCollections are
             returned.
 
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int.
-        IndexError
-            If Q_index is out of bounds for the number of ComponentCollections.
-
         Returns
         -------
         ComponentCollection | list[ComponentCollection]
             The ComponentCollection at the specified Q index. If Q_index is None, a list of all
             ComponentCollections is returned.
         """
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is None:
             return self._component_collections
 
-        if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
-        if Q_index < 0 or Q_index >= len(self._component_collections):
-            raise IndexError(
-                f'Q_index {Q_index} is out of bounds for component collections '
-                f'of length {len(self._component_collections)}'
-            )
         return self._component_collections[Q_index]
 
     # ------------------------------------------------------------------

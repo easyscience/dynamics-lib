@@ -581,20 +581,20 @@ class TestAnalysisBase:
         # EXPECT
         assert result == valid_Q_index
 
-    def test_verify_Q_index_invalid(self, analysis_base):
+    def test_verify_Q_index_invalid(self, analysis_base_with_components):
         # WHEN
         invalid_Q_index = -1
 
         # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index must be an integer'):
-            analysis_base._verify_Q_index(invalid_Q_index)
+        with pytest.raises(IndexError, match='Q_index -1 is out of bounds for Q of length 2'):
+            analysis_base_with_components._verify_Q_index(invalid_Q_index)
 
     def test_verify_Q_index_invalid_when_Q_is_none(self, analysis_base):
         # WHEN
         positive_Q_index = 0
 
         # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index must be an integer'):
+        with pytest.raises(ValueError, match='Q is None, cannot validate Q_index'):
             analysis_base._verify_Q_index(positive_Q_index)
 
     def test_repr(self, analysis_base):

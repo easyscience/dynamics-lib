@@ -168,7 +168,7 @@ class TestModelBase:
         # WHEN / THEN / EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds for component collections of length 3',
+            match='Q_index 5 is out of bounds for Q of length 3',
         ):
             model_base.get_all_variables(Q_index=5)
 
@@ -198,7 +198,7 @@ class TestModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds for ',
+            match='Q_index 5 is out of bounds for Q of length 3',
         ):
             model_base.get_component_collection(Q_index=5)
 

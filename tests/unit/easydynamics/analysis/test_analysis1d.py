@@ -75,8 +75,8 @@ class TestAnalysis1d:
     @pytest.mark.parametrize(
         'invalid_Q_index, expected_exception, expected_message',
         [
-            (-1, IndexError, 'Q_index must be'),
-            (10, IndexError, 'Q_index must be'),
+            (-1, IndexError, 'Q_index -1 is out of bounds'),
+            (10, IndexError, 'Q_index 10 is out of bounds'),
             ('invalid', TypeError, 'Q_index must be '),
             (np.nan, TypeError, 'Q_index must be '),
             ([1, 2], TypeError, 'Q_index must be '),
