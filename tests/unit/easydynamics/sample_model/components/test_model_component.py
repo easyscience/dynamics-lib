@@ -22,8 +22,8 @@ class DummyComponent(ModelComponent):
     def get_all_parameters(self):
         return [self.area, self.center, self.width]
 
-    def evaluate(self, x):
-        return np.zeros_like(x)
+    def _evaluate_values(self, x_vals, _eval_unit):
+        return np.zeros_like(x_vals)
 
 
 class TestModelComponent:

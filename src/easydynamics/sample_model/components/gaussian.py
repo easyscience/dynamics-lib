@@ -6,13 +6,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-import scipp as sc
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
 if TYPE_CHECKING:
+    import scipp as sc
     from easyscience.variable import Parameter
 
 
@@ -201,15 +201,11 @@ class Gaussian(CreateParametersMixin, ModelComponent):
             raise ValueError('width must be positive')
         self._width.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Gaussian at x.
+        Evaluate the Gaussian at x_vals.
 
-        Parameters in the model's own units are temporarily converted to x's unit for the
+        Parameters in the model's own units are temporarily converted to eval_unit for the
         computation.
 
         intensity is given by $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2}
@@ -219,30 +215,23 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
-            Evaluated Gaussian values at x.
+        np.ndarray
+            Evaluated Gaussian values at x_vals.
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self.x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
-
         center = self._resolve_param_value(self._center, eval_unit)
         width = self._resolve_param_value(self._width, eval_unit)
-        area = self._resolve_param_value(self._area, eval_area_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
         normalization = 1 / (np.sqrt(2 * np.pi) * width)
         exponent = -0.5 * ((x_vals - center) / width) ** 2
-        result = area * normalization * np.exp(exponent)
-
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self.y_unit)
-        return result
+        return area * normalization * np.exp(exponent)
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """

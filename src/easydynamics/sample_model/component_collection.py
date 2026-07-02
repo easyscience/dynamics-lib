@@ -164,29 +164,8 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         ----------
         new_x_unit : str | sc.Unit
             The target x-axis unit to convert to.
-
-        Raises
-        ------
-        TypeError
-            If new_x_unit is not a string or sc.Unit.
-        Exception
-            If any component cannot be converted to the specified unit.
         """
-        if not isinstance(new_x_unit, (str, sc.Unit)):
-            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
-
-        old_unit = self.x_unit
-        try:
-            for component in self:
-                component.convert_x_unit(new_x_unit)
-            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        except Exception as e:
-            try:
-                for component in self:
-                    component.convert_x_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        self._convert_axis_unit(new_x_unit, axis='x')
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """
@@ -196,28 +175,51 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         ----------
         new_y_unit : str | sc.Unit
             The target y-axis unit to convert to.
+        """
+        self._convert_axis_unit(new_y_unit, axis='y')
+
+    def _convert_axis_unit(self, unit: str | sc.Unit, axis: str) -> None:
+        """
+        Convert one axis unit on all components in the collection.
+
+        Converts every component via its ``convert_<axis>_unit`` method and updates the
+        collection's own unit attribute. On failure, attempts a best-effort rollback of all
+        components to the old unit before re-raising.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new unit to convert to.
+        axis : str
+            Which axis to convert: ``'x'`` or ``'y'``.
 
         Raises
         ------
         TypeError
-            If new_y_unit is not a string or sc.Unit.
+            If the provided unit is not a string or sc.Unit.
         Exception
             If any component cannot be converted to the specified unit.
         """
-        if not isinstance(new_y_unit, (str, sc.Unit)):
-            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'{axis}_unit must be a string or sc.Unit, got {type(unit).__name__}')
 
-        old_unit = self.y_unit
+        method = f'convert_{axis}_unit'
+        old_unit = self.x_unit if axis == 'x' else self.y_unit
         try:
             for component in self:
-                component.convert_y_unit(new_y_unit)
-            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+                getattr(component, method)(unit)
+            unit_str = str(unit) if isinstance(unit, sc.Unit) else unit
+            if axis == 'x':
+                self._x_unit = unit_str
+            else:
+                self._y_unit = unit_str
         except Exception as e:
-            try:
-                for component in self:
-                    component.convert_y_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass
+            if old_unit is not None:
+                try:
+                    for component in self:
+                        getattr(component, method)(old_unit)
+                except Exception:  # noqa: S110
+                    pass
             raise e
 
     # ------------------------------------------------------------------
@@ -280,7 +282,17 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
                     stacklevel=2,
                 )
 
-        total_area_value = sum(p.value for p in area_params)
+        if not area_params:
+            raise ValueError('No components with an area attribute; cannot normalize.')
+
+        # Sum the areas in a common unit so components with different (but compatible)
+        # units normalize correctly. Dividing each value by the total expressed in the
+        # reference unit makes the areas sum to 1 in that unit.
+        reference_unit = str(area_params[0].unit)
+        total_area_value = sum(
+            sc.to_unit(sc.scalar(p.value, unit=str(p.unit)), reference_unit).value
+            for p in area_params
+        )
 
         if total_area_value == 0:
             raise ValueError('Total area is zero; cannot normalize.')
@@ -327,7 +339,15 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
             Evaluated model values.
         """
         if not self:
-            return np.zeros_like(x)
+            if isinstance(x, (sc.Variable, sc.DataArray)):
+                values = np.zeros_like(x.values, dtype=float)
+                dim = x.dims[0] if x.dims else 'x'
+            else:
+                values = np.zeros_like(x, dtype=float)
+                dim = 'x'
+            if output == 'scipp':
+                return sc.array(dims=[dim], values=values, unit=self.y_unit)
+            return values
         # This is needed to handle both scipp and numpy output - a normal call to sum does not work
         gen = (component.evaluate(x, output=output) for component in self)
         first = next(gen)
@@ -478,10 +498,18 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
         components = [deserialise_component(c) for c in obj_dict['components']]
 
+        # Dicts serialised before the x_unit/y_unit split store a single 'unit' key.
+        if 'x_unit' not in obj_dict and 'unit' in obj_dict:
+            x_unit = obj_dict['unit']
+            y_unit = 'dimensionless'
+        else:
+            x_unit = obj_dict['x_unit']
+            y_unit = obj_dict['y_unit']
+
         return cls(
             components=components,
-            x_unit=obj_dict['x_unit'],
-            y_unit=obj_dict['y_unit'],
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=obj_dict['name'],
             display_name=obj_dict['display_name'],
         )

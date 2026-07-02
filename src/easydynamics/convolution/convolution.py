@@ -172,7 +172,7 @@ class Convolution(NumericalConvolutionBase):
         np.ndarray
             The convolved values evaluated at energy.
         """
-        if not self.convolution_settings.convolution_plan_is_valid:
+        if not self._convolution_plan_is_current():
             self._build_convolution_plan()
         total = np.zeros_like(self.energy.values, dtype=float)
 
@@ -291,7 +291,7 @@ class Convolution(NumericalConvolutionBase):
 
         # Update convolvers
         self._set_convolvers()
-        self.convolution_settings.convolution_plan_is_valid = True
+        self._mark_convolution_plan_current()
 
     def _set_convolvers(self) -> None:
         """
@@ -365,6 +365,7 @@ class Convolution(NumericalConvolutionBase):
         # Only rebuild the convolution plan if reactions are enabled, to
         # avoid issues during __init__
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
+            self._plan_is_valid = False
             self.convolution_settings.convolution_plan_is_valid = False
 
     def __repr__(self) -> str:

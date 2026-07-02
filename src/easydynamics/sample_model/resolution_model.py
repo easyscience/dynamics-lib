@@ -160,24 +160,19 @@ class ResolutionModel(ModelBase):
         )
 
         if sample_model.Q is not None:
-            resolution_model._ensure_component_collections_current()
-            for index in range(len(sample_model.Q)):
-                resolution_model._component_collections[index] = copy(
-                    sample_model.get_component_collection(Q_index=index)
-                )
-            # Prevent any EasyScience callbacks triggered during __init__ or copy
-            # from scheduling a rebuild that would discard the installed collections.
-            resolution_model._component_collections_is_dirty = False
-
-        if normalize_area:
-            resolution_model.normalize_area()
-
-        if fix_parameters:
-            resolution_model.fix_all_parameters()
-
-        # Re-protect after normalize_area / fix_all_parameters in case their
-        # parameter callbacks set the dirty flag again.
-        if sample_model.Q is not None:
+            # Prepare the per-Q collections detached from the model so no EasyScience
+            # callback can schedule a rebuild halfway through, then install them and
+            # clear the dirty flag in one final step.
+            collections = [
+                copy(sample_model.get_component_collection(Q_index=index))
+                for index in range(len(sample_model.Q))
+            ]
+            for collection in collections:
+                if normalize_area:
+                    collection.normalize_area()
+                if fix_parameters:
+                    collection.fix_all_parameters()
+            resolution_model._component_collections = collections
             resolution_model._component_collections_is_dirty = False
 
         return resolution_model

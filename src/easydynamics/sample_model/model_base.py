@@ -273,34 +273,8 @@ class ModelBase(EasyDynamicsModelBase):
         ----------
         unit : str | sc.Unit
             The new x-axis unit to convert to.
-
-        Raises
-        ------
-        TypeError
-            If the provided unit is not a string or sc.Unit.
-        Exception
-            If the provided unit is not compatible with the current unit.
         """
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
-
-        old_unit = self.x_unit
-        try:
-            for component in self.components:
-                component.convert_x_unit(unit)
-            for collection in self._component_collections:
-                collection.convert_x_unit(unit)
-            self._x_unit = str(unit) if isinstance(unit, sc.Unit) else unit
-        except Exception as e:
-            if old_unit is not None:
-                try:
-                    for component in self.components:
-                        component.convert_x_unit(old_unit)
-                    for collection in self._component_collections:
-                        collection.convert_x_unit(old_unit)
-                except Exception:  # noqa: S110
-                    pass
-            raise e
+        self._convert_axis_unit(unit, axis='x')
 
     def convert_y_unit(self, unit: str | sc.Unit) -> None:
         """
@@ -310,6 +284,23 @@ class ModelBase(EasyDynamicsModelBase):
         ----------
         unit : str | sc.Unit
             The new y-axis unit to convert to.
+        """
+        self._convert_axis_unit(unit, axis='y')
+
+    def _convert_axis_unit(self, unit: str | sc.Unit, axis: str) -> None:
+        """
+        Convert one axis unit on all template components and per-Q collections.
+
+        Converts every child via its ``convert_<axis>_unit`` method and updates the model's own
+        unit attribute. On failure, attempts a best-effort rollback of all children to the old unit
+        before re-raising.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new unit to convert to.
+        axis : str
+            Which axis to convert: ``'x'`` or ``'y'``.
 
         Raises
         ------
@@ -321,21 +312,27 @@ class ModelBase(EasyDynamicsModelBase):
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
 
-        old_unit = self.y_unit
+        method = f'convert_{axis}_unit'
+        old_unit = self.x_unit if axis == 'x' else self.y_unit
         try:
             for component in self.components:
-                component.convert_y_unit(unit)
+                getattr(component, method)(unit)
             for collection in self._component_collections:
-                collection.convert_y_unit(unit)
-            self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
+                getattr(collection, method)(unit)
+            unit_str = str(unit) if isinstance(unit, sc.Unit) else unit
+            if axis == 'x':
+                self._x_unit = unit_str
+            else:
+                self._y_unit = unit_str
         except Exception as e:
-            try:
-                for component in self.components:
-                    component.convert_y_unit(old_unit)
-                for collection in self._component_collections:
-                    collection.convert_y_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass
+            if old_unit is not None:
+                try:
+                    for component in self.components:
+                        getattr(component, method)(old_unit)
+                    for collection in self._component_collections:
+                        getattr(collection, method)(old_unit)
+                except Exception:  # noqa: S110
+                    pass
             raise e
 
     def fix_all_parameters(self) -> None:

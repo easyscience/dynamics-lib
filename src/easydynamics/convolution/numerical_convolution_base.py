@@ -120,7 +120,36 @@ class NumericalConvolutionBase(ConvolutionBase):
         # When upsample_factor>1, we evaluate on this grid and
         # interpolate back to the original values at the end
         self._energy_grid = self._create_energy_grid()
-        self._convolution_settings.convolution_plan_is_valid = True
+        self._mark_convolution_plan_current()
+
+    def _convolution_plan_is_current(self) -> bool:
+        """
+        Check whether this convolver's plan is up to date.
+
+        Plan validity is tracked per convolver so several convolvers can share one
+        ConvolutionSettings object: a local flag covers convolver-local invalidations (e.g. a new
+        energy grid), while the settings' plan version detects settings changes this convolver has
+        not consumed yet — even if a sibling convolver already rebuilt and set the shared flag.
+        Explicitly setting ``convolution_plan_is_valid = True`` on the settings remains an escape
+        hatch that suppresses rebuilds for all convolvers.
+
+        Returns
+        -------
+        bool
+            True if the plan does not need to be rebuilt.
+        """
+        if not getattr(self, '_plan_is_valid', False):
+            return False
+        return self.convolution_settings._plan_valid_for(  # noqa: SLF001
+            self._plan_settings_version_seen
+        )
+
+    def _mark_convolution_plan_current(self) -> None:
+        """Record that this convolver's plan matches its current state and settings."""
+        self._plan_is_valid = True
+        self._plan_settings_version_seen = (
+            self.convolution_settings._mark_plan_built()  # noqa: SLF001
+        )
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -153,6 +182,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         if not isinstance(settings, ConvolutionSettings):
             raise TypeError('settings must be a ConvolutionSettings instance.')
         self._convolution_settings = settings
+        self._plan_is_valid = False
         self._convolution_settings.convolution_plan_is_valid = False
 
     @ConvolutionBase.energy.setter
@@ -167,6 +197,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         """
         ConvolutionBase.energy.fset(self, energy)
         self._energy_grid = self._create_energy_grid()
+        self._plan_is_valid = False
         self.convolution_settings.convolution_plan_is_valid = False
 
     @property

@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-import scipp as sc
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
@@ -15,6 +14,7 @@ from easydynamics.utils.utils import Numeric
 EPSILON = 1e-8  # tolerance for bin-edge comparisons
 
 if TYPE_CHECKING:
+    import scipp as sc
     from easyscience.variable import Parameter
 
 
@@ -163,27 +163,23 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             raise TypeError('center must be a number')
         self._center.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         """
-        Evaluate the Delta function at x.
+        Evaluate the Delta function at x_vals.
 
-        Parameters in the model's own units are temporarily converted to x's unit for the
+        Parameters in the model's own units are temporarily converted to eval_unit for the
         computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input x values.
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit. Assumed sorted for the bin-width computation.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
+        np.ndarray
             Zero everywhere, with a single non-zero bin nearest the center when center falls within
             the x range.
 
@@ -193,12 +189,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an identity
         element (handled by the Convolution class).
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self.x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
-
         center = self._resolve_param_value(self._center, eval_unit)
-        area = self._resolve_param_value(self._area, eval_area_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
         model = np.zeros_like(x_vals, dtype=float)
 
@@ -222,8 +214,6 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             bin_width = 0.5 * (left + right)
             model[i] = area / bin_width
 
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=model, unit=self.y_unit)
         return model
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:

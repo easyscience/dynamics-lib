@@ -216,6 +216,40 @@ class FitBinding(EasyDynamicsBase):
             raise TypeError('All modes in the list must be strings')
         self._modes = value
 
+    @property
+    def x_unit(self) -> str | None:
+        """
+        The x-axis unit the fit callables expect, or None if they take raw values.
+
+        Diffusion-model callables (built by build_callables) take raw Q values, so no unit
+        conversion should be applied to their input.
+
+        Returns
+        -------
+        str | None
+            The x-axis unit of the model, or None if the callables take raw values.
+        """
+        if isinstance(self.model, DiffusionModelBase):
+            return None
+        return self.model.x_unit
+
+    @property
+    def y_unit(self) -> str | None:
+        """
+        The y-axis unit the fit callables produce, or None if they return raw values.
+
+        Diffusion-model callables (built by build_callables) return raw values, so no unit
+        conversion should be applied to their output.
+
+        Returns
+        -------
+        str | None
+            The y-axis unit of the model, or None if the callables return raw values.
+        """
+        if isinstance(self.model, DiffusionModelBase):
+            return None
+        return self.model.y_unit
+
     # ------------------------------------------------------------------
     # Other methods
     # ------------------------------------------------------------------
@@ -265,7 +299,14 @@ class FitBinding(EasyDynamicsBase):
 
         if isinstance(self.model, DiffusionModelBase):
             # TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003
-            return [f'{self.parameter_name} {mode}' for mode in modes]
+            # The 'delta' mode fits the delta component's weight, which is stored in the
+            # parameters Dataset as the DeltaFunction's area parameter ('<name> area').
+            return [
+                f'{self.parameter_name} area'
+                if mode == 'delta'
+                else f'{self.parameter_name} {mode}'
+                for mode in modes
+            ]
 
         return [self.parameter_name]
 

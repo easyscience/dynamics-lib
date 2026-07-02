@@ -90,6 +90,13 @@ class ConvolutionSettings(EasyDynamicsBase):
         self._suppress_warnings = suppress_warnings
 
         self._convolution_plan_is_valid = False
+        # Plan-invalidation bookkeeping for convolvers sharing this settings object.
+        # _plan_version is bumped whenever the plan is invalidated (accuracy knob change or
+        # an explicit convolution_plan_is_valid = False). _blessed_plan_version records the
+        # version at the last explicit convolution_plan_is_valid = True, which suppresses
+        # rebuilds for all convolvers until the next invalidation.
+        self._plan_version = 0
+        self._blessed_plan_version = -1
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -216,6 +223,48 @@ class ConvolutionSettings(EasyDynamicsBase):
         if not isinstance(is_valid, bool):
             raise TypeError('convolution_plan_is_valid must be True or False.')
         self._convolution_plan_is_valid = is_valid
+        if is_valid:
+            # An explicit True blesses the current version: all convolvers sharing these
+            # settings may skip rebuilding until the next invalidation.
+            self._blessed_plan_version = self._plan_version
+        else:
+            # An explicit False (or a knob setter delegating here) invalidates the plan for
+            # every convolver sharing these settings.
+            self._plan_version += 1
+
+    def _plan_valid_for(self, seen_version: int) -> bool:
+        """
+        Check whether a convolver that last rebuilt at seen_version can skip rebuilding.
+
+        Parameters
+        ----------
+        seen_version : int
+            The plan version the convolver recorded when it last rebuilt its plan.
+
+        Returns
+        -------
+        bool
+            True if the plan flag is set and no invalidation happened since the convolver's rebuild
+            (or the current version was explicitly blessed).
+        """
+        return self._convolution_plan_is_valid and (
+            seen_version == self._plan_version or self._blessed_plan_version == self._plan_version
+        )
+
+    def _mark_plan_built(self) -> int:
+        """
+        Record that one convolver rebuilt its plan.
+
+        Sets the plan flag without blessing the current version, so other convolvers sharing this
+        settings object still detect invalidations they have not consumed yet.
+
+        Returns
+        -------
+        int
+            The current plan version, to be stored by the convolver.
+        """
+        self._convolution_plan_is_valid = True
+        return self._plan_version
 
     @property
     def suppress_warnings(self) -> bool:

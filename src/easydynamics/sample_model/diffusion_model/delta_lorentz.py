@@ -1068,8 +1068,8 @@ class DeltaLorentz(DiffusionModelBase):
             String representation of the DeltaLorentz model.
         """
         return (
-            f'DeltaLorentz(display_name={self.display_name},'
-            f'x_unit={self.x_unit}), y_unit={self.y_unit}, \n'
+            f'DeltaLorentz(display_name={self.display_name}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, \n'
             f'    mean_u_squared={self.mean_u_squared}, \n'
             f'    A_0={self.A_0}, A_1={self.A_1}, \n'
             f'    lorentzian_width={self.lorentzian_width}, \n'

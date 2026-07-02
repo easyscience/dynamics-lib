@@ -233,12 +233,14 @@ class ModelComponent(EasyDynamicsModelBase):
         new_x_unit: str | sc.Unit,
         x_params: list,
         area_param: Parameter,
+        inverse_params: list | None = None,
     ) -> None:
         """
         Shared convert_x_unit logic for components with an area parameter (area = x_unit * y_unit).
 
-        Validates the input type, converts all x-axis parameters and the area parameter to the new
-        unit, and updates ``_x_unit``.  Rolls back all conversions if any step fails.
+        Validates the input type, converts all x-axis parameters, the area parameter, and any
+        reciprocal (``1/x_unit``) parameters to the new unit, and updates ``_x_unit``.  Rolls back
+        all conversions if any step fails.
 
         Parameters
         ----------
@@ -248,6 +250,8 @@ class ModelComponent(EasyDynamicsModelBase):
             Parameters whose unit equals *x_unit* (e.g. center, width).
         area_param : Parameter
             The parameter whose unit equals ``x_unit * y_unit``.
+        inverse_params : list | None, default=None
+            Parameters whose unit equals ``1/x_unit`` (e.g. an exponential rate).
 
         Raises
         ------
@@ -258,6 +262,7 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+        inverse_params = inverse_params or []
         old_x_unit = self.x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
@@ -265,6 +270,8 @@ class ModelComponent(EasyDynamicsModelBase):
             for p in x_params:
                 p.convert_unit(new_x_unit)
             area_param.convert_unit(new_area_unit)
+            for p in inverse_params:
+                p.convert_unit('1/' + new_x_str)
             self._x_unit = new_x_str
         except Exception as e:
             try:
@@ -272,6 +279,8 @@ class ModelComponent(EasyDynamicsModelBase):
                 for p in x_params:
                     p.convert_unit(old_x_unit)
                 area_param.convert_unit(old_area_unit)
+                for p in inverse_params:
+                    p.convert_unit('1/' + str(old_x_unit))
             except Exception:  # noqa: S110
                 pass
             raise e
@@ -371,7 +380,6 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         raise NotImplementedError(f'{self.__class__.__name__} does not support convert_y_unit.')
 
-    @abstractmethod
     def evaluate(
         self,
         x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
@@ -380,17 +388,76 @@ class ModelComponent(EasyDynamicsModelBase):
         """
         Evaluate the model component at input x.
 
+        When x carries a unit (scipp input), parameter values are temporarily converted to that
+        unit for the computation without mutating the parameters.
+
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
+            Input x values.
         output : str, default='numpy'
             'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+
+        Raises
+        ------
+        ValueError
+            If output is not 'numpy' or 'scipp'.
 
         Returns
         -------
         np.ndarray | sc.Variable
             Evaluated model values at x.
         """
+        if output not in ('numpy', 'scipp'):
+            raise ValueError(f"output must be 'numpy' or 'scipp', got {output!r}")
+        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+        eval_unit = detected_unit or self.x_unit
+        values = self._evaluate_values(x_vals, eval_unit)
+        if output == 'scipp':
+            return sc.array(dims=[dim], values=values, unit=self.y_unit)
+        return values
+
+    @abstractmethod
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
+        """
+        Compute the component's values for raw x values expressed in eval_unit.
+
+        Implementations must resolve their parameters to *eval_unit* (via
+        :meth:`_resolve_param_value`) and return plain numpy values; the public :meth:`evaluate`
+        handles input validation and output wrapping.
+
+        Parameters
+        ----------
+        x_vals : np.ndarray
+            Raw x values, expressed in *eval_unit*.
+        eval_unit : str | None
+            The unit of *x_vals* (the detected input unit, falling back to the component's x_unit),
+            or None if no unit information is available.
+
+        Returns
+        -------
+        np.ndarray
+            Evaluated model values at x_vals.
+        """
+
+    def _eval_area_unit(self, eval_unit: str | None) -> str | None:
+        """
+        Get the area unit (``eval_unit * y_unit``) matching an evaluation unit.
+
+        Parameters
+        ----------
+        eval_unit : str | None
+            The unit x values are expressed in during evaluation.
+
+        Returns
+        -------
+        str | None
+            The corresponding area unit, or None when either unit is unknown (in which case
+            parameter values are used unconverted).
+        """
+        if eval_unit is None or self.y_unit is None:
+            return None
+        return str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
 
     def __repr__(self) -> str:
         """

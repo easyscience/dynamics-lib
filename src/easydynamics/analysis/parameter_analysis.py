@@ -15,7 +15,6 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
-from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -530,16 +529,17 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
     def _get_unit_conversions(self, binding: FitBinding, pname: str) -> tuple[float, float]:
         """
-        Return (x_factor, y_factor) to convert dataset values into the model's declared units.
+        Return (x_factor, y_factor) to convert dataset values into the binding's declared units.
 
-        x_factor converts Q coordinate values from their stored unit to model.x_unit. y_factor
-        converts parameter values from their stored unit to model.y_unit. Both factors are 1.0 for
-        DiffusionModelBase bindings (whose callables take raw Q).
+        x_factor converts Q coordinate values from their stored unit to binding.x_unit. y_factor
+        converts parameter values from their stored unit to binding.y_unit. A factor is 1.0 when
+        the binding declares the corresponding unit as None (its callables take raw values, e.g.
+        diffusion-model bindings).
 
         Parameters
         ----------
         binding : FitBinding
-            The binding whose model defines the target units.
+            The binding whose unit contract defines the target units.
         pname : str
             The parameter name in ``self.parameters`` supplying the data units.
 
@@ -553,33 +553,29 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         sc.UnitError
             If x or y units are physically incompatible (e.g. meV vs 1/angstrom).
         """
-        if isinstance(binding.model, DiffusionModelBase):
-            return 1.0, 1.0
-
         da = self.parameters[pname]
-        model = binding.model
         x_factor = 1.0
         y_factor = 1.0
 
-        if model.x_unit is not None:
+        if binding.x_unit is not None:
             q_unit = str(da.coords['Q'].unit)
             try:
-                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(model.x_unit)).value
+                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(binding.x_unit)).value
             except Exception as e:
                 raise sc.UnitError(
                     f"Q coordinate unit '{q_unit}' is incompatible with "
-                    f"model '{model.display_name}' x_unit '{model.x_unit}' "
+                    f"model '{binding.model.display_name}' x_unit '{binding.x_unit}' "
                     f"for parameter '{pname}'."
                 ) from e
 
-        if model.y_unit is not None:
+        if binding.y_unit is not None:
             param_unit = str(da.unit)
             try:
-                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(model.y_unit)).value
+                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(binding.y_unit)).value
             except Exception as e:
                 raise sc.UnitError(
                     f"Parameter '{pname}' unit '{param_unit}' is incompatible with "
-                    f"model '{model.display_name}' y_unit '{model.y_unit}'."
+                    f"model '{binding.model.display_name}' y_unit '{binding.y_unit}'."
                 ) from e
 
         return x_factor, y_factor

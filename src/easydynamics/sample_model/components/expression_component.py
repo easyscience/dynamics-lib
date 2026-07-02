@@ -7,13 +7,13 @@ import warnings
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
-import scipp as sc
 import sympy as sp
 from easyscience.variable import Parameter
 from scipy.special import erf
 
 if TYPE_CHECKING:
     import numpy as np
+    import scipp as sc
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
@@ -258,38 +258,33 @@ class ExpressionComponent(ModelComponent):
 
         raise AttributeError('Expression cannot be changed after initialization')
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         """
-        Evaluate the expression for given x values.
+        Evaluate the expression for the given x values.
 
-        Unit conversion of parameters is not supported for ExpressionComponent. If x has a
-        different unit than x_unit, a warning is issued and x values are used as-is.
+        Unit conversion of parameters is not supported for ExpressionComponent. If x_vals is
+        expressed in a different unit than x_unit, a warning is issued and the values are used
+        as-is.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input values for the independent variable.
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
+        np.ndarray
             Evaluated results.
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-
-        if detected_unit is not None and detected_unit != self.x_unit:
+        if eval_unit is not None and self.x_unit is not None and eval_unit != self.x_unit:
             warnings.warn(
-                f'Input x has unit {detected_unit} but {self.__class__.__name__} has '
+                f'Input x has unit {eval_unit} but {self.__class__.__name__} has '
                 f'x_unit {self.x_unit}. ExpressionComponent cannot auto-convert parameters. '
                 'x values are used as-is.',
                 UserWarning,
-                stacklevel=2,
+                stacklevel=3,
             )
 
         args = []
@@ -299,11 +294,7 @@ class ExpressionComponent(ModelComponent):
             else:
                 args.append(self._parameters[name].value)
 
-        result = self._func(*args)
-
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self.y_unit)
-        return result
+        return self._func(*args)
 
     def get_all_variables(self) -> list[Parameter]:
         """

@@ -696,15 +696,14 @@ class Analysis(AnalysisBase):
         """
         self._analysis_list = []
         for Q_index in range(len(self.Q)):
-            # Each Analysis1d gets its own ConvolutionSettings so that
-            # convolution_plan_is_valid is tracked independently per Q index.
-            per_q_settings = copy(self.convolution_settings)
+            # The ConvolutionSettings object is shared so user changes reach every Q index;
+            # plan validity is tracked per convolver, not on the settings object.
             analysis = Analysis1d(
                 display_name=f'{self.display_name}_Q{Q_index}',
                 experiment=self.experiment,
                 sample_model=self.sample_model,
                 instrument_model=self.instrument_model,
-                convolution_settings=per_q_settings,
+                convolution_settings=self.convolution_settings,
                 detailed_balance_settings=self.detailed_balance_settings,
                 extra_parameters=self._extra_parameters,
                 Q_index=Q_index,

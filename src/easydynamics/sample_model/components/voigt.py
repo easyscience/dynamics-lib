@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import scipp as sc
 from scipy.special import voigt_profile
 
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
@@ -14,6 +13,7 @@ from easydynamics.utils.utils import Numeric
 
 if TYPE_CHECKING:
     import numpy as np
+    import scipp as sc
     from easyscience.variable import Parameter
 
 
@@ -249,40 +249,31 @@ class Voigt(CreateParametersMixin, ModelComponent):
             raise ValueError('lorentzian_width must be positive')
         self._lorentzian_width.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         """
-        Evaluate the Voigt at x.
+        Evaluate the Voigt at x_vals.
+
+        Parameters in the model's own units are temporarily converted to eval_unit for the
+        computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input x values.
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
-            Evaluated Voigt profile values at x.
+        np.ndarray
+            Evaluated Voigt profile values at x_vals.
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self.x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
-
         center = self._resolve_param_value(self._center, eval_unit)
         gw = self._resolve_param_value(self._gaussian_width, eval_unit)
         lw = self._resolve_param_value(self._lorentzian_width, eval_unit)
-        area = self._resolve_param_value(self._area, eval_area_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
-        result = area * voigt_profile(x_vals - center, gw, lw)
-
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self.y_unit)
-        return result
+        return area * voigt_profile(x_vals - center, gw, lw)
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """

@@ -10,7 +10,6 @@ from easyscience.variable import Parameter
 from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
-from easydynamics.utils.utils import _assert_valid_unit
 
 
 class Exponential(CreateParametersMixin, ModelComponent):
@@ -210,44 +209,33 @@ class Exponential(CreateParametersMixin, ModelComponent):
             raise TypeError('rate must be a number')
         self._rate.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Exponential at x.
+        Evaluate the Exponential at x_vals.
 
-        Parameters in the model's own units are temporarily converted to x's unit for the
+        Parameters in the model's own units are temporarily converted to eval_unit for the
         computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Input x values.
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
-            Evaluated exponential values at x.
+        np.ndarray
+            Evaluated exponential values at x_vals.
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self.x_unit
-        eval_area_unit = str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
-        eval_rate_unit = '1/' + str(eval_unit)
+        eval_rate_unit = None if eval_unit is None else '1/' + str(eval_unit)
 
         center = self._resolve_param_value(self._center, eval_unit)
         rate = self._resolve_param_value(self._rate, eval_rate_unit)
-        amplitude = self._resolve_param_value(self._amplitude, eval_area_unit)
+        amplitude = self._resolve_param_value(self._amplitude, self._eval_area_unit(eval_unit))
 
         exponent = rate * (x_vals - center)
-        result = amplitude * np.exp(exponent)
-
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self.y_unit)
-        return result
+        return amplitude * np.exp(exponent)
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
@@ -258,31 +246,13 @@ class Exponential(CreateParametersMixin, ModelComponent):
         new_x_unit : str | sc.Unit
             Target x-axis unit.  Must be dimensionally compatible with the current x_unit.  The
             rate unit is set to ``1/new_x_unit``.
-
-        Raises
-        ------
-        Exception
-            If the unit conversion fails.  On failure the component is rolled back to its original
-            units.
         """
-        _assert_valid_unit(new_x_unit)
-        old_x_unit = self.x_unit
-        new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
-        try:
-            self._center.convert_unit(new_x_unit)
-            self._amplitude.convert_unit(new_area_unit)
-            self._rate.convert_unit('1/' + new_x_str)
-            self._x_unit = new_x_str
-        except Exception as e:
-            try:
-                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
-                self._center.convert_unit(old_x_unit)
-                self._amplitude.convert_unit(old_area_unit)
-                self._rate.convert_unit('1/' + str(old_x_unit))
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center],
+            area_param=self._amplitude,
+            inverse_params=[self._rate],
+        )
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """

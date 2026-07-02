@@ -238,34 +238,29 @@ class Polynomial(ModelComponent):
             raise TypeError('Suppress_warnings must be True or False')
         self._suppress_warnings = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-        output: str = 'numpy',
-    ) -> np.ndarray | sc.Variable:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Polynomial at x.
+        Evaluate the Polynomial at x_vals.
 
-        When x has a different unit than the stored x_unit, coefficient values are temporarily
-        rescaled (same power-law logic as convert_x_unit) without mutation.
+        When x_vals is expressed in a different unit than the stored x_unit, coefficient values are
+        temporarily rescaled (same power-law logic as convert_x_unit) without mutation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-        output : str, default='numpy'
-            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
-        np.ndarray | sc.Variable
+        np.ndarray
             Evaluated polynomial values.
         """
-        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-
-        if detected_unit is not None and detected_unit != self.x_unit:
+        if eval_unit is not None and self.x_unit is not None and eval_unit != self.x_unit:
             # Temporary coefficient rescaling — no mutation
             helper = sc.scalar(1.0, unit=self.x_unit)
-            helper_in_x = sc.to_unit(helper, detected_unit)
+            helper_in_x = sc.to_unit(helper, eval_unit)
             scale = helper.value / helper_in_x.value
             coeff_vals = [p.value * scale**i for i, p in enumerate(self._coefficients)]
         else:
@@ -280,11 +275,9 @@ class Polynomial(ModelComponent):
                 f'The Polynomial with unique_name {self.unique_name} has negative values, '
                 'which may not be physically meaningful.',
                 UserWarning,
-                stacklevel=2,
+                stacklevel=3,
             )
 
-        if output == 'scipp':
-            return sc.array(dims=[dim], values=result, unit=self.y_unit)
         return result
 
     def get_all_variables(self) -> list[DescriptorBase]:

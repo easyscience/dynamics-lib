@@ -431,7 +431,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         return (
             f'{self.__class__.__name__}('
             f'name={self.name!r}, display_name={self.display_name!r},\n'
-            f'x_unit={self.x_unit}), y_unit={self.y_unit}, \n'
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, \n'
             f'    diffusion_coefficient={self.diffusion_coefficient},\n'
             f'    scale={self.scale})'
         )

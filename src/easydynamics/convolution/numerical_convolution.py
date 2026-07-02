@@ -32,9 +32,9 @@ class NumericalConvolution(NumericalConvolutionBase):
         """
         # Make sure the convolver is updated with the latest convolution
         # settings before convolution.
-        if not self.convolution_settings.convolution_plan_is_valid:
+        if not self._convolution_plan_is_current():
             self._energy_grid = self._create_energy_grid()
-            self.convolution_settings.convolution_plan_is_valid = True
+            self._mark_convolution_plan_current()
 
         # Give warnings if peaks are very wide or very narrow
         if not self.convolution_settings.suppress_warnings:

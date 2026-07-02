@@ -551,6 +551,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         return (
             f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
-            f'x_unit={self.x_unit}), y_unit={self.y_unit}, \n'
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, \n'
             f'    scale={self.scale})'
         )
