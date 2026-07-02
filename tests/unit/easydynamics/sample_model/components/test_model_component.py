@@ -230,6 +230,26 @@ class TestModelComponent:
         with pytest.raises(NotImplementedError, match='does not support convert_y_unit'):
             dummy.convert_y_unit('1/meV')
 
+    def test_evaluate_invalid_output_raises(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match="output must be 'numpy' or 'scipp'"):
+            dummy.evaluate(np.linspace(-1, 1, 5), output='Scipp')
+
+    def test_eval_area_unit(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT: y_unit is dimensionless, so the area unit equals the eval unit
+        assert sc.Unit(dummy._eval_area_unit('meV')) == sc.Unit('meV')
+
+    def test_eval_area_unit_none_eval_unit(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT: without an eval unit there is no area unit
+        assert dummy._eval_area_unit(None) is None
+
+    def test_eval_area_unit_none_y_unit(self, dummy: DummyComponent):
+        # WHEN
+        dummy._y_unit = None
+
+        # THEN EXPECT
+        assert dummy._eval_area_unit('meV') is None
+
     def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
         # WHEN: a Gaussian and a DataArray where the coord key ('energy') differs
         # from the coord Variable's internal dim name ('x').  This is a valid scipp

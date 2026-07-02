@@ -533,12 +533,18 @@ class TestAnalysis:
             assert 'Q' in parameters_dataset[parameter_name].dims
 
     def test_parameters_to_dataset_raises_on_duplicate_names(self, analysis):
-        # Add a second Gaussian with the same parameter names as the first
-        analysis.sample_model.append_component(
-            Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
-        )
+        # Add a second Gaussian with the same parameter names as the first. Appending and the
+        # later per-Q copy both warn about the duplicate names; capture them so the test suite
+        # stays warning-clean.
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            analysis.sample_model.append_component(
+                Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
+            )
 
-        with pytest.raises(ValueError, match='Duplicate parameter names'):
+        with (
+            pytest.warns(UserWarning, match='Duplicate component names'),
+            pytest.raises(ValueError, match='Duplicate parameter names'),
+        ):
             analysis.parameters_to_dataset()
 
     @pytest.mark.parametrize(

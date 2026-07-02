@@ -604,3 +604,29 @@ class TestConvolution:
         # EXPECT: y_unit updated and propagated to sub-convolvers via Convolution.convert_y_unit
         assert conv.y_unit == '1/eV'
         assert conv._analytical_convolver._y_unit == '1/eV'
+
+    def test_convert_y_unit_propagates_to_numerical_convolver(self):
+        # WHEN: a DHO sample component forces a numerical convolver
+        energy = np.linspace(-10, 10, 5001)
+        sample_components = ComponentCollection()
+        sample_components.append_component(
+            DampedHarmonicOscillator(
+                name='DHO', area=1.0, center=1.0, width=0.5, x_unit='meV', y_unit='1/meV'
+            )
+        )
+        resolution_components = ComponentCollection()
+        resolution_components.append_component(
+            Gaussian(name='R', area=1.0, center=0.0, width=0.3, x_unit='meV', y_unit='1/meV')
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+
+        # THEN
+        conv.convert_y_unit('1/eV')
+
+        # EXPECT
+        assert conv.y_unit == '1/eV'
+        assert conv._numerical_convolver._y_unit == '1/eV'

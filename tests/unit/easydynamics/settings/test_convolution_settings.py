@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
+
 import pytest
 
 from easydynamics.settings.convolution_settings import ConvolutionSettings
@@ -21,6 +23,21 @@ class TestConvolutionSettings:
         assert default_convolution_settings.upsample_factor == 5
         assert default_convolution_settings.extension_factor == pytest.approx(0.2)
         assert default_convolution_settings.convolution_plan_is_valid is False
+
+    def test_copy(self):
+        # WHEN
+        settings = ConvolutionSettings(
+            upsample_factor=10, extension_factor=0.5, suppress_warnings=True
+        )
+
+        # THEN
+        settings_copy = copy(settings)
+
+        # EXPECT: a distinct instance with the same knob values
+        assert settings_copy is not settings
+        assert settings_copy.upsample_factor == 10
+        assert settings_copy.extension_factor == pytest.approx(0.5)
+        assert settings_copy.suppress_warnings is True
 
     def test_init_with_custom_parameters(self):
         """

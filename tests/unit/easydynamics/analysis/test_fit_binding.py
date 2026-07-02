@@ -237,6 +237,18 @@ class TestFitBinding:
         # EXPECT
         assert parameter_names == ['parameter3 area', 'parameter3 width']
 
+    def test_get_parameter_names_diffusion_delta_mode_maps_to_area(self, diffusion_fit_binding):
+        # WHEN: the delta contribution is stored in the parameters Dataset as the
+        # DeltaFunction's area parameter ('<name> area'), so mode 'delta' must map to
+        # '<parameter_name> area' while other modes keep their own suffix.
+        diffusion_fit_binding.modes = ['delta', 'width']
+
+        # THEN
+        parameter_names = diffusion_fit_binding.get_parameter_names()
+
+        # EXPECT
+        assert parameter_names == ['parameter3 area', 'parameter3 width']
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------

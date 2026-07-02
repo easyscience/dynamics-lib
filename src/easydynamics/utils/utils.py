@@ -6,6 +6,7 @@ import scipp as sc
 from easyscience.variable import DescriptorNumber
 from numpy.typing import ArrayLike
 from scipp.constants import hbar as scipp_hbar
+from scipp.constants import k as scipp_k
 
 Numeric = float | int
 
@@ -13,6 +14,7 @@ Q_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 energy_type = np.ndarray | Numeric | list | ArrayLike | sc.Variable
 
 hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
+kb = DescriptorNumber.from_scipp('kb', scipp_k)
 angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
 

@@ -498,18 +498,10 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
         components = [deserialise_component(c) for c in obj_dict['components']]
 
-        # Dicts serialised before the x_unit/y_unit split store a single 'unit' key.
-        if 'x_unit' not in obj_dict and 'unit' in obj_dict:
-            x_unit = obj_dict['unit']
-            y_unit = 'dimensionless'
-        else:
-            x_unit = obj_dict['x_unit']
-            y_unit = obj_dict['y_unit']
-
         return cls(
             components=components,
-            x_unit=x_unit,
-            y_unit=y_unit,
+            x_unit=obj_dict['x_unit'],
+            y_unit=obj_dict['y_unit'],
             name=obj_dict['name'],
             display_name=obj_dict['display_name'],
         )

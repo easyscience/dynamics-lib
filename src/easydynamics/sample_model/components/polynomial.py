@@ -257,7 +257,11 @@ class Polynomial(ModelComponent):
         np.ndarray
             Evaluated polynomial values.
         """
-        if eval_unit is not None and self.x_unit is not None and eval_unit != self.x_unit:
+        if (
+            eval_unit is not None
+            and self.x_unit is not None
+            and sc.Unit(eval_unit) != sc.Unit(self.x_unit)
+        ):
             # Temporary coefficient rescaling — no mutation
             helper = sc.scalar(1.0, unit=self.x_unit)
             helper_in_x = sc.to_unit(helper, eval_unit)

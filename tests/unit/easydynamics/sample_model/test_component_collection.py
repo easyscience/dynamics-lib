@@ -225,6 +225,32 @@ class TestComponentCollection:
         assert np.all(result == pytest.approx(0.0))
         assert result.shape == x.shape
 
+    def test_evaluate_no_components_scipp_output(self):
+        # WHEN
+        component_collection = ComponentCollection(display_name='EmptyModel', y_unit='1/meV')
+        x = np.linspace(-5, 5, 100)
+
+        # THEN
+        result = component_collection.evaluate(x, output='scipp')
+
+        # EXPECT: an sc.Variable of zeros carrying the collection's y_unit
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+        assert np.all(result.values == pytest.approx(0.0))
+
+    def test_evaluate_no_components_scipp_input(self):
+        # WHEN
+        component_collection = ComponentCollection(display_name='EmptyModel')
+        x = sc.linspace('energy', -5.0, 5.0, 100, unit='meV')
+
+        # THEN
+        result = component_collection.evaluate(x, output='scipp')
+
+        # EXPECT: zeros on the input grid, keeping the input's dimension name
+        assert isinstance(result, sc.Variable)
+        assert result.dims == ('energy',)
+        assert np.all(result.values == pytest.approx(0.0))
+
     def test_evaluate_component(self, component_collection):
         # WHEN
         x = np.linspace(-5, 5, 100)
@@ -308,6 +334,48 @@ class TestComponentCollection:
         # THEN EXPECT
         with pytest.warns(UserWarning, match="does not have an 'area' "):
             component_collection.normalize_area()
+
+    def test_convert_x_unit_rollback_skipped_when_old_unit_none(self):
+        # WHEN: a collection without an x_unit of its own
+        collection = ComponentCollection(
+            components=Gaussian(name='G', area=1.0, width=0.5, x_unit='meV'), x_unit=None
+        )
+
+        # THEN: an incompatible unit fails; the outer rollback is skipped (no old unit to
+        # restore) but the component's own atomic rollback keeps it consistent
+        with pytest.raises(sc.UnitError):
+            collection.convert_x_unit('m')
+
+        # EXPECT
+        assert collection[0].x_unit == 'meV'
+
+    def test_normalize_area_only_non_area_components_raises(self):
+        # WHEN: no component in the collection has an area attribute
+        collection = ComponentCollection(
+            components=Polynomial(display_name='OnlyPolynomial', coefficients=[1, 2])
+        )
+
+        # THEN EXPECT
+        with (
+            pytest.warns(UserWarning, match="does not have an 'area' "),
+            pytest.raises(ValueError, match='No components with an area attribute'),
+        ):
+            collection.normalize_area()
+
+    def test_normalize_area_mixed_units(self):
+        # WHEN: two Gaussians with compatible but different area units (meV and ueV)
+        gaussian_mev = Gaussian(name='G1', area=1.0, width=1.0, x_unit='meV')
+        gaussian_uev = Gaussian(name='G2', area=1000.0, width=500.0, x_unit='ueV')
+        collection = ComponentCollection(components=[gaussian_mev, gaussian_uev])
+
+        # THEN: both areas are physically 1 meV, so each should end up at half its value
+        collection.normalize_area()
+
+        # EXPECT: areas sum to 1 in the first component's unit (meV)
+        total_mev = gaussian_mev.area.value + gaussian_uev.area.value / 1000.0
+        assert total_mev == pytest.approx(1.0)
+        assert gaussian_mev.area.value == pytest.approx(0.5)
+        assert gaussian_uev.area.value == pytest.approx(500.0)
 
     def test_get_all_parameters(self, component_collection):
         # WHEN THEN

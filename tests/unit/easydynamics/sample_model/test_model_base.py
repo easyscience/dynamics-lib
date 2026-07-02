@@ -322,6 +322,30 @@ class TestModelBase:
         # EXPECT: state rolled back
         assert model_base.y_unit == 'dimensionless'
 
+    def test_convert_x_unit_rollback_restores_collections(self):
+        # WHEN: a model with built per-Q collections
+        component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
+        model = ModelBase(display_name='M', components=component, Q=[1.0, 2.0])
+        collection = model.get_component_collection(0)
+
+        # THEN: an incompatible unit fails and triggers the rollback of components and
+        # collections
+        with pytest.raises(UnitError):
+            model.convert_x_unit('m')
+
+        # EXPECT
+        assert model.x_unit == 'meV'
+        assert component.x_unit == 'meV'
+        assert collection[0].x_unit == 'meV'
+
+    def test_component_collections_empty_without_Q(self):
+        # WHEN: a model without Q regenerates its collections
+        model = ModelBase(display_name='M', components=Gaussian(name='G'))
+
+        # THEN EXPECT: no per-Q collections and therefore no variables
+        assert model.get_all_variables() == []
+        assert model._component_collections == []
+
     def test_components_setter(self, model_base):
         # WHEN
         new_component = Lorentzian(name='NewLorentzian')
