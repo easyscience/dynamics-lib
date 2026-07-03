@@ -642,7 +642,7 @@ class SampleModel(ModelBase):
         return (
             f'{self.__class__.__name__}(unique_name={self.unique_name}, '
             f'x_unit={self.x_unit}, y_unit={self.y_unit}, '
-            f'Q = {self.Q}, \n '
+            f'Q = {None if self.Q is None else self.Q.values}, \n '
             f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
             f'temperature = {self.temperature}, '
             f'detailed_balance_settings = {self.detailed_balance_settings})'

@@ -159,14 +159,14 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._scale.value = float(scale)
 
     @property
-    def Q(self) -> np.ndarray | None:
+    def Q(self) -> sc.Variable | None:
         """
         Get the Q values of the SampleModel.
 
         Returns
         -------
-        np.ndarray | None
-            The Q values of the SampleModel, or None if not set.
+        sc.Variable | None
+            The Q values of the SampleModel in 1/angstrom, or None if not set.
         """
         return self._Q
 
@@ -198,7 +198,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'
@@ -680,8 +680,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """
-        Convert Q to a numpy array, ensuring it is not None. Uses the stored Q if no input is
-        given.
+        Convert Q to a numpy array of values in 1/angstrom, ensuring it is not None. Uses the
+        stored Q if no input is given.
 
         Parameters
         ----------
@@ -703,7 +703,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if Q is None:
             raise ValueError('Q must be provided either as an argument or set in the model.')
 
-        return _validate_and_convert_Q(Q)
+        return _validate_and_convert_Q(Q).values
 
     # ------------------------------------------------------------------
     # dunder methods

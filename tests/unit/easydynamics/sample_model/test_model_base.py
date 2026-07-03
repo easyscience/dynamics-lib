@@ -51,7 +51,10 @@ class TestModelBase:
         assert model_base.x_unit == 'meV'
         assert model_base.y_unit == 'dimensionless'
         assert len(model_base.components) == 2
-        np.testing.assert_array_equal(model_base.Q, np.array([1.0, 2.0, 3.0]))
+        assert isinstance(model_base.Q, sc.Variable)
+        assert model_base.Q.dims == ('Q',)
+        assert model_base.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_array_equal(model_base.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_init_raises_with_invalid_components(self):
         # WHEN / THEN / EXPECT
@@ -389,8 +392,9 @@ class TestModelBase:
             [1.0, 2.0, 3.0],
             np.array([1.0, 2.0, 3.0]),
             sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom'),
+            sc.Variable(dims=['Q'], values=[10.0, 20.0, 30.0], unit='1/nm'),
         ],
-        ids=['list', 'numpy_array', 'scipp_variable'],
+        ids=['list', 'numpy_array', 'scipp_variable', 'scipp_variable_other_unit'],
     )
     def test_Q_setter_with_similar_Q(self, model_base, new_Q):
         # WHEN
@@ -400,7 +404,7 @@ class TestModelBase:
         model_base.Q = new_Q
 
         # EXPECT
-        np.testing.assert_array_equal(model_base.Q, old_Q)
+        np.testing.assert_array_equal(model_base.Q.values, old_Q.values)
 
     def test_Q_setter_with_none(self, model_base):
         # WHEN
@@ -421,7 +425,20 @@ class TestModelBase:
         model_base.Q = new_Q
 
         # EXPECT
-        np.testing.assert_array_equal(model_base.Q, np.array(new_Q))
+        np.testing.assert_array_equal(model_base.Q.values, np.array(new_Q))
+
+    def test_Q_stored_as_scipp_in_inverse_angstrom(self, model_base):
+        # WHEN: a scipp Q in 1/nm
+        model_base._Q = None
+        new_Q = sc.Variable(dims=['Q'], values=[5.0, 10.0], unit='1/nm')
+
+        # THEN
+        model_base.Q = new_Q
+
+        # EXPECT: stored canonically in 1/angstrom
+        assert isinstance(model_base.Q, sc.Variable)
+        assert model_base.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(model_base.Q.values, [0.5, 1.0])
 
     def test_clear_Q(self, model_base):
         # WHEN

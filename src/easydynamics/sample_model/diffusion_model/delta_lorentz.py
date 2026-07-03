@@ -496,9 +496,10 @@ class DeltaLorentz(DiffusionModelBase):
             List of ComponentCollections with Lorentzian and delta function components for each Q
             value.
         """
-        Q = self.Q
-        if Q is None:
+        if self.Q is None:
             return []
+
+        Q = self.Q.values
 
         if self._allow_Q_variation['A_0'] is True:
             A_0_list, A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
@@ -871,7 +872,7 @@ class DeltaLorentz(DiffusionModelBase):
         """
         A_0_list = []
         A_1_list = []
-        for _ in self.Q:
+        for _ in range(len(self.Q)):
             a0 = Parameter(
                 name='A_0',
                 value=float(A_0.value),
@@ -917,7 +918,7 @@ class DeltaLorentz(DiffusionModelBase):
                 min=MINIMUM_WIDTH,
                 unit=self.x_unit,
             )
-            for _ in self.Q
+            for _ in range(len(self.Q))
         ]
 
     # ------------------------------------------------------------------

@@ -19,7 +19,7 @@ kb = DescriptorNumber.from_scipp('kb', scipp_k)
 angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
 
-def verify_Q_index(Q_index: int, Q: np.ndarray | None, allow_none: bool = False) -> None:
+def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False) -> None:
     """
     Verify that Q_index is a valid integer index into Q.
 
@@ -27,8 +27,8 @@ def verify_Q_index(Q_index: int, Q: np.ndarray | None, allow_none: bool = False)
     ----------
     Q_index : int
         Index to validate.
-    Q : np.ndarray | None
-        The Q values array (may be None if no data is loaded).
+    Q : sc.Variable | None
+        The Q values (may be None if no data is loaded).
     allow_none : bool, default=False
         Whether or not to allow Q_index to be None
 
@@ -99,14 +99,17 @@ def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:
 
 def _validate_and_convert_Q(
     Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
-) -> np.ndarray | None:
+) -> sc.Variable | None:
     """
-    Validate and convert Q to a numpy array.
+    Validate and convert Q to a scipp Variable in 1/angstrom.
+
+    Numbers, lists, and numpy arrays are assumed to be in 1/angstrom. Scipp Variables may be in any
+    unit convertible to 1/angstrom and are converted.
 
     Parameters
     ----------
     Q : np.ndarray | Numeric | list | ArrayLike | sc.Variable | None
-        Scattering vector values in 1/angstrom.
+        Scattering vector values.
 
     Raises
     ------
@@ -118,8 +121,8 @@ def _validate_and_convert_Q(
 
     Returns
     -------
-    np.ndarray | None
-        Q as a np.ndarray or None if Q is None.
+    sc.Variable | None
+        Q as a sc.Variable with dimension 'Q' and unit 1/angstrom, or None if Q is None.
     """
     if Q is None:
         return None
@@ -140,7 +143,7 @@ def _validate_and_convert_Q(
         if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
         Q = Q.to(unit='1/angstrom')
-    return Q.values
+    return Q
 
 
 def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:

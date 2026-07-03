@@ -3,7 +3,6 @@
 
 from copy import copy
 
-import numpy as np
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
 from easyscience.variable import Parameter
@@ -215,14 +214,14 @@ class InstrumentModel(NewBase):
         self._on_background_model_change()
 
     @property
-    def Q(self) -> np.ndarray | None:
+    def Q(self) -> sc.Variable | None:
         """
         Get the Q values of the InstrumentModel.
 
         Returns
         -------
-        np.ndarray | None
-            The Q values of the InstrumentModel, or None if not set.
+        sc.Variable | None
+            The Q values of the InstrumentModel in 1/angstrom, or None if not set.
         """
         return self._Q
 
@@ -255,7 +254,7 @@ class InstrumentModel(NewBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'
@@ -525,7 +524,7 @@ class InstrumentModel(NewBase):
             self._energy_offsets = []
             return
 
-        self._energy_offsets = [copy(self._energy_offset) for _ in self._Q]
+        self._energy_offsets = [copy(self._energy_offset) for _ in range(len(self._Q))]
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""

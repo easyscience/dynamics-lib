@@ -540,8 +540,8 @@ class TestAnalysisBase:
 
             # EXPECT
             np.testing.assert_array_equal(analysis_base.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_on_sample_model_changed_updates_Q(self, analysis_base):
         # WHEN
@@ -557,7 +557,7 @@ class TestAnalysisBase:
             analysis_base._on_sample_model_changed()
 
             # EXPECT
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
 
     def test_on_instrument_model_changed_updates_Q(self, analysis_base):
         # WHEN
@@ -569,7 +569,7 @@ class TestAnalysisBase:
             # THEN
             analysis_base._on_instrument_model_changed()
             # EXPECT
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_verify_Q_index_valid(self, analysis_base_with_components):
         # WHEN

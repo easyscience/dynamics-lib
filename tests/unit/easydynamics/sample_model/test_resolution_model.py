@@ -78,7 +78,7 @@ class TestResolutionModel:
         assert resolution_model.x_unit == 'meV'
         assert resolution_model.y_unit == 'dimensionless'
         assert len(resolution_model.components) == 2
-        np.testing.assert_array_equal(resolution_model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(resolution_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     @pytest.mark.parametrize(
         'invalid_component, expected_error_msg',
@@ -218,7 +218,7 @@ class TestResolutionModel:
         assert resolution_model.x_unit == 'meV'
         assert len(resolution_model.components) == 2
         np.testing.assert_array_equal(
-            resolution_model.Q,
+            resolution_model.Q.values,
             np.array([1.0, 2.0, 3.0]),
         )
 

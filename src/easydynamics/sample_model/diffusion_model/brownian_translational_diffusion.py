@@ -244,11 +244,11 @@ class BrownianTranslationalDiffusion(DiffusionModelBase):
             Lorentzian has a width given by $D*Q^2$ and an area given by the scale parameter
             multiplied by the QISF (which is 1 for this model).
         """
-        Q = self.Q
-        if Q is None:
+        if self.Q is None:
             self._component_collections = []
             return self._component_collections
 
+        Q = self.Q.values
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
         # Lorentzians and the delta function.

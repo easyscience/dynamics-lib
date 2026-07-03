@@ -189,7 +189,9 @@ class TestDiffusionModelBase:
         diffusion_model.Q = [1.0, 2.0, 3.0]
 
         # EXPECT
-        np.testing.assert_allclose(diffusion_model.Q, [1.0, 2.0, 3.0])
+        assert isinstance(diffusion_model.Q, sc.Variable)
+        assert diffusion_model.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0, 3.0])
 
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'New Q values are not similar to the old ones'):
@@ -204,6 +206,16 @@ class TestDiffusionModelBase:
 
         # EXPECT
         assert diffusion_model.Q is None
+
+    def test_Q_setter_accepts_equivalent_scipp_Q_in_other_unit(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0, 3.0]
+
+        # THEN: the same Q in 1/nm is equivalent after conversion, so no error is raised
+        diffusion_model.Q = sc.Variable(dims=['Q'], values=[10.0, 20.0, 30.0], unit='1/nm')
+
+        # EXPECT
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0, 3.0])
 
     def test_repr(self, diffusion_model):
         # WHEN THEN

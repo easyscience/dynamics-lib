@@ -184,6 +184,17 @@ class TestBrownianTranslationalDiffusion:
         expected_widths = 1.0 * unit_conversion_factor.value * (Q_values**2)
         np.testing.assert_allclose(widths, expected_widths, rtol=1e-5)
 
+    def test_calculate_width_scipp_Q_converts_unit(self, brownian_diffusion_model):
+        # WHEN: the same Q expressed in 1/angstrom (numpy, assumed) and in 1/nm (scipp)
+        Q_values = np.array([0.1, 0.2, 0.3])
+        Q_scipp = sc.Variable(dims=['Q'], values=Q_values * 10, unit='1/nm')
+
+        # THEN EXPECT: scipp input is converted to 1/angstrom before the width calculation
+        np.testing.assert_allclose(
+            brownian_diffusion_model.calculate_width(Q_scipp),
+            brownian_diffusion_model.calculate_width(Q_values),
+        )
+
     def test_calculate_EISF(self, brownian_diffusion_model):
         # WHEN
         Q_values = np.array([0.1, 0.2, 0.3])  # Example Q values in Å^-1

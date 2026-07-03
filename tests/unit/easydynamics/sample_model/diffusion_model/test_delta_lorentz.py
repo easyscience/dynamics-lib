@@ -462,7 +462,7 @@ class TestDeltaLorentz:
         for i in range(len(eisf)):
             expected = delta_lorentz_model_with_Q._A_0_list[i].value * np.exp(
                 -delta_lorentz_model_with_Q.mean_u_squared.value
-                * delta_lorentz_model_with_Q.Q[i] ** 2
+                * delta_lorentz_model_with_Q.Q.values[i] ** 2
             )
             assert eisf[i] == pytest.approx(expected)
 
@@ -486,7 +486,7 @@ class TestDeltaLorentz:
         for i in range(len(qisf)):
             expected = delta_lorentz_model_with_Q._A_1_list[i].value * np.exp(
                 -delta_lorentz_model_with_Q.mean_u_squared.value
-                * delta_lorentz_model_with_Q.Q[i] ** 2
+                * delta_lorentz_model_with_Q.Q.values[i] ** 2
             )
 
             assert qisf[i] == pytest.approx(expected)

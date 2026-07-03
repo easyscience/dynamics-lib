@@ -310,11 +310,11 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
         list[ComponentCollection]
             List of ComponentCollections with Jump Diffusion Lorentzian components.
         """
-        Q = self.Q
-        if Q is None:
+        if self.Q is None:
             self._component_collections = []
             return self._component_collections
 
+        Q = self.Q.values
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
         # Lorentzians and the delta function.
