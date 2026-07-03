@@ -293,3 +293,5 @@ class TestJumpTranslationalDiffusion:
         assert 'JumpTranslationalDiffusion' in repr_str
         assert 'diffusion_coefficient' in repr_str
         assert 'scale=' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str

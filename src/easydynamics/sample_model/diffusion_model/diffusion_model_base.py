@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import contextlib
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
@@ -33,6 +35,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         Initialize a new DiffusionModel.
 
+        Unit validation raises ``UnitError`` if x_unit is not a string or scipp Unit, or if it
+        cannot be converted to meV.
+
         Parameters
         ----------
         scale : Numeric, default=1.0
@@ -62,21 +67,13 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ------
         TypeError
             If scale is not a number.
-        UnitError
-            If x_unit is not a string or scipp Unit, or if it cannot be converted to meV.
         ValueError
             If scale is negative.
         """
 
         self._Q = _validate_and_convert_Q(Q)
 
-        try:
-            test = DescriptorNumber(name='test', value=1, unit=x_unit)
-            test.convert_unit('meV')
-        except Exception as e:
-            raise UnitError(
-                f'Invalid unit: {x_unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
-            ) from e
+        self._assert_convertible_to_mev(x_unit)
 
         if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
@@ -84,7 +81,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if float(scale) < 0:
             raise ValueError('scale must be non-negative.')
 
-        area_unit = str(sc.Unit(x_unit) * sc.Unit(y_unit))
+        area_unit = str(sc.Unit(str(x_unit)) * sc.Unit(str(y_unit)))
         self._scale = Parameter(
             name='scale', value=float(scale), fixed=False, min=0.0, unit=area_unit
         )
@@ -289,6 +286,140 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             )
         self._Q = None
         self._on_Q_change()
+
+    # ------------------------------------------------------------------
+    # Unit conversion
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _assert_convertible_to_mev(unit: str | sc.Unit) -> None:
+        """
+        Assert that the given unit is an energy unit (convertible to meV).
+
+        Frequency axes such as 1/ps are not supported for now.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The unit to validate.
+
+        Raises
+        ------
+        UnitError
+            If unit is not a string or scipp Unit, or if it cannot be converted to meV.
+        """
+        try:
+            test = DescriptorNumber(name='test', value=1, unit=str(unit))
+            test.convert_unit('meV')
+        except Exception as e:
+            raise UnitError(
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+            ) from e
+
+    def convert_x_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the x-axis unit of the diffusion model.
+
+        Converts the scale parameter (unit ``x_unit * y_unit``), any subclass-specific x-unit
+        parameters, and the existing component collections in place — parameter values and object
+        identity are preserved, and nothing is scheduled for regeneration. Only energy units are
+        supported (the unit must be convertible to meV).
+
+        Unit validation raises ``UnitError`` when the unit is not convertible to meV.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new x-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit.
+        Exception
+            If any conversion fails; the already-converted state is rolled back best-effort before
+            re-raising.
+        """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(unit).__name__}')
+        unit_str = str(unit)
+        self._assert_convertible_to_mev(unit_str)
+
+        old_x_unit = str(self.x_unit)
+        new_scale_unit = str(sc.Unit(unit_str) * sc.Unit(str(self.y_unit)))
+        self._scale.convert_unit(new_scale_unit)
+        try:
+            self._convert_extra_x_unit_parameters(unit_str)
+            for collection in self._component_collections:
+                collection.convert_x_unit(unit_str)
+        except Exception:
+            old_scale_unit = str(sc.Unit(old_x_unit) * sc.Unit(str(self.y_unit)))
+            with contextlib.suppress(Exception):
+                self._scale.convert_unit(old_scale_unit)
+            with contextlib.suppress(Exception):
+                self._convert_extra_x_unit_parameters(old_x_unit)
+            for collection in self._component_collections:
+                with contextlib.suppress(Exception):
+                    collection.convert_x_unit(old_x_unit)
+            raise
+
+        self._x_unit = unit_str
+
+    def convert_y_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit of the diffusion model.
+
+        Converts the scale parameter from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit`` and
+        the existing component collections in place — parameter values and object identity are
+        preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
+        compatible with the current one; the scale conversion raises ``UnitError`` otherwise.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new y-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit.
+        Exception
+            If any conversion fails; the already-converted state is rolled back best-effort before
+            re-raising.
+        """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(unit).__name__}')
+        unit_str = str(unit)
+
+        old_y_unit = str(self.y_unit)
+        new_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(unit_str))
+        self._scale.convert_unit(new_scale_unit)
+        try:
+            for collection in self._component_collections:
+                collection.convert_y_unit(unit_str)
+        except Exception:
+            old_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(old_y_unit))
+            with contextlib.suppress(Exception):
+                self._scale.convert_unit(old_scale_unit)
+            for collection in self._component_collections:
+                with contextlib.suppress(Exception):
+                    collection.convert_y_unit(old_y_unit)
+            raise
+
+        self._y_unit = unit_str
+
+    def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
+        """
+        Convert subclass-specific parameters that carry the x-axis unit.
+
+        The base implementation does nothing; subclasses with x-unit parameters (e.g. a Lorentzian
+        width template) override this method.
+
+        Parameters
+        ----------
+        unit_str : str
+            The new x-axis unit as a string.
+        """
 
     # ------------------------------------------------------------------
     # Methods

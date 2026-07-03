@@ -12,6 +12,7 @@ from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import convert_parameter_unit
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
@@ -268,19 +269,19 @@ class ModelComponent(EasyDynamicsModelBase):
         new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
         try:
             for p in x_params:
-                p.convert_unit(new_x_unit)
-            area_param.convert_unit(new_area_unit)
+                convert_parameter_unit(p, new_x_unit)
+            convert_parameter_unit(area_param, new_area_unit)
             for p in inverse_params:
-                p.convert_unit('1/' + new_x_str)
+                convert_parameter_unit(p, '1/' + new_x_str)
             self._x_unit = new_x_str
         except Exception as e:
             try:
                 old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
                 for p in x_params:
-                    p.convert_unit(old_x_unit)
-                area_param.convert_unit(old_area_unit)
+                    convert_parameter_unit(p, old_x_unit)
+                convert_parameter_unit(area_param, old_area_unit)
                 for p in inverse_params:
-                    p.convert_unit('1/' + str(old_x_unit))
+                    convert_parameter_unit(p, '1/' + str(old_x_unit))
             except Exception:  # noqa: S110
                 pass
             raise e
@@ -315,12 +316,12 @@ class ModelComponent(EasyDynamicsModelBase):
         old_y_unit = self.y_unit
         new_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(new_y_unit))
         try:
-            area_param.convert_unit(new_area_unit)
+            convert_parameter_unit(area_param, new_area_unit)
             self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
         except Exception as e:
             try:
                 old_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(old_y_unit))
-                area_param.convert_unit(old_area_unit)
+                convert_parameter_unit(area_param, old_area_unit)
             except Exception:  # noqa: S110
                 pass
             raise e
@@ -352,12 +353,12 @@ class ModelComponent(EasyDynamicsModelBase):
         pars = self.get_all_parameters()
         try:
             for p in pars:
-                p.convert_unit(new_x_unit)
+                convert_parameter_unit(p, new_x_unit)
             self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
         except Exception as e:
             try:
                 for p in pars:
-                    p.convert_unit(old_unit)
+                    convert_parameter_unit(p, old_unit)
             except Exception:  # noqa: S110
                 pass
             raise e

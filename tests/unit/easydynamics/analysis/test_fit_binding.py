@@ -237,6 +237,19 @@ class TestFitBinding:
         # EXPECT
         assert parameter_names == ['parameter3 area', 'parameter3 width']
 
+    def test_unit_contract_for_component_model(self, fit_binding):
+        # WHEN THEN EXPECT: component bindings expose the model's units, so ParameterAnalysis
+        # converts data into them before fitting
+        assert fit_binding.x_unit == fit_binding.model.x_unit
+        assert fit_binding.y_unit == fit_binding.model.y_unit
+
+    def test_unit_contract_for_diffusion_model(self, diffusion_fit_binding):
+        # WHEN THEN EXPECT: diffusion-model callables take raw Q values, so the binding
+        # declares no units and no conversion is applied (regression: an isinstance check in
+        # ParameterAnalysis used to encode this knowledge)
+        assert diffusion_fit_binding.x_unit is None
+        assert diffusion_fit_binding.y_unit is None
+
     def test_get_parameter_names_diffusion_delta_mode_maps_to_area(self, diffusion_fit_binding):
         # WHEN: the delta contribution is stored in the parameters Dataset as the
         # DeltaFunction's area parameter ('<name> area'), so mode 'delta' must map to

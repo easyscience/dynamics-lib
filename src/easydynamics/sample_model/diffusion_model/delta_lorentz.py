@@ -13,6 +13,7 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import angstrom
 from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
@@ -138,6 +139,18 @@ class DeltaLorentz(DiffusionModelBase):
         # Parameters
         # --------------------------------------------------------------
         self._mean_u_squared = self._create_mean_u_squared_parameter(mean_u_squared)
+
+        # Dimensionless <u^2>/angstrom^2 for use inside exp() in the area dependency
+        # expressions and the EISF/QISF calculations. Deriving it through the dependency
+        # graph keeps those quantities correct if mean_u_squared is converted to another
+        # unit (e.g. nm**2), which a raw `.value` would silently get wrong.
+        with np.errstate(invalid='ignore'):
+            self._mean_u_squared_over_angstrom_squared = Parameter.from_dependency(
+                name='mean_u_squared_over_angstrom_squared',
+                dependency_expression='mean_u_squared / angstrom**2',
+                dependency_map={'mean_u_squared': self._mean_u_squared, 'angstrom': angstrom},
+            )
+            self._mean_u_squared_over_angstrom_squared.set_desired_unit('dimensionless')
 
         self._A_0, self._A_1 = self._create_A0_A1_parameters(A_0)
 
@@ -439,12 +452,13 @@ class DeltaLorentz(DiffusionModelBase):
             EISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
+        mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
             A_0_values = [A_0_.value for A_0_ in self._A_0_list]
-            return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
+            return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_0_values)
 
         A_0_values = [self.A_0.value] * len(Q)
-        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
+        return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_0_values)
 
     def calculate_QISF(self, Q: Q_type = None) -> np.ndarray:
         """
@@ -461,12 +475,13 @@ class DeltaLorentz(DiffusionModelBase):
             QISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
+        mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
             A_1_values = [A_1_.value for A_1_ in self._A_1_list]
-            return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
+            return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
         A_1_values = [self.A_1.value] * len(Q)
-        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
+        return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
     def create_component_collections(
         self,
@@ -906,6 +921,20 @@ class DeltaLorentz(DiffusionModelBase):
                 self._lorentzian_width_list = []
         self._component_collections = self.create_component_collections()
 
+    def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
+        """
+        Convert the Lorentzian width template to the new x-axis unit.
+
+        The per-Q width list (when Q-variation is enabled) holds the very Parameter objects used by
+        the components, so those are converted in place with the collections.
+
+        Parameters
+        ----------
+        unit_str : str
+            The new x-axis unit as a string.
+        """
+        self._lorentzian_width.convert_unit(unit_str)
+
     def _write_lorz_width_dependency_expression(self, Q: float) -> str:
         """
         Write the dependency expression for the width as a function of Q to make dependent
@@ -968,7 +997,9 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_1'
+        # mean_u_squared_ratio is <u^2>/angstrom^2, kept dimensionless through the dependency
+        # graph so the expression stays correct if mean_u_squared is converted to another unit.
+        return f'scale * exp(-mean_u_squared_ratio.value * {Q}**2 / 3) * A_1'
 
     def _write_lorz_area_dependency_map_expression(
         self, Q_index: int | None
@@ -990,13 +1021,13 @@ class DeltaLorentz(DiffusionModelBase):
         if Q_index is None:
             return {
                 'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
+                'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
                 'A_1': self.A_1,
             }
 
         return {
             'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
+            'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
             'A_1': self._A_1_list[Q_index],
         }
 
@@ -1022,7 +1053,9 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_0'
+        # mean_u_squared_ratio is <u^2>/angstrom^2, kept dimensionless through the dependency
+        # graph so the expression stays correct if mean_u_squared is converted to another unit.
+        return f'scale * exp(-mean_u_squared_ratio.value * {Q}**2 / 3) * A_0'
 
     def _write_delta_area_dependency_map_expression(
         self,
@@ -1045,12 +1078,12 @@ class DeltaLorentz(DiffusionModelBase):
         if Q_index is None:
             return {
                 'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
+                'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
                 'A_0': self.A_0,
             }
         return {
             'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
+            'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
             'A_0': self._A_0_list[Q_index],
         }
 

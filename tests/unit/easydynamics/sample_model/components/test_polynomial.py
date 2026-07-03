@@ -272,6 +272,18 @@ class TestPolynomial:
         np.testing.assert_allclose(result, [2.0, 3.0], rtol=1e-5)
         assert p.x_unit == 'meV'
 
+    def test_evaluate_with_equivalent_unit_spelling_does_not_rescale(self):
+        # WHEN: 'ueV' and scipp's canonical micro-sign spelling are the same unit
+        # (regression: a string comparison used to treat them as different and rescale)
+        p = Polynomial(coefficients=[1.0, 1.0], x_unit='ueV', suppress_warnings=True)
+        x = sc.array(dims=['x'], values=np.array([1.0, 2.0]), unit='\u00b5eV')
+
+        # THEN
+        result = p.evaluate(x)
+
+        # EXPECT: f(x) = 1 + x with the raw coefficient values, no rescaling applied
+        np.testing.assert_allclose(result, [2.0, 3.0])
+
     def test_convert_y_unit_invalid_type_raises(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
         with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):

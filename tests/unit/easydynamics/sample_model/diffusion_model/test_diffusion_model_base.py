@@ -3,7 +3,9 @@
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable.parameter import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 
@@ -44,6 +46,54 @@ class TestDiffusionModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError, match=r'read-only'):
             diffusion_model.y_unit = '1/meV'
+
+    def test_init_accepts_scipp_units(self):
+        # WHEN THEN
+        model = DiffusionModelBase(x_unit=sc.Unit('meV'), y_unit=sc.Unit('1/meV'))
+
+        # EXPECT: scale.unit = x_unit * y_unit = dimensionless
+        assert str(model.x_unit) == 'meV'
+        assert sc.Unit(str(model.scale.unit)) == sc.Unit('dimensionless')
+
+    def test_convert_x_unit(self, diffusion_model):
+        # WHEN THEN
+        diffusion_model.convert_x_unit('ueV')
+
+        # EXPECT: x_unit and the scale unit (x_unit * y_unit) follow
+        assert sc.Unit(diffusion_model.x_unit) == sc.Unit('ueV')
+        assert sc.Unit(str(diffusion_model.scale.unit)) == sc.Unit('ueV')
+
+    def test_convert_x_unit_invalid_type_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc.Unit'):
+            diffusion_model.convert_x_unit(123)
+
+    @pytest.mark.parametrize('unit', ['m', '1/ps'], ids=['length', 'frequency'])
+    def test_convert_x_unit_non_energy_raises(self, diffusion_model, unit):
+        # WHEN THEN EXPECT: only energy axes are supported for now
+        with pytest.raises(UnitError, match=r'convertible to meV'):
+            diffusion_model.convert_x_unit(unit)
+
+    def test_convert_y_unit(self):
+        # WHEN
+        model = DiffusionModelBase(y_unit='1/meV')
+
+        # THEN
+        model.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit and the scale unit follow (meV * 1/eV)
+        assert sc.Unit(model.y_unit) == sc.Unit('1/eV')
+        assert sc.Unit(str(model.scale.unit)) == sc.Unit('meV/eV')
+
+    def test_convert_y_unit_invalid_type_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'y_unit must be a string or sc.Unit'):
+            diffusion_model.convert_y_unit(123)
+
+    def test_convert_y_unit_incompatible_raises(self, diffusion_model):
+        # WHEN THEN EXPECT: dimensionless -> K changes the dimension of the scale unit
+        with pytest.raises(UnitError):
+            diffusion_model.convert_y_unit('K')
 
     @pytest.mark.parametrize(
         ('attribute', 'value', 'expected'),
@@ -161,7 +211,8 @@ class TestDiffusionModelBase:
 
         # EXPECT
         assert 'DiffusionModelBase' in repr_str
-        assert 'x_unit=meV' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str
 
     def test_get_independent_variables(self, diffusion_model):
         # WHEN THEN EXPECT

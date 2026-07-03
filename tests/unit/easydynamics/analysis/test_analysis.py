@@ -98,6 +98,24 @@ class TestAnalysis:
         for i in range(3):
             assert analysis.analysis_list[i].Q_index == i
 
+    def test_analysis_list_shares_convolution_settings(self, analysis):
+        # WHEN THEN EXPECT: every Analysis1d holds the same ConvolutionSettings object, so
+        # user changes to analysis.convolution_settings reach all Q indices (regression:
+        # per-Q copies silently detached the settings)
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings is analysis.convolution_settings
+
+    def test_convolution_settings_changes_reach_all_Q(self, analysis):
+        # WHEN: the analysis list has been built
+        assert len(analysis.analysis_list) == 3
+
+        # THEN: mutate the settings on the Analysis after the fact
+        analysis.convolution_settings.upsample_factor = 20
+
+        # EXPECT: the per-Q analyses see the new value
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings.upsample_factor == 20
+
     def test_analysis_list_setter_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with pytest.raises(

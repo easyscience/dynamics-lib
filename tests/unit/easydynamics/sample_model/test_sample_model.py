@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import scipp as sc
 from scipp import UnitError
 
 from easydynamics.sample_model import ComponentCollection
@@ -309,6 +310,62 @@ class TestSampleModel:
         ):
             model.convert_temperature_unit('invalid_unit')
 
+    def test_convert_x_unit_propagates_to_diffusion_models(self):
+        # WHEN: a SampleModel with an attached diffusion model
+        Q = np.array([1.0, 2.0])
+        brownian = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=Q)
+        model = SampleModel(Q=Q, diffusion_models=brownian)
+        width_mev = model.get_component_collection(0)[0].width.value
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: the diffusion model follows the SampleModel's new unit, and the merged
+        # collections carry rescaled widths in the new unit
+        assert sc.Unit(str(brownian.x_unit)) == sc.Unit('ueV')
+        assert sc.Unit(str(brownian.scale.unit)) == sc.Unit('ueV')
+        collection = model.get_component_collection(0)
+        assert sc.Unit(str(collection[0].width.unit)) == sc.Unit('ueV')
+        assert collection[0].width.value == pytest.approx(width_mev * 1000)
+
+    def test_convert_x_unit_does_not_mark_collections_dirty(self):
+        # WHEN: a SampleModel with an attached diffusion model and built collections
+        Q = np.array([1.0, 2.0])
+        brownian = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=Q)
+        model = SampleModel(Q=Q, diffusion_models=brownian)
+        collection_before = model.get_component_collection(0)
+        width = collection_before[0].width
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: conversion works in place — no dirty flag, no rebuild, and the converted
+        # dependent width stays in the new unit through later dependency-graph updates
+        # (regression: conversion used to mark the collections dirty, and the rebuild
+        # discarded per-Q state and object references)
+        assert model._component_collections_is_dirty is False
+        assert model.get_component_collection(0) is collection_before
+        width_uev = width.value
+        brownian.diffusion_coefficient = 4.8e-9
+        assert sc.Unit(str(width.unit)) == sc.Unit('ueV')
+        assert width.value == pytest.approx(2 * width_uev)
+
+    def test_convert_y_unit_propagates_to_diffusion_models(self):
+        # WHEN: SampleModel and diffusion model sharing y_unit='1/meV'
+        Q = np.array([1.0])
+        brownian = BrownianTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, Q=Q, y_unit='1/meV'
+        )
+        model = SampleModel(Q=Q, y_unit='1/meV', diffusion_models=brownian)
+
+        # THEN
+        model.convert_y_unit('1/eV')
+
+        # EXPECT
+        assert sc.Unit(str(brownian.y_unit)) == sc.Unit('1/eV')
+        assert sc.Unit(str(brownian.scale.unit)) == sc.Unit('meV/eV')
+        assert sc.Unit(str(model.y_unit)) == sc.Unit('1/eV')
+
     def test_normalize_detailed_balance_setter(self, sample_model):
         # WHEN
         model = sample_model
@@ -532,11 +589,14 @@ class TestSampleModel:
 
         # THEN / EXPECT
         assert 'SampleModel' in repr_str
-        assert 'x_unit=' in repr_str
         assert 'Q = ' in repr_str
         assert 'components' in repr_str
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
+        # Regression: a stray ')' and a missing separator used to mangle this into
+        # 'x_unit=meV), y_unit=dimensionlessQ = ...', and the closing ')' was missing
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str
+        assert repr_str.rstrip().endswith(')')
         assert 'normalize_detailed_balance' in repr_str
 
     def test_y_unit_setter_raises(self, sample_model):

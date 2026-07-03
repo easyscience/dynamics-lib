@@ -389,6 +389,48 @@ class SampleModel(ModelBase):
                 self.temperature.convert_unit(old_unit)
             raise
 
+    def _convert_axis_unit(self, unit: str | sc.Unit, axis: str) -> None:
+        """
+        Convert one axis unit on the SampleModel, including any attached diffusion models.
+
+        Extends the ModelBase conversion (template components and per-Q collections) by also
+        converting each diffusion model, whose regenerated collections would otherwise come back in
+        the old unit on the next rebuild.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new unit to convert to.
+        axis : str
+            Which axis to convert: ``'x'`` or ``'y'``.
+
+        Raises
+        ------
+        Exception
+            If any conversion fails; the already-converted diffusion models and the ModelBase state
+            are rolled back before re-raising.
+        """
+        old_unit = self.x_unit if axis == 'x' else self.y_unit
+        super()._convert_axis_unit(unit, axis)
+
+        method = f'convert_{axis}_unit'
+        converted_models = []
+        try:
+            for diffusion_model in self.diffusion_models:
+                getattr(diffusion_model, method)(unit)
+                converted_models.append(diffusion_model)
+        except Exception:
+            for diffusion_model in converted_models:
+                with suppress(Exception):
+                    getattr(diffusion_model, method)(old_unit)
+            if old_unit is not None:
+                with suppress(Exception):
+                    super()._convert_axis_unit(old_unit, axis)
+            raise
+        # Everything is converted in place (the merged collections share the diffusion models'
+        # component objects), so nothing is marked dirty: conversion must not discard the
+        # per-Q state by triggering a rebuild.
+
     @property
     def normalize_detailed_balance(self) -> bool:
         """

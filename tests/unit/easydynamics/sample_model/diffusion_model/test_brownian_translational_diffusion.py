@@ -31,6 +31,48 @@ class TestBrownianTranslationalDiffusion:
         assert brownian_diffusion_model.scale.unit == 'meV'
         assert brownian_diffusion_model.diffusion_coefficient.value == pytest.approx(1.0)
 
+    def test_convert_x_unit_rescales_widths(self):
+        # WHEN
+        model = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=np.array([1.0]))
+        width_mev = model.calculate_width()[0]
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: calculated width and the component width follow the new unit
+        assert model.calculate_width()[0] == pytest.approx(width_mev * 1000)
+        collection = model.get_component_collections(0)
+        assert sc.Unit(str(collection[0].width.unit)) == sc.Unit('ueV')
+        assert collection[0].width.value == pytest.approx(width_mev * 1000)
+        assert sc.Unit(str(model.scale.unit)) == sc.Unit('ueV')
+
+    def test_convert_x_unit_converts_collections_in_place(self):
+        # WHEN
+        model = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=np.array([1.0]))
+        collection_before = model.get_component_collections(0)
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: conversion does not regenerate the collections (regression: rebuilding
+        # replaced the component objects, breaking external references)
+        assert model.get_component_collections(0) is collection_before
+
+    def test_convert_x_unit_persists_after_dependency_update(self):
+        # WHEN
+        model = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=np.array([1.0]))
+        width = model.get_component_collections(0)[0].width
+        model.convert_x_unit('ueV')
+        width_uev = width.value
+
+        # THEN: trigger a dependency-graph recompute
+        model.diffusion_coefficient = 4.8e-9
+
+        # EXPECT: the dependent width stays in the new unit (regression: a plain convert_unit
+        # was reverted to the old desired unit by the next graph update)
+        assert sc.Unit(str(width.unit)) == sc.Unit('ueV')
+        assert width.value == pytest.approx(2 * width_uev)
+
     @pytest.mark.parametrize(
         'kwargs,expected_exception, expected_message',
         [
@@ -247,3 +289,5 @@ class TestBrownianTranslationalDiffusion:
         assert 'BrownianTranslationalDiffusion' in repr_str
         assert 'diffusion_coefficient' in repr_str
         assert 'scale=' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str

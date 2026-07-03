@@ -4,6 +4,7 @@
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
+from easyscience.variable import Parameter
 from numpy.typing import ArrayLike
 from scipp.constants import hbar as scipp_hbar
 from scipp.constants import k as scipp_k
@@ -53,6 +54,28 @@ def verify_Q_index(Q_index: int, Q: np.ndarray | None, allow_none: bool = False)
 
     if not (0 <= Q_index < len(Q)):
         raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(Q)}')
+
+
+def convert_parameter_unit(parameter: Parameter, unit: str | sc.Unit) -> None:
+    """
+    Convert a parameter to a new unit, keeping dependent parameters consistent.
+
+    Independent parameters are converted with ``convert_unit``. Dependent parameters are converted
+    with ``set_desired_unit``, so the new unit survives later dependency-graph recomputations (a
+    plain ``convert_unit`` would be reverted to the old desired unit the next time the dependency
+    expression is re-evaluated).
+
+    Parameters
+    ----------
+    parameter : Parameter
+        The parameter to convert.
+    unit : str | sc.Unit
+        The unit to convert to.
+    """
+    if parameter.independent:
+        parameter.convert_unit(str(unit))
+    else:
+        parameter.set_desired_unit(str(unit))
 
 
 def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:

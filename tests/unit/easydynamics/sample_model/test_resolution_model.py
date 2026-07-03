@@ -242,6 +242,21 @@ class TestResolutionModel:
         variables = resolution_model.get_all_variables()
         assert all(var.fixed for var in variables) is all_fixed
 
+    def test_from_sample_model_installed_collections_are_stable(self, sample_model):
+        # WHEN
+        resolution_model = ResolutionModel.from_sample_model(sample_model)
+
+        # EXPECT: the installed collections are not scheduled for a rebuild (regression: init
+        # callbacks used to set the dirty flag, so the next access silently regenerated the
+        # collections from templates, discarding the normalization)
+        assert resolution_model._component_collections_is_dirty is False
+
+        # and repeated access returns the same installed, normalized collections
+        first_access = resolution_model.get_component_collection(0)
+        second_access = resolution_model.get_component_collection(0)
+        assert first_access is second_access
+        assert (first_access[0].area.value + first_access[1].area.value) == pytest.approx(1.0)
+
     def test_from_sample_model_with_no_Q(self, sample_model):
         # WHEN
         sample_model_no_Q = SampleModel(

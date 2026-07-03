@@ -11,27 +11,79 @@ from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
+
+
+def _make_numerical_convolution(convolution_settings=None):
+    energy = np.linspace(-10, 10, 5001)
+    sample_components = ComponentCollection(display_name='ComponentCollection')
+    sample_components.append_component(Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4))
+    resolution_components = ComponentCollection(display_name='ResolutionModel')
+    resolution_components.append_component(
+        Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
+    )
+
+    return NumericalConvolution(
+        energy=energy,
+        sample_components=sample_components,
+        resolution_components=resolution_components,
+        convolution_settings=convolution_settings,
+    )
 
 
 class TestNumericalConvolution:
     @pytest.fixture
     def default_numerical_convolution(self):
-        energy = np.linspace(-10, 10, 5001)
-        sample_components = ComponentCollection(display_name='ComponentCollection')
-        sample_components.append_component(
-            Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
-        )
-        resolution_components = ComponentCollection(display_name='ResolutionModel')
-        resolution_components.append_component(
-            Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
-        )
+        return _make_numerical_convolution()
 
-        return NumericalConvolution(
-            energy=energy,
-            sample_components=sample_components,
-            resolution_components=resolution_components,
-        )
+    def test_settings_change_invalidates_all_sharing_convolvers(self):
+        # WHEN: two convolvers sharing one ConvolutionSettings, and an accuracy knob changes
+        settings = ConvolutionSettings()
+        convolver_a = _make_numerical_convolution(settings)
+        convolver_b = _make_numerical_convolution(settings)
+        settings.upsample_factor = 10
+
+        # THEN: A consumes the change by rebuilding its plan
+        convolver_a.convolution()
+
+        # EXPECT: A is current, but B still sees the stale plan (regression: A's rebuild
+        # setting the shared flag used to mask the settings change from B)
+        assert convolver_a._convolution_plan_is_current() is True
+        assert convolver_b._convolution_plan_is_current() is False
+
+        # and B becomes current after its own rebuild
+        convolver_b.convolution()
+        assert convolver_b._convolution_plan_is_current() is True
+
+    def test_manual_plan_valid_true_blesses_all_sharing_convolvers(self):
+        # WHEN: a settings change followed by an explicit convolution_plan_is_valid = True
+        settings = ConvolutionSettings()
+        convolver_a = _make_numerical_convolution(settings)
+        convolver_b = _make_numerical_convolution(settings)
+        settings.upsample_factor = 10
+
+        # THEN: the escape hatch suppresses rebuilds for every convolver sharing the settings
+        settings.convolution_plan_is_valid = True
+
+        # EXPECT
+        assert convolver_a._convolution_plan_is_current() is True
+        assert convolver_b._convolution_plan_is_current() is True
+
+    def test_manual_plan_valid_false_invalidates_all_sharing_convolvers(self):
+        # WHEN: two current convolvers sharing one ConvolutionSettings
+        settings = ConvolutionSettings()
+        convolver_a = _make_numerical_convolution(settings)
+        convolver_b = _make_numerical_convolution(settings)
+
+        # THEN: an explicit False invalidates the plan for every convolver, and one
+        # convolver rebuilding does not mask the invalidation from the other
+        settings.convolution_plan_is_valid = False
+        convolver_a.convolution()
+
+        # EXPECT
+        assert convolver_a._convolution_plan_is_current() is True
+        assert convolver_b._convolution_plan_is_current() is False
 
     def test_init(self, default_numerical_convolution):
         """
