@@ -17,6 +17,19 @@ from easydynamics.sample_model.components.polynomial import Polynomial
 from easydynamics.sample_model.diffusion_model.brownian_translational_diffusion import (
     BrownianTranslationalDiffusion,
 )
+from easydynamics.utils.fit_target import FitTarget
+
+
+def make_target(dataset_key, function, label, x_unit=None, y_unit=None, name='value'):
+    """Build a FitTarget for mocking FitBinding.get_targets in tests."""
+    return FitTarget(
+        name=name,
+        dataset_key=dataset_key,
+        function=function,
+        label=label,
+        x_unit=x_unit,
+        y_unit=y_unit,
+    )
 
 
 class TestParameterAnalysis:
@@ -66,8 +79,11 @@ class TestParameterAnalysis:
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
         diffusion_model = BrownianTranslationalDiffusion()
 
-        fit_binding1 = FitBinding(parameter_name='parameter1', model=model)
-        fit_binding2 = FitBinding(parameter_name='parameter3', model=diffusion_model)
+        fit_binding1 = FitBinding(model=model, targets='parameter1')
+        fit_binding2 = FitBinding(
+            model=diffusion_model,
+            targets={'area': 'parameter3 area', 'width': 'parameter3 width'},
+        )
 
         return ParameterAnalysis(parameters=dataset, bindings=[fit_binding1, fit_binding2])
 
@@ -75,8 +91,11 @@ class TestParameterAnalysis:
         # WHEN THEN EXPECT
         assert isinstance(parameter_analysis, ParameterAnalysis)
         assert len(parameter_analysis.bindings) == 2
-        assert parameter_analysis.bindings[0].parameter_name == 'parameter1'
-        assert parameter_analysis.bindings[1].parameter_name == 'parameter3'
+        assert parameter_analysis.bindings[0].targets == 'parameter1'
+        assert parameter_analysis.bindings[1].targets == {
+            'area': 'parameter3 area',
+            'width': 'parameter3 width',
+        }
 
     def test_parameter_property(self, parameter_analysis):
         # WHEN
@@ -133,7 +152,7 @@ class TestParameterAnalysis:
 
         # WHEN
         model = Polynomial(coefficients=[2.0, 1.0])
-        new_binding = FitBinding(parameter_name='parameter2', model=model)
+        new_binding = FitBinding(model=model, targets='parameter2')
         parameter_analysis.bindings = new_binding
 
         # THEN EXPECT
@@ -162,7 +181,7 @@ class TestParameterAnalysis:
     def test_fit_wrong_parameter_name_raises(self, parameter_analysis):
         # WHEN
         model = Polynomial(coefficients=[2.0, 1.0])
-        incorrect_binding = FitBinding(parameter_name='nonexistent_parameter', model=model)
+        incorrect_binding = FitBinding(model=model, targets='nonexistent_parameter')
         parameter_analysis.bindings = incorrect_binding
 
         # THEN EXPECT
@@ -175,7 +194,7 @@ class TestParameterAnalysis:
     def test_fit_incompatible_x_unit_raises(self, dataset):
         # WHEN: Polynomial has x_unit='meV' but Q coordinate has unit '1/angstrom'
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='meV', y_unit='meV')
-        binding = FitBinding(parameter_name='parameter1', model=model)
+        binding = FitBinding(model=model, targets='parameter1')
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         # THEN EXPECT
@@ -185,7 +204,7 @@ class TestParameterAnalysis:
     def test_fit_incompatible_y_unit_raises(self, dataset):
         # WHEN: Polynomial has y_unit='1/angstrom' but parameter1 has unit 'meV'
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='1/angstrom')
-        binding = FitBinding(parameter_name='parameter1', model=model)
+        binding = FitBinding(model=model, targets='parameter1')
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         # THEN EXPECT
@@ -206,7 +225,7 @@ class TestParameterAnalysis:
         )
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
         pa = ParameterAnalysis(
-            parameters=dataset, bindings=FitBinding(parameter_name='param', model=model)
+            parameters=dataset, bindings=FitBinding(model=model, targets='param')
         )
 
         with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
@@ -238,7 +257,7 @@ class TestParameterAnalysis:
         )
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
         pa = ParameterAnalysis(
-            parameters=dataset, bindings=FitBinding(parameter_name='param', model=model)
+            parameters=dataset, bindings=FitBinding(model=model, targets='param')
         )
 
         with patch('easydynamics.analysis.parameter_analysis.MultiFitter') as MockMultiFitter:
@@ -550,9 +569,11 @@ class TestParameterAnalysis:
         binding = parameter_analysis.bindings[0]
 
         with (
-            patch.object(binding, 'get_parameter_names', return_value=['missing_name']),
-            patch.object(binding, 'get_model_names', return_value=['model']),
-            patch.object(binding, 'build_callables', return_value=[lambda x: x]),
+            patch.object(
+                binding,
+                'get_targets',
+                return_value=[make_target('missing_name', lambda x: x, 'model')],
+            ),
             pytest.raises(ValueError, match='not found in parameters Dataset'),
         ):
             parameter_analysis.calculate_model_dataset([binding])
@@ -564,10 +585,10 @@ class TestParameterAnalysis:
         # Mock callable to return predictable output
         mock_callable = MagicMock(return_value=np.array([10.0, 20.0]))
 
-        with (
-            patch.object(binding, 'build_callables', return_value=[mock_callable]),
-            patch.object(binding, 'get_model_names', return_value=['model1']),
-            patch.object(binding, 'get_parameter_names', return_value=['parameter1']),
+        with patch.object(
+            binding,
+            'get_targets',
+            return_value=[make_target('parameter1', mock_callable, 'model1')],
         ):
             # THEN
             result = parameter_analysis.calculate_model_dataset([binding])
@@ -597,12 +618,16 @@ class TestParameterAnalysis:
         mock_callable2 = MagicMock(return_value=np.array([30.0, 40.0]))
 
         with (
-            patch.object(binding1, 'build_callables', return_value=[mock_callable1]),
-            patch.object(binding1, 'get_model_names', return_value=['model1']),
-            patch.object(binding1, 'get_parameter_names', return_value=['parameter1']),
-            patch.object(binding2, 'build_callables', return_value=[mock_callable2]),
-            patch.object(binding2, 'get_model_names', return_value=['model2']),
-            patch.object(binding2, 'get_parameter_names', return_value=['parameter2']),
+            patch.object(
+                binding1,
+                'get_targets',
+                return_value=[make_target('parameter1', mock_callable1, 'model1')],
+            ),
+            patch.object(
+                binding2,
+                'get_targets',
+                return_value=[make_target('parameter2', mock_callable2, 'model2')],
+            ),
         ):
             # THEN
             result = parameter_analysis.calculate_model_dataset([binding1, binding2])
@@ -643,19 +668,18 @@ class TestParameterAnalysis:
         mock_callable2w = MagicMock(return_value=np.array([50.0, 60.0]))
 
         with (
-            patch.object(binding1, 'build_callables', return_value=[mock_callable1]),
-            patch.object(binding1, 'get_model_names', return_value=['model1']),
-            patch.object(binding1, 'get_parameter_names', return_value=['parameter1']),
             patch.object(
-                binding2,
-                'build_callables',
-                return_value=[mock_callable2a, mock_callable2w],
+                binding1,
+                'get_targets',
+                return_value=[make_target('parameter1', mock_callable1, 'model1')],
             ),
-            patch.object(binding2, 'get_model_names', return_value=['model2a', 'model2w']),
             patch.object(
                 binding2,
-                'get_parameter_names',
-                return_value=['parameter3 area', 'parameter3 width'],
+                'get_targets',
+                return_value=[
+                    make_target('parameter3 area', mock_callable2a, 'model2a', name='area'),
+                    make_target('parameter3 width', mock_callable2w, 'model2w', name='width'),
+                ],
             ),
         ):
             # THEN
@@ -708,12 +732,20 @@ class TestParameterAnalysis:
             }
         )
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
-        binding = FitBinding(parameter_name='param', model=model)
+        binding = FitBinding(model=model, targets='param')
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         mock_callable = MagicMock(return_value=np.array([10.0, 20.0]))
         # THEN
-        with patch.object(binding, 'build_callables', return_value=[mock_callable]):
+        with patch.object(
+            binding,
+            'get_targets',
+            return_value=[
+                make_target(
+                    'param', mock_callable, 'Polynomial', x_unit='1/angstrom', y_unit='meV'
+                )
+            ],
+        ):
             pa.calculate_model_dataset([binding])
 
         # EXPECT: callable received x in 1/angstrom, not raw 1/m values
@@ -733,12 +765,20 @@ class TestParameterAnalysis:
             }
         )
         model = Polynomial(coefficients=[1.0, 0.5], x_unit='1/angstrom', y_unit='meV')
-        binding = FitBinding(parameter_name='param', model=model)
+        binding = FitBinding(model=model, targets='param')
         pa = ParameterAnalysis(parameters=dataset, bindings=binding)
 
         mock_callable = MagicMock(return_value=np.array([1.0, 2.0]))  # meV
         # THEN
-        with patch.object(binding, 'build_callables', return_value=[mock_callable]):
+        with patch.object(
+            binding,
+            'get_targets',
+            return_value=[
+                make_target(
+                    'param', mock_callable, 'Polynomial', x_unit='1/angstrom', y_unit='meV'
+                )
+            ],
+        ):
             result = pa.calculate_model_dataset([binding])
 
         # EXPECT: model output converted from meV back to eV
@@ -748,7 +788,7 @@ class TestParameterAnalysis:
     def test_append_binding(self, parameter_analysis):
         # WHEN
         model = Polynomial(coefficients=[2.0, 1.0])
-        new_binding = FitBinding(parameter_name='parameter2', model=model)
+        new_binding = FitBinding(model=model, targets='parameter2')
 
         # THEN
         parameter_analysis.append_binding(new_binding)
@@ -797,8 +837,8 @@ class TestParameterAnalysis:
         # Create two bindings with overlapping variables
         model1 = Gaussian(display_name='model1')
 
-        binding1 = FitBinding(parameter_name='parameter1', model=model1)
-        binding2 = FitBinding(parameter_name='parameter2', model=model1)
+        binding1 = FitBinding(model=model1, targets='parameter1')
+        binding2 = FitBinding(model=model1, targets='parameter2')
 
         parameter_analysis.bindings = [binding1, binding2]
 
@@ -1076,10 +1116,10 @@ class TestParameterAnalysis:
     def test_get_unit_conversions_none_x_unit(self, parameter_analysis):
         # WHEN
         model = Polynomial(coefficients=[1.0], x_unit=None, y_unit='meV')
-        binding = FitBinding(parameter_name='parameter1', model=model)
+        binding = FitBinding(model=model, targets='parameter1')
 
         # THEN
-        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding.get_targets()[0])
 
         # EXPECT
         assert x_factor == pytest.approx(1.0)
@@ -1088,10 +1128,10 @@ class TestParameterAnalysis:
     def test_get_unit_conversions_none_y_unit(self, parameter_analysis):
         # WHEN
         model = Polynomial(coefficients=[1.0], x_unit='1/angstrom', y_unit=None)
-        binding = FitBinding(parameter_name='parameter1', model=model)
+        binding = FitBinding(model=model, targets='parameter1')
 
         # THEN
-        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding, 'parameter1')
+        x_factor, y_factor = parameter_analysis._get_unit_conversions(binding.get_targets()[0])
 
         # EXPECT
         assert x_factor == pytest.approx(1.0)
@@ -1109,3 +1149,102 @@ class TestParameterAnalysis:
         assert f'n_parameters={len(parameter_analysis.parameters)}' in repr_str
         assert 'parameter_names=' in repr_str
         assert 'bindings=' in repr_str
+
+
+class TestParameterAnalysisWorkflows:
+    """End-to-end fits for the standard workflows on synthetic data."""
+
+    @staticmethod
+    def _dataset_from_targets(model, Q, unit_overrides=None):
+        """Build a parameters Dataset from a model's own predictions (no noise)."""
+        unit_overrides = unit_overrides or {}
+        Q_coord = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        data = {}
+        for target in model.get_fit_targets():
+            values = target.function(Q)
+            unit = unit_overrides.get(target.name, target.y_unit)
+            factor = sc.to_unit(sc.scalar(1.0, unit=target.y_unit), unit).value
+            data[target.dataset_key] = sc.DataArray(
+                data=sc.array(
+                    dims=['Q'],
+                    values=values * factor,
+                    variances=(0.01 * values * factor) ** 2,
+                    unit=unit,
+                ),
+                coords={'Q': Q_coord},
+            )
+        return sc.Dataset(data)
+
+    def test_delta_lorentz_three_target_simultaneous_fit(self):
+        # WHEN: synthetic width, area, and delta area curves from a known DeltaLorentz
+        from easydynamics.sample_model.diffusion_model.delta_lorentz import DeltaLorentz
+
+        Q = np.linspace(0.4, 2.0, 9)
+        truth = DeltaLorentz(scale=2.0, mean_u_squared=0.3, A_0=0.6, lorentzian_width=0.12)
+        dataset = self._dataset_from_targets(truth, Q)
+
+        # THEN: fit a fresh DeltaLorentz to all three dataset keys simultaneously
+        fit_model = DeltaLorentz(scale=1.5, mean_u_squared=0.2, A_0=0.5, lorentzian_width=0.1)
+        pa = ParameterAnalysis(parameters=dataset, bindings=FitBinding(model=fit_model))
+        pa.fit()
+
+        # EXPECT: the shared parameters are recovered across all three curves
+        assert fit_model.scale.value == pytest.approx(2.0, rel=1e-3)
+        assert fit_model.mean_u_squared.value == pytest.approx(0.3, rel=1e-3)
+        assert fit_model.A_0.value == pytest.approx(0.6, rel=1e-3)
+        assert fit_model.lorentzian_width.value == pytest.approx(0.12, rel=1e-3)
+
+    def test_jump_diffusion_width_only_fit(self):
+        # WHEN: synthetic widths from a known jump diffusion model
+        from easydynamics.sample_model.diffusion_model.jump_translational_diffusion import (
+            JumpTranslationalDiffusion,
+        )
+
+        Q = np.linspace(0.4, 2.0, 9)
+        truth = JumpTranslationalDiffusion(diffusion_coefficient=2.4e-9, relaxation_time=2.0)
+        dataset = self._dataset_from_targets(truth, Q)
+
+        # THEN: fit only the width prediction
+        fit_model = JumpTranslationalDiffusion(diffusion_coefficient=1.0e-9, relaxation_time=1.0)
+        fit_model.scale.fixed = True
+        pa = ParameterAnalysis(
+            parameters=dataset, bindings=FitBinding(model=fit_model, targets=['width'])
+        )
+        pa.fit()
+
+        # EXPECT
+        assert fit_model.diffusion_coefficient.value == pytest.approx(2.4e-9, rel=1e-3)
+        assert fit_model.relaxation_time.value == pytest.approx(2.0, rel=1e-3)
+
+    def test_diffusion_fit_converts_dataset_units(self):
+        # WHEN: the dataset stores widths in ueV and Q in 1/nm, while the model works in meV
+        # and 1/angstrom (regression: diffusion fits used to ignore units entirely, silently
+        # misfitting scaled data)
+        Q = np.linspace(0.4, 2.0, 9)
+        truth = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9)
+        width_target = {t.name: t for t in truth.get_fit_targets()}['width']
+        widths_mev = width_target.function(Q)
+
+        Q_coord = sc.array(dims=['Q'], values=Q * 10, unit='1/nm')  # 1 1/angstrom = 10 1/nm
+        dataset = sc.Dataset({
+            width_target.dataset_key: sc.DataArray(
+                data=sc.array(
+                    dims=['Q'],
+                    values=widths_mev * 1000,  # meV -> ueV
+                    variances=(0.01 * widths_mev * 1000) ** 2,
+                    unit='ueV',
+                ),
+                coords={'Q': Q_coord},
+            )
+        })
+
+        # THEN
+        fit_model = BrownianTranslationalDiffusion(diffusion_coefficient=1.0e-9)
+        fit_model.scale.fixed = True
+        pa = ParameterAnalysis(
+            parameters=dataset, bindings=FitBinding(model=fit_model, targets=['width'])
+        )
+        pa.fit()
+
+        # EXPECT: the diffusion coefficient is recovered despite the unit differences
+        assert fit_model.diffusion_coefficient.value == pytest.approx(2.4e-9, rel=1e-3)

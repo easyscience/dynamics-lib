@@ -15,6 +15,7 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import _in_notebook
 
 
@@ -25,15 +26,15 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     Can be used to fit parameters to ModelComponents, ComponentCollections, or DiffusionModelBase
     objects, and to plot the parameters and fit results. The parameters to be analyzed can be
     provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
-    simultaneously, and the fit functions can be customized for each parameter. For diffusion
-    models, the area and width can be fitted separately (or not at all) by specifying fit settings.
+    simultaneously, and each binding maps its model's predictions onto the dataset keys they are
+    fitted against (for diffusion models e.g. 'area', 'width', or 'delta_area').
 
     Examples
     --------
     **Fitting Lorentzian widths to a diffusion model**
 
-    After a full Analysis fit, pass the Analysis directly and bind each parameter to a fit function
-    using a ``FitBinding``:
+    After a full Analysis fit, pass the Analysis directly and bind the model's predictions to
+    dataset keys using a ``FitBinding``:
     ```python
     import easydynamics as edyn
     import easydynamics.sample_model as sm
@@ -41,9 +42,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # analysis is an edyn.Analysis object with previously fitted parameters
     diffusion_model = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
     binding = edyn.FitBinding(
-        parameter_name='Lorentzian width',
         model=diffusion_model,
-        modes=['width'],
+        targets={'width': 'Lorentzian width'},
     )
 
     param_analysis = edyn.ParameterAnalysis(
@@ -58,8 +58,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
     ```python
     area_binding = edyn.FitBinding(
-        parameter_name='Lorentzian area',
         model=sm.Polynomial(coefficients=[0.5, 0.0]),
+        targets='Lorentzian area',
     )
     param_analysis = edyn.ParameterAnalysis(
         parameters=analysis,
@@ -183,18 +183,15 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         funcs, models = [], []
 
         for binding in self.bindings:
-            param_names = binding.get_parameter_names()
-            callables = binding.build_callables()
-
-            for pname, func in zip(param_names, callables, strict=True):
-                if pname not in self.parameters:
+            for target in binding.get_targets():
+                if target.dataset_key not in self.parameters:
                     raise ValueError(
-                        f"Parameter '{pname}' from binding '{binding.unique_name}' "
-                        f'not found in parameters Dataset.'
+                        f"Parameter '{target.dataset_key}' from binding "
+                        f"'{binding.unique_name}' not found in parameters Dataset."
                     )
 
-                x, y, weight = self._get_xyweight_from_dataset(pname)
-                x_factor, y_factor = self._get_unit_conversions(binding, pname)
+                x, y, weight = self._get_xyweight_from_dataset(target.dataset_key)
+                x_factor, y_factor = self._get_unit_conversions(target)
                 x = x * x_factor
                 y = y * y_factor
                 weight = weight / y_factor
@@ -203,7 +200,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 ys.append(y)
                 ws.append(weight)
 
-                funcs.append(func)
+                funcs.append(target.function)
                 models.append(binding.model)
 
         mf = MultiFitter(
@@ -262,7 +259,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 names = list(self.parameters.keys())
             else:
                 for b in self.bindings:
-                    names.extend(b.get_parameter_names())
+                    names.extend(target.dataset_key for target in b.get_targets())
 
         names = self._normalize_names(names)
 
@@ -286,14 +283,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         data_arrays = {}
         model_arrays = {}
 
-        # map parameter names to model names
+        # map dataset keys to model labels
         param_to_model = {}
         if self.bindings is not None:
             for b in self.bindings:
-                param_names = b.get_parameter_names()
-                model_names = b.get_model_names()
-
-                param_to_model.update(dict(zip(param_names, model_names, strict=True)))
+                param_to_model.update({
+                    target.dataset_key: target.label for target in b.get_targets()
+                })
 
         for pname in names:
             data_arrays[pname] = self.parameters[pname]
@@ -358,24 +354,20 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         arrays = {}
 
         for b in bindings:
-            param_names = b.get_parameter_names()
-            model_names = b.get_model_names()
-            callables = b.build_callables()
-
-            for pname, mname, func in zip(param_names, model_names, callables, strict=True):
-                if pname not in self.parameters:
+            for target in b.get_targets():
+                if target.dataset_key not in self.parameters:
                     raise ValueError(
-                        f"Parameter '{pname}' from binding '{b.unique_name}' "
+                        f"Parameter '{target.dataset_key}' from binding '{b.unique_name}' "
                         f'not found in parameters Dataset.'
                     )
-                da = self.parameters[pname]
+                da = self.parameters[target.dataset_key]
                 x = da.coords['Q']
-                x_factor, y_factor = self._get_unit_conversions(b, pname)
+                x_factor, y_factor = self._get_unit_conversions(target)
 
-                y_model = func(x.values * x_factor)
+                y_model = target.function(x.values * x_factor)
                 y_model = y_model / y_factor
 
-                arrays[mname] = sc.DataArray(
+                arrays[target.label] = sc.DataArray(
                     data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
                     coords={'Q': x},
                 )
@@ -527,21 +519,19 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # Private methods
     #############
 
-    def _get_unit_conversions(self, binding: FitBinding, pname: str) -> tuple[float, float]:
+    def _get_unit_conversions(self, target: FitTarget) -> tuple[float, float]:
         """
-        Return (x_factor, y_factor) to convert dataset values into the binding's declared units.
+        Return (x_factor, y_factor) to convert dataset values into the target's declared units.
 
-        x_factor converts Q coordinate values from their stored unit to binding.x_unit. y_factor
-        converts parameter values from their stored unit to binding.y_unit. A factor is 1.0 when
-        the binding declares the corresponding unit as None (its callables take raw values, e.g.
-        diffusion-model bindings).
+        x_factor converts Q coordinate values from their stored unit to target.x_unit (e.g.
+        1/angstrom for diffusion-model predictions). y_factor converts parameter values from their
+        stored unit to target.y_unit. A factor is 1.0 when the target declares the corresponding
+        unit as None (its function takes raw values).
 
         Parameters
         ----------
-        binding : FitBinding
-            The binding whose unit contract defines the target units.
-        pname : str
-            The parameter name in ``self.parameters`` supplying the data units.
+        target : FitTarget
+            The fit target whose unit contract defines the target units.
 
         Returns
         -------
@@ -553,29 +543,29 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         sc.UnitError
             If x or y units are physically incompatible (e.g. meV vs 1/angstrom).
         """
-        da = self.parameters[pname]
+        da = self.parameters[target.dataset_key]
         x_factor = 1.0
         y_factor = 1.0
 
-        if binding.x_unit is not None:
+        if target.x_unit is not None:
             q_unit = str(da.coords['Q'].unit)
             try:
-                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(binding.x_unit)).value
+                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(target.x_unit)).value
             except Exception as e:
                 raise sc.UnitError(
                     f"Q coordinate unit '{q_unit}' is incompatible with "
-                    f"model '{binding.model.display_name}' x_unit '{binding.x_unit}' "
-                    f"for parameter '{pname}'."
+                    f"the x_unit '{target.x_unit}' of fit target '{target.label}' "
+                    f"for parameter '{target.dataset_key}'."
                 ) from e
 
-        if binding.y_unit is not None:
+        if target.y_unit is not None:
             param_unit = str(da.unit)
             try:
-                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(binding.y_unit)).value
+                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(target.y_unit)).value
             except Exception as e:
                 raise sc.UnitError(
-                    f"Parameter '{pname}' unit '{param_unit}' is incompatible with "
-                    f"model '{binding.model.display_name}' y_unit '{binding.y_unit}'."
+                    f"Parameter '{target.dataset_key}' unit '{param_unit}' is incompatible "
+                    f"with the y_unit '{target.y_unit}' of fit target '{target.label}'."
                 ) from e
 
         return x_factor, y_factor
@@ -654,9 +644,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         binding_info = [
             {
-                'parameter': b.parameter_name,
                 'model': b.model.display_name,
-                'modes': b.modes,
+                'targets': b.targets,
             }
             for b in self._bindings
         ]

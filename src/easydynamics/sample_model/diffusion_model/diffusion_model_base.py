@@ -11,6 +11,7 @@ from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -420,6 +421,43 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         unit_str : str
             The new x-axis unit as a string.
         """
+
+    # ------------------------------------------------------------------
+    # Fit targets
+    # ------------------------------------------------------------------
+
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of the diffusion model as FitTargets.
+
+        The base implementation declares ``'area'`` (``scale * QISF(Q)``) and ``'width'`` (the HWHM
+        ``Gamma(Q)``), with default dataset keys derived from the Lorentzian component's name.
+        Subclasses with additional predictions (e.g. a delta-function weight) extend this list. The
+        targets are snapshots: units and default keys reflect the model state at call time.
+
+        Returns
+        -------
+        list[FitTarget]
+            The fittable predictions of this model.
+        """
+        return [
+            FitTarget(
+                name='area',
+                dataset_key=f'{self.lorentzian_name} area',
+                function=lambda Q, model=self, **_: model.calculate_QISF(Q) * model.scale.value,
+                label=f'{self.display_name} area',
+                x_unit='1/angstrom',
+                y_unit=str(self.scale.unit),
+            ),
+            FitTarget(
+                name='width',
+                dataset_key=f'{self.lorentzian_name} width',
+                function=lambda Q, model=self, **_: model.calculate_width(Q),
+                label=f'{self.display_name} width',
+                x_unit='1/angstrom',
+                y_unit=str(self.x_unit),
+            ),
+        ]
 
     # ------------------------------------------------------------------
     # Methods

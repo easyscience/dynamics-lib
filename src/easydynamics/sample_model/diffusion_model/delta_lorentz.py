@@ -11,6 +11,7 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DeltaFunction
 from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
@@ -583,6 +584,32 @@ class DeltaLorentz(DiffusionModelBase):
             component_collection_list[i].append_component(delta_component)
 
         return component_collection_list
+
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of the DeltaLorentz model as FitTargets.
+
+        Extends the base ``'area'`` and ``'width'`` predictions with ``'delta_area'`` (``scale *
+        EISF(Q)``, the delta function's weight), whose default dataset key is derived from the
+        delta component's name.
+
+        Returns
+        -------
+        list[FitTarget]
+            The fittable predictions of this model.
+        """
+        targets = super().get_fit_targets()
+        targets.append(
+            FitTarget(
+                name='delta_area',
+                dataset_key=f'{self.delta_name} area',
+                function=lambda Q, model=self, **_: model.calculate_EISF(Q) * model.scale.value,
+                label=f'{self.display_name} delta_area',
+                x_unit='1/angstrom',
+                y_unit=str(self.scale.unit),
+            )
+        )
+        return targets
 
     def get_global_variables(self) -> list[Parameter]:
         """
