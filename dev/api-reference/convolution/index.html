@@ -2374,7 +2374,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.Convolution.energy&lt;/code&gt;)" href="#easydynamics.convolution.Convolution.energy">energy</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Set the energy array and recreate the dense grid.</p>
+                  <p>Set the energy array and invalidate this convolver's plan.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3623,7 +3623,9 @@ can be changed.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Set the energy array and recreate the dense grid.</p>
+        <p>Set the energy array and invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected — a new energy array is a convolver-local change.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3679,6 +3681,8 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3734,19 +3738,6 @@ can be changed.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5349,6 +5340,8 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5410,19 +5403,6 @@ can be changed.</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -5443,7 +5423,9 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit of the sample components.</p>
-<p>Only propagates to sample components (resolution is normalised and unit-independent).</p>
+<p>Only propagates to sample components (resolution is normalised and unit-independent). If
+any component raises during unit conversion, the conversion is rolled back best-effort
+before the exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5499,19 +5481,6 @@ can be changed.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any component raises during unit conversion.  On failure, attempts to roll back.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -6073,7 +6042,7 @@ Increase <code>upsample_factor</code> and <code>extension_factor</code> for bett
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.convolution.Convolution.energy&lt;/code&gt;)" href="#easydynamics.convolution.convolution.Convolution.energy">energy</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Set the energy array and recreate the dense grid.</p>
+                  <p>Set the energy array and invalidate this convolver's plan.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7469,7 +7438,9 @@ can be changed.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Set the energy array and recreate the dense grid.</p>
+        <p>Set the energy array and invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected — a new energy array is a convolver-local change.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7525,6 +7496,8 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -7580,19 +7553,6 @@ can be changed.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8748,6 +8708,8 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8809,19 +8771,6 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -8842,7 +8791,9 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit of the sample components.</p>
-<p>Only propagates to sample components (resolution is normalised and unit-independent).</p>
+<p>Only propagates to sample components (resolution is normalised and unit-independent). If
+any component raises during unit conversion, the conversion is rolled back best-effort
+before the exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -8898,19 +8849,6 @@ resolution_components is not a ComponentCollection or ModelComponent.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any component raises during unit conversion.  On failure, attempts to roll back.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9858,7 +9796,7 @@ string or sc.Unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution.NumericalConvolution.energy&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution.NumericalConvolution.energy">energy</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Set the energy array and recreate the dense grid.</p>
+                  <p>Set the energy array and invalidate this convolver's plan.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11133,7 +11071,9 @@ can be changed.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Set the energy array and recreate the dense grid.</p>
+        <p>Set the energy array and invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected — a new energy array is a convolver-local change.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11189,6 +11129,8 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11250,19 +11192,6 @@ can be changed.</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -11283,7 +11212,9 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit of the sample components.</p>
-<p>Only propagates to sample components (resolution is normalised and unit-independent).</p>
+<p>Only propagates to sample components (resolution is normalised and unit-independent). If
+any component raises during unit conversion, the conversion is rolled back best-effort
+before the exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11339,19 +11270,6 @@ can be changed.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any component raises during unit conversion.  On failure, attempts to roll back.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11759,7 +11677,7 @@ string or sc.Unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy&lt;/code&gt;)" href="#easydynamics.convolution.numerical_convolution_base.NumericalConvolutionBase.energy">energy</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Set the energy array and recreate the dense grid.</p>
+                  <p>Set the energy array and invalidate this convolver's plan.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12889,7 +12807,9 @@ convolution. 0.2 means extending by 20% of the original energy span on each side
 
     <div class="doc doc-contents ">
 
-        <p>Set the energy array and recreate the dense grid.</p>
+        <p>Set the energy array and invalidate this convolver's plan.</p>
+<p>The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+ConvolutionSettings are unaffected — a new energy array is a convolver-local change.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13203,6 +13123,8 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the energy axis, energy_offset, and all components to the specified unit.</p>
+<p>If any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13264,19 +13186,6 @@ can be changed.</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If energy cannot be converted to the specified unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -13297,7 +13206,9 @@ can be changed.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit of the sample components.</p>
-<p>Only propagates to sample components (resolution is normalised and unit-independent).</p>
+<p>Only propagates to sample components (resolution is normalised and unit-independent). If
+any component raises during unit conversion, the conversion is rolled back best-effort
+before the exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13353,19 +13264,6 @@ can be changed.</p>
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or scipp unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any component raises during unit conversion.  On failure, attempts to roll back.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

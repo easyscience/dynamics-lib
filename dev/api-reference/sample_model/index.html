@@ -9771,7 +9771,7 @@ unit for the computation without mutating the parameters.</p>
         <p>Model of an exponential function.</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)} \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> is the rate. amplitude has unit =
-x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
+y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9821,7 +9821,7 @@ x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Pre-exponential factor A.  Unit is <code>x_unit * y_unit</code>.</p>
+                <p>Pre-exponential factor A.  Unit is <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9879,8 +9879,7 @@ fixed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.
-amplitude_unit = x_unit * y_unit.</p>
+                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9899,7 +9898,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the y-axis (output).</p>
+                <p>Unit of the y-axis (output).  amplitude is stored in this unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10168,7 +10167,7 @@ amplitude_unit = x_unit * y_unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.Exponential.convert_x_unit&lt;/code&gt;)" href="#easydynamics.sample_model.Exponential.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+                  <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10626,7 +10625,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The amplitude Parameter with unit <code>x_unit * y_unit</code>.</p>
+                <p>The amplitude Parameter with unit <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11143,7 +11142,8 @@ unit for the computation without mutating the parameters.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+        <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
+<p>The amplitude carries <code>y_unit</code> only and is unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11200,7 +11200,7 @@ rate unit is set to <code>1/new_x_unit</code>.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit by rescaling the amplitude parameter.</p>
-<p>The amplitude is rescaled from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code>.</p>
+<p>The amplitude is rescaled from <code>old_y_unit</code> to <code>new_y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21218,7 +21218,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21280,20 +21282,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -21317,7 +21305,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -21373,20 +21363,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24231,7 +24207,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24293,20 +24271,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -24330,7 +24294,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24386,20 +24352,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24509,8 +24461,9 @@ ComponentCollections is returned.</p>
     <div class="doc doc-contents ">
 
         <p>Calculate the half-width at half-maximum (HWHM) for the diffusion model. If the width is
-allowed to vary with Q then the Q stored in the model is used and the input is ignored. If
-the width is not allowed to vary then the same width is returned for all Q values.</p>
+allowed to vary with Q then the requested Q values are matched against the Q stored in the
+model and the corresponding per-Q widths are returned. If the width is not allowed to vary
+then the same width is returned for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24536,7 +24489,7 @@ the width is not allowed to vary then the same width is returned for all Q value
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Scattering vector in 1/angstrom.</p>
+                <p>Scattering vector in 1/angstrom. If None, the Q stored in the model is used.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -24591,7 +24544,8 @@ the width is not allowed to vary then the same width is returned for all Q value
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q-variation is enabled but Q has not been set on the model yet.</p>
+                <p>If Q-variation is enabled but Q has not been set on the model yet, or if the requested
+Q values do not match the stored ones.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27075,7 +27029,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27137,20 +27093,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -27174,7 +27116,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -27230,20 +27174,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -38694,7 +38624,7 @@ provided.</p>
     </div>
 
 </div>
-
+<h4 id="easydynamics.sample_model.component_collection-functions">Functions</h4>
 
 
 
@@ -41875,7 +41805,7 @@ unit for the computation without mutating the parameters.</p>
         <p>Model of an exponential function.</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)} \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> is the rate. amplitude has unit =
-x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
+y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -41925,7 +41855,7 @@ x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Pre-exponential factor A.  Unit is <code>x_unit * y_unit</code>.</p>
+                <p>Pre-exponential factor A.  Unit is <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -41983,8 +41913,7 @@ fixed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.
-amplitude_unit = x_unit * y_unit.</p>
+                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42003,7 +41932,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the y-axis (output).</p>
+                <p>Unit of the y-axis (output).  amplitude is stored in this unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42272,7 +42201,7 @@ amplitude_unit = x_unit * y_unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.Exponential.convert_x_unit&lt;/code&gt;)" href="#easydynamics.sample_model.components.Exponential.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+                  <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -42730,7 +42659,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The amplitude Parameter with unit <code>x_unit * y_unit</code>.</p>
+                <p>The amplitude Parameter with unit <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -43247,7 +43176,8 @@ unit for the computation without mutating the parameters.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+        <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
+<p>The amplitude carries <code>y_unit</code> only and is unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -43304,7 +43234,7 @@ rate unit is set to <code>1/new_x_unit</code>.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit by rescaling the amplitude parameter.</p>
-<p>The amplitude is rescaled from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code>.</p>
+<p>The amplitude is rescaled from <code>old_y_unit</code> to <code>new_y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -54616,7 +54546,7 @@ unit for the computation without mutating the parameters.</p>
         <p>Model of an exponential function.</p>
 <div class="arithmatex">\[ I(x) = A e^{B (x-x_0)} \]</div>
 <p>where <span class="arithmatex">\(A\)</span> is the amplitude, <span class="arithmatex">\(x_0\)</span> is the center, and <span class="arithmatex">\(B\)</span> is the rate. amplitude has unit =
-x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
+y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -54666,7 +54596,7 @@ x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Pre-exponential factor A.  Unit is <code>x_unit * y_unit</code>.</p>
+                <p>Pre-exponential factor A.  Unit is <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -54724,8 +54654,7 @@ fixed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.
-amplitude_unit = x_unit * y_unit.</p>
+                <p>Unit of the x-axis.  center is stored in this unit; rate is stored in <code>1/x_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -54744,7 +54673,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Unit of the y-axis (output).</p>
+                <p>Unit of the y-axis (output).  amplitude is stored in this unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -54877,7 +54806,7 @@ amplitude_unit = x_unit * y_unit.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new_x_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.exponential.Exponential.convert_x_unit&lt;/code&gt;)" href="#easydynamics.sample_model.components.exponential.Exponential.convert_x_unit">convert_x_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+                  <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -55262,7 +55191,7 @@ amplitude_unit = x_unit * y_unit.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The amplitude Parameter with unit <code>x_unit * y_unit</code>.</p>
+                <p>The amplitude Parameter with unit <code>y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -55603,7 +55532,8 @@ amplitude_unit = x_unit * y_unit.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.</p>
+        <p>Convert center to new_x_unit and rate to 1/new_x_unit.</p>
+<p>The amplitude carries <code>y_unit</code> only and is unaffected.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -55660,7 +55590,7 @@ rate unit is set to <code>1/new_x_unit</code>.</p>
     <div class="doc doc-contents ">
 
         <p>Convert the y-axis unit by rescaling the amplitude parameter.</p>
-<p>The amplitude is rescaled from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code>.</p>
+<p>The amplitude is rescaled from <code>old_y_unit</code> to <code>new_y_unit</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -62191,7 +62121,9 @@ unique_name : str | None, default=None
 
         <p>Convert the x-axis unit of the component.</p>
 <p>The base implementation converts all parameters. Subclasses with mixed-unit parameters
-(e.g. area ≠ x_unit) should override this method.</p>
+(e.g. area ≠ x_unit) should override this method. If the conversion between the current
+unit and <em>new_x_unit</em> fails, the component is rolled back to its original unit and the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -62247,20 +62179,6 @@ unique_name : str | None, default=None
             <td>
               <div class="doc-md-description">
                 <p>If <em>new_x_unit</em> is not a <code>str</code> or <code>sc.Unit</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the conversion between the current unit and <em>new_x_unit</em> fails. On failure the
-component is rolled back to its original unit.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -67912,7 +67830,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -67974,20 +67894,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -68011,7 +67917,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -68067,20 +67975,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -70651,7 +70545,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -70713,20 +70609,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -70750,7 +70632,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -70806,20 +70690,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -73701,7 +73571,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -73763,20 +73635,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -73800,7 +73658,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -73856,20 +73716,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -75929,8 +75775,9 @@ default, None.</p>
     <div class="doc doc-contents ">
 
         <p>Calculate the half-width at half-maximum (HWHM) for the diffusion model. If the width is
-allowed to vary with Q then the Q stored in the model is used and the input is ignored. If
-the width is not allowed to vary then the same width is returned for all Q values.</p>
+allowed to vary with Q then the requested Q values are matched against the Q stored in the
+model and the corresponding per-Q widths are returned. If the width is not allowed to vary
+then the same width is returned for all Q values.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -75956,7 +75803,7 @@ the width is not allowed to vary then the same width is returned for all Q value
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Scattering vector in 1/angstrom.</p>
+                <p>Scattering vector in 1/angstrom. If None, the Q stored in the model is used.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -76011,7 +75858,8 @@ the width is not allowed to vary then the same width is returned for all Q value
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q-variation is enabled but Q has not been set on the model yet.</p>
+                <p>If Q-variation is enabled but Q has not been set on the model yet, or if the requested
+Q values do not match the stored ones.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77075,7 +76923,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77137,20 +76987,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -77174,7 +77010,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -77230,20 +77068,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78613,7 +78437,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78675,20 +78501,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -78712,7 +78524,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -78768,20 +78582,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -82022,7 +81822,9 @@ associated Parameters.</p>
 parameters, and the existing component collections in place — parameter values and object
 identity are preserved, and nothing is scheduled for regeneration. Only energy units are
 supported (the unit must be convertible to meV).</p>
-<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV.</p>
+<p>Unit validation raises <code>UnitError</code> when the unit is not convertible to meV. If any
+conversion fails, the already-converted state is rolled back best-effort before the failing
+conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -82084,20 +81886,6 @@ supported (the unit must be convertible to meV).</p>
               </div>
             </td>
           </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
       </tbody>
     </table>
 
@@ -82121,7 +81909,9 @@ re-raising.</p>
 <p>Converts the scale parameter from <code>x_unit * old_y_unit</code> to <code>x_unit * new_y_unit</code> and
 the existing component collections in place — parameter values and object identity are
 preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise.</p>
+compatible with the current one; the scale conversion raises <code>UnitError</code> otherwise. If
+any conversion fails, the already-converted state is rolled back best-effort before the
+failing conversion's exception is re-raised.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -82177,20 +81967,6 @@ compatible with the current one; the scale conversion raises <code>UnitError</co
             <td>
               <div class="doc-md-description">
                 <p>If unit is not a string or sc.Unit.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If any conversion fails; the already-converted state is rolled back best-effort before
-re-raising.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

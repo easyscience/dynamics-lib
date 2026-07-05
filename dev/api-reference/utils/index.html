@@ -3259,6 +3259,17 @@ contains a residuals array.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_units_with_rollback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conversions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.utils.convert_units_with_rollback&lt;/code&gt;)" href="#easydynamics.utils.utils.convert_units_with_rollback">convert_units_with_rollback</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Apply a sequence of unit conversions, rolling all of them back if any fails.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;convert_parameter_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.utils.utils.convert_parameter_unit&lt;/code&gt;)" href="#easydynamics.utils.utils.convert_parameter_unit">convert_parameter_unit</a></code></td>
               <td>
                 <div class="doc-md-description">
@@ -3310,6 +3321,8 @@ contains a residuals array.</p>
     <div class="doc doc-contents ">
 
         <p>Verify that Q_index is a valid integer index into Q.</p>
+<p>When Q is None (e.g. no data has been loaded yet), only the type and sign of Q_index are
+checked; the upper-bound check is deferred until Q is available.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3415,20 +3428,93 @@ contains a residuals array.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q_index is out of range.</p>
+                <p>If Q_index is negative, or out of range when Q is available.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
               </div>
             </td>
           </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.utils.utils.convert_units_with_rollback" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">convert_units_with_rollback</span><span class="p">(</span><span class="n">conversions</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply a sequence of unit conversions, rolling all of them back if any fails.</p>
+<p>Each item is <code>(convert, new_unit, old_unit)</code> where <code>convert</code> is a callable applying a unit
+(e.g. a bound <code>convert_x_unit</code> or a <code>functools.partial</code> around
+:func:<code>convert_parameter_unit</code>). The conversions are applied in order; if any raises, every
+item is converted back to its old unit best-effort (converting a not-yet-converted item back to
+its old unit is a no-op) and the original exception is re-raised.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="ValueError">ValueError</span></code>
+                <code>conversions</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="tuple">tuple</span>[<span title="collections.abc.Callable">Callable</span>[[<span title="str">str</span> | <span title="scipp">sc</span>.<span title="scipp.Unit">Unit</span>], None], <span title="str">str</span> | <span title="scipp">sc</span>.<span title="scipp.Unit">Unit</span>, <span title="str">str</span> | <span title="scipp">sc</span>.<span title="scipp.Unit">Unit</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If Q is None and Q_index is not None.</p>
+                <p>The conversions to apply, each as <code>(convert, new_unit, old_unit)</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whatever the failing conversion raised, after the rollback attempt.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->

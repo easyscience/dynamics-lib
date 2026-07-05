@@ -4983,8 +4983,11 @@ dataset keys using a <code>FitBinding</code>:
 <span class="n">param_analysis</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div></p>
 <p><strong>Fitting multiple parameters with separate bindings</strong></p>
+<p>Component models declare the units their evaluate expects: here the Polynomial's x is the
+dataset's Q coordinate and its y is the fitted parameter, so construct it with matching units
+(or pass <code>x_unit=None</code> / <code>y_unit=None</code> to fit raw values):
 <div class="language-python highlight"><pre><span></span><code><span class="n">area_binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">,</span> <span class="n">y_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">),</span>
     <span class="n">targets</span><span class="o">=</span><span class="s1">&#39;Lorentzian area&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
@@ -4992,7 +4995,7 @@ dataset keys using a <code>FitBinding</code>:
     <span class="n">bindings</span><span class="o">=</span><span class="p">[</span><span class="n">binding</span><span class="p">,</span> <span class="n">area_binding</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</code></pre></div>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -14141,11 +14144,19 @@ be fitted against.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <p><strong>Fitting a component model to one parameter</strong></p>
 <p>Component models (e.g. a Polynomial) have a single prediction — their <code>evaluate</code> — so
-<code>targets</code> is simply the dataset key to fit against:
+<code>targets</code> is simply the dataset key to fit against. The model's x_unit/y_unit declare the
+units its evaluate expects: here x is the dataset's Q coordinate and y the fitted parameter, so
+construct the model with matching units (or pass <code>x_unit=None</code> / <code>y_unit=None</code> to fit raw
+values):
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">edyn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
 
-<span class="n">fit_func</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">3.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Straight line&#39;</span><span class="p">)</span>
+<span class="n">fit_func</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span>
+    <span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">3.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">,</span>
+    <span class="n">y_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Straight line&#39;</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">fit_func</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="s1">&#39;Gaussian area&#39;</span><span class="p">)</span>
 </code></pre></div></p>
 <p><strong>Fitting a diffusion model with default dataset keys</strong></p>
@@ -15032,8 +15043,11 @@ dataset keys using a <code>FitBinding</code>:
 <span class="n">param_analysis</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div></p>
 <p><strong>Fitting multiple parameters with separate bindings</strong></p>
+<p>Component models declare the units their evaluate expects: here the Polynomial's x is the
+dataset's Q coordinate and its y is the fitted parameter, so construct it with matching units
+(or pass <code>x_unit=None</code> / <code>y_unit=None</code> to fit raw values):
 <div class="language-python highlight"><pre><span></span><code><span class="n">area_binding</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">FitBinding</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">,</span> <span class="n">y_unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">),</span>
     <span class="n">targets</span><span class="o">=</span><span class="s1">&#39;Lorentzian area&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">param_analysis</span> <span class="o">=</span> <span class="n">edyn</span><span class="o">.</span><span class="n">ParameterAnalysis</span><span class="p">(</span>
@@ -15041,7 +15055,7 @@ dataset keys using a <code>FitBinding</code>:
     <span class="n">bindings</span><span class="o">=</span><span class="p">[</span><span class="n">binding</span><span class="p">,</span> <span class="n">area_binding</span><span class="p">],</span>
 <span class="p">)</span>
 <span class="n">param_analysis</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</code></pre></div>
+</code></pre></div></p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
