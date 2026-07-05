@@ -586,7 +586,8 @@ class Analysis(AnalysisBase):
 
         ds = self.parameters_to_dataset()
 
-        if names is None:
+        # None or an empty list both mean 'plot all parameters'.
+        if not names:
             names = list(ds.keys())
 
         if isinstance(names, str):

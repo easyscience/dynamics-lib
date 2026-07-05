@@ -173,7 +173,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         x_vals : np.ndarray
-            Raw x values expressed in eval_unit. Assumed sorted for the bin-width computation.
+            Raw x values expressed in eval_unit. May be in any order; bin widths are computed on
+            the sorted values.
         eval_unit : str | None
             The unit of x_vals.
 
@@ -195,24 +196,29 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         model = np.zeros_like(x_vals, dtype=float)
 
         if x_vals.min() - EPSILON <= center <= x_vals.max() + EPSILON:
-            # nearest index
-            i = np.argmin(np.abs(x_vals - center))
+            # Bin widths only make sense on a sorted grid; compute there and map the spike back
+            # to the original position of the nearest x value.
+            order = np.argsort(x_vals)
+            x_sorted = x_vals[order]
+
+            # nearest index in the sorted grid
+            i = np.argmin(np.abs(x_sorted - center))
 
             # left half-width
             if i == 0:
-                left = x_vals[1] - x_vals[0] if x_vals.size > 1 else 0.5
+                left = x_sorted[1] - x_sorted[0] if x_sorted.size > 1 else 0.5
             else:
-                left = x_vals[i] - x_vals[i - 1]
+                left = x_sorted[i] - x_sorted[i - 1]
 
             # right half-width
-            if i == x_vals.size - 1:
-                right = x_vals[-1] - x_vals[-2] if x_vals.size > 1 else 0.5
+            if i == x_sorted.size - 1:
+                right = x_sorted[-1] - x_sorted[-2] if x_sorted.size > 1 else 0.5
             else:
-                right = x_vals[i + 1] - x_vals[i]
+                right = x_sorted[i + 1] - x_sorted[i]
 
             # effective bin width: half left + half right
             bin_width = 0.5 * (left + right)
-            model[i] = area / bin_width
+            model[order[i]] = area / bin_width
 
         return model
 

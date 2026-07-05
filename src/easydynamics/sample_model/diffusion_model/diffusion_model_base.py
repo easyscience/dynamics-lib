@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import contextlib
+from functools import partial
 
 import numpy as np
 import scipp as sc
@@ -15,6 +15,8 @@ from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -326,7 +328,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         identity are preserved, and nothing is scheduled for regeneration. Only energy units are
         supported (the unit must be convertible to meV).
 
-        Unit validation raises ``UnitError`` when the unit is not convertible to meV.
+        Unit validation raises ``UnitError`` when the unit is not convertible to meV. If any
+        conversion fails, the already-converted state is rolled back best-effort before the failing
+        conversion's exception is re-raised.
 
         Parameters
         ----------
@@ -337,9 +341,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ------
         TypeError
             If unit is not a string or sc.Unit.
-        Exception
-            If any conversion fails; the already-converted state is rolled back best-effort before
-            re-raising.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(unit).__name__}')
@@ -348,21 +349,16 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         old_x_unit = str(self.x_unit)
         new_scale_unit = str(sc.Unit(unit_str) * sc.Unit(str(self.y_unit)))
-        self._scale.convert_unit(new_scale_unit)
-        try:
-            self._convert_extra_x_unit_parameters(unit_str)
-            for collection in self._component_collections:
-                collection.convert_x_unit(unit_str)
-        except Exception:
-            old_scale_unit = str(sc.Unit(old_x_unit) * sc.Unit(str(self.y_unit)))
-            with contextlib.suppress(Exception):
-                self._scale.convert_unit(old_scale_unit)
-            with contextlib.suppress(Exception):
-                self._convert_extra_x_unit_parameters(old_x_unit)
-            for collection in self._component_collections:
-                with contextlib.suppress(Exception):
-                    collection.convert_x_unit(old_x_unit)
-            raise
+        old_scale_unit = str(sc.Unit(old_x_unit) * sc.Unit(str(self.y_unit)))
+        conversions = [
+            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+            (self._convert_extra_x_unit_parameters, unit_str, old_x_unit),
+        ]
+        conversions.extend(
+            (collection.convert_x_unit, unit_str, old_x_unit)
+            for collection in self._component_collections
+        )
+        convert_units_with_rollback(conversions)
 
         self._x_unit = unit_str
 
@@ -373,7 +369,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         Converts the scale parameter from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit`` and
         the existing component collections in place — parameter values and object identity are
         preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
-        compatible with the current one; the scale conversion raises ``UnitError`` otherwise.
+        compatible with the current one; the scale conversion raises ``UnitError`` otherwise. If
+        any conversion fails, the already-converted state is rolled back best-effort before the
+        failing conversion's exception is re-raised.
 
         Parameters
         ----------
@@ -384,9 +382,6 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ------
         TypeError
             If unit is not a string or sc.Unit.
-        Exception
-            If any conversion fails; the already-converted state is rolled back best-effort before
-            re-raising.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'y_unit must be a string or sc.Unit, got {type(unit).__name__}')
@@ -394,18 +389,15 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
         old_y_unit = str(self.y_unit)
         new_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(unit_str))
-        self._scale.convert_unit(new_scale_unit)
-        try:
-            for collection in self._component_collections:
-                collection.convert_y_unit(unit_str)
-        except Exception:
-            old_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(old_y_unit))
-            with contextlib.suppress(Exception):
-                self._scale.convert_unit(old_scale_unit)
-            for collection in self._component_collections:
-                with contextlib.suppress(Exception):
-                    collection.convert_y_unit(old_y_unit)
-            raise
+        old_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(old_y_unit))
+        conversions = [
+            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+        ]
+        conversions.extend(
+            (collection.convert_y_unit, unit_str, old_y_unit)
+            for collection in self._component_collections
+        )
+        convert_units_with_rollback(conversions)
 
         self._y_unit = unit_str
 
@@ -704,6 +696,42 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             raise ValueError('Q must be provided either as an argument or set in the model.')
 
         return _validate_and_convert_Q(Q).values
+
+    def _match_Q_indices(self, Q_values: np.ndarray) -> np.ndarray:
+        """
+        Map Q values (in 1/angstrom) onto indices of the stored Q.
+
+        Predictions backed by per-Q parameters use this to evaluate a subset of the stored Q values
+        (e.g. when a fit drops rows with missing data), returning one entry per requested Q instead
+        of one per stored Q.
+
+        Parameters
+        ----------
+        Q_values : np.ndarray
+            The requested Q values in 1/angstrom.
+
+        Returns
+        -------
+        np.ndarray
+            For each requested Q value, the index of the matching stored Q value.
+
+        Raises
+        ------
+        ValueError
+            If Q is not set on the model, or if any requested Q value does not match a stored Q
+            value.
+        """
+        if self.Q is None:
+            raise ValueError('Q must be set in the model to match Q values against it.')
+
+        stored = self.Q.values
+        indices = np.abs(np.subtract.outer(Q_values, stored)).argmin(axis=1)
+        if not np.allclose(stored[indices], Q_values):
+            raise ValueError(
+                'Requested Q values do not match the Q values stored in the model. '
+                'Per-Q parameters are only defined at the stored Q values.'
+            )
+        return indices
 
     # ------------------------------------------------------------------
     # dunder methods

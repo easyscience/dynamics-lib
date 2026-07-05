@@ -131,10 +131,13 @@ class CreateParametersMixin:
                 raise ValueError('center must be None or a finite number.')
             center_param = Parameter(name=name + ' center', value=float(center), unit=x_unit)
 
-        if enforce_minimum_center and center_param.min < DHO_MINIMUM_CENTER:
-            center_param.min = DHO_MINIMUM_CENTER
+        if enforce_minimum_center:
+            # Clamp the value before raising the bound: Parameter.min rejects a new minimum
+            # that is larger than the current value.
             if center_param.value < DHO_MINIMUM_CENTER:
                 center_param.value = DHO_MINIMUM_CENTER
+            if center_param.min < DHO_MINIMUM_CENTER:
+                center_param.min = DHO_MINIMUM_CENTER
         return center_param
 
     def _create_width_parameter(

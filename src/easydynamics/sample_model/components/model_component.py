@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from functools import partial
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -13,6 +14,7 @@ from scipp import UnitError
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
@@ -233,15 +235,16 @@ class ModelComponent(EasyDynamicsModelBase):
         self,
         new_x_unit: str | sc.Unit,
         x_params: list,
-        area_param: Parameter,
+        area_param: Parameter | None = None,
         inverse_params: list | None = None,
     ) -> None:
         """
-        Shared convert_x_unit logic for components with an area parameter (area = x_unit * y_unit).
+        Shared convert_x_unit logic for components whose parameters carry mixed x-based units.
 
-        Validates the input type, converts all x-axis parameters, the area parameter, and any
-        reciprocal (``1/x_unit``) parameters to the new unit, and updates ``_x_unit``.  Rolls back
-        all conversions if any step fails.
+        Validates the input type, converts all x-axis parameters, the optional area parameter (area
+        = x_unit * y_unit), and any reciprocal (``1/x_unit``) parameters to the new unit, and
+        updates ``_x_unit``.  If any step fails, all parameters are rolled back to their original
+        units and the failing conversion's exception is re-raised.
 
         Parameters
         ----------
@@ -249,8 +252,8 @@ class ModelComponent(EasyDynamicsModelBase):
             Target x-axis unit.
         x_params : list
             Parameters whose unit equals *x_unit* (e.g. center, width).
-        area_param : Parameter
-            The parameter whose unit equals ``x_unit * y_unit``.
+        area_param : Parameter | None, default=None
+            The parameter whose unit equals ``x_unit * y_unit``, if the component has one.
         inverse_params : list | None, default=None
             Parameters whose unit equals ``1/x_unit`` (e.g. an exponential rate).
 
@@ -258,80 +261,84 @@ class ModelComponent(EasyDynamicsModelBase):
         ------
         TypeError
             If *new_x_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the conversion fails; all parameters are rolled back to their original units.
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
-        inverse_params = inverse_params or []
         old_x_unit = self.x_unit
         new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
-        try:
-            for p in x_params:
-                convert_parameter_unit(p, new_x_unit)
-            convert_parameter_unit(area_param, new_area_unit)
-            for p in inverse_params:
-                convert_parameter_unit(p, '1/' + new_x_str)
-            self._x_unit = new_x_str
-        except Exception as e:
-            try:
-                old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
-                for p in x_params:
-                    convert_parameter_unit(p, old_x_unit)
-                convert_parameter_unit(area_param, old_area_unit)
-                for p in inverse_params:
-                    convert_parameter_unit(p, '1/' + str(old_x_unit))
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        conversions = [
+            (partial(convert_parameter_unit, p), new_x_str, old_x_unit) for p in x_params
+        ]
+        if area_param is not None:
+            new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
+            old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
+            conversions.append((
+                partial(convert_parameter_unit, area_param),
+                new_area_unit,
+                old_area_unit,
+            ))
+        conversions.extend(
+            (partial(convert_parameter_unit, p), '1/' + new_x_str, '1/' + str(old_x_unit))
+            for p in inverse_params or []
+        )
+        convert_units_with_rollback(conversions)
+        self._x_unit = new_x_str
 
     def _convert_y_unit_area_based(
         self,
         new_y_unit: str | sc.Unit,
-        area_param: Parameter,
+        area_param: Parameter | None = None,
+        y_params: list | None = None,
     ) -> None:
         """
-        Shared convert_y_unit logic for components with an area parameter (area = x_unit * y_unit).
+        Shared convert_y_unit logic for components whose parameters carry y-based units.
 
-        Validates the input type, rescales the area parameter from ``x_unit * old_y_unit`` to
-        ``x_unit * new_y_unit``, and updates ``_y_unit``.  Rolls back on failure.
+        Validates the input type, rescales the optional area parameter from ``x_unit * old_y_unit``
+        to ``x_unit * new_y_unit`` and any pure y-unit parameters to the new unit, and updates
+        ``_y_unit``.  If any step fails, the parameters are rolled back to their original units and
+        the failing conversion's exception is re-raised.
 
         Parameters
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
-        area_param : Parameter
-            The parameter whose unit equals ``x_unit * y_unit``.
+        area_param : Parameter | None, default=None
+            The parameter whose unit equals ``x_unit * y_unit``, if the component has one.
+        y_params : list | None, default=None
+            Parameters whose unit equals *y_unit* (e.g. an amplitude).
 
         Raises
         ------
         TypeError
             If *new_y_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the conversion fails; the area parameter is rolled back to its original unit.
         """
         if not isinstance(new_y_unit, (str, sc.Unit)):
             raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
         old_y_unit = self.y_unit
-        new_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(new_y_unit))
-        try:
-            convert_parameter_unit(area_param, new_area_unit)
-            self._y_unit = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
-        except Exception as e:
-            try:
-                old_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(old_y_unit))
-                convert_parameter_unit(area_param, old_area_unit)
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        new_y_str = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+        conversions = []
+        if area_param is not None:
+            new_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(new_y_str))
+            old_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(old_y_unit))
+            conversions.append((
+                partial(convert_parameter_unit, area_param),
+                new_area_unit,
+                old_area_unit,
+            ))
+        conversions.extend(
+            (partial(convert_parameter_unit, p), new_y_str, old_y_unit) for p in y_params or []
+        )
+        convert_units_with_rollback(conversions)
+        self._y_unit = new_y_str
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
         Convert the x-axis unit of the component.
 
         The base implementation converts all parameters. Subclasses with mixed-unit parameters
-        (e.g. area ≠ x_unit) should override this method.
+        (e.g. area ≠ x_unit) should override this method. If the conversion between the current
+        unit and *new_x_unit* fails, the component is rolled back to its original unit and the
+        failing conversion's exception is re-raised.
 
         Parameters
         ----------
@@ -342,26 +349,16 @@ class ModelComponent(EasyDynamicsModelBase):
         ------
         TypeError
             If *new_x_unit* is not a ``str`` or ``sc.Unit``.
-        Exception
-            If the conversion between the current unit and *new_x_unit* fails. On failure the
-            component is rolled back to its original unit.
         """
         if not isinstance(new_x_unit, (str, sc.Unit)):
             raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
 
         old_unit = self.x_unit
-        pars = self.get_all_parameters()
-        try:
-            for p in pars:
-                convert_parameter_unit(p, new_x_unit)
-            self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
-        except Exception as e:
-            try:
-                for p in pars:
-                    convert_parameter_unit(p, old_unit)
-            except Exception:  # noqa: S110
-                pass
-            raise e
+        convert_units_with_rollback([
+            (partial(convert_parameter_unit, p), new_x_unit, old_unit)
+            for p in self.get_all_parameters()
+        ])
+        self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
 
     def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
         """

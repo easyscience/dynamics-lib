@@ -89,12 +89,12 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise TypeError('suppress_warnings must be True or False.')
         self._suppress_warnings = suppress_warnings
 
-        self._convolution_plan_is_valid = False
         # Plan-invalidation bookkeeping for convolvers sharing this settings object.
         # _plan_version is bumped whenever the plan is invalidated (accuracy knob change or
-        # an explicit convolution_plan_is_valid = False). _blessed_plan_version records the
-        # version at the last explicit convolution_plan_is_valid = True, which suppresses
-        # rebuilds for all convolvers until the next invalidation.
+        # an explicit convolution_plan_is_valid = False); each convolver records the version
+        # it last rebuilt against. _blessed_plan_version records the version at the last
+        # explicit convolution_plan_is_valid = True, which suppresses rebuilds for all
+        # convolvers until the next invalidation.
         self._plan_version = 0
         self._blessed_plan_version = -1
 
@@ -180,11 +180,6 @@ class ConvolutionSettings(EasyDynamicsBase):
             If factor is negative.
         """
 
-        if factor is None:
-            self._extension_factor = factor
-            self.convolution_plan_is_valid = False
-            return
-
         if not isinstance(factor, Numeric):
             raise TypeError('Extension factor must be a number.')
         if factor < 0.0:
@@ -196,14 +191,19 @@ class ConvolutionSettings(EasyDynamicsBase):
     @property
     def convolution_plan_is_valid(self) -> bool:
         """
-        Get whether the convolution plan is valid.
+        Get whether the current plan version was explicitly marked valid.
+
+        This reflects explicit assignments only: it is True after ``convolution_plan_is_valid =
+        True`` until the next invalidation (a knob change or an explicit False). Whether an
+        individual convolver needs a rebuild is tracked by the convolver itself against the
+        settings' plan version.
 
         Returns
         -------
         bool
-            Whether the convolution plan is valid.
+            Whether the current plan version was explicitly marked valid.
         """
-        return self._convolution_plan_is_valid
+        return self._blessed_plan_version == self._plan_version
 
     @convolution_plan_is_valid.setter
     def convolution_plan_is_valid(self, is_valid: bool) -> None:
@@ -222,7 +222,6 @@ class ConvolutionSettings(EasyDynamicsBase):
         """
         if not isinstance(is_valid, bool):
             raise TypeError('convolution_plan_is_valid must be True or False.')
-        self._convolution_plan_is_valid = is_valid
         if is_valid:
             # An explicit True blesses the current version: all convolvers sharing these
             # settings may skip rebuilding until the next invalidation.
@@ -244,27 +243,12 @@ class ConvolutionSettings(EasyDynamicsBase):
         Returns
         -------
         bool
-            True if the plan flag is set and no invalidation happened since the convolver's rebuild
-            (or the current version was explicitly blessed).
+            True if no invalidation happened since the convolver's rebuild, or the current version
+            was explicitly blessed.
         """
-        return self._convolution_plan_is_valid and (
+        return (
             seen_version == self._plan_version or self._blessed_plan_version == self._plan_version
         )
-
-    def _mark_plan_built(self) -> int:
-        """
-        Record that one convolver rebuilt its plan.
-
-        Sets the plan flag without blessing the current version, so other convolvers sharing this
-        settings object still detect invalidations they have not consumed yet.
-
-        Returns
-        -------
-        int
-            The current plan version, to be stored by the convolver.
-        """
-        self._convolution_plan_is_valid = True
-        return self._plan_version
 
     @property
     def suppress_warnings(self) -> bool:

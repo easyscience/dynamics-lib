@@ -16,6 +16,7 @@ from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import convert_units_with_rollback
 
 
 class SampleModel(ModelBase):
@@ -414,15 +415,12 @@ class SampleModel(ModelBase):
         super()._convert_axis_unit(unit, axis)
 
         method = f'convert_{axis}_unit'
-        converted_models = []
         try:
-            for diffusion_model in self.diffusion_models:
-                getattr(diffusion_model, method)(unit)
-                converted_models.append(diffusion_model)
+            convert_units_with_rollback([
+                (getattr(diffusion_model, method), unit, old_unit)
+                for diffusion_model in self.diffusion_models
+            ])
         except Exception:
-            for diffusion_model in converted_models:
-                with suppress(Exception):
-                    getattr(diffusion_model, method)(old_unit)
             if old_unit is not None:
                 with suppress(Exception):
                     super()._convert_axis_unit(old_unit, axis)

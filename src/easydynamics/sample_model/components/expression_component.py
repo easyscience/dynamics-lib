@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import hbar
 from easydynamics.utils.utils import kb
 
@@ -357,8 +358,8 @@ class ExpressionComponent(ModelComponent):
         Evaluate the expression for the given x values.
 
         Unit conversion of parameters is not supported for ExpressionComponent. If x_vals is
-        expressed in a different unit than x_unit, a warning is issued and the values are used
-        as-is.
+        expressed in a different unit than x_unit, a UnitError is raised — silently evaluating the
+        expression with wrongly-scaled x would corrupt the result.
 
         Parameters
         ----------
@@ -366,6 +367,11 @@ class ExpressionComponent(ModelComponent):
             Raw x values expressed in eval_unit.
         eval_unit : str | None
             The unit of x_vals.
+
+        Raises
+        ------
+        sc.UnitError
+            If eval_unit differs from the component's x_unit.
 
         Returns
         -------
@@ -377,12 +383,10 @@ class ExpressionComponent(ModelComponent):
             and self.x_unit is not None
             and sc.Unit(eval_unit) != sc.Unit(self.x_unit)
         ):
-            warnings.warn(
+            raise sc.UnitError(
                 f'Input x has unit {eval_unit} but {self.__class__.__name__} has '
-                f'x_unit {self.x_unit}. ExpressionComponent cannot auto-convert parameters. '
-                'x values are used as-is.',
-                UserWarning,
-                stacklevel=3,
+                f'x_unit {self.x_unit}. ExpressionComponent cannot auto-convert its parameters; '
+                f'convert x to {self.x_unit} before evaluating.'
             )
 
         args = []
@@ -430,6 +434,9 @@ class ExpressionComponent(ModelComponent):
         """
         Validate and apply a unit relabel to a parameter (see set_unit).
 
+        Unit validation is delegated to ``_assert_valid_unit``, which raises ``ValueError`` for a
+        string that is not a valid scipp unit.
+
         Parameters
         ----------
         name : str
@@ -443,8 +450,6 @@ class ExpressionComponent(ModelComponent):
             If name is not a string or unit is not a string or sc.Unit.
         KeyError
             If no parameter with the given name exists.
-        ValueError
-            If unit is not a valid scipp unit.
         AttributeError
             If the parameter is a physical constant or a dependent parameter.
         """
@@ -457,12 +462,8 @@ class ExpressionComponent(ModelComponent):
             )
         if '_parameters' not in self.__dict__ or name not in self._parameters:
             raise KeyError(f"No parameter named '{name}' in this {self.__class__.__name__}.")
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(f'unit must be a string or sc.Unit, got {type(unit).__name__}')
-        try:
-            new_unit = sc.Unit(str(unit))
-        except sc.UnitError as e:
-            raise ValueError(f"'{unit}' is not a valid scipp unit.") from e
+        _assert_valid_unit(unit)
+        new_unit = sc.Unit(str(unit))
 
         param = self._parameters[name]
         if not param.independent:

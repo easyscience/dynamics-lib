@@ -166,7 +166,8 @@ class TestExponential:
         # EXPECT
         assert exponential.x_unit == 'microeV'
 
-        assert exponential.amplitude.value == pytest.approx(2.0 * 1e3)
+        # amplitude carries y_unit only and is unaffected by x-unit conversion
+        assert exponential.amplitude.value == pytest.approx(2.0)
         assert exponential.center.value == pytest.approx(0.5 * 1e3)
 
         # rate should scale inversely
@@ -189,7 +190,7 @@ class TestExponential:
         # EXPECT - values should be unchanged
         assert exponential.x_unit == 'meV'
         assert exponential.amplitude.value == pytest.approx(2.0)
-        assert exponential.amplitude.unit == 'meV'
+        assert exponential.amplitude.unit == 'dimensionless'
         assert exponential.center.value == pytest.approx(0.5)
         assert exponential.center.unit == 'meV'
         assert exponential.rate.value == pytest.approx(1.2)
@@ -296,3 +297,16 @@ class TestExponential:
         # EXPECT: state rolled back
         assert exp.y_unit == 'dimensionless'
         assert exp.amplitude.value == pytest.approx(1.0)
+
+    def test_evaluate_unchanged_by_convert_x_unit(self):
+        # WHEN: regression — the amplitude used to carry x_unit * y_unit, so converting the
+        # x unit rescaled the whole curve by the conversion factor
+        exp = Exponential(amplitude=2.0, center=0.0, rate=1.0, x_unit='meV')
+        before = exp.evaluate(np.array([0.0]))
+
+        # THEN: convert the x-axis unit and evaluate at the same physical point
+        exp.convert_x_unit('ueV')
+        after = exp.evaluate(np.array([0.0]))
+
+        # EXPECT: the curve is unchanged
+        np.testing.assert_allclose(after, before)

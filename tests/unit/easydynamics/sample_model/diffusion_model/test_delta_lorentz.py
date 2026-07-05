@@ -568,7 +568,7 @@ class TestDeltaLorentz:
     @pytest.mark.parametrize(
         ('Q_index', 'expected_exception', 'expected_message'),
         [
-            (-1, IndexError, r'Q_index -1 is out of bounds'),
+            (-1, IndexError, r'Q_index must be non-negative'),
             (100, IndexError, r'Q_index 100 is out of bounds'),
             ('string', TypeError, r'Q_index must be an int or None, got str'),
         ],
@@ -642,7 +642,7 @@ class TestDeltaLorentz:
 
     def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
-        with pytest.raises(IndexError, match='Q_index -1 is out of bounds'):
+        with pytest.raises(IndexError, match='Q_index must be non-negative'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=-1)
 
         with pytest.raises(IndexError, match=r'Q_index \d+ is out of bounds'):
@@ -925,6 +925,38 @@ class TestDeltaLorentz:
 
     # ───── Regression tests ─────
 
+    def test_calculate_width_with_Q_subset(self, delta_lorentz_model_with_Q):
+        # WHEN: Q-varying widths with distinguishable per-Q values
+        model = delta_lorentz_model_with_Q
+        for i, width in enumerate(model._lorentzian_width_list):
+            width.value = 1.0 + i
+
+        # THEN: request a subset of the stored Q values (as ParameterAnalysis does when it
+        # drops rows with missing data)
+        subset = model.Q.values[[1, 3, 5]]
+        widths = model.calculate_width(subset)
+
+        # EXPECT: one width per requested Q, matching the stored per-Q parameters
+        np.testing.assert_allclose(widths, [2.0, 4.0, 6.0])
+
+    def test_calculate_EISF_with_Q_subset(self, delta_lorentz_model_with_Q):
+        # WHEN: Q-varying A_0 with distinguishable per-Q values
+        model = delta_lorentz_model_with_Q
+        for i, A_0 in enumerate(model._A_0_list):
+            A_0.value = (i + 1) / 10
+
+        # THEN
+        subset = model.Q.values[[0, 6]]
+        eisf = model.calculate_EISF(subset)
+
+        # EXPECT: mean_u_squared is 0, so EISF equals the per-Q A_0 values
+        np.testing.assert_allclose(eisf, [0.1, 0.7])
+
+    def test_calculate_width_with_unknown_Q_raises(self, delta_lorentz_model_with_Q):
+        # WHEN THEN EXPECT: a Q value not stored in the model has no per-Q width
+        with pytest.raises(ValueError, match='do not match the Q values stored'):
+            delta_lorentz_model_with_Q.calculate_width(np.array([10.0]))
+
     def test_calculate_width_raises_after_clear_Q_when_allow_Q_variation(
         self, delta_lorentz_model_with_Q
     ):
@@ -937,5 +969,5 @@ class TestDeltaLorentz:
         assert len(delta_lorentz_model_with_Q._lorentzian_width_list) == 0
 
         # THEN: before the fix, calculate_width() silently returned [] instead of raising.
-        with pytest.raises(ValueError, match='Lorentzian width Q-variation list is empty'):
+        with pytest.raises(ValueError, match='Q must be provided'):
             delta_lorentz_model_with_Q.calculate_width()

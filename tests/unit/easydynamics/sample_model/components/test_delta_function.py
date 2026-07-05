@@ -113,6 +113,29 @@ class TestDeltaFunction:
 
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
+    def test_evaluate_descending_grid(self):
+        # WHEN: a descending energy grid (regression: neighbor differences used to produce a
+        # negative bin width and a negative spike)
+        delta = DeltaFunction(area=1.0)
+        x = np.array([2.0, 0.0, -2.0])
+
+        # THEN
+        result = delta.evaluate(x)
+
+        # EXPECT: positive spike at the position of the value nearest the center
+        np.testing.assert_allclose(result, [0.0, 0.5, 0.0])
+
+    def test_evaluate_unsorted_grid(self):
+        # WHEN: an unsorted grid; bin widths must come from the sorted values
+        delta = DeltaFunction(area=1.0)
+        x = np.array([0.0, 2.0, 1.0])
+
+        # THEN
+        result = delta.evaluate(x)
+
+        # EXPECT: spike at x=0 with bin width from the sorted grid [0, 1, 2] -> 1.0
+        np.testing.assert_allclose(result, [1.0, 0.0, 0.0])
+
     def test_evaluate_out_of_bounds(self, delta_function: DeltaFunction):
         # WHEN
         x = np.linspace(1, 2, 100)  # center is at 0.5, so out of bounds

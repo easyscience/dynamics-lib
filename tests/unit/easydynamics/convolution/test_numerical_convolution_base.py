@@ -163,11 +163,8 @@ class TestNumericalConvolutionBase:
         assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
         assert np.allclose(default_numerical_convolution_base.energy.values, new_energy)
 
-        # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        # EXPECT: this convolver's plan is invalidated
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # THEN
         # Force regeneration of energy grid
@@ -202,10 +199,7 @@ class TestNumericalConvolutionBase:
         default_numerical_convolution_base.upsample_factor = new_upsample_factor
 
         # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # Force regeneration of energy grid
         default_numerical_convolution_base._energy_grid = (
@@ -256,10 +250,7 @@ class TestNumericalConvolutionBase:
         default_numerical_convolution_base.extension_factor = new_extension_factor
 
         # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # THEN
         # Force regeneration of energy grid
@@ -416,9 +407,11 @@ class TestNumericalConvolutionBase:
         # THEN
         default_numerical_convolution_base.convolution_settings = new_settings
 
-        # EXPECT
+        # EXPECT: the convolver's own plan is invalidated, but the new settings object is
+        # untouched — other convolvers sharing it are unaffected.
         assert default_numerical_convolution_base.convolution_settings is new_settings
-        assert new_settings.convolution_plan_is_valid is False
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
+        assert new_settings.convolution_plan_is_valid is True
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',

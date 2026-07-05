@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
+from functools import partial
 
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
@@ -14,6 +15,8 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -368,12 +371,18 @@ class InstrumentModel(NewBase):
         if unit is None:
             raise ValueError('x_unit must be a valid unit string or scipp Unit')
 
-        self._background_model.convert_x_unit(unit)
-        self._resolution_model.convert_x_unit(unit)
         self._ensure_energy_offsets_current()
-        self._energy_offset.convert_unit(unit)
-        for offset in self._energy_offsets:
-            offset.convert_unit(unit)
+        old_unit = self.x_unit
+        conversions = [
+            (self._background_model.convert_x_unit, unit, old_unit),
+            (self._resolution_model.convert_x_unit, unit, old_unit),
+            (partial(convert_parameter_unit, self._energy_offset), unit, old_unit),
+        ]
+        conversions.extend(
+            (partial(convert_parameter_unit, offset), unit, old_unit)
+            for offset in self._energy_offsets
+        )
+        convert_units_with_rollback(conversions)
 
         self._x_unit = unit
 

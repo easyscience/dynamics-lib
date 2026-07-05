@@ -86,6 +86,18 @@ class TestCreateParametersMixin:
         with pytest.raises(TypeError, match='center must be None or a number'):
             dummy_model._create_center_parameter('invalid', 'TestModel', fix_if_none=False)
 
+    @pytest.mark.parametrize('center_input', [None, 0.0, 1e-12])
+    def test_create_center_parameter_enforce_minimum_clamps(self, dummy_model, center_input):
+        # WHEN: a center below the DHO minimum (regression: setting min before clamping the
+        # value used to raise ValueError from Parameter.min)
+        center_param = dummy_model._create_center_parameter(
+            center_input, 'TestModel', fix_if_none=False, enforce_minimum_center=True
+        )
+
+        # EXPECT: value clamped up to the minimum, and the bound enforced
+        assert center_param.value == pytest.approx(1e-10)
+        assert center_param.min == pytest.approx(1e-10)
+
     @pytest.mark.parametrize(
         'non_finite_center',
         [

@@ -236,13 +236,11 @@ class TestDiffusionModelBase:
     @pytest.mark.parametrize(
         ('Q_index', 'expected_exception', 'expected_message'),
         [
-            (-1, ValueError, 'Q is None'),
-            (100, ValueError, 'Q is None'),
+            (-1, IndexError, 'Q_index must be non-negative'),
             ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
-            'index too large',
             'non-integer index',
         ],
     )
@@ -253,11 +251,16 @@ class TestDiffusionModelBase:
         with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_independent_variables(Q_index=Q_index)
 
+    def test_get_independent_variables_deferred_when_Q_is_none(self, diffusion_model):
+        # WHEN: Q is None, so the upper-bound check on Q_index is deferred
+        # THEN EXPECT: no exception, and no independent variables
+        assert diffusion_model.get_independent_variables(Q_index=100) == []
+
     @pytest.mark.parametrize(
         ('Q_index', 'expected_exception', 'expected_message'),
         [
-            (-1, ValueError, 'Q is None'),
-            (100, ValueError, 'Q is None'),
+            (-1, IndexError, 'Q_index must be non-negative'),
+            (100, IndexError, 'out of range'),
             ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[

@@ -586,16 +586,19 @@ class TestAnalysisBase:
         invalid_Q_index = -1
 
         # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index -1 is out of bounds for Q of length 2'):
+        with pytest.raises(IndexError, match='Q_index must be non-negative'):
             analysis_base_with_components._verify_Q_index(invalid_Q_index)
 
-    def test_verify_Q_index_invalid_when_Q_is_none(self, analysis_base):
-        # WHEN
+    def test_verify_Q_index_deferred_when_Q_is_none(self, analysis_base):
+        # WHEN: no data is loaded yet (Q is None)
         positive_Q_index = 0
 
-        # THEN / EXPECT
-        with pytest.raises(ValueError, match='Q is None, cannot validate Q_index'):
-            analysis_base._verify_Q_index(positive_Q_index)
+        # THEN: a non-negative Q_index is accepted; the upper-bound check is deferred until
+        # Q is available
+        result = analysis_base._verify_Q_index(positive_Q_index)
+
+        # EXPECT
+        assert result == positive_Q_index
 
     def test_repr(self, analysis_base):
         # WHEN

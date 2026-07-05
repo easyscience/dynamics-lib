@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import contextlib
+from functools import partial
 
 import numpy as np
 import scipp as sc
@@ -11,6 +11,8 @@ from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import energy_to_scipp
 
 
@@ -207,6 +209,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         Convert the energy axis, energy_offset, and all components to the specified unit.
 
+        If any conversion fails, the already-converted state is rolled back best-effort before the
+        failing conversion's exception is re-raised.
+
         Parameters
         ----------
         unit : str | sc.Unit
@@ -216,36 +221,25 @@ class ConvolutionBase(EasyDynamicsModelBase):
         ------
         TypeError
             If unit is not a string or scipp unit.
-        Exception
-            If energy cannot be converted to the specified unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError('Energy unit must be a string or scipp unit.')
 
-        old_energy = self.energy.copy()
         old_x_unit = str(self.x_unit)
         old_offset_unit = str(self.energy_offset.unit)
 
-        try:
-            self.energy = sc.to_unit(self.energy, unit)
-            self._energy_offset.convert_unit(unit)
-            if self.sample_components is not None:
-                self.sample_components.convert_x_unit(unit)
-            if self.resolution_components is not None:
-                self.resolution_components.convert_x_unit(unit)
-        except Exception:
-            self.energy = old_energy
-            # Roll back energy_offset if it was already converted to the new unit.
-            if str(self._energy_offset.unit) != old_offset_unit:
-                self._energy_offset.convert_unit(old_offset_unit)
-            # Roll back component collections that may have been partially converted.
-            if self.sample_components is not None:
-                with contextlib.suppress(Exception):
-                    self.sample_components.convert_x_unit(old_x_unit)
-            if self.resolution_components is not None:
-                with contextlib.suppress(Exception):
-                    self.resolution_components.convert_x_unit(old_x_unit)
-            raise
+        def _convert_energy(target_unit: str | sc.Unit) -> None:
+            self.energy = sc.to_unit(self.energy, target_unit)
+
+        conversions = [
+            (_convert_energy, unit, old_x_unit),
+            (partial(convert_parameter_unit, self._energy_offset), unit, old_offset_unit),
+        ]
+        if self.sample_components is not None:
+            conversions.append((self.sample_components.convert_x_unit, unit, old_x_unit))
+        if self.resolution_components is not None:
+            conversions.append((self.resolution_components.convert_x_unit, unit, old_x_unit))
+        convert_units_with_rollback(conversions)
 
         self._x_unit = unit
 
@@ -253,7 +247,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         Convert the y-axis unit of the sample components.
 
-        Only propagates to sample components (resolution is normalised and unit-independent).
+        Only propagates to sample components (resolution is normalised and unit-independent). If
+        any component raises during unit conversion, the conversion is rolled back best-effort
+        before the exception is re-raised.
 
         Parameters
         ----------
@@ -264,21 +260,15 @@ class ConvolutionBase(EasyDynamicsModelBase):
         ------
         TypeError
             If unit is not a string or scipp unit.
-        Exception
-            If any component raises during unit conversion.  On failure, attempts to roll back.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError('y_unit must be a string or scipp unit.')
         old_y_unit = self.y_unit
-        try:
-            if self.sample_components is not None:
-                self.sample_components.convert_y_unit(unit)
-            self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
-        except Exception:
-            if self.sample_components is not None:
-                with contextlib.suppress(Exception):
-                    self.sample_components.convert_y_unit(old_y_unit)
-            raise
+        if self.sample_components is not None:
+            convert_units_with_rollback([
+                (self.sample_components.convert_y_unit, unit, old_y_unit)
+            ])
+        self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
 
     @property
     def sample_components(self) -> ComponentCollection | ModelComponent:

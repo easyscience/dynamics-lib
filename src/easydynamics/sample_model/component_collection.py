@@ -13,6 +13,7 @@ import scipp as sc
 from easydynamics.base_classes.easydynamics_list import EasyDynamicsList
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.utils import convert_units_with_rollback
 
 if TYPE_CHECKING:
     from easyscience.variable import DescriptorBase
@@ -184,7 +185,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
 
         Converts every component via its ``convert_<axis>_unit`` method and updates the
         collection's own unit attribute. On failure, attempts a best-effort rollback of all
-        components to the old unit before re-raising.
+        components to the old unit before re-raising the failing conversion's exception.
 
         Parameters
         ----------
@@ -197,30 +198,20 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         ------
         TypeError
             If the provided unit is not a string or sc.Unit.
-        Exception
-            If any component cannot be converted to the specified unit.
         """
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'{axis}_unit must be a string or sc.Unit, got {type(unit).__name__}')
 
         method = f'convert_{axis}_unit'
         old_unit = self.x_unit if axis == 'x' else self.y_unit
-        try:
-            for component in self:
-                getattr(component, method)(unit)
-            unit_str = str(unit) if isinstance(unit, sc.Unit) else unit
-            if axis == 'x':
-                self._x_unit = unit_str
-            else:
-                self._y_unit = unit_str
-        except Exception as e:
-            if old_unit is not None:
-                try:
-                    for component in self:
-                        getattr(component, method)(old_unit)
-                except Exception:  # noqa: S110
-                    pass
-            raise e
+        convert_units_with_rollback([
+            (getattr(component, method), unit, old_unit) for component in self
+        ])
+        unit_str = str(unit) if isinstance(unit, sc.Unit) else unit
+        if axis == 'x':
+            self._x_unit = unit_str
+        else:
+            self._y_unit = unit_str
 
     # ------------------------------------------------------------------
     # Component management

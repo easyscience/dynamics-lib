@@ -590,17 +590,17 @@ class TestExpressionComponentOutputUnit:
         # THEN EXPECT
         assert sc.Unit(expr.output_unit) == sc.Unit('meV')
 
-    def test_evaluate_warns_for_genuinely_different_x_unit(self):
+    def test_evaluate_raises_for_genuinely_different_x_unit(self):
         # WHEN: x carries a different (but compatible) unit than x_unit
         expr = ExpressionComponent(
             'A * x', parameters={'A': 1.0}, parameter_units={'A': '1/meV'}, x_unit='meV'
         )
         x = sc.linspace('energy', -1.0, 1.0, 11, unit='ueV')
 
-        # THEN EXPECT: ExpressionComponent cannot auto-convert, so it warns and uses raw values
-        with pytest.warns(UserWarning, match='cannot auto-convert'):
-            result = expr.evaluate(x)
-        np.testing.assert_allclose(result, x.values)
+        # THEN EXPECT: ExpressionComponent cannot auto-convert, so evaluating with
+        # wrongly-scaled x raises instead of silently producing wrong values
+        with pytest.raises(sc.UnitError, match='cannot auto-convert'):
+            expr.evaluate(x)
 
     def test_evaluate_does_not_warn_for_equivalent_unit_spelling(self):
         # WHEN: 'ueV' and scipp's canonical micro-sign spelling are the same unit

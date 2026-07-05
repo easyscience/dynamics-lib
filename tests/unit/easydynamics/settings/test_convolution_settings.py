@@ -152,13 +152,12 @@ class TestConvolutionSettings:
 
     @pytest.mark.parametrize(
         'value',
-        [0.0, 0.2, 1, 5.5, None],
+        [0.0, 0.2, 1, 5.5],
         ids=[
             'zero',
             'typical_fraction',
             'integer',
             'float',
-            'none_valid',
         ],
     )
     def test_extension_factor_setter_valid(self, default_convolution_settings, value):
@@ -170,18 +169,19 @@ class TestConvolutionSettings:
         default_convolution_settings.extension_factor = value
 
         # EXPECT
-        expected = pytest.approx(float(value)) if value is not None else None
-        assert default_convolution_settings.extension_factor == expected
+        assert default_convolution_settings.extension_factor == pytest.approx(float(value))
         assert default_convolution_settings.convolution_plan_is_valid is False
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',
         [
             ('0.2', TypeError, 'must be a number'),
+            (None, TypeError, 'must be a number'),
             (-0.1, ValueError, 'must be non-negative'),
         ],
         ids=[
             'not_numeric',
+            'none',
             'negative',
         ],
     )

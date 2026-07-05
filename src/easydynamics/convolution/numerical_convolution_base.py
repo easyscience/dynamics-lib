@@ -127,29 +127,25 @@ class NumericalConvolutionBase(ConvolutionBase):
         Check whether this convolver's plan is up to date.
 
         Plan validity is tracked per convolver so several convolvers can share one
-        ConvolutionSettings object: a local flag covers convolver-local invalidations (e.g. a new
-        energy grid), while the settings' plan version detects settings changes this convolver has
-        not consumed yet — even if a sibling convolver already rebuilt and set the shared flag.
-        Explicitly setting ``convolution_plan_is_valid = True`` on the settings remains an escape
-        hatch that suppresses rebuilds for all convolvers.
+        ConvolutionSettings object: each convolver stores the settings' plan version it last
+        rebuilt against (None after a convolver-local invalidation such as a new energy grid), and
+        the settings bump their version on every invalidation. Explicitly setting
+        ``convolution_plan_is_valid = True`` on the settings remains an escape hatch that
+        suppresses rebuilds for all convolvers.
 
         Returns
         -------
         bool
             True if the plan does not need to be rebuilt.
         """
-        if not getattr(self, '_plan_is_valid', False):
+        seen_version = getattr(self, '_plan_seen_version', None)
+        if seen_version is None:
             return False
-        return self.convolution_settings._plan_valid_for(  # noqa: SLF001
-            self._plan_settings_version_seen
-        )
+        return self.convolution_settings._plan_valid_for(seen_version)  # noqa: SLF001
 
     def _mark_convolution_plan_current(self) -> None:
         """Record that this convolver's plan matches its current state and settings."""
-        self._plan_is_valid = True
-        self._plan_settings_version_seen = (
-            self.convolution_settings._mark_plan_built()  # noqa: SLF001
-        )
+        self._plan_seen_version = self.convolution_settings._plan_version  # noqa: SLF001
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -182,13 +178,17 @@ class NumericalConvolutionBase(ConvolutionBase):
         if not isinstance(settings, ConvolutionSettings):
             raise TypeError('settings must be a ConvolutionSettings instance.')
         self._convolution_settings = settings
-        self._plan_is_valid = False
-        self._convolution_settings.convolution_plan_is_valid = False
+        # Convolver-local invalidation: other convolvers sharing the new settings object are
+        # unaffected.
+        self._plan_seen_version = None
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
         """
-        Set the energy array and recreate the dense grid.
+        Set the energy array and invalidate this convolver's plan.
+
+        The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+        ConvolutionSettings are unaffected — a new energy array is a convolver-local change.
 
         Parameters
         ----------
@@ -196,9 +196,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
-        self._energy_grid = self._create_energy_grid()
-        self._plan_is_valid = False
-        self.convolution_settings.convolution_plan_is_valid = False
+        self._plan_seen_version = None
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -368,6 +366,10 @@ class NumericalConvolutionBase(ConvolutionBase):
 
             energy_span_dense = self.energy.values.max() - self.energy.values.min()
         else:
+            if self.extension_factor is None:
+                raise ValueError(
+                    'extension_factor must be a number (not None) when upsample_factor is set.'
+                )
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
             energy_span_original = energy_max - energy_min

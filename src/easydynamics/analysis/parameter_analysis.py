@@ -56,9 +56,12 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
     **Fitting multiple parameters with separate bindings**
 
+    Component models declare the units their evaluate expects: here the Polynomial's x is the
+    dataset's Q coordinate and its y is the fitted parameter, so construct it with matching units
+    (or pass ``x_unit=None`` / ``y_unit=None`` to fit raw values):
     ```python
     area_binding = edyn.FitBinding(
-        model=sm.Polynomial(coefficients=[0.5, 0.0]),
+        model=sm.Polynomial(coefficients=[0.5, 0.0], x_unit='1/angstrom', y_unit='meV'),
         targets='Lorentzian area',
     )
     param_analysis = edyn.ParameterAnalysis(

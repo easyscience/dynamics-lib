@@ -94,7 +94,7 @@ class TestConvolution:
             default_convolution._delta_sample_components[0]
             is default_convolution.sample_components[2]
         )
-        assert default_convolution.convolution_settings.convolution_plan_is_valid is True
+        assert default_convolution._convolution_plan_is_current() is True
         assert default_convolution._reactions_enabled is True
 
     def test_init_components(self, convolution_with_components):
@@ -134,7 +134,7 @@ class TestConvolution:
             convolution_with_components._delta_sample_components, ComponentCollection
         )
         assert convolution_with_components._delta_sample_components.is_empty
-        assert convolution_with_components.convolution_settings.convolution_plan_is_valid is True
+        assert convolution_with_components._convolution_plan_is_current() is True
         assert convolution_with_components._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
@@ -278,7 +278,7 @@ class TestConvolution:
             patch_numerical as mock_numerical_method,
             patch_delta as mock_delta_method,
         ):
-            conv.convolution_settings._convolution_plan_is_valid = True
+            conv.convolution_settings.convolution_plan_is_valid = True
             conv.convolution()
 
             if analytical_component:
@@ -483,7 +483,7 @@ class TestConvolution:
                 expected_numerical_count += 1
             assert len(conv._numerical_sample_components) == expected_numerical_count
 
-        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert conv._convolution_plan_is_current() is True
 
     @pytest.mark.parametrize(
         'analytical_component',

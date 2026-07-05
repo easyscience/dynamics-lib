@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import contextlib
+from collections.abc import Callable
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
@@ -23,6 +26,9 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
     """
     Verify that Q_index is a valid integer index into Q.
 
+    When Q is None (e.g. no data has been loaded yet), only the type and sign of Q_index are
+    checked; the upper-bound check is deferred until Q is available.
+
     Parameters
     ----------
     Q_index : int
@@ -37,9 +43,7 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
     TypeError
         If Q_index is not an int (or not an int or None when allow_none=True).
     IndexError
-        If Q_index is out of range.
-    ValueError
-        If Q is None and Q_index is not None.
+        If Q_index is negative, or out of range when Q is available.
     """
     if allow_none and Q_index is None:
         return
@@ -49,11 +53,43 @@ def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False
             raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
         raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
 
-    if Q is None:
-        raise ValueError('Q is None, cannot validate Q_index.')
+    if Q_index < 0:
+        raise IndexError(f'Q_index must be non-negative, got {Q_index}')
 
-    if not (0 <= Q_index < len(Q)):
+    if Q is not None and Q_index >= len(Q):
         raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(Q)}')
+
+
+def convert_units_with_rollback(
+    conversions: list[tuple[Callable[[str | sc.Unit], None], str | sc.Unit, str | sc.Unit]],
+) -> None:
+    """
+    Apply a sequence of unit conversions, rolling all of them back if any fails.
+
+    Each item is ``(convert, new_unit, old_unit)`` where ``convert`` is a callable applying a unit
+    (e.g. a bound ``convert_x_unit`` or a ``functools.partial`` around
+    :func:`convert_parameter_unit`). The conversions are applied in order; if any raises, every
+    item is converted back to its old unit best-effort (converting a not-yet-converted item back to
+    its old unit is a no-op) and the original exception is re-raised.
+
+    Parameters
+    ----------
+    conversions : list[tuple[Callable[[str | sc.Unit], None], str | sc.Unit, str | sc.Unit]]
+        The conversions to apply, each as ``(convert, new_unit, old_unit)``.
+
+    Raises
+    ------
+    Exception
+        Whatever the failing conversion raised, after the rollback attempt.
+    """
+    try:
+        for convert, new_unit, _ in conversions:
+            convert(new_unit)
+    except Exception:
+        for convert, _, old_unit in conversions:
+            with contextlib.suppress(Exception):
+                convert(old_unit)
+        raise
 
 
 def convert_parameter_unit(parameter: Parameter, unit: str | sc.Unit) -> None:

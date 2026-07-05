@@ -82,7 +82,6 @@ class Convolution(NumericalConvolutionBase):
     # is sufficient — listing 'energy' separately would cause a double invalidation.
     _invalidate_plan_on_change: ClassVar[set[str]] = {
         '_energy',
-        '_energy_grid',
         '_sample_components',
         '_resolution_components',
         '_temperature',
@@ -363,10 +362,10 @@ class Convolution(NumericalConvolutionBase):
         super().__setattr__(name, value)
 
         # Only rebuild the convolution plan if reactions are enabled, to
-        # avoid issues during __init__
+        # avoid issues during __init__. These are convolver-local changes, so other convolvers
+        # sharing the same ConvolutionSettings are unaffected.
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
-            self._plan_is_valid = False
-            self.convolution_settings.convolution_plan_is_valid = False
+            self._plan_seen_version = None
 
     def __repr__(self) -> str:
         return (

@@ -4,10 +4,89 @@
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import verify_Q_index
+
+
+class TestVerifyQIndex:
+    def test_valid_index(self):
+        # WHEN THEN EXPECT: no exception
+        verify_Q_index(1, sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom'))
+
+    def test_none_allowed(self):
+        # WHEN THEN EXPECT: no exception
+        verify_Q_index(None, None, allow_none=True)
+
+    def test_none_not_allowed_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_index must be an int'):
+            verify_Q_index(None, None)
+
+    def test_non_int_raises(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match='Q_index must be an int'):
+            verify_Q_index('0', None)
+
+    def test_negative_raises_even_when_Q_is_none(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(IndexError, match='Q_index must be non-negative'):
+            verify_Q_index(-1, None)
+
+    def test_out_of_bounds_raises(self):
+        # WHEN THEN EXPECT
+        Q = sc.array(dims=['Q'], values=[0.5, 1.0], unit='1/angstrom')
+        with pytest.raises(IndexError, match='Q_index 2 is out of bounds'):
+            verify_Q_index(2, Q)
+
+    def test_upper_bound_deferred_when_Q_is_none(self):
+        # WHEN: Q is None (no data loaded yet)
+        # THEN EXPECT: a non-negative index is accepted; the bound check is deferred
+        verify_Q_index(100, None)
+
+
+class TestConvertUnitsWithRollback:
+    def test_applies_all_conversions(self):
+        # WHEN
+        p1 = Parameter(name='p1', value=1.0, unit='meV')
+        p2 = Parameter(name='p2', value=2.0, unit='meV')
+
+        # THEN
+        convert_units_with_rollback([
+            (lambda u, p=p1: convert_parameter_unit(p, u), 'ueV', 'meV'),
+            (lambda u, p=p2: convert_parameter_unit(p, u), 'ueV', 'meV'),
+        ])
+
+        # EXPECT
+        assert sc.Unit(str(p1.unit)) == sc.Unit('ueV')
+        assert p1.value == pytest.approx(1000.0)
+        assert sc.Unit(str(p2.unit)) == sc.Unit('ueV')
+        assert p2.value == pytest.approx(2000.0)
+
+    def test_rolls_back_on_failure_and_reraises(self):
+        # WHEN: the second conversion fails (meV -> K is not valid)
+        p1 = Parameter(name='p1', value=1.0, unit='meV')
+        p2 = Parameter(name='p2', value=2.0, unit='meV')
+
+        def fail(_unit):
+            raise RuntimeError('conversion failed')
+
+        # THEN EXPECT: the original exception propagates and p1 is rolled back
+        with pytest.raises(RuntimeError, match='conversion failed'):
+            convert_units_with_rollback([
+                (lambda u, p=p1: convert_parameter_unit(p, u), 'ueV', 'meV'),
+                (fail, 'ueV', 'meV'),
+            ])
+
+        assert str(p1.unit) == 'meV'
+        assert p1.value == pytest.approx(1.0)
+        assert str(p2.unit) == 'meV'
+        assert p2.value == pytest.approx(2.0)
 
 
 class TestValidateAndConvertQ:

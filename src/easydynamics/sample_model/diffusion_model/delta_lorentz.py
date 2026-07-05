@@ -15,6 +15,7 @@ from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
+from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
@@ -405,13 +406,14 @@ class DeltaLorentz(DiffusionModelBase):
     def calculate_width(self, Q: Q_type = None) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the diffusion model. If the width is
-        allowed to vary with Q then the Q stored in the model is used and the input is ignored. If
-        the width is not allowed to vary then the same width is returned for all Q values.
+        allowed to vary with Q then the requested Q values are matched against the Q stored in the
+        model and the corresponding per-Q widths are returned. If the width is not allowed to vary
+        then the same width is returned for all Q values.
 
         Parameters
         ----------
         Q : Q_type, default=None
-            Scattering vector in 1/angstrom.
+            Scattering vector in 1/angstrom. If None, the Q stored in the model is used.
 
         Returns
         -------
@@ -421,22 +423,21 @@ class DeltaLorentz(DiffusionModelBase):
         Raises
         ------
         ValueError
-            If Q-variation is enabled but Q has not been set on the model yet.
+            If Q-variation is enabled but Q has not been set on the model yet, or if the requested
+            Q values do not match the stored ones.
         """
+        Q = self._ensure_Q(Q)
+
         if self._allow_Q_variation['lorentzian_width'] is True:
             if not self._lorentzian_width_list:
                 raise ValueError(
                     'Lorentzian width Q-variation list is empty. '
                     'Set Q before calling calculate_width.'
                 )
-            widths = [lorentzian_width.value for lorentzian_width in self._lorentzian_width_list]
-            return np.array(widths)
+            indices = self._match_Q_indices(Q)
+            return np.array([self._lorentzian_width_list[i].value for i in indices])
 
-        Q = self._ensure_Q(Q)
-
-        widths = self.lorentzian_width.value * np.ones_like(Q)
-
-        return np.array(widths)
+        return self.lorentzian_width.value * np.ones_like(Q)
 
     def calculate_EISF(self, Q: Q_type = None) -> np.ndarray:
         """
@@ -455,7 +456,8 @@ class DeltaLorentz(DiffusionModelBase):
         Q = self._ensure_Q(Q)
         mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
-            A_0_values = [A_0_.value for A_0_ in self._A_0_list]
+            indices = self._match_Q_indices(Q)
+            A_0_values = [self._A_0_list[i].value for i in indices]
             return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_0_values)
 
         A_0_values = [self.A_0.value] * len(Q)
@@ -478,7 +480,8 @@ class DeltaLorentz(DiffusionModelBase):
         Q = self._ensure_Q(Q)
         mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
-            A_1_values = [A_1_.value for A_1_ in self._A_1_list]
+            indices = self._match_Q_indices(Q)
+            A_1_values = [self._A_1_list[i].value for i in indices]
             return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
         A_1_values = [self.A_1.value] * len(Q)
@@ -961,7 +964,7 @@ class DeltaLorentz(DiffusionModelBase):
         unit_str : str
             The new x-axis unit as a string.
         """
-        self._lorentzian_width.convert_unit(unit_str)
+        convert_parameter_unit(self._lorentzian_width, unit_str)
 
     def _write_lorz_width_dependency_expression(self, Q: float) -> str:
         """

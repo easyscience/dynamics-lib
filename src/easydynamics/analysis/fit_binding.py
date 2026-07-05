@@ -23,12 +23,20 @@ class FitBinding(EasyDynamicsBase):
     **Fitting a component model to one parameter**
 
     Component models (e.g. a Polynomial) have a single prediction — their ``evaluate`` — so
-    ``targets`` is simply the dataset key to fit against:
+    ``targets`` is simply the dataset key to fit against. The model's x_unit/y_unit declare the
+    units its evaluate expects: here x is the dataset's Q coordinate and y the fitted parameter, so
+    construct the model with matching units (or pass ``x_unit=None`` / ``y_unit=None`` to fit raw
+    values):
     ```python
     import easydynamics as edyn
     import easydynamics.sample_model as sm
 
-    fit_func = sm.Polynomial(coefficients=[3.7, -0.5], display_name='Straight line')
+    fit_func = sm.Polynomial(
+        coefficients=[3.7, -0.5],
+        x_unit='1/angstrom',
+        y_unit='meV',
+        display_name='Straight line',
+    )
     binding = edyn.FitBinding(model=fit_func, targets='Gaussian area')
     ```
 

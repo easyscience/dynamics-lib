@@ -19,7 +19,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
     $$ I(x) = A e^{B (x-x_0)} $$
 
     where $A$ is the amplitude, $x_0$ is the center, and $B$ is the rate. amplitude has unit =
-    x_unit * y_unit; center has unit = x_unit; rate has unit = 1/x_unit.
+    y_unit; center has unit = x_unit; rate has unit = 1/x_unit.
 
     Examples
     --------
@@ -64,7 +64,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         amplitude : Numeric, default=1.0
-            Pre-exponential factor A.  Unit is ``x_unit * y_unit``.
+            Pre-exponential factor A.  Unit is ``y_unit``.
         center : Numeric | None, default=None
             Reference point x_0 in x_unit.  If None, defaults to 0 and the center parameter is
             fixed.
@@ -72,9 +72,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
             Exponential rate B in units of ``1/x_unit``.
         x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.  center is stored in this unit; rate is stored in ``1/x_unit``.
-            amplitude_unit = x_unit * y_unit.
         y_unit : str | sc.Unit, default='dimensionless'
-            Unit of the y-axis (output).
+            Unit of the y-axis (output).  amplitude is stored in this unit.
         name : str, default='Exponential'
             Name of the component.
         display_name : str | None, default=None
@@ -98,14 +97,13 @@ class Exponential(CreateParametersMixin, ModelComponent):
         )
 
         x_unit_str = str(x_unit) if isinstance(x_unit, sc.Unit) else x_unit
-        amplitude_unit = str(sc.Unit(x_unit_str) * sc.Unit(self.y_unit))
 
         if not isinstance(amplitude, Numeric):
             raise TypeError('amplitude must be a number.')
         if not np.isfinite(amplitude):
             raise ValueError('amplitude must be finite.')
         self._amplitude = Parameter(
-            name=name + ' amplitude', value=float(amplitude), unit=amplitude_unit
+            name=name + ' amplitude', value=float(amplitude), unit=self.y_unit
         )
 
         self._center = self._create_center_parameter(
@@ -126,7 +124,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The amplitude Parameter with unit ``x_unit * y_unit``.
+            The amplitude Parameter with unit ``y_unit``.
         """
         return self._amplitude
 
@@ -136,7 +134,7 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         value : Numeric
-            New amplitude value (in current amplitude unit = x_unit * y_unit).
+            New amplitude value (in current amplitude unit = y_unit).
 
         Raises
         ------
@@ -232,14 +230,17 @@ class Exponential(CreateParametersMixin, ModelComponent):
 
         center = self._resolve_param_value(self._center, eval_unit)
         rate = self._resolve_param_value(self._rate, eval_rate_unit)
-        amplitude = self._resolve_param_value(self._amplitude, self._eval_area_unit(eval_unit))
+        # The amplitude carries y_unit only, so it is unaffected by the x evaluation unit.
+        amplitude = self._amplitude.value
 
         exponent = rate * (x_vals - center)
         return amplitude * np.exp(exponent)
 
     def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
-        Convert center and amplitude to new_x_unit, rate to 1/new_x_unit.
+        Convert center to new_x_unit and rate to 1/new_x_unit.
+
+        The amplitude carries ``y_unit`` only and is unaffected.
 
         Parameters
         ----------
@@ -250,7 +251,6 @@ class Exponential(CreateParametersMixin, ModelComponent):
         self._convert_x_unit_area_based(
             new_x_unit=new_x_unit,
             x_params=[self._center],
-            area_param=self._amplitude,
             inverse_params=[self._rate],
         )
 
@@ -258,14 +258,14 @@ class Exponential(CreateParametersMixin, ModelComponent):
         """
         Convert the y-axis unit by rescaling the amplitude parameter.
 
-        The amplitude is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+        The amplitude is rescaled from ``old_y_unit`` to ``new_y_unit``.
 
         Parameters
         ----------
         new_y_unit : str | sc.Unit
             Target y-axis unit.
         """
-        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._amplitude)
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, y_params=[self._amplitude])
 
     def __repr__(self) -> str:
         """
