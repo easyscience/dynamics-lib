@@ -50,6 +50,22 @@ class TestComponentCollection:
         assert component_collection.x_unit == 'meV'
         assert component_collection.y_unit == 'dimensionless'
 
+    def test_get_fit_targets(self, component_collection):
+        # WHEN
+        targets = component_collection.get_fit_targets()
+
+        # EXPECT: a single 'value' prediction wrapping the summed evaluate, stamped with the
+        # collection's units and no default dataset key
+        assert len(targets) == 1
+        target = targets[0]
+        assert target.name == 'value'
+        assert target.dataset_key is None
+        assert target.label == 'TestComponentCollection'
+        assert target.x_unit == component_collection.x_unit
+        assert target.y_unit == component_collection.y_unit
+        x = np.linspace(-1, 1, 5)
+        np.testing.assert_allclose(target.function(x), component_collection.evaluate(x))
+
     def test_init_with_component(self):
         # WHEN THEN
         component1 = Gaussian(name='TestGaussian1', area=1.0, center=0.0, width=1.0, x_unit='meV')

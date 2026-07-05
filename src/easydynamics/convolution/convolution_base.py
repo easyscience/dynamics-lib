@@ -268,6 +268,21 @@ class ConvolutionBase(EasyDynamicsModelBase):
             convert_units_with_rollback([
                 (self.sample_components.convert_y_unit, unit, old_y_unit)
             ])
+        self._relabel_y_unit(unit)
+
+    def _relabel_y_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Update the y-unit label without converting any components.
+
+        This is the contract for a parent convolver whose sub-convolvers share its component
+        objects: the parent converts the components once, then relabels the sub-convolvers so their
+        y_unit stays consistent without double-converting the shared components.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new y-axis unit. The caller is responsible for having converted the components.
+        """
         self._y_unit = str(unit) if isinstance(unit, sc.Unit) else unit
 
     @property

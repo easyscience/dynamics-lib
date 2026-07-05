@@ -51,20 +51,20 @@ class NumericalConvolution(NumericalConvolutionBase):
         # sc.to_unit returns a new scalar — self.energy_offset is never mutated.
         offset_value = sc.to_unit(self.energy_offset.full_value, self.energy.unit).value
 
-        # Evaluate sample model. If called via the Convolution class,
-        # delta functions are already filtered out.
-        sample_vals = self.sample_components.evaluate(
+        shifted_energy = (
             self._energy_grid.energy_dense
             - self._energy_grid.energy_even_length_offset
             - offset_value
         )
 
+        # Evaluate sample model. If called via the Convolution class,
+        # delta functions are already filtered out.
+        sample_vals = self.sample_components.evaluate(shifted_energy)
+
         # Detailed balance correction
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense
-                - self._energy_grid.energy_even_length_offset
-                - offset_value,
+                energy=shifted_energy,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,

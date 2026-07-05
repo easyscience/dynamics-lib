@@ -319,6 +319,23 @@ class TestExperiment:
         assert len(masked_energy) == 1
         assert masked_energy.values == pytest.approx(30.0)
 
+    def test_get_masked_energy_with_precomputed_mask(self, experiment_with_data):
+        "Test that passing a precomputed mask gives the same result as computing it"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+
+        experiment_with_data.data = invalid_data
+        mask = experiment_with_data.get_finite_energy_mask(Q_index=Q_index)
+
+        # THEN
+        masked_energy = experiment_with_data.get_masked_energy(Q_index=Q_index, mask=mask)
+
+        # EXPECT: identical to the mask-free call
+        expected = experiment_with_data.get_masked_energy(Q_index=Q_index)
+        assert sc.identical(masked_energy, expected)
+
     def test_get_masked_energy_no_data_returns_None(self):
         "Test getting masked energy returns zero when no data is present"
 

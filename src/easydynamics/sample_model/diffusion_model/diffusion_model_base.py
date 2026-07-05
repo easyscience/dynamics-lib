@@ -12,6 +12,7 @@ from scipp import UnitError
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.utils.fit_target import FitTarget
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
@@ -438,7 +439,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 dataset_key=f'{self.lorentzian_name} area',
                 function=lambda Q, model=self, **_: model.calculate_QISF(Q) * model.scale.value,
                 label=f'{self.display_name} area',
-                x_unit='1/angstrom',
+                x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
             ),
             FitTarget(
@@ -446,7 +447,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
                 dataset_key=f'{self.lorentzian_name} width',
                 function=lambda Q, model=self, **_: model.calculate_width(Q),
                 label=f'{self.display_name} width',
-                x_unit='1/angstrom',
+                x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.x_unit),
             ),
         ]
@@ -672,8 +673,12 @@ class DiffusionModelBase(EasyDynamicsModelBase):
 
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """
-        Convert Q to a numpy array of values in 1/angstrom, ensuring it is not None. Uses the
-        stored Q if no input is given.
+        Convert Q to a numpy array of values in the canonical Q unit (1/angstrom), ensuring it is
+        not None. Uses the stored Q if no input is given.
+
+        The stored Q and 1-dimensional numpy input are returned directly (the stored Q was
+        validated when set; raw numpy values are assumed to be in the canonical unit, as in
+        :func:`_validate_and_convert_Q`). Other inputs go through full validation and conversion.
 
         Parameters
         ----------
@@ -691,9 +696,12 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If the provided Q and self.Q are both None
         """
         if Q is None:
-            Q = self.Q
-        if Q is None:
-            raise ValueError('Q must be provided either as an argument or set in the model.')
+            if self._Q is None:
+                raise ValueError('Q must be provided either as an argument or set in the model.')
+            return self._Q.values
+
+        if isinstance(Q, np.ndarray) and Q.ndim == 1:
+            return Q
 
         return _validate_and_convert_Q(Q).values
 

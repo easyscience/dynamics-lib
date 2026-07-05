@@ -12,6 +12,7 @@ from easydynamics.sample_model.components import DeltaFunction
 from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.fit_target import FitTarget
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import angstrom
@@ -609,7 +610,7 @@ class DeltaLorentz(DiffusionModelBase):
                 dataset_key=f'{self.delta_name} area',
                 function=lambda Q, model=self, **_: model.calculate_EISF(Q) * model.scale.value,
                 label=f'{self.display_name} delta_area',
-                x_unit='1/angstrom',
+                x_unit=CANONICAL_Q_UNIT,
                 y_unit=str(self.scale.unit),
             )
         )

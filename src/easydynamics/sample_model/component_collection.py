@@ -13,7 +13,9 @@ import scipp as sc
 from easydynamics.base_classes.easydynamics_list import EasyDynamicsList
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.components.model_component import ModelComponent
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import convert_value_unit
 
 if TYPE_CHECKING:
     from easyscience.variable import DescriptorBase
@@ -245,6 +247,31 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         """
         return [component.name for component in self]
 
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of this collection as FitTargets.
+
+        Collections have a single prediction — their summed ``evaluate`` — named ``'value'`` with
+        no default dataset key; ``FitBinding`` supplies the dataset key to fit against. The target
+        is a snapshot: its units reflect the collection's x_unit/y_unit at call time (None means
+        raw values are fitted without unit conversion).
+
+        Returns
+        -------
+        list[FitTarget]
+            A single FitTarget wrapping this collection's evaluate.
+        """
+        return [
+            FitTarget(
+                name='value',
+                dataset_key=None,
+                function=lambda x, model=self, **_: model.evaluate(x),
+                label=self.display_name,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
+            )
+        ]
+
     def normalize_area(self) -> None:
         """
         Normalize the areas of all components so they sum to 1.
@@ -281,8 +308,7 @@ class ComponentCollection(EasyDynamicsList, EasyDynamicsModelBase):
         # reference unit makes the areas sum to 1 in that unit.
         reference_unit = str(area_params[0].unit)
         total_area_value = sum(
-            sc.to_unit(sc.scalar(p.value, unit=str(p.unit)), reference_unit).value
-            for p in area_params
+            convert_value_unit(p.value, p.unit, reference_unit) for p in area_params
         )
 
         if total_area_value == 0:

@@ -175,11 +175,11 @@ class ExpressionComponent(ModelComponent):
             without rescaling its value (see :meth:`set_unit`), and takes precedence over the unit
             of a Parameter instance given in *parameters*. When units are in use, a warning is
             issued if the expression's output unit does not match y_unit.
-        x_unit : str | sc.Unit, default="meV"
+        x_unit : str | sc.Unit, default='meV'
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the y-axis (output).
-        name : str, default="Expression"
+        name : str, default='Expression'
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

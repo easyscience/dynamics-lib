@@ -230,7 +230,9 @@ class Experiment(EasyDynamicsBase):
         """
         raise AttributeError('energy is a read-only property derived from the data.')
 
-    def get_masked_energy(self, Q_index: int) -> sc.Variable | None:
+    def get_masked_energy(
+        self, Q_index: int, mask: sc.Variable | None = None
+    ) -> sc.Variable | None:
         """
         Get the energy values from the dataset, removing points where the y values or variances are
         NaN or Inf for the given Q index.
@@ -239,20 +241,22 @@ class Experiment(EasyDynamicsBase):
         ----------
         Q_index : int
             The Q index to get the masked energy values for.
+        mask : sc.Variable | None, default=None
+            Optional precomputed finite-energy mask (as returned by
+            :meth:`get_finite_energy_mask`), so callers that already extracted the data do not pay
+            for a second extraction. If None, the mask is computed.
 
         Returns
         -------
         sc.Variable | None
             The masked energy values from the dataset, or None if no data is loaded.
         """
-        if self.binned_data is None:
+        if mask is None:
+            mask = self.get_finite_energy_mask(Q_index=Q_index)
+        if mask is None:
             return None
 
-        verify_Q_index(Q_index, self.Q)
-
-        energy = self.binned_data.coords['energy']
-        mask_var = self.get_finite_energy_mask(Q_index=Q_index)
-        return energy[mask_var]
+        return self.binned_data.coords['energy'][mask]
 
     def get_finite_energy_mask(self, Q_index: int) -> sc.Variable | None:
         """
@@ -292,12 +296,10 @@ class Experiment(EasyDynamicsBase):
             The binned data for the given Q index with NaN/Inf points removed, or None if no data
             is loaded.
         """
-        if self.binned_data is None:
+        mask_var = self.get_finite_energy_mask(Q_index=Q_index)
+        if mask_var is None:
             return None
 
-        verify_Q_index(Q_index, self.Q)
-
-        mask_var = self.get_finite_energy_mask(Q_index=Q_index)
         return self.binned_data['Q', Q_index][mask_var]
 
     ###########

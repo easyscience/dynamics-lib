@@ -24,8 +24,10 @@ class FitTarget:
     ----------
     name : str
         The prediction's name (e.g. ``'width'``, ``'area'``, ``'delta_area'``, ``'value'``).
-    dataset_key : str
-        The key in the parameters Dataset holding the data this prediction is fitted against.
+    dataset_key : str | None
+        The key in the parameters Dataset holding the data this prediction is fitted against. None
+        when the prediction has no default key (component models); ``FitBinding`` supplies the key
+        in that case.
     function : Callable
         The fit function; called as ``function(x)`` with raw x values expressed in *x_unit* and
         returning raw values expressed in *y_unit*.
@@ -38,7 +40,7 @@ class FitTarget:
     """
 
     name: str
-    dataset_key: str
+    dataset_key: str | None
     function: Callable
     label: str
     x_unit: str | None

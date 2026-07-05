@@ -17,6 +17,7 @@ from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import convert_value_unit
 
 
 class ParameterAnalysis(EasyDynamicsModelBase):
@@ -529,7 +530,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         x_factor converts Q coordinate values from their stored unit to target.x_unit (e.g.
         1/angstrom for diffusion-model predictions). y_factor converts parameter values from their
         stored unit to target.y_unit. A factor is 1.0 when the target declares the corresponding
-        unit as None (its function takes raw values).
+        unit as None (its function takes raw values). ``sc.UnitError`` is raised when x or y units
+        are physically incompatible (e.g. meV vs 1/angstrom).
 
         Parameters
         ----------
@@ -540,36 +542,33 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         -------
         tuple[float, float]
             ``(x_factor, y_factor)`` scale factors to apply before/after model evaluation.
-
-        Raises
-        ------
-        sc.UnitError
-            If x or y units are physically incompatible (e.g. meV vs 1/angstrom).
         """
         da = self.parameters[target.dataset_key]
-        x_factor = 1.0
-        y_factor = 1.0
 
-        if target.x_unit is not None:
-            q_unit = str(da.coords['Q'].unit)
+        def factor(from_unit: str, to_unit: str | None, error_message: str) -> float:
+            if to_unit is None:
+                return 1.0
             try:
-                x_factor = sc.to_unit(sc.scalar(1.0, unit=q_unit), str(target.x_unit)).value
+                return convert_value_unit(1.0, from_unit, str(to_unit))
             except Exception as e:
-                raise sc.UnitError(
-                    f"Q coordinate unit '{q_unit}' is incompatible with "
-                    f"the x_unit '{target.x_unit}' of fit target '{target.label}' "
-                    f"for parameter '{target.dataset_key}'."
-                ) from e
+                raise sc.UnitError(error_message) from e
 
-        if target.y_unit is not None:
-            param_unit = str(da.unit)
-            try:
-                y_factor = sc.to_unit(sc.scalar(1.0, unit=param_unit), str(target.y_unit)).value
-            except Exception as e:
-                raise sc.UnitError(
-                    f"Parameter '{target.dataset_key}' unit '{param_unit}' is incompatible "
-                    f"with the y_unit '{target.y_unit}' of fit target '{target.label}'."
-                ) from e
+        q_unit = str(da.coords['Q'].unit)
+        x_factor = factor(
+            q_unit,
+            target.x_unit,
+            f"Q coordinate unit '{q_unit}' is incompatible with "
+            f"the x_unit '{target.x_unit}' of fit target '{target.label}' "
+            f"for parameter '{target.dataset_key}'.",
+        )
+
+        param_unit = str(da.unit)
+        y_factor = factor(
+            param_unit,
+            target.y_unit,
+            f"Parameter '{target.dataset_key}' unit '{param_unit}' is incompatible "
+            f"with the y_unit '{target.y_unit}' of fit target '{target.label}'.",
+        )
 
         return x_factor, y_factor
 

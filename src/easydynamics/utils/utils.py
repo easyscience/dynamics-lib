@@ -21,6 +21,9 @@ hbar = DescriptorNumber.from_scipp('hbar', scipp_hbar)
 kb = DescriptorNumber.from_scipp('kb', scipp_k)
 angstrom = DescriptorNumber('angstrom', 1e-10, unit='m')
 
+# The unit all Q values are normalized to and assumed to be in when given as raw numbers.
+CANONICAL_Q_UNIT = '1/angstrom'
+
 
 def verify_Q_index(Q_index: int, Q: sc.Variable | None, allow_none: bool = False) -> None:
     """
@@ -90,6 +93,32 @@ def convert_units_with_rollback(
             with contextlib.suppress(Exception):
                 convert(old_unit)
         raise
+
+
+def convert_value_unit(value: float, from_unit: str | sc.Unit, to_unit: str | sc.Unit) -> float:
+    """
+    Convert a numeric value from one unit to another without mutating anything.
+
+    Returns the value unchanged when the two units compare equal as strings (the common
+    no-conversion case, kept cheap for hot paths).
+
+    Parameters
+    ----------
+    value : float
+        The value to convert.
+    from_unit : str | sc.Unit
+        The unit the value is currently expressed in.
+    to_unit : str | sc.Unit
+        The unit to convert the value to.
+
+    Returns
+    -------
+    float
+        The value expressed in *to_unit*.
+    """
+    if str(from_unit) == str(to_unit):
+        return value
+    return sc.to_unit(sc.scalar(value, unit=str(from_unit)), str(to_unit)).value
 
 
 def convert_parameter_unit(parameter: Parameter, unit: str | sc.Unit) -> None:
@@ -173,12 +202,12 @@ def _validate_and_convert_Q(
         if Q.ndim > 1:
             raise ValueError('Q must be a 1-dimensional array.')
 
-        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        Q = sc.array(dims=['Q'], values=Q, unit=CANONICAL_Q_UNIT)
 
     if isinstance(Q, sc.Variable):
         if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit='1/angstrom')
+        Q = Q.to(unit=CANONICAL_Q_UNIT)
     return Q
 
 

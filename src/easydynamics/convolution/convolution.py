@@ -338,10 +338,12 @@ class Convolution(NumericalConvolutionBase):
             The new y-axis unit.
         """
         super().convert_y_unit(unit)
+        # The sub-convolvers share this convolver's component objects, which were already
+        # converted by super(); only their y-unit labels need updating.
         if getattr(self, '_analytical_convolver', None) is not None:
-            self._analytical_convolver._y_unit = self.y_unit  # noqa: SLF001
+            self._analytical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
         if getattr(self, '_numerical_convolver', None) is not None:
-            self._numerical_convolver._y_unit = self.y_unit  # noqa: SLF001
+            self._numerical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:

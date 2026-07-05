@@ -11,6 +11,7 @@ from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import convert_value_unit
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -48,6 +49,25 @@ class TestVerifyQIndex:
         # WHEN: Q is None (no data loaded yet)
         # THEN EXPECT: a non-negative index is accepted; the bound check is deferred
         verify_Q_index(100, None)
+
+
+class TestConvertValueUnit:
+    def test_same_unit_returns_value_unchanged(self):
+        # WHEN THEN EXPECT: string-equal units short-circuit without scipp round-trip
+        assert convert_value_unit(2.5, 'meV', 'meV') == pytest.approx(2.5)
+
+    def test_converts_between_compatible_units(self):
+        # WHEN THEN EXPECT
+        assert convert_value_unit(1.0, 'meV', 'ueV') == pytest.approx(1000.0)
+
+    def test_accepts_scipp_units(self):
+        # WHEN THEN EXPECT
+        assert convert_value_unit(1.0, sc.Unit('meV'), sc.Unit('ueV')) == pytest.approx(1000.0)
+
+    def test_incompatible_units_raise(self):
+        # WHEN THEN EXPECT
+        with pytest.raises(sc.UnitError):
+            convert_value_unit(1.0, 'meV', 'K')
 
 
 class TestConvertUnitsWithRollback:

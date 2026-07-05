@@ -60,6 +60,23 @@ class TestModelComponent:
         dummy.fix_all_parameters()
         assert all(p.fixed for p in dummy.get_all_parameters())
 
+    def test_get_fit_targets(self, dummy: DummyComponent):
+        # WHEN
+        targets = dummy.get_fit_targets()
+
+        # EXPECT: a single 'value' prediction wrapping evaluate, stamped with the component's
+        # units and no default dataset key
+        assert len(targets) == 1
+        target = targets[0]
+        assert target.name == 'value'
+        assert target.dataset_key is None
+        assert target.label == 'Dummy'
+        assert target.x_unit == dummy.x_unit
+        assert target.y_unit == dummy.y_unit
+        np.testing.assert_allclose(
+            target.function(np.array([1.0, 2.0])), dummy.evaluate(np.array([1.0, 2.0]))
+        )
+
     def test_repr(self, dummy):
         # WHEN THEN EXPECT
         repr_str = repr(dummy)

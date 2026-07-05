@@ -12,9 +12,11 @@ import scipp as sc
 from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import convert_value_unit
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
@@ -111,6 +113,31 @@ class ModelComponent(EasyDynamicsModelBase):
             f'y_unit is read-only. Use convert_y_unit to change the unit '
             f'or create a new {self.__class__.__name__} with the desired unit.'
         )
+
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of this component as FitTargets.
+
+        Component models have a single prediction — their ``evaluate`` — named ``'value'`` with no
+        default dataset key; ``FitBinding`` supplies the dataset key to fit against. The target is
+        a snapshot: its units reflect the component's x_unit/y_unit at call time (None means raw
+        values are fitted without unit conversion).
+
+        Returns
+        -------
+        list[FitTarget]
+            A single FitTarget wrapping this component's evaluate.
+        """
+        return [
+            FitTarget(
+                name='value',
+                dataset_key=None,
+                function=lambda x, model=self, **_: model.evaluate(x),
+                label=self.display_name,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
+            )
+        ]
 
     def fix_all_parameters(self) -> None:
         """
@@ -227,9 +254,9 @@ class ModelComponent(EasyDynamicsModelBase):
         float
             The parameter value expressed in *target_unit*.
         """
-        if target_unit is None or str(param.unit) == str(target_unit):
+        if target_unit is None:
             return param.value
-        return sc.to_unit(sc.scalar(param.value, unit=str(param.unit)), target_unit).value
+        return convert_value_unit(param.value, param.unit, target_unit)
 
     def _convert_x_unit_area_based(
         self,
@@ -409,7 +436,9 @@ class ModelComponent(EasyDynamicsModelBase):
         if output not in ('numpy', 'scipp'):
             raise ValueError(f"output must be 'numpy' or 'scipp', got {output!r}")
         x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
-        eval_unit = detected_unit or self.x_unit
+        # eval_unit is None when x is already in the component's own x_unit (unitless input is
+        # assumed to be), letting _evaluate_values skip all unit resolution in the hot path.
+        eval_unit = detected_unit if detected_unit != self.x_unit else None
         values = self._evaluate_values(x_vals, eval_unit)
         if output == 'scipp':
             return sc.array(dims=[dim], values=values, unit=self.y_unit)
@@ -429,8 +458,8 @@ class ModelComponent(EasyDynamicsModelBase):
         x_vals : np.ndarray
             Raw x values, expressed in *eval_unit*.
         eval_unit : str | None
-            The unit of *x_vals* (the detected input unit, falling back to the component's x_unit),
-            or None if no unit information is available.
+            The unit of *x_vals* when it differs from the component's own x_unit, or None when
+            x_vals is already expressed in the component's x_unit (no resolution needed).
 
         Returns
         -------

@@ -108,6 +108,14 @@ class Analysis1d(AnalysisBase):
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
         """
+        # Initialize state read by observer callbacks (e.g. _on_experiment_changed) before
+        # super().__init__ wires the sub-models and fires them.
+        self._Q_index = None
+        self._masked_energy = None
+        self._fit_result = None
+        self._convolver = None
+        self._convolver_is_dirty = True
+
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -122,14 +130,7 @@ class Analysis1d(AnalysisBase):
         self._Q_index = self._verify_Q_index(Q_index)
 
         if self._Q_index is not None and self.experiment is not None:
-            masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
-            self._masked_energy = masked_energy
-        else:
-            self._masked_energy = None
-
-        self._fit_result = None
-        self._convolver = None
-        self._convolver_is_dirty = True
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
 
     #############
     # Properties
@@ -529,7 +530,7 @@ class Analysis1d(AnalysisBase):
         """Mark the convolver as dirty when the experiment changes."""
         super()._on_experiment_changed()
         # Refresh masked energy if Q_index is already set (i.e. post-init experiment swap).
-        if getattr(self, '_Q_index', None) is not None and self.experiment is not None:
+        if self._Q_index is not None and self.experiment is not None:
             self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
 

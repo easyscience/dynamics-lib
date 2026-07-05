@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import TYPE_CHECKING
 
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
-from easydynamics.utils.fit_target import FitTarget
+
+if TYPE_CHECKING:
+    from easydynamics.utils.fit_target import FitTarget
 
 
 class FitBinding(EasyDynamicsBase):
@@ -107,7 +110,7 @@ class FitBinding(EasyDynamicsBase):
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         self._validate_model(model)
-        self._validate_targets(model, targets)
+        self._normalize_targets(model, targets)
         self._model = model
         self._targets = targets
 
@@ -142,7 +145,7 @@ class FitBinding(EasyDynamicsBase):
             The new model to fit.
         """
         self._validate_model(value)
-        self._validate_targets(value, self._targets)
+        self._normalize_targets(value, self._targets)
         self._model = value
 
     @property
@@ -170,7 +173,7 @@ class FitBinding(EasyDynamicsBase):
         value : str | list[str] | dict[str, str] | None
             The new targets specification (see ``__init__``).
         """
-        self._validate_targets(self._model, value)
+        self._normalize_targets(self._model, value)
         self._targets = value
 
     # ------------------------------------------------------------------
@@ -189,28 +192,13 @@ class FitBinding(EasyDynamicsBase):
         list[FitTarget]
             The resolved fit targets.
         """
-        if isinstance(self.model, DiffusionModelBase):
-            available = {target.name: target for target in self.model.get_fit_targets()}
-            if self._targets is None:
-                return list(available.values())
-            if isinstance(self._targets, str):
-                return [available[self._targets]]
-            if isinstance(self._targets, list):
-                return [available[name] for name in self._targets]
-            return [
-                replace(available[name], dataset_key=dataset_key)
-                for name, dataset_key in self._targets.items()
-            ]
-
+        available = {target.name: target for target in self.model.get_fit_targets()}
+        normalized = self._normalize_targets(self.model, self._targets)
         return [
-            FitTarget(
-                name='value',
-                dataset_key=self._targets,
-                function=lambda x, model=self.model, **_: model.evaluate(x),
-                label=self.model.display_name,
-                x_unit=self.model.x_unit,
-                y_unit=self.model.y_unit,
-            )
+            available[name]
+            if dataset_key is None
+            else replace(available[name], dataset_key=dataset_key)
+            for name, dataset_key in normalized.items()
         ]
 
     # ------------------------------------------------------------------
@@ -240,19 +228,29 @@ class FitBinding(EasyDynamicsBase):
             )
 
     @staticmethod
-    def _validate_targets(
+    def _normalize_targets(
         model: ModelComponent | ComponentCollection | DiffusionModelBase,
         targets: str | list[str] | dict[str, str] | None,
-    ) -> None:
+    ) -> dict[str, str | None]:
         """
-        Validate a targets specification against a model.
+        Validate a targets specification and normalize it to a prediction-name mapping.
+
+        This is the one place that knows the two spec dialects: component models take the dataset
+        key as a plain string for their single ``'value'`` prediction, while diffusion models
+        select predictions by name (None selects all) with optional dataset-key overrides.
 
         Parameters
         ----------
         model : ModelComponent | ComponentCollection | DiffusionModelBase
             The model the targets apply to.
         targets : str | list[str] | dict[str, str] | None
-            The targets specification to validate.
+            The targets specification to validate and normalize.
+
+        Returns
+        -------
+        dict[str, str | None]
+            Mapping of prediction name to dataset-key override (None means the prediction's default
+            dataset key is used).
 
         Raises
         ------
@@ -261,40 +259,41 @@ class FitBinding(EasyDynamicsBase):
         ValueError
             If targets names a prediction the model does not declare.
         """
-        if isinstance(model, DiffusionModelBase):
-            if targets is None:
-                return
-            if isinstance(targets, str):
-                requested = [targets]
-            elif isinstance(targets, list):
-                requested = targets
-            elif isinstance(targets, dict):
-                requested = list(targets.keys())
-                if not all(isinstance(key, str) for key in targets.values()):
-                    raise TypeError('targets dict values must be dataset keys (strings)')
-            else:
+        if not isinstance(model, DiffusionModelBase):
+            if not isinstance(targets, str):
                 raise TypeError(
-                    'targets must be None, a prediction name, a list of prediction names, '
-                    'or a dict mapping prediction names to dataset keys'
+                    'For component models, targets must be the dataset key (a string) to fit '
+                    "the model's evaluate against."
                 )
-            if not all(isinstance(name, str) for name in requested):
-                raise TypeError('prediction names in targets must be strings')
+            return {'value': targets}
 
-            available = [target.name for target in model.get_fit_targets()]
-            unknown = sorted(set(requested) - set(available))
-            if unknown:
-                raise ValueError(
-                    f'Unknown prediction(s) {", ".join(unknown)} for '
-                    f'{model.__class__.__name__}. Available predictions: '
-                    f'{", ".join(available)}.'
-                )
-            return
-
-        if not isinstance(targets, str):
+        available = [target.name for target in model.get_fit_targets()]
+        if targets is None:
+            return dict.fromkeys(available)
+        if isinstance(targets, str):
+            requested = [targets]
+        elif isinstance(targets, list):
+            requested = targets
+        elif isinstance(targets, dict):
+            requested = list(targets.keys())
+            if not all(isinstance(key, str) for key in targets.values()):
+                raise TypeError('targets dict values must be dataset keys (strings)')
+        else:
             raise TypeError(
-                'For component models, targets must be the dataset key (a string) to fit '
-                "the model's evaluate against."
+                'targets must be None, a prediction name, a list of prediction names, '
+                'or a dict mapping prediction names to dataset keys'
             )
+        if not all(isinstance(name, str) for name in requested):
+            raise TypeError('prediction names in targets must be strings')
+
+        unknown = sorted(set(requested) - set(available))
+        if unknown:
+            raise ValueError(
+                f'Unknown prediction(s) {", ".join(unknown)} for '
+                f'{model.__class__.__name__}. Available predictions: '
+                f'{", ".join(available)}.'
+            )
+        return dict(targets) if isinstance(targets, dict) else dict.fromkeys(requested)
 
     # ------------------------------------------------------------------
     # dunder methods
