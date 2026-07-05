@@ -1989,7 +1989,7 @@ load from. If None, no data is loaded.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.get_masked_energy&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.get_masked_energy">get_masked_energy</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.Experiment.get_masked_energy&lt;/code&gt;)" href="#easydynamics.experiment.Experiment.get_masked_energy">get_masked_energy</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Get the energy values from the dataset, removing points where the y values or variances are</p>
@@ -2670,7 +2670,7 @@ notebooks.</p>
 
 
 <h5 id="easydynamics.experiment.Experiment.get_masked_energy" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_masked_energy</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_masked_energy</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -2712,6 +2712,27 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>mask</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<span title="scipp.Variable">Variable</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional precomputed finite-energy mask (as returned by
+:meth:<code>get_finite_energy_mask</code>), so callers that already extracted the data do not pay
+for a second extraction. If None, the mask is computed.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -3848,7 +3869,7 @@ load from. If None, no data is loaded.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.get_masked_energy&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.get_masked_energy">get_masked_energy</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;get_masked_energy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Q_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.experiment.experiment.Experiment.get_masked_energy&lt;/code&gt;)" href="#easydynamics.experiment.experiment.Experiment.get_masked_energy">get_masked_energy</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Get the energy values from the dataset, removing points where the y values or variances are</p>
@@ -4488,7 +4509,7 @@ load from. If None, no data is loaded.</p>
 
 
 <h7 id="easydynamics.experiment.experiment.Experiment.get_masked_energy" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_masked_energy</span><span class="p">(</span><span class="n">Q_index</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_masked_energy</span><span class="p">(</span><span class="n">Q_index</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h7>
 
@@ -4530,6 +4551,27 @@ NaN or Inf for the given Q index.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>mask</code>
+            </td>
+            <td>
+                  <code><span title="scipp">sc</span>.<span title="scipp.Variable">Variable</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional precomputed finite-energy mask (as returned by
+:meth:<code>get_finite_energy_mask</code>), so callers that already extracted the data do not pay
+for a second extraction. If None, the mask is computed.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
