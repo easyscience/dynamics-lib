@@ -79,7 +79,7 @@ class ExpressionComponent(ModelComponent):
 
     **Physical constants**
 
-    The symbols ``hbar`` (in meV*ps) and ``kb`` (in meV/K) are provided automatically as read-only
+    The symbols ``hbar`` (in meV*s) and ``kb`` (in meV/K) are provided automatically as read-only
     constants (DescriptorNumbers) when they appear in the expression:
     ```python
     boltzmann = sm.ExpressionComponent(
@@ -133,7 +133,7 @@ class ExpressionComponent(ModelComponent):
     # Physical constants provided automatically as read-only DescriptorNumbers when their
     # symbol appears in the expression: name -> (source constant from utils, default unit).
     _PHYSICAL_CONSTANTS: ClassVar[dict[str, tuple[DescriptorNumber, str]]] = {
-        'hbar': (hbar, 'meV*ps'),
+        'hbar': (hbar, 'meV*s'),
         'kb': (kb, 'meV/K'),
     }
 
@@ -166,7 +166,7 @@ class ExpressionComponent(ModelComponent):
         expression : str
             The symbolic expression as a string. Must contain 'x' as the independent variable. The
             symbols ``hbar`` and ``kb`` are provided automatically as read-only physical constants
-            (in meV*ps and meV/K respectively) unless overridden via *parameters*.
+            (in meV*s and meV/K respectively) unless overridden via *parameters*.
         parameters : dict[str, Numeric] | None, default=None
             Dictionary of parameter names and their initial values. Parameters that are not given a
             unit are dimensionless.
@@ -175,11 +175,11 @@ class ExpressionComponent(ModelComponent):
             without rescaling its value (see :meth:`set_unit`), and takes precedence over the unit
             of a Parameter instance given in *parameters*. When units are in use, a warning is
             issued if the expression's output unit does not match y_unit.
-        x_unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default="meV"
             Unit of the x-axis.
-        y_unit : str | sc.Unit, default='dimensionless'
+        y_unit : str | sc.Unit, default="dimensionless"
             Unit of the y-axis (output).
-        name : str, default='Expression'
+        name : str, default="Expression"
             Name of the component.
         display_name : str | None, default=None
             Display name shown when plotting.  Falls back to *name* if None.

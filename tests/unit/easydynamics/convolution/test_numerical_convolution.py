@@ -56,29 +56,15 @@ class TestNumericalConvolution:
         convolver_b.convolution()
         assert convolver_b._convolution_plan_is_current() is True
 
-    def test_manual_plan_valid_true_blesses_all_sharing_convolvers(self):
-        # WHEN: a settings change followed by an explicit convolution_plan_is_valid = True
-        settings = ConvolutionSettings()
-        convolver_a = _make_numerical_convolution(settings)
-        convolver_b = _make_numerical_convolution(settings)
-        settings.upsample_factor = 10
-
-        # THEN: the escape hatch suppresses rebuilds for every convolver sharing the settings
-        settings.convolution_plan_is_valid = True
-
-        # EXPECT
-        assert convolver_a._convolution_plan_is_current() is True
-        assert convolver_b._convolution_plan_is_current() is True
-
-    def test_manual_plan_valid_false_invalidates_all_sharing_convolvers(self):
+    def test_invalidate_plan_invalidates_all_sharing_convolvers(self):
         # WHEN: two current convolvers sharing one ConvolutionSettings
         settings = ConvolutionSettings()
         convolver_a = _make_numerical_convolution(settings)
         convolver_b = _make_numerical_convolution(settings)
 
-        # THEN: an explicit False invalidates the plan for every convolver, and one
-        # convolver rebuilding does not mask the invalidation from the other
-        settings.convolution_plan_is_valid = False
+        # THEN: an invalidation affects every convolver, and one convolver rebuilding does
+        # not mask the invalidation from the other
+        settings._invalidate_plan()
         convolver_a.convolution()
 
         # EXPECT
@@ -204,7 +190,10 @@ class TestNumericalConvolution:
 
         conv.upsample_factor = upsample
 
-        conv.convolution_settings.convolution_plan_is_valid = plan_valid
+        if plan_valid:
+            conv._mark_convolution_plan_current()
+        else:
+            conv._plan_seen_version = None
 
         # --- Track calls ---
         create_grid_called = False

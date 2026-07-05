@@ -143,7 +143,7 @@ class TestConvolution:
         """
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = False
+        conv._plan_seen_version = None
 
         # THEN EXPECT
         with patch.object(conv, '_build_convolution_plan') as build_plan:
@@ -278,7 +278,9 @@ class TestConvolution:
             patch_numerical as mock_numerical_method,
             patch_delta as mock_delta_method,
         ):
-            conv.convolution_settings.convolution_plan_is_valid = True
+            # The plan was built above; keep it current so convolution() does not rebuild
+            # the convolvers and discard the mocks.
+            conv._mark_convolution_plan_current()
             conv.convolution()
 
             if analytical_component:
@@ -549,7 +551,7 @@ class TestConvolution:
     ):
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = True
+        assert conv._convolution_plan_is_current() is True
 
         # Capture current identity of internal state to ensure no rebuild
         old_plan_id = id(conv._analytical_sample_components)
@@ -560,7 +562,7 @@ class TestConvolution:
         conv.display_name = 'new_name'
 
         # EXPECT
-        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert conv._convolution_plan_is_current() is True
         assert id(conv._analytical_sample_components) == old_plan_id
         assert id(conv._numerical_sample_components) == old_numerical_id
         assert id(conv._delta_sample_components) == old_delta_id
@@ -572,13 +574,13 @@ class TestConvolution:
     ):
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = True
+        assert conv._convolution_plan_is_current() is True
 
         # THEN
         conv.upsample_factor = 10
 
         # EXPECT
-        assert conv.convolution_settings.convolution_plan_is_valid is False
+        assert conv._convolution_plan_is_current() is False
 
     def test_convert_y_unit_propagates_to_sub_convolvers(self):
         # WHEN: Convolution with Gaussian sample and resolution components,

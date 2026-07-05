@@ -647,9 +647,9 @@ class TestExpressionComponentPhysicalConstants:
             'exp(-(x * tau / hbar)**2)', parameters={'tau': 1.0}, parameter_units={'tau': 'ps'}
         )
 
-        # THEN EXPECT: hbar in meV*ps, a read-only DescriptorNumber
-        assert expr.hbar.value == pytest.approx(0.6582120, rel=1e-6)
-        assert sc.Unit(str(expr.hbar.unit)) == sc.Unit('meV*ps')
+        # THEN EXPECT: hbar in meV*s, a read-only DescriptorNumber
+        assert expr.hbar.value == pytest.approx(6.582119569509065e-13, rel=1e-6)
+        assert sc.Unit(str(expr.hbar.unit)) == sc.Unit('meV*s')
         assert isinstance(expr.hbar, DescriptorNumber)
         assert not isinstance(expr.hbar, Parameter)
 

@@ -402,7 +402,7 @@ class TestNumericalConvolutionBase:
         new_settings = ConvolutionSettings()
 
         # WHEN
-        new_settings.convolution_plan_is_valid = True
+        version_before = new_settings._plan_version
 
         # THEN
         default_numerical_convolution_base.convolution_settings = new_settings
@@ -411,7 +411,7 @@ class TestNumericalConvolutionBase:
         # untouched — other convolvers sharing it are unaffected.
         assert default_numerical_convolution_base.convolution_settings is new_settings
         assert default_numerical_convolution_base._convolution_plan_is_current() is False
-        assert new_settings.convolution_plan_is_valid is True
+        assert new_settings._plan_version == version_before
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',

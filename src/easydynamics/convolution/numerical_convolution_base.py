@@ -129,9 +129,7 @@ class NumericalConvolutionBase(ConvolutionBase):
         Plan validity is tracked per convolver so several convolvers can share one
         ConvolutionSettings object: each convolver stores the settings' plan version it last
         rebuilt against (None after a convolver-local invalidation such as a new energy grid), and
-        the settings bump their version on every invalidation. Explicitly setting
-        ``convolution_plan_is_valid = True`` on the settings remains an escape hatch that
-        suppresses rebuilds for all convolvers.
+        the settings bump their version whenever an accuracy knob changes.
 
         Returns
         -------

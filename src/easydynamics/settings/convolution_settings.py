@@ -90,13 +90,9 @@ class ConvolutionSettings(EasyDynamicsBase):
         self._suppress_warnings = suppress_warnings
 
         # Plan-invalidation bookkeeping for convolvers sharing this settings object.
-        # _plan_version is bumped whenever the plan is invalidated (accuracy knob change or
-        # an explicit convolution_plan_is_valid = False); each convolver records the version
-        # it last rebuilt against. _blessed_plan_version records the version at the last
-        # explicit convolution_plan_is_valid = True, which suppresses rebuilds for all
-        # convolvers until the next invalidation.
+        # _plan_version is bumped whenever an accuracy knob changes; each convolver records
+        # the version it last rebuilt against and rebuilds when the versions differ.
         self._plan_version = 0
-        self._blessed_plan_version = -1
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -130,7 +126,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         """
         if factor is None:
             self._upsample_factor = factor
-            self.convolution_plan_is_valid = False
+            self._invalidate_plan()
             return
 
         if not isinstance(factor, Numeric):
@@ -141,7 +137,7 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         self._upsample_factor = factor
 
-        self.convolution_plan_is_valid = False
+        self._invalidate_plan()
 
     @property
     def extension_factor(self) -> float:
@@ -186,50 +182,16 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise ValueError('Extension factor must be non-negative.')
 
         self._extension_factor = float(factor)
-        self.convolution_plan_is_valid = False
+        self._invalidate_plan()
 
-    @property
-    def convolution_plan_is_valid(self) -> bool:
+    def _invalidate_plan(self) -> None:
         """
-        Get whether the current plan version was explicitly marked valid.
+        Invalidate the convolution plan for every convolver sharing these settings.
 
-        This reflects explicit assignments only: it is True after ``convolution_plan_is_valid =
-        True`` until the next invalidation (a knob change or an explicit False). Whether an
-        individual convolver needs a rebuild is tracked by the convolver itself against the
-        settings' plan version.
-
-        Returns
-        -------
-        bool
-            Whether the current plan version was explicitly marked valid.
+        Bumps the plan version, so every convolver that recorded an earlier version rebuilds its
+        plan before the next convolution.
         """
-        return self._blessed_plan_version == self._plan_version
-
-    @convolution_plan_is_valid.setter
-    def convolution_plan_is_valid(self, is_valid: bool) -> None:
-        """
-        Set whether the convolution plan is valid.
-
-        Parameters
-        ----------
-        is_valid : bool
-            Whether the convolution plan is valid.
-
-        Raises
-        ------
-        TypeError
-            If is_valid is not a bool.
-        """
-        if not isinstance(is_valid, bool):
-            raise TypeError('convolution_plan_is_valid must be True or False.')
-        if is_valid:
-            # An explicit True blesses the current version: all convolvers sharing these
-            # settings may skip rebuilding until the next invalidation.
-            self._blessed_plan_version = self._plan_version
-        else:
-            # An explicit False (or a knob setter delegating here) invalidates the plan for
-            # every convolver sharing these settings.
-            self._plan_version += 1
+        self._plan_version += 1
 
     def _plan_valid_for(self, seen_version: int) -> bool:
         """
@@ -243,12 +205,9 @@ class ConvolutionSettings(EasyDynamicsBase):
         Returns
         -------
         bool
-            True if no invalidation happened since the convolver's rebuild, or the current version
-            was explicitly blessed.
+            True if no invalidation happened since the convolver's rebuild.
         """
-        return (
-            seen_version == self._plan_version or self._blessed_plan_version == self._plan_version
-        )
+        return seen_version == self._plan_version
 
     @property
     def suppress_warnings(self) -> bool:

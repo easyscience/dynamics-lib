@@ -22,7 +22,6 @@ class TestConvolutionSettings:
         assert isinstance(default_convolution_settings, ConvolutionSettings)
         assert default_convolution_settings.upsample_factor == 5
         assert default_convolution_settings.extension_factor == pytest.approx(0.2)
-        assert default_convolution_settings.convolution_plan_is_valid is False
 
     def test_copy(self):
         # WHEN
@@ -54,7 +53,6 @@ class TestConvolutionSettings:
         # THEN EXPECT
         assert convolution_settings.upsample_factor == 10
         assert convolution_settings.extension_factor == pytest.approx(0.5)
-        assert convolution_settings.convolution_plan_is_valid is False
         assert convolution_settings.suppress_warnings is True
 
     def test_init_with_None(self):
@@ -71,7 +69,6 @@ class TestConvolutionSettings:
         # THEN EXPECT
         assert convolution_settings.upsample_factor is None
         assert convolution_settings.extension_factor is None
-        assert convolution_settings.convolution_plan_is_valid is False
         assert convolution_settings.suppress_warnings is False
 
     @pytest.mark.parametrize(
@@ -115,16 +112,15 @@ class TestConvolutionSettings:
         settings = default_convolution_settings
 
         # WHEN
-        # Ensure it's True first so we can test the reset
-        settings.convolution_plan_is_valid = True
+        version_before = settings._plan_version
 
         # THEN
         settings.upsample_factor = value
 
-        # EXPECT
+        # EXPECT: value stored and the plan invalidated for all convolvers
         expected = pytest.approx(float(value)) if value is not None else None
         assert settings.upsample_factor == expected
-        assert settings.convolution_plan_is_valid is False
+        assert settings._plan_version == version_before + 1
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',
@@ -163,14 +159,14 @@ class TestConvolutionSettings:
     def test_extension_factor_setter_valid(self, default_convolution_settings, value):
 
         # WHEN
-        default_convolution_settings.convolution_plan_is_valid = True
+        version_before = default_convolution_settings._plan_version
 
         # THEN
         default_convolution_settings.extension_factor = value
 
-        # EXPECT
+        # EXPECT: value stored and the plan invalidated for all convolvers
         assert default_convolution_settings.extension_factor == pytest.approx(float(value))
-        assert default_convolution_settings.convolution_plan_is_valid is False
+        assert default_convolution_settings._plan_version == version_before + 1
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',
@@ -197,51 +193,22 @@ class TestConvolutionSettings:
         with pytest.raises(expected_exception, match=match):
             default_convolution_settings.extension_factor = value
 
-    @pytest.mark.parametrize(
-        'value',
-        [True, False],
-        ids=[
-            'true',
-            'false',
-        ],
-    )
-    def test_convolution_plan_is_valid_setter_valid(
-        self,
-        default_convolution_settings,
-        value,
-    ):
+    def test_invalidate_plan_bumps_version(self, default_convolution_settings):
         # WHEN
-        default_convolution_settings.convolution_plan_is_valid = not value
+        version_before = default_convolution_settings._plan_version
 
         # THEN
-        default_convolution_settings.convolution_plan_is_valid = value
+        default_convolution_settings._invalidate_plan()
 
         # EXPECT
-        assert default_convolution_settings.convolution_plan_is_valid is value
-
-    @pytest.mark.parametrize(
-        'value, expected_exception, match',
-        [
-            ('True', TypeError, 'must be True or False'),
-            (1, TypeError, 'must be True or False'),
-            (None, TypeError, 'must be True or False'),
-        ],
-        ids=[
-            'string',
-            'int',
-            'none',
-        ],
-    )
-    def test_convolution_plan_is_valid_setter_invalid(
-        self,
-        default_convolution_settings,
-        value,
-        expected_exception,
-        match,
-    ):
-        # WHEN / THEN / EXPECT
-        with pytest.raises(expected_exception, match=match):
-            default_convolution_settings.convolution_plan_is_valid = value
+        assert default_convolution_settings._plan_version == version_before + 1
+        assert default_convolution_settings._plan_valid_for(version_before) is False
+        assert (
+            default_convolution_settings._plan_valid_for(
+                default_convolution_settings._plan_version
+            )
+            is True
+        )
 
     def test_suppress_warnings_setter_valid(self, default_convolution_settings):
         # WHEN
