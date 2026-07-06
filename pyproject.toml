@@ -55,6 +55,7 @@ dev = [
   'jupytext',                        # Jupyter notebook text format support
   'jupyterquiz',                     # Quizzes in Jupyter notebooks
   'pydoclint',                       # Docstring linter
+  'docstring-parser-fork!=0.0.15',   # Parser used by pydoclint. 0.0.15 splits NumPy-style defaults -> DOC105 failures
   'format-docstring',                # Docstring formatter
   'docstripy',                       # Convert docstrings to other formats
   'interrogate',                     # Docstring coverage checker
