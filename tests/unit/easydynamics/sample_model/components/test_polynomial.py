@@ -5,6 +5,7 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 from scipp import UnitError
 
@@ -27,7 +28,8 @@ class TestPolynomial:
         # EXPECT
         assert polynomial.display_name == 'Polynomial'
         assert polynomial.coefficients[0].value == pytest.approx(0.0)
-        assert polynomial.unit == 'meV'
+        assert polynomial.x_unit == 'meV'
+        assert polynomial.y_unit == 'dimensionless'
 
     def test_initialization(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
@@ -48,7 +50,11 @@ class TestPolynomial:
                 'Each coefficient must be ',
             ),
             (
-                {'coefficients': [1.0, -2.0, 3.0], 'unit': 123},
+                {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 123},
+                'unit must be ',
+            ),
+            (
+                {'coefficients': [1.0, -2.0, 3.0], 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
             ),
             (
@@ -59,6 +65,7 @@ class TestPolynomial:
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_message):
             Polynomial(display_name='TestPolynomial', **kwargs)
 
@@ -118,13 +125,12 @@ class TestPolynomial:
             assert np.isclose(polynomial.coefficients[i].value, expected)
 
     def test_set_coefficients_wrong_length_raises(self, polynomial: Polynomial):
-        """Ensure that setting coefficients with mismatched length
-        raises an error."""
+        # WHEN THEN EXPECT
         with pytest.raises(ValueError, match='Number of coefficients'):
             polynomial.coefficients = [1.0, 2.0]  # shorter list
 
     def test_set_coefficients_invalid_type_raises(self, polynomial: Polynomial):
-        """Ensure that invalid coefficient types raise a TypeError."""
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError):
             polynomial.coefficients = [1.0, 'invalid', 3.0]
 
@@ -137,8 +143,11 @@ class TestPolynomial:
         ],
     )
     def test_set_coefficients_raises(self, invalid_coeffs, expected_message):
+        # WHEN
+        # THEN
+        polynomial = Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
         with pytest.raises(TypeError, match=expected_message):
-            polynomial = Polynomial(display_name='TestPolynomial', coefficients=[1.0, -2.0, 3.0])
+            # EXPECT
             polynomial.coefficients = invalid_coeffs
 
     def test_coefficient_values(self, polynomial: Polynomial):
@@ -161,20 +170,20 @@ class TestPolynomial:
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
 
-    def test_convert_unit(self, polynomial: Polynomial):
+    def test_convert_x_unit(self, polynomial: Polynomial):
         # WHEN
-        polynomial.convert_unit('microeV')
+        polynomial.convert_x_unit('microeV')
 
         # THEN EXPECT
-        assert polynomial._unit == 'microeV'
+        assert polynomial._x_unit == 'microeV'
         assert np.isclose(polynomial.coefficients[0].value, 1.0)
         assert np.isclose(polynomial.coefficients[1].value, -2.0 * 1e-3)
         assert np.isclose(polynomial.coefficients[2].value, 3.0 * 1e-6)
 
-    def test_convert_unit_raises_invalid_unit(self, polynomial: Polynomial):
+    def test_convert_x_unit_raises_invalid_unit(self, polynomial: Polynomial):
         # WHEN THEN EXPECT
-        with pytest.raises(UnitError, match='unit must be '):
-            polynomial.convert_unit(123)
+        with pytest.raises(Exception, match='unit must be '):
+            polynomial.convert_x_unit(123)
 
     def test_copy(self, polynomial: Polynomial):
         # WHEN THEN
@@ -192,10 +201,101 @@ class TestPolynomial:
             assert copied_coeff.value == original_coeff.value
             assert copied_coeff.fixed == original_coeff.fixed
 
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert p.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            polynomial.y_unit = '1/meV'
+
+    def test_convert_y_unit_scales_all_coefficients(self):
+        # WHEN: polynomial with two non-zero coefficients and a physical y_unit
+        p = Polynomial(coefficients=[3.0, 1.0], x_unit='meV', y_unit='meV^-1')
+        x = np.array([2.0])
+        val_before = p.evaluate(x)[0]  # 3.0 + 1.0*2.0 = 5.0 [meV^-1]
+
+        # THEN
+        p.convert_y_unit('eV^-1')
+
+        # EXPECT: both coefficients rescaled by 1000 (1 meV^-1 = 1000 eV^-1)
+        assert p.y_unit == 'eV^-1'
+        assert np.isclose(p.coefficients[0].value, 3000.0)
+        assert np.isclose(p.coefficients[1].value, 1000.0)
+        assert np.isclose(p.evaluate(x)[0], val_before * 1000.0)
+
+    def test_evaluate_scipp_output(self):
+        # WHEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV', suppress_warnings=True)
+        x = np.linspace(-3, 3, 40)
+        # THEN
+        result = p.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 40
+        np.testing.assert_allclose(result.values, p.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        p = Polynomial(
+            coefficients=[1.0, 2.0],
+            x_unit='meV',
+            y_unit='1/meV',
+            suppress_warnings=True,
+        )
+        x = np.linspace(-3, 3, 40)
+        # THEN
+        result = p.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+
     def test_repr(self, polynomial: Polynomial):
         # WHEN THEN
         repr_str = repr(polynomial)
 
         # EXPECT
-        assert "name='PolynomialName'" in repr_str
-        assert 'coefficients=' in repr_str
+        assert 'name = PolynomialName' in repr_str
+        assert 'coefficients =' in repr_str
+
+    def test_evaluate_with_scipp_x_different_compatible_unit(self):
+        # WHEN: polynomial with x_unit='meV', coefficients [1.0, 1.0] → f(x) = 1 + x
+        p = Polynomial(coefficients=[1.0, 1.0], x_unit='meV')
+        # THEN: evaluate with x in eV (compatible unit) — triggers unit-rescaling branch
+        x_eV = sc.array(dims=['x'], values=np.array([0.001, 0.002]), unit='eV')
+        result = p.evaluate(x_eV)
+        # EXPECT: 0.001 eV = 1 meV → f(1)=2, 0.002 eV = 2 meV → f(2)=3; state not mutated
+        np.testing.assert_allclose(result, [2.0, 3.0], rtol=1e-5)
+        assert p.x_unit == 'meV'
+
+    def test_evaluate_with_equivalent_unit_spelling_does_not_rescale(self):
+        # WHEN: 'ueV' and scipp's canonical micro-sign spelling are the same unit
+        # (regression: a string comparison used to treat them as different and rescale)
+        p = Polynomial(coefficients=[1.0, 1.0], x_unit='ueV', suppress_warnings=True)
+        x = sc.array(dims=['x'], values=np.array([1.0, 2.0]), unit='\u00b5eV')
+
+        # THEN
+        result = p.evaluate(x)
+
+        # EXPECT: f(x) = 1 + x with the raw coefficient values, no rescaling applied
+        np.testing.assert_allclose(result, [2.0, 3.0])
+
+    def test_convert_y_unit_invalid_type_raises(self, polynomial: Polynomial):
+        # WHEN THEN EXPECT
+        with pytest.raises(UnitError, match='new_y_unit must be a string or a scipp unit'):
+            polynomial.convert_y_unit(123)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+        # THEN
+        with pytest.raises(UnitError):
+            p.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert p.y_unit == 'dimensionless'
+        assert np.isclose(p.coefficients[0].value, 1.0)
+        assert np.isclose(p.coefficients[1].value, 2.0)

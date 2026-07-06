@@ -4,33 +4,72 @@
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.variable import Parameter
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.energy_grid import EnergyGrid
 from easydynamics.convolution.numerical_convolution import NumericalConvolution
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
+
+
+def _make_numerical_convolution(convolution_settings=None):
+    energy = np.linspace(-10, 10, 5001)
+    sample_components = ComponentCollection(display_name='ComponentCollection')
+    sample_components.append_component(Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4))
+    resolution_components = ComponentCollection(display_name='ResolutionModel')
+    resolution_components.append_component(
+        Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
+    )
+
+    return NumericalConvolution(
+        energy=energy,
+        sample_components=sample_components,
+        resolution_components=resolution_components,
+        convolution_settings=convolution_settings,
+    )
 
 
 class TestNumericalConvolution:
     @pytest.fixture
     def default_numerical_convolution(self):
-        energy = np.linspace(-10, 10, 5001)
-        sample_components = ComponentCollection(display_name='ComponentCollection')
-        sample_components.append_component(
-            Gaussian(name='Gaussian1', area=2.0, center=0.1, width=0.4)
-        )
-        resolution_components = ComponentCollection(display_name='ResolutionModel')
-        resolution_components.append_component(
-            Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5)
-        )
+        return _make_numerical_convolution()
 
-        return NumericalConvolution(
-            energy=energy,
-            sample_components=sample_components,
-            resolution_components=resolution_components,
-        )
+    def test_settings_change_invalidates_all_sharing_convolvers(self):
+        # WHEN: two convolvers sharing one ConvolutionSettings, and an accuracy knob changes
+        settings = ConvolutionSettings()
+        convolver_a = _make_numerical_convolution(settings)
+        convolver_b = _make_numerical_convolution(settings)
+        settings.upsample_factor = 10
+
+        # THEN: A consumes the change by rebuilding its plan
+        convolver_a.convolution()
+
+        # EXPECT: A is current, but B still sees the stale plan (regression: A's rebuild
+        # setting the shared flag used to mask the settings change from B)
+        assert convolver_a._convolution_plan_is_current() is True
+        assert convolver_b._convolution_plan_is_current() is False
+
+        # and B becomes current after its own rebuild
+        convolver_b.convolution()
+        assert convolver_b._convolution_plan_is_current() is True
+
+    def test_invalidate_plan_invalidates_all_sharing_convolvers(self):
+        # WHEN: two current convolvers sharing one ConvolutionSettings
+        settings = ConvolutionSettings()
+        convolver_a = _make_numerical_convolution(settings)
+        convolver_b = _make_numerical_convolution(settings)
+
+        # THEN: an invalidation affects every convolver, and one convolver rebuilding does
+        # not mask the invalidation from the other
+        settings._invalidate_plan()
+        convolver_a.convolution()
+
+        # EXPECT
+        assert convolver_a._convolution_plan_is_current() is True
+        assert convolver_b._convolution_plan_is_current() is False
 
     def test_init(self, default_numerical_convolution):
         """
@@ -48,7 +87,8 @@ class TestNumericalConvolution:
         assert default_numerical_convolution.upsample_factor == 5
         assert default_numerical_convolution.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution.temperature is None
-        assert default_numerical_convolution.unit == 'meV'
+        assert default_numerical_convolution.x_unit == 'meV'
+        assert default_numerical_convolution.y_unit == 'dimensionless'
         assert (
             default_numerical_convolution.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -150,7 +190,10 @@ class TestNumericalConvolution:
 
         conv.upsample_factor = upsample
 
-        conv.convolution_settings.convolution_plan_is_valid = plan_valid
+        if plan_valid:
+            conv._mark_convolution_plan_current()
+        else:
+            conv._plan_seen_version = None
 
         # --- Track calls ---
         create_grid_called = False
@@ -233,3 +276,53 @@ class TestNumericalConvolution:
             assert result.shape == conv.energy.values.shape
         else:
             assert result.shape == dense.shape
+
+    def test_convolution_with_energy_offset_in_different_unit(self, default_numerical_convolution):
+        # WHEN: energy grid is in meV, offset given as a Parameter in eV (0.001 eV = 1.0 meV)
+        conv = default_numerical_convolution
+        conv.energy_offset = Parameter(name='energy_offset', value=0.001, unit='eV')
+        result_ev = conv.convolution()
+
+        # THEN: run again with the numerically equivalent offset as an explicit meV Parameter
+        conv.energy_offset = Parameter(name='energy_offset', value=1.0, unit='meV')
+        result_mev = conv.convolution()
+
+        # EXPECT: unit conversion is transparent — results are numerically identical
+        np.testing.assert_allclose(result_ev, result_mev, rtol=1e-6)
+
+    def test_repr(self, default_numerical_convolution):
+        r = repr(default_numerical_convolution)
+        assert 'NumericalConvolution' in r
+        assert 'energy_len=' in r
+
+    # ───── Regression tests ─────
+
+    def test_detailed_balance_energy_includes_even_length_offset(
+        self, default_numerical_convolution, monkeypatch
+    ):
+        # WHEN: even-length energy grid with temperature
+        nc = default_numerical_convolution
+        nc.energy = np.linspace(-10, 10, 100)  # even-length → non-zero energy_even_length_offset
+        nc.temperature = 300.0
+
+        captured = {}
+
+        # spy_dbf wraps detailed_balance_factor: captures the energy argument passed to it,
+        # then delegates to the real function so the convolution still produces a valid result.
+        def spy_dbf(**kwargs):
+            captured['energy'] = kwargs['energy']
+            return detailed_balance_factor(**kwargs)
+
+        monkeypatch.setattr(
+            'easydynamics.convolution.numerical_convolution.detailed_balance_factor', spy_dbf
+        )
+
+        # THEN: run convolution
+        nc.convolution()
+
+        # EXPECT: DBF receives energy_dense - energy_even_length_offset
+        # Before the fix, energy_even_length_offset was omitted, causing a half-bin error.
+        grid = nc._energy_grid
+        np.testing.assert_allclose(
+            captured['energy'], grid.energy_dense - grid.energy_even_length_offset, atol=1e-12
+        )

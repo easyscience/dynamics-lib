@@ -3,15 +3,23 @@
 
 from __future__ import annotations
 
-import warnings
 from abc import abstractmethod
+from functools import partial
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipp as sc
 from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import Numeric
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import convert_value_unit
+
+if TYPE_CHECKING:
+    from easyscience.variable import Parameter
 
 
 class ModelComponent(EasyDynamicsModelBase):
@@ -19,107 +27,111 @@ class ModelComponent(EasyDynamicsModelBase):
 
     def __init__(
         self,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'ModelComponent',
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
-        Initialize the ModelComponent.
-
         Parameters
         ----------
-        unit : str | sc.Unit, default='meV'
-            The unit of the model component.
+        x_unit : str | sc.Unit, default='meV'
+            Unit for the x-axis (independent variable) of this component.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit for the y-axis (dependent variable / output) of this component.
         name : str, default='ModelComponent'
-            The name of the model component for indexing.
+            Internal name used for parameter labelling and logging.
         display_name : str | None, default=None
-            A human-readable name for the component.
+            Human-readable name shown in plots and reports. Falls back to *name* if None.
         unique_name : str | None, default=None
-            A unique identifier for the component.
+            Globally unique identifier. Auto-generated if None.
         """
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-    @property
-    def unit(self) -> str:
+    def get_fit_targets(self) -> list[FitTarget]:
         """
-        Get the unit.
+        Get the fittable predictions of this component as FitTargets.
+
+        Component models have a single prediction — their ``evaluate`` — named ``'value'`` with no
+        default dataset key; ``FitBinding`` supplies the dataset key to fit against. The target is
+        a snapshot: its units reflect the component's x_unit/y_unit at call time (None means raw
+        values are fitted without unit conversion).
 
         Returns
         -------
-        str
-            The unit of the model component.
+        list[FitTarget]
+            A single FitTarget wrapping this component's evaluate.
         """
-        return str(self._unit)
-
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
-        """
-        Unit is read-only.
-
-        Use convert_unit to change the unit between allowed types or create a new ModelComponent
-        with the desired unit.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit to set.
-
-        Raises
-        ------
-        AttributeError
-            Always raised since unit is read-only.
-        """
-        raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
-            f'or create a new {self.__class__.__name__} with the desired unit.'
-        )
+        return [
+            FitTarget(
+                name='value',
+                dataset_key=None,
+                function=lambda x, model=self, **_: model.evaluate(x),
+                label=self.display_name,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
+            )
+        ]
 
     def fix_all_parameters(self) -> None:
-        """Fix all parameters in the model component."""
+        """
+        Fix all parameters in the model component.
 
-        pars = self.get_fittable_parameters()
-        for p in pars:
+        Sets ``fixed=True`` on every fittable parameter returned by
+        :meth:`get_fittable_parameters`.
+        """
+        for p in self.get_fittable_parameters():
             p.fixed = True
 
     def free_all_parameters(self) -> None:
-        """Free all parameters in the model component."""
+        """
+        Free all parameters in the model component.
+
+        Sets ``fixed=False`` on every fittable parameter returned by
+        :meth:`get_fittable_parameters`.
+        """
         for p in self.get_fittable_parameters():
             p.fixed = False
 
     def _prepare_x_for_evaluate(
         self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> np.ndarray:
+    ) -> tuple[np.ndarray, str | None, str]:
         """
-        Prepare the input x for evaluation by handling units and converting to a numpy array.
+        Validate x and extract its values, detected unit, and dimension name.
+
+        x is never converted. When x carries a unit, the caller is responsible for resolving
+        parameter values to that unit via _resolve_param_value.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The input data to prepare.
-
-        Raises
-        ------
-        ValueError
-            If x contains NaN or infinite values, or if a sc.DataArray has more than one
-            coordinate.
-        UnitError
-            If x has incompatible units that cannot be converted to the component's unit.
+            Input x values to validate and extract.
 
         Returns
         -------
-        np.ndarray
-            The prepared input data as a numpy array.
-        """
+        tuple[np.ndarray, str | None, str]
+            x_values : np.ndarray of raw float values (no unit conversion) detected_unit : str unit
+            of x if scipp input, else None dim : scipp dimension name if scipp input, else 'x'
 
-        # Handle units
+        Raises
+        ------
+        UnitError
+            If x has a unit incompatible with the model's x_unit.
+        ValueError
+            If x contains NaN or infinite values, or if a DataArray has more than one coordinate.
+        """
+        detected_unit: str | None = None
+        dim: str = 'x'
+        dim_from_dataarray: bool = False
+
         if isinstance(x, sc.DataArray):
-            # Check that there's exactly one coordinate
             coords = dict(x.coords)
             ncoords = len(coords)
             if ncoords != 1:
@@ -128,31 +140,25 @@ class ModelComponent(EasyDynamicsModelBase):
                     f'scipp.DataArray must have exactly one coordinate to be used as input `x`. '
                     f'Found {ncoords} coordinates: {coord_names}.'
                 )
-            # get the coordinate, it's a sc.Variable
-            _, coord_obj = next(iter(coords.items()))
+            dim, coord_obj = next(iter(coords.items()))
             x = coord_obj
+            dim_from_dataarray = True
+
         if isinstance(x, sc.Variable):
-            # Need to check if the units are consistent,
-            # and convert if not.
+            detected_unit = str(x.unit)
+            if not dim_from_dataarray:
+                dim = x.dims[0] if x.dims else 'x'
             x_in = x.value if x.sizes == {} else x.values
-            if self._unit is not None and x.unit != self._unit:
-                self_unit_for_warning = self._unit
+
+            # Validate that x's unit is compatible with model's x_unit
+            if self.x_unit is not None and detected_unit != self.x_unit:
                 try:
-                    self.convert_unit(x.unit.name)
+                    sc.to_unit(sc.scalar(1.0, unit=detected_unit), self.x_unit)
                 except Exception as e:
                     raise UnitError(
-                        f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
-                            has unit {self._unit}. \
-                                Failed to convert {self.__class__.__name__} to {x.unit}.'
+                        f'Input x has unit {detected_unit}, which is incompatible with '
+                        f'{self.__class__.__name__} x_unit {self.x_unit}.'
                     ) from e
-
-                warnings.warn(
-                    f'Input x has unit {x.unit}, but {self.__class__.__name__} component \
-                        has unit {self_unit_for_warning}. \
-                            Converting {self.__class__.__name__} to {x.unit}.',
-                    UserWarning,
-                    stacklevel=3,
-                )
         else:
             x_in = x
 
@@ -167,60 +173,259 @@ class ModelComponent(EasyDynamicsModelBase):
         if any(np.isinf(x_in)):
             raise ValueError('Input x contains infinite values.')
 
-        return np.sort(x_in)
+        return x_in, detected_unit, dim
 
-    def convert_unit(self, unit: str | sc.Unit) -> None:
+    def _resolve_param_value(self, param: Parameter, target_unit: str | None) -> float:
         """
-        Convert the unit of the Parameters in the component.
+        Return param's value converted to target_unit without mutating param.
+
+        If target_unit is None or already matches param's unit, returns param.value directly. Uses
+        a temporary scipp scalar for the conversion.
 
         Parameters
         ----------
-        unit : str | sc.Unit
-            The new unit to convert to.
+        param : Parameter
+            The parameter whose value should be resolved.
+        target_unit : str | None
+            The unit to which the parameter value should be converted.  When None (or equal to the
+            parameter's own unit) the raw value is returned without any conversion.
+
+        Returns
+        -------
+        float
+            The parameter value expressed in *target_unit*.
+        """
+        if target_unit is None:
+            return param.value
+        return convert_value_unit(param.value, param.unit, target_unit)
+
+    def _convert_x_unit_area_based(
+        self,
+        new_x_unit: str | sc.Unit,
+        x_params: list,
+        area_param: Parameter | None = None,
+        inverse_params: list | None = None,
+    ) -> None:
+        """
+        Shared convert_x_unit logic for components whose parameters carry mixed x-based units.
+
+        Validates the input type, converts all x-axis parameters, the optional area parameter (area
+        = x_unit * y_unit), and any reciprocal (``1/x_unit``) parameters to the new unit, and
+        updates ``_x_unit``.  If any step fails, all parameters are rolled back to their original
+        units and the failing conversion's exception is re-raised.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.
+        x_params : list
+            Parameters whose unit equals *x_unit* (e.g. center, width).
+        area_param : Parameter | None, default=None
+            The parameter whose unit equals ``x_unit * y_unit``, if the component has one.
+        inverse_params : list | None, default=None
+            Parameters whose unit equals ``1/x_unit`` (e.g. an exponential rate).
 
         Raises
         ------
         TypeError
-            If the provided unit is not a str or sc.Unit.
-        Exception
-            If the provided unit is invalid or incompatible with the component's parameters.
+            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
         """
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
+        if not isinstance(new_x_unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+        old_x_unit = self.x_unit
+        new_x_str = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
+        conversions = [
+            (partial(convert_parameter_unit, p), new_x_str, old_x_unit) for p in x_params
+        ]
+        if area_param is not None:
+            new_area_unit = str(sc.Unit(new_x_str) * sc.Unit(self.y_unit))
+            old_area_unit = str(sc.Unit(old_x_unit) * sc.Unit(self.y_unit))
+            conversions.append((
+                partial(convert_parameter_unit, area_param),
+                new_area_unit,
+                old_area_unit,
+            ))
+        conversions.extend(
+            (partial(convert_parameter_unit, p), '1/' + new_x_str, '1/' + str(old_x_unit))
+            for p in inverse_params or []
+        )
+        convert_units_with_rollback(conversions)
+        self._x_unit = new_x_str
 
-        old_unit = self._unit
-        pars = self.get_all_parameters()
-        try:
-            for p in pars:
-                p.convert_unit(unit)
-            self._unit = unit
-        except Exception as e:
-            # Attempt to rollback on failure
-            try:
-                for p in pars:
-                    if hasattr(p, 'convert_unit'):
-                        p.convert_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
-
-    @abstractmethod
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def _convert_y_unit_area_based(
+        self,
+        new_y_unit: str | sc.Unit,
+        area_param: Parameter | None = None,
+        y_params: list | None = None,
+    ) -> None:
         """
-        Abstract method to evaluate the model component at input x.
+        Shared convert_y_unit logic for components whose parameters carry y-based units.
 
-        Must be implemented by subclasses.
+        Validates the input type, rescales the optional area parameter from ``x_unit * old_y_unit``
+        to ``x_unit * new_y_unit`` and any pure y-unit parameters to the new unit, and updates
+        ``_y_unit``.  If any step fails, the parameters are rolled back to their original units and
+        the failing conversion's exception is re-raised.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        area_param : Parameter | None, default=None
+            The parameter whose unit equals ``x_unit * y_unit``, if the component has one.
+        y_params : list | None, default=None
+            Parameters whose unit equals *y_unit* (e.g. an amplitude).
+
+        Raises
+        ------
+        TypeError
+            If *new_y_unit* is not a ``str`` or ``sc.Unit``.
+        """
+        if not isinstance(new_y_unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(new_y_unit).__name__}')
+        old_y_unit = self.y_unit
+        new_y_str = str(new_y_unit) if isinstance(new_y_unit, sc.Unit) else new_y_unit
+        conversions = []
+        if area_param is not None:
+            new_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(new_y_str))
+            old_area_unit = str(sc.Unit(self.x_unit) * sc.Unit(old_y_unit))
+            conversions.append((
+                partial(convert_parameter_unit, area_param),
+                new_area_unit,
+                old_area_unit,
+            ))
+        conversions.extend(
+            (partial(convert_parameter_unit, p), new_y_str, old_y_unit) for p in y_params or []
+        )
+        convert_units_with_rollback(conversions)
+        self._y_unit = new_y_str
+
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert the x-axis unit of the component.
+
+        The base implementation converts all parameters. Subclasses with mixed-unit parameters
+        (e.g. area ≠ x_unit) should override this method. If the conversion between the current
+        unit and *new_x_unit* fails, the component is rolled back to its original unit and the
+        failing conversion's exception is re-raised.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+
+        Raises
+        ------
+        TypeError
+            If *new_x_unit* is not a ``str`` or ``sc.Unit``.
+        """
+        if not isinstance(new_x_unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(new_x_unit).__name__}')
+
+        old_unit = self.x_unit
+        convert_units_with_rollback([
+            (partial(convert_parameter_unit, p), new_x_unit, old_unit)
+            for p in self.get_all_parameters()
+        ])
+        self._x_unit = str(new_x_unit) if isinstance(new_x_unit, sc.Unit) else new_x_unit
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis (output) unit. Subclasses with an area parameter should override this.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised in this base implementation.  Subclasses that carry an area parameter
+            (area_unit = x_unit * y_unit) must override this method to rescale the area
+            appropriately.
+        """
+        raise NotImplementedError(f'{self.__class__.__name__} does not support convert_y_unit.')
+
+    def evaluate(
+        self,
+        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
+        output: str = 'numpy',
+    ) -> np.ndarray | sc.Variable:
+        """
+        Evaluate the model component at input x.
+
+        When x carries a unit (scipp input), parameter values are temporarily converted to that
+        unit for the computation without mutating the parameters.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the component.
+            Input x values.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray; 'scipp' returns sc.Variable with y_unit.
+
+        Raises
+        ------
+        ValueError
+            If output is not 'numpy' or 'scipp'.
+
+        Returns
+        -------
+        np.ndarray | sc.Variable
+            Evaluated model values at x.
+        """
+        if output not in ('numpy', 'scipp'):
+            raise ValueError(f"output must be 'numpy' or 'scipp', got {output!r}")
+        x_vals, detected_unit, dim = self._prepare_x_for_evaluate(x)
+        # eval_unit is None when x is already in the component's own x_unit (unitless input is
+        # assumed to be), letting _evaluate_values skip all unit resolution in the hot path.
+        eval_unit = detected_unit if detected_unit != self.x_unit else None
+        values = self._evaluate_values(x_vals, eval_unit)
+        if output == 'scipp':
+            return sc.array(dims=[dim], values=values, unit=self.y_unit)
+        return values
+
+    @abstractmethod
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
+        """
+        Compute the component's values for raw x values expressed in eval_unit.
+
+        Implementations must resolve their parameters to *eval_unit* (via
+        :meth:`_resolve_param_value`) and return plain numpy values; the public :meth:`evaluate`
+        handles input validation and output wrapping.
+
+        Parameters
+        ----------
+        x_vals : np.ndarray
+            Raw x values, expressed in *eval_unit*.
+        eval_unit : str | None
+            The unit of *x_vals* when it differs from the component's own x_unit, or None when
+            x_vals is already expressed in the component's x_unit (no resolution needed).
 
         Returns
         -------
         np.ndarray
-            Evaluated function values.
+            Evaluated model values at x_vals.
         """
+
+    def _eval_area_unit(self, eval_unit: str | None) -> str | None:
+        """
+        Get the area unit (``eval_unit * y_unit``) matching an evaluation unit.
+
+        Parameters
+        ----------
+        eval_unit : str | None
+            The unit x values are expressed in during evaluation.
+
+        Returns
+        -------
+        str | None
+            The corresponding area unit, or None when either unit is unknown (in which case
+            parameter values are used unconverted).
+        """
+        if eval_unit is None or self.y_unit is None:
+            return None
+        return str(sc.Unit(eval_unit) * sc.Unit(self.y_unit))
 
     def __repr__(self) -> str:
         """
@@ -231,5 +436,7 @@ class ModelComponent(EasyDynamicsModelBase):
         str
             A string representation of the ModelComponent.
         """
-
-        return f'{self.__class__.__name__}(unique_name={self.unique_name!r}, unit={self._unit})'
+        return (
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit})'
+        )

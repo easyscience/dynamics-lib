@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model.components.delta_function import DeltaFunction
@@ -14,6 +15,57 @@ class TestDeltaLorentz:
     @pytest.fixture
     def delta_lorentz_model(self):
         return DeltaLorentz()
+
+    def test_mean_u_squared_unit_conversion_leaves_physics_unchanged(self):
+        # WHEN: a model with a non-zero Debye-Waller factor
+        model = DeltaLorentz(A_0=0.5, mean_u_squared=1.0, lorentzian_width=0.1, Q=np.array([1.0]))
+        eisf_before = model.calculate_EISF()
+        qisf_before = model.calculate_QISF()
+        delta_area_before = model.get_component_collections(0)[1].area.value
+
+        # THEN: convert mean_u_squared to nm**2 (same physical value, different number)
+        model.mean_u_squared.convert_unit('nm**2')
+
+        # EXPECT: EISF, QISF, and the dependent delta area are unchanged
+        np.testing.assert_allclose(model.calculate_EISF(), eisf_before)
+        np.testing.assert_allclose(model.calculate_QISF(), qisf_before)
+        assert model.get_component_collections(0)[1].area.value == pytest.approx(delta_area_before)
+
+    def test_convert_x_unit_converts_lorentzian_width(self):
+        # WHEN
+        model = DeltaLorentz(lorentzian_width=0.1, Q=np.array([1.0]))
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: the width template is rescaled and the regenerated component follows
+        assert sc.Unit(str(model.lorentzian_width.unit)) == sc.Unit('ueV')
+        assert model.lorentzian_width.value == pytest.approx(100.0)
+        collection = model.get_component_collections(0)
+        assert sc.Unit(str(collection[0].width.unit)) == sc.Unit('ueV')
+        assert collection[0].width.value == pytest.approx(100.0)
+
+    def test_convert_x_unit_with_q_varying_width_preserves_state(self):
+        # WHEN: a model with per-Q widths, one of which has been changed from the template
+        model = DeltaLorentz(
+            lorentzian_width=0.1,
+            Q=np.array([1.0, 2.0]),
+            allow_Q_variation={'lorentzian_width': True},
+        )
+        model._lorentzian_width_list[0].value = 0.2
+        collection_before = model.get_component_collections(0)
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: conversion happens in place — per-Q values are converted, not reset to the
+        # template, and the collections are not regenerated (regression: conversion used to
+        # rebuild the collections, discarding per-Q state)
+        assert model.get_component_collections(0) is collection_before
+        assert model._lorentzian_width_list[0].value == pytest.approx(200.0)
+        assert model._lorentzian_width_list[1].value == pytest.approx(100.0)
+        for width in model._lorentzian_width_list:
+            assert sc.Unit(str(width.unit)) == sc.Unit('ueV')
 
     @pytest.fixture
     def delta_lorentz_model_with_Q(self):
@@ -38,16 +90,22 @@ class TestDeltaLorentz:
     def test_init_default(self, delta_lorentz_model):
         # WHEN THEN EXPECT
         assert delta_lorentz_model.display_name == 'DeltaLorentz'
-        assert delta_lorentz_model.unit == 'meV'
+        assert delta_lorentz_model.x_unit == 'meV'
+        assert delta_lorentz_model.y_unit == 'dimensionless'
         assert delta_lorentz_model.scale.value == pytest.approx(1.0)
         assert delta_lorentz_model.mean_u_squared.value == pytest.approx(0.0)
         assert delta_lorentz_model.A_0.value == pytest.approx(1.0)
         assert delta_lorentz_model.lorentzian_width.value == pytest.approx(1.0)
 
+    def test_y_unit_setter_raises(self, delta_lorentz_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            delta_lorentz_model.y_unit = '1/meV'
+
     def test_init_with_Q(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
         assert delta_lorentz_model_with_Q.display_name == 'DeltaLorentz'
-        assert delta_lorentz_model_with_Q.unit == 'meV'
+        assert delta_lorentz_model_with_Q.x_unit == 'meV'
         assert delta_lorentz_model_with_Q.scale.value == pytest.approx(1.0)
         assert delta_lorentz_model_with_Q.mean_u_squared.value == pytest.approx(0.0)
         assert delta_lorentz_model_with_Q.A_0.value == pytest.approx(0.5)
@@ -404,7 +462,7 @@ class TestDeltaLorentz:
         for i in range(len(eisf)):
             expected = delta_lorentz_model_with_Q._A_0_list[i].value * np.exp(
                 -delta_lorentz_model_with_Q.mean_u_squared.value
-                * delta_lorentz_model_with_Q.Q[i] ** 2
+                * delta_lorentz_model_with_Q.Q.values[i] ** 2
             )
             assert eisf[i] == pytest.approx(expected)
 
@@ -428,7 +486,7 @@ class TestDeltaLorentz:
         for i in range(len(qisf)):
             expected = delta_lorentz_model_with_Q._A_1_list[i].value * np.exp(
                 -delta_lorentz_model_with_Q.mean_u_squared.value
-                * delta_lorentz_model_with_Q.Q[i] ** 2
+                * delta_lorentz_model_with_Q.Q.values[i] ** 2
             )
 
             assert qisf[i] == pytest.approx(expected)
@@ -459,7 +517,8 @@ class TestDeltaLorentz:
             assert collection[0].width.independent is True
             assert collection[0].area.independent is False
             assert (
-                'scale * exp(-mean_u_squared.value *' in collection[0].area.dependency_expression
+                'scale * exp(-mean_u_squared_ratio.value *'
+                in collection[0].area.dependency_expression
             )
             assert 'A_1' in collection[0].area.dependency_expression
 
@@ -467,7 +526,8 @@ class TestDeltaLorentz:
             assert isinstance(collection[1], DeltaFunction)
             assert collection[1].area.independent is False
             assert (
-                'scale * exp(-mean_u_squared.value *' in collection[1].area.dependency_expression
+                'scale * exp(-mean_u_squared_ratio.value *'
+                in collection[1].area.dependency_expression
             )
             assert 'A_0' in collection[1].area.dependency_expression
 
@@ -491,7 +551,8 @@ class TestDeltaLorentz:
             assert collection[0].width.dependency_expression == 'lorentzian_width'
             assert collection[0].area.independent is False
             assert (
-                'scale * exp(-mean_u_squared.value *' in collection[0].area.dependency_expression
+                'scale * exp(-mean_u_squared_ratio.value *'
+                in collection[0].area.dependency_expression
             )
             assert 'A_1' in collection[0].area.dependency_expression
 
@@ -499,16 +560,17 @@ class TestDeltaLorentz:
             assert isinstance(collection[1], DeltaFunction)
             assert collection[1].area.independent is False
             assert (
-                'scale * exp(-mean_u_squared.value *' in collection[1].area.dependency_expression
+                'scale * exp(-mean_u_squared_ratio.value *'
+                in collection[1].area.dependency_expression
             )
             assert 'A_0' in collection[1].area.dependency_expression
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError, r'Q_index must be non-negative'),
+            (100, IndexError, r'Q_index 100 is out of bounds'),
+            ('string', TypeError, r'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -516,9 +578,11 @@ class TestDeltaLorentz:
             'non-integer index',
         ],
     )
-    def test_get_independent_variables_raises(self, delta_lorentz_model_with_Q, Q_index):
+    def test_get_independent_variables_raises(
+        self, delta_lorentz_model_with_Q, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             delta_lorentz_model_with_Q.get_independent_variables(Q_index=Q_index)
 
     def test_get_all_variables_no_Q_index(self, delta_lorentz_model_with_Q):
@@ -578,10 +642,10 @@ class TestDeltaLorentz:
 
     def test_get_all_variables_invalid_Q_index(self, delta_lorentz_model_with_Q):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+        with pytest.raises(IndexError, match='Q_index must be non-negative'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=-1)
 
-        with pytest.raises(ValueError, match='Q_index must be an integer between 0 and'):
+        with pytest.raises(IndexError, match=r'Q_index \d+ is out of bounds'):
             delta_lorentz_model_with_Q.get_all_variables(Q_index=len(delta_lorentz_model_with_Q.Q))
 
     @pytest.mark.parametrize(
@@ -856,3 +920,54 @@ class TestDeltaLorentz:
         assert 'mean_u_squared' in repr_str
         assert 'A_0' in repr_str
         assert 'lorentzian_width' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str
+
+    # ───── Regression tests ─────
+
+    def test_calculate_width_with_Q_subset(self, delta_lorentz_model_with_Q):
+        # WHEN: Q-varying widths with distinguishable per-Q values
+        model = delta_lorentz_model_with_Q
+        for i, width in enumerate(model._lorentzian_width_list):
+            width.value = 1.0 + i
+
+        # THEN: request a subset of the stored Q values (as ParameterAnalysis does when it
+        # drops rows with missing data)
+        subset = model.Q.values[[1, 3, 5]]
+        widths = model.calculate_width(subset)
+
+        # EXPECT: one width per requested Q, matching the stored per-Q parameters
+        np.testing.assert_allclose(widths, [2.0, 4.0, 6.0])
+
+    def test_calculate_EISF_with_Q_subset(self, delta_lorentz_model_with_Q):
+        # WHEN: Q-varying A_0 with distinguishable per-Q values
+        model = delta_lorentz_model_with_Q
+        for i, A_0 in enumerate(model._A_0_list):
+            A_0.value = (i + 1) / 10
+
+        # THEN
+        subset = model.Q.values[[0, 6]]
+        eisf = model.calculate_EISF(subset)
+
+        # EXPECT: mean_u_squared is 0, so EISF equals the per-Q A_0 values
+        np.testing.assert_allclose(eisf, [0.1, 0.7])
+
+    def test_calculate_width_with_unknown_Q_raises(self, delta_lorentz_model_with_Q):
+        # WHEN THEN EXPECT: a Q value not stored in the model has no per-Q width
+        with pytest.raises(ValueError, match='do not match the Q values stored'):
+            delta_lorentz_model_with_Q.calculate_width(np.array([10.0]))
+
+    def test_calculate_width_raises_after_clear_Q_when_allow_Q_variation(
+        self, delta_lorentz_model_with_Q
+    ):
+        # WHEN: model with Q-variation enabled for lorentzian_width
+        assert delta_lorentz_model_with_Q._allow_Q_variation['lorentzian_width'] is True
+        assert len(delta_lorentz_model_with_Q._lorentzian_width_list) > 0
+
+        # THEN: clear Q (empties _lorentzian_width_list)
+        delta_lorentz_model_with_Q.clear_Q(confirm=True)
+        assert len(delta_lorentz_model_with_Q._lorentzian_width_list) == 0
+
+        # THEN: before the fix, calculate_width() silently returned [] instead of raising.
+        with pytest.raises(ValueError, match='Q must be provided'):
+            delta_lorentz_model_with_Q.calculate_width()

@@ -21,14 +21,14 @@ class TestResolutionModel:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             display_name='TestLorentzian1',
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -36,7 +36,7 @@ class TestResolutionModel:
         return ResolutionModel(
             display_name='InitModel',
             components=component_collection,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
 
@@ -48,7 +48,7 @@ class TestResolutionModel:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -56,7 +56,7 @@ class TestResolutionModel:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -65,20 +65,20 @@ class TestResolutionModel:
         return SampleModel(
             display_name='InitModel',
             components=component_collection,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
             temperature=10.0,
         )
 
     def test_init(self, resolution_model):
         # WHEN THEN
-        model = resolution_model
 
         # EXPECT
-        assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
-        assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        assert resolution_model.display_name == 'InitModel'
+        assert resolution_model.x_unit == 'meV'
+        assert resolution_model.y_unit == 'dimensionless'
+        assert len(resolution_model.components) == 2
+        np.testing.assert_array_equal(resolution_model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     @pytest.mark.parametrize(
         'invalid_component, expected_error_msg',
@@ -215,10 +215,10 @@ class TestResolutionModel:
 
         # EXPECT
         assert resolution_model.display_name == 'InitModel'
-        assert resolution_model.unit == 'meV'
+        assert resolution_model.x_unit == 'meV'
         assert len(resolution_model.components) == 2
         np.testing.assert_array_equal(
-            resolution_model.Q,
+            resolution_model.Q.values,
             np.array([1.0, 2.0, 3.0]),
         )
 
@@ -241,6 +241,21 @@ class TestResolutionModel:
 
         variables = resolution_model.get_all_variables()
         assert all(var.fixed for var in variables) is all_fixed
+
+    def test_from_sample_model_installed_collections_are_stable(self, sample_model):
+        # WHEN
+        resolution_model = ResolutionModel.from_sample_model(sample_model)
+
+        # EXPECT: the installed collections are not scheduled for a rebuild (regression: init
+        # callbacks used to set the dirty flag, so the next access silently regenerated the
+        # collections from templates, discarding the normalization)
+        assert resolution_model._component_collections_is_dirty is False
+
+        # and repeated access returns the same installed, normalized collections
+        first_access = resolution_model.get_component_collection(0)
+        second_access = resolution_model.get_component_collection(0)
+        assert first_access is second_access
+        assert (first_access[0].area.value + first_access[1].area.value) == pytest.approx(1.0)
 
     def test_from_sample_model_with_no_Q(self, sample_model):
         # WHEN
@@ -301,3 +316,19 @@ class TestResolutionModel:
             match='cannot be a DeltaFunction',
         ):
             ResolutionModel.from_sample_model(sample_model)
+
+    def test_y_unit_setter_raises(self, resolution_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            resolution_model.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        model = ResolutionModel(components=g, x_unit='meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+        # EXPECT
+        assert model.y_unit == '1/eV'
+        assert model.components[0].y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)

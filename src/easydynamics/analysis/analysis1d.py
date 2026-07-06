@@ -22,6 +22,7 @@ from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.utils import verify_Q_index
 
 
 class Analysis1d(AnalysisBase):
@@ -108,6 +109,14 @@ class Analysis1d(AnalysisBase):
             Extra parameters to be included in the analysis for advanced users. If None, no extra
             parameters are added.
         """
+        # Initialize state read by observer callbacks (e.g. _on_experiment_changed) before
+        # super().__init__ wires the sub-models and fires them.
+        self._Q_index = None
+        self._masked_energy = None
+        self._fit_result = None
+        self._convolver = None
+        self._convolver_is_dirty = True
+
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -119,17 +128,11 @@ class Analysis1d(AnalysisBase):
             extra_parameters=extra_parameters,
         )
 
-        self._Q_index = self._verify_Q_index(Q_index)
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        self._Q_index = Q_index
 
         if self._Q_index is not None and self.experiment is not None:
-            masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
-            self._masked_energy = masked_energy
-        else:
-            self._masked_energy = None
-
-        self._fit_result = None
-        self._convolver = None
-        self._convolver_is_dirty = True
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
 
     #############
     # Properties
@@ -158,8 +161,8 @@ class Analysis1d(AnalysisBase):
         value : int | None
             The Q index.
         """
-
-        self._Q_index = self._verify_Q_index(value)
+        verify_Q_index(Q_index=value, Q=self.Q, allow_none=True)
+        self._Q_index = value
         self._on_Q_index_changed()
 
     #############
@@ -170,7 +173,7 @@ class Analysis1d(AnalysisBase):
         """
         Calculate the model prediction for the chosen Q index.
 
-        Makes sure the convolver is up to date before calculating.
+        Creates a new convolver before calculating without touching the stored convolver.
 
         Parameters
         ----------
@@ -184,14 +187,12 @@ class Analysis1d(AnalysisBase):
             The calculated model prediction.
         """
         energy = self._verify_energy(energy)
-        self._convolver = self._create_convolver(energy=energy)
-        # Mark dirty so the next fit() call rebuilds the convolver with the standard
-        # (unmasked) energy grid rather than reusing this plot-path grid.
-        self._convolver_is_dirty = True
+        convolver = self._create_convolver(energy=energy)
+        return self._calculate(energy=energy, convolver=convolver)
 
-        return self._calculate(energy=energy)
-
-    def _calculate(self, energy: sc.Variable | None = None) -> np.ndarray:
+    def _calculate(
+        self, energy: sc.Variable | None = None, convolver: Convolution | None = None
+    ) -> np.ndarray:
         """
         Calculate the model prediction for the chosen Q index.
 
@@ -202,18 +203,21 @@ class Analysis1d(AnalysisBase):
         energy : sc.Variable | None, default=None
             Optional energy grid to use for calculation. If None, the energy grid from the
             experiment is used.
+        convolver : Convolution | None, default=None
+            Optional convolver to use. If None, uses self._convolver.
 
         Returns
         -------
         np.ndarray
             The calculated model prediction.
         """
-
+        if convolver is None:
+            convolver = self._convolver
         Q_index = self._require_Q_index()
         sample = self._evaluate_with_convolution(
             self.sample_model.get_component_collection(Q_index),
             energy,
-            convolver=self._convolver,
+            convolver=convolver,
         )
         background = self._evaluate_direct(
             self.instrument_model.background_model.get_component_collection(Q_index),
@@ -254,7 +258,7 @@ class Analysis1d(AnalysisBase):
             fit_function=self.as_fit_function(),
         )
 
-        x, y, weights, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+        x, y, weights, _ = self.experiment.extract_x_y_weights_only_finite(
             Q_index=self._require_Q_index()
         )
         fit_result = fitter.fit(x=x, y=y, weights=weights)
@@ -438,7 +442,7 @@ class Analysis1d(AnalysisBase):
             energy = self._masked_energy
 
         data_and_model = {
-            'Data': self.experiment.binned_data['Q', self.Q_index],
+            'Data': self.experiment.get_masked_binned_data(Q_index=self.Q_index),
             'Model': self._create_model_array(energy=energy),
         }
 
@@ -516,6 +520,10 @@ class Analysis1d(AnalysisBase):
         This method is called whenever the Q index is changed. It updates the masked energy from
         the experiment for the new Q index and marks the convolver as dirty.
         """
+        if self._Q_index is None:
+            self._masked_energy = None
+            self._convolver_is_dirty = True
+            return
         masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._masked_energy = masked_energy
         self._convolver_is_dirty = True
@@ -523,6 +531,9 @@ class Analysis1d(AnalysisBase):
     def _on_experiment_changed(self) -> None:
         """Mark the convolver as dirty when the experiment changes."""
         super()._on_experiment_changed()
+        # Refresh masked energy if Q_index is already set (i.e. post-init experiment swap).
+        if self._Q_index is not None and self.experiment is not None:
+            self._masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
         self._convolver_is_dirty = True
 
     def _on_sample_model_changed(self) -> None:
@@ -561,28 +572,15 @@ class Analysis1d(AnalysisBase):
         energy_offset : Parameter
             The energy offset to apply.
 
-        Raises
-        ------
-        sc.UnitError
-            If the energy and energy offset have incompatible units.
-
         Returns
         -------
         sc.Variable
             The energy grid with the offset applied.
         """
 
-        if energy.unit != energy_offset.unit:
-            try:
-                energy_offset.convert_unit(str(energy.unit))
-            except Exception as e:
-                raise sc.UnitError(
-                    f'Energy and energy offset must have compatible units. '
-                    f'Got {energy.unit} and {energy_offset.unit}.'
-                ) from e
-
-        energy_with_offset = energy.copy(deep=True)
-        energy_with_offset.values -= energy_offset.value
+        offset_value = sc.to_unit(energy_offset.full_value, energy.unit).value
+        energy_with_offset = energy.copy()
+        energy_with_offset.values = energy.values - offset_value
         return energy_with_offset
 
     #############
@@ -640,18 +638,15 @@ class Analysis1d(AnalysisBase):
                     energy=energy_with_offset,
                     temperature=self.temperature,
                     divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
-                    energy_unit=self.unit,
+                    energy_unit=self.x_unit,
                 )
             return result
 
-        return Convolution(
-            energy=energy,
+        return self._build_convolution(
             sample_components=components,
             resolution_components=resolution,
+            energy=energy,
             energy_offset=energy_offset,
-            convolution_settings=self.convolution_settings,
-            temperature=self.temperature,
-            detailed_balance_settings=self.detailed_balance_settings,
         ).convolution()
 
     def _evaluate_direct(
@@ -719,11 +714,25 @@ class Analysis1d(AnalysisBase):
         if resolution_components.is_empty:
             return None
 
+        return self._build_convolution(
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+            energy=energy,
+            energy_offset=self.instrument_model.get_energy_offset(Q_index),
+        )
+
+    def _build_convolution(
+        self,
+        sample_components: ComponentCollection | ModelComponent,
+        resolution_components: ComponentCollection,
+        energy: sc.Variable,
+        energy_offset: Parameter,
+    ) -> Convolution:
         return Convolution(
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            energy_offset=self.instrument_model.get_energy_offset(Q_index),
+            energy_offset=energy_offset,
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
             detailed_balance_settings=self.detailed_balance_settings,
@@ -769,7 +778,7 @@ class Analysis1d(AnalysisBase):
         if self.Q_index is None:
             raise ValueError('Q_index must be set to calculate residuals.')
 
-        data = self.experiment.binned_data['Q', self.Q_index]
+        data = self.experiment.get_masked_binned_data(Q_index=self.Q_index)
         model = self._create_model_array()
         return data.copy(deep=True) - model
 

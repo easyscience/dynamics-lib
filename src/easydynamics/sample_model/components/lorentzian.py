@@ -20,9 +20,10 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     r"""
     Model of a Lorentzian function.
 
-    The intensity is given by $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2}, $$
-    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half maximum
-    (HWHM).
+    $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2} $$
+
+    where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the hald width at half max (HWHM).
+    area has unit = x_unit * y_unit; center and width have unit = x_unit.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
@@ -58,7 +59,8 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Lorentzian',
         display_name: str | None = None,
         unique_name: str | None = None,
@@ -69,39 +71,38 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         area : Numeric, default=1.0
-            Area of the Lorentzian.
+            Integrated area under the Lorentzian.  Unit is ``x_unit * y_unit``.
         center : Numeric | None, default=None
-            Center of the Lorentzian. If None, defaults to 0 and is fixed.
+            Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
         width : Numeric, default=1.0
-            Half width at half maximum (HWHM).
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Half-width at half-maximum (HWHM, gamma) in x_unit.  Must be strictly positive.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
+            y_unit.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         name : str, default='Lorentzian'
-            Name of the component for indexing.
+            Name of the component.
         display_name : str | None, default=None
-            Display name for the component.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. If None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
         """
-
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        self._area = self._create_area_parameter(
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
-        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
-
-        self._area = area
-        self._center = center
-        self._width = width
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
+        )
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self.x_unit)
 
     @property
     def area(self) -> Parameter:
@@ -111,24 +112,22 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The area parameter.
+            The area Parameter with unit ``x_unit * y_unit``.
         """
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
         """
-        Set the value of the area parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the area parameter.
+            New area value (in current area unit = x_unit * y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
@@ -142,26 +141,24 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The center parameter.
+            The center Parameter with unit ``x_unit``.
         """
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the value of the center parameter.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None, defaults to 0 and is fixed.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not None and not a numeric type.
         """
-
         if value is None:
             value = 0.0
             self._center.fixed = True
@@ -177,63 +174,85 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The width parameter.
+            The HWHM (gamma) Parameter with unit ``x_unit``.
         """
         return self._width
 
     @width.setter
     def width(self, value: Numeric) -> None:
         """
-        Set the width parameter value (HWHM).
-
         Parameters
         ----------
         value : Numeric
-            The new value for the width parameter.
+            New HWHM value in x_unit.  Must be strictly positive.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         ValueError
-            If the value is not positive.
+            If *value* is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
-
         if float(value) <= 0:
             raise ValueError('width must be positive')
         self._width.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Lorentzian at the given x values.
+        Evaluate the Lorentzian at x_vals.
 
-        If x is a scipp Variable, the unit of the Lorentzian will be converted to match x. The
-        intensity is given by
-
-        $$ I(x) = \frac{A}{\pi} \frac{\Gamma}{(x - x_0)^2 + \Gamma^2}, $$
-
-        where $A$ is the area, $x_0$ is the center, and $\Gamma$ is the half width at half maximum
-        (HWHM).
+        Parameters in the model's own units are temporarily converted to eval_unit for the
+        computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Lorentzian.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
         np.ndarray
-            The intensity of the Lorentzian at the given x values.
+            Evaluated Lorentzian values at x_vals.
         """
+        center = self._resolve_param_value(self._center, eval_unit)
+        width = self._resolve_param_value(self._width, eval_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
-        x = self._prepare_x_for_evaluate(x)
+        normalization = width / np.pi
+        denominator = (x_vals - center) ** 2 + width**2
+        return area * normalization / denominator
 
-        normalization = self.width.value / np.pi
-        denominator = (x - self.center.value) ** 2 + self.width.value**2
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert x-axis parameters (center, width) and area to new_x_unit.
 
-        return self.area.value * normalization / denominator
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+        """
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center, self._width],
+            area_param=self._area,
+        )
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis (output) unit by rescaling the area parameter.
+
+        The area is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        """
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
         """
@@ -245,10 +264,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
             A string representation of the Lorentzian.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'name={self.name!r}, display_name={self.display_name!r}, '
-            f'unit={self._unit},\n'
-            f'    area={self.area},\n'
-            f'    center={self.center},\n'
-            f'    width={self.width})'
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center},\n'
+            f'    width = {self.width})'
         )

@@ -5,7 +5,9 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Lorentzian
@@ -20,7 +22,7 @@ class TestLorentzian:
             area=2.0,
             center=0.5,
             width=0.6,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -32,7 +34,8 @@ class TestLorentzian:
         assert lorentzian.area.value == pytest.approx(1.0)
         assert lorentzian.center.value == pytest.approx(0.0)
         assert lorentzian.width.value == pytest.approx(1.0)
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.x_unit == 'meV'
+        assert lorentzian.y_unit == 'dimensionless'
         assert lorentzian.center.fixed is True
 
     def test_initialization(self, lorentzian: Lorentzian):
@@ -41,26 +44,30 @@ class TestLorentzian:
         assert lorentzian.area.value == pytest.approx(2.0)
         assert lorentzian.center.value == pytest.approx(0.5)
         assert lorentzian.width.value == pytest.approx(0.6)
-        assert lorentzian.unit == 'meV'
+        assert lorentzian.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
-                'center must be None',
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
+                'center must be None or a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
-                'unit must be None',
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
+                'unit must be None, a string',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
+                'unit must be None, a string',
             ),
         ],
     )
@@ -78,7 +85,7 @@ class TestLorentzian:
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -89,7 +96,7 @@ class TestLorentzian:
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -103,11 +110,12 @@ class TestLorentzian:
     def test_property_setters(
         self, lorentzian: Lorentzian, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(lorentzian, prop, valid_value)
+        # THEN EXPECT
         assert getattr(lorentzian, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(lorentzian, prop, invalid_value)
 
@@ -166,12 +174,12 @@ class TestLorentzian:
         # EXPECT
         assert numerical_area == pytest.approx(lorentzian.area.value, rel=2e-3)
 
-    def test_convert_unit(self, lorentzian: Lorentzian):
+    def test_convert_x_unit(self, lorentzian: Lorentzian):
         # WHEN THEN
-        lorentzian.convert_unit('microeV')
+        lorentzian.convert_x_unit('microeV')
 
         # EXPECT
-        assert lorentzian.unit == 'microeV'
+        assert lorentzian.x_unit == 'microeV'
         assert lorentzian.area.value == pytest.approx(2 * 1e3)
         assert lorentzian.center.value == pytest.approx(0.5 * 1e3)
         assert lorentzian.width.value == pytest.approx(0.6 * 1e3)
@@ -193,7 +201,7 @@ class TestLorentzian:
         assert lorentzian_copy.width.value == lorentzian.width.value
         assert lorentzian_copy.width.fixed == lorentzian.width.fixed
 
-        assert lorentzian_copy.unit == lorentzian.unit
+        assert lorentzian_copy.x_unit == lorentzian.x_unit
 
     def test_repr(self, lorentzian: Lorentzian):
         # WHEN THEN
@@ -201,8 +209,79 @@ class TestLorentzian:
 
         # EXPECT
         assert 'Lorentzian' in repr_str
-        assert "name='LorentzianName'" in repr_str
-        assert 'unit=meV' in repr_str
-        assert 'area=' in repr_str
-        assert 'center=' in repr_str
-        assert 'width=' in repr_str
+        assert 'name = LorentzianName' in repr_str
+        assert 'x_unit = meV' in repr_str
+        assert 'area =' in repr_str
+        assert 'center =' in repr_str
+        assert 'width =' in repr_str
+
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert lor.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            lorentzian.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        lor.convert_y_unit('1/eV')
+        # EXPECT: y_unit updated and area value rescaled (1e3 factor)
+        assert lor.y_unit == '1/eV'
+        assert lor.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            lorentzian.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, lorentzian: Lorentzian):
+        # WHEN
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = lorentzian.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, lorentzian.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = lor.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+
+    def test_convert_x_unit_invalid_type_raises(self, lorentzian: Lorentzian):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            lorentzian.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, lorentzian: Lorentzian):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            lorentzian.convert_x_unit('m')
+        # EXPECT: state rolled back
+        assert lorentzian.x_unit == 'meV'
+        assert lorentzian.area.value == pytest.approx(2.0)
+        assert lorentzian.center.value == pytest.approx(0.5)
+        assert lorentzian.width.value == pytest.approx(0.6)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        lor = Lorentzian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        # THEN
+        with pytest.raises(UnitError):
+            lor.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert lor.y_unit == 'dimensionless'
+        assert lor.area.value == pytest.approx(1.0)

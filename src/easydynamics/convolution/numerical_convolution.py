@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import numpy as np
+import scipp as sc
 from scipy.signal import fftconvolve
 
 from easydynamics.convolution.numerical_convolution_base import NumericalConvolutionBase
@@ -31,9 +32,9 @@ class NumericalConvolution(NumericalConvolutionBase):
         """
         # Make sure the convolver is updated with the latest convolution
         # settings before convolution.
-        if not self.convolution_settings.convolution_plan_is_valid:
+        if not self._convolution_plan_is_current():
             self._energy_grid = self._create_energy_grid()
-            self.convolution_settings.convolution_plan_is_valid = True
+            self._mark_convolution_plan_current()
 
         # Give warnings if peaks are very wide or very narrow
         if not self.convolution_settings.suppress_warnings:
@@ -46,18 +47,24 @@ class NumericalConvolution(NumericalConvolutionBase):
                 model_name='resolution model',
             )
 
-        # Evaluate sample model. If called via the Convolution class,
-        # delta functions are already filtered out.
-        sample_vals = self.sample_components.evaluate(
+        # Unit-convert the energy offset to match the energy grid unit.
+        # sc.to_unit returns a new scalar — self.energy_offset is never mutated.
+        offset_value = sc.to_unit(self.energy_offset.full_value, self.energy.unit).value
+
+        shifted_energy = (
             self._energy_grid.energy_dense
             - self._energy_grid.energy_even_length_offset
-            - self.energy_offset.value
+            - offset_value
         )
+
+        # Evaluate sample model. If called via the Convolution class,
+        # delta functions are already filtered out.
+        sample_vals = self.sample_components.evaluate(shifted_energy)
 
         # Detailed balance correction
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             detailed_balance_factor_correction = detailed_balance_factor(
-                energy=self._energy_grid.energy_dense - self.energy_offset.value,
+                energy=shifted_energy,
                 temperature=self.temperature,
                 energy_unit=self.energy.unit,
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
@@ -90,7 +97,8 @@ class NumericalConvolution(NumericalConvolutionBase):
             f'{self.__class__.__name__}('
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'energy_len={len(self.energy)}, '
             f'temperature={self.temperature})'
         )

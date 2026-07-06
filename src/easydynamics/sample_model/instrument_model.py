@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from copy import copy
+from functools import partial
 
-import numpy as np
 import scipp as sc
 from easyscience.base_classes.new_base import NewBase
 from easyscience.variable import Parameter
@@ -15,6 +15,9 @@ from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
+from easydynamics.utils.utils import verify_Q_index
 
 
 class InstrumentModel(NewBase):
@@ -60,7 +63,7 @@ class InstrumentModel(NewBase):
         resolution_model: ResolutionModel | SampleModel | None = None,
         background_model: BackgroundModel | None = None,
         energy_offset: Numeric | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
     ) -> None:
         """
         Initialize an InstrumentModel.
@@ -83,7 +86,7 @@ class InstrumentModel(NewBase):
         energy_offset : Numeric | None, default=None
             Template energy offset of the instrument. Will be copied to each Q value. If None, the
             energy offset will be 0.
-        unit : str | sc.Unit, default='meV'
+        x_unit : str | sc.Unit, default='meV'
             The unit of the energy axis.
 
         Raises
@@ -97,7 +100,7 @@ class InstrumentModel(NewBase):
             unique_name=unique_name,
         )
 
-        self._unit = _validate_unit(unit)
+        self._x_unit = _validate_unit(x_unit)
 
         if resolution_model is None:
             self._resolution_model = ResolutionModel()
@@ -130,7 +133,7 @@ class InstrumentModel(NewBase):
         self._energy_offset = Parameter(
             name='energy_offset',
             value=float(energy_offset),
-            unit=self.unit,
+            unit=self.x_unit,
             fixed=False,
         )
         self._energy_offsets: list = []
@@ -189,7 +192,6 @@ class InstrumentModel(NewBase):
         BackgroundModel
             The background model of the instrument.
         """
-
         return self._background_model
 
     @background_model.setter
@@ -207,7 +209,6 @@ class InstrumentModel(NewBase):
         TypeError
             If value is not a BackgroundModel.
         """
-
         if not isinstance(value, BackgroundModel):
             raise TypeError(
                 f'background_model must be a BackgroundModel, got {type(value).__name__}'
@@ -216,14 +217,14 @@ class InstrumentModel(NewBase):
         self._on_background_model_change()
 
     @property
-    def Q(self) -> np.ndarray | None:
+    def Q(self) -> sc.Variable | None:
         """
         Get the Q values of the InstrumentModel.
 
         Returns
         -------
-        np.ndarray | None
-            The Q values of the InstrumentModel, or None if not set.
+        sc.Variable | None
+            The Q values of the InstrumentModel in 1/angstrom, or None if not set.
         """
         return self._Q
 
@@ -256,68 +257,63 @@ class InstrumentModel(NewBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'
             )
 
     @property
-    def unit(self) -> str | sc.Unit:
+    def x_unit(self) -> str | sc.Unit | None:
         """
-        Get the unit of the InstrumentModel.
+        Get the x-axis unit of the InstrumentModel.
 
         Returns
         -------
-        str | sc.Unit
-            The unit of the InstrumentModel.
+        str | sc.Unit | None
+            The x-axis unit of the InstrumentModel.
         """
-        return self._unit
+        return self._x_unit
 
-    @unit.setter
-    def unit(self, _unit_str: str) -> None:
+    @x_unit.setter
+    def x_unit(self, _: str) -> None:
         """
-        Set the unit of the InstrumentModel.
+        x_unit is read-only and cannot be set directly.
 
-        The unit is read-only and cannot be set directly. Use convert_unit to change the unit
-        between allowed types or create a new InstrumentModel with the desired unit.
-
-        Parameters
-        ----------
-        _unit_str : str
-            The new unit for the InstrumentModel (ignored).
+        Use convert_x_unit to change the unit between allowed types or create a new InstrumentModel
+        with the desired unit.
 
         Raises
         ------
         AttributeError
-            Always, as the unit is read-only.
+            Always, as x_unit is read-only.
         """
         raise AttributeError(
-            f'Unit is read-only. Use convert_unit to change the unit between allowed types '
+            f'x_unit is read-only. Use convert_x_unit to change the unit between allowed types '
             f'or create a new {self.__class__.__name__} with the desired unit.'
         )
 
     @property
     def energy_offset(self) -> Parameter:
         """
-        Get the energy offset template parameter of the instrument model.
+        Get the template energy offset of the instrument.
 
         Returns
         -------
         Parameter
-            The energy offset template parameter of the instrument model.
+            The energy offset Parameter. Each Q value gets its own copy via get_energy_offset().
         """
         return self._energy_offset
 
     @energy_offset.setter
     def energy_offset(self, value: Numeric) -> None:
         """
-        Set the offset parameter of the instrument model.
+        Set the template energy offset value, propagating to all Q-specific offsets.
 
         Parameters
         ----------
         value : Numeric
-            The new value for the energy offset parameter. Will be copied to all Q values.
+            The new energy offset value in x_unit.
 
         Raises
         ------
@@ -327,7 +323,6 @@ class InstrumentModel(NewBase):
         if not isinstance(value, Numeric):
             raise TypeError(f'energy_offset must be a number, got {type(value).__name__}')
         self._energy_offset.value = value
-
         self._on_energy_offset_change()
 
     # --------------------------------------------------------------
@@ -358,32 +353,38 @@ class InstrumentModel(NewBase):
         self.resolution_model.clear_Q(confirm=True)
         self._on_Q_change()
 
-    def convert_unit(self, unit_str: str | sc.Unit) -> None:
+    def convert_x_unit(self, x_unit: str | sc.Unit) -> None:
         """
         Convert the unit of the InstrumentModel.
 
         Parameters
         ----------
-        unit_str : str | sc.Unit
+        x_unit : str | sc.Unit
             The unit to convert to.
 
         Raises
         ------
         ValueError
-            If unit_str is not a valid unit string or scipp Unit.
+            If x_unit is not a valid unit string or scipp Unit.
         """
-        unit = _validate_unit(unit_str)
+        unit = _validate_unit(x_unit)
         if unit is None:
-            raise ValueError('unit_str must be a valid unit string or scipp Unit')
+            raise ValueError('x_unit must be a valid unit string or scipp Unit')
 
-        self._background_model.convert_unit(unit)
-        self._resolution_model.convert_unit(unit)
-        self._energy_offset.convert_unit(unit)
         self._ensure_energy_offsets_current()
-        for offset in self._energy_offsets:
-            offset.convert_unit(unit)
+        old_unit = self.x_unit
+        conversions = [
+            (self._background_model.convert_x_unit, unit, old_unit),
+            (self._resolution_model.convert_x_unit, unit, old_unit),
+            (partial(convert_parameter_unit, self._energy_offset), unit, old_unit),
+        ]
+        conversions.extend(
+            (partial(convert_parameter_unit, offset), unit, old_unit)
+            for offset in self._energy_offsets
+        )
+        convert_units_with_rollback(conversions)
 
-        self._unit = unit
+        self._x_unit = unit
 
     def get_all_variables(self, Q_index: int | None = None) -> list[Parameter]:
         """
@@ -394,13 +395,6 @@ class InstrumentModel(NewBase):
         Q_index : int | None, default=None
             The index of the Q value to get variables for. If None, get variables for all Q values.
 
-
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int or None.
-        IndexError
-            If Q_index is out of bounds for the Q values in the InstrumentModel.
 
         Returns
         -------
@@ -413,15 +407,10 @@ class InstrumentModel(NewBase):
             return []
 
         self._ensure_energy_offsets_current()
+        verify_Q_index(Q_index=Q_index, Q=self._Q, allow_none=True)
         if Q_index is None:
             variables = [self._energy_offsets[i] for i in range(len(self._Q))]
         else:
-            if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-            if Q_index < 0 or Q_index >= len(self._Q):
-                raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
-                )
             variables = [self._energy_offsets[Q_index]]
 
         variables.extend(self._background_model.get_all_variables(Q_index=Q_index))
@@ -458,10 +447,6 @@ class InstrumentModel(NewBase):
         ------
         ValueError
             If no Q values are set in the InstrumentModel.
-        IndexError
-            If Q_index is out of bounds.
-        TypeError
-            If Q_index is not an int or None.
 
         Returns
         -------
@@ -473,14 +458,9 @@ class InstrumentModel(NewBase):
             raise ValueError('No Q values are set in the InstrumentModel.')
 
         self._ensure_energy_offsets_current()
+        verify_Q_index(Q_index=Q_index, Q=self._Q, allow_none=True)
         if Q_index is None:
             return self._energy_offsets
-
-        if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-
-        if Q_index < 0 or Q_index >= len(self._Q):
-            raise IndexError(f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}')
 
         return self._energy_offsets[Q_index]
 
@@ -531,27 +511,14 @@ class InstrumentModel(NewBase):
             energy offsets for all Q values.
         fixed : bool, default=True
             Whether to fix (True) or free (False) the energy offset.
-
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int or None.
-        IndexError
-            If Q_index is out of bounds for the Q values in the InstrumentModel.
         """
-
         self._ensure_energy_offsets_current()
+        verify_Q_index(Q_index=Q_index, Q=self._Q, allow_none=True)
         if Q_index is None:
+            self._energy_offset.fixed = fixed
             for offset in self._energy_offsets:
                 offset.fixed = fixed
         else:
-            if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-
-            if Q_index < 0 or Q_index >= len(self._Q):
-                raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for Q of length {len(self._Q)}'
-                )
             self._energy_offsets[Q_index].fixed = fixed
 
     def _ensure_energy_offsets_current(self) -> None:
@@ -566,7 +533,7 @@ class InstrumentModel(NewBase):
             self._energy_offsets = []
             return
 
-        self._energy_offsets = [copy(self._energy_offset) for _ in self._Q]
+        self._energy_offsets = [copy(self._energy_offset) for _ in range(len(self._Q))]
 
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
@@ -601,11 +568,10 @@ class InstrumentModel(NewBase):
         str
             A string representation of the InstrumentModel.
         """
-
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'resolution_model={self._resolution_model!r}, '
             f'background_model={self._background_model!r})'

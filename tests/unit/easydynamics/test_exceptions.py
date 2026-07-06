@@ -7,11 +7,14 @@ from easydynamics.exceptions import AmbiguousNameError
 
 class TestAmbiguousNameError:
     def test_initialization(self):
+        # WHEN
         name = 'test'
         matches = ['test1', 'test2', 'test3']
 
+        # THEN
         error = AmbiguousNameError(name, matches)
 
+        # EXPECT
         assert error.name == name
         assert error.matches == matches
         assert str(error) == (
@@ -19,11 +22,14 @@ class TestAmbiguousNameError:
         )
 
     def test_empty_matches(self):
+        # WHEN
         name = 'unknown'
         matches = []
 
+        # THEN
         error = AmbiguousNameError(name, matches)
 
+        # EXPECT
         assert error.name == name
         assert error.matches == matches
         assert str(error) == ("Ambiguous name 'unknown' matches 0 elements: []")

@@ -142,6 +142,18 @@ class TestExperiment:
         with pytest.raises(OSError):
             experiment.load_hdf5('non_existent_file.h5')
 
+    def test_load_hdf5_invalid_data_type_raises(self, experiment):
+        "Test that loading a file that returns a non-DataArray raises TypeError"
+        # WHEN THEN EXPECT
+        with (
+            patch(
+                'easydynamics.experiment.experiment.sc_load_hdf5',
+                return_value=sc.scalar(1.0),
+            ),
+            pytest.raises(TypeError, match=r'sc\.DataArray'),
+        ):
+            experiment.load_hdf5('fake_file.h5')
+
     def test_save_hdf5(self, tmp_path, experiment):
         "Test saving data to an HDF5 file. Load the saved file"
         'using scipp and compare to the original data.'
@@ -307,6 +319,23 @@ class TestExperiment:
         assert len(masked_energy) == 1
         assert masked_energy.values == pytest.approx(30.0)
 
+    def test_get_masked_energy_with_precomputed_mask(self, experiment_with_data):
+        "Test that passing a precomputed mask gives the same result as computing it"
+        # WHEN
+        Q_index = 0
+        invalid_data = experiment_with_data._data.copy()
+        invalid_data.data.values[Q_index][0] = np.inf
+
+        experiment_with_data.data = invalid_data
+        mask = experiment_with_data.get_finite_energy_mask(Q_index=Q_index)
+
+        # THEN
+        masked_energy = experiment_with_data.get_masked_energy(Q_index=Q_index, mask=mask)
+
+        # EXPECT: identical to the mask-free call
+        expected = experiment_with_data.get_masked_energy(Q_index=Q_index)
+        assert sc.identical(masked_energy, expected)
+
     def test_get_masked_energy_no_data_returns_None(self):
         "Test getting masked energy returns zero when no data is present"
 
@@ -319,14 +348,54 @@ class TestExperiment:
 
     @pytest.mark.parametrize(
         'Q_index',
-        [-1, 100, 'not an index'],
-        ids=['negative_index', 'out_of_bounds_index', 'invalid_type'],
+        [-1, 100],
+        ids=['negative_index', 'out_of_bounds_index'],
     )
     def test_get_masked_energy_invalid_Q_index_raises(self, experiment_with_data, Q_index):
-        "Test getting masked energy raises IndexError when Q index is invalid"
+        "Test getting masked energy raises IndexError when Q index is out of range"
         # WHEN THEN EXPECT
         with pytest.raises(IndexError):
             experiment_with_data.get_masked_energy(Q_index=Q_index)
+
+    def test_get_masked_energy_invalid_type_raises(self, experiment_with_data):
+        "Test getting masked energy raises TypeError when Q index is not an integer"
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            experiment_with_data.get_masked_energy(Q_index='not an index')
+
+    def test_get_finite_energy_mask_returns_none_without_data(self):
+        "Test get_finite_energy_mask returns None when no data is loaded"
+        # WHEN THEN EXPECT
+        assert Experiment().get_finite_energy_mask(Q_index=0) is None
+
+    def test_get_masked_binned_data_returns_none_without_data(self):
+        "Test get_masked_binned_data returns None when no data is loaded"
+        # WHEN THEN EXPECT
+        assert Experiment().get_masked_binned_data(Q_index=0) is None
+
+    def test_get_finite_energy_mask_with_data(self, experiment_with_data):
+        "Test get_finite_energy_mask returns a boolean scipp variable when data is loaded"
+        # WHEN
+
+        # THEN
+        mask = experiment_with_data.get_finite_energy_mask(Q_index=0)
+
+        # EXPECT
+        assert mask is not None
+        assert mask.dims == ('energy',)
+        assert len(mask) == 3
+
+    def test_get_masked_binned_data_with_data(self, experiment_with_data):
+        "Test get_masked_binned_data returns a DataArray with all-finite data loaded"
+        # WHEN
+
+        # THEN
+        result = experiment_with_data.get_masked_binned_data(Q_index=0)
+
+        # EXPECT
+        assert result is not None
+        assert isinstance(result, sc.DataArray)
+        assert result.dims == ('energy',)
 
     ##############
     # test plotting
@@ -496,8 +565,8 @@ class TestExperiment:
             experiment_with_data.data.variances[Q_index],
         )
 
-    def test_extract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
-        "Test that _extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
+    def testextract_x_y_weights_only_finite_zero_variances(self, experiment_with_data):
+        "Test that extract_x_y_weights_only_finite raises ValueError when variances contain zeros"
         # WHEN
         Q_index = 0
         invalid_data = experiment_with_data._data.copy()
@@ -507,10 +576,10 @@ class TestExperiment:
 
         # THEN EXPECT
         with pytest.raises(ValueError, match='Cannot compute weights: some variances are zero'):
-            Experiment(data=invalid_data)._extract_x_y_weights_only_finite(Q_index=Q_index)
+            Experiment(data=invalid_data).extract_x_y_weights_only_finite(Q_index=Q_index)
 
-    def test_extract_x_y_weights_only_finite(self, experiment_with_data):
-        "Test that _extract_x_y_weights_only_finite only returns finite values"
+    def testextract_x_y_weights_only_finite(self, experiment_with_data):
+        "Test that extract_x_y_weights_only_finite only returns finite values"
         # WHEN
         Q_index = 0
         invalid_data = experiment_with_data._data.copy()
@@ -518,7 +587,7 @@ class TestExperiment:
         invalid_data.data.variances[Q_index][1] = np.nan
 
         # THEN
-        x, y, weights, mask = Experiment(data=invalid_data)._extract_x_y_weights_only_finite(
+        x, y, weights, mask = Experiment(data=invalid_data).extract_x_y_weights_only_finite(
             Q_index=Q_index
         )
 
@@ -533,7 +602,7 @@ class TestExperiment:
         # Mask should indicate which values were removed
         assert np.array_equal(mask, [False, False, True])
 
-    def test_extract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
+    def testextract_x_y_weights_only_finite_zero_variance(self, experiment_with_data):
         "Test getting x y and weights when variances are None"
         # WHEN
         Q_index = 0
@@ -543,9 +612,7 @@ class TestExperiment:
         experiment_with_data.data = data
 
         # THEN
-        x, y, weights, mask = experiment_with_data._extract_x_y_weights_only_finite(
-            Q_index=Q_index
-        )
+        x, y, weights, mask = experiment_with_data.extract_x_y_weights_only_finite(Q_index=Q_index)
 
         # EXPECT
         assert np.array_equal(x, experiment_with_data.energy.values)
