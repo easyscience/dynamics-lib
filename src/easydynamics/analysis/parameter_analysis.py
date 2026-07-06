@@ -15,7 +15,9 @@ from plopp.backends.matplotlib.figure import InteractiveFigure
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
+from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import convert_value_unit
 
 
 class ParameterAnalysis(EasyDynamicsModelBase):
@@ -25,15 +27,15 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     Can be used to fit parameters to ModelComponents, ComponentCollections, or DiffusionModelBase
     objects, and to plot the parameters and fit results. The parameters to be analyzed can be
     provided as a sc.Dataset or directly as an Analysis object. Multiple parameters can be fitted
-    simultaneously, and the fit functions can be customized for each parameter. For diffusion
-    models, the area and width can be fitted separately (or not at all) by specifying fit settings.
+    simultaneously, and each binding maps its model's predictions onto the dataset keys they are
+    fitted against (for diffusion models e.g. 'area', 'width', or 'delta_area').
 
     Examples
     --------
     **Fitting Lorentzian widths to a diffusion model**
 
-    After a full Analysis fit, pass the Analysis directly and bind each parameter to a fit function
-    using a ``FitBinding``:
+    After a full Analysis fit, pass the Analysis directly and bind the model's predictions to
+    dataset keys using a ``FitBinding``:
     ```python
     import easydynamics as edyn
     import easydynamics.sample_model as sm
@@ -41,9 +43,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # analysis is an edyn.Analysis object with previously fitted parameters
     diffusion_model = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
     binding = edyn.FitBinding(
-        parameter_name='Lorentzian width',
         model=diffusion_model,
-        modes=['width'],
+        targets={'width': 'Lorentzian width'},
     )
 
     param_analysis = edyn.ParameterAnalysis(
@@ -56,10 +57,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
     **Fitting multiple parameters with separate bindings**
 
+    Component models declare the units their evaluate expects: here the Polynomial's x is the
+    dataset's Q coordinate and its y is the fitted parameter, so construct it with matching units
+    (or pass ``x_unit=None`` / ``y_unit=None`` to fit raw values):
     ```python
     area_binding = edyn.FitBinding(
-        parameter_name='Lorentzian area',
-        model=sm.Polynomial(coefficients=[0.5, 0.0]),
+        model=sm.Polynomial(coefficients=[0.5, 0.0], x_unit='1/angstrom', y_unit='meV'),
+        targets='Lorentzian area',
     )
     param_analysis = edyn.ParameterAnalysis(
         parameters=analysis,
@@ -183,23 +187,24 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         funcs, models = [], []
 
         for binding in self.bindings:
-            param_names = binding.get_parameter_names()
-            callables = binding.build_callables()
-
-            for pname, func in zip(param_names, callables, strict=True):
-                if pname not in self.parameters:
+            for target in binding.get_targets():
+                if target.dataset_key not in self.parameters:
                     raise ValueError(
-                        f"Parameter '{pname}' from binding '{binding.unique_name}' "
-                        f'not found in parameters Dataset.'
+                        f"Parameter '{target.dataset_key}' from binding "
+                        f"'{binding.unique_name}' not found in parameters Dataset."
                     )
 
-                x, y, weight = self._get_xyweight_from_dataset(pname)
+                x, y, weight = self._get_xyweight_from_dataset(target.dataset_key)
+                x_factor, y_factor = self._get_unit_conversions(target)
+                x = x * x_factor
+                y = y * y_factor
+                weight = weight / y_factor
 
                 xs.append(x)
                 ys.append(y)
                 ws.append(weight)
 
-                funcs.append(func)
+                funcs.append(target.function)
                 models.append(binding.model)
 
         mf = MultiFitter(
@@ -258,7 +263,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 names = list(self.parameters.keys())
             else:
                 for b in self.bindings:
-                    names.extend(b.get_parameter_names())
+                    names.extend(target.dataset_key for target in b.get_targets())
 
         names = self._normalize_names(names)
 
@@ -282,14 +287,13 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         data_arrays = {}
         model_arrays = {}
 
-        # map parameter names to model names
+        # map dataset keys to model labels
         param_to_model = {}
         if self.bindings is not None:
             for b in self.bindings:
-                param_names = b.get_parameter_names()
-                model_names = b.get_model_names()
-
-                param_to_model.update(dict(zip(param_names, model_names, strict=True)))
+                param_to_model.update({
+                    target.dataset_key: target.label for target in b.get_targets()
+                })
 
         for pname in names:
             data_arrays[pname] = self.parameters[pname]
@@ -354,22 +358,20 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         arrays = {}
 
         for b in bindings:
-            param_names = b.get_parameter_names()
-            model_names = b.get_model_names()
-            callables = b.build_callables()
-
-            for pname, mname, func in zip(param_names, model_names, callables, strict=True):
-                if pname not in self.parameters:
+            for target in b.get_targets():
+                if target.dataset_key not in self.parameters:
                     raise ValueError(
-                        f"Parameter '{pname}' from binding '{b.unique_name}' "
+                        f"Parameter '{target.dataset_key}' from binding '{b.unique_name}' "
                         f'not found in parameters Dataset.'
                     )
-                da = self.parameters[pname]
+                da = self.parameters[target.dataset_key]
                 x = da.coords['Q']
+                x_factor, y_factor = self._get_unit_conversions(target)
 
-                y_model = func(x.values)
+                y_model = target.function(x.values * x_factor)
+                y_model = y_model / y_factor
 
-                arrays[mname] = sc.DataArray(
+                arrays[target.label] = sc.DataArray(
                     data=sc.array(dims=['Q'], values=y_model, unit=da.unit),
                     coords={'Q': x},
                 )
@@ -521,6 +523,55 @@ class ParameterAnalysis(EasyDynamicsModelBase):
     # Private methods
     #############
 
+    def _get_unit_conversions(self, target: FitTarget) -> tuple[float, float]:
+        """
+        Return (x_factor, y_factor) to convert dataset values into the target's declared units.
+
+        x_factor converts Q coordinate values from their stored unit to target.x_unit (e.g.
+        1/angstrom for diffusion-model predictions). y_factor converts parameter values from their
+        stored unit to target.y_unit. A factor is 1.0 when the target declares the corresponding
+        unit as None (its function takes raw values). ``sc.UnitError`` is raised when x or y units
+        are physically incompatible (e.g. meV vs 1/angstrom).
+
+        Parameters
+        ----------
+        target : FitTarget
+            The fit target whose unit contract defines the target units.
+
+        Returns
+        -------
+        tuple[float, float]
+            ``(x_factor, y_factor)`` scale factors to apply before/after model evaluation.
+        """
+        da = self.parameters[target.dataset_key]
+
+        def factor(from_unit: str, to_unit: str | None, error_message: str) -> float:
+            if to_unit is None:
+                return 1.0
+            try:
+                return convert_value_unit(1.0, from_unit, str(to_unit))
+            except Exception as e:
+                raise sc.UnitError(error_message) from e
+
+        q_unit = str(da.coords['Q'].unit)
+        x_factor = factor(
+            q_unit,
+            target.x_unit,
+            f"Q coordinate unit '{q_unit}' is incompatible with "
+            f"the x_unit '{target.x_unit}' of fit target '{target.label}' "
+            f"for parameter '{target.dataset_key}'.",
+        )
+
+        param_unit = str(da.unit)
+        y_factor = factor(
+            param_unit,
+            target.y_unit,
+            f"Parameter '{target.dataset_key}' unit '{param_unit}' is incompatible "
+            f"with the y_unit '{target.y_unit}' of fit target '{target.label}'.",
+        )
+
+        return x_factor, y_factor
+
     def _get_xyweight_from_dataset(
         self, parameter_name: str
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -549,21 +600,29 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             raise ValueError(f"Parameter name '{parameter_name}' not found in parameters Dataset.")
 
         variances = self._parameters[parameter_name].variances
+        values = self._parameters[parameter_name].values
+        q_values = self._parameters[parameter_name].coords['Q'].values
+
         if variances is None:
-            weight = np.ones_like(self._parameters[parameter_name].values)
-        elif np.any(~np.isfinite(variances)) or np.any(variances <= 0):
+            return q_values, values, np.ones_like(values)
+
+        # NaN variances arise when a parameter is absent for a given Q (parameters_to_dataset
+        # fills np.nan for missing parameters). Filter those rows silently; other non-finite or
+        # non-positive variances are errors.
+        nan_mask = np.isnan(variances)
+        if np.any(~nan_mask & (~np.isfinite(variances) | (variances <= 0))):
             raise ValueError(
                 f"Non-finite variances found for parameter '{parameter_name}', "
                 f'cannot compute weights.'
             )
-        else:
-            weight = 1 / np.sqrt(variances)
+        valid_mask = ~nan_mask
+        if not np.any(valid_mask):
+            raise ValueError(
+                f"No finite positive variances found for parameter '{parameter_name}', "
+                f'cannot compute weights.'
+            )
 
-        return (
-            self._parameters[parameter_name].coords['Q'].values,
-            self._parameters[parameter_name].values,
-            weight,
-        )
+        return q_values[valid_mask], values[valid_mask], 1 / np.sqrt(variances[valid_mask])
 
     #############
     # Dunder methods
@@ -587,9 +646,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
 
         binding_info = [
             {
-                'parameter': b.parameter_name,
                 'model': b.model.display_name,
-                'modes': b.modes,
+                'targets': b.targets,
             }
             for b in self._bindings
         ]
