@@ -501,8 +501,8 @@ class TestAnalysisBase:
             # EXPECT
             # assert that the Q attribute was set
             np.testing.assert_array_equal(analysis_base.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_on_sample_model_changed_updates_Q(self, analysis_base):
         # WHEN
@@ -518,7 +518,7 @@ class TestAnalysisBase:
             analysis_base._on_sample_model_changed()
 
             # EXPECT
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
 
     def test_on_instrument_model_changed_updates_Q(self, analysis_base):
         fake_Q = [1, 2, 3]
@@ -530,7 +530,7 @@ class TestAnalysisBase:
             mock_Q.return_value = fake_Q
 
             analysis_base._on_instrument_model_changed()
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_repr(self, analysis_base):
         # WHEN

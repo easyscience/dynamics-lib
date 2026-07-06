@@ -45,7 +45,7 @@ class TestBackgroundModel:
         assert model.display_name == 'InitModel'
         assert model.unit == 'meV'
         assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     @pytest.mark.parametrize(
         'invalid_component, expected_error_msg',
