@@ -5,6 +5,7 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
 
 from easydynamics.sample_model import ExpressionComponent
@@ -16,14 +17,14 @@ class TestExpressionComponent:
         return ExpressionComponent(
             'A * exp(-(x - x0)**2 / (2*sigma**2))',
             parameters={'A': 2.0, 'x0': 0.5, 'sigma': 0.6},
-            unit='meV',
+            x_unit='meV',
             display_name='TestExpression',
         )
 
     def test_init_valid(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
         assert expr.display_name == 'TestExpression'
-        assert expr.unit == 'meV'
+        assert expr.x_unit == 'meV'
 
         assert expr.A.value == pytest.approx(2.0)
         assert expr.x0.value == pytest.approx(0.5)
@@ -131,10 +132,26 @@ class TestExpressionComponent:
         with pytest.raises(AttributeError, match='cannot be changed'):
             expr.expression = 'x'
 
-    def test_convert_unit_not_implemented(self, expr: ExpressionComponent):
+    def test_convert_x_unit_not_implemented(self, expr: ExpressionComponent):
         # WHEN THEN EXPECT
         with pytest.raises(NotImplementedError, match='not implemented'):
-            expr.convert_unit('microeV')
+            expr.convert_x_unit('microeV')
+
+    def test_convert_y_unit_not_implemented(self, expr: ExpressionComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(NotImplementedError, match='not implemented'):
+            expr.convert_y_unit('1/meV')
+
+    def test_evaluate_scipp_output(self, expr: ExpressionComponent):
+        # WHEN
+        x = np.linspace(-2, 2, 30)
+        # THEN
+        result = expr.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 30
+        np.testing.assert_allclose(result.values, expr.evaluate(x, output='numpy'))
 
     def test_missing_parameter_defaults(self):
         # WHEN THEN
@@ -166,20 +183,19 @@ class TestExpressionComponent:
     def test_evaluate_scalar_input(self, expr: ExpressionComponent):
         # WHEN
         x = 0.5
-        result = expr.evaluate(x)
-
         # THEN
+        result = expr.evaluate(x)
+        # EXPECT
         expected = 2.0 * np.exp(-((x - 0.5) ** 2) / (2 * 0.6**2))
         assert np.isclose(result, expected)
 
     def test_reserved_name_not_parameter(self):
         # WHEN
         expr = ExpressionComponent('x + A', parameters={'A': 2.0})
-
         # THEN
         params = expr.get_all_variables()
         names = {p.name for p in params}
-
+        # EXPECT
         assert 'A' in names
         assert 'x' not in names  # x is reserved
 
@@ -191,7 +207,8 @@ class TestExpressionComponent:
         assert expr_copy is not expr
         assert isinstance(expr_copy, ExpressionComponent)
         assert expr_copy.expression == expr.expression
-        assert expr_copy.unit == expr.unit
+        assert expr_copy.x_unit == expr.x_unit
+        assert expr_copy.y_unit == expr.y_unit
         assert expr_copy.display_name == expr.display_name
 
         assert expr_copy.A.value == pytest.approx(expr.A.value)

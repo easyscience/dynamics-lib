@@ -13,7 +13,7 @@ class TestEasyDynamicsModelBase:
     def easy_dynamics_modelbase(self):
         """Fixture for creating an instance of EasyDynamicsModelBase."""
 
-        return EasyDynamicsModelBase(name='TestModel', unit='meV')
+        return EasyDynamicsModelBase(name='TestModel', x_unit='meV')
 
     def test_initialization(self, easy_dynamics_modelbase):
         """Test that the EasyDynamicsModelBase is initialized correctly."""
@@ -22,6 +22,8 @@ class TestEasyDynamicsModelBase:
         assert easy_dynamics_modelbase.name == 'TestModel'
         assert easy_dynamics_modelbase.display_name == 'TestModel'
         assert easy_dynamics_modelbase.unique_name is not None
+        assert easy_dynamics_modelbase.x_unit == 'meV'
+        assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
     def test_init_raises_type_error_for_invalid_name(self):
         """Test that initializing with an invalid name raises a TypeError."""
@@ -68,9 +70,15 @@ class TestEasyDynamicsModelBase:
     def test_unit_property(self, easy_dynamics_modelbase):
         # WHEN THEN EXPECT
 
-        assert easy_dynamics_modelbase.unit == 'meV'
+        assert easy_dynamics_modelbase.x_unit == 'meV'
+        assert easy_dynamics_modelbase.y_unit == 'dimensionless'
 
-    def test_unit_setter_raises(self, easy_dynamics_modelbase):
+    def test_x_unit_setter_raises(self, easy_dynamics_modelbase):
         # WHEN / THEN / EXPECT
-        with pytest.raises(AttributeError, match='Use convert_unit to change '):
-            easy_dynamics_modelbase.unit = 'K'
+        with pytest.raises(AttributeError, match='read-only'):
+            easy_dynamics_modelbase.x_unit = 'K'
+
+    def test_y_unit_setter_raises(self, easy_dynamics_modelbase):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='read-only'):
+            easy_dynamics_modelbase.y_unit = '1/meV'

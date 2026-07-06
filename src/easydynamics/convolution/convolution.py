@@ -80,9 +80,8 @@ class Convolution(NumericalConvolutionBase):
     # needs to be rebuilt.
     # Note: the public 'energy' property setter always writes to '_energy', so '_energy' alone
     # is sufficient — listing 'energy' separately would cause a double invalidation.
-    _invalidate_plan_on_change: ClassVar[dict[str, object]] = {
+    _invalidate_plan_on_change: ClassVar[set[str]] = {
         '_energy',
-        '_energy_grid',
         '_sample_components',
         '_resolution_components',
         '_temperature',
@@ -101,7 +100,8 @@ class Convolution(NumericalConvolutionBase):
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -113,7 +113,7 @@ class Convolution(NumericalConvolutionBase):
         energy : np.ndarray | sc.Variable
             1D array of energy values where the convolution is evaluated.
         sample_components : ComponentCollection | ModelComponent
-            The  sample components to be convolved.
+            The sample components to be convolved.
         resolution_components : ComponentCollection | ModelComponent
             The resolution components to convolve with.
         energy_offset : Numeric | Parameter, default=0.0
@@ -126,8 +126,10 @@ class Convolution(NumericalConvolutionBase):
             The unit of the temperature parameter.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
             The settings for detailed balance. If None, default settings will be used.
-        unit : str | sc.Unit, default='meV'
-            The unit of the energy.
+        x_unit : str | sc.Unit, default='meV'
+            The unit of the energy axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            The unit of the model output (intensity).
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -144,7 +146,8 @@ class Convolution(NumericalConvolutionBase):
             temperature=temperature,
             temperature_unit=temperature_unit,
             detailed_balance_settings=detailed_balance_settings,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -168,7 +171,7 @@ class Convolution(NumericalConvolutionBase):
         np.ndarray
             The convolved values evaluated at energy.
         """
-        if not self.convolution_settings.convolution_plan_is_valid:
+        if not self._convolution_plan_is_current():
             self._build_convolution_plan()
         total = np.zeros_like(self.energy.values, dtype=float)
 
@@ -287,7 +290,7 @@ class Convolution(NumericalConvolutionBase):
 
         # Update convolvers
         self._set_convolvers()
-        self.convolution_settings.convolution_plan_is_valid = True
+        self._mark_convolution_plan_current()
 
     def _set_convolvers(self) -> None:
         """
@@ -303,6 +306,8 @@ class Convolution(NumericalConvolutionBase):
                 energy_offset=self.energy_offset,
                 sample_components=self._analytical_sample_components,
                 resolution_components=self._resolution_components,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
         else:
             self._analytical_convolver = None
@@ -317,10 +322,28 @@ class Convolution(NumericalConvolutionBase):
                 temperature=self.temperature,
                 temperature_unit=self._temperature_unit,
                 detailed_balance_settings=self.detailed_balance_settings,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
         else:
             self._numerical_convolver = None
+
+    def convert_y_unit(self, unit: str) -> None:
+        """
+        Convert the y-axis unit and propagate it to the analytical and numerical sub-convolvers.
+
+        Parameters
+        ----------
+        unit : str
+            The new y-axis unit.
+        """
+        super().convert_y_unit(unit)
+        # The sub-convolvers share this convolver's component objects, which were already
+        # converted by super(); only their y-unit labels need updating.
+        if getattr(self, '_analytical_convolver', None) is not None:
+            self._analytical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
+        if getattr(self, '_numerical_convolver', None) is not None:
+            self._numerical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:
@@ -341,16 +364,18 @@ class Convolution(NumericalConvolutionBase):
         super().__setattr__(name, value)
 
         # Only rebuild the convolution plan if reactions are enabled, to
-        # avoid issues during __init__
+        # avoid issues during __init__. These are convolver-local changes, so other convolvers
+        # sharing the same ConvolutionSettings are unaffected.
         if getattr(self, '_reactions_enabled', False) and name in self._invalidate_plan_on_change:
-            self.convolution_settings.convolution_plan_is_valid = False
+            self._plan_seen_version = None
 
     def __repr__(self) -> str:
         return (
             f'{self.__class__.__name__}('
             f'display_name={self.display_name!r}, '
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'energy_len={len(self.energy)}, '
             f'temperature={self.temperature})'
         )

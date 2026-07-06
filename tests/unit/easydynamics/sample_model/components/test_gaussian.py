@@ -5,7 +5,9 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 
 from easydynamics.sample_model import Gaussian
@@ -20,7 +22,7 @@ class TestGaussian:
             area=2.0,
             center=0.5,
             width=0.6,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -32,7 +34,8 @@ class TestGaussian:
         assert gaussian.area.value == pytest.approx(1.0)
         assert gaussian.center.value == pytest.approx(0.0)
         assert gaussian.width.value == pytest.approx(1.0)
-        assert gaussian.unit == 'meV'
+        assert gaussian.x_unit == 'meV'
+        assert gaussian.y_unit == 'dimensionless'
         assert gaussian.center.fixed is True
 
     def test_initialization(self, gaussian: Gaussian):
@@ -41,33 +44,38 @@ class TestGaussian:
         assert gaussian.area.value == pytest.approx(2.0)
         assert gaussian.center.value == pytest.approx(0.5)
         assert gaussian.width.value == pytest.approx(0.6)
-        assert gaussian.unit == 'meV'
+        assert gaussian.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'width': 0.6, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'width': 0.6, 'x_unit': 'meV'},
                 'center must be None or a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 0.5, 'width': 'invalid', 'x_unit': 'meV'},
                 'width must be a number',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'unit': 123},
-                'unit must be None',
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 123},
+                'unit must be None, a string',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'width': 0.6, 'x_unit': 'meV', 'y_unit': 123},
+                'unit must be None, a string',
             ),
         ],
         ids=[
             'invalid area',
             'invalid center',
             'invalid width',
-            'invalid unit',
+            'invalid x_unit',
+            'invalid y_unit',
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
@@ -84,7 +92,7 @@ class TestGaussian:
                 area=2.0,
                 center=0.5,
                 width=-0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -95,7 +103,7 @@ class TestGaussian:
                 area=-2.0,
                 center=0.5,
                 width=0.6,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -109,11 +117,12 @@ class TestGaussian:
     def test_property_setters(
         self, gaussian: Gaussian, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(gaussian, prop, valid_value)
+        # THEN EXPECT
         assert getattr(gaussian, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(gaussian, prop, invalid_value)
 
@@ -177,12 +186,12 @@ class TestGaussian:
         numerical_area = simpson(y, x)
         assert np.isclose(numerical_area, gaussian.area.value, rtol=1e-3)
 
-    def test_convert_unit(self, gaussian: Gaussian):
+    def test_convert_x_unit(self, gaussian: Gaussian):
         # WHEN THEN
-        gaussian.convert_unit('microeV')
+        gaussian.convert_x_unit('microeV')
 
         # EXPECT
-        assert gaussian.unit == 'microeV'
+        assert gaussian.x_unit == 'microeV'
         assert gaussian.area.value == pytest.approx(2 * 1e3)
         assert gaussian.center.value == pytest.approx(0.5 * 1e3)
         assert gaussian.width.value == pytest.approx(0.6 * 1e3)
@@ -216,15 +225,91 @@ class TestGaussian:
         assert gaussian_copy.width.min == gaussian.width.min
         assert gaussian_copy.width.max == gaussian.width.max
 
-        assert gaussian_copy.unit == gaussian.unit
+        assert gaussian_copy.x_unit == gaussian.x_unit
 
     def test_repr(self, gaussian: Gaussian):
         # WHEN THEN
         repr_str = repr(gaussian)
         # EXPECT
         assert 'Gaussian' in repr_str
-        assert "name='GaussianName'" in repr_str
-        assert 'unit=meV' in repr_str
-        assert 'area=' in repr_str
-        assert 'center=' in repr_str
-        assert 'width=' in repr_str
+        assert 'name = GaussianName' in repr_str
+        assert 'x_unit = meV' in repr_str
+        assert 'area =' in repr_str
+        assert 'center =' in repr_str
+        assert 'width =' in repr_str
+
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        # EXPECT
+        assert gaussian.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            gaussian.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit ≈ dimensionless
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        gaussian.convert_y_unit('1/eV')
+
+        # EXPECT: unit updated and area value rescaled (1/eV = 1e-3/meV, so value x 1e3)
+        assert gaussian.y_unit == '1/eV'
+        assert gaussian.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            gaussian.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, gaussian: Gaussian):
+        # WHEN
+        x = np.linspace(-5, 5, 100)
+
+        # THEN
+        result = gaussian.evaluate(x, output='scipp')
+
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 100
+        np.testing.assert_allclose(result.values, gaussian.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        gaussian = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 100)
+
+        # WHEN
+        result = gaussian.evaluate(x, output='scipp')
+
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+
+    def test_convert_x_unit_invalid_type_raises(self, gaussian: Gaussian):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            gaussian.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, gaussian: Gaussian):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            gaussian.convert_x_unit('m')
+        # EXPECT: state rolled back
+        assert gaussian.x_unit == 'meV'
+        assert gaussian.area.value == pytest.approx(2.0)
+        assert gaussian.center.value == pytest.approx(0.5)
+        assert gaussian.width.value == pytest.approx(0.6)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        gaussian = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        # THEN
+        with pytest.raises(UnitError):
+            gaussian.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert gaussian.y_unit == 'dimensionless'
+        assert gaussian.area.value == pytest.approx(1.0)

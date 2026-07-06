@@ -25,8 +25,10 @@ class TestJumpTranslationalDiffusion:
     def test_init_default(self, jump_diffusion_model):
         # WHEN THEN EXPECT
         assert jump_diffusion_model.display_name == 'JumpTranslationalDiffusion'
-        assert jump_diffusion_model.unit == 'meV'
+        assert jump_diffusion_model.x_unit == 'meV'
+        assert jump_diffusion_model.y_unit == 'dimensionless'
         assert jump_diffusion_model.scale.value == pytest.approx(1.0)
+        assert jump_diffusion_model.scale.unit == 'meV'
         assert jump_diffusion_model.diffusion_coefficient.value == pytest.approx(1.0)
         assert jump_diffusion_model.relaxation_time.value == pytest.approx(1.0)
 
@@ -35,7 +37,7 @@ class TestJumpTranslationalDiffusion:
         [
             (
                 {
-                    'unit': 123,
+                    'x_unit': 123,
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 1.0,
@@ -45,7 +47,17 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'y_unit': 123,
+                    'scale': 1.0,
+                    'diffusion_coefficient': 1.0,
+                    'relaxation_time': 1.0,
+                },
+                TypeError,
+                None,
+            ),
+            (
+                {
+                    'x_unit': 'meV',
                     'scale': 'invalid',
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 1.0,
@@ -55,7 +67,7 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 'invalid',
                     'relaxation_time': 1.0,
@@ -65,7 +77,7 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': -1.0,
                     'relaxation_time': 1.0,
@@ -75,7 +87,7 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': 'invalid',
@@ -85,7 +97,7 @@ class TestJumpTranslationalDiffusion:
             ),
             (
                 {
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'scale': 1.0,
                     'diffusion_coefficient': 1.0,
                     'relaxation_time': -1.0,
@@ -93,6 +105,15 @@ class TestJumpTranslationalDiffusion:
                 ValueError,
                 'relaxation_time must be non-negative',
             ),
+        ],
+        ids=[
+            'invalid_x_unit',
+            'invalid_y_unit',
+            'invalid_scale_type',
+            'invalid_diffusion_coefficient_type',
+            'invalid_diffusion_coefficient_negative',
+            'invalid_relaxation_time_type',
+            'invalid_relaxation_time_negative',
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_exception, expected_message):
@@ -159,7 +180,7 @@ class TestJumpTranslationalDiffusion:
         # EXPECT
         expected_widths = scipp_hbar * diffusion_coefficient_sc * (Q_values**2) / (1 + denominator)
 
-        expected_widths = expected_widths.to(unit=jump_diffusion_model.unit)
+        expected_widths = expected_widths.to(unit=jump_diffusion_model.x_unit)
 
         np.testing.assert_allclose(widths, expected_widths.values, rtol=1e-5)
 
@@ -221,9 +242,11 @@ class TestJumpTranslationalDiffusion:
             model = component_collections[model_index]
             assert len(model) == 1
             component = model[0]
-            assert component.width.unit == jump_diffusion_model.unit
+            assert component.width.unit == jump_diffusion_model.x_unit
             assert np.isclose(component.width.value, expected_widths[model_index])
             assert component.width.independent is False
+            # area.unit = area_unit = x_unit * y_unit
+            assert component.area.unit == 'meV'
 
     def test_write_width_dependency_expression(self, jump_diffusion_model):
         # WHEN THEN
@@ -257,6 +280,11 @@ class TestJumpTranslationalDiffusion:
         with pytest.raises(TypeError, match='QISF must be a float'):
             jump_diffusion_model._write_area_dependency_expression('invalid')
 
+    def test_y_unit_setter_raises(self, jump_diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            jump_diffusion_model.y_unit = '1/meV'
+
     def test_repr(self, jump_diffusion_model):
         # WHEN THEN
         repr_str = repr(jump_diffusion_model)
@@ -265,3 +293,5 @@ class TestJumpTranslationalDiffusion:
         assert 'JumpTranslationalDiffusion' in repr_str
         assert 'diffusion_coefficient' in repr_str
         assert 'scale=' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str

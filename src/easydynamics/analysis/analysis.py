@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from copy import copy
 from typing import Any
 
 import numpy as np
@@ -253,7 +254,6 @@ class Analysis(AnalysisBase):
 
         if Q_index is None:
             return [analysis.calculate(energy=energy) for analysis in self.analysis_list]
-
         verify_Q_index(Q_index=Q_index, Q=self.Q)
         return self.analysis_list[Q_index].calculate(energy=energy)
 
@@ -456,10 +456,7 @@ class Analysis(AnalysisBase):
         self._verify_bool(include_components, 'include_components')
         self._verify_bool(include_residuals, 'include_residuals')
 
-        energy = self._verify_energy(energy)
-
-        if energy is None:
-            energy = self.energy
+        energy = self._verify_energy(energy) if energy is not None else self.energy
 
         data_and_model = {
             'Data': self.experiment.binned_data,
@@ -532,6 +529,7 @@ class Analysis(AnalysisBase):
                         units[name] = p.unit
                     elif units[name] != p.unit:
                         try:
+                            p = copy(p)
                             p.convert_unit(units[name])
                         except Exception as e:
                             raise UnitError(
@@ -587,6 +585,7 @@ class Analysis(AnalysisBase):
 
         ds = self.parameters_to_dataset()
 
+        # None or an empty list both mean 'plot all parameters'.
         if not names:
             names = list(ds.keys())
 
@@ -686,9 +685,8 @@ class Analysis(AnalysisBase):
 
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
-        if self._analysis_list_is_dirty:
-            if self.Q is not None:
-                self._create_analysis_list()
+        if self._analysis_list_is_dirty and self.Q is not None:
+            self._create_analysis_list()
             self._analysis_list_is_dirty = False
 
     def _create_analysis_list(self) -> None:
@@ -698,6 +696,8 @@ class Analysis(AnalysisBase):
         """
         self._analysis_list = []
         for Q_index in range(len(self.Q)):
+            # The ConvolutionSettings object is shared so user changes reach every Q index;
+            # plan validity is tracked per convolver, not on the settings object.
             analysis = Analysis1d(
                 display_name=f'{self.display_name}_Q{Q_index}',
                 experiment=self.experiment,
@@ -756,16 +756,22 @@ class Analysis(AnalysisBase):
         ys = []
         ws = []
 
+        # TODO: consider using scipp built-in masking instead of numpy boolean masks,  # noqa: FIX002 TD002 TD003
+
         for analysis1d in self.analysis_list:
-            x, y, weight, _ = self.experiment._extract_x_y_weights_only_finite(  # noqa: SLF001
+            x, y, weight, mask = self.experiment.extract_x_y_weights_only_finite(
                 analysis1d.Q_index
             )
             xs.append(x)
             ys.append(y)
             ws.append(weight)
 
-            # Make sure the convolver is up to date for this Q index
-            analysis1d.refresh_convolver(energy=x)
+            # Reuse the mask from the extraction above so the masked energy does not require a
+            # second full extraction.
+            mask_var = sc.array(dims=['energy'], values=mask)
+            analysis1d.refresh_convolver(
+                energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
+            )
 
         mf = MultiFitter(
             fit_objects=self.analysis_list,
