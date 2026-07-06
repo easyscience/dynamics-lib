@@ -22,6 +22,7 @@ from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.detailed_balance import detailed_balance_factor
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.utils import verify_Q_index
 
 
 class Analysis1d(AnalysisBase):
@@ -119,7 +120,8 @@ class Analysis1d(AnalysisBase):
             extra_parameters=extra_parameters,
         )
 
-        self._Q_index = self._verify_Q_index(Q_index)
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        self._Q_index = Q_index
 
         if self._Q_index is not None and self.experiment is not None:
             masked_energy = self.experiment.get_masked_energy(Q_index=self._Q_index)
@@ -158,8 +160,8 @@ class Analysis1d(AnalysisBase):
         value : int | None
             The Q index.
         """
-
-        self._Q_index = self._verify_Q_index(value)
+        verify_Q_index(Q_index=value, Q=self.Q, allow_none=True)
+        self._Q_index = value
         self._on_Q_index_changed()
 
     #############

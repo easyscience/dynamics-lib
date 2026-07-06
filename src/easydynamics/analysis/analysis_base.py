@@ -494,37 +494,6 @@ class AnalysisBase(EasyDynamicsModelBase):
         For subclasses that implement convolution, this method can be overridden
         """
 
-    def _verify_Q_index(self, Q_index: int | None) -> int | None:
-        """
-        Verify that the Q index is valid.
-
-        Parameters
-        ----------
-        Q_index : int | None
-            The Q index to verify.
-
-        Raises
-        ------
-        TypeError
-            If Q_index is not an integer or None.
-        IndexError
-            If the Q index is not valid.
-
-        Returns
-        -------
-        int | None
-            The verified Q index.
-        """
-        if Q_index is None:
-            return None
-
-        if not isinstance(Q_index, int):
-            raise TypeError('Q_index must be an integer or None.')
-
-        if Q_index < 0 or (self.Q is not None and Q_index >= len(self.Q)):
-            raise IndexError('Q_index must be a valid index for the Q values.')
-        return Q_index
-
     def _verify_energy(self, energy: sc.Variable | None) -> sc.Variable | None:
         """
         Verify that the provided energy is the correct type.

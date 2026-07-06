@@ -319,14 +319,20 @@ class TestExperiment:
 
     @pytest.mark.parametrize(
         'Q_index',
-        [-1, 100, 'not an index'],
-        ids=['negative_index', 'out_of_bounds_index', 'invalid_type'],
+        [-1, 100],
+        ids=['negative_index', 'out_of_bounds_index'],
     )
     def test_get_masked_energy_invalid_Q_index_raises(self, experiment_with_data, Q_index):
-        "Test getting masked energy raises IndexError when Q index is invalid"
+        "Test getting masked energy raises IndexError when Q index is out of range"
         # WHEN THEN EXPECT
         with pytest.raises(IndexError):
             experiment_with_data.get_masked_energy(Q_index=Q_index)
+
+    def test_get_masked_energy_invalid_type_raises(self, experiment_with_data):
+        "Test getting masked energy raises TypeError when Q index is not an integer"
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            experiment_with_data.get_masked_energy(Q_index='not an index')
 
     ##############
     # test plotting

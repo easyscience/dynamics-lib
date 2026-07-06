@@ -163,29 +163,34 @@ class TestDiffusionModelBase:
         assert independent_vars == []
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError, 'Q_index must be non-negative'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
-            'index too large',
             'non-integer index',
         ],
     )
-    def test_get_independent_variables_raises(self, diffusion_model, Q_index):
+    def test_get_independent_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_independent_variables(Q_index=Q_index)
 
+    def test_get_independent_variables_deferred_when_Q_is_none(self, diffusion_model):
+        # WHEN: Q is None, so the upper-bound check on Q_index is deferred
+        # THEN EXPECT: no exception, and no independent variables
+        assert diffusion_model.get_independent_variables(Q_index=100) == []
+
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError, 'Q_index must be non-negative'),
+            (100, IndexError, 'out of range'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -193,9 +198,11 @@ class TestDiffusionModelBase:
             'non-integer index',
         ],
     )
-    def test_get_all_variables_raises(self, diffusion_model, Q_index):
+    def test_get_all_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_all_variables(Q_index=Q_index)
 
     def test_create_component_collections_no_Q(self, diffusion_model):
