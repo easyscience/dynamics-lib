@@ -68,12 +68,12 @@ class TestInstrumentModel:
 
         # EXPECT
         assert model.display_name == 'TestInstrumentModel'
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
         assert isinstance(model.background_model, BackgroundModel)
         assert isinstance(model.resolution_model, ResolutionModel)
-        np.testing.assert_array_equal(model.background_model.Q, np.array([1.0, 2.0, 3.0]))
-        np.testing.assert_array_equal(model.resolution_model.Q, np.array([1.0, 2.0, 3.0]))
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.background_model.Q.values, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.resolution_model.Q.values, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_init_defaults(self):
         # WHEN THEN
@@ -441,8 +441,12 @@ class TestInstrumentModel:
 
         # EXPECT
         assert instrument_model_without_Q._energy_offsets_is_dirty is True
-        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
-        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.background_model.Q.values, first_new_Q
+        )
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.resolution_model.Q.values, first_new_Q
+        )
 
         # THEN
         new_Q = np.array([4.0, 5.0, 6.0])
@@ -457,8 +461,12 @@ class TestInstrumentModel:
 
         # EXPECT
         # Q values remain unchanged
-        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
-        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.background_model.Q.values, first_new_Q
+        )
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.resolution_model.Q.values, first_new_Q
+        )
 
         # THEN - set Q to an equivalent scipp Variable; values match so should be accepted
         new_Q = sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom')
@@ -466,8 +474,12 @@ class TestInstrumentModel:
 
         # EXPECT - Q propagated to child models, offsets marked dirty again
         assert instrument_model_without_Q._energy_offsets_is_dirty is True
-        np.testing.assert_array_equal(instrument_model_without_Q.background_model.Q, first_new_Q)
-        np.testing.assert_array_equal(instrument_model_without_Q.resolution_model.Q, first_new_Q)
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.background_model.Q.values, first_new_Q
+        )
+        np.testing.assert_array_equal(
+            instrument_model_without_Q.resolution_model.Q.values, first_new_Q
+        )
 
     def test_fix_and_free_offset(self, instrument_model):
         # WHEN

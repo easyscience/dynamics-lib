@@ -71,7 +71,7 @@ class TestSampleModel:
         assert model.normalize_detailed_balance is True
         assert model.use_detailed_balance is True
         assert isinstance(model.detailed_balance_settings, DetailedBalanceSettings)
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_init_custom_input(self):
         # WHEN THEN

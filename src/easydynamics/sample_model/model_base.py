@@ -187,14 +187,14 @@ class ModelBase(EasyDynamicsModelBase):
         return self._component_collections_is_dirty
 
     @property
-    def Q(self) -> np.ndarray | None:
+    def Q(self) -> sc.Variable | None:
         """
         Get the Q values of the SampleModel.
 
         Returns
         -------
-        np.ndarray | None
-            The Q values of the SampleModel, or None if not set.
+        sc.Variable | None
+            The Q values of the SampleModel in 1/angstrom, or None if not set.
         """
         return self._Q
 
@@ -226,7 +226,7 @@ class ModelBase(EasyDynamicsModelBase):
             self._on_Q_change()
             return
 
-        if len(old_Q) != len(new_Q) or not np.allclose(old_Q, new_Q):
+        if len(old_Q) != len(new_Q) or not sc.allclose(old_Q, new_Q):
             raise ValueError(
                 'New Q values are not similar to the old ones. '
                 'To change Q values, first run clear_Q().'
@@ -377,7 +377,7 @@ class ModelBase(EasyDynamicsModelBase):
             return
 
         self._component_collections = []
-        for _ in self.Q:
+        for _ in range(len(self.Q)):
             self._component_collections.append(copy(self._components))
 
     def _on_Q_change(self) -> None:
@@ -405,6 +405,6 @@ class ModelBase(EasyDynamicsModelBase):
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
             f'unit={self.unit}, '
-            f'Q={self.Q}, '
+            f'Q={None if self.Q is None else self.Q.values}, '
             f'components={self.components})'
         )

@@ -51,7 +51,7 @@ class TestModelBase:
         assert model.display_name == 'InitModel'
         assert model.unit == 'meV'
         assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_init_raises_with_invalid_components(self):
         # WHEN / THEN / EXPECT
@@ -352,7 +352,7 @@ class TestModelBase:
         model_base.Q = new_Q
 
         # EXPECT
-        np.testing.assert_array_equal(model_base.Q, np.array(new_Q))
+        np.testing.assert_array_equal(model_base.Q.values, np.array(new_Q))
 
     def test_clear_Q(self, model_base):
         # WHEN
