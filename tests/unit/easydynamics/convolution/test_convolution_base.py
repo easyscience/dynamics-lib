@@ -32,6 +32,8 @@ class TestConvolutionBase:
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
         assert isinstance(convolution_base._sample_components, ComponentCollection)
         assert isinstance(convolution_base._resolution_components, ComponentCollection)
+        assert convolution_base.x_unit == 'meV'
+        assert convolution_base.y_unit == 'dimensionless'
 
     def test_init_with_model_component(self):
         # WHEN
@@ -78,7 +80,7 @@ class TestConvolutionBase:
                     'energy': 'invalid',
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'energy_offset': 0,
                 },
                 'Energy must be',
@@ -88,7 +90,7 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': 'invalid',
                     'resolution_components': ComponentCollection(),
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'energy_offset': 0,
                 },
                 (
@@ -101,7 +103,7 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': 'invalid',
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                     'energy_offset': 0,
                 },
                 (
@@ -114,7 +116,7 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'unit': 123,
+                    'x_unit': 123,
                     'energy_offset': 0,
                 },
                 'unit must be ',
@@ -124,7 +126,17 @@ class TestConvolutionBase:
                     'energy': np.linspace(-10, 10, 100),
                     'sample_components': ComponentCollection(),
                     'resolution_components': ComponentCollection(),
-                    'unit': 'meV',
+                    'y_unit': 123,
+                    'energy_offset': 0,
+                },
+                'unit must be ',
+            ),
+            (
+                {
+                    'energy': np.linspace(-10, 10, 100),
+                    'sample_components': ComponentCollection(),
+                    'resolution_components': ComponentCollection(),
+                    'x_unit': 'meV',
                     'energy_offset': 'invalid',
                 },
                 'Energy_offset must be ',
@@ -181,17 +193,17 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match=r'Use convert_unit to change the unit between allowed types ',
+            match=r'read-only',
         ):
-            convolution_base.unit = 'K'
+            convolution_base.x_unit = 'K'
 
     def test_convert_unit(self, convolution_base):
         # WHEN THEN
-        convolution_base.convert_unit('eV')
+        convolution_base.convert_x_unit('eV')
 
         # EXPECT
         assert convolution_base.energy.unit == 'eV'
-        assert convolution_base.unit == 'eV'
+        assert convolution_base.x_unit == 'eV'
         assert np.allclose(convolution_base.energy.values, np.linspace(-0.01, 0.01, 100))
 
     def test_convert_unit_invalid_type_raises(self, convolution_base):
@@ -200,7 +212,7 @@ class TestConvolutionBase:
             TypeError,
             match=r'Energy unit must be a string or scipp unit.',
         ):
-            convolution_base.convert_unit(123)
+            convolution_base.convert_x_unit(123)
 
     def test_convert_unit_invalid_unit_rollback(self, convolution_base):
         # WHEN THEN
@@ -208,10 +220,10 @@ class TestConvolutionBase:
             UnitError,
             match=r'Conversion from `meV` to `s` is not valid.',
         ):
-            convolution_base.convert_unit('s')
+            convolution_base.convert_x_unit('s')
 
         # EXPECT
-        assert convolution_base.unit == 'meV'
+        assert convolution_base.x_unit == 'meV'
         assert np.allclose(convolution_base.energy.values, np.linspace(-10, 10, 100))
 
     def test_convert_unit_invalid_offset_unit_rollback(self, convolution_base):
@@ -223,10 +235,10 @@ class TestConvolutionBase:
             UnitError,
             match=r'Conversion from `s` to `meV` is not valid.',
         ):
-            convolution_base.convert_unit('meV')
+            convolution_base.convert_x_unit('meV')
 
         # EXPECT
-        assert convolution_base.unit == 'meV'
+        assert convolution_base.x_unit == 'meV'
         assert convolution_base.energy_offset.unit == 's'
 
     def test_energy_offset_property(self, convolution_base):
@@ -254,6 +266,21 @@ class TestConvolutionBase:
         # WHEN THEN EXPECT
         with pytest.raises(AttributeError):
             convolution_base.energy_with_offset = 5
+
+    def test_energy_with_offset_unit_conversion(self, convolution_base):
+        # WHEN: energy is in meV and energy_offset given in eV (0.001 eV = 1 meV)
+        convolution_base.energy_offset = Parameter(
+            name='energy_offset',
+            value=0.001,
+            unit='eV',  # 0.001 eV = 1 meV
+        )
+
+        # THEN
+        result = convolution_base.energy_with_offset
+
+        # EXPECT: offset is converted to meV before subtracting → shifted by -1 meV
+        expected = convolution_base.energy.values - 1.0
+        np.testing.assert_allclose(result.values, expected, rtol=1e-5)
 
     def test_sample_components_property(self, convolution_base):
         # WHEN THEN EXPECT
@@ -303,3 +330,76 @@ class TestConvolutionBase:
             ),
         ):
             convolution_base.resolution_components = 'invalid'
+
+    def test_y_unit_setter_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match='read-only'):
+            convolution_base.y_unit = '1/meV'
+
+    def test_convert_y_unit(self, convolution_base):
+        # WHEN: sample component with y_unit='1/meV'
+        convolution_base.sample_components.append_component(
+            Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        )
+
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        convolution_base.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit updated and propagated to sample components
+        assert convolution_base.y_unit == '1/eV'
+        for component in convolution_base.sample_components:
+            assert component.y_unit == '1/eV'
+
+    def test_convert_y_unit_invalid_type_raises(self, convolution_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            convolution_base.convert_y_unit(123)
+
+    def test_convert_y_unit_rollback_on_failure(self, convolution_base):
+        # WHEN: sample component with default y_unit='dimensionless'
+        convolution_base.sample_components.append_component(Gaussian(area=1.0, x_unit='meV'))
+
+        # THEN EXPECT: 'K' is dimensionally incompatible → triggers rollback
+        with pytest.raises(UnitError):
+            convolution_base.convert_y_unit('K')
+
+        assert convolution_base.y_unit == 'dimensionless'
+
+    def test_convert_x_unit_without_sample_components(self):
+        # WHEN
+        cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+
+        # THEN
+        cb.convert_x_unit('eV')
+
+        # EXPECT
+        assert cb.energy.unit == 'eV'
+        assert np.allclose(cb.energy.values, np.linspace(-0.01, 0.01, 100))
+        assert cb.x_unit == 'eV'
+
+    def test_convert_x_unit_without_resolution_components(self):
+        # WHEN
+        sample = ComponentCollection(display_name='Sample')
+        cb = ConvolutionBase(
+            energy=np.linspace(-10, 10, 100),
+            sample_components=sample,
+            resolution_components=None,
+        )
+
+        # THEN
+        cb.convert_x_unit('eV')
+
+        # EXPECT
+        assert cb.energy.unit == 'eV'
+        assert np.allclose(cb.energy.values, np.linspace(-0.01, 0.01, 100))
+        assert cb.x_unit == 'eV'
+
+    def test_convert_y_unit_without_sample_components(self):
+        # WHEN
+        cb = ConvolutionBase(energy=np.linspace(-10, 10, 100), sample_components=None)
+
+        # THEN
+        cb.convert_y_unit('1/meV')
+
+        # EXPECT
+        assert cb.y_unit == '1/meV'

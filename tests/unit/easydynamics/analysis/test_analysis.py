@@ -98,6 +98,24 @@ class TestAnalysis:
         for i in range(3):
             assert analysis.analysis_list[i].Q_index == i
 
+    def test_analysis_list_shares_convolution_settings(self, analysis):
+        # WHEN THEN EXPECT: every Analysis1d holds the same ConvolutionSettings object, so
+        # user changes to analysis.convolution_settings reach all Q indices (regression:
+        # per-Q copies silently detached the settings)
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings is analysis.convolution_settings
+
+    def test_convolution_settings_changes_reach_all_Q(self, analysis):
+        # WHEN: the analysis list has been built
+        assert len(analysis.analysis_list) == 3
+
+        # THEN: mutate the settings on the Analysis after the fact
+        analysis.convolution_settings.upsample_factor = 20
+
+        # EXPECT: the per-Q analyses see the new value
+        for analysis1d in analysis.analysis_list:
+            assert analysis1d.convolution_settings.upsample_factor == 20
+
     def test_analysis_list_setter_raises(self, analysis):
         # WHEN / THEN / EXPECT
         with pytest.raises(
@@ -512,7 +530,7 @@ class TestAnalysis:
         )
 
         # Convert the unit of a component to eV.
-        analysis.sample_model.get_component_collection(Q_index=1)[0].convert_unit('eV')
+        analysis.sample_model.get_component_collection(Q_index=1)[0].convert_x_unit('eV')
 
         # THEN
         parameters_dataset = analysis.parameters_to_dataset()
@@ -533,12 +551,18 @@ class TestAnalysis:
             assert 'Q' in parameters_dataset[parameter_name].dims
 
     def test_parameters_to_dataset_raises_on_duplicate_names(self, analysis):
-        # Add a second Gaussian with the same parameter names as the first
-        analysis.sample_model.append_component(
-            Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
-        )
+        # Add a second Gaussian with the same parameter names as the first. Appending and the
+        # later per-Q copy both warn about the duplicate names; capture them so the test suite
+        # stays warning-clean.
+        with pytest.warns(UserWarning, match='Duplicate component names'):
+            analysis.sample_model.append_component(
+                Gaussian(name='GaussianName', display_name='Gaussian2', area=0.5)
+            )
 
-        with pytest.raises(ValueError, match='Duplicate parameter names'):
+        with (
+            pytest.warns(UserWarning, match='Duplicate component names'),
+            pytest.raises(ValueError, match='Duplicate parameter names'),
+        ):
             analysis.parameters_to_dataset()
 
     @pytest.mark.parametrize(
@@ -732,15 +756,18 @@ class TestAnalysis:
 
     def test_on_convolution_settings_changed(self, analysis):
         # WHEN
-        new_convolution_settings = ConvolutionSettings()
+        new_convolution_settings = ConvolutionSettings(upsample_factor=7, extension_factor=0.3)
 
         # THEN (this calls _on_convolution_settings_changed internally)
         analysis.convolution_settings = new_convolution_settings
 
-        # EXPECT
+        # EXPECT: the parent holds the new settings object
         assert analysis.convolution_settings is new_convolution_settings
+        # Each Analysis1d gets its own copy of the settings (so plan_is_valid is
+        # tracked independently per Q), but all values are propagated from the parent.
         for analysis1d in analysis.analysis_list:
-            assert analysis1d.convolution_settings is new_convolution_settings
+            assert analysis1d.convolution_settings.upsample_factor == 7
+            assert analysis1d.convolution_settings.extension_factor == pytest.approx(0.3)
 
     def test_fit_single_Q_valid(self, analysis):
         # WHEN
@@ -823,6 +850,51 @@ class TestAnalysis:
 
         # And that the result from the fit method is returned
         assert result == fake_fit_result
+
+    def test_fit_all_Q_simultaneously_with_nan_data(self):
+        # Regression test: energy must be sliced via sc.array(dims=['energy'], values=mask),
+        # NOT via energy[numpy_bool_array].  The bug: numpy booleans are treated as integer
+        # indices by scipp (True→1, False→0), so energy[[True,False,True]] returns 3 elements
+        # with wrong values instead of filtering to the 2 finite points.
+
+        # WHEN: data with a NaN at index 1; finite energies are -1.0 and 1.0
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[-1.0, 0.0, 1.0], unit='meV')
+        values = np.array([[1.0, np.nan, 2.0]])
+        variances = np.array([[0.1, 0.1, 0.1]])
+        data = sc.array(dims=['Q', 'energy'], values=values, variances=variances)
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+        experiment = Experiment(data=data_array)
+
+        # Set up a sample model and analysis
+        sample_model = SampleModel(components=Gaussian(name='G'))
+        analysis = Analysis(experiment=experiment, sample_model=sample_model)
+
+        captured_energy = []
+        original_refresh = analysis.analysis_list[0].refresh_convolver
+
+        # Patch the refresh_convolver method to capture the energy passed to it
+        def capture_refresh(energy, **kwargs):
+            captured_energy.append(energy)
+            return original_refresh(energy=energy, **kwargs)
+
+        analysis.analysis_list[0].refresh_convolver = capture_refresh
+        analysis.get_fit_functions = MagicMock(return_value=['fit_fn'])
+
+        fake_fitter_instance = MagicMock()
+        fake_fitter_instance.fit.return_value = object()
+
+        # THEN
+        with patch(
+            'easydynamics.analysis.analysis.MultiFitter',
+            return_value=fake_fitter_instance,
+        ):
+            analysis._fit_all_Q_simultaneously()
+
+        # EXPECT: only the 2 finite energy points (-1.0, 1.0) were passed, not all 3
+        assert len(captured_energy) == 1
+        assert len(captured_energy[0]) == 2
+        np.testing.assert_array_equal(captured_energy[0].values, [-1.0, 1.0])
 
     def test_get_fit_functions(self, analysis):
         # WHEN
@@ -923,9 +995,9 @@ class TestAnalysis:
         assert components_dataset.sizes['Q'] == 1
         assert components_dataset.coords['Q'].ndim == 1
 
-    def test_ensure_analysis_list_current_clears_dirty_when_Q_is_none(self):
-        # An Analysis with no experiment has Q=None; _ensure_analysis_list_current should still
-        # clear the dirty flag without attempting to build the list.
+    def test_ensure_analysis_list_current_stays_dirty_when_Q_is_none(self):
+        # When Q is None, _ensure_analysis_list_current should NOT clear the dirty flag —
+        # it must stay dirty so the list is rebuilt as soon as Q becomes available.
 
         # WHEN
         analysis = Analysis(display_name='NoQ')
@@ -935,8 +1007,8 @@ class TestAnalysis:
         # THEN
         result = analysis.analysis_list
 
-        # EXPECT - dirty flag cleared, list stays empty
-        assert analysis._analysis_list_is_dirty is False
+        # EXPECT - dirty flag preserved, list stays empty
+        assert analysis._analysis_list_is_dirty is True
         assert result == []
 
     def test_rebin_marks_analysis_list_dirty(self, analysis):
@@ -1039,3 +1111,9 @@ class TestAnalysis:
 
         # EXPECT - analysis_list is NOT marked dirty (callers must use Analysis.rebin())
         assert analysis._analysis_list_is_dirty is False
+
+    def test_repr(self, analysis):
+        repr_str = repr(analysis)
+        assert 'Analysis' in repr_str
+        assert 'display_name=' in repr_str
+        assert 'n_analyses=' in repr_str

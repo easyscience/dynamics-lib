@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
@@ -11,136 +12,111 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from easydynamics.utils.fit_target import FitTarget
 
 
 class FitBinding(EasyDynamicsBase):
     """
-    Contract between dataset, model, and fit function for ParameterAnalysis. This class
-    encapsulates the necessary information to bind a dataset key to a model and convert it into a
-    fit function callable.
+    Contract between dataset, model, and fit functions for ParameterAnalysis. A binding maps the
+    model's fittable predictions (its FitTargets) onto keys of the parameters Dataset they should
+    be fitted against.
 
     Examples
     --------
-    **Basic usage with a ModelComponent**
+    **Fitting a component model to one parameter**
 
-    Bind a fit parameter name to any ``ModelComponent`` or ``ComponentCollection``:
+    Component models (e.g. a Polynomial) have a single prediction — their ``evaluate`` — so
+    ``targets`` is simply the dataset key to fit against. The model's x_unit/y_unit declare the
+    units its evaluate expects: here x is the dataset's Q coordinate and y the fitted parameter, so
+    construct the model with matching units (or pass ``x_unit=None`` / ``y_unit=None`` to fit raw
+    values):
     ```python
     import easydynamics as edyn
     import easydynamics.sample_model as sm
 
-    fit_func = sm.Polynomial(coefficients=[3.7, -0.5], display_name='Straight line')
-    binding = edyn.FitBinding(parameter_name='Gaussian area', model=fit_func)
+    fit_func = sm.Polynomial(
+        coefficients=[3.7, -0.5],
+        x_unit='1/angstrom',
+        y_unit='meV',
+        display_name='Straight line',
+    )
+    binding = edyn.FitBinding(model=fit_func, targets='Gaussian area')
     ```
 
-    **Usage with a DiffusionModelBase and specific modes**
+    **Fitting a diffusion model with default dataset keys**
 
-    For diffusion models, use ``modes`` to select which parameter arrays are fitted:
+    Diffusion models declare their predictions (``'area'``, ``'width'``, and for DeltaLorentz also
+    ``'delta_area'``). With ``targets=None`` all predictions are fitted against default dataset
+    keys derived from the model's component names:
     ```python
     brownian = sm.BrownianTranslationalDiffusion(
-        display_name='Brownian Translational Diffusion',
         diffusion_coefficient=2.4e-9,
         scale=0.5,
+        lorentzian_name='Lorentzian',
     )
+    binding = edyn.FitBinding(model=brownian)  # fits 'Lorentzian area' and 'Lorentzian width'
+    ```
+
+    **Selecting predictions or mapping them to custom dataset keys**
+
+    Pass a list of prediction names, or a dict mapping prediction names to dataset keys:
+    ```python
+    binding = edyn.FitBinding(model=brownian, targets=['width'])
+
+    delta_lorentz = sm.DeltaLorentz(A_0=0.5, lorentzian_width=0.1)
     binding = edyn.FitBinding(
-        parameter_name='Lorentzian',
-        model=brownian,
-        modes=['area', 'width'],
+        model=delta_lorentz,
+        targets={
+            'width': 'Lorentzian width',
+            'area': 'Lorentzian area',
+            'delta_area': 'Elastic area',
+        },
     )
     ```
     """
 
     def __init__(
         self,
-        parameter_name: str,
         model: ModelComponent | ComponentCollection | DiffusionModelBase,
-        modes: str | list[str] | None = None,
+        targets: str | list[str] | dict[str, str] | None = None,
         display_name: str | None = None,
         unique_name: str | None = None,
     ) -> None:
         """
         Initialize a FitBinding.
 
+        Validation raises ``TypeError`` if model or targets have an invalid type, and
+        ``ValueError`` if targets names a prediction the model does not declare.
+
         Parameters
         ----------
-        parameter_name : str
-            The name of the parameter to fit. This should correspond to a key in the dataset.
         model : ModelComponent | ComponentCollection | DiffusionModelBase
             The model to fit. This can be a single ModelComponent, a ComponentCollection, or a
             DiffusionModelBase.
-        modes : str | list[str] | None, default=None
-            The modes to fit for diffusion models. This can be a single string, a list of strings,
-            or None (which defaults to ["area", "width"]). Only applicable if the model is a
-            DiffusionModelBase. Default is None.
+        targets : str | list[str] | dict[str, str] | None, default=None
+            Which predictions of the model to fit, and against which dataset keys. For component
+            models this must be a string: the dataset key to fit the model's ``evaluate`` against.
+            For diffusion models: None fits all predictions against their default dataset keys; a
+            string or list of strings selects predictions by name (default keys); a dict maps
+            prediction names to custom dataset keys.
         display_name : str | None, default=None
             An optional display name for the FitBinding. If None, the unique_name will be used.
             Default is None.
         unique_name : str | None, default=None
             An optional unique name for the FitBinding. If None, a unique name will be generated.
             Default is None.
-
-        Raises
-        ------
-        TypeError
-            If parameter_name is not a string, if model is not a ModelComponent,
-            ComponentCollection or DiffusionModelBase, or if modes is not a string, list of
-            strings, or None.
         """
 
         super().__init__(display_name=display_name, unique_name=unique_name)
 
-        if not isinstance(parameter_name, str):
-            raise TypeError('parameter_name must be a string')
-
-        if not isinstance(model, (ModelComponent, ComponentCollection, DiffusionModelBase)):
-            raise TypeError(
-                'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase'
-            )
-
-        if modes is not None and not isinstance(modes, (str, list)):
-            raise TypeError('modes must be a string, list of strings, or None')
-
-        if isinstance(modes, list) and not all(isinstance(mode, str) for mode in modes):
-            raise TypeError('All modes in the list must be strings')
-
-        self._parameter_name = parameter_name
+        self._validate_model(model)
+        self._normalize_targets(model, targets)
         self._model = model
-        self._modes = modes
+        self._targets = targets
 
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
-
-    @property
-    def parameter_name(self) -> str:
-        """
-        The name of the parameter to fit. This should correspond to a key in the dataset.
-
-        Returns
-        -------
-        str
-            The name of the parameter to fit.
-        """
-        return self._parameter_name
-
-    @parameter_name.setter
-    def parameter_name(self, value: str) -> None:
-        """
-        Set the name of the parameter to fit.
-
-        Parameters
-        ----------
-        value : str
-            The new name of the parameter to fit.
-
-        Raises
-        ------
-        TypeError
-            If the value is not a string.
-        """
-        if not isinstance(value, str):
-            raise TypeError('parameter_name must be a string')
-        self._parameter_name = value
 
     @property
     def model(self) -> ModelComponent | ComponentCollection | DiffusionModelBase:
@@ -160,162 +136,164 @@ class FitBinding(EasyDynamicsBase):
         """
         Set the model to fit.
 
+        Validation raises ``TypeError`` if the value has an invalid type, and ``ValueError`` if the
+        current targets name a prediction the new model does not declare.
+
         Parameters
         ----------
         value : ModelComponent | ComponentCollection | DiffusionModelBase
             The new model to fit.
-
-        Raises
-        ------
-        TypeError
-            If the value is not a ModelComponent, ComponentCollection, or DiffusionModelBase.
         """
-        if not isinstance(value, (ModelComponent, ComponentCollection, DiffusionModelBase)):
-            raise TypeError(
-                'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase.'
-            )
+        self._validate_model(value)
+        self._normalize_targets(value, self._targets)
         self._model = value
 
     @property
-    def modes(self) -> str | list[str] | None:
+    def targets(self) -> str | list[str] | dict[str, str] | None:
         """
-        The modes to fit for diffusion models. This can be a single string, a list of strings, or
-        None (which defaults to ["area", "width"]).
+        Which predictions of the model to fit, and against which dataset keys.
 
         Returns
         -------
-        str | list[str] | None
-            The modes to fit for diffusion models.
+        str | list[str] | dict[str, str] | None
+            The targets specification (see ``__init__``).
         """
-        return self._modes
+        return self._targets
 
-    @modes.setter
-    def modes(self, value: str | list[str] | None) -> None:
+    @targets.setter
+    def targets(self, value: str | list[str] | dict[str, str] | None) -> None:
         """
-        Set the modes to fit for diffusion models.
+        Set which predictions of the model to fit, and against which dataset keys.
+
+        Validation raises ``TypeError`` if the value has an invalid type for the current model, and
+        ``ValueError`` if it names a prediction the model does not declare.
 
         Parameters
         ----------
-        value : str | list[str] | None
-            The new modes to fit for diffusion models.
-
-        Raises
-        ------
-        TypeError
-            If the value is not a string, list of strings, or None.
+        value : str | list[str] | dict[str, str] | None
+            The new targets specification (see ``__init__``).
         """
-        if value is not None and not isinstance(value, (str, list)):
-            raise TypeError('modes must be a string, list of strings, or None')
-
-        if isinstance(value, str):
-            value = [value]
-        if isinstance(value, list) and not all(isinstance(mode, str) for mode in value):
-            raise TypeError('All modes in the list must be strings')
-        self._modes = value
+        self._normalize_targets(self._model, value)
+        self._targets = value
 
     # ------------------------------------------------------------------
     # Other methods
     # ------------------------------------------------------------------
 
-    def build_callables(self) -> list[Callable]:
+    def get_targets(self) -> list[FitTarget]:
         """
-        Build the callables for fitting based on the model and modes.
+        Get the FitTargets this binding fits, with dataset keys resolved.
+
+        Targets are built from the model at call time, so their units and default dataset keys
+        reflect the model's current state.
 
         Returns
         -------
-        list[Callable]
-            A list of callables for fitting.
+        list[FitTarget]
+            The resolved fit targets.
         """
-        modes = self._get_modes()
-
-        if isinstance(self.model, DiffusionModelBase):
-            return [self._build_diffusion_callable(mode) for mode in modes]
-
-        return [lambda x, **_: self.model.evaluate(x)]
-
-    def get_model_names(self) -> list[str]:
-        """
-        Get the names of the models based on the current modes.
-
-        Returns
-        -------
-        list[str]
-            A list of model names.
-        """
-        modes = self._get_modes()
-
-        if isinstance(self.model, DiffusionModelBase):
-            return [f'{self.model.display_name} {mode}' for mode in modes]
-
-        return [self.model.display_name]
-
-    def get_parameter_names(self) -> list[str]:
-        """
-        Get the names of the parameters based on the current modes.
-
-        Returns
-        -------
-        list[str]
-            A list of parameter names.
-        """
-        modes = self._get_modes()
-
-        if isinstance(self.model, DiffusionModelBase):
-            # This needs to be generalised.
-            # TODO: Generalise this for different diffusion models and modes. # noqa TD002 TD003
-            if 'delta' in modes:
-                return [f'{self.parameter_name} area' for mode in modes]
-
-            return [f'{self.parameter_name} {mode}' for mode in modes]
-
-        return [self.parameter_name]
+        available = {target.name: target for target in self.model.get_fit_targets()}
+        normalized = self._normalize_targets(self.model, self._targets)
+        return [
+            available[name]
+            if dataset_key is None
+            else replace(available[name], dataset_key=dataset_key)
+            for name, dataset_key in normalized.items()
+        ]
 
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
 
-    def _build_diffusion_callable(self, mode: str) -> Callable:
+    @staticmethod
+    def _validate_model(
+        model: ModelComponent | ComponentCollection | DiffusionModelBase,
+    ) -> None:
         """
-        Build a callable for a specific diffusion mode.
+        Validate the model type.
 
         Parameters
         ----------
-        mode : str
-            The diffusion mode ("area" or "width").
-
-        Returns
-        -------
-        Callable
-            A callable for the specified diffusion mode.
+        model : ModelComponent | ComponentCollection | DiffusionModelBase
+            The model to validate.
 
         Raises
         ------
-        ValueError
-            If the mode is unknown.
+        TypeError
+            If model is not a ModelComponent, ComponentCollection, or DiffusionModelBase.
         """
-        model = self.model
+        if not isinstance(model, (ModelComponent, ComponentCollection, DiffusionModelBase)):
+            raise TypeError(
+                'model must be a ModelComponent, ComponentCollection, or DiffusionModelBase'
+            )
 
-        if mode == 'area':
-            return lambda x, **_: model.calculate_QISF(x) * model.scale.value
-
-        if mode == 'width':
-            return lambda x, **_: model.calculate_width(x)
-
-        if mode == 'delta':
-            return lambda x, **_: model.calculate_EISF(x) * model.scale.value
-
-        raise ValueError(f'Unknown diffusion mode: {mode}')
-
-    def _get_modes(self) -> list[str]:
+    @staticmethod
+    def _normalize_targets(
+        model: ModelComponent | ComponentCollection | DiffusionModelBase,
+        targets: str | list[str] | dict[str, str] | None,
+    ) -> dict[str, str | None]:
         """
-        Get the modes to fit for diffusion models, defaulting to ["area", "width"] if not set.
+        Validate a targets specification and normalize it to a prediction-name mapping.
+
+        This is the one place that knows the two spec dialects: component models take the dataset
+        key as a plain string for their single ``'value'`` prediction, while diffusion models
+        select predictions by name (None selects all) with optional dataset-key overrides.
+
+        Parameters
+        ----------
+        model : ModelComponent | ComponentCollection | DiffusionModelBase
+            The model the targets apply to.
+        targets : str | list[str] | dict[str, str] | None
+            The targets specification to validate and normalize.
 
         Returns
         -------
-        list[str]
-            The modes to fit for diffusion models.
+        dict[str, str | None]
+            Mapping of prediction name to dataset-key override (None means the prediction's default
+            dataset key is used).
+
+        Raises
+        ------
+        TypeError
+            If targets has an invalid type for the given model.
+        ValueError
+            If targets names a prediction the model does not declare.
         """
-        return ['area', 'width'] if self.modes is None else self.modes
+        if not isinstance(model, DiffusionModelBase):
+            if not isinstance(targets, str):
+                raise TypeError(
+                    'For component models, targets must be the dataset key (a string) to fit '
+                    "the model's evaluate against."
+                )
+            return {'value': targets}
+
+        available = [target.name for target in model.get_fit_targets()]
+        if targets is None:
+            return dict.fromkeys(available)
+        if isinstance(targets, str):
+            requested = [targets]
+        elif isinstance(targets, list):
+            requested = targets
+        elif isinstance(targets, dict):
+            requested = list(targets.keys())
+            if not all(isinstance(key, str) for key in targets.values()):
+                raise TypeError('targets dict values must be dataset keys (strings)')
+        else:
+            raise TypeError(
+                'targets must be None, a prediction name, a list of prediction names, '
+                'or a dict mapping prediction names to dataset keys'
+            )
+        if not all(isinstance(name, str) for name in requested):
+            raise TypeError('prediction names in targets must be strings')
+
+        unknown = sorted(set(requested) - set(available))
+        if unknown:
+            raise ValueError(
+                f'Unknown prediction(s) {", ".join(unknown)} for '
+                f'{model.__class__.__name__}. Available predictions: '
+                f'{", ".join(available)}.'
+            )
+        return dict(targets) if isinstance(targets, dict) else dict.fromkeys(requested)
 
     # ------------------------------------------------------------------
     # dunder methods
@@ -331,10 +309,8 @@ class FitBinding(EasyDynamicsBase):
             A string representation of the FitBinding.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'parameter_name={self.parameter_name!r},\n'
-            f'    model={self.model.display_name!r},\n'
-            f'    modes={self.modes},\n'
-            f'    display_name={self.display_name!r},\n'
-            f'    unique_name={self.unique_name!r})'
+            f'{self.__class__.__name__}(\n'
+            f'    model={self.model.display_name},\n'
+            f'    targets={self.targets},\n'
+            f')'
         )

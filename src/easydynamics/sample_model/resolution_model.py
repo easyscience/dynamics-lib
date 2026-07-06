@@ -51,12 +51,13 @@ class ResolutionModel(ModelBase):
         self,
         display_name: str = 'MyResolutionModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
         """
-        Initialize a ResolutionModel.
+        Initialize the ResolutionModel.
 
         Parameters
         ----------
@@ -64,19 +65,20 @@ class ResolutionModel(ModelBase):
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default='meV'
-            Unit of the model.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         components : ModelComponent | ComponentCollection | None, default=None
-            Template components of the model. If None, no components are added. These components
-            are copied into ComponentCollections for each Q value.
+            Template components. DeltaFunction, Polynomial, and Exponential are not allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
         """
-
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             components=components,
             Q=Q,
         )
@@ -85,8 +87,8 @@ class ResolutionModel(ModelBase):
         """
         Append a component to the ResolutionModel.
 
-        Does not allow DeltaFunction or Polynomial components, as these are not physical resolution
-        components.
+        Does not allow DeltaFunction, Polynomial, or Exponential components, as these are not
+        physical resolution components.
 
         Parameters
         ----------
@@ -96,7 +98,7 @@ class ResolutionModel(ModelBase):
         Raises
         ------
         TypeError
-            If the component is a DeltaFunction or Polynomial.
+            If the component is a DeltaFunction, Polynomial, or Exponential.
         """
         components = component if isinstance(component, ComponentCollection) else (component,)
 
@@ -151,22 +153,27 @@ class ResolutionModel(ModelBase):
 
         resolution_model = cls(
             display_name=sample_model.display_name,
-            unit=sample_model.unit,
+            x_unit=sample_model.x_unit,
+            y_unit=sample_model.y_unit,
             components=sample_model.components,
             Q=sample_model.Q,
         )
 
         if sample_model.Q is not None:
-            resolution_model._ensure_component_collections_current()
-            for index in range(len(sample_model.Q)):
-                resolution_model._component_collections[index] = copy(
-                    sample_model.get_component_collection(Q_index=index)
-                )
-        if normalize_area:
-            resolution_model.normalize_area()
-
-        if fix_parameters:
-            resolution_model.fix_all_parameters()
+            # Prepare the per-Q collections detached from the model so no EasyScience
+            # callback can schedule a rebuild halfway through, then install them and
+            # clear the dirty flag in one final step.
+            collections = [
+                copy(sample_model.get_component_collection(Q_index=index))
+                for index in range(len(sample_model.Q))
+            ]
+            for collection in collections:
+                if normalize_area:
+                    collection.normalize_area()
+                if fix_parameters:
+                    collection.fix_all_parameters()
+            resolution_model._component_collections = collections
+            resolution_model._component_collections_is_dirty = False
 
         return resolution_model
 
@@ -174,7 +181,8 @@ class ResolutionModel(ModelBase):
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'Q_len={None if self._Q is None else len(self._Q)}, '
             f'components={self.components})'
         )

@@ -5,7 +5,9 @@ import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 
+from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 
@@ -15,13 +17,13 @@ class DummyComponent(ModelComponent):
         self.area = Parameter(name='area', value=1.0, unit='meV', fixed=False)
         self.center = Parameter(name='center', value=2.0, unit='meV', fixed=True)
         self.width = Parameter(name='width', value=3.0, unit='meV', fixed=True)
-        self._unit = 'meV'
+        self._x_unit = 'meV'
 
     def get_all_parameters(self):
         return [self.area, self.center, self.width]
 
-    def evaluate(self, x):
-        return np.zeros_like(x)
+    def _evaluate_values(self, x_vals, _eval_unit):
+        return np.zeros_like(x_vals)
 
 
 class TestModelComponent:
@@ -31,23 +33,23 @@ class TestModelComponent:
 
     def test_unit_cannot_be_set_directly(self, dummy: ModelComponent):
         # WHEN THEN EXPECT
-        with pytest.raises(AttributeError, match='Unit is read-only'):
-            dummy.unit = 'K'
+        with pytest.raises(AttributeError, match='read-only'):
+            dummy.x_unit = 'K'
 
     def test_convert_unit(self, dummy: DummyComponent):
         # WHEN THEN
-        dummy.convert_unit('microeV')
+        dummy.convert_x_unit('microeV')
 
         # EXPECT
-        assert dummy.unit == 'microeV'
+        assert dummy.x_unit == 'microeV'
         assert dummy.area.value == pytest.approx(1 * 1e3)
         assert dummy.center.value == pytest.approx(2 * 1e3)
         assert dummy.width.value == pytest.approx(3 * 1e3)
 
     def test_convert_unit_incorrect_unit_raises(self, dummy: DummyComponent):
         # WHEN THEN EXPECT
-        with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
-            dummy.convert_unit(123)
+        with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
+            dummy.convert_x_unit(123)
 
     def test_free_and_fix_all_parameters(self, dummy):
         # WHEN THEN EXPECT
@@ -57,6 +59,23 @@ class TestModelComponent:
         # THEN EXPECT
         dummy.fix_all_parameters()
         assert all(p.fixed for p in dummy.get_all_parameters())
+
+    def test_get_fit_targets(self, dummy: DummyComponent):
+        # WHEN
+        targets = dummy.get_fit_targets()
+
+        # EXPECT: a single 'value' prediction wrapping evaluate, stamped with the component's
+        # units and no default dataset key
+        assert len(targets) == 1
+        target = targets[0]
+        assert target.name == 'value'
+        assert target.dataset_key is None
+        assert target.label == 'Dummy'
+        assert target.x_unit == dummy.x_unit
+        assert target.y_unit == dummy.y_unit
+        np.testing.assert_allclose(
+            target.function(np.array([1.0, 2.0])), dummy.evaluate(np.array([1.0, 2.0]))
+        )
 
     def test_repr(self, dummy):
         # WHEN THEN EXPECT
@@ -92,8 +111,11 @@ class TestModelComponent:
         ],
     )
     def test_prepare_x_for_evaluate_various_inputs(self, dummy, x_input, expected_array):
-        x_prepared = dummy._prepare_x_for_evaluate(x_input)
+        # WHEN THEN
+        result = dummy._prepare_x_for_evaluate(x_input)
+        x_prepared, _detected_unit, _dim = result
 
+        # EXPECT
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == expected_array.shape
         np.testing.assert_array_equal(x_prepared, expected_array)
@@ -137,26 +159,126 @@ class TestModelComponent:
         # THEN EXPECT
         with pytest.raises(
             Exception,
-            match='Input x has unit nm, but DummyComponent component ',
+            match='Input x has unit nm',
         ):
             dummy._prepare_x_for_evaluate(x)
 
-    def test_prepare_x_for_evaluate_with_different_unit_warns(self, dummy):
+    def test_prepare_x_for_evaluate_with_different_unit_no_warn(self, dummy):
         # WHEN
         x = sc.array(dims=['x'], values=[1.0, 2.0, 3.0], unit='microeV')
 
-        # THEN EXPECT
-        with pytest.warns(
-            UserWarning,
-            match='Input x has unit [µμ]eV, but DummyComponent component ',
-        ):
-            x_prepared = dummy._prepare_x_for_evaluate(x)
+        # THEN: compatible units are accepted without warning;
+        # the component's x_unit is NOT mutated and x values are returned as-is.
+        x_prepared, _detected_unit, _dim = dummy._prepare_x_for_evaluate(x)
 
         # EXPECT
         assert isinstance(x_prepared, np.ndarray)
         assert x_prepared.shape == (3,)
         np.testing.assert_array_equal(x_prepared, [1.0, 2.0, 3.0])
-        assert dummy.unit == 'µeV'  # noqa: RUF001
-        assert dummy.area.value == pytest.approx(1.0 * 1e3)
-        assert dummy.center.value == pytest.approx(2.0 * 1e3)
-        assert dummy.width.value == pytest.approx(3.0 * 1e3)
+        assert dummy.x_unit == 'meV'  # component unit unchanged
+        assert dummy.area.value == pytest.approx(1.0)  # parameter values unchanged
+        assert dummy.center.value == pytest.approx(2.0)
+        assert dummy.width.value == pytest.approx(3.0)
+
+    def test_resolve_param_value_same_unit_returns_raw_value(self, dummy):
+        # WHEN: target unit matches parameter unit
+
+        # THEN
+        result = dummy._resolve_param_value(dummy.area, 'meV')
+        # EXPECT: raw value returned without conversion
+        assert result == pytest.approx(dummy.area.value)
+
+    def test_resolve_param_value_none_target_returns_raw_value(self, dummy):
+        # WHEN: target unit is None
+
+        # THEN
+        result = dummy._resolve_param_value(dummy.area, None)
+
+        # EXPECT: raw value returned without conversion
+        assert result == pytest.approx(dummy.area.value)
+
+    def test_resolve_param_value_converts_without_mutating(self, dummy):
+        # WHEN: target unit differs from parameter unit
+
+        # THEN
+        result = dummy._resolve_param_value(dummy.area, 'eV')
+        # EXPECT: converted value (1.0 meV → 0.001 eV)
+        assert result == pytest.approx(0.001)
+        # parameter itself is not mutated
+        assert dummy.area.value == pytest.approx(1.0)
+        assert str(dummy.area.unit) == 'meV'
+
+    def test_evaluate_with_compatible_unit_gives_correct_result(self):
+        # WHEN: Gaussian in meV and a physically equivalent Gaussian in eV
+        g_mev = Gaussian(area=1.0, center=0.0, width=0.5, x_unit='meV')
+        g_ev = Gaussian(area=0.001, center=0.0, width=0.0005, x_unit='eV')
+
+        x_ev = sc.array(
+            dims=['energy'],
+            values=np.array([-0.002, -0.001, 0.0, 0.001, 0.002]),
+            unit='eV',
+        )
+        x_ev_np = np.array([-0.002, -0.001, 0.0, 0.001, 0.002])
+
+        # THEN: evaluate meV-Gaussian with x in eV
+        result_mev = g_mev.evaluate(x_ev)
+        result_ev = g_ev.evaluate(x_ev_np)
+
+        # EXPECT: physically identical outputs
+        np.testing.assert_allclose(result_mev, result_ev, rtol=1e-10)
+        # EXPECT: model state is unchanged
+        assert g_mev.x_unit == 'meV'
+        assert g_mev.width.value == pytest.approx(0.5)
+        assert g_mev.area.value == pytest.approx(1.0)
+
+    # ───── Regression tests ─────
+
+    def test_convert_x_unit_rollback_on_failure(self, dummy: DummyComponent):
+        # Conversion to 'm' (length) is incompatible with 'meV' (energy) → triggers rollback
+        with pytest.raises(UnitError):
+            dummy.convert_x_unit('m')
+        # Parameters should be restored to original values after rollback
+        assert dummy.x_unit == 'meV'
+        assert dummy.area.value == pytest.approx(1.0)
+        assert dummy.center.value == pytest.approx(2.0)
+        assert dummy.width.value == pytest.approx(3.0)
+
+    def test_convert_y_unit_not_implemented(self, dummy: DummyComponent):
+        with pytest.raises(NotImplementedError, match='does not support convert_y_unit'):
+            dummy.convert_y_unit('1/meV')
+
+    def test_evaluate_invalid_output_raises(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT
+        with pytest.raises(ValueError, match="output must be 'numpy' or 'scipp'"):
+            dummy.evaluate(np.linspace(-1, 1, 5), output='Scipp')
+
+    def test_eval_area_unit(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT: y_unit is dimensionless, so the area unit equals the eval unit
+        assert sc.Unit(dummy._eval_area_unit('meV')) == sc.Unit('meV')
+
+    def test_eval_area_unit_none_eval_unit(self, dummy: DummyComponent):
+        # WHEN THEN EXPECT: without an eval unit there is no area unit
+        assert dummy._eval_area_unit(None) is None
+
+    def test_eval_area_unit_none_y_unit(self, dummy: DummyComponent):
+        # WHEN
+        dummy._y_unit = None
+
+        # THEN EXPECT
+        assert dummy._eval_area_unit('meV') is None
+
+    def test_evaluate_preserves_dataarray_coord_key_as_dim(self):
+        # WHEN: a Gaussian and a DataArray where the coord key ('energy') differs
+        # from the coord Variable's internal dim name ('x').  This is a valid scipp
+        # non-dimension coordinate: the data's dimension is 'x' and the coord is
+        # labelled 'energy' but lives on the same 'x' axis.
+        g = Gaussian(name='G', area=1.0, center=0.0, width=1.0, x_unit='meV')
+        coord = sc.Variable(dims=['x'], values=np.linspace(-5.0, 5.0, 10), unit='meV')
+        data = sc.Variable(dims=['x'], values=np.ones(10))
+        da = sc.DataArray(data=data, coords={'energy': coord})
+        # THEN: evaluate with scipp output
+        # Before the fix, dim was overwritten with coord.dims[0] = 'x', so the
+        # output Variable had dim 'x' instead of the coord key 'energy'.
+        result = g.evaluate(da, output='scipp')
+        # EXPECT: output dim must be the coord key 'energy', not the Variable dim 'x'.
+        assert result.dims == ('energy',)

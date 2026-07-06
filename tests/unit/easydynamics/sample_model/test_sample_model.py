@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import scipp as sc
 from scipp import UnitError
 
 from easydynamics.sample_model import ComponentCollection
@@ -28,7 +29,7 @@ class TestSampleModel:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -36,7 +37,7 @@ class TestSampleModel:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -50,7 +51,7 @@ class TestSampleModel:
             display_name='InitModel',
             components=component_collection,
             diffusion_models=diffusion_model,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
             temperature=10.0,
         )
@@ -62,7 +63,8 @@ class TestSampleModel:
 
         # EXPECT
         assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
+        assert model.x_unit == 'meV'
+        assert model.y_unit == 'dimensionless'
         assert len(model.components) == 2
         assert isinstance(model.diffusion_models, list)
         assert len(model.diffusion_models) == 1
@@ -308,6 +310,62 @@ class TestSampleModel:
         ):
             model.convert_temperature_unit('invalid_unit')
 
+    def test_convert_x_unit_propagates_to_diffusion_models(self):
+        # WHEN: a SampleModel with an attached diffusion model
+        Q = np.array([1.0, 2.0])
+        brownian = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=Q)
+        model = SampleModel(Q=Q, diffusion_models=brownian)
+        width_mev = model.get_component_collection(0)[0].width.value
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: the diffusion model follows the SampleModel's new unit, and the merged
+        # collections carry rescaled widths in the new unit
+        assert sc.Unit(str(brownian.x_unit)) == sc.Unit('ueV')
+        assert sc.Unit(str(brownian.scale.unit)) == sc.Unit('ueV')
+        collection = model.get_component_collection(0)
+        assert sc.Unit(str(collection[0].width.unit)) == sc.Unit('ueV')
+        assert collection[0].width.value == pytest.approx(width_mev * 1000)
+
+    def test_convert_x_unit_does_not_mark_collections_dirty(self):
+        # WHEN: a SampleModel with an attached diffusion model and built collections
+        Q = np.array([1.0, 2.0])
+        brownian = BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, Q=Q)
+        model = SampleModel(Q=Q, diffusion_models=brownian)
+        collection_before = model.get_component_collection(0)
+        width = collection_before[0].width
+
+        # THEN
+        model.convert_x_unit('ueV')
+
+        # EXPECT: conversion works in place — no dirty flag, no rebuild, and the converted
+        # dependent width stays in the new unit through later dependency-graph updates
+        # (regression: conversion used to mark the collections dirty, and the rebuild
+        # discarded per-Q state and object references)
+        assert model._component_collections_is_dirty is False
+        assert model.get_component_collection(0) is collection_before
+        width_uev = width.value
+        brownian.diffusion_coefficient = 4.8e-9
+        assert sc.Unit(str(width.unit)) == sc.Unit('ueV')
+        assert width.value == pytest.approx(2 * width_uev)
+
+    def test_convert_y_unit_propagates_to_diffusion_models(self):
+        # WHEN: SampleModel and diffusion model sharing y_unit='1/meV'
+        Q = np.array([1.0])
+        brownian = BrownianTranslationalDiffusion(
+            diffusion_coefficient=2.4e-9, Q=Q, y_unit='1/meV'
+        )
+        model = SampleModel(Q=Q, y_unit='1/meV', diffusion_models=brownian)
+
+        # THEN
+        model.convert_y_unit('1/eV')
+
+        # EXPECT
+        assert sc.Unit(str(brownian.y_unit)) == sc.Unit('1/eV')
+        assert sc.Unit(str(brownian.scale.unit)) == sc.Unit('meV/eV')
+        assert sc.Unit(str(model.y_unit)) == sc.Unit('1/eV')
+
     def test_normalize_detailed_balance_setter(self, sample_model):
         # WHEN
         model = sample_model
@@ -402,12 +460,12 @@ class TestSampleModel:
                 energy=x,
                 temperature=sample_model.temperature,
                 divide_by_temperature=sample_model.normalize_detailed_balance,
-                energy_unit=sample_model.unit,
+                energy_unit=sample_model.x_unit,
             )
 
             # Check that evaluate was called on each component
-            collection1.evaluate.assert_called_once_with(x)
-            collection2.evaluate.assert_called_once_with(x)
+            collection1.evaluate.assert_called_once_with(x, output='numpy')
+            collection2.evaluate.assert_called_once_with(x, output='numpy')
 
             # Check that DBF was applied elementwise
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]) * 10.0)
@@ -452,8 +510,8 @@ class TestSampleModel:
             mock_dbf.assert_not_called()
 
             # Check that evaluate was called on each component
-            collection1.evaluate.assert_called_once_with(x)
-            collection2.evaluate.assert_called_once_with(x)
+            collection1.evaluate.assert_called_once_with(x, output='numpy')
+            collection2.evaluate.assert_called_once_with(x, output='numpy')
 
             # Check that results were not modified by DBF
             np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
@@ -531,9 +589,28 @@ class TestSampleModel:
 
         # THEN / EXPECT
         assert 'SampleModel' in repr_str
-        assert 'unit=' in repr_str
-        assert 'Q=' in repr_str
+        assert 'Q = ' in repr_str
         assert 'components' in repr_str
         assert 'diffusion_models' in repr_str
         assert 'temperature' in repr_str
+        # Regression: a stray ')' and a missing separator used to mangle this into
+        # 'x_unit=meV), y_unit=dimensionlessQ = ...', and the closing ')' was missing
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str
+        assert repr_str.rstrip().endswith(')')
         assert 'normalize_detailed_balance' in repr_str
+
+    def test_y_unit_setter_raises(self, sample_model):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            sample_model.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        model = SampleModel(components=g, x_unit='meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+        # EXPECT
+        assert model.y_unit == '1/eV'
+        assert model.components[0].y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)

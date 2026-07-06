@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from functools import partial
+
 import numpy as np
 import scipp as sc
 from easyscience.variable import DescriptorNumber
@@ -9,9 +11,13 @@ from scipp import UnitError
 
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.utils.fit_target import FitTarget
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import convert_parameter_unit
+from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -22,7 +28,8 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self,
         scale: Numeric = 1.0,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'DiffusionModel',
         display_name: str | None = 'DiffusionModel',
         lorentzian_name: str | None = None,
@@ -32,14 +39,20 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         """
         Initialize a new DiffusionModel.
 
+        Unit validation raises ``UnitError`` if x_unit is not a string or scipp Unit, or if it
+        cannot be converted to meV.
+
         Parameters
         ----------
         scale : Numeric, default=1.0
-            Scale factor for the diffusion model. Must be a non-negative number.
+            Scale factor for the diffusion model. Must be a non-negative number. Its unit equals
+            area_unit = x_unit * y_unit because scale * QISF/EISF (dimensionless) = component area.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy/frequency). Must be convertible to meV.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity). Together with x_unit determines area_unit.
         name : str, default='DiffusionModel'
             Name of the diffusion model.
         display_name : str | None, default='DiffusionModel'
@@ -58,21 +71,13 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         ------
         TypeError
             If scale is not a number.
-        UnitError
-            If unit is not a string or scipp Unit, or if it cannot be converted to meV.
         ValueError
             If scale is negative.
         """
 
         self._Q = _validate_and_convert_Q(Q)
 
-        try:
-            test = DescriptorNumber(name='test', value=1, unit=unit)
-            test.convert_unit('meV')
-        except Exception as e:
-            raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
-            ) from e
+        self._assert_convertible_to_mev(x_unit)
 
         if not isinstance(scale, Numeric):
             raise TypeError('scale must be a number.')
@@ -80,10 +85,18 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if float(scale) < 0:
             raise ValueError('scale must be non-negative.')
 
-        scale = Parameter(name='scale', value=float(scale), fixed=False, min=0.0, unit=unit)
-        self._scale = scale
+        area_unit = str(sc.Unit(str(x_unit)) * sc.Unit(str(y_unit)))
+        self._scale = Parameter(
+            name='scale', value=float(scale), fixed=False, min=0.0, unit=area_unit
+        )
 
-        super().__init__(unit=unit, name=name, display_name=display_name, unique_name=unique_name)
+        super().__init__(
+            x_unit=x_unit,
+            y_unit=y_unit,
+            name=name,
+            display_name=display_name,
+            unique_name=unique_name,
+        )
 
         if lorentzian_name is None:
             lorentzian_name = name
@@ -103,7 +116,10 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         if self.Q is None:
             self._component_collections = []
         else:
-            self._component_collections = [ComponentCollection()] * len(self.Q)
+            self._component_collections = [
+                ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+                for _ in range(len(self.Q))
+            ]
 
     # ------------------------------------------------------------------
     # Properties
@@ -276,6 +292,167 @@ class DiffusionModelBase(EasyDynamicsModelBase):
         self._on_Q_change()
 
     # ------------------------------------------------------------------
+    # Unit conversion
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _assert_convertible_to_mev(unit: str | sc.Unit) -> None:
+        """
+        Assert that the given unit is an energy unit (convertible to meV).
+
+        Frequency axes such as 1/ps are not supported for now.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The unit to validate.
+
+        Raises
+        ------
+        UnitError
+            If unit is not a string or scipp Unit, or if it cannot be converted to meV.
+        """
+        try:
+            test = DescriptorNumber(name='test', value=1, unit=str(unit))
+            test.convert_unit('meV')
+        except Exception as e:
+            raise UnitError(
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+            ) from e
+
+    def convert_x_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the x-axis unit of the diffusion model.
+
+        Converts the scale parameter (unit ``x_unit * y_unit``), any subclass-specific x-unit
+        parameters, and the existing component collections in place — parameter values and object
+        identity are preserved, and nothing is scheduled for regeneration. Only energy units are
+        supported (the unit must be convertible to meV).
+
+        Unit validation raises ``UnitError`` when the unit is not convertible to meV. If any
+        conversion fails, the already-converted state is rolled back best-effort before the failing
+        conversion's exception is re-raised.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new x-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit.
+        """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'x_unit must be a string or sc.Unit, got {type(unit).__name__}')
+        unit_str = str(unit)
+        self._assert_convertible_to_mev(unit_str)
+
+        old_x_unit = str(self.x_unit)
+        new_scale_unit = str(sc.Unit(unit_str) * sc.Unit(str(self.y_unit)))
+        old_scale_unit = str(sc.Unit(old_x_unit) * sc.Unit(str(self.y_unit)))
+        conversions = [
+            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+            (self._convert_extra_x_unit_parameters, unit_str, old_x_unit),
+        ]
+        conversions.extend(
+            (collection.convert_x_unit, unit_str, old_x_unit)
+            for collection in self._component_collections
+        )
+        convert_units_with_rollback(conversions)
+
+        self._x_unit = unit_str
+
+    def convert_y_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit of the diffusion model.
+
+        Converts the scale parameter from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit`` and
+        the existing component collections in place — parameter values and object identity are
+        preserved, and nothing is scheduled for regeneration. The new y-unit must be dimensionally
+        compatible with the current one; the scale conversion raises ``UnitError`` otherwise. If
+        any conversion fails, the already-converted state is rolled back best-effort before the
+        failing conversion's exception is re-raised.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new y-axis unit.
+
+        Raises
+        ------
+        TypeError
+            If unit is not a string or sc.Unit.
+        """
+        if not isinstance(unit, (str, sc.Unit)):
+            raise TypeError(f'y_unit must be a string or sc.Unit, got {type(unit).__name__}')
+        unit_str = str(unit)
+
+        old_y_unit = str(self.y_unit)
+        new_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(unit_str))
+        old_scale_unit = str(sc.Unit(str(self.x_unit)) * sc.Unit(old_y_unit))
+        conversions = [
+            (partial(convert_parameter_unit, self._scale), new_scale_unit, old_scale_unit),
+        ]
+        conversions.extend(
+            (collection.convert_y_unit, unit_str, old_y_unit)
+            for collection in self._component_collections
+        )
+        convert_units_with_rollback(conversions)
+
+        self._y_unit = unit_str
+
+    def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
+        """
+        Convert subclass-specific parameters that carry the x-axis unit.
+
+        The base implementation does nothing; subclasses with x-unit parameters (e.g. a Lorentzian
+        width template) override this method.
+
+        Parameters
+        ----------
+        unit_str : str
+            The new x-axis unit as a string.
+        """
+
+    # ------------------------------------------------------------------
+    # Fit targets
+    # ------------------------------------------------------------------
+
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of the diffusion model as FitTargets.
+
+        The base implementation declares ``'area'`` (``scale * QISF(Q)``) and ``'width'`` (the HWHM
+        ``Gamma(Q)``), with default dataset keys derived from the Lorentzian component's name.
+        Subclasses with additional predictions (e.g. a delta-function weight) extend this list. The
+        targets are snapshots: units and default keys reflect the model state at call time.
+
+        Returns
+        -------
+        list[FitTarget]
+            The fittable predictions of this model.
+        """
+        return [
+            FitTarget(
+                name='area',
+                dataset_key=f'{self.lorentzian_name} area',
+                function=lambda Q, model=self, **_: model.calculate_QISF(Q) * model.scale.value,
+                label=f'{self.display_name} area',
+                x_unit=CANONICAL_Q_UNIT,
+                y_unit=str(self.scale.unit),
+            ),
+            FitTarget(
+                name='width',
+                dataset_key=f'{self.lorentzian_name} width',
+                function=lambda Q, model=self, **_: model.calculate_width(Q),
+                label=f'{self.display_name} width',
+                x_unit=CANONICAL_Q_UNIT,
+                y_unit=str(self.x_unit),
+            ),
+        ]
+
+    # ------------------------------------------------------------------
     # Methods
     # ------------------------------------------------------------------
     def get_global_variables(self) -> list[Parameter]:
@@ -422,7 +599,9 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             self._component_collections = []
             return self._component_collections
 
-        self._component_collections = [ComponentCollection()] * len(self.Q)
+        self._component_collections = [
+            ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit) for _ in range(len(self.Q))
+        ]
 
         return self._component_collections
 
@@ -454,14 +633,52 @@ class DiffusionModelBase(EasyDynamicsModelBase):
     # private methods
     # ------------------------------------------------------------------
 
+    def _write_area_dependency_expression(self, QISF: float) -> str:
+        """
+        Write the dependency expression for the Lorentzian area.
+
+        Parameters
+        ----------
+        QISF : float
+            Q-dependent incoherent scattering function value.
+
+        Raises
+        ------
+        TypeError
+            If QISF is not a float.
+
+        Returns
+        -------
+        str
+            Dependency expression for the area.
+        """
+        if not isinstance(QISF, float):
+            raise TypeError('QISF must be a float.')
+        return f'{QISF} * scale'
+
+    def _write_area_dependency_map_expression(self) -> dict[str, DescriptorNumber]:
+        """
+        Write the dependency map for the Lorentzian area.
+
+        Returns
+        -------
+        dict[str, DescriptorNumber]
+            Dependency map for the area.
+        """
+        return {'scale': self.scale}
+
     def _on_Q_change(self) -> None:
         """Handle changes to the Q values."""
         self.create_component_collections()
 
     def _ensure_Q(self, Q: Q_type) -> np.ndarray:
         """
-        Convert Q to a numpy array, ensuring it is not None. Uses the stored Q if no input is
-        given.
+        Convert Q to a numpy array of values in the canonical Q unit (1/angstrom), ensuring it is
+        not None. Uses the stored Q if no input is given.
+
+        The stored Q and 1-dimensional numpy input are returned directly (the stored Q was
+        validated when set; raw numpy values are assumed to be in the canonical unit, as in
+        :func:`_validate_and_convert_Q`). Other inputs go through full validation and conversion.
 
         Parameters
         ----------
@@ -479,11 +696,50 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             If the provided Q and self.Q are both None
         """
         if Q is None:
-            Q = self.Q
-        if Q is None:
-            raise ValueError('Q must be provided either as an argument or set in the model.')
+            if self._Q is None:
+                raise ValueError('Q must be provided either as an argument or set in the model.')
+            return self._Q.values
+
+        if isinstance(Q, np.ndarray) and Q.ndim == 1:
+            return Q
 
         return _validate_and_convert_Q(Q).values
+
+    def _match_Q_indices(self, Q_values: np.ndarray) -> np.ndarray:
+        """
+        Map Q values (in 1/angstrom) onto indices of the stored Q.
+
+        Predictions backed by per-Q parameters use this to evaluate a subset of the stored Q values
+        (e.g. when a fit drops rows with missing data), returning one entry per requested Q instead
+        of one per stored Q.
+
+        Parameters
+        ----------
+        Q_values : np.ndarray
+            The requested Q values in 1/angstrom.
+
+        Returns
+        -------
+        np.ndarray
+            For each requested Q value, the index of the matching stored Q value.
+
+        Raises
+        ------
+        ValueError
+            If Q is not set on the model, or if any requested Q value does not match a stored Q
+            value.
+        """
+        if self.Q is None:
+            raise ValueError('Q must be set in the model to match Q values against it.')
+
+        stored = self.Q.values
+        indices = np.abs(np.subtract.outer(Q_values, stored)).argmin(axis=1)
+        if not np.allclose(stored[indices], Q_values):
+            raise ValueError(
+                'Requested Q values do not match the Q values stored in the model. '
+                'Per-Q parameters are only defined at the stored Q values.'
+            )
+        return indices
 
     # ------------------------------------------------------------------
     # dunder methods
@@ -499,8 +755,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             String representation of the DiffusionModel.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'name={self.name!r}, display_name={self.display_name!r}, '
-            f'unit={self.unit},\n'
+            f'{self.__class__.__name__}(name={self.name}, display_name={self.display_name}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, \n'
             f'    scale={self.scale})'
         )
