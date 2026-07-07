@@ -1,17 +1,21 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from unittest.mock import Mock
+
 import numpy as np
 import pytest
 import scipp as sc
 from easyscience.variable import Parameter
 
+from easydynamics.utils.utils import _assert_valid_unit
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import _validate_and_convert_Q
 from easydynamics.utils.utils import _validate_unit
 from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import convert_value_unit
+from easydynamics.utils.utils import energy_to_scipp
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -282,3 +286,42 @@ class TestInNotebook:
 
         # EXPECT
         assert _in_notebook() is False
+
+
+def test_verify_Q_index_allow_none_rejects_non_int():
+    # WHEN THEN EXPECT: a non-int, non-None Q_index is rejected even when None is allowed
+    with pytest.raises(TypeError, match=r'Q_index must be an int or None'):
+        verify_Q_index('not an int', Q=None, allow_none=True)
+
+
+def test_convert_parameter_unit_dependent_sets_desired_unit():
+    # GIVEN a dependent parameter (cannot be converted directly)
+    param = Mock()
+    param.independent = False
+    # WHEN converting its unit
+    convert_parameter_unit(param, 'meV')
+    # EXPECT the desired unit is recorded instead of an in-place conversion
+    param.set_desired_unit.assert_called_once_with('meV')
+    param.convert_unit.assert_not_called()
+
+
+def test_energy_to_scipp_returns_variable_with_unit():
+    # WHEN converting a numpy energy array
+    result = energy_to_scipp(np.array([1.0, 2.0, 3.0]), 'meV')
+    # EXPECT a scipp Variable on the 'energy' dimension with the given unit
+    assert isinstance(result, sc.Variable)
+    assert result.unit == sc.Unit('meV')
+    assert result.dims == ('energy',)
+    np.testing.assert_allclose(result.values, [1.0, 2.0, 3.0])
+
+
+def test_assert_valid_unit_rejects_non_unit_type():
+    # WHEN THEN EXPECT
+    with pytest.raises(TypeError, match=r'unit must be a string or sc.Unit'):
+        _assert_valid_unit(123)
+
+
+def test_assert_valid_unit_rejects_invalid_unit_string():
+    # WHEN THEN EXPECT
+    with pytest.raises(ValueError, match=r'is not a valid scipp unit'):
+        _assert_valid_unit('not_a_real_unit')
