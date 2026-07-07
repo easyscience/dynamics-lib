@@ -226,3 +226,12 @@ class TestExpressionComponent:
         # EXPECT
         expected = np.array([-0.84270079, 0.0, 0.84270079])  # erf(-1), erf(0), erf(1)
         np.testing.assert_allclose(result, expected, rtol=1e-5)
+
+
+def test_evaluate_warns_when_input_unit_differs_from_x_unit():
+    # GIVEN an ExpressionComponent with x_unit meV
+    expr = ExpressionComponent('A * x', parameters={'A': 2.0}, x_unit='meV')
+    x = sc.array(dims=['x'], values=[1.0, 2.0], unit='ueV')
+    # WHEN evaluating with x in a different unit THEN EXPECT a warning
+    with pytest.warns(UserWarning, match=r'cannot auto-convert parameters'):
+        expr.evaluate(x)

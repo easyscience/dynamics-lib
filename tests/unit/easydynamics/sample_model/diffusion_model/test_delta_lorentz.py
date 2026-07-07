@@ -971,3 +971,22 @@ class TestDeltaLorentz:
         # THEN: before the fix, calculate_width() silently returned [] instead of raising.
         with pytest.raises(ValueError, match='Q must be provided'):
             delta_lorentz_model_with_Q.calculate_width()
+
+
+def test_get_fit_targets_includes_delta_area():
+    # GIVEN a DeltaLorentz model
+    model = DeltaLorentz(delta_name='Delta function', lorentzian_name='Lorentzian')
+    # WHEN
+    targets = model.get_fit_targets()
+    # EXPECT base area/width plus the delta_area prediction
+    assert [t.name for t in targets] == ['area', 'width', 'delta_area']
+    delta_area = next(t for t in targets if t.name == 'delta_area')
+    assert delta_area.dataset_key == 'Delta function area'
+
+
+def test_calculate_width_raises_when_Q_variation_enabled_but_Q_unset():
+    # GIVEN Q-variation enabled for the width but Q never set on the model (empty per-Q list)
+    model = DeltaLorentz(lorentzian_width=0.1, allow_Q_variation={'lorentzian_width': True})
+    # WHEN a Q is requested THEN EXPECT the empty per-Q width list to be reported
+    with pytest.raises(ValueError, match=r'Lorentzian width Q-variation list is empty'):
+        model.calculate_width(np.array([1.0]))

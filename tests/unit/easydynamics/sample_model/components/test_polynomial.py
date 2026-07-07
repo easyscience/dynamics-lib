@@ -299,3 +299,11 @@ class TestPolynomial:
         assert p.y_unit == 'dimensionless'
         assert np.isclose(p.coefficients[0].value, 1.0)
         assert np.isclose(p.coefficients[1].value, 2.0)
+
+
+def test_suppress_warnings_setter_raises_for_non_bool():
+    # GIVEN a Polynomial
+    p = Polynomial(coefficients=[1.0, 2.0], x_unit='meV')
+    # WHEN THEN EXPECT
+    with pytest.raises(TypeError, match=r'Suppress_warnings must be True or False'):
+        p.suppress_warnings = 'yes'
