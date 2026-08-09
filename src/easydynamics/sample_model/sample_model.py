@@ -16,6 +16,7 @@ from easydynamics.utils import detailed_balance_factor
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import convert_units_with_rollback
 
 
 class SampleModel(ModelBase):
@@ -66,7 +67,8 @@ class SampleModel(ModelBase):
         self,
         display_name: str = 'MySampleModel',
         unique_name: str | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
         diffusion_models: DiffusionModelBase | list[DiffusionModelBase] | None = None,
@@ -83,33 +85,31 @@ class SampleModel(ModelBase):
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit, default='meV'
-            Unit of the model. If None,.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         components : ModelComponent | ComponentCollection | None, default=None
-            Template components of the model. If None, no components are added. These components
-            are copied into ComponentCollections for each Q value.
+            Template components copied into each Q's ComponentCollection.
         Q : Q_type | None, default=None
-            Q values for the model. If None, Q is not set.
+            Q values. If None, Q is not set.
         diffusion_models : DiffusionModelBase | list[DiffusionModelBase] | None, default=None
-            Diffusion models to include in the SampleModel. If None, no diffusion models are added.
+            Diffusion models to include. Each must be a DiffusionModelBase.
         temperature : float | None, default=None
-            Temperature for detailed balancing. If None, no detailed balancing is applied. By
-            default, None.
+            Sample temperature in temperature_unit. If provided, detailed balance is applied.
         temperature_unit : str | sc.Unit, default='K'
-            Unit of the temperature.
+            Unit for the temperature parameter.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
-            Settings for detailed balancing.
+            Detailed balance settings. If None, default settings are used.
 
         Raises
         ------
         TypeError
-            If diffusion_models is not a DiffusionModelBase, a list of DiffusionModelBase, or None,
-            or if temperature is not a number or None, or if detailed_balance_settings is not a
-            DetailedBalanceSettings instance.
+            If diffusion_models contains non-DiffusionModelBase items, temperature is not numeric,
+            or detailed_balance_settings is not a DetailedBalanceSettings instance.
         ValueError
             If temperature is negative.
         """
-
         if diffusion_models is None:
             self._diffusion_models = []
         elif isinstance(diffusion_models, DiffusionModelBase):
@@ -131,7 +131,8 @@ class SampleModel(ModelBase):
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             components=components,
             Q=Q,
         )
@@ -178,7 +179,6 @@ class SampleModel(ModelBase):
         TypeError
             If the diffusion_model is not a DiffusionModelBase.
         """
-
         if not isinstance(diffusion_model, DiffusionModelBase):
             raise TypeError(
                 f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
@@ -201,15 +201,19 @@ class SampleModel(ModelBase):
         ValueError
             If no DiffusionModel with the given name is found.
         """
-        for i, dm in enumerate(self.diffusion_models):
-            if dm.name == name:
-                del self.diffusion_models[i]
-                self._component_collections_is_dirty = True
-                return
-        raise ValueError(
-            f'No DiffusionModel with name {name} found. \n'
-            f'The available names are: {[dm.name for dm in self.diffusion_models]}'
-        )
+        matches = [i for i, dm in enumerate(self.diffusion_models) if dm.name == name]
+        if len(matches) == 0:
+            raise ValueError(
+                f'No DiffusionModel with name {name!r} found. '
+                f'Available names are: {[dm.name for dm in self.diffusion_models]}'
+            )
+        if len(matches) > 1:
+            raise ValueError(
+                f'Multiple DiffusionModels share the name {name!r}. '
+                f'Rename them to have unique names before removing.'
+            )
+        del self.diffusion_models[matches[0]]
+        self._component_collections_is_dirty = True
 
     def clear_diffusion_models(self) -> None:
         """Clear all DiffusionModels from the SampleModel."""
@@ -250,7 +254,6 @@ class SampleModel(ModelBase):
         TypeError
             If value is not a DiffusionModelBase, a list of DiffusionModelBase, or None.
         """
-
         if value is None:
             self._diffusion_models = []
             self._on_diffusion_models_change()
@@ -292,7 +295,7 @@ class SampleModel(ModelBase):
         Parameters
         ----------
         value : Numeric | None
-            The temperature value to set. Can be a number or None to unset the temperature.
+            The temperature value. If None, temperature is cleared (no detailed balance).
 
         Raises
         ------
@@ -325,12 +328,12 @@ class SampleModel(ModelBase):
     @property
     def temperature_unit(self) -> str | sc.Unit:
         """
-        Get the temperature unit of the SampleModel.
+        Get the temperature unit.
 
         Returns
         -------
         str | sc.Unit
-            The unit of the temperature Parameter.
+            The unit of the temperature parameter.
         """
         return self._temperature_unit
 
@@ -351,8 +354,8 @@ class SampleModel(ModelBase):
         """
 
         raise AttributeError(
-            f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit between allowed types '  # noqa: E501
-            f'or create a new {self.__class__.__name__} with the desired unit.'
+            f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit '
+            f'between allowed types or create a new {self.__class__.__name__} with the desired unit.'  # noqa: E501
         )
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:
@@ -382,9 +385,49 @@ class SampleModel(ModelBase):
             self._temperature_unit = unit
         except Exception:
             # Attempt to rollback on failure
+
             with suppress(Exception):
                 self.temperature.convert_unit(old_unit)
             raise
+
+    def _convert_axis_unit(self, unit: str | sc.Unit, axis: str) -> None:
+        """
+        Convert one axis unit on the SampleModel, including any attached diffusion models.
+
+        Extends the ModelBase conversion (template components and per-Q collections) by also
+        converting each diffusion model, whose regenerated collections would otherwise come back in
+        the old unit on the next rebuild.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new unit to convert to.
+        axis : str
+            Which axis to convert: ``'x'`` or ``'y'``.
+
+        Raises
+        ------
+        Exception
+            If any conversion fails; the already-converted diffusion models and the ModelBase state
+            are rolled back before re-raising.
+        """
+        old_unit = self.x_unit if axis == 'x' else self.y_unit
+        super()._convert_axis_unit(unit, axis)
+
+        method = f'convert_{axis}_unit'
+        try:
+            convert_units_with_rollback([
+                (getattr(diffusion_model, method), unit, old_unit)
+                for diffusion_model in self.diffusion_models
+            ])
+        except Exception:
+            if old_unit is not None:
+                with suppress(Exception):
+                    super()._convert_axis_unit(old_unit, axis)
+            raise
+        # Everything is converted in place (the merged collections share the diffusion models'
+        # component objects), so nothing is marked dirty: conversion must not discard the
+        # per-Q state by triggering a rebuild.
 
     @property
     def normalize_detailed_balance(self) -> bool:
@@ -420,12 +463,12 @@ class SampleModel(ModelBase):
     @property
     def use_detailed_balance(self) -> bool:
         """
-        Get whether to apply detailed balance to the model.
+        Get whether detailed balance correction is applied.
 
         Returns
         -------
         bool
-            True if detailed balance is applied, False otherwise.
+            True if detailed balance is applied during evaluation, False otherwise
         """
         return self.detailed_balance_settings.use_detailed_balance
 
@@ -451,12 +494,12 @@ class SampleModel(ModelBase):
     @property
     def detailed_balance_settings(self) -> DetailedBalanceSettings:
         """
-        Get the DetailedBalanceSettings of the SampleModel.
+        Get the detailed balance settings.
 
         Returns
         -------
         DetailedBalanceSettings
-            The DetailedBalanceSettings of the SampleModel.
+            The detailed balance settings object.
         """
         return self._detailed_balance_settings
 
@@ -484,31 +527,33 @@ class SampleModel(ModelBase):
     # ------------------------------------------------------------------
 
     def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> list[np.ndarray]:
+        self,
+        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
+        output: str = 'numpy',
+    ) -> list[np.ndarray] | list[sc.Variable]:
         """
         Evaluate the sample model at all Q for the given x values.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values to evaluate the model at. Can be a number, list, numpy array, scipp
-            Variable, or scipp DataArray.
+            The x values to evaluate the model at.
+        output : str, default='numpy'
+            'numpy' returns list of np.ndarray; 'scipp' returns list of sc.Variable.
 
         Returns
         -------
-        list[np.ndarray]
+        list[np.ndarray] | list[sc.Variable]
             List of evaluated model values for each Q.
         """
-
-        y = super().evaluate(x)
+        y = super().evaluate(x, output=output)
 
         if self.temperature is not None and self.detailed_balance_settings.use_detailed_balance:
             DBF = detailed_balance_factor(
                 energy=x,
                 temperature=self.temperature,
                 divide_by_temperature=self.detailed_balance_settings.normalize_detailed_balance,
-                energy_unit=self.unit,
+                energy_unit=self.x_unit,
             )
             y = [yi * DBF for yi in y]
 
@@ -530,10 +575,8 @@ class SampleModel(ModelBase):
         Returns
         -------
         list[Parameter]
-            List of all Parameters and Descriptors, including temperature if set and all variables
-            from diffusion models.
+            All Parameters and Descriptors in the SampleModel.
         """
-
         all_vars = super().get_all_variables(Q_index=Q_index)
         if self.temperature is not None:
             all_vars.append(self.temperature)
@@ -557,8 +600,7 @@ class SampleModel(ModelBase):
 
         if self.Q is None:
             return
-        # Generate components from diffusion models
-        # and add to component collections
+        # Generate components from diffusion models and add to component collections
         for diffusion_model in self.diffusion_models:
             diffusion_collections = diffusion_model.get_component_collections()
             for target, source in zip(
@@ -595,12 +637,11 @@ class SampleModel(ModelBase):
         str
             A string representation of the SampleModel.
         """
-
         return (
-            f'{self.__class__.__name__}('
-            f'unique_name={self.unique_name!r}, unit={self.unit},\n'
-            f'    Q={self.Q},\n'
-            f'    components={self.components}, diffusion_models={self.diffusion_models},\n'
-            f'    temperature={self.temperature},\n'
-            f'    detailed_balance_settings={self.detailed_balance_settings})'
+            f'{self.__class__.__name__}(unique_name={self.unique_name}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, '
+            f'Q = {None if self.Q is None else self.Q.values}, \n '
+            f'components = {self.components}, diffusion_models = {self.diffusion_models}, '
+            f'temperature = {self.temperature}, '
+            f'detailed_balance_settings = {self.detailed_balance_settings})'
         )

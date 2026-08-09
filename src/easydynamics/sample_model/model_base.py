@@ -13,6 +13,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import convert_units_with_rollback
 from easydynamics.utils.utils import verify_Q_index
 
 
@@ -27,7 +28,8 @@ class ModelBase(EasyDynamicsModelBase):
         self,
         display_name: str = 'MyModelBase',
         unique_name: str | None = None,
-        unit: str | sc.Unit | None = 'meV',
+        x_unit: str | sc.Unit | None = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         components: ModelComponent | ComponentCollection | None = None,
         Q: Q_type | None = None,
     ) -> None:
@@ -40,8 +42,10 @@ class ModelBase(EasyDynamicsModelBase):
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        unit : str | sc.Unit | None, default='meV'
-            Unit of the model.
+        x_unit : str | sc.Unit | None, default='meV'
+            Unit of the x-axis (energy, Q, etc.).
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity).
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
             are copied into ComponentCollections for each Q value.
@@ -54,7 +58,8 @@ class ModelBase(EasyDynamicsModelBase):
             If components is not a ModelComponent or ComponentCollection.
         """
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             display_name=display_name,
             unique_name=unique_name,
         )
@@ -75,17 +80,19 @@ class ModelBase(EasyDynamicsModelBase):
             self.append_component(components)
 
     def evaluate(
-        self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-    ) -> list[np.ndarray]:
+        self,
+        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
+        output: str = 'numpy',
+    ) -> list[np.ndarray] | list[sc.Variable]:
         """
         Evaluate the sample model at all Q for the given x values.
 
         Parameters
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            Energy axis values to evaluate the model at. If a scipp Variable or DataArray is
-            provided, the unit of the model will be converted to match the unit of x for
-            evaluation, and the result will be returned in the same unit as x.
+            Energy axis values to evaluate the model at.
+        output : str, default='numpy'
+            'numpy' returns np.ndarray per Q; 'scipp' returns sc.Variable per Q.
 
         Raises
         ------
@@ -94,15 +101,16 @@ class ModelBase(EasyDynamicsModelBase):
 
         Returns
         -------
-        list[np.ndarray]
-            A list of numpy arrays containing the evaluated model values for each Q. The length of
-            the list will match the number of Q values in the model.
+        list[np.ndarray] | list[sc.Variable]
+            A list of arrays containing the evaluated model values for each Q. The length of the
+            list will match the number of Q values in the model.
         """
-
         self._ensure_component_collections_current()
         if not self._component_collections:
             raise ValueError('No components in the model to evaluate.')
-        return [collection.evaluate(x) for collection in self._component_collections]
+        return [
+            collection.evaluate(x, output=output) for collection in self._component_collections
+        ]
 
     # ------------------------------------------------------------------
     # Component management
@@ -258,40 +266,62 @@ class ModelBase(EasyDynamicsModelBase):
     # Other methods
     # ------------------------------------------------------------------
 
-    def convert_unit(self, unit: str | sc.Unit) -> None:
+    def convert_x_unit(self, unit: str | sc.Unit) -> None:
         """
-        Convert the unit of the ComponentCollection and all its components.
+        Convert the x-axis unit of all components in the model.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new x-axis unit to convert to.
+        """
+        self._convert_axis_unit(unit, axis='x')
+
+    def convert_y_unit(self, unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit of all components in the model.
+
+        Parameters
+        ----------
+        unit : str | sc.Unit
+            The new y-axis unit to convert to.
+        """
+        self._convert_axis_unit(unit, axis='y')
+
+    def _convert_axis_unit(self, unit: str | sc.Unit, axis: str) -> None:
+        """
+        Convert one axis unit on all template components and per-Q collections.
+
+        Converts every child via its ``convert_<axis>_unit`` method and updates the model's own
+        unit attribute. On failure, attempts a best-effort rollback of all children to the old unit
+        before re-raising the failing conversion's exception.
 
         Parameters
         ----------
         unit : str | sc.Unit
             The new unit to convert to.
+        axis : str
+            Which axis to convert: ``'x'`` or ``'y'``.
 
         Raises
         ------
         TypeError
             If the provided unit is not a string or sc.Unit.
-        Exception
-            If the provided unit is not compatible with the current unit.
         """
-
-        old_unit = self._unit
-
         if not isinstance(unit, (str, sc.Unit)):
             raise TypeError(f'Unit must be a string or sc.Unit, got {type(unit).__name__}')
-        try:
-            for component in self.components:
-                component.convert_unit(unit)
-            self._unit = unit
-        except Exception as e:
-            # Attempt to rollback on failure
-            try:
-                for component in self.components:
-                    component.convert_unit(old_unit)
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
-        self._on_components_change()
+
+        method = f'convert_{axis}_unit'
+        old_unit = self.x_unit if axis == 'x' else self.y_unit
+        children = [*self.components, *self._component_collections]
+        convert_units_with_rollback([
+            (getattr(child, method), unit, old_unit) for child in children
+        ])
+        unit_str = str(unit) if isinstance(unit, sc.Unit) else unit
+        if axis == 'x':
+            self._x_unit = unit_str
+        else:
+            self._y_unit = unit_str
 
     def fix_all_parameters(self) -> None:
         """Fix all Parameters in all ComponentCollections."""
@@ -371,7 +401,6 @@ class ModelBase(EasyDynamicsModelBase):
 
     def _generate_component_collections(self) -> None:
         """Generate ComponentCollections for each Q value."""
-
         if self.Q is None:
             self._component_collections = []
             return
@@ -404,7 +433,8 @@ class ModelBase(EasyDynamicsModelBase):
         return (
             f'{self.__class__.__name__}('
             f'unique_name={self.unique_name!r}, '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, '
+            f'y_unit={self.y_unit}, '
             f'Q={None if self.Q is None else self.Q.values}, '
             f'components={self.components})'
         )

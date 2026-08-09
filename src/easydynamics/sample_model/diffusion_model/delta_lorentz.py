@@ -11,8 +11,12 @@ from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components import DeltaFunction
 from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
+from easydynamics.utils.fit_target import FitTarget
+from easydynamics.utils.utils import CANONICAL_Q_UNIT
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import angstrom
+from easydynamics.utils.utils import convert_parameter_unit
 from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
@@ -64,7 +68,8 @@ class DeltaLorentz(DiffusionModelBase):
         lorentzian_width: Numeric = 1.0,
         allow_Q_variation: dict | None = None,
         Q: Q_type | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'DeltaLorentz',
         display_name: str | None = None,
         lorentzian_name: str = 'Lorentzian',
@@ -93,8 +98,10 @@ class DeltaLorentz(DiffusionModelBase):
             allowed.
         Q : Q_type | None, default=None
             Q values for the model. If None, Q is not set.
-        unit : str | sc.Unit, default='meV'
-            Unit of the diffusion model. Must be convertible to meV.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis (energy/frequency). Must be convertible to meV.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the model output (intensity). Determines scale.unit = x_unit * y_unit.
         name : str, default='DeltaLorentz'
             Name of the diffusion model.
         display_name : str | None, default=None
@@ -121,7 +128,8 @@ class DeltaLorentz(DiffusionModelBase):
         """
         super().__init__(
             scale=scale,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             Q=Q,
             lorentzian_name=lorentzian_name,
             lorentzian_display_name=lorentzian_display_name,
@@ -134,6 +142,18 @@ class DeltaLorentz(DiffusionModelBase):
         # Parameters
         # --------------------------------------------------------------
         self._mean_u_squared = self._create_mean_u_squared_parameter(mean_u_squared)
+
+        # Dimensionless <u^2>/angstrom^2 for use inside exp() in the area dependency
+        # expressions and the EISF/QISF calculations. Deriving it through the dependency
+        # graph keeps those quantities correct if mean_u_squared is converted to another
+        # unit (e.g. nm**2), which a raw `.value` would silently get wrong.
+        with np.errstate(invalid='ignore'):
+            self._mean_u_squared_over_angstrom_squared = Parameter.from_dependency(
+                name='mean_u_squared_over_angstrom_squared',
+                dependency_expression='mean_u_squared / angstrom**2',
+                dependency_map={'mean_u_squared': self._mean_u_squared, 'angstrom': angstrom},
+            )
+            self._mean_u_squared_over_angstrom_squared.set_desired_unit('dimensionless')
 
         self._A_0, self._A_1 = self._create_A0_A1_parameters(A_0)
 
@@ -387,28 +407,38 @@ class DeltaLorentz(DiffusionModelBase):
     def calculate_width(self, Q: Q_type = None) -> np.ndarray:
         """
         Calculate the half-width at half-maximum (HWHM) for the diffusion model. If the width is
-        allowed to vary with Q then the Q stored in the model is used and the input is ignored. If
-        the width is not allowed to vary then the same width is returned for all Q values.
+        allowed to vary with Q then the requested Q values are matched against the Q stored in the
+        model and the corresponding per-Q widths are returned. If the width is not allowed to vary
+        then the same width is returned for all Q values.
 
         Parameters
         ----------
         Q : Q_type, default=None
-            Scattering vector in 1/angstrom.
+            Scattering vector in 1/angstrom. If None, the Q stored in the model is used.
 
         Returns
         -------
         np.ndarray
             HWHM values in the unit of the model (e.g., meV).
-        """
-        if self._allow_Q_variation['lorentzian_width'] is True:
-            widths = [lorentzian_width.value for lorentzian_width in self._lorentzian_width_list]
-            return np.array(widths)
 
+        Raises
+        ------
+        ValueError
+            If Q-variation is enabled but Q has not been set on the model yet, or if the requested
+            Q values do not match the stored ones.
+        """
         Q = self._ensure_Q(Q)
 
-        widths = self.lorentzian_width.value * np.ones_like(Q)
+        if self._allow_Q_variation['lorentzian_width'] is True:
+            if not self._lorentzian_width_list:
+                raise ValueError(
+                    'Lorentzian width Q-variation list is empty. '
+                    'Set Q before calling calculate_width.'
+                )
+            indices = self._match_Q_indices(Q)
+            return np.array([self._lorentzian_width_list[i].value for i in indices])
 
-        return np.array(widths)
+        return self.lorentzian_width.value * np.ones_like(Q)
 
     def calculate_EISF(self, Q: Q_type = None) -> np.ndarray:
         """
@@ -425,12 +455,14 @@ class DeltaLorentz(DiffusionModelBase):
             EISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
+        mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
-            A_0_values = [A_0_.value for A_0_ in self._A_0_list]
-            return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
+            indices = self._match_Q_indices(Q)
+            A_0_values = [self._A_0_list[i].value for i in indices]
+            return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_0_values)
 
         A_0_values = [self.A_0.value] * len(Q)
-        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_0_values)
+        return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_0_values)
 
     def calculate_QISF(self, Q: Q_type = None) -> np.ndarray:
         """
@@ -447,12 +479,14 @@ class DeltaLorentz(DiffusionModelBase):
             QISF values (dimensionless).
         """
         Q = self._ensure_Q(Q)
+        mean_u_squared = self._mean_u_squared_over_angstrom_squared.value
         if self._allow_Q_variation['A_0'] is True:
-            A_1_values = [A_1_.value for A_1_ in self._A_1_list]
-            return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
+            indices = self._match_Q_indices(Q)
+            A_1_values = [self._A_1_list[i].value for i in indices]
+            return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
         A_1_values = [self.A_1.value] * len(Q)
-        return np.exp(-self.mean_u_squared.value * Q**2 / 3) * np.array(A_1_values)
+        return np.exp(-mean_u_squared * Q**2 / 3) * np.array(A_1_values)
 
     def create_component_collections(
         self,
@@ -466,10 +500,10 @@ class DeltaLorentz(DiffusionModelBase):
             List of ComponentCollections with Lorentzian and delta function components for each Q
             value.
         """
-        Q = self.Q
-        if Q is None:
+        if self.Q is None:
             return []
-        Q = Q.values
+
+        Q = self.Q.values
 
         if self._allow_Q_variation['A_0'] is True:
             A_0_list, A_1_list = self._create_A0_A1_parameter_lists(self.A_0)
@@ -486,19 +520,21 @@ class DeltaLorentz(DiffusionModelBase):
         for i, Q_value in enumerate(Q):
             component_collection_list[i] = ComponentCollection(
                 display_name=f'{self.display_name}_Q{Q_value:.2f}',
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             # ------------------------------#
             # Create Lorentzian
             # ------------------------------#
-            lorentzian_component = Lorentzian(
+            lorz_component = Lorentzian(
                 name=self.lorentzian_name,
                 display_name=self.lorentzian_display_name,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
             if self._allow_Q_variation['lorentzian_width'] is True:
-                lorentzian_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
+                lorz_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made
@@ -506,10 +542,10 @@ class DeltaLorentz(DiffusionModelBase):
             if self._allow_Q_variation['lorentzian_width'] is False:
                 dependency_map = self._write_width_dependency_map_expression()
 
-                lorentzian_component.width.make_dependent_on(
+                lorz_component.width.make_dependent_on(
                     dependency_expression=self._write_lorz_width_dependency_expression(Q_value),
                     dependency_map=dependency_map,
-                    desired_unit=self.unit,
+                    desired_unit=self.x_unit,
                 )
             # The area is always a dependent parameter in this model, as
             # it depends on the scale, mean_u_squared and A_1 parameters
@@ -522,12 +558,12 @@ class DeltaLorentz(DiffusionModelBase):
             else:
                 dependency_map = self._write_lorz_area_dependency_map_expression(None)
 
-            lorentzian_component.area.make_dependent_on(
+            lorz_component.area.make_dependent_on(
                 dependency_expression=self._write_lorz_area_dependency_expression(Q_value),
                 dependency_map=dependency_map,
             )
 
-            component_collection_list[i].append_component(lorentzian_component)
+            component_collection_list[i].append_component(lorz_component)
 
             # ------------------------------#
             # Create delta function
@@ -536,7 +572,8 @@ class DeltaLorentz(DiffusionModelBase):
             delta_component = DeltaFunction(
                 name=self.delta_name,
                 display_name=self.delta_display_name,
-                unit=self.unit,
+                x_unit=self.x_unit,
+                y_unit=self.y_unit,
             )
 
             if self._allow_Q_variation['A_0'] is True:
@@ -552,6 +589,32 @@ class DeltaLorentz(DiffusionModelBase):
             component_collection_list[i].append_component(delta_component)
 
         return component_collection_list
+
+    def get_fit_targets(self) -> list[FitTarget]:
+        """
+        Get the fittable predictions of the DeltaLorentz model as FitTargets.
+
+        Extends the base ``'area'`` and ``'width'`` predictions with ``'delta_area'`` (``scale *
+        EISF(Q)``, the delta function's weight), whose default dataset key is derived from the
+        delta component's name.
+
+        Returns
+        -------
+        list[FitTarget]
+            The fittable predictions of this model.
+        """
+        targets = super().get_fit_targets()
+        targets.append(
+            FitTarget(
+                name='delta_area',
+                dataset_key=f'{self.delta_name} area',
+                function=lambda Q, model=self, **_: model.calculate_EISF(Q) * model.scale.value,
+                label=f'{self.display_name} delta_area',
+                x_unit=CANONICAL_Q_UNIT,
+                y_unit=str(self.scale.unit),
+            )
+        )
+        return targets
 
     def get_global_variables(self) -> list[Parameter]:
         """
@@ -790,7 +853,7 @@ class DeltaLorentz(DiffusionModelBase):
             value=float(lorentzian_width),
             fixed=False,
             min=MINIMUM_WIDTH,
-            unit=self.unit,
+            unit=self.x_unit,
         )
 
     def _create_A0_A1_parameter_lists(
@@ -857,7 +920,7 @@ class DeltaLorentz(DiffusionModelBase):
                 value=float(lorentzian_width.value),
                 fixed=False,
                 min=MINIMUM_WIDTH,
-                unit=self.unit,
+                unit=self.x_unit,
             )
             for _ in range(len(self.Q))
         ]
@@ -889,6 +952,20 @@ class DeltaLorentz(DiffusionModelBase):
             else:
                 self._lorentzian_width_list = []
         self._component_collections = self.create_component_collections()
+
+    def _convert_extra_x_unit_parameters(self, unit_str: str) -> None:
+        """
+        Convert the Lorentzian width template to the new x-axis unit.
+
+        The per-Q width list (when Q-variation is enabled) holds the very Parameter objects used by
+        the components, so those are converted in place with the collections.
+
+        Parameters
+        ----------
+        unit_str : str
+            The new x-axis unit as a string.
+        """
+        convert_parameter_unit(self._lorentzian_width, unit_str)
 
     def _write_lorz_width_dependency_expression(self, Q: float) -> str:
         """
@@ -952,7 +1029,9 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_1'
+        # mean_u_squared_ratio is <u^2>/angstrom^2, kept dimensionless through the dependency
+        # graph so the expression stays correct if mean_u_squared is converted to another unit.
+        return f'scale * exp(-mean_u_squared_ratio.value * {Q}**2 / 3) * A_1'
 
     def _write_lorz_area_dependency_map_expression(
         self, Q_index: int | None
@@ -974,13 +1053,13 @@ class DeltaLorentz(DiffusionModelBase):
         if Q_index is None:
             return {
                 'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
+                'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
                 'A_1': self.A_1,
             }
 
         return {
             'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
+            'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
             'A_1': self._A_1_list[Q_index],
         }
 
@@ -1006,7 +1085,9 @@ class DeltaLorentz(DiffusionModelBase):
         if not isinstance(Q, (float)):
             raise TypeError('Q must be a float.')
 
-        return f'scale * exp(-mean_u_squared.value * {Q}**2 / 3) * A_0'
+        # mean_u_squared_ratio is <u^2>/angstrom^2, kept dimensionless through the dependency
+        # graph so the expression stays correct if mean_u_squared is converted to another unit.
+        return f'scale * exp(-mean_u_squared_ratio.value * {Q}**2 / 3) * A_0'
 
     def _write_delta_area_dependency_map_expression(
         self,
@@ -1029,12 +1110,12 @@ class DeltaLorentz(DiffusionModelBase):
         if Q_index is None:
             return {
                 'scale': self.scale,
-                'mean_u_squared': self.mean_u_squared,
+                'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
                 'A_0': self.A_0,
             }
         return {
             'scale': self.scale,
-            'mean_u_squared': self.mean_u_squared,
+            'mean_u_squared_ratio': self._mean_u_squared_over_angstrom_squared,
             'A_0': self._A_0_list[Q_index],
         }
 
@@ -1052,10 +1133,10 @@ class DeltaLorentz(DiffusionModelBase):
             String representation of the DeltaLorentz model.
         """
         return (
-            f'{self.__class__.__name__}('
-            f'display_name={self.display_name!r}, unit={self.unit},\n'
-            f'    mean_u_squared={self.mean_u_squared},\n'
-            f'    A_0={self.A_0}, A_1={self.A_1},\n'
-            f'    lorentzian_width={self.lorentzian_width},\n'
+            f'DeltaLorentz(display_name={self.display_name}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, \n'
+            f'    mean_u_squared={self.mean_u_squared}, \n'
+            f'    A_0={self.A_0}, A_1={self.A_1}, \n'
+            f'    lorentzian_width={self.lorentzian_width}, \n'
             f'    scale={self.scale})'
         )

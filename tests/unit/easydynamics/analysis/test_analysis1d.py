@@ -111,10 +111,10 @@ class TestAnalysis1d:
         result = analysis1d.calculate()
 
         # EXPECT
-
         analysis1d._create_convolver.assert_called_once()
-        assert analysis1d._convolver is fake_convolver
-        analysis1d._calculate.assert_called_once()
+        # calculate() passes the convolver directly to _calculate without storing it on self
+        _, call_kwargs = analysis1d._calculate.call_args
+        assert call_kwargs['convolver'] is fake_convolver
         np.testing.assert_array_equal(result, expected_result)
 
     def test__calculate_adds_sample_and_background(self, analysis1d):
@@ -150,7 +150,7 @@ class TestAnalysis1d:
         fake_weights = np.array([0.1, 0.2, 0.3])
         fake_mask = np.array([True, False, True])
 
-        analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+        analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
             return_value=(fake_x, fake_y, fake_weights, fake_mask)
         )
 
@@ -180,7 +180,7 @@ class TestAnalysis1d:
             fit_function='fit_func',
         )
 
-        analysis1d.experiment._extract_x_y_weights_only_finite.assert_called_once()
+        analysis1d.experiment.extract_x_y_weights_only_finite.assert_called_once()
 
         fake_fitter_instance.fit.assert_called_once_with(
             x=fake_x,
@@ -508,15 +508,19 @@ class TestAnalysis1d:
         # WHEN
         energy = analysis1d.experiment.energy
         energy_offset = analysis1d.instrument_model.get_energy_offset(Q_index=analysis1d.Q_index)
-        energy_offset.value = 1.0  # override with a simple value for testing
-        energy_offset.convert_unit('eV')
+        energy_offset.value = 1.0  # set to 1.0 in original unit (meV)
+        energy_offset.convert_unit('eV')  # now 0.001 eV, still represents 1 meV
 
         # THEN
         result = analysis1d._calculate_energy_with_offset(energy, energy_offset)
 
-        # EXPECT
-        expected = energy.values - energy_offset.value
-        np.testing.assert_array_equal(result.values, expected)
+        # EXPECT: offset must be converted to energy's unit before subtraction
+        offset_in_energy_unit = sc.to_unit(
+            sc.scalar(energy_offset.value, unit=str(energy_offset.unit)),
+            str(energy.unit),
+        ).value
+        expected = energy.values - offset_in_energy_unit
+        np.testing.assert_array_almost_equal(result.values, expected)
 
     def test_calculate_energy_with_offset_raises_if_incompatible_units(self, analysis1d):
         # WHEN
@@ -524,9 +528,7 @@ class TestAnalysis1d:
         energy_offset = Parameter(name='energy_offset', value=1.0, unit='m')  # incompatible unit
 
         # THEN / EXPECT
-        with pytest.raises(
-            sc.UnitError, match='Energy and energy offset must have compatible units'
-        ):
+        with pytest.raises(sc.UnitError):
             analysis1d._calculate_energy_with_offset(energy, energy_offset)
 
     #############
@@ -920,7 +922,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),
@@ -946,7 +948,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),
@@ -1030,7 +1032,7 @@ class TestAnalysis1d:
             'easydynamics.analysis.analysis1d.EasyScienceFitter',
             return_value=MagicMock(fit=MagicMock(return_value=MagicMock())),
         ):
-            analysis1d.experiment._extract_x_y_weights_only_finite = MagicMock(
+            analysis1d.experiment.extract_x_y_weights_only_finite = MagicMock(
                 return_value=(
                     np.array([1.0, 2.0, 3.0]),
                     np.array([1.0, 2.0, 3.0]),
@@ -1042,3 +1044,106 @@ class TestAnalysis1d:
 
         # EXPECT
         analysis1d._create_convolver.assert_called_once()
+
+    # ───── Regression tests ─────
+
+    @pytest.fixture
+    def analysis1d_with_nan(self):
+        """analysis1d fixture whose data contains a NaN at the second energy point."""
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
+        energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=[[1.0, float('nan'), 3.0]],
+            variances=[[0.1, 0.2, 0.3]],
+        )
+        data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+        experiment = Experiment(data=data_array)
+        sample_model = SampleModel(components=Gaussian())
+        instrument_model = InstrumentModel()
+        return Analysis1d(
+            display_name='TestNaN',
+            experiment=experiment,
+            sample_model=sample_model,
+            instrument_model=instrument_model,
+            Q_index=0,
+        )
+
+    def test_create_residuals_array_with_nan_data_does_not_crash(self, analysis1d_with_nan):
+        # Before the fix, residuals subtracted a 2-point model from 3-point data
+        # (including NaN) which caused a dimension mismatch crash.
+        # WHEN
+
+        # THEN
+        result = analysis1d_with_nan._create_residuals_array()
+
+        # EXPECT
+        assert isinstance(result, sc.DataArray)
+        # Only the 2 finite energy points survive the mask.
+        assert result.sizes['energy'] == 2
+
+    def test_data_and_model_to_datagroup_with_nan_excludes_nan_from_data(
+        self, analysis1d_with_nan
+    ):
+        # Before the fix, 'Data' contained the full 3-point grid (including NaN)
+        # and computing Residuals crashed on the dimension mismatch.
+        # WHEN
+        energy = sc.array(dims=['energy'], values=[20.0, 30.0, 40.0], unit='meV')
+
+        # THEN
+        datagroup = analysis1d_with_nan.data_and_model_to_datagroup(
+            energy=energy, include_residuals=True
+        )
+
+        # EXPECT
+        assert isinstance(datagroup, sc.DataGroup)
+        # 'Data' must contain only the 2 finite points.
+        assert datagroup['Data'].sizes['energy'] == 2
+        # Residuals must be present and have matching size.
+        assert 'Residuals' in datagroup
+        assert datagroup['Residuals'].sizes['energy'] == 2
+
+    def test_repr(self, analysis1d):
+        repr_str = repr(analysis1d)
+        assert 'Analysis1d' in repr_str
+        assert 'display_name=' in repr_str
+        assert 'Q_index=' in repr_str
+
+
+def _coverage_analysis1d():
+    Q = sc.array(dims=['Q'], values=[1, 2, 3], unit='1/Angstrom')
+    energy = sc.array(dims=['energy'], values=[10.0, 20.0, 30.0], unit='meV')
+    data = sc.array(
+        dims=['Q', 'energy'],
+        values=[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]],
+        variances=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+    )
+    data_array = sc.DataArray(data=data, coords={'Q': Q, 'energy': energy})
+    return Analysis1d(
+        display_name='CoverageAnalysis',
+        experiment=Experiment(data=data_array),
+        sample_model=SampleModel(components=Gaussian()),
+        instrument_model=InstrumentModel(),
+        Q_index=0,
+    )
+
+
+def test_on_Q_index_changed_with_none_clears_masked_energy():
+    # GIVEN an analysis whose Q_index has been cleared
+    analysis1d = _coverage_analysis1d()
+    analysis1d._Q_index = None
+    # WHEN the Q-index-changed handler runs
+    analysis1d._on_Q_index_changed()
+    # EXPECT masked energy cleared and convolver marked dirty
+    assert analysis1d._masked_energy is None
+    assert analysis1d._convolver_is_dirty is True
+
+
+def test_on_experiment_changed_refreshes_masked_energy_when_Q_index_set():
+    # GIVEN an analysis with a Q_index already set
+    analysis1d = _coverage_analysis1d()
+    # WHEN the experiment-changed handler runs
+    analysis1d._on_experiment_changed()
+    # EXPECT masked energy refreshed and convolver marked dirty
+    assert analysis1d._masked_energy is not None
+    assert analysis1d._convolver_is_dirty is True

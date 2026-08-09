@@ -20,7 +20,7 @@ class TestDeltaFunction:
             display_name='TestDeltaFunction',
             area=2.0,
             center=0.5,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -31,7 +31,8 @@ class TestDeltaFunction:
         assert delta_function.display_name == 'DeltaFunction'
         assert delta_function.area.value == pytest.approx(1.0)
         assert delta_function.center.value == pytest.approx(0.0)
-        assert delta_function.unit == 'meV'
+        assert delta_function.x_unit == 'meV'
+        assert delta_function.y_unit == 'dimensionless'
         assert delta_function.center.fixed is True
 
     def test_initialization(self, delta_function: DeltaFunction):
@@ -39,21 +40,25 @@ class TestDeltaFunction:
         assert delta_function.display_name == 'TestDeltaFunction'
         assert delta_function.area.value == pytest.approx(2.0)
         assert delta_function.center.value == pytest.approx(0.5)
-        assert delta_function.unit == 'meV'
+        assert delta_function.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
         [
             (
-                {'area': 'invalid', 'center': 0.5, 'unit': 'meV'},
+                {'area': 'invalid', 'center': 0.5, 'x_unit': 'meV'},
                 'area must be a number',
             ),
             (
-                {'area': 2.0, 'center': 'invalid', 'unit': 'meV'},
+                {'area': 2.0, 'center': 'invalid', 'x_unit': 'meV'},
                 'center must be ',
             ),
             (
-                {'area': 2.0, 'center': 0.5, 'unit': 123},
+                {'area': 2.0, 'center': 0.5, 'x_unit': 123},
+                'unit must be ',
+            ),
+            (
+                {'area': 2.0, 'center': 0.5, 'x_unit': 'meV', 'y_unit': 123},
                 'unit must be ',
             ),
         ],
@@ -65,7 +70,7 @@ class TestDeltaFunction:
     def test_negative_area_warns(self):
         # WHEN THEN EXPECT
         with pytest.warns(UserWarning, match='may not be physically meaningful'):
-            DeltaFunction(display_name='TestDeltaFunction', area=-2.0, center=0.5, unit='meV')
+            DeltaFunction(display_name='TestDeltaFunction', area=-2.0, center=0.5, x_unit='meV')
 
     @pytest.mark.parametrize(
         'prop, valid_value, invalid_value, invalid_message',
@@ -82,11 +87,13 @@ class TestDeltaFunction:
         invalid_value,
         invalid_message,
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(delta_function, prop, valid_value)
+
+        # THEN EXPECT
         assert getattr(delta_function, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(delta_function, prop, invalid_value)
 
@@ -105,6 +112,29 @@ class TestDeltaFunction:
         expected_result[idx] = 2.0 / dx
 
         np.testing.assert_allclose(result, expected_result, rtol=1e-5)
+
+    def test_evaluate_descending_grid(self):
+        # WHEN: a descending energy grid (regression: neighbor differences used to produce a
+        # negative bin width and a negative spike)
+        delta = DeltaFunction(area=1.0)
+        x = np.array([2.0, 0.0, -2.0])
+
+        # THEN
+        result = delta.evaluate(x)
+
+        # EXPECT: positive spike at the position of the value nearest the center
+        np.testing.assert_allclose(result, [0.0, 0.5, 0.0])
+
+    def test_evaluate_unsorted_grid(self):
+        # WHEN: an unsorted grid; bin widths must come from the sorted values
+        delta = DeltaFunction(area=1.0)
+        x = np.array([0.0, 2.0, 1.0])
+
+        # THEN
+        result = delta.evaluate(x)
+
+        # EXPECT: spike at x=0 with bin width from the sorted grid [0, 1, 2] -> 1.0
+        np.testing.assert_allclose(result, [1.0, 0.0, 0.0])
 
     def test_evaluate_out_of_bounds(self, delta_function: DeltaFunction):
         # WHEN
@@ -147,7 +177,7 @@ class TestDeltaFunction:
         # THEN EXPECT
         with pytest.raises(
             UnitError,
-            match='Input x has unit nm, but DeltaFunction component ',
+            match='Input x has unit nm',
         ):
             delta_function.evaluate(x)
 
@@ -190,12 +220,12 @@ class TestDeltaFunction:
         actual_names = {param.name for param in params}
         assert actual_names == expected_names
 
-    def test_convert_unit(self, delta_function: DeltaFunction):
+    def test_convert_x_unit(self, delta_function: DeltaFunction):
         # WHEN THEN
-        delta_function.convert_unit('microeV')
+        delta_function.convert_x_unit('microeV')
 
         # EXPECT
-        assert delta_function.unit == 'microeV'
+        assert delta_function.x_unit == 'microeV'
         assert delta_function.area.value == pytest.approx(2 * 1e3)
         assert delta_function.center.value == pytest.approx(0.5 * 1e3)
 
@@ -213,7 +243,7 @@ class TestDeltaFunction:
         assert delta_copy.center.value == delta_function.center.value
         assert delta_copy.center.fixed == delta_function.center.fixed
 
-        assert delta_copy.unit == delta_function.unit
+        assert delta_copy.x_unit == delta_function.x_unit
 
     def test_repr(self, delta_function: DeltaFunction):
         # WHEN THEN
@@ -221,7 +251,103 @@ class TestDeltaFunction:
 
         # EXPECT
         assert 'DeltaFunction' in repr_str
-        assert "name='DeltaFunctionName'" in repr_str
-        assert 'unit=meV' in repr_str
-        assert 'area=' in repr_str
-        assert 'center=' in repr_str
+        assert 'name = DeltaFunctionName' in repr_str
+        assert 'x_unit = meV' in repr_str
+        assert 'area =' in repr_str
+        assert 'center =' in repr_str
+
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+
+        # EXPECT
+        assert delta.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            delta_function.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        delta.convert_y_unit('1/eV')
+        # EXPECT: y_unit updated and area value rescaled (1e3 factor)
+        assert delta.y_unit == '1/eV'
+        assert delta.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            delta_function.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, delta_function: DeltaFunction):
+        # WHEN
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = delta_function.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, delta_function.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        delta = DeltaFunction(area=1.0, x_unit='meV', y_unit='1/meV')
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = delta.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+
+    @pytest.mark.parametrize(
+        'x, center, expected_idx',
+        [
+            (np.array([0.5, 1.0, 2.0]), 0.5, 0),  # center at first element (line 202)
+            (np.array([0.0, 1.0, 1.5]), 1.5, 2),  # center at last element (line 207)
+        ],
+        ids=['center_at_first', 'center_at_last'],
+    )
+    def test_evaluate_center_at_boundary(self, x, center, expected_idx):
+        # WHEN
+        area = 1.0
+        delta = DeltaFunction(area=area, center=center, x_unit='meV')
+
+        # THEN
+        result = delta.evaluate(x)
+
+        # EXPECT
+        # All elements except the boundary one should be zero
+        assert result[expected_idx] > 0.0
+        other_indices = [i for i in range(len(x)) if i != expected_idx]
+        assert all(result[i] == pytest.approx(0.0) for i in other_indices)
+        # Boundary bin width: both left and right are set to the single adjacent spacing
+        bin_width = x[1] - x[0] if expected_idx == 0 else x[-1] - x[-2]
+        assert np.isclose(result[expected_idx], area / bin_width, rtol=1e-10)
+
+    def test_convert_x_unit_invalid_type_raises(self, delta_function: DeltaFunction):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            delta_function.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, delta_function: DeltaFunction):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            delta_function.convert_x_unit('m')
+        # EXPECT: state rolled back
+        assert delta_function.x_unit == 'meV'
+        assert delta_function.area.value == pytest.approx(2.0)
+        assert delta_function.center.value == pytest.approx(0.5)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        delta = DeltaFunction(area=1.0, center=0.0, x_unit='meV', y_unit='dimensionless')
+        # THEN
+        with pytest.raises(UnitError):
+            delta.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert delta.y_unit == 'dimensionless'
+        assert delta.area.value == pytest.approx(1.0)

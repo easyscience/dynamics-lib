@@ -289,7 +289,6 @@ class TestAnalyticalConvolution:
         """
         # WHEN THEN
         delta_function = DeltaFunction(area=2.0, center=0.5)
-        function1 = Gaussian(area=3.0, center=-1.0, width=1.0)
 
         convoluted = default_analytical_convolution._convolute_analytic_pair(
             delta_function, function1

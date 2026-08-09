@@ -23,7 +23,7 @@ class TestModelBase:
             area=1.0,
             center=0.0,
             width=1.0,
-            unit='meV',
+            x_unit='meV',
         )
         component2 = Lorentzian(
             name='TestLorentzian1Name',
@@ -31,7 +31,7 @@ class TestModelBase:
             area=2.0,
             center=1.0,
             width=0.5,
-            unit='meV',
+            x_unit='meV',
         )
         component_collection = ComponentCollection()
         component_collection.append_component(component1)
@@ -39,19 +39,22 @@ class TestModelBase:
         return ModelBase(
             display_name='InitModel',
             components=component_collection,
-            unit='meV',
+            x_unit='meV',
             Q=np.array([1.0, 2.0, 3.0]),
         )
 
     def test_init(self, model_base):
         # WHEN THEN
-        model = model_base
 
         # EXPECT
-        assert model.display_name == 'InitModel'
-        assert model.unit == 'meV'
-        assert len(model.components) == 2
-        np.testing.assert_array_equal(model.Q.values, np.array([1.0, 2.0, 3.0]))
+        assert model_base.display_name == 'InitModel'
+        assert model_base.x_unit == 'meV'
+        assert model_base.y_unit == 'dimensionless'
+        assert len(model_base.components) == 2
+        assert isinstance(model_base.Q, sc.Variable)
+        assert model_base.Q.dims == ('Q',)
+        assert model_base.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_array_equal(model_base.Q.values, np.array([1.0, 2.0, 3.0]))
 
     def test_init_raises_with_invalid_components(self):
         # WHEN / THEN / EXPECT
@@ -78,8 +81,8 @@ class TestModelBase:
         result = model_base.evaluate(x)
 
         # EXPECT
-        collection1.evaluate.assert_called_once_with(x)
-        collection2.evaluate.assert_called_once_with(x)
+        collection1.evaluate.assert_called_once_with(x, output='numpy')
+        collection2.evaluate.assert_called_once_with(x, output='numpy')
 
         np.testing.assert_allclose(result[0], np.array([1.0, 2.0, 3.0]))
         np.testing.assert_allclose(result[1], np.array([4.0, 5.0, 6.0]))
@@ -128,7 +131,7 @@ class TestModelBase:
         # WHEN
         all_vars = model_base.get_all_variables()
 
-        # THEN
+        # EXPECT
         expected_var_display_names = {
             'TestGaussian1Name area',
             'TestGaussian1Name center',
@@ -198,7 +201,7 @@ class TestModelBase:
         # WHEN THEN EXPECT
         with pytest.raises(
             IndexError,
-            match='Q_index 5 is out of bounds for ',
+            match='Q_index 5 is out of bounds for Q of length 3',
         ):
             model_base.get_component_collection(Q_index=5)
 
@@ -246,36 +249,105 @@ class TestModelBase:
         with pytest.raises(TypeError, match=' must be '):
             model_base.append_component('invalid_component')
 
-    def test_unit_property(self, model_base):
+    def test_x_unit_property(self, model_base):
         # WHEN
-        unit = model_base.unit
+        unit = model_base.x_unit
 
         # THEN / EXPECT
         assert unit == 'meV'
 
-    def test_unit_setter_raises(self, model_base):
+    def test_x_unit_setter_raises(self, model_base):
         # WHEN / THEN / EXPECT
-        with pytest.raises(AttributeError, match='Use convert_unit to change '):
-            model_base.unit = 'K'
+        with pytest.raises(AttributeError):
+            model_base.x_unit = 'K'
 
-    def test_convert_unit(self, model_base):
+    def test_convert_x_unit(self, model_base):
+        # Build collections before conversion so we can verify in-place update
+        _ = model_base.get_component_collection(0)
+        assert model_base._component_collections_is_dirty is False
+        collection_before = model_base._component_collections[0]
+
         # WHEN
-        model_base.convert_unit('eV')
+        model_base.convert_x_unit('eV')
 
-        # THEN / EXPECT
-        assert model_base.unit == 'eV'
+        # THEN / EXPECT: dirty flag NOT set and same collections reused (not rebuilt)
+        assert model_base._component_collections_is_dirty is False
+        assert model_base._component_collections[0] is collection_before
+
+        assert model_base.x_unit == 'eV'
         for component in model_base.components:
-            assert component.unit == 'eV'
+            assert component.x_unit == 'eV'
+        for collection in model_base._component_collections:
+            for component in collection:
+                assert component.x_unit == 'eV'
 
-    def test_convert_unit_invalid_raises(self, model_base):
+    def test_convert_x_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
         with pytest.raises(UnitError):
-            model_base.convert_unit('invalid_unit')
+            model_base.convert_x_unit('invalid_unit')
 
-    def test_convert_unit_incorrect_unit_raises(self, model_base):
+    def test_convert_x_unit_incorrect_unit_raises(self, model_base):
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=r'Unit must be a string or sc.Unit'):
-            model_base.convert_unit(123)
+            model_base.convert_x_unit(123)
+
+    def test_components_setter_none(self, model_base):
+        # WHEN THEN
+        model_base.components = None
+        # EXPECT
+        assert len(model_base.components) == 0
+
+    def test_convert_x_unit_rollback_when_old_unit_none(self):
+        # WHEN: model with _x_unit=None (rollback branch is skipped when old_unit is None)
+        component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
+        model = ModelBase(display_name='M', x_unit=None, components=component)
+        model._x_unit = None
+        # THEN
+        with pytest.raises(UnitError):
+            model.convert_x_unit('m')  # incompatible unit triggers failure
+        # EXPECT: Gaussian's own atomic rollback keeps it at 'meV' even though
+        # ModelBase's outer rollback loop is skipped when old_unit is None
+        assert component.x_unit == 'meV'
+
+    def test_convert_x_unit_rollback_on_failure(self, model_base):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            model_base.convert_x_unit('m')
+        # EXPECT: state rolled back
+        assert model_base.x_unit == 'meV'
+        for component in model_base.components:
+            assert component.x_unit == 'meV'
+
+    def test_convert_y_unit_rollback_on_failure(self, model_base):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            model_base.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert model_base.y_unit == 'dimensionless'
+
+    def test_convert_x_unit_rollback_restores_collections(self):
+        # WHEN: a model with built per-Q collections
+        component = Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV')
+        model = ModelBase(display_name='M', components=component, Q=[1.0, 2.0])
+        collection = model.get_component_collection(0)
+
+        # THEN: an incompatible unit fails and triggers the rollback of components and
+        # collections
+        with pytest.raises(UnitError):
+            model.convert_x_unit('m')
+
+        # EXPECT
+        assert model.x_unit == 'meV'
+        assert component.x_unit == 'meV'
+        assert collection[0].x_unit == 'meV'
+
+    def test_component_collections_empty_without_Q(self):
+        # WHEN: a model without Q regenerates its collections
+        model = ModelBase(display_name='M', components=Gaussian(name='G'))
+
+        # THEN EXPECT: no per-Q collections and therefore no variables
+        assert model.get_all_variables() == []
+        assert model._component_collections == []
 
     def test_components_setter(self, model_base):
         # WHEN
@@ -320,8 +392,9 @@ class TestModelBase:
             [1.0, 2.0, 3.0],
             np.array([1.0, 2.0, 3.0]),
             sc.Variable(dims=['Q'], values=[1.0, 2.0, 3.0], unit='1/angstrom'),
+            sc.Variable(dims=['Q'], values=[10.0, 20.0, 30.0], unit='1/nm'),
         ],
-        ids=['list', 'numpy_array', 'scipp_variable'],
+        ids=['list', 'numpy_array', 'scipp_variable', 'scipp_variable_other_unit'],
     )
     def test_Q_setter_with_similar_Q(self, model_base, new_Q):
         # WHEN
@@ -331,7 +404,7 @@ class TestModelBase:
         model_base.Q = new_Q
 
         # EXPECT
-        np.testing.assert_array_equal(model_base.Q, old_Q)
+        np.testing.assert_array_equal(model_base.Q.values, old_Q.values)
 
     def test_Q_setter_with_none(self, model_base):
         # WHEN
@@ -353,6 +426,19 @@ class TestModelBase:
 
         # EXPECT
         np.testing.assert_array_equal(model_base.Q.values, np.array(new_Q))
+
+    def test_Q_stored_as_scipp_in_inverse_angstrom(self, model_base):
+        # WHEN: a scipp Q in 1/nm
+        model_base._Q = None
+        new_Q = sc.Variable(dims=['Q'], values=[5.0, 10.0], unit='1/nm')
+
+        # THEN
+        model_base.Q = new_Q
+
+        # EXPECT: stored canonically in 1/angstrom
+        assert isinstance(model_base.Q, sc.Variable)
+        assert model_base.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(model_base.Q.values, [0.5, 1.0])
 
     def test_clear_Q(self, model_base):
         # WHEN
@@ -388,3 +474,42 @@ class TestModelBase:
         assert 'unit' in repr_str
         assert 'Q=' in repr_str
         assert 'components=' in repr_str
+
+    def test_y_unit_setter_raises(self, model_base):
+        # WHEN / THEN / EXPECT
+        with pytest.raises(AttributeError):
+            model_base.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN: model with components where y_unit='1/meV' so area_unit ≈ dimensionless
+        g = Gaussian(area=1.0, x_unit='meV', y_unit='1/meV')
+        lor = Lorentzian(area=1.0, x_unit='meV', y_unit='1/meV')
+        cc = ComponentCollection(components=[g, lor])
+        model = ModelBase(components=cc, x_unit='meV', Q=np.array([1.0]))
+
+        # Build collections before conversion so we can verify in-place update
+        _ = model.get_component_collection(0)
+        assert model._component_collections_is_dirty is False
+        collection_before = model._component_collections[0]
+
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        model.convert_y_unit('1/eV')
+
+        # EXPECT: dirty flag NOT set and same collections reused (not rebuilt)
+        assert model._component_collections_is_dirty is False
+        assert model._component_collections[0] is collection_before
+
+        # EXPECT: model y_unit and template components updated
+        assert model.y_unit == '1/eV'
+        for component in model.components:
+            assert component.y_unit == '1/eV'
+        assert g.area.value == pytest.approx(1e3)
+        assert lor.area.value == pytest.approx(1e3)
+        # EXPECT: component collections updated in-place (not rebuilt from templates)
+        for component in collection_before:
+            assert component.y_unit == '1/eV'
+
+    def test_convert_y_unit_invalid_raises(self, model_base):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            model_base.convert_y_unit(123)

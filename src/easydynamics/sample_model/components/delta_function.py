@@ -11,8 +11,7 @@ from easydynamics.sample_model.components.mixins import CreateParametersMixin
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 
-EPSILON = 1e-8  # small number to avoid floating point issues
-
+EPSILON = 1e-8  # tolerance for bin-edge comparisons
 
 if TYPE_CHECKING:
     import scipp as sc
@@ -23,9 +22,12 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
     """
     Delta function.
 
-    Evaluates to zero everywhere, except in convolutions, where it acts as an identity. This is
-    handled by the Convolution method. If the center is not provided, it will be centered at 0 and
-    fixed, which is typically what you want in QENS.
+    When called directly, returns zero everywhere except at the bin nearest to ``center``, where it
+    returns ``area / bin_width``. In convolutions it acts as an identity element (handled by the
+    ``Convolution`` class). area has unit = x_unit * y_unit; center has unit = x_unit.
+
+    If the center is not provided, it will be centered at 0 and fixed, which is typically what you
+    want in QENS.
 
     Examples
     --------
@@ -57,7 +59,8 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         self,
         center: Numeric | None = None,
         area: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'DeltaFunction',
         display_name: str | None = None,
         unique_name: str | None = None,
@@ -68,35 +71,35 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         center : Numeric | None, default=None
-            Center of the delta function. If None, it will be centered at 0 and fixed.
+            Position of the delta function in x_unit.  If None, defaults to 0 and the center
+            parameter is fixed.
         area : Numeric, default=1.0
-            Total area under the curve.
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Integrated area (weight) of the delta function.  Unit is ``x_unit * y_unit``.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center is stored in this unit. area_unit = x_unit * y_unit.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         name : str, default='DeltaFunction'
-            Name of the component for indexing.
+            Name of the component.
         display_name : str | None, default=None
-            Display name of the component.
+            Display name of the component, shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. If None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
         """
-        # Validate inputs and create Parameters if not given
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        self._area = self._create_area_parameter(
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
-
-        self._area = area
-        self._center = center
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
+        )
 
     @property
     def area(self) -> Parameter:
@@ -106,27 +109,23 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The area parameter.
+            The area Parameter with unit ``x_unit * y_unit``.
         """
-
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
         """
-        Set the value of the area parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the area parameter.
+            New area value (in current area unit = x_unit * y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
-
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
         self._area.value = value
@@ -139,27 +138,24 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The center parameter.
+            The center Parameter with unit ``x_unit``.
         """
-
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the center parameter value.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None, defaults to 0 and is fixed.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not None and not a numeric type.
         """
-
         if value is None:
             value = 0.0
             self._center.fixed = True
@@ -167,52 +163,92 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
             raise TypeError('center must be a number')
         self._center.value = value
 
-    def evaluate(self, x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray) -> np.ndarray:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         """
-        Evaluate the Delta function at the given x values.
+        Evaluate the Delta function at x_vals.
 
-        The Delta function evaluates to zero everywhere, except at the center. Its numerical
-        integral is equal to the area. It acts as an identity in convolutions.
+        Parameters in the model's own units are temporarily converted to eval_unit for the
+        computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Delta function.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit. May be in any order; bin widths are computed on
+            the sorted values.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
         np.ndarray
-            The evaluated Delta function at the given x values.
+            Zero everywhere, with a single non-zero bin nearest the center when center falls within
+            the x range.
+
+        Notes
+        -----
+        When ``center`` falls within the x range, the bin nearest to ``center`` receives ``area /
+        bin_width`` rather than zero.  In convolutions, the DeltaFunction acts as an identity
+        element (handled by the Convolution class).
         """
+        center = self._resolve_param_value(self._center, eval_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
-        # x assumed sorted, 1D numpy array
-        x = self._prepare_x_for_evaluate(x)
-        model = np.zeros_like(x, dtype=float)
-        center = self.center.value
-        area = self.area.value
+        model = np.zeros_like(x_vals, dtype=float)
 
-        if x.min() - EPSILON <= center <= x.max() + EPSILON:
-            # nearest index
-            i = np.argmin(np.abs(x - center))
+        if x_vals.min() - EPSILON <= center <= x_vals.max() + EPSILON:
+            # Bin widths only make sense on a sorted grid; compute there and map the spike back
+            # to the original position of the nearest x value.
+            order = np.argsort(x_vals)
+            x_sorted = x_vals[order]
+
+            # nearest index in the sorted grid
+            i = np.argmin(np.abs(x_sorted - center))
 
             # left half-width
-            if i == 0:  # noqa: SIM108
-                left = x[1] - x[0] if x.size > 1 else 0.5
+            if i == 0:
+                left = x_sorted[1] - x_sorted[0] if x_sorted.size > 1 else 0.5
             else:
-                left = x[i] - x[i - 1]
+                left = x_sorted[i] - x_sorted[i - 1]
 
             # right half-width
-            if i == x.size - 1:  # noqa: SIM108
-                right = x[-1] - x[-2] if x.size > 1 else 0.5
+            if i == x_sorted.size - 1:
+                right = x_sorted[-1] - x_sorted[-2] if x_sorted.size > 1 else 0.5
             else:
-                right = x[i + 1] - x[i]
+                right = x_sorted[i + 1] - x_sorted[i]
 
             # effective bin width: half left + half right
             bin_width = 0.5 * (left + right)
-
-            model[i] = area / bin_width
+            model[order[i]] = area / bin_width
 
         return model
+
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert x-axis parameters (center) and area to new_x_unit.
+
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+        """
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center],
+            area_param=self._area,
+        )
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit by rescaling the area parameter.
+
+        The area is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        """
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
         """
@@ -223,11 +259,9 @@ class DeltaFunction(CreateParametersMixin, ModelComponent):
         str
             A string representation of the Delta function.
         """
-
         return (
-            f'{self.__class__.__name__}('
-            f'name={self.name!r}, display_name={self.display_name!r}, '
-            f'unit={self.unit},\n'
-            f'    area={self.area},\n'
-            f'    center={self.center})'
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
+            f'    area = {self.area},\n'
+            f'    center = {self.center})'
         )
