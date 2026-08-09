@@ -20,6 +20,7 @@ from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import verify_Q_index
 
 
 class Analysis(AnalysisBase):
@@ -253,7 +254,7 @@ class Analysis(AnalysisBase):
         if Q_index is None:
             return [analysis.calculate(energy=energy) for analysis in self.analysis_list]
 
-        Q_index = self._verify_Q_index(Q_index)
+        verify_Q_index(Q_index=Q_index, Q=self.Q)
         return self.analysis_list[Q_index].calculate(energy=energy)
 
     def fit(
@@ -291,7 +292,7 @@ class Analysis(AnalysisBase):
                 'No Q values available for fitting. Please check the experiment data.'
             )
 
-        Q_index = self._verify_Q_index(Q_index)
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         if fit_method == 'independent':
             if Q_index is not None:
@@ -347,9 +348,8 @@ class Analysis(AnalysisBase):
         InteractiveFigure
             A Plopp InteractiveFigure containing the plot of the data and model.
         """
-
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is not None:
-            Q_index = self._verify_Q_index(Q_index)
             return self.analysis_list[Q_index].plot_data_and_model(
                 plot_components=plot_components,
                 add_background=add_background,
@@ -627,8 +627,8 @@ class Analysis(AnalysisBase):
             Index of the Q value to fix the energy offset for. If None, fixes the energy offset for
             all Q values.
         """
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is not None:
-            Q_index = self._verify_Q_index(Q_index)
             self.analysis_list[Q_index].fix_energy_offset()
         else:
             for analysis in self.analysis_list:
@@ -645,8 +645,8 @@ class Analysis(AnalysisBase):
             Index of the Q value to free the energy offset for. If None, frees the energy offset
             for all Q values.
         """
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is not None:
-            Q_index = self._verify_Q_index(Q_index)
             self.analysis_list[Q_index].free_energy_offset()
         else:
             for analysis in self.analysis_list:

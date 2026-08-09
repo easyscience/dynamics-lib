@@ -13,6 +13,7 @@ from scipp.io import save_hdf5 as sc_save_hdf5
 
 from easydynamics.base_classes.easydynamics_base import EasyDynamicsBase
 from easydynamics.utils.utils import _in_notebook
+from easydynamics.utils.utils import verify_Q_index
 
 
 class Experiment(EasyDynamicsBase):
@@ -239,11 +240,6 @@ class Experiment(EasyDynamicsBase):
         Q_index : int
             The Q index to get the masked energy values for.
 
-        Raises
-        ------
-        IndexError
-            If Q_index is not a valid index for the Q values.
-
         Returns
         -------
         sc.Variable | None
@@ -252,12 +248,7 @@ class Experiment(EasyDynamicsBase):
         if self.binned_data is None:
             return None
 
-        if (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or (self.Q is not None and Q_index >= len(self.Q))
-        ):
-            raise IndexError('Q_index must be a valid index for the Q values.')
+        verify_Q_index(Q_index, self.Q)
 
         energy = self.binned_data.coords['energy']
         _, _, _, mask = self._extract_x_y_weights_only_finite(Q_index=Q_index)

@@ -13,6 +13,7 @@ from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
 from easydynamics.utils.utils import _validate_and_convert_Q
+from easydynamics.utils.utils import verify_Q_index
 
 
 class ModelBase(EasyDynamicsModelBase):
@@ -314,21 +315,14 @@ class ModelBase(EasyDynamicsModelBase):
             If None, get variables for all ComponentCollections. If int, get variables for the
             ComponentCollection at this index.
 
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int or None.
-        IndexError
-            If Q_index is out of bounds for the number of ComponentCollections.
-
         Returns
         -------
         list[Parameter]
             A list of all Parameters and Descriptors from the ComponentCollections in the
             ModelBase.
         """
-
         self._ensure_component_collections_current()
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
         if Q_index is None:
             all_vars = [
                 var
@@ -336,13 +330,6 @@ class ModelBase(EasyDynamicsModelBase):
                 for var in collection.get_all_variables()
             ]
         else:
-            if not isinstance(Q_index, int):
-                raise TypeError(f'Q_index must be an int or None, got {type(Q_index).__name__}')
-            if Q_index < 0 or Q_index >= len(self._component_collections):
-                raise IndexError(
-                    f'Q_index {Q_index} is out of bounds for component collections '
-                    f'of length {len(self._component_collections)}'
-                )
             all_vars = self._component_collections[Q_index].get_all_variables()
         return all_vars
 
@@ -355,26 +342,13 @@ class ModelBase(EasyDynamicsModelBase):
         Q_index : int
             The index of the desired ComponentCollection.
 
-        Raises
-        ------
-        TypeError
-            If Q_index is not an int.
-        IndexError
-            If Q_index is out of bounds for the number of ComponentCollections.
-
         Returns
         -------
         ComponentCollection
             The ComponentCollection at the given Q index.
         """
         self._ensure_component_collections_current()
-        if not isinstance(Q_index, int):
-            raise TypeError(f'Q_index must be an int, got {type(Q_index).__name__}')
-        if Q_index < 0 or Q_index >= len(self._component_collections):
-            raise IndexError(
-                f'Q_index {Q_index} is out of bounds for component collections '
-                f'of length {len(self._component_collections)}'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q)
         return self._component_collections[Q_index]
 
     def normalize_area(self) -> None:

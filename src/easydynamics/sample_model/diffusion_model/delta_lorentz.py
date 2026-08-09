@@ -13,6 +13,7 @@ from easydynamics.sample_model.components import Lorentzian
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import Q_type
+from easydynamics.utils.utils import verify_Q_index
 
 MINIMUM_WIDTH = 1e-10  # To avoid division by zero
 
@@ -587,22 +588,9 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         list[Parameter]
             List of independent variables in the model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is not None and is not a valid index for the Q values in the model.
         """
 
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         variables = []
         if self._allow_Q_variation['A_0'] is True:
@@ -629,22 +617,9 @@ class DeltaLorentz(DiffusionModelBase):
         -------
         list[DescriptorNumber]
             List of all variables in the model.
-
-        Raises
-        ------
-        ValueError
-            If Q_index is not None and is not a valid index for the Q values in the model.
         """
 
-        if Q_index is not None and (
-            not isinstance(Q_index, int)
-            or Q_index < 0
-            or Q_index >= len(self._component_collections)
-        ):
-            raise ValueError(
-                f'Q_index must be an integer between 0 and '
-                f'{len(self._component_collections) - 1}, or None.'
-            )
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
 
         variables = self.get_global_variables()
         variables.extend(self.get_independent_variables(Q_index=Q_index))
