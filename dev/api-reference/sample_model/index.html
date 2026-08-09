@@ -16120,16 +16120,33 @@ values are rescaled so the evaluated result stays the same. The output unit is y
 <span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
 <span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
 </code></pre></div></p>
+<p><strong>Creating a sparse polynomial from a dict</strong></p>
+<p>Powers that are not listed are filled with coefficients fixed to zero:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">})</span>  <span class="c1"># 1.5*x^2, with c0 and c1 fixed at 0</span>
+</code></pre></div></p>
+<p><strong>Changing the degree after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">add_coefficient</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># now 2.0 + 0.1*x + 0.05*x^2</span>
+<span class="n">removed</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">remove_coefficient</span><span class="p">()</span>  <span class="c1"># returns 0.05, back to 2.0 + 0.1*x</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
 
-        <p>coefficients : Sequence[Numeric | Parameter], default=(0.0,)
-    Ordered list of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the polynomial is
-    <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>.  Each element may be a plain numeric value
-    (wrapped into a dimensionless :class:<code>Parameter</code>) or an existing :class:<code>Parameter</code>
-    instance. Must contain at least one element.
-x_unit : str | sc.Unit, default='meV'
+        <p>coefficients : _CoefficientsInput, default=(0.0,)
+    Either an ordered sequence of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the
+    polynomial is <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>, or a sparse <code>dict</code> mapping
+    integer powers to numeric values (e.g. <code>{2: 1.5}</code> for <code>1.5*x^2</code>).</p>
+<div class="language-text highlight"><pre><span></span><code>For a sequence, each element may be a plain numeric value (wrapped into a dimensionless
+:class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
+present are filled with fixed-to-zero Parameters, and the degree is taken from the
+largest key.  Must contain at least one element.
+</code></pre></div>
+<p>x_unit : str | sc.Unit, default='meV'
     Unit of the x-axis.  When the x_unit is changed via :meth:<code>convert_x_unit</code>, coefficient
     values are rescaled by power-law factors so the evaluated output remains unchanged.
 y_unit : str | sc.Unit, default='dimensionless'
@@ -16162,8 +16179,9 @@ suppress_warnings : bool, default=False
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is not a list, tuple, or ndarray, or if any element is neither
-numeric nor a :class:<code>Parameter</code>.</p>
+                <p>If <em>coefficients</em> is not a list, tuple, ndarray, or dict, if any sequence element is
+neither numeric nor a :class:<code>Parameter</code>, or if any dict key is not an integer or dict
+value is not numeric.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -16176,7 +16194,7 @@ numeric nor a :class:<code>Parameter</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is empty.</p>
+                <p>If <em>coefficients</em> is empty, or if any dict key is negative.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -16336,6 +16354,28 @@ numeric nor a :class:<code>Parameter</code>.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get the coefficients of the polynomial as a list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;add_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fixed&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.Polynomial.add_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.Polynomial.add_coefficient">add_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.Polynomial.remove_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.Polynomial.remove_coefficient">remove_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -17323,6 +17363,179 @@ unit for the computation without mutating the parameters.</p>
             <td>
               <div class="doc-md-description">
                 <p>Current numeric values of all coefficients <code>[c0.value, c1.value, ..., cN.value]</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.Polynomial.add_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">add_coefficient</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The numeric value of the new coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>fixed</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, the new coefficient is fixed (not free for fitting).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <em>value</em> is not a numeric value.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easydynamics.sample_model.Polynomial.remove_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_coefficient</span><span class="p">()</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The value of the removed coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If only one coefficient remains; a Polynomial must always keep at least one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47411,16 +47624,33 @@ values are rescaled so the evaluated result stays the same. The output unit is y
 <span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
 <span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
 </code></pre></div></p>
+<p><strong>Creating a sparse polynomial from a dict</strong></p>
+<p>Powers that are not listed are filled with coefficients fixed to zero:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">})</span>  <span class="c1"># 1.5*x^2, with c0 and c1 fixed at 0</span>
+</code></pre></div></p>
+<p><strong>Changing the degree after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">add_coefficient</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># now 2.0 + 0.1*x + 0.05*x^2</span>
+<span class="n">removed</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">remove_coefficient</span><span class="p">()</span>  <span class="c1"># returns 0.05, back to 2.0 + 0.1*x</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
 
-        <p>coefficients : Sequence[Numeric | Parameter], default=(0.0,)
-    Ordered list of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the polynomial is
-    <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>.  Each element may be a plain numeric value
-    (wrapped into a dimensionless :class:<code>Parameter</code>) or an existing :class:<code>Parameter</code>
-    instance. Must contain at least one element.
-x_unit : str | sc.Unit, default='meV'
+        <p>coefficients : _CoefficientsInput, default=(0.0,)
+    Either an ordered sequence of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the
+    polynomial is <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>, or a sparse <code>dict</code> mapping
+    integer powers to numeric values (e.g. <code>{2: 1.5}</code> for <code>1.5*x^2</code>).</p>
+<div class="language-text highlight"><pre><span></span><code>For a sequence, each element may be a plain numeric value (wrapped into a dimensionless
+:class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
+present are filled with fixed-to-zero Parameters, and the degree is taken from the
+largest key.  Must contain at least one element.
+</code></pre></div>
+<p>x_unit : str | sc.Unit, default='meV'
     Unit of the x-axis.  When the x_unit is changed via :meth:<code>convert_x_unit</code>, coefficient
     values are rescaled by power-law factors so the evaluated output remains unchanged.
 y_unit : str | sc.Unit, default='dimensionless'
@@ -47453,8 +47683,9 @@ suppress_warnings : bool, default=False
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is not a list, tuple, or ndarray, or if any element is neither
-numeric nor a :class:<code>Parameter</code>.</p>
+                <p>If <em>coefficients</em> is not a list, tuple, ndarray, or dict, if any sequence element is
+neither numeric nor a :class:<code>Parameter</code>, or if any dict key is not an integer or dict
+value is not numeric.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47467,7 +47698,7 @@ numeric nor a :class:<code>Parameter</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is empty.</p>
+                <p>If <em>coefficients</em> is empty, or if any dict key is negative.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -47627,6 +47858,28 @@ numeric nor a :class:<code>Parameter</code>.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get the coefficients of the polynomial as a list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;add_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fixed&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.Polynomial.add_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.components.Polynomial.add_coefficient">add_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.Polynomial.remove_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.components.Polynomial.remove_coefficient">remove_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -48614,6 +48867,179 @@ unit for the computation without mutating the parameters.</p>
             <td>
               <div class="doc-md-description">
                 <p>Current numeric values of all coefficients <code>[c0.value, c1.value, ..., cN.value]</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.components.Polynomial.add_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">add_coefficient</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The numeric value of the new coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>fixed</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, the new coefficient is fixed (not free for fitting).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <em>value</em> is not a numeric value.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easydynamics.sample_model.components.Polynomial.remove_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_coefficient</span><span class="p">()</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The value of the removed coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If only one coefficient remains; a Polynomial must always keep at least one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -61580,16 +62006,33 @@ values are rescaled so the evaluated result stays the same. The output unit is y
 <span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Background&#39;</span><span class="p">)</span>
 <span class="n">poly</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
 </code></pre></div></p>
+<p><strong>Creating a sparse polynomial from a dict</strong></p>
+<p>Powers that are not listed are filled with coefficients fixed to zero:
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">})</span>  <span class="c1"># 1.5*x^2, with c0 and c1 fixed at 0</span>
+</code></pre></div></p>
+<p><strong>Changing the degree after construction</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">easydynamics.sample_model</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+
+<span class="n">poly</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Polynomial</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+<span class="n">poly</span><span class="o">.</span><span class="n">add_coefficient</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># now 2.0 + 0.1*x + 0.05*x^2</span>
+<span class="n">removed</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">remove_coefficient</span><span class="p">()</span>  <span class="c1"># returns 0.05, back to 2.0 + 0.1*x</span>
+</code></pre></div>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
 
-        <p>coefficients : Sequence[Numeric | Parameter], default=(0.0,)
-    Ordered list of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the polynomial is
-    <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>.  Each element may be a plain numeric value
-    (wrapped into a dimensionless :class:<code>Parameter</code>) or an existing :class:<code>Parameter</code>
-    instance. Must contain at least one element.
-x_unit : str | sc.Unit, default='meV'
+        <p>coefficients : _CoefficientsInput, default=(0.0,)
+    Either an ordered sequence of polynomial coefficients <code>[c0, c1, ..., cN]</code> where the
+    polynomial is <code>c0 + c1*x + c2*x^2 + ... + cN*x^N</code>, or a sparse <code>dict</code> mapping
+    integer powers to numeric values (e.g. <code>{2: 1.5}</code> for <code>1.5*x^2</code>).</p>
+<div class="language-text highlight"><pre><span></span><code>For a sequence, each element may be a plain numeric value (wrapped into a dimensionless
+:class:`Parameter`) or an existing :class:`Parameter` instance.  For a dict, powers not
+present are filled with fixed-to-zero Parameters, and the degree is taken from the
+largest key.  Must contain at least one element.
+</code></pre></div>
+<p>x_unit : str | sc.Unit, default='meV'
     Unit of the x-axis.  When the x_unit is changed via :meth:<code>convert_x_unit</code>, coefficient
     values are rescaled by power-law factors so the evaluated output remains unchanged.
 y_unit : str | sc.Unit, default='dimensionless'
@@ -61622,8 +62065,9 @@ suppress_warnings : bool, default=False
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is not a list, tuple, or ndarray, or if any element is neither
-numeric nor a :class:<code>Parameter</code>.</p>
+                <p>If <em>coefficients</em> is not a list, tuple, ndarray, or dict, if any sequence element is
+neither numeric nor a :class:<code>Parameter</code>, or if any dict key is not an integer or dict
+value is not numeric.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -61636,7 +62080,7 @@ numeric nor a :class:<code>Parameter</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <em>coefficients</em> is empty.</p>
+                <p>If <em>coefficients</em> is empty, or if any dict key is negative.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -61671,6 +62115,28 @@ numeric nor a :class:<code>Parameter</code>.</p>
               <td>
                 <div class="doc-md-description">
                   <p>Get the coefficients of the polynomial as a list.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;add_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fixed&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.polynomial.Polynomial.add_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.components.polynomial.Polynomial.add_coefficient">add_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;remove_coefficient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easydynamics.sample_model.components.polynomial.Polynomial.remove_coefficient&lt;/code&gt;)" href="#easydynamics.sample_model.components.polynomial.Polynomial.remove_coefficient">remove_coefficient</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -62389,6 +62855,179 @@ returned list does not affect the model; use the setter to replace values.</p>
             <td>
               <div class="doc-md-description">
                 <p>Current numeric values of all coefficients <code>[c0.value, c1.value, ..., cN.value]</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h9 id="easydynamics.sample_model.components.polynomial.Polynomial.add_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">add_coefficient</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h9>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add a new coefficient at the next highest power, increasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="easydynamics.utils.utils.Numeric">Numeric</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The numeric value of the new coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>fixed</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, the new coefficient is fixed (not free for fitting).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <em>value</em> is not a numeric value.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h9 id="easydynamics.sample_model.components.polynomial.Polynomial.remove_coefficient" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_coefficient</span><span class="p">()</span></code>
+
+</h9>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Remove the highest-power coefficient, decreasing the degree by one.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The value of the removed coefficient.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If only one coefficient remains; a Polynomial must always keep at least one.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
