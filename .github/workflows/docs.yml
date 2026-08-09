@@ -83,6 +83,9 @@ jobs:
           fi
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
           echo "DOCS_VERSION=${DOCS_VERSION}" >> "$GITHUB_ENV"
+          # Artifact names cannot contain '/', so sanitize the (possibly slash-containing)
+          # branch name for use in the uploaded artifact name.
+          echo "ARTIFACT_SUFFIX=${RELEASE_VERSION//\//-}" >> "$GITHUB_ENV"
 
       # Check out the repository source code.
       # Note: The gh-pages branch is fetched separately later for mike deployment.
@@ -135,7 +138,7 @@ jobs:
       - name: Upload built site as artifact
         uses: ./.github/actions/upload-artifact
         with:
-          name: site-local_easydynamics-lib-${{ env.RELEASE_VERSION }}
+          name: site-local_easydynamics-lib-${{ env.ARTIFACT_SUFFIX }}
           path: docs/site/
 
       # Create GitHub App token for pushing to gh-pages as easyscience[bot].
