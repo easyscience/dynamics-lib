@@ -311,6 +311,7 @@ class JumpTranslationalDiffusion(DiffusionModelBase):
             self._component_collections = []
             return self._component_collections
 
+        Q = Q.values
         component_collection_list = [None] * len(Q)
         # In more complex models, this is used to scale the area of the
         # Lorentzians and the delta function.

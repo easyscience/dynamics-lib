@@ -124,12 +124,14 @@ class TestValidateAndConvertQ:
         ],
     )
     def test_validate_and_convert_Q_numeric_and_array(self, Q_input, expected):
-        # WHEN THEN
+        # WHEN THEN: numbers, lists, and numpy arrays are assumed to be in 1/angstrom
         result = _validate_and_convert_Q(Q_input)
 
         # EXPECT
-        assert isinstance(result, np.ndarray)
-        np.testing.assert_allclose(result, expected)
+        assert isinstance(result, sc.Variable)
+        assert result.dims == ('Q',)
+        assert result.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(result.values, expected)
 
     def test_validate_and_convert_Q_scipp_variable(self):
         # WHEN
@@ -139,8 +141,20 @@ class TestValidateAndConvertQ:
         result = _validate_and_convert_Q(Q)
 
         # EXPECT
-        assert isinstance(result, np.ndarray)
-        np.testing.assert_allclose(result, [1.0, 2.0])
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(result.values, [1.0, 2.0])
+
+    def test_validate_and_convert_Q_scipp_variable_other_unit(self):
+        # WHEN: a scipp Q in 1/nm
+        Q = sc.array(dims=['Q'], values=[10.0, 20.0], unit='1/nm')
+
+        # THEN
+        result = _validate_and_convert_Q(Q)
+
+        # EXPECT: converted to 1/angstrom
+        assert result.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(result.values, [1.0, 2.0])
 
     def test_validate_and_convert_Q_none(self):
         # WHEN THEN EXPECT

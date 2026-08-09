@@ -164,14 +164,17 @@ def energy_to_scipp(energy: np.ndarray, unit: str | sc.Unit) -> sc.Variable:
 
 def _validate_and_convert_Q(
     Q: np.ndarray | Numeric | list | ArrayLike | sc.Variable | None,
-) -> np.ndarray | None:
+) -> sc.Variable | None:
     """
-    Validate and convert Q to a numpy array.
+    Validate and convert Q to a scipp Variable in 1/angstrom.
+
+    Numbers, lists, and numpy arrays are assumed to be in 1/angstrom. Scipp Variables may be in any
+    unit convertible to 1/angstrom and are converted.
 
     Parameters
     ----------
     Q : np.ndarray | Numeric | list | ArrayLike | sc.Variable | None
-        Scattering vector values in 1/angstrom.
+        Scattering vector values.
 
     Raises
     ------
@@ -183,8 +186,8 @@ def _validate_and_convert_Q(
 
     Returns
     -------
-    np.ndarray | None
-        Q as a np.ndarray or None if Q is None.
+    sc.Variable | None
+        Q as a sc.Variable with dimension 'Q' and unit 1/angstrom, or None if Q is None.
     """
     if Q is None:
         return None
@@ -199,13 +202,13 @@ def _validate_and_convert_Q(
         if Q.ndim > 1:
             raise ValueError('Q must be a 1-dimensional array.')
 
-        Q = sc.array(dims=['Q'], values=Q, unit='1/angstrom')
+        Q = sc.array(dims=['Q'], values=Q, unit=CANONICAL_Q_UNIT)
 
     if isinstance(Q, sc.Variable):
         if Q.dims != ('Q',):
             raise ValueError("Q must have a single dimension named 'Q'.")
-        Q = Q.to(unit='1/angstrom')
-    return Q.values
+        Q = Q.to(unit=CANONICAL_Q_UNIT)
+    return Q
 
 
 def _validate_unit(unit: str | sc.Unit | None) -> sc.Unit | None:
