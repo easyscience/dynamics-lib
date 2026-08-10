@@ -20,15 +20,40 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     r"""
     Model of a Gaussian function.
 
-     The intensity is given by
+    $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
+    x_0}{\sigma}\right)^2 \right) $$
 
-     $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2} \left(\frac{x -
-     x_0}{\sigma}\right)^2 \right) $$
-
-     where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width.
+    where $A$ is the area, $x_0$ is the center, and $\sigma$ is the width. area has unit = x_unit *
+    y_unit; center and width have unit = x_unit.
 
     If the center is not provided, it will be centered at 0 and fixed, which is typically what you
     want in QENS.
+
+    Examples
+    --------
+    **Creating a Gaussian with a fixed center (typical QENS use)**
+
+    By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=1.0, width=0.5)
+    x = np.linspace(-2, 2, 100)
+    values = g.evaluate(x)
+    ```
+
+    **Creating a Gaussian with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting, and use the property
+    setters to update parameter values after construction:
+    ```python
+    import easydynamics.sample_model as sm
+
+    g = sm.Gaussian(area=2.0, center=0.5, width=0.3, name='Peak')
+    g.area = 3.0
+    g.width = 0.2
+    ```
     """
 
     def __init__(
@@ -36,7 +61,8 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         area: Numeric = 1.0,
         center: Numeric | None = None,
         width: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Gaussian',
         display_name: str | None = None,
         unique_name: str | None = None,
@@ -47,39 +73,38 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         area : Numeric, default=1.0
-            Area of the Gaussian.
+            Integrated area under the Gaussian.  Unit is ``x_unit * y_unit``.
         center : Numeric | None, default=None
-            Center of the Gaussian. If None.
+            Peak position in x_unit.  If None, defaults to 0 and the center parameter is fixed.
         width : Numeric, default=1.0
-            Standard deviation.
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Standard deviation (sigma) in x_unit.  Must be strictly positive.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center and width are stored in this unit. area_unit = x_unit *
+            y_unit.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).
         name : str, default='Gaussian'
-            Name of the component for indexing.
-        display_name : str | None, default=None
             Name of the component.
+        display_name : str | None, default=None
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. if None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
         """
-        # Validate inputs and create Parameters if not given
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        # These methods live in ValidationMixin
-        area = self._create_area_parameter(area=area, name=name, unit=self._unit)
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        self._area = self._create_area_parameter(
+            area=area, name=name, x_unit=self.x_unit, y_unit=self.y_unit
         )
-        width = self._create_width_parameter(width=width, name=name, unit=self._unit)
-
-        self._area = area
-        self._center = center
-        self._width = width
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
+        )
+        self._width = self._create_width_parameter(width=width, name=name, x_unit=self.x_unit)
 
     @property
     def area(self) -> Parameter:
@@ -89,27 +114,23 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The area parameter.
+            The area Parameter with unit ``x_unit * y_unit``.
         """
-
         return self._area
 
     @area.setter
     def area(self, value: Numeric) -> None:
         """
-        Set the value of the area parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the area parameter.
+            New area value (in current area unit = x_unit * y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
-
         if not isinstance(value, Numeric):
             raise TypeError('area must be a number')
         self._area.value = value
@@ -122,27 +143,24 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The center parameter.
+            The center Parameter with unit ``x_unit``.
         """
-
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the center parameter value.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter. If None, defaults to 0 and is fixed.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not None and not a numeric type.
         """
-
         if value is None:
             value = 0.0
             self._center.fixed = True
@@ -153,48 +171,43 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     @property
     def width(self) -> Parameter:
         """
-        Get the width parameter (standard deviation).
+        Get the width parameter (sigma).
 
         Returns
         -------
         Parameter
-            The width parameter.
+            The width (sigma) Parameter with unit ``x_unit``.
         """
         return self._width
 
     @width.setter
     def width(self, value: Numeric) -> None:
         """
-        Set the width parameter value.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the width parameter.
+            New width value in x_unit.  Must be strictly positive.
 
         Raises
         ------
         TypeError
-            If the value is not a number or None.
+            If *value* is not a numeric type.
         ValueError
-            If the value is not positive.
+            If *value* is not positive.
         """
         if not isinstance(value, Numeric):
             raise TypeError('width must be a number')
-
         if float(value) <= 0:
             raise ValueError('width must be positive')
-
         self._width.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-    ) -> np.ndarray:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Gaussian at the given x values.
+        Evaluate the Gaussian at x_vals.
 
-        If x is a scipp Variable, the unit of the Gaussian will be converted to match x. The
+        Parameters in the model's own units are temporarily converted to eval_unit for the
+        computation.
+
         intensity is given by $$ I(x) = \frac{A}{\sigma \sqrt{2\pi}} \exp\left( -\frac{1}{2}
         \left(\frac{x - x_0}{\sigma}\right)^2 \right) $$
 
@@ -202,21 +215,51 @@ class Gaussian(CreateParametersMixin, ModelComponent):
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Gaussian.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
         np.ndarray
-            The intensity of the Gaussian at the given x values.
+            Evaluated Gaussian values at x_vals.
         """
+        center = self._resolve_param_value(self._center, eval_unit)
+        width = self._resolve_param_value(self._width, eval_unit)
+        area = self._resolve_param_value(self._area, self._eval_area_unit(eval_unit))
 
-        x = self._prepare_x_for_evaluate(x)
+        normalization = 1 / (np.sqrt(2 * np.pi) * width)
+        exponent = -0.5 * ((x_vals - center) / width) ** 2
+        return area * normalization * np.exp(exponent)
 
-        normalization = 1 / (np.sqrt(2 * np.pi) * self.width.value)
-        exponent = -0.5 * ((x - self.center.value) / self.width.value) ** 2
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
+        """
+        Convert x-axis parameters (center, width) and area to new_x_unit.
 
-        return self.area.value * normalization * np.exp(exponent)
+        Parameters
+        ----------
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.
+        """
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center, self._width],
+            area_param=self._area,
+        )
+
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis (output) unit by rescaling the area parameter.
+
+        The area is rescaled from ``x_unit * old_y_unit`` to ``x_unit * new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        """
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, area_param=self._area)
 
     def __repr__(self) -> str:
         """
@@ -227,10 +270,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
         str
             A string representation of the Gaussian.
         """
-
         return (
-            f'Gaussian(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n'
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n'
             f'    area = {self.area},\n'
             f'    center = {self.center},\n'
             f'    width = {self.width})'

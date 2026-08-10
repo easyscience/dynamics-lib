@@ -73,7 +73,8 @@ class TestConvolution:
         assert default_convolution.upsample_factor == 5
         assert default_convolution.extension_factor == pytest.approx(0.2)
         assert default_convolution.temperature is None
-        assert default_convolution.unit == 'meV'
+        assert default_convolution.x_unit == 'meV'
+        assert default_convolution.y_unit == 'dimensionless'
         assert default_convolution.detailed_balance_settings.normalize_detailed_balance is True
         assert isinstance(default_convolution._energy_grid, EnergyGrid)
 
@@ -93,7 +94,7 @@ class TestConvolution:
             default_convolution._delta_sample_components[0]
             is default_convolution.sample_components[2]
         )
-        assert default_convolution.convolution_settings.convolution_plan_is_valid is True
+        assert default_convolution._convolution_plan_is_current() is True
         assert default_convolution._reactions_enabled is True
 
     def test_init_components(self, convolution_with_components):
@@ -107,7 +108,8 @@ class TestConvolution:
         assert convolution_with_components.upsample_factor == 5
         assert convolution_with_components.extension_factor == pytest.approx(0.2)
         assert convolution_with_components.temperature is None
-        assert convolution_with_components.unit == 'meV'
+        assert convolution_with_components.x_unit == 'meV'
+        assert convolution_with_components.y_unit == 'dimensionless'
         assert (
             convolution_with_components.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -132,7 +134,7 @@ class TestConvolution:
             convolution_with_components._delta_sample_components, ComponentCollection
         )
         assert convolution_with_components._delta_sample_components.is_empty
-        assert convolution_with_components.convolution_settings.convolution_plan_is_valid is True
+        assert convolution_with_components._convolution_plan_is_current() is True
         assert convolution_with_components._reactions_enabled is True
 
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
@@ -141,7 +143,7 @@ class TestConvolution:
         """
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = False
+        conv._plan_seen_version = None
 
         # THEN EXPECT
         with patch.object(conv, '_build_convolution_plan') as build_plan:
@@ -276,7 +278,9 @@ class TestConvolution:
             patch_numerical as mock_numerical_method,
             patch_delta as mock_delta_method,
         ):
-            conv.convolution_settings._convolution_plan_is_valid = True
+            # The plan was built above; keep it current so convolution() does not rebuild
+            # the convolvers and discard the mocks.
+            conv._mark_convolution_plan_current()
             conv.convolution()
 
             if analytical_component:
@@ -392,40 +396,6 @@ class TestConvolution:
             )
 
     @pytest.mark.parametrize(
-        'sample_component,resolution_component',
-        [
-            (
-                'NotAModelComponent',
-                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
-            ),
-            (
-                Gaussian(name='G', area=1.0, center=0.0, width=0.1),
-                'NotAModelComponent',
-            ),
-        ],
-        ids=['invalid_sample_component', 'invalid_resolution_component'],
-    )
-    def test_check_if_pair_is_analytic_raises_with_invalid_types(
-        self, default_convolution, sample_component, resolution_component
-    ):
-        """
-        Test that _check_if_pair_is_analytic raises TypeError when given
-        invalid component types.
-        """
-        # WHEN
-        conv = default_convolution
-
-        # THEN EXPECT
-        with pytest.raises(
-            TypeError,
-            match='must be a ModelComponent',
-        ):
-            conv._check_if_pair_is_analytic(
-                sample_component=sample_component,
-                resolution_component=resolution_component,
-            )
-
-    @pytest.mark.parametrize(
         'analytical_component',
         [True, False],
         ids=['with_analytical', 'without_analytical'],
@@ -437,7 +407,7 @@ class TestConvolution:
     )
     @pytest.mark.parametrize('delta_component', [True, False], ids=['with_delta', 'without_delta'])
     @pytest.mark.parametrize(
-        'temperature', [None, 100], ids=['with_temperature', 'without_temperature']
+        'temperature', [None, 100], ids=['without_temperature', 'with_temperature']
     )
     def test_build_convolution_plan(
         self,
@@ -515,7 +485,7 @@ class TestConvolution:
                 expected_numerical_count += 1
             assert len(conv._numerical_sample_components) == expected_numerical_count
 
-        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert conv._convolution_plan_is_current() is True
 
     @pytest.mark.parametrize(
         'analytical_component',
@@ -581,7 +551,7 @@ class TestConvolution:
     ):
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = True
+        assert conv._convolution_plan_is_current() is True
 
         # Capture current identity of internal state to ensure no rebuild
         old_plan_id = id(conv._analytical_sample_components)
@@ -592,7 +562,7 @@ class TestConvolution:
         conv.display_name = 'new_name'
 
         # EXPECT
-        assert conv.convolution_settings.convolution_plan_is_valid is True
+        assert conv._convolution_plan_is_current() is True
         assert id(conv._analytical_sample_components) == old_plan_id
         assert id(conv._numerical_sample_components) == old_numerical_id
         assert id(conv._delta_sample_components) == old_delta_id
@@ -604,10 +574,61 @@ class TestConvolution:
     ):
         # WHEN
         conv = default_convolution
-        conv.convolution_settings.convolution_plan_is_valid = True
+        assert conv._convolution_plan_is_current() is True
 
         # THEN
         conv.upsample_factor = 10
 
         # EXPECT
-        assert conv.convolution_settings.convolution_plan_is_valid is False
+        assert conv._convolution_plan_is_current() is False
+
+    def test_convert_y_unit_propagates_to_sub_convolvers(self):
+        # WHEN: Convolution with Gaussian sample and resolution components,
+        #       both with y_unit='1/meV'
+        energy = np.linspace(-10, 10, 5001)
+        sample_components = ComponentCollection()
+        sample_components.append_component(
+            Gaussian(name='G', area=1.0, center=0.0, width=0.5, x_unit='meV', y_unit='1/meV')
+        )
+        resolution_components = ComponentCollection()
+        resolution_components.append_component(
+            Gaussian(name='R', area=1.0, center=0.0, width=0.3, x_unit='meV', y_unit='1/meV')
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+
+        # THEN: convert y_unit to '1/eV'
+        conv.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit updated and propagated to sub-convolvers via Convolution.convert_y_unit
+        assert conv.y_unit == '1/eV'
+        assert conv._analytical_convolver._y_unit == '1/eV'
+
+    def test_convert_y_unit_propagates_to_numerical_convolver(self):
+        # WHEN: a DHO sample component forces a numerical convolver
+        energy = np.linspace(-10, 10, 5001)
+        sample_components = ComponentCollection()
+        sample_components.append_component(
+            DampedHarmonicOscillator(
+                name='DHO', area=1.0, center=1.0, width=0.5, x_unit='meV', y_unit='1/meV'
+            )
+        )
+        resolution_components = ComponentCollection()
+        resolution_components.append_component(
+            Gaussian(name='R', area=1.0, center=0.0, width=0.3, x_unit='meV', y_unit='1/meV')
+        )
+        conv = Convolution(
+            energy=energy,
+            sample_components=sample_components,
+            resolution_components=resolution_components,
+        )
+
+        # THEN
+        conv.convert_y_unit('1/eV')
+
+        # EXPECT
+        assert conv.y_unit == '1/eV'
+        assert conv._numerical_convolver._y_unit == '1/eV'

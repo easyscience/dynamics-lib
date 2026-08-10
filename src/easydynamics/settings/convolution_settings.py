@@ -9,6 +9,27 @@ from easydynamics.utils.utils import Numeric
 class ConvolutionSettings(EasyDynamicsBase):
     """
     Settings for numerical convolutions.
+
+    These settings are passed to an ``Analysis`` to control how the numerical convolution is
+    performed. Increasing ``upsample_factor`` and ``extension_factor`` improves accuracy at the
+    cost of computation time.
+
+    Examples
+    --------
+    **Creating custom convolution settings and passing to an Analysis**
+
+    ```python
+    import easydynamics as edyn
+
+    settings = edyn.ConvolutionSettings(upsample_factor=10, extension_factor=0.5)
+    analysis = edyn.Analysis(convolution_settings=settings)
+    ```
+
+    **Suppressing warnings about peak widths**
+
+    ```python
+    settings = edyn.ConvolutionSettings(suppress_warnings=True)
+    ```
     """
 
     def __init__(
@@ -68,7 +89,10 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise TypeError('suppress_warnings must be True or False.')
         self._suppress_warnings = suppress_warnings
 
-        self._convolution_plan_is_valid = False
+        # Plan-invalidation bookkeeping for convolvers sharing this settings object.
+        # _plan_version is bumped whenever an accuracy knob changes; each convolver records
+        # the version it last rebuilt against and rebuilds when the versions differ.
+        self._plan_version = 0
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -102,7 +126,7 @@ class ConvolutionSettings(EasyDynamicsBase):
         """
         if factor is None:
             self._upsample_factor = factor
-            self.convolution_plan_is_valid = False
+            self._invalidate_plan()
             return
 
         if not isinstance(factor, Numeric):
@@ -113,7 +137,7 @@ class ConvolutionSettings(EasyDynamicsBase):
 
         self._upsample_factor = factor
 
-        self.convolution_plan_is_valid = False
+        self._invalidate_plan()
 
     @property
     def extension_factor(self) -> float:
@@ -158,38 +182,32 @@ class ConvolutionSettings(EasyDynamicsBase):
             raise ValueError('Extension factor must be non-negative.')
 
         self._extension_factor = float(factor)
-        self.convolution_plan_is_valid = False
+        self._invalidate_plan()
 
-    @property
-    def convolution_plan_is_valid(self) -> bool:
+    def _invalidate_plan(self) -> None:
         """
-        Get whether the convolution plan is valid.
+        Invalidate the convolution plan for every convolver sharing these settings.
+
+        Bumps the plan version, so every convolver that recorded an earlier version rebuilds its
+        plan before the next convolution.
+        """
+        self._plan_version += 1
+
+    def _plan_valid_for(self, seen_version: int) -> bool:
+        """
+        Check whether a convolver that last rebuilt at seen_version can skip rebuilding.
+
+        Parameters
+        ----------
+        seen_version : int
+            The plan version the convolver recorded when it last rebuilt its plan.
 
         Returns
         -------
         bool
-            Whether the convolution plan is valid.
+            True if no invalidation happened since the convolver's rebuild.
         """
-        return self._convolution_plan_is_valid
-
-    @convolution_plan_is_valid.setter
-    def convolution_plan_is_valid(self, is_valid: bool) -> None:
-        """
-        Set whether the convolution plan is valid.
-
-        Parameters
-        ----------
-        is_valid : bool
-            Whether the convolution plan is valid.
-
-        Raises
-        ------
-        TypeError
-            If is_valid is not a bool.
-        """
-        if not isinstance(is_valid, bool):
-            raise TypeError('convolution_plan_is_valid must be True or False.')
-        self._convolution_plan_is_valid = is_valid
+        return seen_version == self._plan_version
 
     @property
     def suppress_warnings(self) -> bool:
@@ -221,6 +239,22 @@ class ConvolutionSettings(EasyDynamicsBase):
         if not isinstance(suppress, bool):
             raise TypeError('suppress_warnings must be True or False.')
         self._suppress_warnings = suppress
+
+    def __copy__(self) -> 'ConvolutionSettings':
+        """
+        Return a shallow copy of the ConvolutionSettings.
+
+        Returns
+        -------
+        'ConvolutionSettings'
+            A new ConvolutionSettings instance with the same parameter values.
+        """
+        return ConvolutionSettings(
+            upsample_factor=self.upsample_factor,
+            extension_factor=self.extension_factor,
+            suppress_warnings=self.suppress_warnings,
+            display_name=self.display_name,
+        )
 
     def __repr__(self) -> str:
         """

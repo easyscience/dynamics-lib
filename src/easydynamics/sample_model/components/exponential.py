@@ -16,11 +16,35 @@ class Exponential(CreateParametersMixin, ModelComponent):
     r"""
     Model of an exponential function.
 
-    The intensity is given by
+    $$ I(x) = A e^{B (x-x_0)} $$
 
-    $$ I(x) = A e^{B (x-x_0)}, $$
+    where $A$ is the amplitude, $x_0$ is the center, and $B$ is the rate. amplitude has unit =
+    y_unit; center has unit = x_unit; rate has unit = 1/x_unit.
 
-    where $A$ is the amplitude, $x_0$ is the center, and $B$ describes the rate of decay or growth.
+    Examples
+    --------
+    **Creating an Exponential with a fixed center**
+
+    By default the center is fixed at 0. A negative ``rate`` gives a decaying exponential:
+    ```python
+    import numpy as np
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=1.0, rate=-0.5)
+    x = np.linspace(0, 5, 100)
+    values = exp.evaluate(x)
+    ```
+
+    **Creating an Exponential with a free center and modifying parameters**
+
+    Pass a numeric value for ``center`` to leave it free during fitting:
+    ```python
+    import easydynamics.sample_model as sm
+
+    exp = sm.Exponential(amplitude=2.0, center=1.0, rate=-1.0, name='Background')
+    exp.amplitude = 3.0
+    exp.rate = -0.5
+    ```
     """
 
     def __init__(
@@ -28,7 +52,8 @@ class Exponential(CreateParametersMixin, ModelComponent):
         amplitude: Numeric = 1.0,
         center: Numeric | None = None,
         rate: Numeric = 1.0,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         name: str = 'Exponential',
         display_name: str | None = None,
         unique_name: str | None = None,
@@ -39,61 +64,57 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Parameters
         ----------
         amplitude : Numeric, default=1.0
-            Amplitude of the Exponential.
+            Pre-exponential factor A.  Unit is ``y_unit``.
         center : Numeric | None, default=None
-            Center of the Exponential. If None, the center is fixed at 0.
+            Reference point x_0 in x_unit.  If None, defaults to 0 and the center parameter is
+            fixed.
         rate : Numeric, default=1.0
-            Decay or growth constant of the Exponential.
-        unit : str | sc.Unit, default='meV'
-            Unit of the parameters.
+            Exponential rate B in units of ``1/x_unit``.
+        x_unit : str | sc.Unit, default='meV'
+            Unit of the x-axis.  center is stored in this unit; rate is stored in ``1/x_unit``.
+        y_unit : str | sc.Unit, default='dimensionless'
+            Unit of the y-axis (output).  amplitude is stored in this unit.
         name : str, default='Exponential'
-            Name of the component for indexing.
+            Name of the component.
         display_name : str | None, default=None
-            Display name of the component.
+            Display name shown when plotting.  Falls back to *name* if None.
         unique_name : str | None, default=None
-            Unique name of the component. If None, a unique_name is automatically generated. By
-            default, None.
+            Globally unique identifier.  Auto-generated if None.
 
         Raises
         ------
         TypeError
-            If amplitude, center, or rate are not numbers or Parameters.
+            If *amplitude* or *rate* is not numeric.
         ValueError
-            If amplitude, center or rate are not finite numbers.
+            If *amplitude* or *rate* is not finite.
         """
-        # Validate inputs and create Parameters if not given
         super().__init__(
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             name=name,
             display_name=display_name,
             unique_name=unique_name,
         )
 
-        if not isinstance(amplitude, (Parameter, Numeric)):
-            raise TypeError('amplitude must be a number or a Parameter.')
+        x_unit_str = str(x_unit) if isinstance(x_unit, sc.Unit) else x_unit
 
-        if isinstance(amplitude, Numeric):
-            if not np.isfinite(amplitude):
-                raise ValueError('amplitude must be a finite number or a Parameter')
-
-            amplitude = Parameter(name=name + ' amplitude', value=float(amplitude), unit=unit)
-
-        center = self._create_center_parameter(
-            center=center, name=name, fix_if_none=True, unit=self._unit
+        if not isinstance(amplitude, Numeric):
+            raise TypeError('amplitude must be a number.')
+        if not np.isfinite(amplitude):
+            raise ValueError('amplitude must be finite.')
+        self._amplitude = Parameter(
+            name=name + ' amplitude', value=float(amplitude), unit=self.y_unit
         )
 
-        if not isinstance(rate, (Parameter, Numeric)):
-            raise TypeError('rate must be a number or a Parameter.')
+        self._center = self._create_center_parameter(
+            center=center, name=name, fix_if_none=True, x_unit=self.x_unit
+        )
 
-        if isinstance(rate, Numeric):
-            if not np.isfinite(rate):
-                raise ValueError('rate must be a finite number or a Parameter')
-
-            rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + str(unit))
-
-        self._amplitude = amplitude
-        self._center = center
-        self._rate = rate
+        if not isinstance(rate, Numeric):
+            raise TypeError('rate must be a number.')
+        if not np.isfinite(rate):
+            raise ValueError('rate must be finite.')
+        self._rate = Parameter(name=name + ' rate', value=float(rate), unit='1/' + x_unit_str)
 
     @property
     def amplitude(self) -> Parameter:
@@ -103,27 +124,23 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The amplitude parameter.
+            The amplitude Parameter with unit ``y_unit``.
         """
-
         return self._amplitude
 
     @amplitude.setter
     def amplitude(self, value: Numeric) -> None:
         """
-        Set the value of the amplitude parameter.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the amplitude parameter.
+            New amplitude value (in current amplitude unit = y_unit).
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
-
         if not isinstance(value, Numeric):
             raise TypeError('amplitude must be a number')
         self._amplitude.value = value
@@ -136,31 +153,27 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The center parameter.
+            The center (x_0) Parameter with unit ``x_unit``.
         """
-
         return self._center
 
     @center.setter
     def center(self, value: Numeric | None) -> None:
         """
-        Set the center parameter value.
-
         Parameters
         ----------
         value : Numeric | None
-            The new value for the center parameter.
+            New center value in x_unit.  If None, the center is set to 0 and the parameter is
+            fixed.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not None and not a numeric type.
         """
-
         if value is None:
             value = 0.0
             self._center.fixed = True
-
         if not isinstance(value, Numeric):
             raise TypeError('center must be a number')
         self._center.value = value
@@ -173,94 +186,86 @@ class Exponential(CreateParametersMixin, ModelComponent):
         Returns
         -------
         Parameter
-            The rate parameter.
+            The exponential rate (B) Parameter with unit ``1/x_unit``.
         """
         return self._rate
 
     @rate.setter
     def rate(self, value: Numeric) -> None:
         """
-        Set the rate parameter value.
-
         Parameters
         ----------
         value : Numeric
-            The new value for the rate parameter.
+            New exponential rate in ``1/x_unit``.
 
         Raises
         ------
         TypeError
-            If the value is not a number.
+            If *value* is not a numeric type.
         """
         if not isinstance(value, Numeric):
             raise TypeError('rate must be a number')
-
         self._rate.value = value
 
-    def evaluate(
-        self,
-        x: Numeric | list | np.ndarray | sc.Variable | sc.DataArray,
-    ) -> np.ndarray:
+    def _evaluate_values(self, x_vals: np.ndarray, eval_unit: str | None) -> np.ndarray:
         r"""
-        Evaluate the Exponential at the given x values.
+        Evaluate the Exponential at x_vals.
 
-        If x is a scipp Variable, the unit of the Exponential will be converted to match x. The
-        intensity is given by $$ I(x) = A \exp\left( r (x - x_0) \right) $$
-
-        where $A$ is the amplitude, $x_0$ is the center, and $r$ is the rate.
+        Parameters in the model's own units are temporarily converted to eval_unit for the
+        computation.
 
         Parameters
         ----------
-        x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
-            The x values at which to evaluate the Exponential.
+        x_vals : np.ndarray
+            Raw x values expressed in eval_unit.
+        eval_unit : str | None
+            The unit of x_vals.
 
         Returns
         -------
         np.ndarray
-            The intensity of the Exponential at the given x values.
+            Evaluated exponential values at x_vals.
         """
+        eval_rate_unit = None if eval_unit is None else '1/' + str(eval_unit)
 
-        x = self._prepare_x_for_evaluate(x)
-        exponent = self.rate.value * (x - self.center.value)
+        center = self._resolve_param_value(self._center, eval_unit)
+        rate = self._resolve_param_value(self._rate, eval_rate_unit)
+        # The amplitude carries y_unit only, so it is unaffected by the x evaluation unit.
+        amplitude = self._amplitude.value
 
-        return self.amplitude.value * np.exp(exponent)
+        exponent = rate * (x_vals - center)
+        return amplitude * np.exp(exponent)
 
-    def convert_unit(self, unit: str | sc.Unit) -> None:
+    def convert_x_unit(self, new_x_unit: str | sc.Unit) -> None:
         """
-        Convert the unit of the Parameters in the component.
+        Convert center to new_x_unit and rate to 1/new_x_unit.
+
+        The amplitude carries ``y_unit`` only and is unaffected.
 
         Parameters
         ----------
-        unit : str | sc.Unit
-            The new unit to convert to.
-
-        Raises
-        ------
-        TypeError
-            If unit is not a string or sc.Unit.
-        Exception
-            If conversion fails for any parameter.
+        new_x_unit : str | sc.Unit
+            Target x-axis unit.  Must be dimensionally compatible with the current x_unit.  The
+            rate unit is set to ``1/new_x_unit``.
         """
+        self._convert_x_unit_area_based(
+            new_x_unit=new_x_unit,
+            x_params=[self._center],
+            inverse_params=[self._rate],
+        )
 
-        if not isinstance(unit, (str, sc.Unit)):
-            raise TypeError('unit must be a string or sc.Unit')
+    def convert_y_unit(self, new_y_unit: str | sc.Unit) -> None:
+        """
+        Convert the y-axis unit by rescaling the amplitude parameter.
 
-        old_unit = self._unit
-        pars = [self.amplitude, self.center]
-        try:
-            for p in pars:
-                p.convert_unit(unit)
-            self.rate.convert_unit('1/' + str(unit))
-            self._unit = unit
-        except Exception as e:
-            # Attempt to rollback on failure
-            try:
-                for p in pars:
-                    p.convert_unit(old_unit)
-                self.rate.convert_unit('1/' + str(old_unit))
-            except Exception:  # noqa: S110
-                pass  # Best effort rollback
-            raise e
+        The amplitude is rescaled from ``old_y_unit`` to ``new_y_unit``.
+
+        Parameters
+        ----------
+        new_y_unit : str | sc.Unit
+            Target y-axis unit.
+        """
+        self._convert_y_unit_area_based(new_y_unit=new_y_unit, y_params=[self._amplitude])
 
     def __repr__(self) -> str:
         """
@@ -271,10 +276,9 @@ class Exponential(CreateParametersMixin, ModelComponent):
         str
             A string representation of the Exponential.
         """
-
         return (
-            f'Exponential(name = {self.name}, display_name = {self.display_name}, '
-            f'unit = {self._unit},\n '
+            f'{self.__class__.__name__}(name = {self.name}, display_name = {self.display_name}, '
+            f'x_unit = {self.x_unit}, y_unit = {self.y_unit},\n '
             f'    amplitude = {self.amplitude},\n '
             f'    center = {self.center},\n '
             f'    rate = {self.rate})'

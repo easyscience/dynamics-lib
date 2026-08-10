@@ -92,19 +92,28 @@ class TestAnalysisBase:
         assert analysis.detailed_balance_settings is detailed_balance_settings
 
     def test_init_extra_parameter(self):
+        # WHEN
         extra_parameter = Parameter(name='param1', value=1.0)
+
+        # THEN
         analysis = AnalysisBase(extra_parameters=extra_parameter)
+        # EXPECT
         assert analysis._extra_parameters == [extra_parameter]
 
     def test_init_extra_parameters(self):
+        # WHEN
         extra_parameters = [
             Parameter(name='param1', value=1.0),
             Parameter(name='param2', value=2.0),
         ]
+
+        # THEN
         analysis = AnalysisBase(extra_parameters=extra_parameters)
+        # EXPECT
         assert analysis._extra_parameters == extra_parameters
 
     def test_init_calls_on_experiment_changed(self):
+        # WHEN THEN EXPECT
         with patch.object(AnalysisBase, '_on_experiment_changed') as mock_on_experiment_changed:
             AnalysisBase()
             mock_on_experiment_changed.assert_called_once()
@@ -140,12 +149,12 @@ class TestAnalysisBase:
             (
                 {'extra_parameters': 123},
                 TypeError,
-                'extra_parameters must be a Parameter or a list of Parameters.',
+                'extra_parameters must be a Parameter, a list of Parameters, or None.',
             ),
             (
                 {'extra_parameters': [123]},
                 TypeError,
-                'extra_parameters must be a Parameter or a list of Parameters.',
+                'extra_parameters must be a Parameter, a list of Parameters, or None.',
             ),
         ],
         ids=[
@@ -159,74 +168,99 @@ class TestAnalysisBase:
         ],
     )
     def test_init_invalid_inputs(self, kwargs, expected_exception, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(expected_exception, match=expected_message):
             AnalysisBase(**kwargs)
 
     def test_experiment_setter_calls_on_experiment_changed(self, analysis_base):
+        # WHEN THEN EXPECT
         with patch.object(analysis_base, '_on_experiment_changed') as mock_on_experiment_changed:
             new_experiment = Experiment()
             analysis_base.experiment = new_experiment
             mock_on_experiment_changed.assert_called_once()
 
     def test_experiment_setter_invalid_type(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='experiment must be an instance of Experiment'):
             analysis_base.experiment = 'not an experiment'
 
     def test_experiment_setter_valid(self, analysis_base):
+        # WHEN
         new_experiment = Experiment()
         analysis_base.experiment = new_experiment
+        # THEN EXPECT
         assert analysis_base.experiment == new_experiment
 
     def test_sample_model_setter_invalid_type(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='sample_model must be an instance of SampleModel'):
             analysis_base.sample_model = 'not a sample model'
 
     def test_sample_model_setter_valid(self, analysis_base):
+        # WHEN
         new_sample_model = SampleModel()
+
+        # THEN
         analysis_base.sample_model = new_sample_model
+        # EXPECT
         assert analysis_base.sample_model == new_sample_model
 
     def test_sample_model_setter_calls_on_sample_model_changed(self, analysis_base):
+        # WHEN
+        new_sample_model = SampleModel()
         with patch.object(
             analysis_base, '_on_sample_model_changed'
         ) as mock_on_sample_model_changed:
-            new_sample_model = SampleModel()
+            # THEN
             analysis_base.sample_model = new_sample_model
+
+            # EXPECT
             mock_on_sample_model_changed.assert_called_once()
 
     def test_instrument_model_setter_invalid_type(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(
             TypeError, match='instrument_model must be an instance of InstrumentModel'
         ):
             analysis_base.instrument_model = 'not an instrument model'
 
     def test_instrument_model_setter_valid(self, analysis_base):
+        # WHEN
         new_instrument_model = InstrumentModel()
+
+        # THEN
         analysis_base.instrument_model = new_instrument_model
+
+        # EXPECT
         assert analysis_base.instrument_model == new_instrument_model
 
     def test_instrument_model_setter_calls_on_instrument_model_changed(self, analysis_base):
+        # WHEN
+        new_instrument_model = InstrumentModel()
         with patch.object(
             analysis_base, '_on_instrument_model_changed'
         ) as mock_on_instrument_model_changed:
-            new_instrument_model = InstrumentModel()
+            # THEN
             analysis_base.instrument_model = new_instrument_model
+
+            # EXPECT
             mock_on_instrument_model_changed.assert_called_once()
 
     def test_Q_property(self, analysis_base):
-        # Create a mock Q value
+        # WHEN
         fake_Q = [1, 2, 3]
-
-        # Patch the 'experiment' attribute's Q property
         with patch.object(
             type(analysis_base.experiment), 'Q', new_callable=PropertyMock
         ) as mock_Q:
             mock_Q.return_value = fake_Q
-            result = analysis_base.Q  # Access the property
+            # THEN
+            result = analysis_base.Q
+            # EXPECT
             assert result == fake_Q
             mock_Q.assert_called_once()
 
     def test_Q_setter_raises(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
             match=r'Q is a read-only property derived from the Experiment.',
@@ -234,19 +268,20 @@ class TestAnalysisBase:
             analysis_base.Q = [1, 2, 3]
 
     def test_energy_property(self, analysis_base):
-        # Create a mock energy value
+        # WHEN
         fake_energy = [10, 20, 30]
-
-        # Patch the 'experiment' attribute's energy property
         with patch.object(
             type(analysis_base.experiment), 'energy', new_callable=PropertyMock
         ) as mock_energy:
             mock_energy.return_value = fake_energy
-            result = analysis_base.energy  # Access the property
+            # THEN
+            result = analysis_base.energy
+            # EXPECT
             assert result == fake_energy
             mock_energy.assert_called_once()
 
     def test_energy_setter_raises(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
             match=r'energy is a read-only property derived from the Experiment.',
@@ -254,30 +289,32 @@ class TestAnalysisBase:
             analysis_base.energy = [10, 20, 30]
 
     def test_temperature_property_no_temperature(self, analysis_base):
-        # Patch the 'experiment' attribute's temperature property to
-        # return None
+        # WHEN
         with patch.object(
             type(analysis_base.sample_model), 'temperature', new_callable=PropertyMock
         ) as mock_temperature:
             mock_temperature.return_value = None
-            result = analysis_base.temperature  # Access the property
+            # THEN
+            result = analysis_base.temperature
+            # EXPECT
             assert result is None
             mock_temperature.assert_called_once()
 
     def test_temperature_property(self, analysis_base):
-        # Create a mock temperature value
+        # WHEN
         fake_temperature = 300
-
-        # Patch the 'sample_model' attribute's temperature property
         with patch.object(
             type(analysis_base.sample_model), 'temperature', new_callable=PropertyMock
         ) as mock_temperature:
             mock_temperature.return_value = fake_temperature
-            result = analysis_base.temperature  # Access the property
+            # THEN
+            result = analysis_base.temperature
+            # EXPECT
             assert result == fake_temperature
             mock_temperature.assert_called_once()
 
     def test_temperature_setter_raises(self, analysis_base):
+        # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
             match='temperature is a read-only property',
@@ -381,6 +418,7 @@ class TestAnalysisBase:
         ],
     )
     def test_extra_parameters_setter_invalid_type(self, analysis_base, invalid_extra_parameters):
+        # WHEN THEN EXPECT
         with pytest.raises(
             TypeError,
             match='extra_parameters must be',
@@ -392,6 +430,7 @@ class TestAnalysisBase:
     #############
 
     def test_normalize_resolution_calls_instrument_model(self, analysis_base):
+        # WHEN THEN EXPECT
         with patch.object(
             analysis_base.instrument_model, 'normalize_resolution'
         ) as mock_normalize_resolution:
@@ -458,12 +497,13 @@ class TestAnalysisBase:
     def test_get_parameters_near_bounds_errors(
         self, analysis_base_with_components, rtol, atol, expected_param, expected_error
     ):
+        # WHEN THEN
         with pytest.raises(expected_error) as exc:
             analysis_base_with_components.get_parameters_near_bounds(
                 rtol=rtol,
                 atol=atol,
             )
-
+        # EXPECT
         assert expected_param in str(exc.value)
 
     def test_not_finite_parameters(self, analysis_base_with_components):
@@ -499,10 +539,9 @@ class TestAnalysisBase:
             analysis_base._on_experiment_changed()
 
             # EXPECT
-            # assert that the Q attribute was set
             np.testing.assert_array_equal(analysis_base.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_on_sample_model_changed_updates_Q(self, analysis_base):
         # WHEN
@@ -518,37 +557,19 @@ class TestAnalysisBase:
             analysis_base._on_sample_model_changed()
 
             # EXPECT
-            np.testing.assert_array_equal(analysis_base.sample_model.Q, fake_Q)
+            np.testing.assert_array_equal(analysis_base.sample_model.Q.values, fake_Q)
 
     def test_on_instrument_model_changed_updates_Q(self, analysis_base):
+        # WHEN
         fake_Q = [1, 2, 3]
-
-        # Patch the Q property of analysis_base
         with patch.object(
             type(analysis_base.experiment), 'Q', new_callable=PropertyMock
         ) as mock_Q:
             mock_Q.return_value = fake_Q
-
+            # THEN
             analysis_base._on_instrument_model_changed()
-            np.testing.assert_array_equal(analysis_base.instrument_model.Q, fake_Q)
-
-    def test_verify_Q_index_valid(self, analysis_base):
-        # WHEN
-        valid_Q_index = 0
-
-        # THEN
-        result = analysis_base._verify_Q_index(valid_Q_index)
-
-        # EXPECT
-        assert result == valid_Q_index
-
-    def test_verify_Q_index_invalid(self, analysis_base):
-        # WHEN
-        invalid_Q_index = -1
-
-        # THEN / EXPECT
-        with pytest.raises(IndexError, match='Q_index must be a valid index'):
-            analysis_base._verify_Q_index(invalid_Q_index)
+            # EXPECT
+            np.testing.assert_array_equal(analysis_base.instrument_model.Q.values, fake_Q)
 
     def test_repr(self, analysis_base):
         # WHEN
@@ -556,5 +577,5 @@ class TestAnalysisBase:
 
         # THEN EXPECT
         assert 'AnalysisBase' in repr_str
-        assert 'display_name=TestAnalysis' in repr_str
+        assert "display_name='TestAnalysis'" in repr_str
         assert 'unique_name=' in repr_str

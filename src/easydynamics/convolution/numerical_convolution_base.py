@@ -43,7 +43,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         temperature: Parameter | Numeric | None = None,
         temperature_unit: str | sc.Unit = 'K',
         detailed_balance_settings: DetailedBalanceSettings | None = None,
-        unit: str | sc.Unit = 'meV',
+        x_unit: str | sc.Unit = 'meV',
+        y_unit: str | sc.Unit = 'dimensionless',
         display_name: str | None = 'MyConvolution',
         unique_name: str | None = None,
     ) -> None:
@@ -68,8 +69,10 @@ class NumericalConvolutionBase(ConvolutionBase):
             The unit of the temperature parameter.
         detailed_balance_settings : DetailedBalanceSettings | None, default=None
             The settings for detailed balance. If None, default settings will be used.
-        unit : str | sc.Unit, default='meV'
-            The unit of the energy.
+        x_unit : str | sc.Unit, default='meV'
+            The unit of the energy axis.
+        y_unit : str | sc.Unit, default='dimensionless'
+            The unit of the model output (intensity).
         display_name : str | None, default='MyConvolution'
             Display name of the model.
         unique_name : str | None, default=None
@@ -85,7 +88,8 @@ class NumericalConvolutionBase(ConvolutionBase):
             energy=energy,
             sample_components=sample_components,
             resolution_components=resolution_components,
-            unit=unit,
+            x_unit=x_unit,
+            y_unit=y_unit,
             energy_offset=energy_offset,
             display_name=display_name,
             unique_name=unique_name,
@@ -116,6 +120,30 @@ class NumericalConvolutionBase(ConvolutionBase):
         # When upsample_factor>1, we evaluate on this grid and
         # interpolate back to the original values at the end
         self._energy_grid = self._create_energy_grid()
+        self._mark_convolution_plan_current()
+
+    def _convolution_plan_is_current(self) -> bool:
+        """
+        Check whether this convolver's plan is up to date.
+
+        Plan validity is tracked per convolver so several convolvers can share one
+        ConvolutionSettings object: each convolver stores the settings' plan version it last
+        rebuilt against (None after a convolver-local invalidation such as a new energy grid), and
+        the settings bump their version whenever an accuracy knob changes.
+
+        Returns
+        -------
+        bool
+            True if the plan does not need to be rebuilt.
+        """
+        seen_version = getattr(self, '_plan_seen_version', None)
+        if seen_version is None:
+            return False
+        return self.convolution_settings._plan_valid_for(seen_version)  # noqa: SLF001
+
+    def _mark_convolution_plan_current(self) -> None:
+        """Record that this convolver's plan matches its current state and settings."""
+        self._plan_seen_version = self.convolution_settings._plan_version  # noqa: SLF001
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -148,12 +176,17 @@ class NumericalConvolutionBase(ConvolutionBase):
         if not isinstance(settings, ConvolutionSettings):
             raise TypeError('settings must be a ConvolutionSettings instance.')
         self._convolution_settings = settings
-        self._convolution_settings.convolution_plan_is_valid = False
+        # Convolver-local invalidation: other convolvers sharing the new settings object are
+        # unaffected.
+        self._plan_seen_version = None
 
     @ConvolutionBase.energy.setter
     def energy(self, energy: np.ndarray) -> None:
         """
-        Set the energy array and recreate the dense grid.
+        Set the energy array and invalidate this convolver's plan.
+
+        The dense grid is rebuilt lazily on the next convolution. Other convolvers sharing the same
+        ConvolutionSettings are unaffected — a new energy array is a convolver-local change.
 
         Parameters
         ----------
@@ -161,7 +194,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             The new energy array.
         """
         ConvolutionBase.energy.fset(self, energy)
-        self.convolution_settings.convolution_plan_is_valid = False
+        self._plan_seen_version = None
 
     @property
     def upsample_factor(self) -> Numeric | None:
@@ -179,30 +212,13 @@ class NumericalConvolutionBase(ConvolutionBase):
     @upsample_factor.setter
     def upsample_factor(self, factor: Numeric | None) -> None:
         """
-        Set the upsample factor and recreate the dense grid.
+        Set the upsample factor.
 
         Parameters
         ----------
         factor : Numeric | None
             The new upsample factor.
-
-        Raises
-        ------
-        TypeError
-            If factor is not a number or None.
-        ValueError
-            If factor is not greater than 1.
         """
-        if factor is None:
-            self.convolution_settings.upsample_factor = factor
-            return
-
-        if not isinstance(factor, Numeric):
-            raise TypeError('Upsample factor must be a numerical value or None.')
-        factor = float(factor)
-        if factor <= 1.0:
-            raise ValueError('Upsample factor must be greater than 1.')
-
         self.convolution_settings.upsample_factor = factor
 
     @property
@@ -224,7 +240,7 @@ class NumericalConvolutionBase(ConvolutionBase):
     @extension_factor.setter
     def extension_factor(self, factor: Numeric) -> None:
         """
-        Set the extension factor and recreate the dense grid.
+        Set the extension factor.
 
         The extension factor determines how much the energy range is extended on both sides before
         convolution. 0.2 means extending by 20% of the original energy span on each side.
@@ -233,21 +249,8 @@ class NumericalConvolutionBase(ConvolutionBase):
         ----------
         factor : Numeric
             The new extension factor.
-
-        Raises
-        ------
-        TypeError
-            If factor is not a number.
-        ValueError
-            If factor is negative.
         """
-
-        if not isinstance(factor, Numeric):
-            raise TypeError('Extension factor must be a number.')
-        if factor < 0.0:
-            raise ValueError('Extension factor must be non-negative.')
-
-        self.convolution_settings.extension_factor = float(factor)
+        self.convolution_settings.extension_factor = factor
 
     @property
     def temperature(self) -> Parameter | None:
@@ -361,6 +364,10 @@ class NumericalConvolutionBase(ConvolutionBase):
 
             energy_span_dense = self.energy.values.max() - self.energy.values.min()
         else:
+            if self.extension_factor is None:
+                raise ValueError(
+                    'extension_factor must be a number (not None) when upsample_factor is set.'
+                )
             # Create an extended and upsampled energy grid
             energy_min, energy_max = self.energy.values.min(), self.energy.values.max()
             energy_span_original = energy_max - energy_min
@@ -397,16 +404,13 @@ class NumericalConvolutionBase(ConvolutionBase):
         else:
             energy_dense_centered = energy_dense
 
-        energy_grid = EnergyGrid(
+        return EnergyGrid(
             energy_dense=energy_dense,
             energy_dense_centered=energy_dense_centered,
             energy_dense_step=energy_dense_step,
             energy_span_dense=energy_span_dense,
             energy_even_length_offset=energy_even_length_offset,
         )
-        self._energy_grid = energy_grid
-        self.convolution_settings.convolution_plan_is_valid = True
-        return energy_grid
 
     def _check_width_thresholds(
         self,
@@ -472,7 +476,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             f'energy=array of shape {self.energy.values.shape},\n '
             f'sample_components={self.sample_components!r}, \n'
             f'resolution_components={self.resolution_components!r},\n '
-            f'unit={self.unit}, '
+            f'x_unit={self.x_unit}, y_unit={self.y_unit}, '
             f'upsample_factor={self.upsample_factor}, '
             f'extension_factor={self.extension_factor}, '
             f'temperature={self.temperature}, '

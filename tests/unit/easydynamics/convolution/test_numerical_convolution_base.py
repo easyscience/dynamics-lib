@@ -48,7 +48,8 @@ class TestNumericalConvolutionBase:
         assert default_numerical_convolution_base.upsample_factor == 5
         assert default_numerical_convolution_base.extension_factor == pytest.approx(0.2)
         assert default_numerical_convolution_base.temperature is None
-        assert default_numerical_convolution_base.unit == 'meV'
+        assert default_numerical_convolution_base.x_unit == 'meV'
+        assert default_numerical_convolution_base.y_unit == 'dimensionless'
         assert (
             default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is True
@@ -79,7 +80,7 @@ class TestNumericalConvolutionBase:
             detailed_balance_settings=detailed_balance_settings,
             temperature=temperature,
             temperature_unit=temperature_unit,
-            unit=unit,
+            x_unit=unit,
         )
 
         # EXPECT
@@ -87,7 +88,8 @@ class TestNumericalConvolutionBase:
         assert numerical_convolution_base.extension_factor == pytest.approx(0.5)
         assert numerical_convolution_base.temperature.value == temperature
         assert numerical_convolution_base.temperature.unit == temperature_unit
-        assert numerical_convolution_base.unit == unit
+        assert numerical_convolution_base.x_unit == unit
+        assert numerical_convolution_base.y_unit == 'dimensionless'
         assert (
             numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance
             is False
@@ -161,15 +163,14 @@ class TestNumericalConvolutionBase:
         assert isinstance(default_numerical_convolution_base.energy, sc.Variable)
         assert np.allclose(default_numerical_convolution_base.energy.values, new_energy)
 
-        # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        # EXPECT: this convolver's plan is invalidated
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # THEN
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT
         assert default_numerical_convolution_base._energy_grid.energy_dense.shape[0] == round(
@@ -198,13 +199,12 @@ class TestNumericalConvolutionBase:
         default_numerical_convolution_base.upsample_factor = new_upsample_factor
 
         # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT: correct factor + grid size
         assert default_numerical_convolution_base.upsample_factor == new_upsample_factor
@@ -250,14 +250,13 @@ class TestNumericalConvolutionBase:
         default_numerical_convolution_base.extension_factor = new_extension_factor
 
         # EXPECT: plan invalidated
-        assert (
-            default_numerical_convolution_base.convolution_settings.convolution_plan_is_valid
-            is False
-        )
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
 
         # THEN
         # Force regeneration of energy grid
-        default_numerical_convolution_base._create_energy_grid()
+        default_numerical_convolution_base._energy_grid = (
+            default_numerical_convolution_base._create_energy_grid()
+        )
 
         # EXPECT
         assert default_numerical_convolution_base.extension_factor == new_extension_factor
@@ -403,14 +402,16 @@ class TestNumericalConvolutionBase:
         new_settings = ConvolutionSettings()
 
         # WHEN
-        new_settings.convolution_plan_is_valid = True
+        version_before = new_settings._plan_version
 
         # THEN
         default_numerical_convolution_base.convolution_settings = new_settings
 
-        # EXPECT
+        # EXPECT: the convolver's own plan is invalidated, but the new settings object is
+        # untouched — other convolvers sharing it are unaffected.
         assert default_numerical_convolution_base.convolution_settings is new_settings
-        assert new_settings.convolution_plan_is_valid is False
+        assert default_numerical_convolution_base._convolution_plan_is_current() is False
+        assert new_settings._plan_version == version_before
 
     @pytest.mark.parametrize(
         'value, expected_exception, match',
@@ -483,9 +484,11 @@ class TestNumericalConvolutionBase:
         and non-uniform energy raises ValueError (the energy grid must
         always be uniform).
         """
-        # WHEN
+        # WHEN: non-uniform energy with upsample_factor=None
         default_numerical_convolution_base.energy = np.array([0, 1, 3, 6, 10])
         default_numerical_convolution_base.upsample_factor = None
+
+        # THEN EXPECT
         with pytest.raises(
             ValueError,
             match='Input array `energy` must be uniformly spaced if upsample_factor is not given',
@@ -637,8 +640,20 @@ class TestNumericalConvolutionBase:
         assert 'resolution_components=' in repr_str
 
         # Important parameters
-        assert 'unit=meV' in repr_str
+        assert 'x_unit=meV' in repr_str
         assert 'upsample_factor=5' in repr_str
         assert 'extension_factor=0.2' in repr_str
         assert 'temperature=None' in repr_str
         assert 'normalize_detailed_balance=True' in repr_str
+
+
+def test_create_energy_grid_raises_when_extension_factor_none_with_upsampling():
+    # GIVEN upsampling enabled but no extension_factor, the dense energy grid cannot be built
+    # WHEN THEN EXPECT (the grid is built eagerly during construction)
+    with pytest.raises(ValueError, match=r'extension_factor must be a number'):
+        NumericalConvolutionBase(
+            energy=np.linspace(-10, 10, 101),
+            sample_components=ComponentCollection(display_name='ComponentCollection'),
+            resolution_components=ComponentCollection(display_name='ResolutionModel'),
+            convolution_settings=ConvolutionSettings(upsample_factor=5, extension_factor=None),
+        )

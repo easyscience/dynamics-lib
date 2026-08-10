@@ -3,7 +3,9 @@
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable.parameter import Parameter
+from scipp import UnitError
 
 from easydynamics.sample_model.diffusion_model.diffusion_model_base import DiffusionModelBase
 
@@ -19,7 +21,10 @@ class TestDiffusionModelBase:
         assert diffusion_model.name == 'DiffusionModel'
         assert diffusion_model.lorentzian_name == 'DiffusionModel'
         assert diffusion_model.lorentzian_display_name == 'DiffusionModel'
-        assert diffusion_model.unit == 'meV'
+        assert diffusion_model.x_unit == 'meV'
+        assert diffusion_model.y_unit == 'dimensionless'
+        # scale.unit = area_unit = x_unit * y_unit = meV * dimensionless = meV
+        assert diffusion_model.scale.unit == 'meV'
 
     def test_init_raises(self):
         # WHEN THEN EXPECT
@@ -29,13 +34,66 @@ class TestDiffusionModelBase:
         with pytest.raises(TypeError, match=r'lorentzian_display_name must be a string or None'):
             DiffusionModelBase(lorentzian_display_name=123)
 
-    def test_unit_setter_raises(self, diffusion_model):
+    def test_x_unit_setter_raises(self, diffusion_model):
         # WHEN THEN EXPECT
         with pytest.raises(
             AttributeError,
-            match=r'Unit is read-only. Use convert_unit to change the unit between allowed types',
+            match=r'read-only',
         ):
-            diffusion_model.unit = 'eV'
+            diffusion_model.x_unit = 'eV'
+
+    def test_y_unit_setter_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError, match=r'read-only'):
+            diffusion_model.y_unit = '1/meV'
+
+    def test_init_accepts_scipp_units(self):
+        # WHEN THEN
+        model = DiffusionModelBase(x_unit=sc.Unit('meV'), y_unit=sc.Unit('1/meV'))
+
+        # EXPECT: scale.unit = x_unit * y_unit = dimensionless
+        assert str(model.x_unit) == 'meV'
+        assert sc.Unit(str(model.scale.unit)) == sc.Unit('dimensionless')
+
+    def test_convert_x_unit(self, diffusion_model):
+        # WHEN THEN
+        diffusion_model.convert_x_unit('ueV')
+
+        # EXPECT: x_unit and the scale unit (x_unit * y_unit) follow
+        assert sc.Unit(diffusion_model.x_unit) == sc.Unit('ueV')
+        assert sc.Unit(str(diffusion_model.scale.unit)) == sc.Unit('ueV')
+
+    def test_convert_x_unit_invalid_type_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc.Unit'):
+            diffusion_model.convert_x_unit(123)
+
+    @pytest.mark.parametrize('unit', ['m', '1/ps'], ids=['length', 'frequency'])
+    def test_convert_x_unit_non_energy_raises(self, diffusion_model, unit):
+        # WHEN THEN EXPECT: only energy axes are supported for now
+        with pytest.raises(UnitError, match=r'convertible to meV'):
+            diffusion_model.convert_x_unit(unit)
+
+    def test_convert_y_unit(self):
+        # WHEN
+        model = DiffusionModelBase(y_unit='1/meV')
+
+        # THEN
+        model.convert_y_unit('1/eV')
+
+        # EXPECT: y_unit and the scale unit follow (meV * 1/eV)
+        assert sc.Unit(model.y_unit) == sc.Unit('1/eV')
+        assert sc.Unit(str(model.scale.unit)) == sc.Unit('meV/eV')
+
+    def test_convert_y_unit_invalid_type_raises(self, diffusion_model):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'y_unit must be a string or sc.Unit'):
+            diffusion_model.convert_y_unit(123)
+
+    def test_convert_y_unit_incompatible_raises(self, diffusion_model):
+        # WHEN THEN EXPECT: dimensionless -> K changes the dimension of the scale unit
+        with pytest.raises(UnitError):
+            diffusion_model.convert_y_unit('K')
 
     @pytest.mark.parametrize(
         ('attribute', 'value', 'expected'),
@@ -131,7 +189,9 @@ class TestDiffusionModelBase:
         diffusion_model.Q = [1.0, 2.0, 3.0]
 
         # EXPECT
-        np.testing.assert_allclose(diffusion_model.Q, [1.0, 2.0, 3.0])
+        assert isinstance(diffusion_model.Q, sc.Variable)
+        assert diffusion_model.Q.unit == sc.Unit('1/angstrom')
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0, 3.0])
 
         # THEN EXPECT
         with pytest.raises(ValueError, match=r'New Q values are not similar to the old ones'):
@@ -147,13 +207,24 @@ class TestDiffusionModelBase:
         # EXPECT
         assert diffusion_model.Q is None
 
+    def test_Q_setter_accepts_equivalent_scipp_Q_in_other_unit(self, diffusion_model):
+        # WHEN
+        diffusion_model.Q = [1.0, 2.0, 3.0]
+
+        # THEN: the same Q in 1/nm is equivalent after conversion, so no error is raised
+        diffusion_model.Q = sc.Variable(dims=['Q'], values=[10.0, 20.0, 30.0], unit='1/nm')
+
+        # EXPECT
+        np.testing.assert_allclose(diffusion_model.Q.values, [1.0, 2.0, 3.0])
+
     def test_repr(self, diffusion_model):
         # WHEN THEN
         repr_str = repr(diffusion_model)
 
         # EXPECT
         assert 'DiffusionModelBase' in repr_str
-        assert 'unit=meV' in repr_str
+        # Regression: a stray ')' used to mangle this into 'x_unit=meV), y_unit=...'
+        assert 'x_unit=meV, y_unit=dimensionless' in repr_str
 
     def test_get_independent_variables(self, diffusion_model):
         # WHEN THEN EXPECT
@@ -163,29 +234,34 @@ class TestDiffusionModelBase:
         assert independent_vars == []
 
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError, 'Q_index must be non-negative'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
-            'index too large',
             'non-integer index',
         ],
     )
-    def test_get_independent_variables_raises(self, diffusion_model, Q_index):
+    def test_get_independent_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_independent_variables(Q_index=Q_index)
 
+    def test_get_independent_variables_deferred_when_Q_is_none(self, diffusion_model):
+        # WHEN: Q is None, so the upper-bound check on Q_index is deferred
+        # THEN EXPECT: no exception, and no independent variables
+        assert diffusion_model.get_independent_variables(Q_index=100) == []
+
     @pytest.mark.parametrize(
-        'Q_index',
+        ('Q_index', 'expected_exception', 'expected_message'),
         [
-            -1,
-            100,
-            'string',
+            (-1, IndexError, 'Q_index must be non-negative'),
+            (100, IndexError, 'out of range'),
+            ('string', TypeError, 'Q_index must be an int or None, got str'),
         ],
         ids=[
             'negative index',
@@ -193,9 +269,11 @@ class TestDiffusionModelBase:
             'non-integer index',
         ],
     )
-    def test_get_all_variables_raises(self, diffusion_model, Q_index):
+    def test_get_all_variables_raises(
+        self, diffusion_model, Q_index, expected_exception, expected_message
+    ):
         # WHEN THEN EXPECT
-        with pytest.raises(ValueError, match=r'Q_index must be an integer between 0 and'):
+        with pytest.raises(expected_exception, match=expected_message):
             diffusion_model.get_all_variables(Q_index=Q_index)
 
     def test_create_component_collections_no_Q(self, diffusion_model):
@@ -276,3 +354,22 @@ class TestDiffusionModelBase:
 
         # EXPECT
         np.testing.assert_allclose(Q, [1.0, 2.0])
+
+
+def test_get_fit_targets_declares_area_and_width():
+    # GIVEN a diffusion model
+    model = DiffusionModelBase(lorentzian_name='Lorentzian')
+    # WHEN
+    targets = model.get_fit_targets()
+    # EXPECT area and width predictions with keys derived from the Lorentzian name
+    assert [t.name for t in targets] == ['area', 'width']
+    assert targets[0].dataset_key == 'Lorentzian area'
+    assert targets[1].dataset_key == 'Lorentzian width'
+
+
+def test_match_Q_indices_raises_when_Q_not_set():
+    # GIVEN a diffusion model with no Q set
+    model = DiffusionModelBase()
+    # WHEN THEN EXPECT
+    with pytest.raises(ValueError, match=r'Q must be set in the model'):
+        model._match_Q_indices(np.array([1.0]))

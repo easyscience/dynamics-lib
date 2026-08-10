@@ -91,6 +91,7 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
     def append(self, value: ProtectedType_) -> None:
         """
         Append an item to the end of the list.
+
         Parameters
         ----------
         value : ProtectedType_

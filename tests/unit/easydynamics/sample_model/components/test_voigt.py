@@ -5,7 +5,9 @@ from copy import copy
 
 import numpy as np
 import pytest
+import scipp as sc
 from easyscience.variable import Parameter
+from scipp import UnitError
 from scipy.integrate import simpson
 from scipy.special import voigt_profile
 
@@ -22,7 +24,7 @@ class TestVoigt:
             center=0.5,
             gaussian_width=0.6,
             lorentzian_width=0.7,
-            unit='meV',
+            x_unit='meV',
         )
 
     def test_init_no_inputs(self):
@@ -35,7 +37,8 @@ class TestVoigt:
         assert voigt.center.value == pytest.approx(0.0)
         assert voigt.gaussian_width.value == pytest.approx(1.0)
         assert voigt.lorentzian_width.value == pytest.approx(1.0)
-        assert voigt.unit == 'meV'
+        assert voigt.x_unit == 'meV'
+        assert voigt.y_unit == 'dimensionless'
         assert voigt.center.fixed is True
 
     def test_initialization(self, voigt: Voigt):
@@ -45,7 +48,7 @@ class TestVoigt:
         assert voigt.center.value == pytest.approx(0.5)
         assert voigt.gaussian_width.value == pytest.approx(0.6)
         assert voigt.lorentzian_width.value == pytest.approx(0.7)
-        assert voigt.unit == 'meV'
+        assert voigt.x_unit == 'meV'
 
     @pytest.mark.parametrize(
         'kwargs, expected_message',
@@ -56,7 +59,7 @@ class TestVoigt:
                     'center': 0.5,
                     'gaussian_width': 0.6,
                     'lorentzian_width': 0.7,
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                 },
                 'area must be a number',
             ),
@@ -66,7 +69,7 @@ class TestVoigt:
                     'center': 'invalid',
                     'gaussian_width': 0.6,
                     'lorentzian_width': 0.7,
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                 },
                 'center must be None',
             ),
@@ -76,7 +79,7 @@ class TestVoigt:
                     'center': 0.5,
                     'gaussian_width': 'invalid',
                     'lorentzian_width': 0.7,
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                 },
                 'gaussian_width must be a number',
             ),
@@ -86,7 +89,7 @@ class TestVoigt:
                     'center': 0.5,
                     'gaussian_width': 0.6,
                     'lorentzian_width': 'invalid',
-                    'unit': 'meV',
+                    'x_unit': 'meV',
                 },
                 'lorentzian_width must be a number',
             ),
@@ -96,13 +99,25 @@ class TestVoigt:
                     'center': 0.5,
                     'gaussian_width': 0.6,
                     'lorentzian_width': 0.7,
-                    'unit': 123,
+                    'x_unit': 123,
                 },
-                'unit must be None,',
+                'unit must be None, a string',
+            ),
+            (
+                {
+                    'area': 2.0,
+                    'center': 0.5,
+                    'gaussian_width': 0.6,
+                    'lorentzian_width': 0.7,
+                    'x_unit': 'meV',
+                    'y_unit': 123,
+                },
+                'unit must be None, a string',
             ),
         ],
     )
     def test_input_type_validation_raises(self, kwargs, expected_message):
+        # WHEN THEN EXPECT
         with pytest.raises(TypeError, match=expected_message):
             Voigt(display_name='TestVoigt', **kwargs)
 
@@ -117,7 +132,7 @@ class TestVoigt:
                 center=0.5,
                 gaussian_width=-0.6,
                 lorentzian_width=0.7,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_lorentzian_width_raises(self):
@@ -132,7 +147,7 @@ class TestVoigt:
                 center=0.5,
                 gaussian_width=0.6,
                 lorentzian_width=-0.7,
-                unit='meV',
+                x_unit='meV',
             )
 
     def test_negative_area_warns(self):
@@ -144,7 +159,7 @@ class TestVoigt:
                 center=0.5,
                 gaussian_width=0.6,
                 lorentzian_width=0.7,
-                unit='meV',
+                x_unit='meV',
             )
 
     @pytest.mark.parametrize(
@@ -164,11 +179,12 @@ class TestVoigt:
     def test_property_setters(
         self, voigt: Voigt, prop, valid_value, invalid_value, invalid_message
     ):
-        # set valid
+        # WHEN: set a valid value
         setattr(voigt, prop, valid_value)
+        # THEN EXPECT
         assert getattr(voigt, prop).value == valid_value
 
-        # invalid
+        # WHEN: set an invalid value — THEN EXPECT
         with pytest.raises(TypeError, match=invalid_message):
             setattr(voigt, prop, invalid_value)
 
@@ -214,19 +230,19 @@ class TestVoigt:
             center=None,
             gaussian_width=0.6,
             lorentzian_width=0.7,
-            unit='meV',
+            x_unit='meV',
         )
 
         # EXPECT
         assert test_voigt.center.value == pytest.approx(0.0)
         assert test_voigt.center.fixed is True
 
-    def test_convert_unit(self, voigt: Voigt):
+    def test_convert_x_unit(self, voigt: Voigt):
         # WHEN THEN
-        voigt.convert_unit('microeV')
+        voigt.convert_x_unit('microeV')
 
         # EXPECT
-        assert voigt.unit == 'microeV'
+        assert voigt.x_unit == 'microeV'
         assert voigt.area.value == pytest.approx(2 * 1e3)
         assert voigt.center.value == pytest.approx(0.5 * 1e3)
         assert voigt.gaussian_width.value == pytest.approx(0.6 * 1e3)
@@ -285,7 +301,7 @@ class TestVoigt:
         assert voigt_copy.lorentzian_width.value == voigt.lorentzian_width.value
         assert voigt_copy.lorentzian_width.fixed == voigt.lorentzian_width.fixed
 
-        assert voigt_copy.unit == voigt.unit
+        assert voigt_copy.x_unit == voigt.x_unit
 
     def test_repr(self, voigt: Voigt):
         # WHEN THEN
@@ -294,8 +310,101 @@ class TestVoigt:
         # EXPECT
         assert 'Voigt' in repr_str
         assert 'name = VoigtName' in repr_str
-        assert 'unit = meV' in repr_str
+        assert 'x_unit = meV' in repr_str
         assert 'area =' in repr_str
         assert 'center =' in repr_str
         assert 'gaussian_width =' in repr_str
         assert 'lorentzian_width =' in repr_str
+
+    def test_y_unit_custom(self):
+        # WHEN THEN
+        voigt = Voigt(
+            area=1.0,
+            center=0.0,
+            gaussian_width=0.5,
+            lorentzian_width=0.3,
+            x_unit='meV',
+            y_unit='1/meV',
+        )
+        # EXPECT
+        assert voigt.y_unit == '1/meV'
+
+    def test_y_unit_setter_raises(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        with pytest.raises(AttributeError):
+            voigt.y_unit = '1/meV'
+
+    def test_convert_y_unit(self):
+        # WHEN: x_unit='meV', y_unit='1/meV' → area_unit='dimensionless'
+        voigt = Voigt(
+            area=1.0,
+            center=0.0,
+            gaussian_width=0.5,
+            lorentzian_width=0.3,
+            x_unit='meV',
+            y_unit='1/meV',
+        )
+        # THEN: convert y_unit to '1/eV' (same dimension, different scale)
+        voigt.convert_y_unit('1/eV')
+        # EXPECT: y_unit updated and area value rescaled (1e3 factor)
+        assert voigt.y_unit == '1/eV'
+        assert voigt.area.value == pytest.approx(1e3)
+
+    def test_convert_y_unit_invalid_type_raises(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError):
+            voigt.convert_y_unit(123)
+
+    def test_evaluate_scipp_output(self, voigt: Voigt):
+        # WHEN
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = voigt.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('dimensionless')
+        assert len(result.values) == 50
+        np.testing.assert_allclose(result.values, voigt.evaluate(x, output='numpy'))
+
+    def test_evaluate_scipp_output_with_y_unit(self):
+        # WHEN
+        voigt = Voigt(
+            area=1.0,
+            center=0.0,
+            gaussian_width=0.5,
+            lorentzian_width=0.3,
+            x_unit='meV',
+            y_unit='1/meV',
+        )
+        x = np.linspace(-5, 5, 50)
+        # THEN
+        result = voigt.evaluate(x, output='scipp')
+        # EXPECT
+        assert isinstance(result, sc.Variable)
+        assert result.unit == sc.Unit('1/meV')
+
+    def test_convert_x_unit_invalid_type_raises(self, voigt: Voigt):
+        # WHEN THEN EXPECT
+        with pytest.raises(TypeError, match=r'x_unit must be a string or sc\.Unit'):
+            voigt.convert_x_unit(123)
+
+    def test_convert_x_unit_rollback_on_failure(self, voigt: Voigt):
+        # WHEN THEN
+        with pytest.raises(UnitError):
+            voigt.convert_x_unit('m')
+        # EXPECT: state rolled back
+        assert voigt.x_unit == 'meV'
+        assert voigt.area.value == pytest.approx(2.0)
+        assert voigt.center.value == pytest.approx(0.5)
+        assert voigt.gaussian_width.value == pytest.approx(0.6)
+        assert voigt.lorentzian_width.value == pytest.approx(0.7)
+
+    def test_convert_y_unit_rollback_on_failure(self):
+        # WHEN
+        voigt = Voigt(area=1.0, center=0.0, gaussian_width=0.5, lorentzian_width=0.3, x_unit='meV')
+        # THEN
+        with pytest.raises(UnitError):
+            voigt.convert_y_unit('K')
+        # EXPECT: state rolled back
+        assert voigt.y_unit == 'dimensionless'
+        assert voigt.area.value == pytest.approx(1.0)
