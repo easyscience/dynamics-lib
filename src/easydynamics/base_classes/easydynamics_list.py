@@ -206,7 +206,7 @@ class EasyDynamicsList(EasyList[ProtectedType_]):
         if not isinstance(value, tuple(self._protected_types)):
             allowed = ', '.join(t.__name__ for t in self._protected_types)
             raise TypeError(
-                f'Value must be an instance of type: {allowed}. Got {type(value).__name__} instead.'  # noqa: E501
+                f'Value must be an instance of type: {allowed}. Got {type(value).__name__} instead.'  # ruff: ignore[line-too-long]
             )
 
     # ------------------------------------------------------------------

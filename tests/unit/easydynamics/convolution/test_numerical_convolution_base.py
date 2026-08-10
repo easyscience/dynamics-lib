@@ -371,7 +371,7 @@ class TestNumericalConvolutionBase:
         """
         # WHEN THEN EXPECT
         with pytest.raises(TypeError, match='normalize_detailed_balance must be'):
-            default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance = (  # noqa: E501
+            default_numerical_convolution_base.detailed_balance_settings.normalize_detailed_balance = (  # ruff: ignore[line-too-long]
                 'invalid'
             )
 

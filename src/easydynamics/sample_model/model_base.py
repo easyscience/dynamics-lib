@@ -38,13 +38,13 @@ class ModelBase(EasyDynamicsModelBase):
 
         Parameters
         ----------
-        display_name : str, default="MyModelBase"
+        display_name : str, default='MyModelBase'
             Display name of the model.
         unique_name : str | None, default=None
             Unique name of the model. If None, a unique name will be generated.
-        x_unit : str | sc.Unit | None, default="meV"
+        x_unit : str | sc.Unit | None, default='meV'
             Unit of the x-axis (energy, Q, etc.).
-        y_unit : str | sc.Unit, default="dimensionless"
+        y_unit : str | sc.Unit, default='dimensionless'
             Unit of the model output (intensity).
         components : ModelComponent | ComponentCollection | None, default=None
             Template components of the model. If None, no components are added. These components
@@ -91,7 +91,7 @@ class ModelBase(EasyDynamicsModelBase):
         ----------
         x : Numeric | list | np.ndarray | sc.Variable | sc.DataArray
             Energy axis values to evaluate the model at.
-        output : str, default="numpy"
+        output : str, default='numpy'
             'numpy' returns np.ndarray per Q; 'scipp' returns sc.Variable per Q.
 
         Raises

@@ -341,9 +341,9 @@ class Convolution(NumericalConvolutionBase):
         # The sub-convolvers share this convolver's component objects, which were already
         # converted by super(); only their y-unit labels need updating.
         if getattr(self, '_analytical_convolver', None) is not None:
-            self._analytical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
+            self._analytical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
         if getattr(self, '_numerical_convolver', None) is not None:
-            self._numerical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
+            self._numerical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:

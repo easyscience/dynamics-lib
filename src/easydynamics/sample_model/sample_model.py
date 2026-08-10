@@ -181,7 +181,7 @@ class SampleModel(ModelBase):
         """
         if not isinstance(diffusion_model, DiffusionModelBase):
             raise TypeError(
-                f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # noqa: E501
+                f'diffusion_model must be a DiffusionModelBase, got {type(diffusion_model).__name__}'  # ruff: ignore[line-too-long]
             )
         diffusion_model.Q = self.Q
         self._diffusion_models.append(diffusion_model)
@@ -355,7 +355,7 @@ class SampleModel(ModelBase):
 
         raise AttributeError(
             f'Temperature_unit is read-only. Use convert_temperature_unit to change the unit '
-            f'between allowed types or create a new {self.__class__.__name__} with the desired unit.'  # noqa: E501
+            f'between allowed types or create a new {self.__class__.__name__} with the desired unit.'  # ruff: ignore[line-too-long]
         )
 
     def convert_temperature_unit(self, unit: str | sc.Unit) -> None:

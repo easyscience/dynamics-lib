@@ -96,7 +96,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(sample_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
         if isinstance(sample_components, ModelComponent):
             sample_components = ComponentCollection(components=[sample_components])
@@ -106,7 +106,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
             isinstance(resolution_components, (ComponentCollection, ModelComponent))
         ):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
         if isinstance(resolution_components, ModelComponent):
             resolution_components = ComponentCollection(components=[resolution_components])
@@ -314,7 +314,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(sample_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
 
         if isinstance(sample_components, ModelComponent):
@@ -353,7 +353,7 @@ class ConvolutionBase(EasyDynamicsModelBase):
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
-                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # noqa: E501
+                f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
 
         if isinstance(resolution_components, ModelComponent):

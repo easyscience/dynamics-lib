@@ -270,7 +270,7 @@ class Analysis1d(AnalysisBase):
     def as_fit_function(
         self,
         _x: np.ndarray | sc.Variable | None = None,
-        **kwargs: dict[str, Any],  # noqa: ARG002
+        **kwargs: dict[str, Any],  # ruff: ignore[unused-method-argument]
     ) -> callable:
         """
         Return self._calculate as a fit function.
@@ -294,7 +294,7 @@ class Analysis1d(AnalysisBase):
 
         def fit_function(
             _x: np.ndarray | sc.Variable | None = None,
-            **kwargs: dict[str, Any],  # noqa: ARG001
+            **kwargs: dict[str, Any],  # ruff: ignore[unused-function-argument]
         ) -> np.ndarray:
             """Fit function."""
             return self._calculate()
