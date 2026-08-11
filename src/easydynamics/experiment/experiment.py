@@ -404,7 +404,9 @@ class Experiment(EasyDynamicsBase):
             )
         if self._data is None:
             raise ValueError('No data to rebin. Please load data first.')
-        binned_data = self._data.copy()
+        # sc.bin cannot handle multi-dimensional dense data with bin-edge
+        # coordinates, so convert them to bin centers first.
+        binned_data = self._convert_to_bin_centers(self._data.copy())
         dim_copy = dimensions.copy()
         for dim, value in dim_copy.items():
             if not isinstance(dim, str):

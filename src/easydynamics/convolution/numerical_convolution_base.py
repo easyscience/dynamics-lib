@@ -139,11 +139,11 @@ class NumericalConvolutionBase(ConvolutionBase):
         seen_version = getattr(self, '_plan_seen_version', None)
         if seen_version is None:
             return False
-        return self.convolution_settings._plan_valid_for(seen_version)  # noqa: SLF001
+        return self.convolution_settings._plan_valid_for(seen_version)  # ruff: ignore[private-member-access]
 
     def _mark_convolution_plan_current(self) -> None:
         """Record that this convolver's plan matches its current state and settings."""
-        self._plan_seen_version = self.convolution_settings._plan_version  # noqa: SLF001
+        self._plan_seen_version = self.convolution_settings._plan_version  # ruff: ignore[private-member-access]
 
     @property
     def convolution_settings(self) -> ConvolutionSettings:
@@ -358,7 +358,7 @@ class NumericalConvolutionBase(ConvolutionBase):
             is_uniform = np.allclose(energy_diff, energy_diff[0])
             if not is_uniform:
                 raise ValueError(
-                    'Input array `energy` must be uniformly spaced if upsample_factor is not given.'  # noqa: E501
+                    'Input array `energy` must be uniformly spaced if upsample_factor is not given.'  # ruff: ignore[line-too-long]
                 )
             energy_dense = self.energy.values
 

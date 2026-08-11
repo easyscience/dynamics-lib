@@ -534,7 +534,7 @@ class DeltaLorentz(DiffusionModelBase):
                 y_unit=self.y_unit,
             )
             if self._allow_Q_variation['lorentzian_width'] is True:
-                lorz_component._width = self._lorentzian_width_list[i]  # noqa: SLF001
+                lorz_component._width = self._lorentzian_width_list[i]  # ruff: ignore[private-member-access]
 
             # If the width is allowed to vary with Q it is independent.
             # If the width is not allowed to vary with Q it must be made

@@ -317,7 +317,7 @@ class DiffusionModelBase(EasyDynamicsModelBase):
             test.convert_unit('meV')
         except Exception as e:
             raise UnitError(
-                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # noqa: E501
+                f'Invalid unit: {unit}. Unit must be a string or scipp Unit and convertible to meV.'  # ruff: ignore[line-too-long]
             ) from e
 
     def convert_x_unit(self, unit: str | sc.Unit) -> None:
