@@ -313,7 +313,9 @@ class ModelBase(EasyDynamicsModelBase):
 
         method = f'convert_{axis}_unit'
         old_unit = self.x_unit if axis == 'x' else self.y_unit
-        children = [*self.components, *self._component_collections]
+        # Convert the template collection as a whole (not its unpacked components) so its own
+        # unit attribute is updated too; regenerated per-Q collections copy that attribute.
+        children = [self._components, *self._component_collections]
         convert_units_with_rollback([
             (getattr(child, method), unit, old_unit) for child in children
         ])

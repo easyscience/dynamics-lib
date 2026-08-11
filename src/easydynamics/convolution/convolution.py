@@ -249,9 +249,9 @@ class Convolution(NumericalConvolutionBase):
         Separate sample model components into analytical pairs, delta functions, and the rest.
         """
 
-        analytical_sample_components = ComponentCollection()
-        delta_sample_components = ComponentCollection()
-        numerical_sample_components = ComponentCollection()
+        analytical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        delta_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        numerical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
 
         for sample_component in self._sample_components:
             # If delta function, put in delta sample model and go to the

@@ -812,7 +812,11 @@ class Analysis(AnalysisBase):
         """
         if energy is None:
             energy = self.energy
-        model = sc.array(dims=['Q', 'energy'], values=self.calculate(energy=energy))
+        model = sc.array(
+            dims=['Q', 'energy'],
+            values=self.calculate(energy=energy),
+            unit=self.sample_model.y_unit,
+        )
         return sc.DataArray(
             data=model,
             coords={'Q': self.Q, 'energy': energy},

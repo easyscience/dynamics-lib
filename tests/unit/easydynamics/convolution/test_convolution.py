@@ -137,6 +137,31 @@ class TestConvolution:
         assert convolution_with_components._convolution_plan_is_current() is True
         assert convolution_with_components._reactions_enabled is True
 
+    def test_convolution_plan_collections_inherit_units(self):
+        "Regression: internal plan collections must carry the Convolution's units"
+        # WHEN
+        convolution = Convolution(
+            energy=np.linspace(-10, 10, 101),
+            sample_components=Gaussian(
+                name='Gaussian1', area=2.0, center=0.1, width=0.4, y_unit='counts'
+            ),
+            resolution_components=Gaussian(name='GaussianRes', area=3.0, center=0.2, width=0.5),
+            y_unit='counts',
+        )
+
+        # THEN EXPECT
+        for collection in (
+            convolution._analytical_sample_components,
+            convolution._delta_sample_components,
+            convolution._numerical_sample_components,
+        ):
+            assert collection.x_unit == 'meV'
+            assert collection.y_unit == 'counts'
+
+        # Wrapping a bare ModelComponent must mirror the component's own units
+        assert convolution._sample_components.y_unit == 'counts'
+        assert convolution._resolution_components.y_unit == 'dimensionless'
+
     def test_convolution_plan_is_built_when_invalid(self, default_convolution):
         """
         Test that convolution plan is built when invalid.

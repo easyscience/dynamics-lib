@@ -99,7 +99,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
                 f'`sample_components` is an instance of {type(sample_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
         if isinstance(sample_components, ModelComponent):
-            sample_components = ComponentCollection(components=[sample_components])
+            sample_components = ComponentCollection(
+                components=[sample_components],
+                x_unit=sample_components.x_unit,
+                y_unit=sample_components.y_unit,
+            )
         self._sample_components = sample_components
 
         if resolution_components is not None and not (
@@ -109,7 +113,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
                 f'`resolution_components` is an instance of {type(resolution_components).__name__}, but must be a ComponentCollection or ModelComponent.'  # ruff: ignore[line-too-long]
             )
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(components=[resolution_components])
+            resolution_components = ComponentCollection(
+                components=[resolution_components],
+                x_unit=resolution_components.x_unit,
+                y_unit=resolution_components.y_unit,
+            )
         self._resolution_components = resolution_components
 
     @property
@@ -318,7 +326,11 @@ class ConvolutionBase(EasyDynamicsModelBase):
             )
 
         if isinstance(sample_components, ModelComponent):
-            sample_components = ComponentCollection(components=[sample_components])
+            sample_components = ComponentCollection(
+                components=[sample_components],
+                x_unit=sample_components.x_unit,
+                y_unit=sample_components.y_unit,
+            )
         self._sample_components = sample_components
 
     @property
@@ -357,5 +369,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
             )
 
         if isinstance(resolution_components, ModelComponent):
-            resolution_components = ComponentCollection(components=[resolution_components])
+            resolution_components = ComponentCollection(
+                components=[resolution_components],
+                x_unit=resolution_components.x_unit,
+                y_unit=resolution_components.y_unit,
+            )
         self._resolution_components = resolution_components

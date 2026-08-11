@@ -736,6 +736,8 @@ class Analysis1d(AnalysisBase):
             convolution_settings=self.convolution_settings,
             temperature=self.temperature,
             detailed_balance_settings=self.detailed_balance_settings,
+            x_unit=self.sample_model.x_unit,
+            y_unit=self.sample_model.y_unit,
         )
 
     #############
@@ -854,7 +856,7 @@ class Analysis1d(AnalysisBase):
         if energy is None:
             energy = self._masked_energy
         return sc.DataArray(
-            data=sc.array(dims=['energy'], values=values),
+            data=sc.array(dims=['energy'], values=values, unit=self.sample_model.y_unit),
             coords={
                 'energy': energy,
                 'Q': self.Q[self.Q_index],

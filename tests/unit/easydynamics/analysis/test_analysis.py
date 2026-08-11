@@ -931,6 +931,30 @@ class TestAnalysis:
             np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
         )
 
+    def test_create_model_array_and_residuals_with_counts_data(self):
+        "Regression: model arrays must carry the sample model y_unit so counts data works"
+        # WHEN
+        Q = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/Angstrom')
+        energy = sc.linspace('energy', -5.0, 5.0, num=20, unit='meV')
+        values = np.ones((2, 20))
+        data_array = sc.DataArray(
+            data=sc.array(dims=['Q', 'energy'], values=values, variances=values, unit='counts'),
+            coords={'Q': Q, 'energy': energy},
+        )
+        analysis = Analysis(
+            experiment=Experiment(data=data_array),
+            sample_model=SampleModel(y_unit='counts', components=Gaussian(y_unit='counts')),
+            instrument_model=InstrumentModel(),
+        )
+
+        # THEN
+        model_array = analysis._create_model_array()
+        residuals = analysis._create_residuals_array()
+
+        # EXPECT
+        assert model_array.unit == sc.Unit('counts')
+        assert residuals.unit == sc.Unit('counts')
+
     def test_create_residuals_array(self, analysis):
         # WHEN
         # Mock the _create_model_array method to return a specific model array

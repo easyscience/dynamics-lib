@@ -13,6 +13,7 @@ from easyscience.variable import Parameter
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
+from easydynamics.sample_model import ResolutionModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.gaussian import Gaussian
@@ -769,6 +770,52 @@ class TestAnalysis1d:
             kwargs['values'],
             np.array([1.0, 2.0, 3.0]),
         )
+
+    @pytest.fixture
+    def analysis1d_counts(self):
+        "Analysis1d with data and all models in counts, as loaded from a real experiment"
+        Q = sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom')
+        energy = sc.linspace('energy', -5.0, 5.0, num=20, unit='meV')
+        values = np.ones((1, 20))
+        data_array = sc.DataArray(
+            data=sc.array(dims=['Q', 'energy'], values=values, variances=values, unit='counts'),
+            coords={'Q': Q, 'energy': energy},
+        )
+
+        return Analysis1d(
+            experiment=Experiment(data=data_array),
+            sample_model=SampleModel(y_unit='counts', components=Gaussian(y_unit='counts')),
+            instrument_model=InstrumentModel(
+                resolution_model=ResolutionModel(components=Gaussian(width=0.5))
+            ),
+            Q_index=0,
+        )
+
+    def test_model_array_has_sample_model_y_unit(self, analysis1d_counts):
+        "Regression: model arrays must carry the sample model y_unit, not dimensionless"
+        # WHEN THEN
+        model_array = analysis1d_counts._create_model_array()
+
+        # EXPECT
+        assert model_array.unit == sc.Unit('counts')
+
+    def test_residuals_and_datagroup_with_counts_data(self, analysis1d_counts):
+        "Regression: residuals (data - model) must work when the data is not dimensionless"
+        # WHEN THEN
+        datagroup = analysis1d_counts.data_and_model_to_datagroup(include_residuals=True)
+
+        # EXPECT
+        assert datagroup['Model'].unit == sc.Unit('counts')
+        assert datagroup['Residuals'].unit == sc.Unit('counts')
+
+    def test_convolver_gets_sample_model_units(self, analysis1d_counts):
+        "Regression: the convolver must be built with the sample model's units"
+        # WHEN THEN
+        convolver = analysis1d_counts._create_convolver()
+
+        # EXPECT
+        assert convolver.x_unit == analysis1d_counts.sample_model.x_unit
+        assert convolver.y_unit == 'counts'
 
     @pytest.mark.parametrize(
         'add_background',
