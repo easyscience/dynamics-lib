@@ -281,6 +281,36 @@ class TestModelBase:
             for component in collection:
                 assert component.x_unit == 'eV'
 
+    def test_init_propagates_units_to_template_collection(self):
+        "Regression: the template ComponentCollection must carry the model's units"
+        # WHEN
+        model = ModelBase(
+            display_name='M',
+            x_unit='ueV',
+            y_unit='counts',
+            components=Gaussian(name='G', x_unit='ueV', y_unit='counts'),
+            Q=np.array([1.0, 2.0]),
+        )
+
+        # THEN EXPECT: template and per-Q collections carry the model units
+        assert model._components.x_unit == 'ueV'
+        assert model._components.y_unit == 'counts'
+        collection = model.get_component_collection(0)
+        assert collection.x_unit == 'ueV'
+        assert collection.y_unit == 'counts'
+        assert collection.get_fit_targets()[0].y_unit == 'counts'
+
+    def test_convert_x_unit_updates_template_collection_unit(self, model_base):
+        "Regression: conversion must update the template collection's own unit attribute"
+        # WHEN
+        model_base.convert_x_unit('eV')
+
+        # THEN EXPECT: the template collection follows, so per-Q collections regenerated
+        # later (e.g. after a Q change) carry the new unit
+        assert model_base._components.x_unit == 'eV'
+        model_base._component_collections_is_dirty = True
+        assert model_base.get_component_collection(0).x_unit == 'eV'
+
     def test_convert_x_unit_invalid_raises(self, model_base):
         # WHEN / THEN / EXPECT
         with pytest.raises(UnitError):

@@ -474,13 +474,13 @@ class ExpressionComponent(ModelComponent):
 
         # Parameter.unit is read-only and convert_unit rescales the value, so a pure relabel
         # has to swap the underlying scipp scalars (value and bounds) directly.
-        param._scalar = sc.scalar(  # noqa: SLF001
+        param._scalar = sc.scalar(  # ruff: ignore[private-member-access]
             param.value,
             unit=new_unit,
-            variance=param._scalar.variance,  # noqa: SLF001
+            variance=param._scalar.variance,  # ruff: ignore[private-member-access]
         )
-        param._min = sc.scalar(param._min.value, unit=new_unit)  # noqa: SLF001
-        param._max = sc.scalar(param._max.value, unit=new_unit)  # noqa: SLF001
+        param._min = sc.scalar(param._min.value, unit=new_unit)  # ruff: ignore[private-member-access]
+        param._max = sc.scalar(param._max.value, unit=new_unit)  # ruff: ignore[private-member-access]
 
     @classmethod
     def _create_physical_constant(cls, name: str) -> DescriptorNumber:

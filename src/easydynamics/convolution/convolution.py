@@ -249,9 +249,9 @@ class Convolution(NumericalConvolutionBase):
         Separate sample model components into analytical pairs, delta functions, and the rest.
         """
 
-        analytical_sample_components = ComponentCollection()
-        delta_sample_components = ComponentCollection()
-        numerical_sample_components = ComponentCollection()
+        analytical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        delta_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
+        numerical_sample_components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
 
         for sample_component in self._sample_components:
             # If delta function, put in delta sample model and go to the
@@ -341,9 +341,9 @@ class Convolution(NumericalConvolutionBase):
         # The sub-convolvers share this convolver's component objects, which were already
         # converted by super(); only their y-unit labels need updating.
         if getattr(self, '_analytical_convolver', None) is not None:
-            self._analytical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
+            self._analytical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
         if getattr(self, '_numerical_convolver', None) is not None:
-            self._numerical_convolver._relabel_y_unit(self.y_unit)  # noqa: SLF001
+            self._numerical_convolver._relabel_y_unit(self.y_unit)  # ruff: ignore[private-member-access]
 
     # Update some setters so the internal sample models are updated
     def __setattr__(self, name: str, value: any) -> None:

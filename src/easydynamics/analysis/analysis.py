@@ -200,7 +200,7 @@ class Analysis(AnalysisBase):
             If rebinning changes Q and ``confirm`` is not ``True``.
         """
         old_Q = np.asarray(self.Q.values) if self.Q is not None else None
-        old_binned_data = self.experiment._binned_data  # noqa: SLF001
+        old_binned_data = self.experiment._binned_data  # ruff: ignore[private-member-access]
 
         self.experiment.rebin(dimensions)
         new_Q = np.asarray(self.Q.values) if self.Q is not None else None
@@ -212,7 +212,7 @@ class Analysis(AnalysisBase):
         )
 
         if q_changed and not confirm:
-            self.experiment._binned_data = old_binned_data  # noqa: SLF001
+            self.experiment._binned_data = old_binned_data  # ruff: ignore[private-member-access]
             raise ValueError(
                 'Rebinning changed Q values, which requires clearing Q from sample_model and '
                 'instrument_model (including resolution and background sub-models). '
@@ -756,7 +756,7 @@ class Analysis(AnalysisBase):
         ys = []
         ws = []
 
-        # TODO: consider using scipp built-in masking instead of numpy boolean masks,  # noqa: FIX002 TD002 TD003
+        # TODO: consider using scipp built-in masking instead of numpy boolean masks,  # ruff: ignore[line-contains-todo, missing-todo-author, missing-todo-link]
 
         for analysis1d in self.analysis_list:
             x, y, weight, mask = self.experiment.extract_x_y_weights_only_finite(
@@ -812,7 +812,11 @@ class Analysis(AnalysisBase):
         """
         if energy is None:
             energy = self.energy
-        model = sc.array(dims=['Q', 'energy'], values=self.calculate(energy=energy))
+        model = sc.array(
+            dims=['Q', 'energy'],
+            values=self.calculate(energy=energy),
+            unit=self.sample_model.y_unit,
+        )
         return sc.DataArray(
             data=model,
             coords={'Q': self.Q, 'energy': energy},
@@ -859,7 +863,7 @@ class Analysis(AnalysisBase):
             energy = self.energy
 
         datasets = [
-            analysis1d._create_components_dataset_single_Q(  # noqa: SLF001
+            analysis1d._create_components_dataset_single_Q(  # ruff: ignore[private-member-access]
                 add_background=add_background, energy=energy
             )
             for analysis1d in self.analysis_list

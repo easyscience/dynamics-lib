@@ -4,4 +4,4 @@
 
 def test_import_easydynamics():
     # WHEN THEN EXPECT: importing raises no error
-    import easydynamics  # noqa: F401
+    import easydynamics  # ruff: ignore[unused-import]
