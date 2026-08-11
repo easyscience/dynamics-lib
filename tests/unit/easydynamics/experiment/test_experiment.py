@@ -238,6 +238,23 @@ class TestExperiment:
         assert rebinned_data.sizes['Q'] == 6
         assert rebinned_data.sizes['energy'] == 7
 
+    def test_rebin_with_bin_edge_coordinate(self):
+        "Test rebinning data whose energy coordinate is at bin edges"
+        # WHEN
+        Q = sc.linspace('Q', 0.5, 1.5, num=10, unit='1/Angstrom')
+        energy_edges = sc.linspace('energy', -5, 5, num=12, unit='meV')
+        values = sc.array(dims=['Q', 'energy'], values=np.ones((10, 11)))
+        data = sc.DataArray(data=values, coords={'Q': Q, 'energy': energy_edges})
+        experiment = Experiment(data=data)
+
+        # THEN
+        experiment.rebin({'energy': 7})
+
+        # EXPECT
+        rebinned_data = experiment.binned_data
+        assert rebinned_data.sizes['Q'] == 10
+        assert rebinned_data.sizes['energy'] == 7
+
     def test_rebin_no_data_raises(self):
         "Test rebinning data when no data is present"
         # WHEN
