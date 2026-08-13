@@ -266,3 +266,60 @@ class TestParameterLabelEdgeCases:
 
         # EXPECT still unambiguous, which is what matters
         assert len(set(labels)) == len(labels)
+
+    def test_colliding_names_with_distinct_models_use_the_display_name(self):
+        # WHEN two diffusion models are bound to different targets. Their parameters are not named
+        # after the model, so the names collide while the model names do not.
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(
+                    model=sm.BrownianTranslationalDiffusion(
+                        name='Diffusion A', diffusion_coefficient=2.4e-9, scale=0.5
+                    ),
+                    targets={'width': 'Lorentzian width'},
+                ),
+                edyn.FitBinding(
+                    model=sm.BrownianTranslationalDiffusion(
+                        name='Diffusion B', diffusion_coefficient=2.4e-9, scale=0.5
+                    ),
+                    targets={'area': 'Lorentzian area'},
+                ),
+            ],
+        )
+
+        # THEN
+        parameters = analysis._get_chain_parameters()
+        labels = [analysis.parameter_label(p) for p in parameters]
+
+        # EXPECT the model's name resolves the collision
+        assert len({p.name for p in parameters}) < len(parameters)
+        assert len(set(labels)) == len(labels)
+        assert any(label.startswith('Diffusion A: ') for label in labels)
+        assert any(label.startswith('Diffusion B: ') for label in labels)
+
+    def test_ambiguous_name_owned_by_no_model_keeps_its_name(self):
+        # WHEN a parameter shares an ambiguous name but belongs to none of the models
+        from easyscience.variable import Parameter
+
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(
+                    model=sm.Polynomial(
+                        coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Line'
+                    ),
+                    targets='Lorentzian width',
+                ),
+                edyn.FitBinding(
+                    model=sm.Polynomial(
+                        coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Line'
+                    ),
+                    targets='Lorentzian area',
+                ),
+            ],
+        )
+        stranger = Parameter(name='Line_c0', value=1.0)
+
+        # EXPECT it falls back to the plain name rather than claiming an owner
+        assert analysis.parameter_label(stranger) == 'Line_c0'

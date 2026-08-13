@@ -291,7 +291,9 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         models that already name their parameters after themselves, keep their plain names -- these
         get long quickly, and there is nothing to disambiguate.
 
-        The prefix is the model's display name, unless two models share that too, in which case the
+        The prefix is the model's name, matching the choice to report parameters under their name
+        rather than their display name -- for several models the display name is just the class
+        name, which would not tell two of them apart. If two models share a name as well, the
         unique name is used: a label that does not actually disambiguate is worse than a long one.
 
         Parameters
@@ -317,10 +319,11 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
             return parameter.name
 
         owner = owners[0]
-        display_names = [model.display_name for model in models.values()]
-        if owner.display_name is None or display_names.count(owner.display_name) > 1:
+        owner_name = getattr(owner, 'name', None) or owner.display_name
+        model_names = [getattr(m, 'name', None) or m.display_name for m in models.values()]
+        if owner_name is None or model_names.count(owner_name) > 1:
             return f'{owner.unique_name}: {parameter.name}'
-        return f'{owner.display_name}: {parameter.name}'
+        return f'{owner_name}: {parameter.name}'
 
     def plot(
         self, names: str | list[str] | None = None, **kwargs: dict[str, Any]

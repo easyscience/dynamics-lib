@@ -185,3 +185,19 @@ class TestPlotPosteriorPredictive:
         # EXPECT
         assert fig.axes[0].get_xlabel() == 'Energy (meV)'
         assert fig.axes[0].get_ylabel() == 'Intensity'
+
+
+class TestScientificNotation:
+    def test_shared_exponent_is_folded_into_the_label(self):
+        # WHEN the values are small enough that matplotlib factors out an exponent, which it parks
+        # on top of the axis label
+        draws = np.random.default_rng(0).normal(size=(200, 2)) * 1e-8 + 1.15e-8
+
+        fig = plot_corner(draws=draws, names=['D', 'scale'], units=['m^2/s', ''])
+
+        # EXPECT the exponent and the unit share one parenthetical, and the overlapping offset
+        # text is hidden
+        xlabel = fig.axes[-2].get_xlabel()
+        assert xlabel.startswith('D (1e')
+        assert 'm^2/s' in xlabel
+        assert not fig.axes[-2].xaxis.get_offset_text().get_visible()
