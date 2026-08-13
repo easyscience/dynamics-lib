@@ -4,9 +4,9 @@
 """
 Integration tests running real BUMPS DREAM chains through Analysis1d.
 
-These are slow by nature. They deliberately run with ``sampler_kwargs={'trim': False}``: BUMPS'
-automatic burn-point trimming re-runs a convergence detector on every call and can crash inside its
-own outlier removal on the very short chains used here.
+These are slow by nature. Two BUMPS options are switched off deliberately: its burn-point trimming,
+which re-runs a convergence detector on every call, and its outlier removal, which indexes past the
+end of its own buffer on chains as short as these. Neither affects the sampling itself.
 """
 
 import warnings
@@ -33,7 +33,10 @@ SAMPLE_KWARGS = {
     'samples': 2000,
     'burn': 100,
     'thin': 2,
-    'sampler_kwargs': {'trim': False},
+    # 'trim': BUMPS' burn-point detector re-runs on every call and is not worth paying
+    # for here. 'outliers': its outlier removal indexes past the end of its own buffer on
+    # chains this short, which has failed in CI; the sampling itself is unaffected.
+    'sampler_kwargs': {'trim': False, 'outliers': 'none'},
 }
 
 
@@ -136,7 +139,7 @@ class TestRealChain:
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             extended = sampled_analysis.extend_sampling(
-                additional_samples=500, thin=2, sampler_kwargs={'trim': False}
+                additional_samples=500, thin=2, sampler_kwargs={'trim': False, 'outliers': 'none'}
             )
 
         # EXPECT

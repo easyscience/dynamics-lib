@@ -438,14 +438,16 @@ class BayesianSamplingMixin:
                 sampler = self._get_or_build_sampler(reuse_sampler=reuse_sampler)
                 results = run(sampler)
             except IndexError as error:
-                # BUMPS' own outlier removal indexes past the end of its buffer when chains
-                # scatter wildly, which in practice means the model is not identifiable. The bare
-                # IndexError says nothing useful, so point at the likely cause instead.
+                # BUMPS' own outlier removal indexes past the end of its buffer. Seen both when
+                # chains scatter because the model is not identifiable, and on short chains where
+                # its buffer has too few generations to work with. The bare IndexError says
+                # nothing useful, so name both causes and the way out.
                 raise RuntimeError(
-                    'The BUMPS sampler failed while removing outlier chains. This usually means '
-                    'the chains scattered because two or more free parameters are degenerate, so '
-                    'the data cannot determine them separately. Check for degenerate parameters '
-                    "and fix one of them, or retry with sampler_kwargs={'outliers': 'none'}."
+                    'The BUMPS sampler failed while removing outlier chains. This happens when '
+                    'the chains scatter because two or more free parameters are degenerate, and '
+                    'also on short chains, where BUMPS has too few generations to work with. '
+                    'Check for degenerate parameters, raise samples, or switch the outlier '
+                    "removal off with sampler_kwargs={'outliers': 'none'}."
                 ) from error
             finally:
                 fitter.switch_minimizer(original_minimizer)

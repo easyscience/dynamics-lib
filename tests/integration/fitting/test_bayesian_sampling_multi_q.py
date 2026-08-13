@@ -4,9 +4,9 @@
 """
 Integration tests running real BUMPS DREAM chains through Analysis and ParameterAnalysis.
 
-Slow by nature, and run with ``sampler_kwargs={'trim': False}`` for the same reason as the
-single-Q integration tests: BUMPS' automatic burn-point trimming re-runs a convergence detector on
-every call and can crash inside its own outlier removal on the very short chains used here.
+Slow by nature, and with the same two BUMPS options switched off as the single-Q integration tests:
+its burn-point trimming, which re-runs a convergence detector on every call, and its outlier
+removal, which indexes past the end of its own buffer on chains as short as these.
 """
 
 import warnings
@@ -29,7 +29,10 @@ SAMPLE_KWARGS = {
     'samples': 2000,
     'burn': 100,
     'thin': 2,
-    'sampler_kwargs': {'trim': False},
+    # 'trim': BUMPS' burn-point detector re-runs on every call and is not worth paying
+    # for here. 'outliers': its outlier removal indexes past the end of its own buffer on
+    # chains this short, which has failed in CI; the sampling itself is unaffected.
+    'sampler_kwargs': {'trim': False, 'outliers': 'none'},
 }
 
 

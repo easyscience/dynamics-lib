@@ -101,6 +101,9 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         """
 
         self._init_bayesian_state()
+        # Which targets the cached fitter was built for, so an in-place edit of a FitBinding is
+        # noticed even though it cannot be observed directly.
+        self._fitter_targets = None
 
         super().__init__(display_name=display_name, unique_name=unique_name)
 
@@ -178,7 +181,8 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
             The results of the fit
         """
 
-        xs, ys, ws, _, _ = self._build_fit_inputs()
+        xs, ys, ws, _, models = self._build_fit_inputs()
+        self._invalidate_fitter_if_targets_changed(models)
         return self.fitter.fit(x=xs, y=ys, weights=ws)
 
     def _build_fit_inputs(self) -> tuple[list, list, list, list, list]:
@@ -250,7 +254,44 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
             A MultiFitter over the per-target models and fit functions.
         """
         _, _, _, funcs, models = self._build_fit_inputs()
+        self._fitter_targets = self._target_signature(models)
         return MultiFitter(fit_objects=models, fit_functions=funcs)
+
+    @staticmethod
+    def _target_signature(models: list) -> tuple:
+        """
+        Summarize which models the fitter was built for, in target order.
+
+        Parameters
+        ----------
+        models : list
+            The model behind each fit target.
+
+        Returns
+        -------
+        tuple
+            A comparable signature of the current targets.
+        """
+        return tuple(model.unique_name for model in models)
+
+    def _invalidate_fitter_if_targets_changed(self, models: list) -> None:
+        """
+        Rebuild the cached fitter when the bindings no longer resolve to the same targets.
+
+        A FitBinding can be edited in place -- ``binding.targets = ...`` -- which this object
+        cannot observe. Doing so changes how many datasets there are, while the cached MultiFitter
+        still holds the old fit functions, and the fit then dies deep inside the minimizer. Compare
+        the targets the fitter was built for against the current ones instead.
+
+        Parameters
+        ----------
+        models : list
+            The model behind each fit target, as currently resolved.
+        """
+        if self._fitter is None:
+            return
+        if self._target_signature(models) != getattr(self, '_fitter_targets', None):
+            self._invalidate_fitter()
 
     def _get_sampling_data(self) -> tuple[list, list, list]:
         """
@@ -261,7 +302,8 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         tuple[list, list, list]
             The ``(x, y, weights)`` triple, one entry per fit target.
         """
-        xs, ys, ws, _, _ = self._build_fit_inputs()
+        xs, ys, ws, _, models = self._build_fit_inputs()
+        self._invalidate_fitter_if_targets_changed(models)
         return xs, ys, ws
 
     def _get_chain_parameters(self) -> list[Parameter]:

@@ -323,3 +323,45 @@ class TestParameterLabelEdgeCases:
 
         # EXPECT it falls back to the plain name rather than claiming an owner
         assert analysis.parameter_label(stranger) == 'Line_c0'
+
+
+class TestInPlaceBindingEdits:
+    def test_changing_the_number_of_targets_rebuilds_the_fitter(self):
+        # WHEN a binding is edited in place so that it resolves to two targets instead of one.
+        # ParameterAnalysis cannot observe this, and the cached fitter would otherwise still hold
+        # one fit function against two datasets, which dies inside the minimizer.
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets={'width': 'Lorentzian width'},
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        assert len(analysis.fit()) == 1
+
+        binding.targets = {'width': 'Lorentzian width', 'area': 'Lorentzian area'}
+
+        # EXPECT the fit follows the binding rather than failing on a stale fitter
+        assert len(analysis.fit()) == 2
+
+    def test_shrinking_the_targets_also_rebuilds(self):
+        # WHEN
+        binding = edyn.FitBinding(
+            model=sm.BrownianTranslationalDiffusion(
+                name='Brownian',
+                lorentzian_name='Lorentzian',
+                diffusion_coefficient=2.4e-9,
+                scale=0.5,
+            ),
+            targets={'width': 'Lorentzian width', 'area': 'Lorentzian area'},
+        )
+        analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
+        assert len(analysis.fit()) == 2
+
+        binding.targets = {'width': 'Lorentzian width'}
+
+        # EXPECT
+        assert len(analysis.fit()) == 1
