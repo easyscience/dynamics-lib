@@ -3,6 +3,7 @@
 
 """Unit tests for Bayesian sampling on Analysis1d, with the EasyScience Sampler mocked out."""
 
+import types
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -68,6 +69,20 @@ def fake_results(analysis, n_draws=100, values=None):
         param_names=[p.unique_name for p in parameters],
         logp=np.zeros(draws.shape[0]),
         state=MagicMock(Ngen=10, Npop=4),
+    )
+
+
+def _bumps_style_index_error():
+    """Build a callable that raises an IndexError from a frame that looks like it is in BUMPS."""
+
+    def raise_index_error(**_kwargs):
+        raise IndexError('index 71 is out of bounds for axis 0 with size 40')
+
+    # The relabelling walks the traceback for a frame belonging to the bumps package, so the
+    # function has to appear to live there.
+    return types.FunctionType(
+        raise_index_error.__code__,
+        {'__name__': 'bumps.dream.state', '__builtins__': __builtins__},
     )
 
 
@@ -487,18 +502,29 @@ class warnings_as_errors:
 
 
 class TestErrorPaths:
-    def test_bumps_outlier_crash_is_reported_as_a_degeneracy(self, analysis):
-        # WHEN BUMPS' own outlier removal indexes past the end of its buffer, which happens when
-        # chains scatter because the model is not identifiable
+    def test_bumps_outlier_crash_is_reported_helpfully(self, analysis):
+        # WHEN BUMPS' own outlier removal indexes past the end of its buffer
         bound_all(analysis)
 
         with patch(SAMPLER_PATH) as sampler_class:
-            sampler_class.return_value.sample.side_effect = IndexError(
-                'index 71 is out of bounds for axis 0 with size 40'
-            )
+            sampler_class.return_value.sample.side_effect = _bumps_style_index_error()
 
-            # EXPECT the bare IndexError is replaced by something actionable
-            with pytest.raises(RuntimeError, match='degenerate'):
+            # EXPECT the bare IndexError is replaced by something actionable, naming both causes
+            with pytest.raises(RuntimeError, match='degenerate') as raised:
+                analysis.sample_posterior(samples=10)
+            assert 'short chains' in str(raised.value)
+            assert isinstance(raised.value.__cause__, IndexError)
+
+    def test_an_index_error_of_our_own_is_not_relabelled(self, analysis):
+        # WHEN the IndexError comes from anywhere but BUMPS, it is a bug here and must not be
+        # dressed up as a modelling problem
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = IndexError('list index out of range')
+
+            # EXPECT it propagates untouched
+            with pytest.raises(IndexError, match='list index out of range'):
                 analysis.sample_posterior(samples=10)
 
     def test_parameters_entry_of_the_wrong_type_raises(self, analysis):
@@ -560,3 +586,49 @@ class TestPlotRendering:
         assert len(analysis.plot_trace().axes) == n_parameters + 1
         assert len(analysis.plot_corner().axes) == n_parameters**2
         plt.close('all')
+
+
+class TestExtendGuards:
+    def test_extending_with_a_different_subset_is_refused(self, analysis):
+        # WHEN a chain is started over all parameters and then extended over one
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            analysis.sample_posterior(samples=10)
+
+            target = analysis.get_free_parameters()[0]
+
+            # EXPECT refused up front, rather than failing obscurely inside BUMPS, which resumes
+            # from a stored chain whose width is fixed
+            with pytest.warns(UserWarning), pytest.raises(ValueError, match='Cannot extend'):
+                analysis.extend_sampling(additional_samples=10, parameters=[target.name])
+
+    def test_extending_with_the_same_parameters_is_allowed(self, analysis):
+        # WHEN
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
+            analysis.sample_posterior(samples=10)
+
+            # EXPECT: does not raise
+            analysis.extend_sampling(additional_samples=10)
+
+
+class TestSidecarLabels:
+    def test_a_subset_run_records_the_same_labels_a_full_run_would(self, analysis):
+        # WHEN only one parameter is sampled. Inside the run the others are fixed, so nothing looks
+        # ambiguous; the recorded labels must still match what a full run would have written, or
+        # the chain cannot be matched up again on reload.
+        bound_all(analysis)
+        target = analysis.get_free_parameters()[0]
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
+            with pytest.warns(UserWarning):
+                analysis.sample_posterior(samples=10, parameters=[target.name])
+
+        # EXPECT
+        assert analysis._chain_name_map[target.unique_name] == analysis.parameter_label(target)

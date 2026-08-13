@@ -123,6 +123,8 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
 
         self._analysis_list: list[Analysis1d] = []
         self._analysis_list_is_dirty = True
+        # Rebuilt with the analysis list; see _parameter_owner_index.
+        self._owner_index = None
         self._init_bayesian_state()
         super().__init__(
             display_name=display_name,
@@ -740,6 +742,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         """
         super()._on_experiment_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
         self._invalidate_fitter()
 
     def _on_sample_model_changed(self) -> None:
@@ -748,6 +751,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         """
         super()._on_sample_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
         self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
@@ -756,6 +760,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         """
         super()._on_instrument_model_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
         self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
@@ -764,6 +769,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         """
         super()._on_convolution_settings_changed()
         self._analysis_list_is_dirty = True
+        self._owner_index = None
         self._invalidate_fitter()
 
     def _ensure_analysis_list_current(self) -> None:
@@ -778,6 +784,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         experiment, sample model, and instrument model.
         """
         self._analysis_list = []
+        self._owner_index = None
         for Q_index in range(len(self.Q)):
             # The ConvolutionSettings object is shared so user changes reach every Q index;
             # plan validity is tracked per convolver, not on the settings object.
@@ -871,16 +878,68 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         """
         if not self._name_is_ambiguous(parameter):
             return parameter.name
-        owners = [
-            analysis1d.Q_index
-            for analysis1d in self.analysis_list
-            if any(
-                p.unique_name == parameter.unique_name for p in analysis1d.get_free_parameters()
-            )
-        ]
-        if len(owners) != 1:
+        owner = self._parameter_owner_index().get(parameter.unique_name)
+        if owner is None:
             return parameter.name
-        return f'{parameter.name} (Q_index={owners[0]})'
+        return f'{parameter.name} (Q_index={owner})'
+
+    def _parameter_owner_index(self) -> dict[str, int]:
+        """
+        Map each parameter to the Q index that owns it.
+
+        Built once per analysis list and reused, because scanning the list for every parameter
+        makes labelling a chain quadratic in the parameter count -- seconds, for a dataset with
+        many Q values. Built from all parameters rather than only the free ones, so that fixing a
+        parameter cannot leave the map stale.
+
+        Returns
+        -------
+        dict[str, int]
+            Mapping of parameter ``unique_name`` to owning Q index. Parameters shared by more than
+            one Q index are left out, since no single Q identifies them.
+        """
+        self._ensure_analysis_list_current()
+        if self._owner_index is None:
+            owners: dict[str, int | None] = {}
+            for analysis1d in self._analysis_list:
+                for parameter in analysis1d.get_all_parameters():
+                    if parameter.unique_name in owners:
+                        owners[parameter.unique_name] = None
+                    else:
+                        owners[parameter.unique_name] = analysis1d.Q_index
+            self._owner_index = {
+                name: q_index for name, q_index in owners.items() if q_index is not None
+            }
+        return self._owner_index
+
+    def _require_posterior_result(self) -> SamplingResults:
+        """
+        Get the stored sampling results, pointing at the per-Q chains when those are what exist.
+
+        Sampling independently stores a chain on each Analysis1d rather than here, so asking this
+        object for a summary afterwards would otherwise report that no sampling has happened, right
+        after it has.
+
+        Returns
+        -------
+        SamplingResults
+            The results of the most recent simultaneous run.
+
+        Raises
+        ------
+        RuntimeError
+            If no simultaneous sampling has been run on this Analysis.
+        """
+        if self._posterior_result is None and any(
+            analysis1d.posterior_result is not None for analysis1d in self.analysis_list
+        ):
+            raise RuntimeError(
+                'This Analysis holds no chain of its own, but its Q indices do: sampling with '
+                "fit_method='independent' gives each Q its own chain. Use "
+                'analysis.analysis_list[Q_index] to summarize or plot one of them, or sample with '
+                "fit_method='simultaneous' to get a single chain over all Q."
+            )
+        return super()._require_posterior_result()
 
     def _prepare_for_sampling(self) -> None:
         """

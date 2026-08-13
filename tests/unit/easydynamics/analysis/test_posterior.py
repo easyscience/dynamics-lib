@@ -322,3 +322,40 @@ class TestPosteriorSummaryContainer:
     def test_repr_with_no_entries(self):
         # EXPECT
         assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))
+
+
+class TestAbsurdBoundsWarning:
+    def test_applying_a_wildly_wide_bound_warns(self):
+        # WHEN a fit returns an enormous uncertainty, which is what a degenerate parameter looks
+        # like coming out of least squares
+        parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # EXPECT it is still applied, since it is what the fit implied, but not silently
+        with pytest.warns(UserWarning, match='far wider than the parameter'):
+            changed = suggestions.apply()
+        assert changed == [parameter]
+
+    def test_a_sane_bound_applies_without_warning(self):
+        # WHEN
+        parameter = make_parameter(name='sane', value=10.0, error=0.5)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # EXPECT
+        import warnings as warnings_module
+
+        with warnings_module.catch_warnings():
+            warnings_module.simplefilter('error')
+            suggestions.apply()
+
+    def test_a_zero_valued_parameter_is_not_called_absurd(self):
+        # WHEN there is no magnitude to compare the width against
+        parameter = make_parameter(name='zero', value=0.0, error=1.0)
+        suggestions = suggest_bounds_for_parameters([parameter])
+
+        # EXPECT no warning, since the ratio is meaningless rather than alarming
+        import warnings as warnings_module
+
+        with warnings_module.catch_warnings():
+            warnings_module.simplefilter('error')
+            suggestions.apply()

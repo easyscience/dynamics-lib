@@ -11,6 +11,7 @@ can be unit-tested on their own and reused by every Analysis class.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -18,6 +19,11 @@ import numpy as np
 
 if TYPE_CHECKING:
     from easyscience.variable import Parameter
+
+# How many times wider than the parameter's own value a suggested range may be before it is
+# reported as suspicious. A fit that returns an uncertainty this large is describing a flat
+# direction rather than a measurement.
+ABSURD_WIDTH_FACTOR = 1e4
 
 # Fraction of the allowed range at each end that counts as "at the bound" when checking whether
 # the posterior has piled up against a bound.
@@ -132,7 +138,9 @@ class BoundsSuggestions:
         """
         Set the suggested bounds on every parameter that has a usable suggestion.
 
-        Parameters needing manual attention are skipped rather than guessed at.
+        Parameters needing manual attention are skipped rather than guessed at. A suggestion that
+        is absurdly wide is still applied -- it is what the fit implied -- but warned about, since
+        reading the table first is easy to skip in a script.
 
         Returns
         -------
@@ -140,12 +148,27 @@ class BoundsSuggestions:
             The parameters whose bounds were changed.
         """
         changed = []
+        absurd = []
         for suggestion in self._suggestions:
             if suggestion.needs_attention or not suggestion.changes_bounds:
                 continue
             suggestion.parameter.min = suggestion.suggested_min
             suggestion.parameter.max = suggestion.suggested_max
             changed.append(suggestion.parameter)
+            if _is_absurdly_wide(suggestion):
+                absurd.append(suggestion.label)
+
+        if absurd:
+            warnings.warn(
+                (
+                    f'Applied bounds far wider than the parameter itself for: '
+                    f'{", ".join(absurd)}. That width comes from a very large fitted uncertainty, '
+                    f'which usually means these parameters are degenerate with others, so the '
+                    f'data cannot determine them separately. Sampling explores that whole range.'
+                ),
+                UserWarning,
+                stacklevel=2,
+            )
         return changed
 
     def __len__(self) -> int:
@@ -200,6 +223,29 @@ class BoundsSuggestions:
                 f'{len(attention)} parameter(s) need bounds set by hand; .apply() will skip them.'
             )
         return '\n'.join(lines)
+
+
+def _is_absurdly_wide(suggestion: BoundsSuggestion) -> bool:
+    """
+    Check whether a suggested range dwarfs the parameter it describes.
+
+    Parameters
+    ----------
+    suggestion : BoundsSuggestion
+        The suggestion to judge.
+
+    Returns
+    -------
+    bool
+        True when the range is more than ``ABSURD_WIDTH_FACTOR`` times the parameter's magnitude.
+    """
+    width = suggestion.suggested_max - suggestion.suggested_min
+    if not np.isfinite(width):
+        return True
+    scale = abs(float(suggestion.parameter.value))
+    if scale == 0:
+        return False
+    return width > ABSURD_WIDTH_FACTOR * scale
 
 
 def suggest_bounds_for_parameters(

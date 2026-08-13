@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import warnings
+from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Any
@@ -33,6 +34,7 @@ from easydynamics.analysis.posterior import unbounded_parameters
 if TYPE_CHECKING:
     import os
     from collections.abc import Callable
+    from collections.abc import Iterator
 
     from easyscience.fitting.fitter import Fitter
     from easyscience.fitting.sampler import SamplingResults
@@ -89,6 +91,8 @@ class BayesianSamplingMixin:
         self._bayesian_sampler = None
         self._bayesian_sampler_is_dirty = True
         self._posterior_result = None
+        # Set only while a bulk operation holds the parameter list, see _bulk_parameter_access.
+        self._chain_parameters_cache = None
         # Maps a chain column's unique_name to the parameter name it had when saved. Only populated
         # by load_chain, because unique_names are per-session and do not survive a round trip.
         self._chain_name_map = {}
@@ -256,10 +260,11 @@ class BayesianSamplingMixin:
         BoundsSuggestions
             The proposed bounds, which must be applied explicitly.
         """
-        parameters = self._get_chain_parameters()
+        with self._bulk_parameter_access() as parameters:
+            labels = [self.parameter_label(parameter) for parameter in parameters]
         return suggest_bounds_for_parameters(
             parameters,
-            labels=[self.parameter_label(parameter) for parameter in parameters],
+            labels=labels,
             n_sigma=n_sigma,
             relative_pad=relative_pad,
             absolute_floor=absolute_floor,
@@ -417,9 +422,11 @@ class BayesianSamplingMixin:
 
         Raises
         ------
+        IndexError
+            Re-raised untouched when it did not come from BUMPS, since that is a bug here rather
+            than a modelling problem.
         RuntimeError
-            If the BUMPS sampler fails while removing outlier chains, which points at degenerate
-            parameters.
+            If the BUMPS sampler fails while removing outlier chains.
         """
         held_fixed = self._resolve_parameters_to_hold_fixed(parameters)
         self._warn_about_held_parameters(held_fixed)
@@ -431,6 +438,9 @@ class BayesianSamplingMixin:
             chain_parameters = self._get_chain_parameters()
             saved_values = [(p, p.value) for p in chain_parameters]
 
+            if reuse_sampler:
+                self._verify_chain_shape_unchanged(chain_parameters)
+
             fitter = self.fitter
             original_minimizer = fitter.minimizer.enum
             fitter.switch_minimizer(AvailableMinimizers.Bumps)
@@ -438,6 +448,8 @@ class BayesianSamplingMixin:
                 sampler = self._get_or_build_sampler(reuse_sampler=reuse_sampler)
                 results = run(sampler)
             except IndexError as error:
+                if not _raised_inside_bumps(error):
+                    raise
                 # BUMPS' own outlier removal indexes past the end of its buffer. Seen both when
                 # chains scatter because the model is not identifiable, and on short chains where
                 # its buffer has too few generations to work with. The bare IndexError says
@@ -454,8 +466,10 @@ class BayesianSamplingMixin:
                 for parameter, value in saved_values:
                     parameter.value = value
 
-            # A fresh chain is labelled with this session's unique names, so any mapping left over
-            # from a loaded chain no longer applies.
+        # Labelled outside the block above, so that a subset run records the same labels a full run
+        # would. Inside it the other parameters are fixed, nothing looks ambiguous, and the sidecar
+        # would be written with unqualified names that no longer match on reload.
+        with self._bulk_parameter_access():
             self._chain_name_map = {
                 parameter.unique_name: self.parameter_label(parameter)
                 for parameter in chain_parameters
@@ -464,6 +478,35 @@ class BayesianSamplingMixin:
         self._posterior_result = results
         self._warn_about_bounds_occupancy(results, self._resolve_chain_parameters(results))
         return results
+
+    def _verify_chain_shape_unchanged(self, chain_parameters: list[Parameter]) -> None:
+        """
+        Check that an extension keeps the chain's columns.
+
+        BUMPS resumes from a stored state whose width is fixed, so a run that would add or drop a
+        parameter cannot continue that chain. Caught here rather than left to fail obscurely inside
+        the sampler.
+
+        Parameters
+        ----------
+        chain_parameters : list[Parameter]
+            The parameters that would form the chain for this run.
+
+        Raises
+        ------
+        ValueError
+            If the number of parameters differs from the existing chain's.
+        """
+        if self._posterior_result is None:
+            return
+        existing = self._posterior_result.draws.shape[1]
+        if len(chain_parameters) != existing:
+            raise ValueError(
+                f'Cannot extend a chain of {existing} parameters with a run of '
+                f'{len(chain_parameters)}. An extension continues the stored chain, whose columns '
+                f'are fixed, so it needs the same parameters the chain was started with. Start a '
+                f'fresh chain with sample_posterior() instead.'
+            )
 
     def _get_or_build_sampler(self, reuse_sampler: bool) -> Sampler:
         """
@@ -948,7 +991,7 @@ class BayesianSamplingMixin:
         list[Parameter | None]
             The parameter for each column, or None where no match could be made.
         """
-        parameters = self._get_chain_parameters()
+        parameters = self._chain_parameters()
         by_unique_name = {p.unique_name: p for p in parameters}
         by_label = {self.parameter_label(p): p for p in parameters}
         resolved = []
@@ -997,8 +1040,44 @@ class BayesianSamplingMixin:
         bool
             True when at least one other chain parameter has the same name.
         """
-        names = [p.name for p in self._get_chain_parameters()]
+        names = [p.name for p in self._chain_parameters()]
         return names.count(parameter.name) > 1
+
+    def _chain_parameters(self) -> list[Parameter]:
+        """
+        Get the chain parameters, reusing the list when a bulk operation is in progress.
+
+        Collecting them walks every sub-model, so labelling a chain one parameter at a time is
+        quadratic in the parameter count -- seconds, for a dataset with many Q values.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the underlying model(s).
+        """
+        if self._chain_parameters_cache is not None:
+            return self._chain_parameters_cache
+        return self._get_chain_parameters()
+
+    @contextmanager
+    def _bulk_parameter_access(self) -> Iterator[list[Parameter]]:
+        """
+        Collect the chain parameters once for the duration of a block.
+
+        Scoped rather than stored, so the cache cannot outlive the operation that wanted it and go
+        stale against a changed model.
+
+        Yields
+        ------
+        list[Parameter]
+            The chain parameters, also served to :meth:`_chain_parameters` inside the block.
+        """
+        previous = self._chain_parameters_cache
+        self._chain_parameters_cache = self._get_chain_parameters()
+        try:
+            yield self._chain_parameters_cache
+        finally:
+            self._chain_parameters_cache = previous
 
     def _chain_units(self, results: SamplingResults) -> list[str]:
         """
@@ -1033,13 +1112,40 @@ class BayesianSamplingMixin:
         list[str]
             One label per column of the chain.
         """
-        resolved = self._resolve_chain_parameters(results)
-        return [
-            self._chain_name_map.get(unique_name, unique_name)
-            if parameter is None
-            else self.parameter_label(parameter)
-            for unique_name, parameter in zip(results.param_names, resolved, strict=True)
-        ]
+        with self._bulk_parameter_access():
+            resolved = self._resolve_chain_parameters(results)
+            return [
+                self._chain_name_map.get(unique_name, unique_name)
+                if parameter is None
+                else self.parameter_label(parameter)
+                for unique_name, parameter in zip(results.param_names, resolved, strict=True)
+            ]
+
+
+def _raised_inside_bumps(error: BaseException) -> bool:
+    """
+    Check whether an exception came from inside BUMPS.
+
+    Used to make sure only BUMPS' own failures are relabelled, so a bug in this package is not
+    reported as a modelling problem.
+
+    Parameters
+    ----------
+    error : BaseException
+        The exception to inspect.
+
+    Returns
+    -------
+    bool
+        True when any frame of the traceback lies in the bumps package.
+    """
+    traceback = error.__traceback__
+    while traceback is not None:
+        module = traceback.tb_frame.f_globals.get('__name__', '')
+        if module == 'bumps' or module.startswith('bumps.'):
+            return True
+        traceback = traceback.tb_next
+    return False
 
 
 class _FixedParameters:

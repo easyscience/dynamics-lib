@@ -289,3 +289,27 @@ class TestParameterLabelEdgeCases:
 
         # EXPECT it is returned unqualified rather than mislabelled
         assert analysis.parameter_label(stranger) == 'Gaussian width'
+
+
+class TestIndependentSamplingDiscoverability:
+    def test_summary_points_at_the_per_q_chains(self, analysis):
+        # WHEN sampling independently, the chains live on the Analysis1d objects, not here
+        for analysis1d in analysis.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameter.min = float(parameter.value) - 5.0
+                parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
+                analysis.analysis_list[0].get_free_parameters()
+            )
+            analysis.sample_posterior(fit_method='independent', samples=10)
+
+        # EXPECT the error says where the chains actually are, rather than claiming none exist
+        with pytest.raises(RuntimeError, match='analysis_list'):
+            analysis.posterior_summary()
+
+    def test_untouched_analysis_still_reports_no_samples(self, analysis):
+        # EXPECT the plain message when nothing has been sampled anywhere
+        with pytest.raises(RuntimeError, match='No posterior samples yet'):
+            analysis.posterior_summary()
