@@ -8,12 +8,14 @@ import numpy as np
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.fitting.sampler import SamplingResults
 from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
+from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
@@ -24,11 +26,15 @@ from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
 
-class Analysis(AnalysisBase):
+class Analysis(BayesianSamplingMixin, AnalysisBase):
     """
     For analysing two-dimensional data, i.e. intensity as function of energy and Q.
 
     Supports independent fits of each Q value and simultaneous fits of all Q.
+
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored with :meth:`sample_posterior`; see
+    :class:`~easydynamics.analysis.bayesian_sampling.BayesianSamplingMixin`.
 
     Examples
     --------
@@ -117,6 +123,7 @@ class Analysis(AnalysisBase):
 
         self._analysis_list: list[Analysis1d] = []
         self._analysis_list_is_dirty = True
+        self._init_bayesian_state()
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -283,8 +290,9 @@ class Analysis(AnalysisBase):
         Returns
         -------
         FitResults | list[FitResults]
-            A list of FitResults if fitting independently, or a single FitResults object if fitting
-            simultaneously.
+            A single FitResults when a specific Q index was fitted, and otherwise a list holding
+            one FitResults per Q index. A simultaneous fit also reports per-Q results, since the
+            underlying MultiFitter splits its combined result back up by dataset.
         """
 
         if self.Q is None:
@@ -300,6 +308,77 @@ class Analysis(AnalysisBase):
             return self._fit_all_Q_independently()
         if fit_method == 'simultaneous':
             return self._fit_all_Q_simultaneously()
+        raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
+
+    def sample_posterior(
+        self,
+        samples: int = 10000,
+        burn: int = 2000,
+        thin: int = 10,
+        fit_method: str = 'independent',
+        Q_index: int | None = None,
+        **sampler_options: dict[str, Any],
+    ) -> SamplingResults | list[SamplingResults]:
+        """
+        Draw samples from the posterior distribution, mirroring :meth:`fit`.
+
+        With ``fit_method='independent'`` each Q index gets its own chain, which is the cheaper
+        option and keeps the Q values from influencing one another. With
+        ``fit_method='simultaneous'`` a single chain covers every Q at once, which is what you want
+        when parameters are shared across Q, but costs considerably more: DREAM runs
+        ``ceil(population * n_parameters)`` chains, and a simultaneous run has the parameters of
+        every Q in play at the same time.
+
+        Parameters
+        ----------
+        samples : int, default=10000
+            Number of raw samples to draw across all chains, before thinning.
+        burn : int, default=2000
+            Burn-in generations to discard before collecting samples.
+        thin : int, default=10
+            Thinning interval, which reduces autocorrelation between retained draws.
+        fit_method : str, default='independent'
+            Either "independent" (a separate chain per Q index) or "simultaneous" (one chain over
+            all Q indices at once).
+        Q_index : int | None, default=None
+            With ``fit_method='independent'``, sample only this Q index. Ignored when sampling
+            simultaneously.
+        **sampler_options : dict[str, Any]
+            Forwarded to the sampler, e.g. ``population``, ``parameters``, ``sampler_kwargs``,
+            ``progress_callback``, or ``abort_test``.
+
+        Returns
+        -------
+        SamplingResults | list[SamplingResults]
+            A single SamplingResults when a specific Q index was sampled or when sampling
+            simultaneously, and otherwise a list holding one SamplingResults per Q index.
+
+        Raises
+        ------
+        ValueError
+            If there are no Q values available, or if fit_method is not "independent" or
+            "simultaneous".
+        """
+        if self.Q is None:
+            raise ValueError(
+                'No Q values available for sampling. Please check the experiment data.'
+            )
+
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+
+        if fit_method == 'independent':
+            if Q_index is not None:
+                return self.analysis_list[Q_index].sample_posterior(
+                    samples=samples, burn=burn, thin=thin, **sampler_options
+                )
+            return [
+                analysis.sample_posterior(samples=samples, burn=burn, thin=thin, **sampler_options)
+                for analysis in self.analysis_list
+            ]
+        if fit_method == 'simultaneous':
+            return super().sample_posterior(
+                samples=samples, burn=burn, thin=thin, **sampler_options
+            )
         raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
 
     def plot_data_and_model(
@@ -661,6 +740,7 @@ class Analysis(AnalysisBase):
         """
         super()._on_experiment_changed()
         self._analysis_list_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_sample_model_changed(self) -> None:
         """
@@ -668,6 +748,7 @@ class Analysis(AnalysisBase):
         """
         super()._on_sample_model_changed()
         self._analysis_list_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_instrument_model_changed(self) -> None:
         """
@@ -675,6 +756,7 @@ class Analysis(AnalysisBase):
         """
         super()._on_instrument_model_changed()
         self._analysis_list_is_dirty = True
+        self._invalidate_fitter()
 
     def _on_convolution_settings_changed(self) -> None:
         """
@@ -682,6 +764,7 @@ class Analysis(AnalysisBase):
         """
         super()._on_convolution_settings_changed()
         self._analysis_list_is_dirty = True
+        self._invalidate_fitter()
 
     def _ensure_analysis_list_current(self) -> None:
         """Rebuild the analysis list if any dependency has changed since it was last built."""
@@ -713,6 +796,105 @@ class Analysis(AnalysisBase):
     #############
     # Private methods
     #############
+
+    #############
+    # Hooks for BayesianSamplingMixin (simultaneous sampling over all Q)
+    #############
+
+    def _build_bayesian_fitter(self) -> MultiFitter:
+        """
+        Build the MultiFitter covering every Q index.
+
+        Returns
+        -------
+        MultiFitter
+            A MultiFitter over the Analysis1d objects and their fit functions.
+        """
+        return MultiFitter(
+            fit_objects=self.analysis_list,
+            fit_functions=self.get_fit_functions(),
+        )
+
+    def _get_sampling_data(self) -> tuple[list, list, list]:
+        """
+        Get the per-Q data to bind to the Sampler, as lists of arrays.
+
+        Returns
+        -------
+        tuple[list, list, list]
+            The ``(x, y, weights)`` triple, one entry per Q index.
+        """
+        xs, ys, ws = [], [], []
+        for analysis1d in self.analysis_list:
+            x, y, weight, _ = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            xs.append(x)
+            ys.append(y)
+            ws.append(weight)
+        return xs, ys, ws
+
+    def _get_chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters across every Q index.
+
+        Each Q index holds its own copy of the model parameters, so the union is taken by
+        ``unique_name``. Parameters shared between Q indices therefore appear only once.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the whole analysis, in Q order and without duplicates.
+        """
+        parameters = {}
+        for analysis1d in self.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameters.setdefault(parameter.unique_name, parameter)
+        return list(parameters.values())
+
+    def parameter_label(self, parameter: Parameter) -> str:
+        """
+        Label a parameter with the Q index it belongs to.
+
+        Every Q index carries its own copy of each model parameter, all sharing a name, so the bare
+        name would produce several identical rows in a summary and could not be used to pick a
+        parameter out. Parameters shared across Q indices, and analyses holding a single Q, keep
+        their plain name.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to label.
+
+        Returns
+        -------
+        str
+            The parameter name, qualified by Q index where that is needed to tell copies apart.
+        """
+        if not self._name_is_ambiguous(parameter):
+            return parameter.name
+        owners = [
+            analysis1d.Q_index
+            for analysis1d in self.analysis_list
+            if any(
+                p.unique_name == parameter.unique_name for p in analysis1d.get_free_parameters()
+            )
+        ]
+        if len(owners) != 1:
+            return parameter.name
+        return f'{parameter.name} (Q_index={owners[0]})'
+
+    def _prepare_for_sampling(self) -> None:
+        """
+        Rebuild every per-Q convolver against its masked energy grid.
+
+        Mirrors what a simultaneous fit does, so that the model evaluations seen by the sampler
+        match the ones the fit would have made.
+        """
+        for analysis1d in self.analysis_list:
+            _, _, _, mask = self.experiment.extract_x_y_weights_only_finite(analysis1d.Q_index)
+            mask_var = sc.array(dims=['energy'], values=mask)
+            analysis1d.refresh_convolver(
+                energy=self.experiment.get_masked_energy(Q_index=analysis1d.Q_index, mask=mask_var)
+            )
 
     def _fit_single_Q(self, Q_index: int) -> FitResults:
         """

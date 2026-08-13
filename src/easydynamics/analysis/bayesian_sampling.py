@@ -256,8 +256,10 @@ class BayesianSamplingMixin:
         BoundsSuggestions
             The proposed bounds, which must be applied explicitly.
         """
+        parameters = self._get_chain_parameters()
         return suggest_bounds_for_parameters(
-            self._get_chain_parameters(),
+            parameters,
+            labels=[self.parameter_label(parameter) for parameter in parameters],
             n_sigma=n_sigma,
             relative_pad=relative_pad,
             absolute_floor=absolute_floor,
@@ -275,7 +277,7 @@ class BayesianSamplingMixin:
         unbounded = unbounded_parameters(self._get_chain_parameters())
         if not unbounded:
             return
-        names = ', '.join(parameter.name for parameter in unbounded)
+        names = ', '.join(self.parameter_label(parameter) for parameter in unbounded)
         raise ValueError(
             f'Bayesian sampling requires finite bounds on every free parameter, because the '
             f'bounds act as the prior. These parameters are unbounded: {names}. '
@@ -453,7 +455,8 @@ class BayesianSamplingMixin:
             # A fresh chain is labelled with this session's unique names, so any mapping left over
             # from a loaded chain no longer applies.
             self._chain_name_map = {
-                parameter.unique_name: parameter.name for parameter in chain_parameters
+                parameter.unique_name: self.parameter_label(parameter)
+                for parameter in chain_parameters
             }
 
         self._posterior_result = results
@@ -610,7 +613,7 @@ class BayesianSamplingMixin:
         results = self._require_posterior_result()
         return summarize_draws(
             draws=results.draws,
-            fallback_names=self._chain_display_names(results),
+            labels=self._chain_display_names(results),
             parameters_by_column=self._resolve_chain_parameters(results),
         )
 
@@ -922,19 +925,59 @@ class BayesianSamplingMixin:
         """
         parameters = self._get_chain_parameters()
         by_unique_name = {p.unique_name: p for p in parameters}
-        by_name = {p.name: p for p in parameters}
+        by_label = {self.parameter_label(p): p for p in parameters}
         resolved = []
         for unique_name in results.param_names:
             parameter = by_unique_name.get(unique_name)
             if parameter is None:
-                saved_name = self._chain_name_map.get(unique_name)
-                parameter = None if saved_name is None else by_name.get(saved_name)
+                saved_label = self._chain_name_map.get(unique_name)
+                parameter = None if saved_label is None else by_label.get(saved_label)
             resolved.append(parameter)
         return resolved
 
+    def parameter_label(self, parameter: Parameter) -> str:
+        """
+        Get the label a parameter is reported under.
+
+        The parameter's own name is enough when it identifies the parameter uniquely. Analysis
+        classes that can hold several identically named parameters override this to qualify the
+        name, but only when it is actually ambiguous -- see :meth:`_name_is_ambiguous`.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to label.
+
+        Returns
+        -------
+        str
+            The label to report the parameter under.
+        """
+        return parameter.name
+
+    def _name_is_ambiguous(self, parameter: Parameter) -> bool:
+        """
+        Check whether another parameter in the chain shares this parameter's name.
+
+        Qualifying a label is only worth the extra width when the bare name would be ambiguous, so
+        a single-Q analysis, or a single binding, keeps its short names.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to check.
+
+        Returns
+        -------
+        bool
+            True when at least one other chain parameter has the same name.
+        """
+        names = [p.name for p in self._get_chain_parameters()]
+        return names.count(parameter.name) > 1
+
     def _chain_display_names(self, results: SamplingResults) -> list[str]:
         """
-        Translate the chain's column names into parameter names.
+        Translate the chain's column names into readable labels.
 
         Parameters
         ----------
@@ -944,13 +987,13 @@ class BayesianSamplingMixin:
         Returns
         -------
         list[str]
-            One name per column of the chain.
+            One label per column of the chain.
         """
         resolved = self._resolve_chain_parameters(results)
         return [
             self._chain_name_map.get(unique_name, unique_name)
             if parameter is None
-            else parameter.name
+            else self.parameter_label(parameter)
             for unique_name, parameter in zip(results.param_names, resolved, strict=True)
         ]
 

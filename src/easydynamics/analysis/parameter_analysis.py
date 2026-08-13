@@ -9,10 +9,12 @@ import plopp as pp
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.variable import Parameter
 from matplotlib import rcParams
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis import Analysis
+from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
 from easydynamics.analysis.fit_binding import FitBinding
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
@@ -20,7 +22,7 @@ from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import convert_value_unit
 
 
-class ParameterAnalysis(EasyDynamicsModelBase):
+class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
     """
     For analysing fitted parameters.
 
@@ -98,6 +100,8 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             default, None.
         """
 
+        self._init_bayesian_state()
+
         super().__init__(display_name=display_name, unique_name=unique_name)
 
         self._parameters = self._verify_parameters(parameters)
@@ -130,6 +134,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The new parameter dataset for the parameter analysis.
         """
         self._parameters = self._verify_parameters(value)
+        self._invalidate_fitter()
 
     @property
     def bindings(self) -> list[FitBinding]:
@@ -154,6 +159,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
             The new fit bindings for the parameter analysis.
         """
         self._bindings = self._verify_bindings(value)
+        self._invalidate_fitter()
 
     #############
     # Other methods
@@ -163,18 +169,36 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         """
         Fit the parameters using the specified fit functions and settings.
 
+        A ``ValueError`` is raised if no parameters Dataset is provided, if no fit bindings are
+        provided, or if a binding names a dataset key that is not in the parameters Dataset.
+
         Returns
         -------
         FitResults
             The results of the fit
+        """
+
+        xs, ys, ws, _, _ = self._build_fit_inputs()
+        return self.fitter.fit(x=xs, y=ys, weights=ws)
+
+    def _build_fit_inputs(self) -> tuple[list, list, list, list, list]:
+        """
+        Resolve every binding into the per-target data, fit functions, and models.
+
+        Shared by fitting and sampling so that both see exactly the same targets, in the same
+        order, with the same unit conversions applied.
+
+        Returns
+        -------
+        tuple[list, list, list, list, list]
+            The ``(x, y, weights, functions, models)`` lists, one entry per fit target.
 
         Raises
         ------
         ValueError
-            If no parameters Dataset is provided. If no fit functions are provided. If no parameter
-            names are found for the fit functions.
+            If no parameters Dataset is provided, if no fit bindings are provided, or if a binding
+            names a dataset key that is not in the parameters Dataset.
         """
-
         if self.parameters is None:
             raise ValueError('No parameters Dataset provided.')
 
@@ -207,16 +231,91 @@ class ParameterAnalysis(EasyDynamicsModelBase):
                 funcs.append(target.function)
                 models.append(binding.model)
 
-        mf = MultiFitter(
-            fit_objects=models,
-            fit_functions=funcs,
-        )
+        return xs, ys, ws, funcs, models
 
-        return mf.fit(
-            x=xs,
-            y=ys,
-            weights=ws,
-        )
+    #############
+    # Hooks for BayesianSamplingMixin
+    #############
+
+    def _build_bayesian_fitter(self) -> MultiFitter:
+        """
+        Build the MultiFitter over the binding models.
+
+        Unlike the other Analysis classes, the objects being fitted are the binding models rather
+        than this object, so the parameters live on those models.
+
+        Returns
+        -------
+        MultiFitter
+            A MultiFitter over the per-target models and fit functions.
+        """
+        _, _, _, funcs, models = self._build_fit_inputs()
+        return MultiFitter(fit_objects=models, fit_functions=funcs)
+
+    def _get_sampling_data(self) -> tuple[list, list, list]:
+        """
+        Get the per-target data to bind to the Sampler.
+
+        Returns
+        -------
+        tuple[list, list, list]
+            The ``(x, y, weights)`` triple, one entry per fit target.
+        """
+        xs, ys, ws, _, _ = self._build_fit_inputs()
+        return xs, ys, ws
+
+    def _get_chain_parameters(self) -> list[Parameter]:
+        """
+        Get the free parameters across every binding model.
+
+        A model appears once per target it is fitted against, so the union is taken by
+        ``unique_name`` to avoid counting its parameters more than once.
+
+        Returns
+        -------
+        list[Parameter]
+            The free parameters of the binding models, without duplicates.
+        """
+        parameters = {}
+        for binding in self.bindings:
+            for parameter in binding.model.get_free_parameters():
+                parameters.setdefault(parameter.unique_name, parameter)
+        return list(parameters.values())
+
+    def parameter_label(self, parameter: Parameter) -> str:
+        """
+        Label a parameter with the binding model it belongs to.
+
+        Two bindings can use models of the same kind, whose parameters would then share a name, so
+        the model's display name is prefixed when that is needed to tell them apart. A single
+        binding, or models that already name their parameters after themselves, keep their plain
+        names -- these get long quickly, and there is nothing to disambiguate.
+
+        Parameters
+        ----------
+        parameter : Parameter
+            The parameter to label.
+
+        Returns
+        -------
+        str
+            The parameter name, qualified by model where that is needed to tell copies apart.
+        """
+        if not self._name_is_ambiguous(parameter):
+            return parameter.name
+        owners = [
+            binding.model
+            for binding in self.bindings
+            if any(
+                p.unique_name == parameter.unique_name for p in binding.model.get_free_parameters()
+            )
+        ]
+        if len(owners) != 1:
+            return parameter.name
+        model_name = owners[0].display_name
+        if model_name is None or parameter.name.startswith(model_name):
+            return parameter.name
+        return f'{model_name}: {parameter.name}'
 
     def plot(
         self, names: str | list[str] | None = None, **kwargs: dict[str, Any]
