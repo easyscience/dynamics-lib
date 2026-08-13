@@ -760,6 +760,7 @@ class BayesianSamplingMixin:
         from easydynamics.utils.posterior_plotting import plot_trace
 
         results = self._require_posterior_result()
+        kwargs.setdefault('units', self._chain_units(results))
         return plot_trace(
             draws=results.draws,
             logp=results.logp,
@@ -789,6 +790,7 @@ class BayesianSamplingMixin:
         from easydynamics.utils.posterior_plotting import plot_corner
 
         results = self._require_posterior_result()
+        kwargs.setdefault('units', self._chain_units(results))
         return plot_corner(
             draws=results.draws,
             names=self._chain_display_names(results),
@@ -847,6 +849,8 @@ class BayesianSamplingMixin:
 
         predictions = self._evaluate_over_draws(results, x, n_draws)
         y_err = None if weights is None else 1.0 / np.asarray(weights)
+        kwargs.setdefault('xlabel', self._predictive_axis_labels()[0])
+        kwargs.setdefault('ylabel', self._predictive_axis_labels()[1])
         return plot_posterior_predictive(
             x=np.asarray(x),
             y=np.asarray(y),
@@ -856,6 +860,25 @@ class BayesianSamplingMixin:
             credible_interval=credible_interval,
             **kwargs,
         )
+
+    def _predictive_axis_labels(self) -> tuple[str | None, str | None]:
+        """
+        Get default axis labels for the posterior predictive plot.
+
+        The base implementation reads the energy and intensity units off the analysis when they are
+        available, and falls back to no label rather than guessing.
+
+        Returns
+        -------
+        tuple[str | None, str | None]
+            The ``(xlabel, ylabel)`` pair.
+        """
+        energy = getattr(self, 'energy', None)
+        xlabel = None if energy is None else f'Energy ({energy.unit})'
+        sample_model = getattr(self, 'sample_model', None)
+        y_unit = None if sample_model is None else getattr(sample_model, 'y_unit', None)
+        ylabel = 'Intensity' if y_unit is None else f'Intensity ({y_unit})'
+        return xlabel, ylabel
 
     def _evaluate_over_draws(
         self,
@@ -974,6 +997,25 @@ class BayesianSamplingMixin:
         """
         names = [p.name for p in self._get_chain_parameters()]
         return names.count(parameter.name) > 1
+
+    def _chain_units(self, results: SamplingResults) -> list[str]:
+        """
+        Get the unit of each column of the chain.
+
+        Parameters
+        ----------
+        results : SamplingResults
+            The sampling results whose columns should be described.
+
+        Returns
+        -------
+        list[str]
+            One unit per column, empty where no parameter could be matched.
+        """
+        return [
+            '' if parameter is None else str(parameter.unit)
+            for parameter in self._resolve_chain_parameters(results)
+        ]
 
     def _chain_display_names(self, results: SamplingResults) -> list[str]:
         """

@@ -204,3 +204,65 @@ class TestSampling:
         # EXPECT
         with pytest.raises(ValueError, match='No fit bindings'):
             analysis.sample_posterior(samples=10)
+
+
+class TestParameterLabelEdgeCases:
+    def test_colliding_names_are_qualified_by_model(self):
+        # WHEN two bindings use models whose parameters share a name
+        shared_name_model_a = sm.Polynomial(
+            coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV', name='Line'
+        )
+        shared_name_model_b = sm.Polynomial(
+            coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV', name='Line'
+        )
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(model=shared_name_model_a, targets='Lorentzian width'),
+                edyn.FitBinding(model=shared_name_model_b, targets='Lorentzian area'),
+            ],
+        )
+
+        # THEN
+        parameters = analysis._get_chain_parameters()
+        names = [p.name for p in parameters]
+        labels = [analysis.parameter_label(p) for p in parameters]
+
+        # EXPECT the bare names collide, and the labels resolve it
+        assert len(set(names)) < len(names)
+        assert len(set(labels)) == len(labels)
+
+    def test_single_binding_keeps_plain_names(self):
+        # WHEN
+        analysis = make_analysis(two_bindings=False)
+
+        # EXPECT no model prefix, since there is nothing to disambiguate
+        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+        assert labels == ['Width line_c0', 'Width line_c1']
+
+    def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
+        # WHEN a parameter belongs to none of the binding models
+        from easyscience.variable import Parameter
+
+        stranger = Parameter(name='Width line_c0', value=1.0)
+
+        # EXPECT it is returned unqualified rather than mislabelled
+        assert analysis.parameter_label(stranger) == 'Width line_c0'
+
+    def test_models_without_a_display_name_fall_back_to_the_unique_name(self):
+        # WHEN two colliding models have no display name to tell them apart
+        model_a = sm.Polynomial(coefficients=[0.1, 0.35], x_unit='1/angstrom', y_unit='meV')
+        model_b = sm.Polynomial(coefficients=[2.0, -0.3], x_unit='1/angstrom', y_unit='meV')
+        analysis = edyn.ParameterAnalysis(
+            parameters=make_dataset(),
+            bindings=[
+                edyn.FitBinding(model=model_a, targets='Lorentzian width'),
+                edyn.FitBinding(model=model_b, targets='Lorentzian area'),
+            ],
+        )
+
+        # THEN
+        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+
+        # EXPECT still unambiguous, which is what matters
+        assert len(set(labels)) == len(labels)

@@ -65,6 +65,13 @@ class TestPlotTrace:
         with pytest.raises(ValueError, match='two-dimensional'):
             plot_trace(draws=np.zeros(10), names=['a'])
 
+    def test_labels_carry_units(self, draws):
+        # WHEN
+        fig = plot_trace(draws=draws, names=['a', 'b', 'c'], units=['meV', 'm^2/s', ''])
+
+        # EXPECT the real units are shown, and an empty one is skipped
+        assert [axis.get_ylabel() for axis in fig.axes] == ['a (meV)', 'b (m^2/s)', 'c']
+
 
 class TestPlotCorner:
     def test_grid_is_square_in_the_parameter_count(self, draws):
@@ -85,6 +92,24 @@ class TestPlotCorner:
         # EXPECT
         with pytest.raises(ValueError, match='one entry per column'):
             plot_corner(draws=draws, names=['a'])
+
+    def test_diagonal_panel_is_labelled_as_counts(self, draws):
+        # WHEN
+        fig = plot_corner(draws=draws, names=['a', 'b', 'c'])
+
+        # EXPECT the top-left panel says what its vertical axis actually is. It is a histogram, so
+        # the parameter is on the x axis and labelling y with the parameter name would be wrong.
+        assert fig.axes[0].get_ylabel() == 'counts'
+
+    def test_units_are_appended_to_labels(self, draws):
+        # WHEN
+        fig = plot_corner(draws=draws, names=['a', 'b', 'c'], units=['meV', '', 'dimensionless'])
+
+        # EXPECT the real unit is shown, and empty or dimensionless ones are skipped
+        bottom_row = fig.axes[-3:]
+        assert bottom_row[0].get_xlabel() == 'a (meV)'
+        assert bottom_row[1].get_xlabel() == 'b'
+        assert bottom_row[2].get_xlabel() == 'c'
 
 
 class TestPlotPosteriorPredictive:
@@ -146,3 +171,17 @@ class TestPlotPosteriorPredictive:
         narrow_span = narrow.axes[0].collections[0].get_paths()[0].get_extents().height
         wide_span = wide.axes[0].collections[0].get_paths()[0].get_extents().height
         assert wide_span > narrow_span
+
+    def test_axis_labels_are_set_when_given(self):
+        # WHEN
+        fig = plot_posterior_predictive(
+            x=np.zeros(4),
+            y=np.zeros(4),
+            predictions=np.zeros((5, 4)),
+            xlabel='Energy (meV)',
+            ylabel='Intensity',
+        )
+
+        # EXPECT
+        assert fig.axes[0].get_xlabel() == 'Energy (meV)'
+        assert fig.axes[0].get_ylabel() == 'Intensity'

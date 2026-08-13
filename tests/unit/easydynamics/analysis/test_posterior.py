@@ -306,3 +306,19 @@ class TestSummarizeDraws:
         # EXPECT
         assert 'Gaussian area' in text
         assert 'median' in text
+
+
+class TestPosteriorSummaryContainer:
+    def test_len_and_iteration(self):
+        # WHEN
+        parameters = [make_parameter(name='a'), make_parameter(name='b')]
+        summary = summarize_draws(np.zeros((7, 2)), ['a', 'b'], parameters)
+
+        # EXPECT
+        assert len(summary) == 2
+        assert [entry.name for entry in summary] == ['a', 'b']
+        assert len(summary.entries) == 2
+
+    def test_repr_with_no_entries(self):
+        # EXPECT
+        assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))

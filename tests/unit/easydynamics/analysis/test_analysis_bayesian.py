@@ -247,3 +247,45 @@ class TestPredictivePlot:
         # EXPECT
         with pytest.raises(NotImplementedError, match='single dataset only'):
             analysis.plot_posterior_predictive()
+
+
+class TestParameterLabelEdgeCases:
+    def test_single_q_analysis_keeps_plain_names(self):
+        # WHEN there is only one Q index, nothing needs disambiguating
+        energy_values = np.linspace(-5.0, 5.0, 15)
+        intensity = 2.0 * np.exp(-0.5 * (energy_values / 1.2) ** 2)
+        experiment = edyn.Experiment(
+            data=sc.DataArray(
+                data=sc.array(
+                    dims=['Q', 'energy'],
+                    values=intensity[None, :],
+                    variances=np.full_like(intensity, 0.01)[None, :],
+                ),
+                coords={
+                    'Q': sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+        analysis = edyn.Analysis(
+            display_name='SingleQ',
+            experiment=experiment,
+            sample_model=sm.SampleModel(components=sm.Gaussian(area=2.0, width=1.0)),
+            instrument_model=sm.InstrumentModel(),
+        )
+
+        # THEN
+        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+
+        # EXPECT the short form, not 'Gaussian width (Q_index=0)'
+        assert 'Gaussian width' in labels
+        assert not any('Q_index=' in label for label in labels)
+
+    def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
+        # WHEN a parameter belongs to no Q index of this analysis
+        from easyscience.variable import Parameter
+
+        stranger = Parameter(name='Gaussian width', value=1.0)
+
+        # EXPECT it is returned unqualified rather than mislabelled
+        assert analysis.parameter_label(stranger) == 'Gaussian width'

@@ -484,3 +484,79 @@ class warnings_as_errors:
         if exc_info[0] is None:
             assert not caught, f'unexpected warnings: {[str(w.message) for w in caught]}'
         return False
+
+
+class TestErrorPaths:
+    def test_bumps_outlier_crash_is_reported_as_a_degeneracy(self, analysis):
+        # WHEN BUMPS' own outlier removal indexes past the end of its buffer, which happens when
+        # chains scatter because the model is not identifiable
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = IndexError(
+                'index 71 is out of bounds for axis 0 with size 40'
+            )
+
+            # EXPECT the bare IndexError is replaced by something actionable
+            with pytest.raises(RuntimeError, match='degenerate'):
+                analysis.sample_posterior(samples=10)
+
+    def test_parameters_entry_of_the_wrong_type_raises(self, analysis):
+        # EXPECT
+        with pytest.raises(TypeError, match='Parameter objects or parameter names'):
+            analysis.sample_posterior(samples=10, parameters=[42])
+
+    def test_median_skips_columns_with_no_matching_parameter(self, analysis):
+        # WHEN a chain carries a column this analysis knows nothing about
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            results = fake_results(analysis)
+            results.param_names = [*results.param_names, 'Parameter_does_not_exist']
+            results.draws = np.column_stack([results.draws, np.zeros(results.draws.shape[0])])
+            sampler_class.return_value.sample.return_value = results
+            analysis.sample_posterior(samples=10)
+
+        # EXPECT the unknown column is skipped rather than crashing
+        changed = analysis.set_parameters_to_posterior_median()
+        assert len(changed) == len(analysis.get_free_parameters())
+
+    def test_load_chain_uses_the_sidecar_when_present(self, analysis, tmp_path):
+        # WHEN a chain is saved and reloaded into a *different* analysis, whose unique names differ
+        bound_all(analysis)
+        with patch(SAMPLER_PATH) as sampler_class:
+            saved = fake_results(analysis)
+            sampler_class.return_value.sample.return_value = saved
+            analysis.sample_posterior(samples=10)
+            analysis.save_chain(str(tmp_path / 'chain'))
+
+        fresh = make_analysis()
+        bound_all(fresh)
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.load_state.return_value = saved
+            fresh.load_chain(str(tmp_path / 'chain'))
+
+        # EXPECT the sidecar maps the old unique names onto the new analysis's parameters
+        summary = fresh.posterior_summary()
+        assert {entry.name for entry in summary} == {p.name for p in fresh.get_free_parameters()}
+        assert all(np.isfinite(entry.value) for entry in summary)
+
+
+class TestPlotRendering:
+    def test_trace_and_corner_render_from_a_chain(self, analysis):
+        # WHEN
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+
+        mpl.use('Agg')
+        bound_all(analysis)
+        n_parameters = len(analysis.get_free_parameters())
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(analysis)
+            analysis.sample_posterior(samples=10)
+
+        # EXPECT
+        assert len(analysis.plot_trace().axes) == n_parameters + 1
+        assert len(analysis.plot_corner().axes) == n_parameters**2
+        plt.close('all')

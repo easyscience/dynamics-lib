@@ -287,9 +287,12 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         Label a parameter with the binding model it belongs to.
 
         Two bindings can use models of the same kind, whose parameters would then share a name, so
-        the model's display name is prefixed when that is needed to tell them apart. A single
-        binding, or models that already name their parameters after themselves, keep their plain
-        names -- these get long quickly, and there is nothing to disambiguate.
+        the owning model is prefixed when that is needed to tell them apart. A single binding, or
+        models that already name their parameters after themselves, keep their plain names -- these
+        get long quickly, and there is nothing to disambiguate.
+
+        The prefix is the model's display name, unless two models share that too, in which case the
+        unique name is used: a label that does not actually disambiguate is worse than a long one.
 
         Parameters
         ----------
@@ -303,19 +306,21 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         """
         if not self._name_is_ambiguous(parameter):
             return parameter.name
+
+        models = {binding.model.unique_name: binding.model for binding in self.bindings}
         owners = [
-            binding.model
-            for binding in self.bindings
-            if any(
-                p.unique_name == parameter.unique_name for p in binding.model.get_free_parameters()
-            )
+            model
+            for model in models.values()
+            if any(p.unique_name == parameter.unique_name for p in model.get_free_parameters())
         ]
         if len(owners) != 1:
             return parameter.name
-        model_name = owners[0].display_name
-        if model_name is None or parameter.name.startswith(model_name):
-            return parameter.name
-        return f'{model_name}: {parameter.name}'
+
+        owner = owners[0]
+        display_names = [model.display_name for model in models.values()]
+        if owner.display_name is None or display_names.count(owner.display_name) > 1:
+            return f'{owner.unique_name}: {parameter.name}'
+        return f'{owner.display_name}: {parameter.name}'
 
     def plot(
         self, names: str | list[str] | None = None, **kwargs: dict[str, Any]
