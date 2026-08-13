@@ -313,3 +313,45 @@ class TestIndependentSamplingDiscoverability:
         # EXPECT the plain message when nothing has been sampled anywhere
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
             analysis.posterior_summary()
+
+
+class TestSharedParameterLabels:
+    def test_a_parameter_shared_across_q_is_not_tied_to_one_index(self):
+        # WHEN a diffusion model contributes global parameters, the same objects appear at every Q
+        energy_values = np.linspace(-5.0, 5.0, 15)
+        rows = [2.0 * np.exp(-0.5 * (energy_values / 1.2) ** 2) for _ in Q_VALUES]
+        observed = np.vstack(rows)
+        experiment = edyn.Experiment(
+            data=sc.DataArray(
+                data=sc.array(
+                    dims=['Q', 'energy'],
+                    values=observed,
+                    variances=np.full_like(observed, 0.01),
+                ),
+                coords={
+                    'Q': sc.array(dims=['Q'], values=Q_VALUES, unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+        analysis = edyn.Analysis(
+            display_name='Shared',
+            experiment=experiment,
+            sample_model=sm.SampleModel(
+                components=sm.ComponentCollection(components=[sm.DeltaFunction(area=0.2)]),
+                diffusion_models=sm.BrownianTranslationalDiffusion(
+                    name='Brownian', diffusion_coefficient=2.4e-9, scale=0.5
+                ),
+            ),
+            instrument_model=sm.InstrumentModel(),
+        )
+
+        # THEN
+        owners = analysis._parameter_owner_index()
+        shared = [p for p in analysis._get_chain_parameters() if p.unique_name not in owners]
+
+        # EXPECT the shared parameters are left out of the owner map, since no single Q owns them,
+        # and so keep their plain names rather than being labelled with an arbitrary Q
+        assert shared, 'expected the diffusion model to contribute parameters shared across Q'
+        for parameter in shared:
+            assert analysis.parameter_label(parameter) == parameter.name

@@ -239,12 +239,12 @@ def _is_absurdly_wide(suggestion: BoundsSuggestion) -> bool:
     bool
         True when the range is more than ``ABSURD_WIDTH_FACTOR`` times the parameter's magnitude.
     """
-    width = suggestion.suggested_max - suggestion.suggested_min
-    if not np.isfinite(width):
-        return True
     scale = abs(float(suggestion.parameter.value))
     if scale == 0:
+        # No magnitude to compare against, so the ratio would be meaningless rather than alarming.
         return False
+    width = suggestion.suggested_max - suggestion.suggested_min
+    # An infinite width compares greater than any threshold, so it needs no separate check.
     return width > ABSURD_WIDTH_FACTOR * scale
 
 

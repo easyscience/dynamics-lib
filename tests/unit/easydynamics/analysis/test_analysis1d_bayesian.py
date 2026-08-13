@@ -632,3 +632,20 @@ class TestSidecarLabels:
 
         # EXPECT
         assert analysis._chain_name_map[target.unique_name] == analysis.parameter_label(target)
+
+    def test_extending_after_a_failed_run_is_allowed(self, analysis):
+        # WHEN a run built the sampler but died before storing results, so there is a sampler to
+        # extend but no chain shape to compare against
+        bound_all(analysis)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = RuntimeError('died mid-run')
+            with pytest.raises(RuntimeError, match='died mid-run'):
+                analysis.sample_posterior(samples=10)
+
+            assert analysis.bayesian_sampler is not None
+            assert analysis.posterior_result is None
+
+            # EXPECT the shape guard steps aside rather than comparing against nothing
+            sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
+            analysis.extend_sampling(additional_samples=10)
