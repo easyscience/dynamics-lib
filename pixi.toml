@@ -100,7 +100,13 @@ user = { features = ['py-max', 'user'] }
 unit-tests = 'python -m pytest tests/unit/ --color=yes -v'
 functional-tests = 'python -m pytest tests/functional/ --color=yes -v'
 integration-tests = 'python -m pytest tests/integration/ --color=yes -n auto -v'
-notebook-tests = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v'
+# Warm the pooch cache first. Several notebooks fetch the same file, and running them with
+# '-n auto' has the workers race: one writes the file while another opens it, which fails on
+# Windows. Fetching up front leaves the parallel run with nothing to do but read.
+prefetch-tutorial-data = 'python tools/prefetch_tutorial_data.py'
+notebook-tests = { cmd = 'python -m pytest --nbmake docs/docs/tutorials/ --nbmake-timeout=1200 --color=yes -n auto -v', depends-on = [
+  'prefetch-tutorial-data',
+] }
 
 test = { depends-on = ['unit-tests'] }
 
