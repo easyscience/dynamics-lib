@@ -447,4 +447,5 @@ def corner_with_slider(
     )
     slider.observe(lambda change: draw(change['new']), names='value')
     draw(indices[0])
-    return widgets.VBox([slider, output])
+    # Slider under the figure, matching where plopp puts its slicer controls.
+    return widgets.VBox([output, slider])

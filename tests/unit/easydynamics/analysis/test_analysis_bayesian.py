@@ -438,7 +438,8 @@ class TestAggregatingPerQChains:
         # The obvious way to build this captures nothing and leaves the panel blank beside the
         # slider, so an empty panel is the regression worth guarding. Which mime type arrives
         # depends on the environment: a live kernel renders a PNG, plain pytest only the repr.
-        slider, panel = widget.children
+        # The figure comes first and the slider sits under it, where plopp puts its controls.
+        panel, slider = widget.children
         assert list(slider.options) == list(range(len(Q_VALUES)))
         assert panel.outputs, 'the initial chain was not drawn'
         assert 'Figure' in str(panel.outputs[0]['data'])
@@ -475,7 +476,7 @@ class TestAggregatingPerQChains:
             widget = analysis.plot_corner()
 
         # EXPECT the slider cannot land on a Q with nothing to draw
-        assert list(widget.children[0].options) == [2]
+        assert list(widget.children[1].options) == [2]
 
     def test_trace_points_at_the_individual_chains(self, analysis):
         # WHEN
