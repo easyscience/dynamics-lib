@@ -31,14 +31,14 @@ def slicerplot_with_residuals(
 
     ```python
     import scipp as sc
-    from easydynamics.utils.plotting import slicerplot_with_residuals
+    import easydynamics as edyn
 
     dg = sc.DataGroup({
         'Data': my_data,
         'Model': my_model,
         'Residuals': my_residuals,
     })
-    fig = slicerplot_with_residuals(dg, residuals_key='Residuals', keep='energy')
+    fig = edyn.slicerplot_with_residuals(dg, residuals_key='Residuals', keep='energy')
     ```
 
     Parameters

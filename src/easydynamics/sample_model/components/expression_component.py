@@ -41,9 +41,9 @@ class ExpressionComponent(ModelComponent):
     construction:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    expr = sm.ExpressionComponent(
+    expr = edyn.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
         parameters={'A': 10, 'x0': 0, 'sigma': 1},
         x_unit='meV',
@@ -68,7 +68,7 @@ class ExpressionComponent(ModelComponent):
     the unit of the evaluated expression is derived from the parameter units and x_unit (see
     ``output_unit``), and a warning is issued if it does not match y_unit:
     ```python
-    expr = sm.ExpressionComponent(
+    expr = edyn.ExpressionComponent(
         'A * exp(-(x - x0)**2 / (2*sigma**2))',
         parameters={'A': 10, 'x0': 0, 'sigma': 1},
         parameter_units={'A': '1/meV', 'x0': 'meV', 'sigma': 'meV'},
@@ -82,7 +82,7 @@ class ExpressionComponent(ModelComponent):
     The symbols ``hbar`` (in meV*s) and ``kb`` (in meV/K) are provided automatically as read-only
     constants (DescriptorNumbers) when they appear in the expression:
     ```python
-    boltzmann = sm.ExpressionComponent(
+    boltzmann = edyn.ExpressionComponent(
         'exp(-x / (kb * T))',
         parameters={'T': 300.0},
         parameter_units={'T': 'K'},

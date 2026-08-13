@@ -40,10 +40,9 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
     dataset keys using a ``FitBinding``:
     ```python
     import easydynamics as edyn
-    import easydynamics.sample_model as sm
 
     # analysis is an edyn.Analysis object with previously fitted parameters
-    diffusion_model = sm.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
+    diffusion_model = edyn.BrownianTranslationalDiffusion(diffusion_coefficient=2.4e-9, scale=0.5)
     binding = edyn.FitBinding(
         model=diffusion_model,
         targets={'width': 'Lorentzian width'},
@@ -64,7 +63,7 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
     (or pass ``x_unit=None`` / ``y_unit=None`` to fit raw values):
     ```python
     area_binding = edyn.FitBinding(
-        model=sm.Polynomial(coefficients=[0.5, 0.0], x_unit='1/angstrom', y_unit='meV'),
+        model=edyn.Polynomial(coefficients=[0.5, 0.0], x_unit='1/angstrom', y_unit='meV'),
         targets='Lorentzian area',
     )
     param_analysis = edyn.ParameterAnalysis(

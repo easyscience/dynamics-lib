@@ -33,9 +33,9 @@ class Polynomial(ModelComponent):
 
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    poly = sm.Polynomial(coefficients=[1.5])
+    poly = edyn.Polynomial(coefficients=[1.5])
     x = np.linspace(-5, 5, 100)
     values = poly.evaluate(x)
     ```
@@ -44,9 +44,9 @@ class Polynomial(ModelComponent):
 
     Coefficients are ordered as ``[c0, c1, ...]``, where ``c0`` is the constant term:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    poly = sm.Polynomial(coefficients=[2.0, 0.1], name='Background')
+    poly = edyn.Polynomial(coefficients=[2.0, 0.1], name='Background')
     poly.coefficients = [1.5, 0.05]
     ```
 
@@ -54,17 +54,17 @@ class Polynomial(ModelComponent):
 
     Powers that are not listed are filled with coefficients fixed to zero:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    poly = sm.Polynomial(coefficients={2: 1.5})  # 1.5*x^2, with c0 and c1 fixed at 0
+    poly = edyn.Polynomial(coefficients={2: 1.5})  # 1.5*x^2, with c0 and c1 fixed at 0
     ```
 
     **Changing the degree after construction**
 
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    poly = sm.Polynomial(coefficients=[2.0, 0.1])
+    poly = edyn.Polynomial(coefficients=[2.0, 0.1])
     poly.add_coefficient(0.05)  # now 2.0 + 0.1*x + 0.05*x^2
     removed = poly.remove_coefficient()  # returns 0.05, back to 2.0 + 0.1*x
     ```

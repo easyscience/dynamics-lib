@@ -44,8 +44,6 @@ class Analysis1d(BayesianSamplingMixin, AnalysisBase):
     ```python
     import pooch
     import easydynamics as edyn
-    import easydynamics.sample_model as sm
-    from easydynamics.analysis.analysis1d import Analysis1d
 
     file_path = pooch.retrieve(
         url='https://github.com/easyscience/dynamics-lib/raw/refs/heads/master/docs/docs/tutorials/data/vanadium_data_example.h5',
@@ -54,15 +52,15 @@ class Analysis1d(BayesianSamplingMixin, AnalysisBase):
     experiment = edyn.Experiment('Vanadium')
     experiment.load_hdf5(filename=file_path)
 
-    sample_model = sm.SampleModel(components=sm.DeltaFunction(area=1))
-    resolution_model = sm.ResolutionModel(components=sm.Gaussian(width=0.1))
-    background_model = sm.BackgroundModel(components=sm.Polynomial(coefficients=[0.001]))
-    instrument_model = sm.InstrumentModel(
+    sample_model = edyn.SampleModel(components=edyn.DeltaFunction(area=1))
+    resolution_model = edyn.ResolutionModel(components=edyn.Gaussian(width=0.1))
+    background_model = edyn.BackgroundModel(components=edyn.Polynomial(coefficients=[0.001]))
+    instrument_model = edyn.InstrumentModel(
         resolution_model=resolution_model,
         background_model=background_model,
     )
 
-    analysis = Analysis1d(
+    analysis = edyn.Analysis1d(
         display_name='Vanadium 1D Analysis',
         experiment=experiment,
         sample_model=sample_model,

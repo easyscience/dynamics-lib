@@ -35,9 +35,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
     By default the center is fixed at 0, which is the typical setup for a QENS quasi-elastic line:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    l = sm.Lorentzian(area=1.0, width=0.3)
+    l = edyn.Lorentzian(area=1.0, width=0.3)
     x = np.linspace(-2, 2, 100)
     values = l.evaluate(x)
     ```
@@ -46,9 +46,9 @@ class Lorentzian(CreateParametersMixin, ModelComponent):
 
     Pass a numeric value for ``center`` to leave it free during fitting:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    l = sm.Lorentzian(area=2.0, center=0.5, width=0.3, name='QE peak')
+    l = edyn.Lorentzian(area=2.0, center=0.5, width=0.3, name='QE peak')
     l.area = 3.0
     l.width = 0.2
     ```

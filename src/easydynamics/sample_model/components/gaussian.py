@@ -36,9 +36,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     By default the center is fixed at 0, which is the typical setup for a QENS elastic line:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    g = sm.Gaussian(area=1.0, width=0.5)
+    g = edyn.Gaussian(area=1.0, width=0.5)
     x = np.linspace(-2, 2, 100)
     values = g.evaluate(x)
     ```
@@ -48,9 +48,9 @@ class Gaussian(CreateParametersMixin, ModelComponent):
     Pass a numeric value for ``center`` to leave it free during fitting, and use the property
     setters to update parameter values after construction:
     ```python
-    import easydynamics.sample_model as sm
+    import easydynamics as edyn
 
-    g = sm.Gaussian(area=2.0, center=0.5, width=0.3, name='Peak')
+    g = edyn.Gaussian(area=2.0, center=0.5, width=0.3, name='Peak')
     g.area = 3.0
     g.width = 0.2
     ```

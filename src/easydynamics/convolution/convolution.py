@@ -42,16 +42,15 @@ class Convolution(NumericalConvolutionBase):
     ``Gaussian``, ``Lorentzian``, or ``Voigt``:
     ```python
     import numpy as np
-    import easydynamics.sample_model as sm
-    from easydynamics.convolution import Convolution
+    import easydynamics as edyn
 
-    sample_components = sm.ComponentCollection(
-        components=[sm.DeltaFunction(area=0.5), sm.Lorentzian(area=1.0, width=0.3)]
+    sample_components = edyn.ComponentCollection(
+        components=[edyn.DeltaFunction(area=0.5), edyn.Lorentzian(area=1.0, width=0.3)]
     )
-    resolution_components = sm.ComponentCollection(components=[sm.Gaussian(width=0.05)])
+    resolution_components = edyn.ComponentCollection(components=[edyn.Gaussian(width=0.05)])
     energy = np.linspace(-2, 2, 100)
 
-    convolver = Convolution(
+    convolver = edyn.Convolution(
         sample_components=sample_components,
         resolution_components=resolution_components,
         energy=energy,
