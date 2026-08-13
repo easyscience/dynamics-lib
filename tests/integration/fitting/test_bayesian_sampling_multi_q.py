@@ -217,3 +217,45 @@ class TestParameterAnalysisChain:
         assert results.draws.shape[1] == len(analysis._get_chain_parameters())
         names = [entry.name for entry in analysis.posterior_summary()]
         assert len(set(names)) == len(names)
+
+
+class TestAggregatedIndependentChains:
+    def test_summary_gathers_the_real_per_q_chains(self):
+        # WHEN each Q is sampled on its own
+        analysis = build_analysis()
+        analysis.fit(fit_method='independent')
+        for analysis1d in analysis.analysis_list:
+            analysis1d.suggest_bounds().apply()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            analysis.sample_posterior(fit_method='independent', **SAMPLE_KWARGS)
+
+        # THEN
+        summary = analysis.posterior_summary()
+
+        # EXPECT one table covering every Q, and the widths still recovered
+        assert len(summary) == sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
+        for q_index in range(len(Q_VALUES)):
+            entry = summary[f'Gaussian width (Q_index={q_index})']
+            spread = max(entry.minus, entry.plus)
+            assert abs(entry.median - true_width(Q_VALUES[q_index])) < 4 * spread
+
+    def test_median_applies_each_chain_to_its_own_q(self):
+        # WHEN
+        analysis = build_analysis()
+        analysis.fit(fit_method='independent')
+        for analysis1d in analysis.analysis_list:
+            analysis1d.suggest_bounds().apply()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            analysis.sample_posterior(fit_method='independent', **SAMPLE_KWARGS)
+
+        changed = analysis.set_parameters_to_posterior_median()
+
+        # EXPECT every Q's parameters land on that Q's own median
+        assert len(changed) == sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
+        summary = analysis.posterior_summary()
+        for entry in summary:
+            assert entry.value == pytest.approx(entry.median, rel=1e-6)

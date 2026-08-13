@@ -7,9 +7,12 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+import matplotlib as mpl
 import numpy as np
 import pytest
 import scipp as sc
+
+mpl.use('Agg')
 
 import easydynamics as edyn
 import easydynamics.sample_model as sm
@@ -292,8 +295,9 @@ class TestParameterLabelEdgeCases:
 
 
 class TestIndependentSamplingDiscoverability:
-    def test_summary_points_at_the_per_q_chains(self, analysis):
+    def test_operations_needing_one_chain_point_at_the_per_q_chains(self, analysis):
         # WHEN sampling independently, the chains live on the Analysis1d objects, not here
+        remaining = iter(analysis.analysis_list)
         for analysis1d in analysis.analysis_list:
             for parameter in analysis1d.get_free_parameters():
                 parameter.min = float(parameter.value) - 5.0
@@ -301,13 +305,14 @@ class TestIndependentSamplingDiscoverability:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
-                analysis.analysis_list[0].get_free_parameters()
+                next(remaining).get_free_parameters()
             )
             analysis.sample_posterior(fit_method='independent', samples=10)
 
-        # EXPECT the error says where the chains actually are, rather than claiming none exist
+        # EXPECT anything that genuinely needs a single chain says where the chains actually are,
+        # rather than claiming none exist
         with pytest.raises(RuntimeError, match='analysis_list'):
-            analysis.posterior_summary()
+            analysis.plot_posterior_predictive()
 
     def test_untouched_analysis_still_reports_no_samples(self, analysis):
         # EXPECT the plain message when nothing has been sampled anywhere
@@ -355,3 +360,121 @@ class TestSharedParameterLabels:
         assert shared, 'expected the diffusion model to contribute parameters shared across Q'
         for parameter in shared:
             assert analysis.parameter_label(parameter) == parameter.name
+
+
+class TestAggregatingPerQChains:
+    def _sample_independently(self, analysis):
+        for analysis1d in analysis.analysis_list:
+            for parameter in analysis1d.get_free_parameters():
+                parameter.min = float(parameter.value) - 5.0
+                parameter.max = float(parameter.value) + 5.0
+
+        # The Q indices sample in order, and each must get a chain over its own parameters.
+        remaining = iter(analysis.analysis_list)
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
+                next(remaining).get_free_parameters()
+            )
+            analysis.sample_posterior(fit_method='independent', samples=10)
+
+    def test_posterior_results_holds_one_chain_per_q(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        # EXPECT
+        assert len(analysis.posterior_results) == len(Q_VALUES)
+        assert all(result is not None for result in analysis.posterior_results)
+
+    def test_posterior_results_is_none_before_sampling(self, analysis):
+        # EXPECT
+        assert analysis.posterior_results is None
+
+    def test_summary_gathers_every_q(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        # THEN
+        summary = analysis.posterior_summary()
+
+        # EXPECT one entry per free parameter per Q, each labelled by its Q index
+        expected = sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
+        names = [entry.name for entry in summary]
+        assert len(summary) == expected
+        assert len(set(names)) == len(names)
+        assert all('Q_index=' in name for name in names)
+
+    def test_median_applies_each_chain_to_its_own_q(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        # THEN
+        changed = analysis.set_parameters_to_posterior_median()
+
+        # EXPECT every Q's parameters are set, from that Q's own chain
+        expected = sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
+        assert len(changed) == expected
+
+    def test_corner_refuses_to_invent_cross_q_correlations(self, analysis):
+        # WHEN each Q was sampled separately, no draw pairs one Q with another
+        self._sample_independently(analysis)
+
+        # EXPECT it says so, rather than plotting correlations that are an artefact of the run
+        with pytest.raises(RuntimeError, match='no draw pairs one Q'):
+            analysis.plot_corner()
+
+    def test_trace_points_at_the_individual_chains(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        # EXPECT
+        with pytest.raises(RuntimeError, match='no single trace'):
+            analysis.plot_trace()
+
+    def test_a_simultaneous_chain_still_takes_precedence(self, analysis):
+        # WHEN a simultaneous run follows an independent one
+        self._sample_independently(analysis)
+        bound_all(analysis)
+        parameters = analysis._get_chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(parameters)
+            analysis.sample_posterior(fit_method='simultaneous', samples=10)
+
+        # EXPECT the single chain is summarized, not the stale per-Q ones
+        assert len(analysis.posterior_summary()) == len(parameters)
+        analysis.plot_corner()
+
+    def test_only_the_sampled_q_indices_are_gathered(self, analysis):
+        # WHEN just one Q index is sampled
+        target = analysis.analysis_list[1]
+        for parameter in target.get_free_parameters():
+            parameter.min = float(parameter.value) - 5.0
+            parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
+                target.get_free_parameters()
+            )
+            analysis.sample_posterior(fit_method='independent', Q_index=1, samples=10)
+
+        # EXPECT the unsampled Q indices are passed over rather than breaking the aggregation
+        summary = analysis.posterior_summary()
+        assert len(summary) == len(target.get_free_parameters())
+        assert all('Q_index=1' in entry.name for entry in summary)
+        assert len(analysis.set_parameters_to_posterior_median()) == len(
+            target.get_free_parameters()
+        )
+
+    def test_a_simultaneous_chain_serves_the_median_and_the_trace(self, analysis):
+        # WHEN
+        bound_all(analysis)
+        parameters = analysis._get_chain_parameters()
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.return_value = fake_results(parameters)
+            analysis.sample_posterior(fit_method='simultaneous', samples=10)
+
+        # EXPECT both come from the single chain, with no per-Q gathering involved
+        assert len(analysis.set_parameters_to_posterior_median()) == len(parameters)
+        assert len(analysis.plot_trace().axes) == len(parameters) + 1

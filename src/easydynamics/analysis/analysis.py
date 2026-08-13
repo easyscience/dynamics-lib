@@ -10,12 +10,15 @@ from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.fitting.sampler import SamplingResults
 from easyscience.variable import Parameter
+from matplotlib.figure import Figure
 from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
 from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
+from easydynamics.analysis.posterior import PosteriorSummary
+from easydynamics.analysis.posterior import summarize_draws
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
@@ -373,15 +376,36 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
                 return self.analysis_list[Q_index].sample_posterior(
                     samples=samples, burn=burn, thin=thin, **sampler_options
                 )
-            return [
+            results = [
                 analysis.sample_posterior(samples=samples, burn=burn, thin=thin, **sampler_options)
                 for analysis in self.analysis_list
             ]
+            # The per-Q chains stay on their own Analysis1d; this only records that they are the
+            # current results, so this object can gather them up again.
+            self._posterior_result = None
+            return results
         if fit_method == 'simultaneous':
             return super().sample_posterior(
                 samples=samples, burn=burn, thin=thin, **sampler_options
             )
         raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
+
+    @property
+    def posterior_results(self) -> list[SamplingResults | None] | None:
+        """
+        The per-Q chains from independent sampling, or None if there are none.
+
+        A simultaneous run produces one chain covering every Q, which is on
+        :attr:`posterior_result` instead.
+
+        Returns
+        -------
+        list[SamplingResults | None] | None
+            One entry per Q index, None where that Q has not been sampled, or None if no Q index
+            has been sampled at all.
+        """
+        results = [analysis1d.posterior_result for analysis1d in self.analysis_list]
+        return results if any(result is not None for result in results) else None
 
     def plot_data_and_model(
         self,
@@ -912,13 +936,137 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
             }
         return self._owner_index
 
+    def posterior_summary(self) -> PosteriorSummary:
+        """
+        Summarize the posterior, gathering the per-Q chains when sampling was independent.
+
+        Every entry is a marginal distribution of one parameter, and a marginal is well defined
+        within its own chain, so collecting them into one table is sound even though the chains are
+        separate. Labels are qualified by Q index, so the table reads the same either way.
+
+        A ``RuntimeError`` is raised if no sampling has been run, on this Analysis or on any of its
+        Q indices.
+
+        Returns
+        -------
+        PosteriorSummary
+            One entry per sampled parameter, across every Q index that has been sampled.
+        """
+        if self._posterior_result is not None:
+            return super().posterior_summary()
+
+        per_q = self.posterior_results
+        if per_q is None:
+            return super().posterior_summary()
+
+        entries = []
+        with self._bulk_parameter_access():
+            for analysis1d, result in zip(self.analysis_list, per_q, strict=True):
+                if result is None:
+                    continue
+                by_unique_name = {p.unique_name: p for p in analysis1d.get_free_parameters()}
+                resolved = [by_unique_name.get(name) for name in result.param_names]
+                labels = [
+                    unique_name if parameter is None else self.parameter_label(parameter)
+                    for unique_name, parameter in zip(result.param_names, resolved, strict=True)
+                ]
+                entries.extend(
+                    summarize_draws(result.draws, labels, resolved).entries,
+                )
+        return PosteriorSummary(entries)
+
+    def set_parameters_to_posterior_median(self) -> list[Parameter]:
+        """
+        Set every sampled parameter to the median of its marginal posterior.
+
+        Applies the per-Q chains to their own Q when sampling was independent.
+
+        A ``RuntimeError`` is raised if no sampling has been run, on this Analysis or on any of its
+        Q indices.
+
+        Returns
+        -------
+        list[Parameter]
+            The parameters that were changed.
+        """
+        if self._posterior_result is not None or self.posterior_results is None:
+            return super().set_parameters_to_posterior_median()
+
+        changed = []
+        for analysis1d in self.analysis_list:
+            if analysis1d.posterior_result is not None:
+                changed.extend(analysis1d.set_parameters_to_posterior_median())
+        return changed
+
+    def plot_corner(self, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot marginal and pairwise posterior distributions.
+
+        Only available for a simultaneous chain. Independent sampling draws each Q separately, so
+        there are no samples pairing a parameter at one Q with a parameter at another, and a corner
+        plot built from them would show correlations that are an artefact of how the sampling was
+        run rather than anything measured.
+
+        Parameters
+        ----------
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_corner`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+
+        Raises
+        ------
+        RuntimeError
+            If only independent per-Q chains exist.
+        """
+        if self._posterior_result is None and self.posterior_results is not None:
+            raise RuntimeError(
+                'A corner plot needs one chain covering the parameters it compares, and '
+                "fit_method='independent' samples each Q on its own, so no draw pairs one Q with "
+                'another. Use analysis.analysis_list[Q_index].plot_corner() for the correlations '
+                "within a Q, or sample with fit_method='simultaneous' to compare across Q."
+            )
+        return super().plot_corner(**kwargs)
+
+    def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
+        """
+        Plot the chain trace of each sampled parameter.
+
+        Only available for a simultaneous chain, since the per-Q chains are separate runs of
+        different lengths rather than one trace.
+
+        Parameters
+        ----------
+        **kwargs : dict[str, Any]
+            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_trace`.
+
+        Returns
+        -------
+        Figure
+            The matplotlib Figure.
+
+        Raises
+        ------
+        RuntimeError
+            If only independent per-Q chains exist.
+        """
+        if self._posterior_result is None and self.posterior_results is not None:
+            raise RuntimeError(
+                'Each Q index has its own chain, so there is no single trace to draw. Use '
+                'analysis.analysis_list[Q_index].plot_trace() for one of them, or sample with '
+                "fit_method='simultaneous'."
+            )
+        return super().plot_trace(**kwargs)
+
     def _require_posterior_result(self) -> SamplingResults:
         """
         Get the stored sampling results, pointing at the per-Q chains when those are what exist.
 
         Sampling independently stores a chain on each Analysis1d rather than here, so asking this
-        object for a summary afterwards would otherwise report that no sampling has happened, right
-        after it has.
+        object for one would otherwise report that no sampling has happened, right after it has.
 
         Returns
         -------
@@ -930,14 +1078,13 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         RuntimeError
             If no simultaneous sampling has been run on this Analysis.
         """
-        if self._posterior_result is None and any(
-            analysis1d.posterior_result is not None for analysis1d in self.analysis_list
-        ):
+        if self._posterior_result is None and self.posterior_results is not None:
             raise RuntimeError(
                 'This Analysis holds no chain of its own, but its Q indices do: sampling with '
-                "fit_method='independent' gives each Q its own chain. Use "
-                'analysis.analysis_list[Q_index] to summarize or plot one of them, or sample with '
-                "fit_method='simultaneous' to get a single chain over all Q."
+                "fit_method='independent' gives each Q its own chain. posterior_summary() and "
+                'set_parameters_to_posterior_median() gather those up; for anything needing a '
+                'single chain, use analysis.analysis_list[Q_index], or sample with '
+                "fit_method='simultaneous'."
             )
         return super()._require_posterior_result()
 
