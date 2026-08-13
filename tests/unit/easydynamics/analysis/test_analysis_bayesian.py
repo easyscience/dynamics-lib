@@ -415,13 +415,67 @@ class TestAggregatingPerQChains:
         expected = sum(len(a.get_free_parameters()) for a in analysis.analysis_list)
         assert len(changed) == expected
 
-    def test_corner_refuses_to_invent_cross_q_correlations(self, analysis):
-        # WHEN each Q was sampled separately, no draw pairs one Q with another
+    def test_corner_plots_one_q_at_a_time(self, analysis):
+        # WHEN each Q was sampled separately, no draw pairs one Q with another, so a corner plot
+        # can only show one chain at a time
         self._sample_independently(analysis)
 
-        # EXPECT it says so, rather than plotting correlations that are an artefact of the run
-        with pytest.raises(RuntimeError, match='no draw pairs one Q'):
+        # THEN
+        figure = analysis.plot_corner(Q_index=1)
+
+        # EXPECT that Q's own chain, not a combination across Q
+        n_parameters = len(analysis.analysis_list[1].get_free_parameters())
+        assert len(figure.axes) == n_parameters**2
+
+    def test_corner_offers_a_slider_in_a_notebook(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        with patch('easydynamics.analysis.analysis._in_notebook', return_value=True):
+            widget = analysis.plot_corner()
+
+        # EXPECT a slider over the sampled Q indices, and a panel that actually holds a figure.
+        # The obvious way to build this captures nothing and leaves the panel blank beside the
+        # slider, so an empty panel is the regression worth guarding. Which mime type arrives
+        # depends on the environment: a live kernel renders a PNG, plain pytest only the repr.
+        slider, panel = widget.children
+        assert list(slider.options) == list(range(len(Q_VALUES)))
+        assert panel.outputs, 'the initial chain was not drawn'
+        assert 'Figure' in str(panel.outputs[0]['data'])
+
+        slider.value = 2
+        assert panel.outputs, 'changing Q did not redraw'
+        assert 'Figure' in str(panel.outputs[0]['data'])
+
+    def test_corner_without_a_notebook_or_q_index_says_what_to_do(self, analysis):
+        # WHEN
+        self._sample_independently(analysis)
+
+        # EXPECT it names the sampled Q indices rather than just refusing
+        with (
+            patch('easydynamics.analysis.analysis._in_notebook', return_value=False),
+            pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
+        ):
             analysis.plot_corner()
+
+    def test_the_slider_only_offers_q_indices_that_were_sampled(self, analysis):
+        # WHEN only one Q index is sampled
+        target = analysis.analysis_list[2]
+        for parameter in target.get_free_parameters():
+            parameter.min = float(parameter.value) - 5.0
+            parameter.max = float(parameter.value) + 5.0
+
+        with patch(SAMPLER_PATH) as sampler_class:
+            sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
+                target.get_free_parameters()
+            )
+            analysis.sample_posterior(fit_method='independent', Q_index=2, samples=10)
+
+        with patch('easydynamics.analysis.analysis._in_notebook', return_value=True):
+            widget = analysis.plot_corner()
+
+        # EXPECT the slider cannot land on a Q with nothing to draw
+        assert list(widget.children[0].options) == [2]
 
     def test_trace_points_at_the_individual_chains(self, analysis):
         # WHEN

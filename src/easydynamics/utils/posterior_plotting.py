@@ -11,12 +11,14 @@ loaded from disk. The Analysis classes wrap them in convenience methods.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
+    from ipywidgets import VBox
     from matplotlib.figure import Figure
 
 
@@ -370,3 +372,79 @@ def _verify_draws(draws: np.ndarray, names: list[str]) -> None:
             f'names must have one entry per column of draws. '
             f'Got {len(names)} names for {draws.shape[1]} columns.'
         )
+
+
+def corner_with_slider(
+    chains: dict[int, dict],
+    title: str | None = None,
+    **kwargs: dict[str, Any],
+) -> VBox:
+    """
+    Show one corner plot at a time, with a slider choosing which chain to look at.
+
+    Chains sampled separately share no draws, so there is no joint distribution across them to
+    plot. Stepping through them one at a time shows the correlations that were actually sampled,
+    which is what a single combined figure could not do honestly.
+
+    Parameters
+    ----------
+    chains : dict[int, dict]
+        Mapping of index to a ``{'draws': ..., 'names': ..., 'units': ...}`` description of one
+        chain. ``units`` is optional.
+    title : str | None, default=None
+        Title prefix, extended with the selected index.
+    **kwargs : dict[str, Any]
+        Forwarded to :func:`plot_corner`.
+
+    Returns
+    -------
+    VBox
+        An ipywidgets box holding the slider and the figure.
+
+    Raises
+    ------
+    ValueError
+        If no chains are given.
+    """
+    import ipywidgets as widgets
+
+    if not chains:
+        raise ValueError('No chains to plot.')
+
+    indices = sorted(chains)
+    output = widgets.Output()
+
+    def draw(index: int) -> None:
+        """
+        Render the corner plot for one chain.
+
+        Parameters
+        ----------
+        index : int
+            The chain to draw.
+        """
+        chain = chains[index]
+        figure = plot_corner(
+            draws=chain['draws'],
+            names=chain['names'],
+            units=chain.get('units'),
+            title=title if title is None else f'{title} (Q index {index})',
+            **kwargs,
+        )
+        # append_display_data rather than the `with output:` context manager, which captures
+        # nothing under some kernels and would leave the slider with a blank panel beside it.
+        output.outputs = ()
+        output.append_display_data(figure)
+        # Rendered into the widget already, so the figure is closed rather than left for a backend
+        # to draw a second time.
+        plt.close(figure)
+
+    slider = widgets.SelectionSlider(
+        options=indices,
+        value=indices[0],
+        description='Q index',
+        continuous_update=False,
+    )
+    slider.observe(lambda change: draw(change['new']), names='value')
+    draw(indices[0])
+    return widgets.VBox([slider, output])

@@ -10,6 +10,7 @@ from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.fitting.sampler import SamplingResults
 from easyscience.variable import Parameter
+from ipywidgets import VBox
 from matplotlib.figure import Figure
 from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp import UnitError
@@ -25,6 +26,7 @@ from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.plotting import slicerplot_with_residuals
+from easydynamics.utils.posterior_plotting import corner_with_slider
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
@@ -998,38 +1000,82 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
                 changed.extend(analysis1d.set_parameters_to_posterior_median())
         return changed
 
-    def plot_corner(self, **kwargs: dict[str, Any]) -> Figure:
+    def plot_corner(self, Q_index: int | None = None, **kwargs: dict[str, Any]) -> Figure | VBox:
         """
         Plot marginal and pairwise posterior distributions.
 
-        Only available for a simultaneous chain. Independent sampling draws each Q separately, so
-        there are no samples pairing a parameter at one Q with a parameter at another, and a corner
-        plot built from them would show correlations that are an artefact of how the sampling was
-        run rather than anything measured.
+        After independent sampling each Q has its own chain, and no draw pairs a parameter at one Q
+        with a parameter at another, so there is no joint distribution across Q to plot. Rather
+        than combine them into a figure showing correlations that are an artefact of how the
+        sampling was run, this steps through the chains one at a time: pick one with ``Q_index``,
+        or leave it out in a notebook to get a slider.
 
         Parameters
         ----------
+        Q_index : int | None, default=None
+            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
+            used for a simultaneous chain, which already covers every Q.
         **kwargs : dict[str, Any]
             Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_corner`.
 
         Returns
         -------
-        Figure
-            The matplotlib Figure.
+        Figure | VBox
+            The matplotlib Figure, or an ipywidgets box with a Q slider.
 
         Raises
         ------
         RuntimeError
-            If only independent per-Q chains exist.
+            If a slider is asked for outside a notebook.
         """
-        if self._posterior_result is None and self.posterior_results is not None:
+        per_q = self.posterior_results
+        if self._posterior_result is not None or per_q is None:
+            return super().plot_corner(**kwargs)
+
+        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
+        if Q_index is not None:
+            return self.analysis_list[Q_index].plot_corner(**kwargs)
+
+        if not _in_notebook():
+            sampled = [index for index, result in enumerate(per_q) if result is not None]
             raise RuntimeError(
-                'A corner plot needs one chain covering the parameters it compares, and '
-                "fit_method='independent' samples each Q on its own, so no draw pairs one Q with "
-                'another. Use analysis.analysis_list[Q_index].plot_corner() for the correlations '
-                "within a Q, or sample with fit_method='simultaneous' to compare across Q."
+                f'Each Q index has its own chain, and the slider needs a Jupyter notebook. '
+                f'Pass Q_index to plot one of them; sampled Q indices are {sampled}.'
             )
-        return super().plot_corner(**kwargs)
+        return corner_with_slider(self._per_q_corner_chains(per_q), title=self.display_name)
+
+    def _per_q_corner_chains(self, per_q: list[SamplingResults | None]) -> dict[int, dict]:
+        """
+        Describe each per-Q chain in the form the slider wants.
+
+        Parameters
+        ----------
+        per_q : list[SamplingResults | None]
+            The chain for each Q index, None where that Q has not been sampled.
+
+        Returns
+        -------
+        dict[int, dict]
+            Mapping of Q index to its draws, labels, and units. Q indices without a chain are left
+            out, so the slider only offers what can actually be drawn.
+        """
+        chains = {}
+        for analysis1d, result in zip(self.analysis_list, per_q, strict=True):
+            if result is None:
+                continue
+            by_unique_name = {p.unique_name: p for p in analysis1d.get_free_parameters()}
+            resolved = [by_unique_name.get(name) for name in result.param_names]
+            chains[analysis1d.Q_index] = {
+                'draws': result.draws,
+                # Labelled with the plain parameter name: the Q index is already on the slider, so
+                # repeating it in every axis label would only cost width.
+                'names': [
+                    unique_name if parameter is None else parameter.name
+                    for unique_name, parameter in zip(result.param_names, resolved, strict=True)
+                ],
+                'units': ['' if p is None else str(p.unit) for p in resolved],
+            }
+        return chains
 
     def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
         """
