@@ -217,6 +217,7 @@ nav:
           - Experiment: tutorials/experiment.ipynb
           - Analysis: tutorials/analysis.ipynb
           - Analysis 1D: tutorials/analysis1d.ipynb
+          - Bayesian analysis: tutorials/bayesian.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
       - analysis: api-reference/analysis.md

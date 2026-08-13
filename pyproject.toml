@@ -23,17 +23,18 @@ classifiers = [
 ]
 requires-python = '>=3.12'
 dependencies = [
-  'easyscience', # The base library of the EasyScience framework
-  'pooch',       # Data downloader
-  'darkdetect',  # Detecting dark mode (system-level)
-  'plopp',       # Plotting library
-  'jupyterlab',  # Jupyter notebooks
-  'pixi-kernel', # Pixi Jupyter kernel
-  'ipykernel',   # Jupyter kernel (required for running notebooks)
-  'ipywidgets',  # Widgets (needed for interactive matplotlib backends)
-  'ipympl',      # Matplotlib Jupyter widget backend (%matplotlib widget)
-  'IPython',     # Interactive Python shell
-  'sympy',       # Symbolic mathematics (used for expression components)
+  'easyscience>=2.5.1', # The base library of the EasyScience framework. 2.5.1 adds fitting.Sampler
+  'matplotlib',         # Plotting (posterior trace, corner, and predictive plots)
+  'pooch',              # Data downloader
+  'darkdetect',         # Detecting dark mode (system-level)
+  'plopp',              # Plotting library
+  'jupyterlab',         # Jupyter notebooks
+  'pixi-kernel',        # Pixi Jupyter kernel
+  'ipykernel',          # Jupyter kernel (required for running notebooks)
+  'ipywidgets',         # Widgets (needed for interactive matplotlib backends)
+  'ipympl',             # Matplotlib Jupyter widget backend (%matplotlib widget)
+  'IPython',            # Interactive Python shell
+  'sympy',              # Symbolic mathematics (used for expression components)
 ]
 
 [project.optional-dependencies]
