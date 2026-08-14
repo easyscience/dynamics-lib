@@ -76,17 +76,17 @@ def build_analysis():
 def sampled_analysis():
     analysis = build_analysis()
     analysis.fit()
-    analysis.suggest_bounds().apply()
+    analysis.bayesian.suggest_bounds().apply()
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        analysis.sample_posterior(**SAMPLE_KWARGS)
+        analysis.bayesian.sample(**SAMPLE_KWARGS)
     return analysis
 
 
 class TestRealChain:
     def test_chain_has_one_column_per_free_parameter(self, sampled_analysis):
         # EXPECT
-        results = sampled_analysis.posterior_result
+        results = sampled_analysis.bayesian.results
         assert results.draws.shape[1] == len(sampled_analysis.get_free_parameters())
         assert results.draws.shape[0] > 0
 
@@ -96,7 +96,7 @@ class TestRealChain:
     )
     def test_posterior_recovers_the_true_parameters(self, sampled_analysis, name, truth):
         # WHEN
-        entry = sampled_analysis.posterior_summary()[name]
+        entry = sampled_analysis.bayesian.summary()[name]
 
         # EXPECT the truth sits within a few posterior standard deviations of the median. A 68%
         # interval is deliberately not used: it excludes the truth about a third of the time for
@@ -106,7 +106,7 @@ class TestRealChain:
 
     def test_summary_is_reported_under_parameter_names_and_units(self, sampled_analysis):
         # WHEN
-        summary = sampled_analysis.posterior_summary()
+        summary = sampled_analysis.bayesian.summary()
 
         # EXPECT
         assert {entry.name for entry in summary} == {
@@ -118,12 +118,12 @@ class TestRealChain:
         # WHEN
         analysis = build_analysis()
         analysis.fit()
-        analysis.suggest_bounds().apply()
+        analysis.bayesian.suggest_bounds().apply()
         before = [float(p.value) for p in analysis.get_free_parameters()]
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            analysis.sample_posterior(**SAMPLE_KWARGS)
+            analysis.bayesian.sample(**SAMPLE_KWARGS)
 
         # EXPECT
         after = [float(p.value) for p in analysis.get_free_parameters()]
@@ -131,11 +131,11 @@ class TestRealChain:
 
     def test_extend_grows_the_chain(self, sampled_analysis):
         # WHEN
-        before = int(sampled_analysis.posterior_result.state.Ngen)
+        before = int(sampled_analysis.bayesian.results.state.Ngen)
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extended = sampled_analysis.extend_sampling(
+            extended = sampled_analysis.bayesian.extend(
                 additional_samples=500, thin=2, sampler_kwargs={'trim': False}
             )
 
@@ -145,17 +145,17 @@ class TestRealChain:
     def test_save_and_load_round_trip_keeps_parameter_identity(self, sampled_analysis, tmp_path):
         # WHEN
         prefix = str(tmp_path / 'chain')
-        sampled_analysis.save_chain(prefix)
+        sampled_analysis.bayesian.save(prefix)
 
         fresh = build_analysis()
         fresh.fit()
-        fresh.suggest_bounds().apply()
+        fresh.bayesian.suggest_bounds().apply()
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            fresh.load_chain(prefix)
+            fresh.bayesian.load(prefix)
 
         # EXPECT the reloaded chain is reported under real names, not internal unique names
-        summary = fresh.posterior_summary()
+        summary = fresh.bayesian.summary()
         assert {entry.name for entry in summary} == {p.name for p in fresh.get_free_parameters()}
         assert all(np.isfinite(entry.value) for entry in summary)
 
@@ -163,24 +163,24 @@ class TestRealChain:
         # WHEN
         analysis = build_analysis()
         analysis.fit()
-        analysis.suggest_bounds().apply()
+        analysis.bayesian.suggest_bounds().apply()
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            results = analysis.sample_posterior(parameters=['Gaussian width'], **SAMPLE_KWARGS)
+            results = analysis.bayesian.sample(parameters=['Gaussian width'], **SAMPLE_KWARGS)
 
         # EXPECT
         assert results.draws.shape[1] == 1
-        assert analysis.posterior_summary().entries[0].name == 'Gaussian width'
+        assert analysis.bayesian.summary().entries[0].name == 'Gaussian width'
 
     def test_plots_render(self, sampled_analysis):
         # WHEN
         import matplotlib.pyplot as plt
 
         n_parameters = len(sampled_analysis.get_free_parameters())
-        trace = sampled_analysis.plot_trace()
-        corner = sampled_analysis.plot_corner()
-        predictive = sampled_analysis.plot_posterior_predictive(n_draws=20)
+        trace = sampled_analysis.bayesian.plot_trace()
+        corner = sampled_analysis.bayesian.plot_corner()
+        predictive = sampled_analysis.bayesian.plot_posterior_predictive(n_draws=20)
 
         # EXPECT
         assert len(trace.axes) == n_parameters + 1
@@ -192,13 +192,13 @@ class TestRealChain:
         # WHEN
         analysis = build_analysis()
         analysis.fit()
-        analysis.suggest_bounds().apply()
+        analysis.bayesian.suggest_bounds().apply()
         fitted = {p.name: float(p.value) for p in analysis.get_free_parameters()}
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            analysis.sample_posterior(**SAMPLE_KWARGS)
-        summary = analysis.posterior_summary()
+            analysis.bayesian.sample(**SAMPLE_KWARGS)
+        summary = analysis.bayesian.summary()
 
         # EXPECT the two agree within the posterior's own uncertainty, since with flat priors the
         # maximum-likelihood point sits inside the bulk of the posterior

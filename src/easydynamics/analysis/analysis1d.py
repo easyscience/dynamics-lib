@@ -12,7 +12,8 @@ from easyscience.variable import Parameter
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.convolution.convolution import Convolution
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
@@ -26,15 +27,15 @@ from easydynamics.utils.plotting import slicerplot_with_residuals
 from easydynamics.utils.utils import verify_Q_index
 
 
-class Analysis1d(BayesianSamplingMixin, AnalysisBase):
+class Analysis1d(AnalysisBase):
     """
     For analysing one-dimensional data, i.e. intensity as function of energy for a single Q index.
 
     Is used primarily in the Analysis class, but can also be used on its own for simpler analyses.
 
-    In addition to least-squares fitting with :meth:`fit`, the posterior distribution of the free
-    parameters can be explored with :meth:`sample_posterior`; see
-    :class:`~easydynamics.analysis.bayesian_sampling.BayesianSamplingMixin`.
+    Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.PosteriorSampler`.
 
     Examples
     --------
@@ -121,7 +122,9 @@ class Analysis1d(BayesianSamplingMixin, AnalysisBase):
         self._fit_result = None
         self._convolver = None
         self._convolver_is_dirty = True
-        self._init_bayesian_state()
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
 
         super().__init__(
             display_name=display_name,
@@ -253,32 +256,82 @@ class Analysis1d(BayesianSamplingMixin, AnalysisBase):
 
         self._prepare_for_sampling()
 
-        x, y, weights = self._get_sampling_data()
+        x, y, weights = self._sampling_data()
         fit_result = self.fitter.fit(x=x, y=y, weights=weights)
 
         self._fit_result = fit_result
 
         return fit_result
 
-    #############
-    # Hooks for BayesianSamplingMixin
-    #############
-
-    def _build_bayesian_fitter(self) -> EasyScienceFitter:
+    @property
+    def fitter(self) -> EasyScienceFitter:
         """
-        Build the EasyScience Fitter for this Analysis.
+        The EasyScience Fitter used for fitting and sampling, built on first use.
+
+        Exposed so the minimizer, tolerance, and maximum evaluation count can be configured
+        directly, e.g. ``analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)``.
 
         Returns
         -------
         EasyScienceFitter
-            A Fitter bound to this Analysis and its fit function.
+            The cached Fitter.
         """
-        return EasyScienceFitter(
-            fit_object=self,
-            fit_function=self.as_fit_function(),
-        )
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = EasyScienceFitter(
+                fit_object=self,
+                fit_function=self.as_fit_function(),
+            )
+            self._fitter_is_dirty = False
+        return self._fitter
 
-    def _get_sampling_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    @property
+    def bayesian(self) -> PosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        PosteriorSampler
+            The sampler, which holds any chain that has been run.
+        """
+        if self._bayesian is None:
+            self._bayesian = PosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the Fitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        self._invalidate_bayesian_sampler()
+
+    def _invalidate_bayesian_sampler(self) -> None:
+        """Mark the Sampler as needing a rebuild, the data having changed."""
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    #############
+    # The contract PosteriorSampler relies on
+    #############
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters.
+
+        A single Q index holds one copy of each parameter, so nothing needs qualifying.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        return ParameterLabels(self._chain_parameters())
+
+    def _sampling_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Get the finite data for the chosen Q index, as used by both fitting and sampling.
 
@@ -292,7 +345,7 @@ class Analysis1d(BayesianSamplingMixin, AnalysisBase):
         )
         return x, y, weights
 
-    def _get_chain_parameters(self) -> list[Parameter]:
+    def _chain_parameters(self) -> list[Parameter]:
         """
         Get the free parameters of this Analysis.
 

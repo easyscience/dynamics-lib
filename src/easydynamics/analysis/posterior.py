@@ -40,6 +40,8 @@ class BoundsSuggestion:
     ----------
     parameter : Parameter
         The parameter the suggestion applies to.
+    label : str
+        The name the parameter is reported under, qualified where several share a name.
     suggested_min : float
         The proposed lower bound. Equal to the parameter's current lower bound when that is already
         finite.
@@ -51,6 +53,7 @@ class BoundsSuggestion:
     """
 
     parameter: Parameter
+    label: str
     suggested_min: float
     suggested_max: float
     reason: str
@@ -178,7 +181,8 @@ class BoundsSuggestions:
         if not self._suggestions:
             return 'BoundsSuggestions(no free parameters)'
 
-        header = f'{"parameter":<28s} {"current":>26s} {"suggested":>26s}'
+        width = max(len('parameter'), *(len(s.label) for s in self._suggestions))
+        header = f'{"parameter":<{width}s} {"current":>26s} {"suggested":>26s}'
         lines = ['BoundsSuggestions', header, '-' * len(header)]
         for s in self._suggestions:
             current = f'({s.parameter.min:.4g}, {s.parameter.max:.4g})'
@@ -186,7 +190,7 @@ class BoundsSuggestions:
                 suggested = f'-- {s.reason}'
             else:
                 suggested = f'({s.suggested_min:.4g}, {s.suggested_max:.4g})'
-            lines.append(f'{s.parameter.name:<28s} {current:>26s} {suggested:>26s}')
+            lines.append(f'{s.label:<{width}s} {current:>26s} {suggested:>26s}')
 
         attention = self.needing_attention
         if attention:
@@ -199,6 +203,7 @@ class BoundsSuggestions:
 
 def suggest_bounds_for_parameters(
     parameters: list[Parameter],
+    labels: list[str] | None = None,
     n_sigma: float = 10.0,
     relative_pad: float = 0.2,
     absolute_floor: float | None = None,
@@ -223,6 +228,9 @@ def suggest_bounds_for_parameters(
     ----------
     parameters : list[Parameter]
         The parameters to propose bounds for.
+    labels : list[str] | None, default=None
+        The name to report each parameter under, one per parameter. Defaults to the parameters' own
+        names.
     n_sigma : float, default=10.0
         How many standard deviations of the parameter's fitted uncertainty to allow on each side.
     relative_pad : float, default=0.2
@@ -242,20 +250,24 @@ def suggest_bounds_for_parameters(
     if absolute_floor is not None:
         _verify_nonneg_number(absolute_floor, 'absolute_floor')
 
+    if labels is None:
+        labels = [parameter.name for parameter in parameters]
     suggestions = [
         _suggest_bounds_for_parameter(
             parameter=parameter,
+            label=label,
             n_sigma=n_sigma,
             relative_pad=relative_pad,
             absolute_floor=absolute_floor,
         )
-        for parameter in parameters
+        for parameter, label in zip(parameters, labels, strict=True)
     ]
     return BoundsSuggestions(suggestions)
 
 
 def _suggest_bounds_for_parameter(
     parameter: Parameter,
+    label: str,
     n_sigma: float,
     relative_pad: float,
     absolute_floor: float | None,
@@ -267,6 +279,8 @@ def _suggest_bounds_for_parameter(
     ----------
     parameter : Parameter
         The parameter to propose bounds for.
+    label : str
+        The name to report the parameter under.
     n_sigma : float
         How many standard deviations to allow on each side.
     relative_pad : float
@@ -288,6 +302,7 @@ def _suggest_bounds_for_parameter(
     if min_is_finite and max_is_finite:
         return BoundsSuggestion(
             parameter=parameter,
+            label=label,
             suggested_min=current_min,
             suggested_max=current_max,
             reason='',
@@ -298,6 +313,7 @@ def _suggest_bounds_for_parameter(
     if not np.isfinite(value):
         return BoundsSuggestion(
             parameter=parameter,
+            label=label,
             suggested_min=current_min,
             suggested_max=current_max,
             reason='value is not finite',
@@ -312,6 +328,7 @@ def _suggest_bounds_for_parameter(
     if not np.isfinite(half_width) or half_width <= 0:
         return BoundsSuggestion(
             parameter=parameter,
+            label=label,
             suggested_min=current_min,
             suggested_max=current_max,
             reason='no scale information (zero value and uncertainty)',
@@ -319,6 +336,7 @@ def _suggest_bounds_for_parameter(
 
     return BoundsSuggestion(
         parameter=parameter,
+        label=label,
         suggested_min=current_min if min_is_finite else value - half_width,
         suggested_max=current_max if max_is_finite else value + half_width,
         reason='',
@@ -527,13 +545,14 @@ class PosteriorSummary:
         if not self._entries:
             return 'PosteriorSummary(no parameters)'
 
+        width = max(len('parameter'), *(len(e.name) for e in self._entries))
         header = (
-            f'{"parameter":<28s} {"unit":>10s} {"median":>14s} '
+            f'{"parameter":<{width}s} {"unit":>10s} {"median":>14s} '
             f'{"-":>12s} {"+":>12s} {"current":>14s}'
         )
         lines = ['PosteriorSummary', header, '-' * len(header)]
         lines.extend(
-            f'{e.name:<28s} {e.unit:>10s} {e.median:>14.5g} '
+            f'{e.name:<{width}s} {e.unit:>10s} {e.median:>14.5g} '
             f'{e.minus:>12.4g} {e.plus:>12.4g} {e.value:>14.5g}'
             for e in self._entries
         )
@@ -542,7 +561,7 @@ class PosteriorSummary:
 
 def summarize_draws(
     draws: np.ndarray,
-    fallback_names: list[str],
+    labels: list[str],
     parameters_by_column: list[Parameter | None],
 ) -> PosteriorSummary:
     """
@@ -556,8 +575,8 @@ def summarize_draws(
     ----------
     draws : np.ndarray
         Posterior draws, shape ``(n_draws, n_parameters)``.
-    fallback_names : list[str]
-        Label to use for any column with no matching parameter, one per column.
+    labels : list[str]
+        The label to report each column under, one per column.
     parameters_by_column : list[Parameter | None]
         The parameter for each column of ``draws``, or None where none could be matched.
 
@@ -573,7 +592,7 @@ def summarize_draws(
         )
         entries.append(
             ParameterPosterior(
-                name=fallback_names[column] if parameter is None else parameter.name,
+                name=labels[column],
                 unit='' if parameter is None else str(parameter.unit),
                 median=median,
                 lower=lower,

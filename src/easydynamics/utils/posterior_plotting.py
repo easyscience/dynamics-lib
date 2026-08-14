@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
@@ -23,6 +24,7 @@ def plot_trace(
     draws: np.ndarray,
     names: list[str],
     logp: np.ndarray | None = None,
+    units: list[str] | None = None,
     title: str | None = None,
     figsize: tuple[float, float] | None = None,
 ) -> Figure:
@@ -44,6 +46,9 @@ def plot_trace(
         One label per column of ``draws``.
     logp : np.ndarray | None, default=None
         Log-posterior values, plotted in an extra panel when given.
+    units : list[str] | None, default=None
+        Unit of each column, appended to its label. Entries that are empty or dimensionless are
+        skipped, since a bare "dimensionless" only adds clutter.
     title : str | None, default=None
         Figure title.
     figsize : tuple[float, float] | None, default=None
@@ -66,7 +71,7 @@ def plot_trace(
 
     for axis, column, name in zip(axes, range(draws.shape[1]), names, strict=False):
         axis.plot(draws[:, column], lw=0.5)
-        axis.set_ylabel(name, fontsize=8)
+        axis.set_ylabel(_with_unit(name, units, column), fontsize=8)
         axis.set_xlim(0, len(draws) - 1)
 
     if logp is not None:
@@ -83,6 +88,7 @@ def plot_trace(
 def plot_corner(
     draws: np.ndarray,
     names: list[str],
+    units: list[str] | None = None,
     title: str | None = None,
     bins: int = 40,
     figsize: tuple[float, float] | None = None,
@@ -103,6 +109,9 @@ def plot_corner(
         Posterior draws, shape ``(n_draws, n_parameters)``.
     names : list[str]
         One label per column of ``draws``.
+    units : list[str] | None, default=None
+        Unit of each column, appended to its label. Entries that are empty or dimensionless are
+        skipped, since a bare "dimensionless" only adds clutter.
     title : str | None, default=None
         Figure title.
     bins : int, default=40
@@ -143,7 +152,25 @@ def plot_corner(
                 axis.set_ylabel(names[row], fontsize=8)
             else:
                 axis.set_yticklabels([])
+            if row == 0 and col == 0:
+                # The top-left panel is a histogram, so its vertical axis counts draws rather than
+                # carrying a parameter. Say so, instead of leaving it blank as if by omission.
+                axis.set_ylabel('counts', fontsize=8)
             axis.tick_params(labelsize=7)
+            axis.xaxis.set_major_locator(MaxNLocator(nbins=4))
+            if row != col:
+                axis.yaxis.set_major_locator(MaxNLocator(nbins=4))
+
+    # Matplotlib parks the shared exponent ("1e-8") at the end of the axis, where it lands on top
+    # of the axis label. Fold it into the label instead.
+    fig.canvas.draw()
+    for row in range(n):
+        for col in range(row + 1):
+            axis = axes[row, col]
+            if row == n - 1:
+                _absorb_offset(axis.xaxis, axis.set_xlabel, names[col], units, col)
+            if col == 0 and row != 0:
+                _absorb_offset(axis.yaxis, axis.set_ylabel, names[row], units, row)
 
     if title is not None:
         fig.suptitle(title)
@@ -158,6 +185,8 @@ def plot_posterior_predictive(
     y_err: np.ndarray | None = None,
     title: str | None = None,
     credible_interval: float = 68.0,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
     figsize: tuple[float, float] = (8.0, 5.0),
 ) -> Figure:
     """
@@ -181,6 +210,10 @@ def plot_posterior_predictive(
         Figure title.
     credible_interval : float, default=68.0
         Width of the credible band, as a percentage.
+    xlabel : str | None, default=None
+        Label for the independent axis.
+    ylabel : str | None, default=None
+        Label for the dependent axis.
     figsize : tuple[float, float], default=(8.0, 5.0)
         Figure size in inches.
 
@@ -224,11 +257,94 @@ def plot_posterior_predictive(
         label=f'{credible_interval:.0f}% credible band',
     )
     axis.plot(x, median, '-', color='C3', label='Posterior median')
+    if xlabel is not None:
+        axis.set_xlabel(xlabel)
+    if ylabel is not None:
+        axis.set_ylabel(ylabel)
     axis.legend()
     if title is not None:
         axis.set_title(title)
     fig.tight_layout()
     return fig
+
+
+def _unit_for(units: list[str] | None, column: int) -> str:
+    """
+    Get the unit to show for a column, if it is worth showing.
+
+    Parameters
+    ----------
+    units : list[str] | None
+        The units, one per column, or None.
+    column : int
+        The column to look up.
+
+    Returns
+    -------
+    str
+        The unit, or an empty string when there is none worth printing.
+    """
+    if units is None or column >= len(units):
+        return ''
+    unit = (units[column] or '').strip()
+    return '' if unit.lower() in ('', 'dimensionless', 'none') else unit
+
+
+def _with_unit(name: str, units: list[str] | None, column: int) -> str:
+    """
+    Append a column's unit to its label.
+
+    Parameters
+    ----------
+    name : str
+        The label to extend.
+    units : list[str] | None
+        The units, one per column, or None.
+    column : int
+        The column the label belongs to.
+
+    Returns
+    -------
+    str
+        The label, with the unit in parentheses when there is one.
+    """
+    unit = _unit_for(units, column)
+    return f'{name} ({unit})' if unit else name
+
+
+def _absorb_offset(
+    axis_object: object,
+    set_label: object,
+    name: str,
+    units: list[str] | None = None,
+    column: int = 0,
+) -> None:
+    """
+    Move an axis' shared exponent into its label, so the two stop overlapping.
+
+    The exponent and the unit share one set of parentheses, since two adjacent parentheticals read
+    badly: ``D (1e-8 m^2/s)`` rather than ``D (1e-8) (m^2/s)``.
+
+    Parameters
+    ----------
+    axis_object : object
+        The matplotlib ``XAxis`` or ``YAxis`` carrying the offset text.
+    set_label : object
+        The corresponding ``set_xlabel`` or ``set_ylabel`` callable.
+    name : str
+        The label the axis should carry, before the exponent and unit are appended.
+    units : list[str] | None, default=None
+        The units, one per column, or None.
+    column : int, default=0
+        The column the axis belongs to.
+    """
+    offset_text = axis_object.get_offset_text()
+    offset = offset_text.get_text()
+    unit = _unit_for(units, column)
+    suffix = ' '.join(part for part in (offset, unit) if part)
+    set_label(f'{name} ({suffix})' if suffix else name, fontsize=8)
+    if offset:
+        offset_text.set_visible(False)
 
 
 def _verify_draws(draws: np.ndarray, names: list[str]) -> None:

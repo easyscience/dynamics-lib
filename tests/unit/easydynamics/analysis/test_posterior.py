@@ -251,7 +251,7 @@ class TestSummarizeDraws:
         draws = np.linspace(0.0, 100.0, 101).reshape(-1, 1)
 
         # THEN
-        summary = summarize_draws(draws, ['Parameter_0'], [parameter])
+        summary = summarize_draws(draws, ['Gaussian width'], [parameter])
 
         # EXPECT
         entry = summary['Gaussian width']
@@ -262,6 +262,17 @@ class TestSummarizeDraws:
         assert entry.minus == pytest.approx(34.0)
         assert entry.plus == pytest.approx(34.0)
         assert entry.value == pytest.approx(1.5)
+
+    def test_labels_are_reported_verbatim(self):
+        # WHEN a caller supplies a qualified label, as a multi-Q analysis does
+        parameter = make_parameter(name='Gaussian width')
+
+        # THEN
+        summary = summarize_draws(np.zeros((5, 1)), ['Gaussian width (Q_index=2)'], [parameter])
+
+        # EXPECT
+        assert summary.entries[0].name == 'Gaussian width (Q_index=2)'
+        assert summary.entries[0].unit == 'meV'
 
     def test_unmatched_column_falls_back_to_the_supplied_name(self):
         # WHEN
@@ -289,7 +300,7 @@ class TestSummarizeDraws:
         parameter = make_parameter(name='Gaussian area')
 
         # THEN
-        text = repr(summarize_draws(np.zeros((5, 1)), ['x'], [parameter]))
+        text = repr(summarize_draws(np.zeros((5, 1)), ['Gaussian area'], [parameter]))
 
         # EXPECT
         assert 'Gaussian area' in text
