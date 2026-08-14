@@ -800,7 +800,7 @@ class Analysis(AnalysisBase):
     #############
 
     #############
-    # Hooks for BayesianSamplingMixin (simultaneous sampling over all Q)
+    # The contract PosteriorSampler relies on (simultaneous sampling over all Q)
     #############
 
     def _build_fitter(self) -> MultiFitter:
