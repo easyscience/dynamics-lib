@@ -15,7 +15,7 @@ from easyscience.fitting.multi_fitter import MultiFitter
 import easydynamics as edyn
 import easydynamics.sample_model as sm
 
-SAMPLER_PATH = 'easydynamics.analysis.bayesian_sampling.Sampler'
+SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler'
 Q = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0])
 
 
@@ -60,7 +60,7 @@ def make_analysis(two_bindings=True):
 
 
 def bound_all(analysis, half_width=5.0):
-    for parameter in analysis._get_chain_parameters():
+    for parameter in analysis._chain_parameters():
         parameter.min = float(parameter.value) - half_width
         parameter.max = float(parameter.value) + half_width
 
@@ -114,7 +114,7 @@ class TestFitterExposure:
 class TestChainParameters:
     def test_covers_every_binding_model(self, analysis):
         # WHEN
-        parameters = analysis._get_chain_parameters()
+        parameters = analysis._chain_parameters()
 
         # EXPECT both Polynomials contribute their two coefficients
         assert len(parameters) == 4
@@ -122,14 +122,14 @@ class TestChainParameters:
 
     def test_labels_are_unique(self, analysis):
         # WHEN
-        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT
         assert len(set(labels)) == len(labels)
 
     def test_model_name_is_not_repeated_in_the_label(self, analysis):
         # WHEN a model already names its parameters after itself
-        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT no 'Width line: Width line_c0'
         assert 'Width line_c0' in labels
@@ -140,16 +140,16 @@ class TestSampling:
     def test_refuses_unbounded_parameters(self, analysis):
         # EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
     def test_binds_one_dataset_per_target(self, analysis):
         # WHEN
         bound_all(analysis)
-        parameters = analysis._get_chain_parameters()
+        parameters = analysis._chain_parameters()
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
         args, kwargs = sampler_class.call_args
@@ -159,21 +159,21 @@ class TestSampling:
     def test_summary_uses_model_qualified_labels(self, analysis):
         # WHEN
         bound_all(analysis)
-        parameters = analysis._get_chain_parameters()
+        parameters = analysis._chain_parameters()
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        names = [entry.name for entry in analysis.posterior_summary()]
+        names = [entry.name for entry in analysis.bayesian.summary()]
         assert len(set(names)) == len(names)
         assert 'Width line_c0' in names
 
     def test_restores_parameter_values(self, analysis):
         # WHEN
         bound_all(analysis)
-        parameters = analysis._get_chain_parameters()
+        parameters = analysis._chain_parameters()
         before = [float(p.value) for p in parameters]
 
         with patch(SAMPLER_PATH) as sampler_class:
@@ -184,7 +184,7 @@ class TestSampling:
                 return fake_results(parameters)
 
             sampler_class.return_value.sample.side_effect = mutate
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
         assert [float(p.value) for p in parameters] == pytest.approx(before)
@@ -195,7 +195,7 @@ class TestSampling:
 
         # EXPECT
         with pytest.raises(ValueError, match='No parameters Dataset'):
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
     def test_missing_bindings_raises(self):
         # WHEN
@@ -203,7 +203,7 @@ class TestSampling:
 
         # EXPECT
         with pytest.raises(ValueError, match='No fit bindings'):
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
 
 class TestParameterLabelEdgeCases:
@@ -224,9 +224,9 @@ class TestParameterLabelEdgeCases:
         )
 
         # THEN
-        parameters = analysis._get_chain_parameters()
+        parameters = analysis._chain_parameters()
         names = [p.name for p in parameters]
-        labels = [analysis.parameter_label(p) for p in parameters]
+        labels = [analysis._parameter_labels().label(p) for p in parameters]
 
         # EXPECT the bare names collide, and the labels resolve it
         assert len(set(names)) < len(names)
@@ -237,7 +237,7 @@ class TestParameterLabelEdgeCases:
         analysis = make_analysis(two_bindings=False)
 
         # EXPECT no model prefix, since there is nothing to disambiguate
-        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
         assert labels == ['Width line_c0', 'Width line_c1']
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
@@ -247,7 +247,7 @@ class TestParameterLabelEdgeCases:
         stranger = Parameter(name='Width line_c0', value=1.0)
 
         # EXPECT it is returned unqualified rather than mislabelled
-        assert analysis.parameter_label(stranger) == 'Width line_c0'
+        assert analysis._parameter_labels().label(stranger) == 'Width line_c0'
 
     def test_models_without_a_display_name_fall_back_to_the_unique_name(self):
         # WHEN two colliding models have no display name to tell them apart
@@ -262,7 +262,7 @@ class TestParameterLabelEdgeCases:
         )
 
         # THEN
-        labels = [analysis.parameter_label(p) for p in analysis._get_chain_parameters()]
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT still unambiguous, which is what matters
         assert len(set(labels)) == len(labels)
@@ -289,14 +289,14 @@ class TestParameterLabelEdgeCases:
         )
 
         # THEN
-        parameters = analysis._get_chain_parameters()
-        labels = [analysis.parameter_label(p) for p in parameters]
+        parameters = analysis._chain_parameters()
+        labels = [analysis._parameter_labels().label(p) for p in parameters]
 
         # EXPECT the model's name resolves the collision
         assert len({p.name for p in parameters}) < len(parameters)
         assert len(set(labels)) == len(labels)
-        assert any(label.startswith('Diffusion A: ') for label in labels)
-        assert any(label.startswith('Diffusion B: ') for label in labels)
+        assert any(label.endswith('(Diffusion A)') for label in labels)
+        assert any(label.endswith('(Diffusion B)') for label in labels)
 
     def test_ambiguous_name_owned_by_no_model_keeps_its_name(self):
         # WHEN a parameter shares an ambiguous name but belongs to none of the models
@@ -322,7 +322,7 @@ class TestParameterLabelEdgeCases:
         stranger = Parameter(name='Line_c0', value=1.0)
 
         # EXPECT it falls back to the plain name rather than claiming an owner
-        assert analysis.parameter_label(stranger) == 'Line_c0'
+        assert analysis._parameter_labels().label(stranger) == 'Line_c0'
 
 
 class TestInPlaceBindingEdits:
