@@ -14,15 +14,16 @@ from matplotlib import rcParams
 from plopp.backends.matplotlib.figure import InteractiveFigure
 
 from easydynamics.analysis.analysis import Analysis
-from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
 from easydynamics.analysis.fit_binding import FitBinding
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import PosteriorSampler
 from easydynamics.base_classes.easydynamics_modelbase import EasyDynamicsModelBase
 from easydynamics.utils.fit_target import FitTarget
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import convert_value_unit
 
 
-class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
+class ParameterAnalysis(EasyDynamicsModelBase):
     """
     For analysing fitted parameters.
 
@@ -99,7 +100,9 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
             default, None.
         """
 
-        self._init_bayesian_state()
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
         # Which targets the cached fitter was built for, so an in-place edit of a FitBinding is
         # noticed even though it cannot be observed directly.
         self._fitter_targets = None
@@ -162,6 +165,93 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         """
         self._bindings = self._verify_bindings(value)
         self._invalidate_fitter()
+
+    @property
+    def fitter(self) -> MultiFitter:
+        """
+        The EasyScience MultiFitter over the binding models, built on first use.
+
+        Returns
+        -------
+        MultiFitter
+            The cached MultiFitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = self._build_fitter()
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> PosteriorSampler:
+        """
+        Bayesian posterior sampling for this analysis, created on first use.
+
+        Returns
+        -------
+        PosteriorSampler
+            The sampler, which holds any chain that has been run.
+        """
+        if self._bayesian is None:
+            self._bayesian = PosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the MultiFitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters, qualified by binding model where needed.
+
+        Two bindings can use models of the same kind, whose parameters would then share a name. The
+        prefix is the model's name, matching the choice to report parameters under their name
+        rather than their display name, since for several models the display name is just the class
+        name. If two models share a name as well, the unique name is used: a label that does not
+        disambiguate is worse than a long one.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the free parameters of the binding models.
+        """
+        models = {binding.model.unique_name: binding.model for binding in self.bindings}
+        owners = {}
+        for model in models.values():
+            for parameter in model.get_free_parameters():
+                owners.setdefault(parameter.unique_name, model)
+        model_names = [getattr(m, 'name', None) or m.display_name for m in models.values()]
+
+        def qualify(parameter: Parameter) -> str | None:
+            """
+            Get the model name a parameter belongs to.
+
+            Parameters
+            ----------
+            parameter : Parameter
+                The parameter to qualify.
+
+            Returns
+            -------
+            str | None
+                The owning model's name, its unique name if that name is shared, or None if the
+                parameter belongs to no binding model.
+            """
+            owner = owners.get(parameter.unique_name)
+            if owner is None:
+                return None
+            name = getattr(owner, 'name', None) or owner.display_name
+            if name is None or model_names.count(name) > 1:
+                return owner.unique_name
+            return name
+
+        return ParameterLabels(self._chain_parameters(), qualify=qualify)
 
     #############
     # Other methods
@@ -240,7 +330,7 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
     # Hooks for BayesianSamplingMixin
     #############
 
-    def _build_bayesian_fitter(self) -> MultiFitter:
+    def _build_fitter(self) -> MultiFitter:
         """
         Build the MultiFitter over the binding models.
 
@@ -292,7 +382,7 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         if self._target_signature(models) != getattr(self, '_fitter_targets', None):
             self._invalidate_fitter()
 
-    def _get_sampling_data(self) -> tuple[list, list, list]:
+    def _sampling_data(self) -> tuple[list, list, list]:
         """
         Get the per-target data to bind to the Sampler.
 
@@ -305,7 +395,7 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
         self._invalidate_fitter_if_targets_changed(models)
         return xs, ys, ws
 
-    def _get_chain_parameters(self) -> list[Parameter]:
+    def _chain_parameters(self) -> list[Parameter]:
         """
         Get the free parameters across every binding model.
 
@@ -322,49 +412,6 @@ class ParameterAnalysis(BayesianSamplingMixin, EasyDynamicsModelBase):
             for parameter in binding.model.get_free_parameters():
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
-
-    def parameter_label(self, parameter: Parameter) -> str:
-        """
-        Label a parameter with the binding model it belongs to.
-
-        Two bindings can use models of the same kind, whose parameters would then share a name, so
-        the owning model is prefixed when that is needed to tell them apart. A single binding, or
-        models that already name their parameters after themselves, keep their plain names -- these
-        get long quickly, and there is nothing to disambiguate.
-
-        The prefix is the model's name, matching the choice to report parameters under their name
-        rather than their display name -- for several models the display name is just the class
-        name, which would not tell two of them apart. If two models share a name as well, the
-        unique name is used: a label that does not actually disambiguate is worse than a long one.
-
-        Parameters
-        ----------
-        parameter : Parameter
-            The parameter to label.
-
-        Returns
-        -------
-        str
-            The parameter name, qualified by model where that is needed to tell copies apart.
-        """
-        if not self._name_is_ambiguous(parameter):
-            return parameter.name
-
-        models = {binding.model.unique_name: binding.model for binding in self.bindings}
-        owners = [
-            model
-            for model in models.values()
-            if any(p.unique_name == parameter.unique_name for p in model.get_free_parameters())
-        ]
-        if len(owners) != 1:
-            return parameter.name
-
-        owner = owners[0]
-        owner_name = getattr(owner, 'name', None) or owner.display_name
-        model_names = [getattr(m, 'name', None) or m.display_name for m in models.values()]
-        if owner_name is None or model_names.count(owner_name) > 1:
-            return f'{owner.unique_name}: {parameter.name}'
-        return f'{owner_name}: {parameter.name}'
 
     def plot(
         self, names: str | list[str] | None = None, **kwargs: dict[str, Any]

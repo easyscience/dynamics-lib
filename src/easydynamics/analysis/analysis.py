@@ -8,38 +8,33 @@ import numpy as np
 import scipp as sc
 from easyscience.fitting.minimizers.utils import FitResults
 from easyscience.fitting.multi_fitter import MultiFitter
-from easyscience.fitting.sampler import SamplingResults
 from easyscience.variable import Parameter
-from ipywidgets import VBox
-from matplotlib.figure import Figure
 from plopp.backends.matplotlib.figure import InteractiveFigure
 from scipp import UnitError
 
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.analysis_base import AnalysisBase
-from easydynamics.analysis.bayesian_sampling import BayesianSamplingMixin
-from easydynamics.analysis.posterior import PosteriorSummary
-from easydynamics.analysis.posterior import summarize_draws
+from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import MultiQPosteriorSampler
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.instrument_model import InstrumentModel
 from easydynamics.settings.convolution_settings import ConvolutionSettings
 from easydynamics.settings.detailed_balance_settings import DetailedBalanceSettings
 from easydynamics.utils.plotting import slicerplot_with_residuals
-from easydynamics.utils.posterior_plotting import corner_with_slider
 from easydynamics.utils.utils import _in_notebook
 from easydynamics.utils.utils import verify_Q_index
 
 
-class Analysis(BayesianSamplingMixin, AnalysisBase):
+class Analysis(AnalysisBase):
     """
     For analysing two-dimensional data, i.e. intensity as function of energy and Q.
 
     Supports independent fits of each Q value and simultaneous fits of all Q.
 
     Besides least-squares fitting with :meth:`fit`, the posterior distribution of the free
-    parameters can be explored with :meth:`sample_posterior`; see
-    :class:`~easydynamics.analysis.bayesian_sampling.BayesianSamplingMixin`.
+    parameters can be explored through :attr:`bayesian`; see
+    :class:`~easydynamics.analysis.posterior_sampling.MultiQPosteriorSampler`.
 
     Examples
     --------
@@ -129,7 +124,9 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         self._analysis_list_is_dirty = True
         # Rebuilt with the analysis list; see _parameter_owner_index.
         self._owner_index = None
-        self._init_bayesian_state()
+        self._fitter = None
+        self._fitter_is_dirty = True
+        self._bayesian = None
         super().__init__(
             display_name=display_name,
             unique_name=unique_name,
@@ -181,6 +178,70 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
             'analysis_list is read-only. '
             'To change the analysis list, modify the experiment, sample model, '
             'or instrument model.'
+        )
+
+    @property
+    def fitter(self) -> MultiFitter:
+        """
+        The EasyScience MultiFitter covering every Q index, built on first use.
+
+        Returns
+        -------
+        MultiFitter
+            The cached MultiFitter.
+        """
+        if self._fitter_is_dirty or self._fitter is None:
+            self._fitter = self._build_fitter()
+            self._fitter_is_dirty = False
+        return self._fitter
+
+    @property
+    def bayesian(self) -> MultiQPosteriorSampler:
+        """
+        Bayesian posterior sampling for this Analysis, created on first use.
+
+        Returns
+        -------
+        MultiQPosteriorSampler
+            The sampler, which can run per Q index or over all of them at once.
+        """
+        if self._bayesian is None:
+            self._bayesian = MultiQPosteriorSampler(
+                analysis=self,
+                sampling_data=self._sampling_data,
+                chain_parameters=self._chain_parameters,
+                parameter_labels=self._parameter_labels,
+                prepare=self._prepare_for_sampling,
+                per_q=lambda: self.analysis_list,
+            )
+        return self._bayesian
+
+    def _invalidate_fitter(self) -> None:
+        """Mark the MultiFitter, and the Sampler built from it, as needing a rebuild."""
+        self._fitter_is_dirty = True
+        if self._bayesian is not None:
+            self._bayesian.invalidate()
+
+    def _parameter_labels(self) -> ParameterLabels:
+        """
+        Get labels for the chain's parameters, qualified by Q index where needed.
+
+        Every Q index carries its own copy of each model parameter, all sharing a name, so a bare
+        name would produce several identical rows in a summary and could not pick a parameter out.
+
+        Returns
+        -------
+        ParameterLabels
+            Labels over the current free parameters.
+        """
+        owners = self._parameter_owner_index()
+        return ParameterLabels(
+            self._chain_parameters(),
+            qualify=lambda parameter: (
+                None
+                if owners.get(parameter.unique_name) is None
+                else f'Q_index={owners[parameter.unique_name]}'
+            ),
         )
 
     #############
@@ -315,98 +376,6 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
         if fit_method == 'simultaneous':
             return self._fit_all_Q_simultaneously()
         raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
-
-    def sample_posterior(
-        self,
-        samples: int = 10000,
-        burn: int = 2000,
-        thin: int = 10,
-        fit_method: str = 'independent',
-        Q_index: int | None = None,
-        **sampler_options: dict[str, Any],
-    ) -> SamplingResults | list[SamplingResults]:
-        """
-        Draw samples from the posterior distribution, mirroring :meth:`fit`.
-
-        With ``fit_method='independent'`` each Q index gets its own chain, which is the cheaper
-        option and keeps the Q values from influencing one another. With
-        ``fit_method='simultaneous'`` a single chain covers every Q at once, which is what you want
-        when parameters are shared across Q, but costs considerably more: DREAM runs
-        ``ceil(population * n_parameters)`` chains, and a simultaneous run has the parameters of
-        every Q in play at the same time.
-
-        Parameters
-        ----------
-        samples : int, default=10000
-            Number of raw samples to draw across all chains, before thinning.
-        burn : int, default=2000
-            Burn-in generations to discard before collecting samples.
-        thin : int, default=10
-            Thinning interval, which reduces autocorrelation between retained draws.
-        fit_method : str, default='independent'
-            Either "independent" (a separate chain per Q index) or "simultaneous" (one chain over
-            all Q indices at once).
-        Q_index : int | None, default=None
-            With ``fit_method='independent'``, sample only this Q index. Ignored when sampling
-            simultaneously.
-        **sampler_options : dict[str, Any]
-            Forwarded to the sampler, e.g. ``population``, ``parameters``, ``sampler_kwargs``,
-            ``progress_callback``, or ``abort_test``.
-
-        Returns
-        -------
-        SamplingResults | list[SamplingResults]
-            A single SamplingResults when a specific Q index was sampled or when sampling
-            simultaneously, and otherwise a list holding one SamplingResults per Q index.
-
-        Raises
-        ------
-        ValueError
-            If there are no Q values available, or if fit_method is not "independent" or
-            "simultaneous".
-        """
-        if self.Q is None:
-            raise ValueError(
-                'No Q values available for sampling. Please check the experiment data.'
-            )
-
-        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
-
-        if fit_method == 'independent':
-            if Q_index is not None:
-                return self.analysis_list[Q_index].sample_posterior(
-                    samples=samples, burn=burn, thin=thin, **sampler_options
-                )
-            results = [
-                analysis.sample_posterior(samples=samples, burn=burn, thin=thin, **sampler_options)
-                for analysis in self.analysis_list
-            ]
-            # The per-Q chains stay on their own Analysis1d; this only records that they are the
-            # current results, so this object can gather them up again.
-            self._posterior_result = None
-            return results
-        if fit_method == 'simultaneous':
-            return super().sample_posterior(
-                samples=samples, burn=burn, thin=thin, **sampler_options
-            )
-        raise ValueError("Invalid fit method. Choose 'independent' or 'simultaneous'.")
-
-    @property
-    def posterior_results(self) -> list[SamplingResults | None] | None:
-        """
-        The per-Q chains from independent sampling, or None if there are none.
-
-        A simultaneous run produces one chain covering every Q, which is on
-        :attr:`posterior_result` instead.
-
-        Returns
-        -------
-        list[SamplingResults | None] | None
-            One entry per Q index, None where that Q has not been sampled, or None if no Q index
-            has been sampled at all.
-        """
-        results = [analysis1d.posterior_result for analysis1d in self.analysis_list]
-        return results if any(result is not None for result in results) else None
 
     def plot_data_and_model(
         self,
@@ -833,7 +802,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
     # Hooks for BayesianSamplingMixin (simultaneous sampling over all Q)
     #############
 
-    def _build_bayesian_fitter(self) -> MultiFitter:
+    def _build_fitter(self) -> MultiFitter:
         """
         Build the MultiFitter covering every Q index.
 
@@ -847,7 +816,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
             fit_functions=self.get_fit_functions(),
         )
 
-    def _get_sampling_data(self) -> tuple[list, list, list]:
+    def _sampling_data(self) -> tuple[list, list, list]:
         """
         Get the per-Q data to bind to the Sampler, as lists of arrays.
 
@@ -864,7 +833,7 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
             ws.append(weight)
         return xs, ys, ws
 
-    def _get_chain_parameters(self) -> list[Parameter]:
+    def _chain_parameters(self) -> list[Parameter]:
         """
         Get the free parameters across every Q index.
 
@@ -881,32 +850,6 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
             for parameter in analysis1d.get_free_parameters():
                 parameters.setdefault(parameter.unique_name, parameter)
         return list(parameters.values())
-
-    def parameter_label(self, parameter: Parameter) -> str:
-        """
-        Label a parameter with the Q index it belongs to.
-
-        Every Q index carries its own copy of each model parameter, all sharing a name, so the bare
-        name would produce several identical rows in a summary and could not be used to pick a
-        parameter out. Parameters shared across Q indices, and analyses holding a single Q, keep
-        their plain name.
-
-        Parameters
-        ----------
-        parameter : Parameter
-            The parameter to label.
-
-        Returns
-        -------
-        str
-            The parameter name, qualified by Q index where that is needed to tell copies apart.
-        """
-        if not self._name_is_ambiguous(parameter):
-            return parameter.name
-        owner = self._parameter_owner_index().get(parameter.unique_name)
-        if owner is None:
-            return parameter.name
-        return f'{parameter.name} (Q_index={owner})'
 
     def _parameter_owner_index(self) -> dict[str, int]:
         """
@@ -936,202 +879,6 @@ class Analysis(BayesianSamplingMixin, AnalysisBase):
                 name: q_index for name, q_index in owners.items() if q_index is not None
             }
         return self._owner_index
-
-    def posterior_summary(self) -> PosteriorSummary:
-        """
-        Summarize the posterior, gathering the per-Q chains when sampling was independent.
-
-        Every entry is a marginal distribution of one parameter, and a marginal is well defined
-        within its own chain, so collecting them into one table is sound even though the chains are
-        separate. Labels are qualified by Q index, so the table reads the same either way.
-
-        A ``RuntimeError`` is raised if no sampling has been run, on this Analysis or on any of its
-        Q indices.
-
-        Returns
-        -------
-        PosteriorSummary
-            One entry per sampled parameter, across every Q index that has been sampled.
-        """
-        if self._posterior_result is not None:
-            return super().posterior_summary()
-
-        per_q = self.posterior_results
-        if per_q is None:
-            return super().posterior_summary()
-
-        entries = []
-        with self._bulk_parameter_access():
-            for analysis1d, result in zip(self.analysis_list, per_q, strict=True):
-                if result is None:
-                    continue
-                by_unique_name = {p.unique_name: p for p in analysis1d.get_free_parameters()}
-                resolved = [by_unique_name.get(name) for name in result.param_names]
-                labels = [
-                    unique_name if parameter is None else self.parameter_label(parameter)
-                    for unique_name, parameter in zip(result.param_names, resolved, strict=True)
-                ]
-                entries.extend(
-                    summarize_draws(result.draws, labels, resolved).entries,
-                )
-        return PosteriorSummary(entries)
-
-    def set_parameters_to_posterior_median(self) -> list[Parameter]:
-        """
-        Set every sampled parameter to the median of its marginal posterior.
-
-        Applies the per-Q chains to their own Q when sampling was independent.
-
-        A ``RuntimeError`` is raised if no sampling has been run, on this Analysis or on any of its
-        Q indices.
-
-        Returns
-        -------
-        list[Parameter]
-            The parameters that were changed.
-        """
-        if self._posterior_result is not None or self.posterior_results is None:
-            return super().set_parameters_to_posterior_median()
-
-        changed = []
-        for analysis1d in self.analysis_list:
-            if analysis1d.posterior_result is not None:
-                changed.extend(analysis1d.set_parameters_to_posterior_median())
-        return changed
-
-    def plot_corner(self, Q_index: int | None = None, **kwargs: dict[str, Any]) -> Figure | VBox:
-        """
-        Plot marginal and pairwise posterior distributions.
-
-        After independent sampling each Q has its own chain, and no draw pairs a parameter at one Q
-        with a parameter at another, so there is no joint distribution across Q to plot. Rather
-        than combine them into a figure showing correlations that are an artefact of how the
-        sampling was run, this steps through the chains one at a time: pick one with ``Q_index``,
-        or leave it out in a notebook to get a slider.
-
-        Parameters
-        ----------
-        Q_index : int | None, default=None
-            Which Q index to plot, when the chains are per-Q. If None, a slider is returned. Not
-            used for a simultaneous chain, which already covers every Q.
-        **kwargs : dict[str, Any]
-            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_corner`.
-
-        Returns
-        -------
-        Figure | VBox
-            The matplotlib Figure, or an ipywidgets box with a Q slider.
-
-        Raises
-        ------
-        RuntimeError
-            If a slider is asked for outside a notebook.
-        """
-        per_q = self.posterior_results
-        if self._posterior_result is not None or per_q is None:
-            return super().plot_corner(**kwargs)
-
-        verify_Q_index(Q_index=Q_index, Q=self.Q, allow_none=True)
-        if Q_index is not None:
-            return self.analysis_list[Q_index].plot_corner(**kwargs)
-
-        if not _in_notebook():
-            sampled = [index for index, result in enumerate(per_q) if result is not None]
-            raise RuntimeError(
-                f'Each Q index has its own chain, and the slider needs a Jupyter notebook. '
-                f'Pass Q_index to plot one of them; sampled Q indices are {sampled}.'
-            )
-        return corner_with_slider(self._per_q_corner_chains(per_q), title=self.display_name)
-
-    def _per_q_corner_chains(self, per_q: list[SamplingResults | None]) -> dict[int, dict]:
-        """
-        Describe each per-Q chain in the form the slider wants.
-
-        Parameters
-        ----------
-        per_q : list[SamplingResults | None]
-            The chain for each Q index, None where that Q has not been sampled.
-
-        Returns
-        -------
-        dict[int, dict]
-            Mapping of Q index to its draws, labels, and units. Q indices without a chain are left
-            out, so the slider only offers what can actually be drawn.
-        """
-        chains = {}
-        for analysis1d, result in zip(self.analysis_list, per_q, strict=True):
-            if result is None:
-                continue
-            by_unique_name = {p.unique_name: p for p in analysis1d.get_free_parameters()}
-            resolved = [by_unique_name.get(name) for name in result.param_names]
-            chains[analysis1d.Q_index] = {
-                'draws': result.draws,
-                # Labelled with the plain parameter name: the Q index is already on the slider, so
-                # repeating it in every axis label would only cost width.
-                'names': [
-                    unique_name if parameter is None else parameter.name
-                    for unique_name, parameter in zip(result.param_names, resolved, strict=True)
-                ],
-                'units': ['' if p is None else str(p.unit) for p in resolved],
-            }
-        return chains
-
-    def plot_trace(self, **kwargs: dict[str, Any]) -> Figure:
-        """
-        Plot the chain trace of each sampled parameter.
-
-        Only available for a simultaneous chain, since the per-Q chains are separate runs of
-        different lengths rather than one trace.
-
-        Parameters
-        ----------
-        **kwargs : dict[str, Any]
-            Forwarded to :func:`easydynamics.utils.posterior_plotting.plot_trace`.
-
-        Returns
-        -------
-        Figure
-            The matplotlib Figure.
-
-        Raises
-        ------
-        RuntimeError
-            If only independent per-Q chains exist.
-        """
-        if self._posterior_result is None and self.posterior_results is not None:
-            raise RuntimeError(
-                'Each Q index has its own chain, so there is no single trace to draw. Use '
-                'analysis.analysis_list[Q_index].plot_trace() for one of them, or sample with '
-                "fit_method='simultaneous'."
-            )
-        return super().plot_trace(**kwargs)
-
-    def _require_posterior_result(self) -> SamplingResults:
-        """
-        Get the stored sampling results, pointing at the per-Q chains when those are what exist.
-
-        Sampling independently stores a chain on each Analysis1d rather than here, so asking this
-        object for one would otherwise report that no sampling has happened, right after it has.
-
-        Returns
-        -------
-        SamplingResults
-            The results of the most recent simultaneous run.
-
-        Raises
-        ------
-        RuntimeError
-            If no simultaneous sampling has been run on this Analysis.
-        """
-        if self._posterior_result is None and self.posterior_results is not None:
-            raise RuntimeError(
-                'This Analysis holds no chain of its own, but its Q indices do: sampling with '
-                "fit_method='independent' gives each Q its own chain. posterior_summary() and "
-                'set_parameters_to_posterior_median() gather those up; for anything needing a '
-                'single chain, use analysis.analysis_list[Q_index], or sample with '
-                "fit_method='simultaneous'."
-            )
-        return super()._require_posterior_result()
 
     def _prepare_for_sampling(self) -> None:
         """

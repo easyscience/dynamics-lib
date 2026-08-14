@@ -19,7 +19,7 @@ from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 
-SAMPLER_PATH = 'easydynamics.analysis.bayesian_sampling.Sampler'
+SAMPLER_PATH = 'easydynamics.analysis.posterior_sampling.Sampler'
 
 
 def make_analysis():
@@ -128,23 +128,23 @@ class TestBoundsPreflight:
     def test_sampling_refuses_unbounded_parameters(self, analysis):
         # EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
     def test_error_names_the_offending_parameters(self, analysis):
         # EXPECT
         with pytest.raises(ValueError, match='Gaussian area'):
-            analysis.check_bounds_for_sampling()
+            analysis.bayesian.check_bounds()
 
     def test_bounded_parameters_pass(self, analysis):
         # WHEN
         bound_all(analysis)
 
         # EXPECT: does not raise
-        analysis.check_bounds_for_sampling()
+        analysis.bayesian.check_bounds()
 
     def test_suggest_bounds_covers_the_free_parameters(self, analysis):
         # WHEN
-        suggestions = analysis.suggest_bounds()
+        suggestions = analysis.bayesian.suggest_bounds()
 
         # EXPECT
         assert len(suggestions) == len(analysis.get_free_parameters())
@@ -165,7 +165,7 @@ class TestSamplePosterior:
                 return fake_results(analysis)
 
             sampler_class.return_value.sample.side_effect = mutate_then_return
-            analysis.sample_posterior(samples=10, burn=1, thin=1)
+            analysis.bayesian.sample(samples=10, burn=1, thin=1)
 
         # EXPECT
         after = [(p.unique_name, p.value) for p in analysis.get_free_parameters()]
@@ -182,7 +182,7 @@ class TestSamplePosterior:
                 seen.append(analysis.fitter.minimizer.enum),
                 fake_results(analysis),
             )[1]
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
         assert seen == [AvailableMinimizers.Bumps]
@@ -194,7 +194,7 @@ class TestSamplePosterior:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = RuntimeError('boom')
             with pytest.raises(RuntimeError, match='boom'):
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
 
         # EXPECT
         assert analysis.fitter.minimizer.enum == AvailableMinimizers.LMFit_leastsq
@@ -205,7 +205,7 @@ class TestSamplePosterior:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=123, burn=7, thin=3, population=5)
+            analysis.bayesian.sample(samples=123, burn=7, thin=3, population=5)
 
         # EXPECT
         kwargs = sampler_class.return_value.sample.call_args.kwargs
@@ -221,11 +221,11 @@ class TestSamplePosterior:
         with patch(SAMPLER_PATH) as sampler_class:
             expected = fake_results(analysis)
             sampler_class.return_value.sample.return_value = expected
-            returned = analysis.sample_posterior(samples=10)
+            returned = analysis.bayesian.sample(samples=10)
 
         # EXPECT
         assert returned is expected
-        assert analysis.posterior_result is expected
+        assert analysis.bayesian.results is expected
 
     def test_warns_when_the_posterior_piles_up_against_a_bound(self, analysis):
         # WHEN a parameter's draws span its whole allowed range
@@ -239,7 +239,7 @@ class TestSamplePosterior:
 
             # EXPECT
             with pytest.warns(UserWarning, match='piled up'):
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
 
     def test_does_not_warn_when_the_posterior_is_well_inside(self, analysis):
         # WHEN
@@ -250,7 +250,7 @@ class TestSamplePosterior:
 
             # EXPECT
             with warnings_as_errors():
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
 
 
 class TestParameterSubset:
@@ -268,7 +268,7 @@ class TestParameterSubset:
 
             sampler_class.return_value.sample.side_effect = record
             with pytest.warns(UserWarning, match='Holding these parameters fixed'):
-                analysis.sample_posterior(samples=10, parameters=[target.name])
+                analysis.bayesian.sample(samples=10, parameters=[target.name])
 
         # EXPECT
         assert seen['free'] == [target.unique_name]
@@ -282,7 +282,7 @@ class TestParameterSubset:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             with pytest.warns(UserWarning):
-                analysis.sample_posterior(samples=10, parameters=[target])
+                analysis.bayesian.sample(samples=10, parameters=[target])
 
         # EXPECT
         assert [(p.unique_name, p.fixed) for p in analysis.get_all_parameters()] == before
@@ -293,17 +293,17 @@ class TestParameterSubset:
 
         # EXPECT
         with pytest.raises(ValueError, match='No free parameter named'):
-            analysis.sample_posterior(samples=10, parameters=['not a parameter'])
+            analysis.bayesian.sample(samples=10, parameters=['not a parameter'])
 
     def test_non_list_parameters_raises(self, analysis):
         # EXPECT
         with pytest.raises(TypeError, match='must be a list'):
-            analysis.sample_posterior(samples=10, parameters='Gaussian area')
+            analysis.bayesian.sample(samples=10, parameters='Gaussian area')
 
     def test_empty_parameter_list_raises(self, analysis):
         # EXPECT
         with pytest.raises(ValueError, match='at least one parameter'):
-            analysis.sample_posterior(samples=10, parameters=[])
+            analysis.bayesian.sample(samples=10, parameters=[])
 
 
 class TestSamplerCaching:
@@ -313,8 +313,8 @@ class TestSamplerCaching:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT the data is bound once, not per run
         assert sampler_class.call_count == 1
@@ -325,9 +325,9 @@ class TestSamplerCaching:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
             analysis.Q_index = 0
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT the Sampler binds its data at construction, so it must be rebuilt
         assert sampler_class.call_count == 2
@@ -338,10 +338,10 @@ class TestSamplerCaching:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        expected_x, expected_y, expected_w = analysis._get_sampling_data()
+        expected_x, expected_y, expected_w = analysis._sampling_data()
         args, kwargs = sampler_class.call_args
         assert np.array_equal(args[1], expected_x)
         assert np.array_equal(args[2], expected_y)
@@ -352,7 +352,7 @@ class TestExtendAndPersistence:
     def test_extend_without_a_chain_raises(self, analysis):
         # EXPECT
         with pytest.raises(RuntimeError, match='No chain to extend'):
-            analysis.extend_sampling()
+            analysis.bayesian.extend()
 
     def test_extend_delegates_to_the_sampler(self, analysis):
         # WHEN
@@ -361,8 +361,8 @@ class TestExtendAndPersistence:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
-            analysis.extend_sampling(additional_samples=42, thin=2)
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.extend(additional_samples=42, thin=2)
 
         # EXPECT
         kwargs = sampler_class.return_value.extend.call_args.kwargs
@@ -372,7 +372,7 @@ class TestExtendAndPersistence:
     def test_save_without_a_chain_raises(self, analysis):
         # EXPECT
         with pytest.raises(RuntimeError, match='No chain to save'):
-            analysis.save_chain('somewhere')
+            analysis.bayesian.save('somewhere')
 
     def test_save_writes_the_parameter_name_sidecar(self, analysis, tmp_path):
         # WHEN
@@ -381,8 +381,8 @@ class TestExtendAndPersistence:
         bound_all(analysis)
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
-            analysis.save_chain(str(tmp_path / 'chain'))
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.save(str(tmp_path / 'chain'))
 
         # EXPECT the unique names are recorded against the stable parameter names
         sidecar = tmp_path / 'chain.parameter-names.json'
@@ -399,14 +399,14 @@ class TestExtendAndPersistence:
 
             # EXPECT
             with pytest.warns(UserWarning, match='No parameter-name sidecar'):
-                analysis.load_chain(str(tmp_path / 'missing'))
+                analysis.bayesian.load(str(tmp_path / 'missing'))
 
 
 class TestResults:
     def test_summary_without_sampling_raises(self, analysis):
         # EXPECT
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
-            analysis.posterior_summary()
+            analysis.bayesian.summary()
 
     def test_summary_uses_parameter_names_and_units(self, analysis):
         # WHEN
@@ -414,10 +414,10 @@ class TestResults:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        summary = analysis.posterior_summary()
+        summary = analysis.bayesian.summary()
         names = {entry.name for entry in summary}
         assert names == {p.name for p in analysis.get_free_parameters()}
         assert all(entry.unit == 'meV' for entry in summary)
@@ -431,9 +431,9 @@ class TestResults:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(analysis, values=draws)
             expected = [float(p.value) + 2.0 for p in parameters]
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
-        changed = analysis.set_parameters_to_posterior_median()
+        changed = analysis.bayesian.set_parameters_to_median()
 
         # EXPECT
         assert len(changed) == len(parameters)
@@ -442,7 +442,7 @@ class TestResults:
     def test_median_without_sampling_raises(self, analysis):
         # EXPECT
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
-            analysis.set_parameters_to_posterior_median()
+            analysis.bayesian.set_parameters_to_median()
 
 
 class TestPlots:
@@ -452,11 +452,11 @@ class TestPlots:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
         with pytest.raises(ValueError, match='positive integer'):
-            analysis.plot_posterior_predictive(n_draws=0)
+            analysis.bayesian.plot_posterior_predictive(n_draws=0)
 
     def test_predictive_restores_parameter_values(self, analysis):
         # WHEN
@@ -466,10 +466,10 @@ class TestPlots:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(analysis, values=draws)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         before = [float(p.value) for p in parameters]
-        analysis.plot_posterior_predictive(n_draws=5)
+        analysis.bayesian.plot_posterior_predictive(n_draws=5)
 
         # EXPECT
         assert [float(p.value) for p in parameters] == pytest.approx(before)
@@ -477,9 +477,9 @@ class TestPlots:
     def test_plots_without_sampling_raise(self, analysis):
         # EXPECT
         with pytest.raises(RuntimeError):
-            analysis.plot_trace()
+            analysis.bayesian.plot_trace()
         with pytest.raises(RuntimeError):
-            analysis.plot_corner()
+            analysis.bayesian.plot_corner()
 
 
 class warnings_as_errors:
@@ -511,7 +511,7 @@ class TestErrorPaths:
 
             # EXPECT the bare IndexError is replaced by something actionable, naming both causes
             with pytest.raises(RuntimeError, match='degenerate') as raised:
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
             assert 'short chains' in str(raised.value)
             assert isinstance(raised.value.__cause__, IndexError)
 
@@ -525,12 +525,12 @@ class TestErrorPaths:
 
             # EXPECT it propagates untouched
             with pytest.raises(IndexError, match='list index out of range'):
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
 
     def test_parameters_entry_of_the_wrong_type_raises(self, analysis):
         # EXPECT
-        with pytest.raises(TypeError, match='Parameter objects or parameter names'):
-            analysis.sample_posterior(samples=10, parameters=[42])
+        with pytest.raises(TypeError, match='Parameter objects or labels'):
+            analysis.bayesian.sample(samples=10, parameters=[42])
 
     def test_median_skips_columns_with_no_matching_parameter(self, analysis):
         # WHEN a chain carries a column this analysis knows nothing about
@@ -541,10 +541,10 @@ class TestErrorPaths:
             results.param_names = [*results.param_names, 'Parameter_does_not_exist']
             results.draws = np.column_stack([results.draws, np.zeros(results.draws.shape[0])])
             sampler_class.return_value.sample.return_value = results
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT the unknown column is skipped rather than crashing
-        changed = analysis.set_parameters_to_posterior_median()
+        changed = analysis.bayesian.set_parameters_to_median()
         assert len(changed) == len(analysis.get_free_parameters())
 
     def test_load_chain_uses_the_sidecar_when_present(self, analysis, tmp_path):
@@ -553,17 +553,17 @@ class TestErrorPaths:
         with patch(SAMPLER_PATH) as sampler_class:
             saved = fake_results(analysis)
             sampler_class.return_value.sample.return_value = saved
-            analysis.sample_posterior(samples=10)
-            analysis.save_chain(str(tmp_path / 'chain'))
+            analysis.bayesian.sample(samples=10)
+            analysis.bayesian.save(str(tmp_path / 'chain'))
 
         fresh = make_analysis()
         bound_all(fresh)
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.load_state.return_value = saved
-            fresh.load_chain(str(tmp_path / 'chain'))
+            fresh.bayesian.load(str(tmp_path / 'chain'))
 
         # EXPECT the sidecar maps the old unique names onto the new analysis's parameters
-        summary = fresh.posterior_summary()
+        summary = fresh.bayesian.summary()
         assert {entry.name for entry in summary} == {p.name for p in fresh.get_free_parameters()}
         assert all(np.isfinite(entry.value) for entry in summary)
 
@@ -580,11 +580,11 @@ class TestPlotRendering:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
         # EXPECT
-        assert len(analysis.plot_trace().axes) == n_parameters + 1
-        assert len(analysis.plot_corner().axes) == n_parameters**2
+        assert len(analysis.bayesian.plot_trace().axes) == n_parameters + 1
+        assert len(analysis.bayesian.plot_corner().axes) == n_parameters**2
         plt.close('all')
 
 
@@ -595,14 +595,14 @@ class TestExtendGuards:
 
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
             target = analysis.get_free_parameters()[0]
 
             # EXPECT refused up front, rather than failing obscurely inside BUMPS, which resumes
             # from a stored chain whose width is fixed
             with pytest.warns(UserWarning), pytest.raises(ValueError, match='Cannot extend'):
-                analysis.extend_sampling(additional_samples=10, parameters=[target.name])
+                analysis.bayesian.extend(additional_samples=10, parameters=[target.name])
 
     def test_extending_with_the_same_parameters_is_allowed(self, analysis):
         # WHEN
@@ -611,10 +611,10 @@ class TestExtendGuards:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
-            analysis.sample_posterior(samples=10)
+            analysis.bayesian.sample(samples=10)
 
             # EXPECT: does not raise
-            analysis.extend_sampling(additional_samples=10)
+            analysis.bayesian.extend(additional_samples=10)
 
 
 class TestSidecarLabels:
@@ -628,10 +628,12 @@ class TestSidecarLabels:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             with pytest.warns(UserWarning):
-                analysis.sample_posterior(samples=10, parameters=[target.name])
+                analysis.bayesian.sample(samples=10, parameters=[target.name])
 
         # EXPECT
-        assert analysis._chain_name_map[target.unique_name] == analysis.parameter_label(target)
+        assert analysis.bayesian._saved_labels[
+            target.unique_name
+        ] == analysis._parameter_labels().label(target)
 
     def test_extending_after_a_failed_run_is_allowed(self, analysis):
         # WHEN a run built the sampler but died before storing results, so there is a sampler to
@@ -641,11 +643,11 @@ class TestSidecarLabels:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = RuntimeError('died mid-run')
             with pytest.raises(RuntimeError, match='died mid-run'):
-                analysis.sample_posterior(samples=10)
+                analysis.bayesian.sample(samples=10)
 
-            assert analysis.bayesian_sampler is not None
-            assert analysis.posterior_result is None
+            assert analysis.bayesian.sampler is not None
+            assert analysis.bayesian.results is None
 
             # EXPECT the shape guard steps aside rather than comparing against nothing
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
-            analysis.extend_sampling(additional_samples=10)
+            analysis.bayesian.extend(additional_samples=10)
