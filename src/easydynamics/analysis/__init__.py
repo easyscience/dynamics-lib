@@ -8,12 +8,14 @@ from easydynamics.analysis.posterior import BoundsSuggestions
 from easydynamics.analysis.posterior import ParameterPosterior
 from easydynamics.analysis.posterior import PosteriorSummary
 from easydynamics.analysis.posterior_labels import ParameterLabels
+from easydynamics.analysis.posterior_sampling import MultiQPosteriorSampler
 from easydynamics.analysis.posterior_sampling import PosteriorSampler
 
 __all__ = [
     'Analysis',
     'BoundsSuggestion',
     'BoundsSuggestions',
+    'MultiQPosteriorSampler',
     'ParameterAnalysis',
     'ParameterLabels',
     'ParameterPosterior',

@@ -327,7 +327,7 @@ class ParameterAnalysis(EasyDynamicsModelBase):
         return xs, ys, ws, funcs, models
 
     #############
-    # Hooks for BayesianSamplingMixin
+    # The contract PosteriorSampler relies on
     #############
 
     def _build_fitter(self) -> MultiFitter:
