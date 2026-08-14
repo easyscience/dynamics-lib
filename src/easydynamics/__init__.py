@@ -9,11 +9,13 @@ for anyone who prefers them; this is only the front door.
 """
 
 from easydynamics.analysis import Analysis
-from easydynamics.analysis import BayesianSamplingMixin
 from easydynamics.analysis import BoundsSuggestion
 from easydynamics.analysis import BoundsSuggestions
+from easydynamics.analysis import MultiQPosteriorSampler
 from easydynamics.analysis import ParameterAnalysis
+from easydynamics.analysis import ParameterLabels
 from easydynamics.analysis import ParameterPosterior
+from easydynamics.analysis import PosteriorSampler
 from easydynamics.analysis import PosteriorSummary
 from easydynamics.analysis.analysis1d import Analysis1d
 from easydynamics.analysis.fit_binding import FitBinding
@@ -50,7 +52,6 @@ __all__ = [
     'Analysis',
     'Analysis1d',
     'BackgroundModel',
-    'BayesianSamplingMixin',
     'BoundsSuggestion',
     'BoundsSuggestions',
     'BrownianTranslationalDiffusion',
@@ -71,9 +72,12 @@ __all__ = [
     'InstrumentModel',
     'JumpTranslationalDiffusion',
     'Lorentzian',
+    'MultiQPosteriorSampler',
     'ParameterAnalysis',
+    'ParameterLabels',
     'ParameterPosterior',
     'Polynomial',
+    'PosteriorSampler',
     'PosteriorSummary',
     'ResolutionModel',
     'SampleModel',
