@@ -8,12 +8,16 @@ import numpy as np
 import pytest
 import scipp as sc
 
+import easydynamics as edyn
+import easydynamics.sample_model as sm
 from easydynamics.analysis.analysis import Analysis
 from easydynamics.experiment import Experiment
 from easydynamics.sample_model import InstrumentModel
 from easydynamics.sample_model import SampleModel
 from easydynamics.sample_model.components.gaussian import Gaussian
 from easydynamics.settings.convolution_settings import ConvolutionSettings
+
+Q_VALUES = [0.5, 1.0, 1.5]
 
 
 class TestAnalysis:
@@ -68,6 +72,33 @@ class TestAnalysis:
             sample_model=sample_model,
             instrument_model=instrument_model,
             extra_parameters=None,
+        )
+
+    @pytest.fixture
+    def multi_q_analysis(self):
+        # Three Q indices sharing one Gaussian, so the per-Q parameter copies collide by name.
+        energy_values = np.linspace(-5.0, 5.0, 15)
+        rows = [2.0 * np.exp(-0.5 * (energy_values / (0.8 + 0.4 * q**2)) ** 2) for q in Q_VALUES]
+        observed = np.vstack(rows)
+        experiment = Experiment(
+            data=sc.DataArray(
+                data=sc.array(
+                    dims=['Q', 'energy'],
+                    values=observed,
+                    variances=np.full_like(observed, 0.01),
+                ),
+                coords={
+                    'Q': sc.array(dims=['Q'], values=Q_VALUES, unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+
+        return Analysis(
+            display_name='TestMultiQ',
+            experiment=experiment,
+            sample_model=SampleModel(components=Gaussian(area=2.0, width=1.0)),
+            instrument_model=InstrumentModel(),
         )
 
     def test_init(self, analysis):
@@ -1141,3 +1172,120 @@ class TestAnalysis:
         assert 'Analysis' in repr_str
         assert 'display_name=' in repr_str
         assert 'n_analyses=' in repr_str
+
+    #############
+    # Chain parameters and labels
+    #############
+
+    def test_union_covers_every_q_index(self, multi_q_analysis):
+        # THEN
+        parameters = multi_q_analysis._chain_parameters()
+
+        # EXPECT one copy of each per-Q parameter, with no duplicates
+        assert len(parameters) == sum(
+            len(a.get_free_parameters()) for a in multi_q_analysis.analysis_list
+        )
+        assert len({p.unique_name for p in parameters}) == len(parameters)
+
+    def test_labels_are_qualified_by_q_index(self, multi_q_analysis):
+        # THEN
+        labels = [
+            multi_q_analysis._parameter_labels().label(p)
+            for p in multi_q_analysis._chain_parameters()
+        ]
+
+        # EXPECT every per-Q copy is distinguishable, which the bare name would not be
+        assert len(set(labels)) == len(labels)
+        assert 'Gaussian width (Q_index=0)' in labels
+        assert 'Gaussian width (Q_index=2)' in labels
+
+    def test_bare_names_would_collide(self, multi_q_analysis):
+        # THEN
+        names = [p.name for p in multi_q_analysis._chain_parameters()]
+
+        # EXPECT the collision the Q-qualified label exists to solve
+        assert len(set(names)) < len(names)
+
+    #############
+    # Parameter label edge cases
+    #############
+
+    def test_single_q_analysis_keeps_plain_names(self):
+        # WHEN there is only one Q index, nothing needs disambiguating
+        energy_values = np.linspace(-5.0, 5.0, 15)
+        intensity = 2.0 * np.exp(-0.5 * (energy_values / 1.2) ** 2)
+        experiment = edyn.Experiment(
+            data=sc.DataArray(
+                data=sc.array(
+                    dims=['Q', 'energy'],
+                    values=intensity[None, :],
+                    variances=np.full_like(intensity, 0.01)[None, :],
+                ),
+                coords={
+                    'Q': sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+        analysis = edyn.Analysis(
+            display_name='SingleQ',
+            experiment=experiment,
+            sample_model=sm.SampleModel(components=sm.Gaussian(area=2.0, width=1.0)),
+            instrument_model=sm.InstrumentModel(),
+        )
+
+        # THEN
+        labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT the short form, not 'Gaussian width (Q_index=0)'
+        assert 'Gaussian width' in labels
+        assert not any('Q_index=' in label for label in labels)
+
+    def test_parameter_from_outside_the_analysis_keeps_its_name(self, multi_q_analysis):
+        # WHEN a parameter belongs to no Q index of this analysis
+        from easyscience.variable import Parameter
+
+        stranger = Parameter(name='Gaussian width', value=1.0)
+
+        # EXPECT it is returned unqualified rather than mislabelled
+        assert multi_q_analysis._parameter_labels().label(stranger) == 'Gaussian width'
+
+    def test_a_parameter_shared_across_q_is_not_tied_to_one_index(self):
+        # WHEN a diffusion model contributes global parameters, the same objects appear at every Q
+        energy_values = np.linspace(-5.0, 5.0, 15)
+        rows = [2.0 * np.exp(-0.5 * (energy_values / 1.2) ** 2) for _ in Q_VALUES]
+        observed = np.vstack(rows)
+        experiment = edyn.Experiment(
+            data=sc.DataArray(
+                data=sc.array(
+                    dims=['Q', 'energy'],
+                    values=observed,
+                    variances=np.full_like(observed, 0.01),
+                ),
+                coords={
+                    'Q': sc.array(dims=['Q'], values=Q_VALUES, unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+        analysis = edyn.Analysis(
+            display_name='Shared',
+            experiment=experiment,
+            sample_model=sm.SampleModel(
+                components=sm.ComponentCollection(components=[sm.DeltaFunction(area=0.2)]),
+                diffusion_models=sm.BrownianTranslationalDiffusion(
+                    name='Brownian', diffusion_coefficient=2.4e-9, scale=0.5
+                ),
+            ),
+            instrument_model=sm.InstrumentModel(),
+        )
+
+        # THEN
+        owners = analysis._parameter_owner_index()
+        shared = [p for p in analysis._chain_parameters() if p.unique_name not in owners]
+
+        # EXPECT the shared parameters are left out of the owner map, since no single Q owns them,
+        # and so keep their plain names rather than being labelled with an arbitrary Q
+        assert shared, 'expected the diffusion model to contribute parameters shared across Q'
+        for parameter in shared:
+            assert analysis._parameter_labels().label(parameter) == parameter.name
