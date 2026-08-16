@@ -78,7 +78,7 @@ def analysis():
 
 class TestFitterExposure:
     def test_fitter_is_built_lazily_and_cached(self, analysis):
-        # WHEN
+        # THEN
         fitter = analysis.fitter
 
         # EXPECT
@@ -88,20 +88,22 @@ class TestFitterExposure:
     def test_fitter_is_rebuilt_when_the_sample_model_changes(self, analysis):
         # WHEN
         original = analysis.fitter
+
+        # THEN
         analysis.sample_model = SampleModel(components=Gaussian(area=1.0))
 
         # EXPECT
         assert analysis.fitter is not original
 
     def test_minimizer_can_be_switched_through_the_fitter(self, analysis):
-        # WHEN
+        # THEN
         analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)
 
         # EXPECT
         assert analysis.fitter.minimizer.enum == AvailableMinimizers.Bumps
 
     def test_fit_uses_the_persistent_fitter(self, analysis):
-        # WHEN
+        # THEN
         result = analysis.fit()
 
         # EXPECT
@@ -111,12 +113,12 @@ class TestFitterExposure:
 
 class TestBoundsPreflight:
     def test_sampling_refuses_unbounded_parameters(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
             analysis.bayesian.sample(samples=10)
 
     def test_error_names_the_offending_parameters(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='Gaussian area'):
             analysis.bayesian.check_bounds()
 
@@ -124,11 +126,11 @@ class TestBoundsPreflight:
         # WHEN
         bound_all(analysis)
 
-        # EXPECT: does not raise
+        # THEN EXPECT: does not raise
         analysis.bayesian.check_bounds()
 
     def test_suggest_bounds_covers_the_free_parameters(self, analysis):
-        # WHEN
+        # THEN
         suggestions = analysis.bayesian.suggest_bounds()
 
         # EXPECT
@@ -141,6 +143,7 @@ class TestSamplePosterior:
         bound_all(analysis)
         before = [(p.unique_name, p.value) for p in analysis.get_free_parameters()]
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
 
             def mutate_then_return(**_kwargs):
@@ -162,6 +165,7 @@ class TestSamplePosterior:
         bound_all(analysis)
         seen = []
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: (
                 seen.append(analysis.fitter.minimizer.enum),
@@ -176,6 +180,7 @@ class TestSamplePosterior:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = RuntimeError('boom')
             with pytest.raises(RuntimeError, match='boom'):
@@ -188,6 +193,7 @@ class TestSamplePosterior:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=123, burn=7, thin=3, population=5)
@@ -203,6 +209,7 @@ class TestSamplePosterior:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             expected = fake_results(analysis)
             sampler_class.return_value.sample.return_value = expected
@@ -222,7 +229,7 @@ class TestSamplePosterior:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(analysis, values=draws)
 
-            # EXPECT
+            # THEN EXPECT
             with pytest.warns(UserWarning, match='piled up'):
                 analysis.bayesian.sample(samples=10)
 
@@ -233,7 +240,7 @@ class TestSamplePosterior:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(analysis)
 
-            # EXPECT
+            # THEN EXPECT
             with warnings_as_errors():
                 analysis.bayesian.sample(samples=10)
 
@@ -245,6 +252,7 @@ class TestParameterSubset:
         target = analysis.get_free_parameters()[0]
         seen = {}
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
 
             def record(**_kwargs):
@@ -264,6 +272,7 @@ class TestParameterSubset:
         before = [(p.unique_name, p.fixed) for p in analysis.get_all_parameters()]
         target = analysis.get_free_parameters()[0]
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             with pytest.warns(UserWarning):
@@ -276,17 +285,17 @@ class TestParameterSubset:
         # WHEN
         bound_all(analysis)
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='No free parameter named'):
             analysis.bayesian.sample(samples=10, parameters=['not a parameter'])
 
     def test_non_list_parameters_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(TypeError, match='must be a list'):
             analysis.bayesian.sample(samples=10, parameters='Gaussian area')
 
     def test_empty_parameter_list_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='at least one parameter'):
             analysis.bayesian.sample(samples=10, parameters=[])
 
@@ -296,6 +305,7 @@ class TestSamplerCaching:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
@@ -308,6 +318,7 @@ class TestSamplerCaching:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
@@ -321,6 +332,7 @@ class TestSamplerCaching:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
@@ -335,7 +347,7 @@ class TestSamplerCaching:
 
 class TestExtendAndPersistence:
     def test_extend_without_a_chain_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError, match='No chain to extend'):
             analysis.bayesian.extend()
 
@@ -343,6 +355,7 @@ class TestExtendAndPersistence:
         # WHEN
         bound_all(analysis)
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
@@ -355,7 +368,7 @@ class TestExtendAndPersistence:
         assert kwargs['thin'] == 2
 
     def test_save_without_a_chain_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError, match='No chain to save'):
             analysis.bayesian.save('somewhere')
 
@@ -364,6 +377,8 @@ class TestExtendAndPersistence:
         import json
 
         bound_all(analysis)
+
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
@@ -382,14 +397,14 @@ class TestExtendAndPersistence:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.load_state.return_value = fake_results(analysis)
 
-            # EXPECT
+            # THEN EXPECT
             with pytest.warns(UserWarning, match='No parameter-name sidecar'):
                 analysis.bayesian.load(str(tmp_path / 'missing'))
 
 
 class TestResults:
     def test_summary_without_sampling_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
             analysis.bayesian.summary()
 
@@ -401,8 +416,10 @@ class TestResults:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
 
-        # EXPECT
+        # THEN
         summary = analysis.bayesian.summary()
+
+        # EXPECT
         names = {entry.name for entry in summary}
         assert names == {p.name for p in analysis.get_free_parameters()}
         assert all(entry.unit == 'meV' for entry in summary)
@@ -418,6 +435,7 @@ class TestResults:
             expected = [float(p.value) + 2.0 for p in parameters]
             analysis.bayesian.sample(samples=10)
 
+        # THEN
         changed = analysis.bayesian.set_parameters_to_median()
 
         # EXPECT
@@ -425,7 +443,7 @@ class TestResults:
         assert [float(p.value) for p in parameters] == pytest.approx(expected)
 
     def test_median_without_sampling_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
             analysis.bayesian.set_parameters_to_median()
 
@@ -439,7 +457,7 @@ class TestPlots:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='positive integer'):
             analysis.bayesian.plot_posterior_predictive(n_draws=0)
 
@@ -454,13 +472,15 @@ class TestPlots:
             analysis.bayesian.sample(samples=10)
 
         before = [float(p.value) for p in parameters]
+
+        # THEN
         analysis.bayesian.plot_posterior_predictive(n_draws=5)
 
         # EXPECT
         assert [float(p.value) for p in parameters] == pytest.approx(before)
 
     def test_plots_without_sampling_raise(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError):
             analysis.bayesian.plot_trace()
         with pytest.raises(RuntimeError):

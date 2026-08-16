@@ -109,12 +109,12 @@ class TestSuggestBounds:
 
     @pytest.mark.parametrize('kwargs', [{'n_sigma': -1.0}, {'relative_pad': -0.1}])
     def test_negative_settings_raise(self, kwargs):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError):
             suggest_bounds_for_parameters([make_parameter()], **kwargs)
 
     def test_non_numeric_setting_raises(self):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(TypeError):
             suggest_bounds_for_parameters([make_parameter()], n_sigma='wide')
 
@@ -125,8 +125,10 @@ class TestBoundsSuggestionsApply:
         parameter = make_parameter(value=10.0, error=0.5)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # THEN nothing has changed until apply is called
+        # WHEN nothing has changed until apply is called
         assert parameter.max == np.inf
+
+        # THEN
         changed = suggestions.apply()
 
         # EXPECT
@@ -160,14 +162,14 @@ class TestBoundsSuggestionsApply:
         assert 'need bounds set by hand' in text
 
     def test_repr_with_no_parameters(self):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert 'no free parameters' in repr(BoundsSuggestions([]))
 
     def test_len_and_iteration(self):
         # WHEN
         suggestions = suggest_bounds_for_parameters([make_parameter(), make_parameter()])
 
-        # EXPECT
+        # THEN EXPECT
         assert len(suggestions) == 2
         assert all(isinstance(s, BoundsSuggestion) for s in suggestions)
 
@@ -291,7 +293,7 @@ class TestSummarizeDraws:
         # WHEN
         summary = summarize_draws(np.zeros((5, 1)), ['x'], [None])
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(KeyError):
             summary['not a parameter']
 
