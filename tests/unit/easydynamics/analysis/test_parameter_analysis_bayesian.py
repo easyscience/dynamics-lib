@@ -87,7 +87,7 @@ class TestFitterExposure:
         assert analysis.fitter is analysis.fitter
 
     def test_fit_still_returns_per_target_results(self, analysis):
-        # WHEN
+        # THEN
         results = analysis.fit()
 
         # EXPECT one result per fit target, as before
@@ -97,6 +97,8 @@ class TestFitterExposure:
     def test_changing_bindings_rebuilds_the_fitter(self, analysis):
         # WHEN
         original = analysis.fitter
+
+        # THEN
         analysis.bindings = analysis.bindings[:1]
 
         # EXPECT
@@ -105,6 +107,8 @@ class TestFitterExposure:
     def test_changing_parameters_rebuilds_the_fitter(self, analysis):
         # WHEN
         original = analysis.fitter
+
+        # THEN
         analysis.parameters = make_dataset()
 
         # EXPECT
@@ -113,7 +117,7 @@ class TestFitterExposure:
 
 class TestChainParameters:
     def test_covers_every_binding_model(self, analysis):
-        # WHEN
+        # THEN
         parameters = analysis._chain_parameters()
 
         # EXPECT both Polynomials contribute their two coefficients
@@ -121,7 +125,7 @@ class TestChainParameters:
         assert len({p.unique_name for p in parameters}) == 4
 
     def test_labels_are_unique(self, analysis):
-        # WHEN
+        # THEN
         labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT
@@ -129,6 +133,8 @@ class TestChainParameters:
 
     def test_model_name_is_not_repeated_in_the_label(self, analysis):
         # WHEN a model already names its parameters after itself
+
+        # THEN
         labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT no 'Width line: Width line_c0'
@@ -138,7 +144,7 @@ class TestChainParameters:
 
 class TestSampling:
     def test_refuses_unbounded_parameters(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
             analysis.bayesian.sample(samples=10)
 
@@ -147,6 +153,7 @@ class TestSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             analysis.bayesian.sample(samples=10)
@@ -161,6 +168,7 @@ class TestSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             analysis.bayesian.sample(samples=10)
@@ -176,6 +184,7 @@ class TestSampling:
         parameters = analysis._chain_parameters()
         before = [float(p.value) for p in parameters]
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
 
             def mutate(**_kwargs):
@@ -193,7 +202,7 @@ class TestSampling:
         # WHEN
         analysis = edyn.ParameterAnalysis()
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='No parameters Dataset'):
             analysis.bayesian.sample(samples=10)
 
@@ -201,7 +210,7 @@ class TestSampling:
         # WHEN
         analysis = edyn.ParameterAnalysis(parameters=make_dataset())
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='No fit bindings'):
             analysis.bayesian.sample(samples=10)
 
@@ -236,8 +245,10 @@ class TestParameterLabelEdgeCases:
         # WHEN
         analysis = make_analysis(two_bindings=False)
 
-        # EXPECT no model prefix, since there is nothing to disambiguate
+        # THEN
         labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
+
+        # EXPECT no model prefix, since there is nothing to disambiguate
         assert labels == ['Width line_c0', 'Width line_c1']
 
     def test_parameter_from_outside_the_analysis_keeps_its_name(self, analysis):
@@ -246,7 +257,7 @@ class TestParameterLabelEdgeCases:
 
         stranger = Parameter(name='Width line_c0', value=1.0)
 
-        # EXPECT it is returned unqualified rather than mislabelled
+        # THEN EXPECT it is returned unqualified rather than mislabelled
         assert analysis._parameter_labels().label(stranger) == 'Width line_c0'
 
     def test_models_without_a_display_name_fall_back_to_the_unique_name(self):
@@ -321,7 +332,7 @@ class TestParameterLabelEdgeCases:
         )
         stranger = Parameter(name='Line_c0', value=1.0)
 
-        # EXPECT it falls back to the plain name rather than claiming an owner
+        # THEN EXPECT it falls back to the plain name rather than claiming an owner
         assert analysis._parameter_labels().label(stranger) == 'Line_c0'
 
 
@@ -342,6 +353,7 @@ class TestInPlaceBindingEdits:
         analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
         assert len(analysis.fit()) == 1
 
+        # THEN
         binding.targets = {'width': 'Lorentzian width', 'area': 'Lorentzian area'}
 
         # EXPECT the fit follows the binding rather than failing on a stale fitter
@@ -361,6 +373,7 @@ class TestInPlaceBindingEdits:
         analysis = edyn.ParameterAnalysis(parameters=make_dataset(), bindings=[binding])
         assert len(analysis.fit()) == 2
 
+        # THEN
         binding.targets = {'width': 'Lorentzian width'}
 
         # EXPECT

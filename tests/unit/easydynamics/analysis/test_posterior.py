@@ -109,12 +109,12 @@ class TestSuggestBounds:
 
     @pytest.mark.parametrize('kwargs', [{'n_sigma': -1.0}, {'relative_pad': -0.1}])
     def test_negative_settings_raise(self, kwargs):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError):
             suggest_bounds_for_parameters([make_parameter()], **kwargs)
 
     def test_non_numeric_setting_raises(self):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(TypeError):
             suggest_bounds_for_parameters([make_parameter()], n_sigma='wide')
 
@@ -125,8 +125,10 @@ class TestBoundsSuggestionsApply:
         parameter = make_parameter(value=10.0, error=0.5)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # THEN nothing has changed until apply is called
+        # WHEN nothing has changed until apply is called
         assert parameter.max == np.inf
+
+        # THEN
         changed = suggestions.apply()
 
         # EXPECT
@@ -160,14 +162,14 @@ class TestBoundsSuggestionsApply:
         assert 'need bounds set by hand' in text
 
     def test_repr_with_no_parameters(self):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert 'no free parameters' in repr(BoundsSuggestions([]))
 
     def test_len_and_iteration(self):
         # WHEN
         suggestions = suggest_bounds_for_parameters([make_parameter(), make_parameter()])
 
-        # EXPECT
+        # THEN EXPECT
         assert len(suggestions) == 2
         assert all(isinstance(s, BoundsSuggestion) for s in suggestions)
 
@@ -292,7 +294,7 @@ class TestSummarizeDraws:
         # WHEN
         summary = summarize_draws(np.zeros((5, 1)), ['x'], [None])
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(KeyError):
             summary['not a parameter']
 
@@ -314,13 +316,13 @@ class TestPosteriorSummaryContainer:
         parameters = [make_parameter(name='a'), make_parameter(name='b')]
         summary = summarize_draws(np.zeros((7, 2)), ['a', 'b'], parameters)
 
-        # EXPECT
+        # THEN EXPECT
         assert len(summary) == 2
         assert [entry.name for entry in summary] == ['a', 'b']
         assert len(summary.entries) == 2
 
     def test_repr_with_no_entries(self):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))
 
 
@@ -331,7 +333,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT it is still applied, since it is what the fit implied, but not silently
+        # THEN EXPECT it is still applied, since it is what the fit implied, but not silently
         with pytest.warns(UserWarning, match='far wider than the parameter'):
             changed = suggestions.apply()
         assert changed == [parameter]
@@ -341,7 +343,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='sane', value=10.0, error=0.5)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT
+        # THEN EXPECT
         import warnings as warnings_module
 
         with warnings_module.catch_warnings():
@@ -353,7 +355,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='zero', value=0.0, error=1.0)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT no warning, since the ratio is meaningless rather than alarming
+        # THEN EXPECT no warning, since the ratio is meaningless rather than alarming
         import warnings as warnings_module
 
         with warnings_module.catch_warnings():

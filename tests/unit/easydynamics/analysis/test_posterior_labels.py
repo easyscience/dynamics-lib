@@ -15,6 +15,8 @@ class TestLabelling:
     def test_unique_names_are_left_alone(self):
         # WHEN nothing is ambiguous, a qualifier would only cost width
         parameters = [make_parameter('area'), make_parameter('width')]
+
+        # THEN
         labels = ParameterLabels(parameters, qualify=lambda _p: 'Q_index=0')
 
         # EXPECT
@@ -24,6 +26,8 @@ class TestLabelling:
         # WHEN two parameters share a name
         first, second = make_parameter('width'), make_parameter('width')
         owners = {first.unique_name: 'Q_index=0', second.unique_name: 'Q_index=1'}
+
+        # THEN
         labels = ParameterLabels([first, second], qualify=lambda p: owners[p.unique_name])
 
         # EXPECT
@@ -33,6 +37,8 @@ class TestLabelling:
     def test_a_qualifier_that_declines_leaves_the_name_alone(self):
         # WHEN the qualifier cannot identify an owner, as for a parameter shared across Q
         first, second = make_parameter('width'), make_parameter('width')
+
+        # THEN
         labels = ParameterLabels([first, second], qualify=lambda _p: None)
 
         # EXPECT the plain name rather than an invented qualifier
@@ -41,6 +47,8 @@ class TestLabelling:
     def test_without_a_qualifier_names_stay_bare(self):
         # WHEN
         first, second = make_parameter('width'), make_parameter('width')
+
+        # THEN
         labels = ParameterLabels([first, second])
 
         # EXPECT
@@ -54,7 +62,7 @@ class TestChainColumns:
         labels = ParameterLabels(parameters)
         columns = [p.unique_name for p in reversed(parameters)]
 
-        # EXPECT resolution follows the chain's order, not the parameter list's
+        # THEN EXPECT resolution follows the chain's order, not the parameter list's
         assert labels.resolve(columns) == list(reversed(parameters))
         assert labels.display_names(columns) == ['width', 'area']
         assert labels.units(columns) == ['meV', 'meV']
@@ -64,6 +72,8 @@ class TestChainColumns:
         original = make_parameter('width')
         saved = {original.unique_name: 'width'}
         current = make_parameter('width')
+
+        # THEN
         labels = ParameterLabels([current])
 
         # EXPECT the saved label finds the parameter this session has
@@ -71,7 +81,7 @@ class TestChainColumns:
         assert labels.display_names([original.unique_name], saved) == ['width']
 
     def test_an_unknown_column_is_reported_not_guessed(self):
-        # WHEN
+        # THEN
         labels = ParameterLabels([make_parameter('area')])
 
         # EXPECT None rather than a wrong parameter, and the raw name to show something
@@ -83,6 +93,8 @@ class TestChainColumns:
         # WHEN
         first, second = make_parameter('width'), make_parameter('width')
         owners = {first.unique_name: 'Q_index=0', second.unique_name: 'Q_index=1'}
+
+        # THEN
         labels = ParameterLabels([first, second], qualify=lambda p: owners[p.unique_name])
 
         # EXPECT what save() writes alongside a chain
@@ -99,7 +111,7 @@ class TestCost:
         parameters = [make_parameter(f'p{i // 2}') for i in range(400)]
         labels = ParameterLabels(parameters, qualify=lambda _p: 'q')
 
-        # EXPECT labelling all of them stays cheap
+        # THEN EXPECT labelling all of them stays cheap
         import time
 
         start = time.perf_counter()
