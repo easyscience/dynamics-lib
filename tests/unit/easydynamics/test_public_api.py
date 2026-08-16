@@ -32,13 +32,13 @@ TUTORIALS = pathlib.Path(__file__).resolve().parents[3] / 'docs' / 'docs' / 'tut
 
 class TestFrontDoor:
     def test_everything_declared_is_importable(self):
-        # EXPECT no name in __all__ that cannot actually be reached
+        # THEN EXPECT no name in __all__ that cannot actually be reached
         missing = [name for name in edyn.__all__ if not hasattr(edyn, name)]
         assert missing == []
 
     @pytest.mark.parametrize('module_name', SUB_PACKAGES)
     def test_sub_package_exports_are_re_exported(self, module_name):
-        # WHEN
+        # THEN
         module = importlib.import_module(module_name)
 
         # EXPECT anything public in a sub-package is on the front door too, so a tutorial never
@@ -50,11 +50,11 @@ class TestFrontDoor:
         # WHEN
         from easydynamics.sample_model import Gaussian
 
-        # EXPECT the front door is an alias, not a copy
+        # THEN EXPECT the front door is an alias, not a copy
         assert edyn.Gaussian is Gaussian
 
     def test_all_is_sorted_and_unique(self):
-        # EXPECT a list that stays easy to scan and cannot hide a duplicate
+        # THEN EXPECT a list that stays easy to scan and cannot hide a duplicate
         assert edyn.__all__ == sorted(edyn.__all__)
         assert len(edyn.__all__) == len(set(edyn.__all__))
 
@@ -62,7 +62,7 @@ class TestFrontDoor:
 class TestTutorialImportStyle:
     @pytest.mark.parametrize('notebook', sorted(TUTORIALS.glob('*.ipynb')), ids=lambda p: p.name)
     def test_notebooks_use_only_the_flat_namespace(self, notebook):
-        # WHEN
+        # THEN
         cells = json.loads(notebook.read_text(encoding='utf-8'))['cells']
         imports = [
             line.strip()
