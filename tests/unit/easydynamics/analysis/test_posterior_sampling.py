@@ -1,7 +1,10 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Unit tests for Bayesian sampling on Analysis1d, with the EasyScience Sampler mocked out."""
+"""
+Unit tests for the posterior sampler, driven through an Analysis1d, with the EasyScience Sampler
+mocked out.
+"""
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -76,42 +79,11 @@ def analysis():
     return make_analysis()
 
 
-class TestFitterExposure:
-    def test_fitter_is_built_lazily_and_cached(self, analysis):
-        # THEN
-        fitter = analysis.fitter
+class TestPosteriorSampler:
+    #############
+    # Bounds pre-flight
+    #############
 
-        # EXPECT
-        assert fitter is analysis.fitter
-        assert fitter.fit_object is analysis
-
-    def test_fitter_is_rebuilt_when_the_sample_model_changes(self, analysis):
-        # WHEN
-        original = analysis.fitter
-
-        # THEN
-        analysis.sample_model = SampleModel(components=Gaussian(area=1.0))
-
-        # EXPECT
-        assert analysis.fitter is not original
-
-    def test_minimizer_can_be_switched_through_the_fitter(self, analysis):
-        # THEN
-        analysis.fitter.switch_minimizer(AvailableMinimizers.Bumps)
-
-        # EXPECT
-        assert analysis.fitter.minimizer.enum == AvailableMinimizers.Bumps
-
-    def test_fit_uses_the_persistent_fitter(self, analysis):
-        # THEN
-        result = analysis.fit()
-
-        # EXPECT
-        assert result is analysis._fit_result
-        assert np.isfinite(result.reduced_chi2)
-
-
-class TestBoundsPreflight:
     def test_sampling_refuses_unbounded_parameters(self, analysis):
         # THEN EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
@@ -136,8 +108,10 @@ class TestBoundsPreflight:
         # EXPECT
         assert len(suggestions) == len(analysis.get_free_parameters())
 
+    #############
+    # Sampling
+    #############
 
-class TestSamplePosterior:
     def test_restores_parameter_values_and_minimizer(self, analysis):
         # WHEN
         bound_all(analysis)
@@ -244,8 +218,10 @@ class TestSamplePosterior:
             with warnings_as_errors():
                 analysis.bayesian.sample(samples=10)
 
+    #############
+    # Parameter subsets
+    #############
 
-class TestParameterSubset:
     def test_holds_other_parameters_fixed_during_the_run(self, analysis):
         # WHEN
         bound_all(analysis)
@@ -299,8 +275,10 @@ class TestParameterSubset:
         with pytest.raises(ValueError, match='at least one parameter'):
             analysis.bayesian.sample(samples=10, parameters=[])
 
+    #############
+    # Sampler caching
+    #############
 
-class TestSamplerCaching:
     def test_sampler_is_reused_between_runs(self, analysis):
         # WHEN
         bound_all(analysis)
@@ -344,8 +322,10 @@ class TestSamplerCaching:
         assert np.array_equal(args[2], expected_y)
         assert np.array_equal(kwargs['weights'], expected_w)
 
+    #############
+    # Extending and persistence
+    #############
 
-class TestExtendAndPersistence:
     def test_extend_without_a_chain_raises(self, analysis):
         # THEN EXPECT
         with pytest.raises(RuntimeError, match='No chain to extend'):
@@ -401,8 +381,10 @@ class TestExtendAndPersistence:
             with pytest.warns(UserWarning, match='No parameter-name sidecar'):
                 analysis.bayesian.load(str(tmp_path / 'missing'))
 
+    #############
+    # Results
+    #############
 
-class TestResults:
     def test_summary_without_sampling_raises(self, analysis):
         # THEN EXPECT
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
@@ -447,8 +429,10 @@ class TestResults:
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
             analysis.bayesian.set_parameters_to_median()
 
+    #############
+    # Plots
+    #############
 
-class TestPlots:
     def test_predictive_rejects_a_bad_draw_count(self, analysis):
         # WHEN
         bound_all(analysis)
