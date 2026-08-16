@@ -529,7 +529,8 @@ class TestErrorPaths:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = _bumps_style_index_error()
 
-            # EXPECT the bare IndexError is replaced by something actionable, naming both causes
+            # THEN EXPECT the bare IndexError is replaced by something actionable, naming both
+            # causes
             with pytest.raises(RuntimeError, match='degenerate') as raised:
                 analysis.bayesian.sample(samples=10)
             assert 'short chains' in str(raised.value)
@@ -543,12 +544,12 @@ class TestErrorPaths:
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = IndexError('list index out of range')
 
-            # EXPECT it propagates untouched
+            # THEN EXPECT it propagates untouched
             with pytest.raises(IndexError, match='list index out of range'):
                 analysis.bayesian.sample(samples=10)
 
     def test_parameters_entry_of_the_wrong_type_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(TypeError, match='Parameter objects or labels'):
             analysis.bayesian.sample(samples=10, parameters=[42])
 
@@ -563,8 +564,10 @@ class TestErrorPaths:
             sampler_class.return_value.sample.return_value = results
             analysis.bayesian.sample(samples=10)
 
-        # EXPECT the unknown column is skipped rather than crashing
+        # THEN
         changed = analysis.bayesian.set_parameters_to_median()
+
+        # EXPECT the unknown column is skipped rather than crashing
         assert len(changed) == len(analysis.get_free_parameters())
 
     def test_load_chain_uses_the_sidecar_when_present(self, analysis, tmp_path):
@@ -578,6 +581,8 @@ class TestErrorPaths:
 
         fresh = make_analysis()
         bound_all(fresh)
+
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.load_state.return_value = saved
             fresh.bayesian.load(str(tmp_path / 'chain'))
@@ -602,7 +607,7 @@ class TestPlotRendering:
             sampler_class.return_value.sample.return_value = fake_results(analysis)
             analysis.bayesian.sample(samples=10)
 
-        # EXPECT
+        # THEN EXPECT
         assert len(analysis.bayesian.plot_trace().axes) == n_parameters + 1
         assert len(analysis.bayesian.plot_corner().axes) == n_parameters**2
         plt.close('all')
@@ -619,8 +624,8 @@ class TestExtendGuards:
 
             target = analysis.get_free_parameters()[0]
 
-            # EXPECT refused up front, rather than failing obscurely inside BUMPS, which resumes
-            # from a stored chain whose width is fixed
+            # THEN EXPECT refused up front, rather than failing obscurely inside BUMPS, which
+            # resumes from a stored chain whose width is fixed
             with pytest.warns(UserWarning), pytest.raises(ValueError, match='Cannot extend'):
                 analysis.bayesian.extend(additional_samples=10, parameters=[target.name])
 
@@ -633,7 +638,7 @@ class TestExtendGuards:
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.sample(samples=10)
 
-            # EXPECT: does not raise
+            # THEN EXPECT: does not raise
             analysis.bayesian.extend(additional_samples=10)
 
 
@@ -645,6 +650,7 @@ class TestSidecarLabels:
         bound_all(analysis)
         target = analysis.get_free_parameters()[0]
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(analysis)
             with pytest.warns(UserWarning):
@@ -668,6 +674,6 @@ class TestSidecarLabels:
             assert analysis.bayesian.sampler is not None
             assert analysis.bayesian.results is None
 
-            # EXPECT the shape guard steps aside rather than comparing against nothing
+            # THEN EXPECT the shape guard steps aside rather than comparing against nothing
             sampler_class.return_value.extend.side_effect = lambda **_k: fake_results(analysis)
             analysis.bayesian.extend(additional_samples=10)

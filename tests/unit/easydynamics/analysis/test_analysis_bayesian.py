@@ -69,7 +69,7 @@ def analysis():
 
 class TestChainParameters:
     def test_union_covers_every_q_index(self, analysis):
-        # WHEN
+        # THEN
         parameters = analysis._chain_parameters()
 
         # EXPECT one copy of each per-Q parameter, with no duplicates
@@ -77,7 +77,7 @@ class TestChainParameters:
         assert len({p.unique_name for p in parameters}) == len(parameters)
 
     def test_labels_are_qualified_by_q_index(self, analysis):
-        # WHEN
+        # THEN
         labels = [analysis._parameter_labels().label(p) for p in analysis._chain_parameters()]
 
         # EXPECT every per-Q copy is distinguishable, which the bare name would not be
@@ -86,7 +86,7 @@ class TestChainParameters:
         assert 'Gaussian width (Q_index=2)' in labels
 
     def test_bare_names_would_collide(self, analysis):
-        # WHEN
+        # THEN
         names = [p.name for p in analysis._chain_parameters()]
 
         # EXPECT the collision the Q-qualified label exists to solve
@@ -95,17 +95,17 @@ class TestChainParameters:
 
 class TestBoundsPreflight:
     def test_sampling_refuses_unbounded_parameters(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='finite bounds'):
             analysis.bayesian.sample(fit_method='simultaneous', samples=10)
 
     def test_error_names_parameters_by_q_index(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match=r'Gaussian width \(Q_index=0\)'):
             analysis.bayesian.check_bounds()
 
     def test_suggest_bounds_labels_every_q(self, analysis):
-        # WHEN
+        # THEN
         suggestions = analysis.bayesian.suggest_bounds()
 
         # EXPECT
@@ -120,6 +120,7 @@ class TestSimultaneousSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             analysis.bayesian.sample(fit_method='simultaneous', samples=10)
@@ -135,6 +136,7 @@ class TestSimultaneousSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             expected = fake_results(parameters)
             sampler_class.return_value.sample.return_value = expected
@@ -149,6 +151,7 @@ class TestSimultaneousSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             analysis.bayesian.sample(fit_method='simultaneous', samples=10)
@@ -163,6 +166,7 @@ class TestSimultaneousSampling:
         bound_all(analysis)
         parameters = analysis._chain_parameters()
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             for analysis1d in analysis.analysis_list:
@@ -189,6 +193,7 @@ class TestIndependentSampling:
                 parameter.min = float(parameter.value) - 5.0
                 parameter.max = float(parameter.value) + 5.0
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
                 analysis.analysis_list[0].get_free_parameters()
@@ -206,6 +211,7 @@ class TestIndependentSampling:
             parameter.min = float(parameter.value) - 5.0
             parameter.max = float(parameter.value) + 5.0
 
+        # THEN
         with patch(SAMPLER_PATH) as sampler_class:
             sampler_class.return_value.sample.side_effect = lambda **_k: fake_results(
                 target.get_free_parameters()
@@ -217,14 +223,14 @@ class TestIndependentSampling:
         assert result is target.bayesian.results
 
     def test_invalid_q_index_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises((ValueError, IndexError)):
             analysis.bayesian.sample(fit_method='independent', Q_index=99, samples=10)
 
 
 class TestSamplePosteriorValidation:
     def test_invalid_fit_method_raises(self, analysis):
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='Invalid fit method'):
             analysis.bayesian.sample(fit_method='nonsense')
 
@@ -232,7 +238,7 @@ class TestSamplePosteriorValidation:
         # WHEN
         analysis = edyn.Analysis(display_name='Empty')
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(ValueError, match='No Q values available'):
             analysis.bayesian.sample()
 
@@ -247,7 +253,7 @@ class TestPredictivePlot:
             sampler_class.return_value.sample.return_value = fake_results(parameters)
             analysis.bayesian.sample(fit_method='simultaneous', samples=10)
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(NotImplementedError, match='single dataset only'):
             analysis.bayesian.plot_posterior_predictive()
 
@@ -309,13 +315,13 @@ class TestIndependentSamplingDiscoverability:
             )
             analysis.bayesian.sample(fit_method='independent', samples=10)
 
-        # EXPECT anything that genuinely needs a single chain says where the chains actually are,
-        # rather than claiming none exist
+        # THEN EXPECT anything that genuinely needs a single chain says where the chains
+        # actually are, rather than claiming none exist
         with pytest.raises(RuntimeError, match='analysis_list'):
             analysis.bayesian.plot_posterior_predictive()
 
     def test_untouched_analysis_still_reports_no_samples(self, analysis):
-        # EXPECT the plain message when nothing has been sampled anywhere
+        # THEN EXPECT the plain message when nothing has been sampled anywhere
         with pytest.raises(RuntimeError, match='No posterior samples yet'):
             analysis.bayesian.summary()
 
@@ -431,6 +437,7 @@ class TestAggregatingPerQChains:
         # WHEN
         self._sample_independently(analysis)
 
+        # THEN
         with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
             widget = analysis.bayesian.plot_corner()
 
@@ -452,7 +459,7 @@ class TestAggregatingPerQChains:
         # WHEN
         self._sample_independently(analysis)
 
-        # EXPECT it names the sampled Q indices rather than just refusing
+        # THEN EXPECT it names the sampled Q indices rather than just refusing
         with (
             patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=False),
             pytest.raises(RuntimeError, match=r'sampled Q indices are \[0, 1, 2\]'),
@@ -472,6 +479,7 @@ class TestAggregatingPerQChains:
             )
             analysis.bayesian.sample(fit_method='independent', Q_index=2, samples=10)
 
+        # THEN
         with patch('easydynamics.analysis.posterior_sampling._in_notebook', return_value=True):
             widget = analysis.bayesian.plot_corner()
 
@@ -482,7 +490,7 @@ class TestAggregatingPerQChains:
         # WHEN
         self._sample_independently(analysis)
 
-        # EXPECT
+        # THEN EXPECT
         with pytest.raises(RuntimeError, match='no single trace'):
             analysis.bayesian.plot_trace()
 
@@ -513,8 +521,10 @@ class TestAggregatingPerQChains:
             )
             analysis.bayesian.sample(fit_method='independent', Q_index=1, samples=10)
 
-        # EXPECT the unsampled Q indices are passed over rather than breaking the aggregation
+        # THEN
         summary = analysis.bayesian.summary()
+
+        # EXPECT the unsampled Q indices are passed over rather than breaking the aggregation
         assert len(summary) == len(target.get_free_parameters())
         assert all('Q_index=1' in entry.name for entry in summary)
         assert len(analysis.bayesian.set_parameters_to_median()) == len(

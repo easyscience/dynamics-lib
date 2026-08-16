@@ -85,13 +85,15 @@ def simultaneously_sampled():
 
 class TestSimultaneousChain:
     def test_chain_covers_every_q_index(self, simultaneously_sampled):
-        # EXPECT one column per free parameter across all Q, in one chain
+        # THEN
         results = simultaneously_sampled.bayesian.results
+
+        # EXPECT one column per free parameter across all Q, in one chain
         assert results.draws.shape[1] == len(simultaneously_sampled._chain_parameters())
         assert results.draws.shape[1] == 3 * len(Q_VALUES)
 
     def test_summary_labels_are_unique_and_q_qualified(self, simultaneously_sampled):
-        # WHEN
+        # THEN
         names = [entry.name for entry in simultaneously_sampled.bayesian.summary()]
 
         # EXPECT
@@ -100,7 +102,7 @@ class TestSimultaneousChain:
 
     @pytest.mark.parametrize('q_index', range(len(Q_VALUES)))
     def test_posterior_recovers_the_true_width_at_each_q(self, simultaneously_sampled, q_index):
-        # WHEN
+        # THEN
         entry = simultaneously_sampled.bayesian.summary()[f'Gaussian width (Q_index={q_index})']
 
         # EXPECT the truth within a few posterior standard deviations. A 68% interval is not used
@@ -115,6 +117,7 @@ class TestSimultaneousChain:
         analysis.bayesian.suggest_bounds().apply()
         before = [float(p.value) for p in analysis._chain_parameters()]
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             analysis.bayesian.sample(fit_method='simultaneous', **SAMPLE_KWARGS)
@@ -128,6 +131,8 @@ class TestSimultaneousChain:
         import matplotlib.pyplot as plt
 
         n_parameters = len(simultaneously_sampled._chain_parameters())
+
+        # THEN
         trace = simultaneously_sampled.bayesian.plot_trace()
         corner = simultaneously_sampled.bayesian.plot_corner()
 
@@ -145,6 +150,7 @@ class TestIndependentChains:
         for analysis1d in analysis.analysis_list:
             analysis1d.bayesian.suggest_bounds().apply()
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             results = analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
@@ -155,12 +161,13 @@ class TestIndependentChains:
             assert result.draws.shape[1] == len(analysis1d.get_free_parameters())
 
     def test_independent_and_simultaneous_agree_on_the_widths(self, simultaneously_sampled):
-        # WHEN the same data is sampled per-Q instead of all at once
+        # WHEN
         analysis = build_analysis()
         analysis.fit(fit_method='independent')
         for analysis1d in analysis.analysis_list:
             analysis1d.bayesian.suggest_bounds().apply()
 
+        # THEN the same data is sampled per-Q instead of all at once
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
@@ -209,6 +216,7 @@ class TestParameterAnalysisChain:
         analysis.bayesian.suggest_bounds(absolute_floor=1.0).apply()
         assert not analysis.bayesian.suggest_bounds().needing_attention
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             results = analysis.bayesian.sample(**SAMPLE_KWARGS)
@@ -252,6 +260,7 @@ class TestAggregatedIndependentChains:
             warnings.simplefilter('ignore')
             analysis.bayesian.sample(fit_method='independent', **SAMPLE_KWARGS)
 
+        # THEN
         changed = analysis.bayesian.set_parameters_to_median()
 
         # EXPECT every Q's parameters land on that Q's own median

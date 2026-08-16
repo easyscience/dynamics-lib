@@ -316,13 +316,13 @@ class TestPosteriorSummaryContainer:
         parameters = [make_parameter(name='a'), make_parameter(name='b')]
         summary = summarize_draws(np.zeros((7, 2)), ['a', 'b'], parameters)
 
-        # EXPECT
+        # THEN EXPECT
         assert len(summary) == 2
         assert [entry.name for entry in summary] == ['a', 'b']
         assert len(summary.entries) == 2
 
     def test_repr_with_no_entries(self):
-        # EXPECT
+        # WHEN THEN EXPECT
         assert 'no parameters' in repr(summarize_draws(np.zeros((3, 0)), [], []))
 
 
@@ -333,7 +333,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='Delta area', value=1.0, error=1e9)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT it is still applied, since it is what the fit implied, but not silently
+        # THEN EXPECT it is still applied, since it is what the fit implied, but not silently
         with pytest.warns(UserWarning, match='far wider than the parameter'):
             changed = suggestions.apply()
         assert changed == [parameter]
@@ -343,7 +343,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='sane', value=10.0, error=0.5)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT
+        # THEN EXPECT
         import warnings as warnings_module
 
         with warnings_module.catch_warnings():
@@ -355,7 +355,7 @@ class TestAbsurdBoundsWarning:
         parameter = make_parameter(name='zero', value=0.0, error=1.0)
         suggestions = suggest_bounds_for_parameters([parameter])
 
-        # EXPECT no warning, since the ratio is meaningless rather than alarming
+        # THEN EXPECT no warning, since the ratio is meaningless rather than alarming
         import warnings as warnings_module
 
         with warnings_module.catch_warnings():
