@@ -88,8 +88,10 @@ def sampled_analysis():
 
 class TestRealChain:
     def test_chain_has_one_column_per_free_parameter(self, sampled_analysis):
-        # EXPECT
+        # THEN
         results = sampled_analysis.bayesian.results
+
+        # EXPECT
         assert results.draws.shape[1] == len(sampled_analysis.get_free_parameters())
         assert results.draws.shape[0] > 0
 
@@ -98,7 +100,7 @@ class TestRealChain:
         [('Gaussian area', TRUE_AREA), ('Gaussian width', TRUE_WIDTH)],
     )
     def test_posterior_recovers_the_true_parameters(self, sampled_analysis, name, truth):
-        # WHEN
+        # THEN
         entry = sampled_analysis.bayesian.summary()[name]
 
         # EXPECT the truth sits within a few posterior standard deviations of the median. A 68%
@@ -108,7 +110,7 @@ class TestRealChain:
         assert abs(entry.median - truth) < 4 * spread
 
     def test_summary_is_reported_under_parameter_names_and_units(self, sampled_analysis):
-        # WHEN
+        # THEN
         summary = sampled_analysis.bayesian.summary()
 
         # EXPECT
@@ -124,6 +126,7 @@ class TestRealChain:
         analysis.bayesian.suggest_bounds().apply()
         before = [float(p.value) for p in analysis.get_free_parameters()]
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             analysis.bayesian.sample(**SAMPLE_KWARGS)
@@ -136,6 +139,7 @@ class TestRealChain:
         # WHEN
         before = int(sampled_analysis.bayesian.results.state.Ngen)
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             extended = sampled_analysis.bayesian.extend(
@@ -153,6 +157,8 @@ class TestRealChain:
         fresh = build_analysis()
         fresh.fit()
         fresh.bayesian.suggest_bounds().apply()
+
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             fresh.bayesian.load(prefix)
@@ -168,6 +174,7 @@ class TestRealChain:
         analysis.fit()
         analysis.bayesian.suggest_bounds().apply()
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             results = analysis.bayesian.sample(parameters=['Gaussian width'], **SAMPLE_KWARGS)
@@ -181,6 +188,8 @@ class TestRealChain:
         import matplotlib.pyplot as plt
 
         n_parameters = len(sampled_analysis.get_free_parameters())
+
+        # THEN
         trace = sampled_analysis.bayesian.plot_trace()
         corner = sampled_analysis.bayesian.plot_corner()
         predictive = sampled_analysis.bayesian.plot_posterior_predictive(n_draws=20)
@@ -198,6 +207,7 @@ class TestRealChain:
         analysis.bayesian.suggest_bounds().apply()
         fitted = {p.name: float(p.value) for p in analysis.get_free_parameters()}
 
+        # THEN
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             analysis.bayesian.sample(**SAMPLE_KWARGS)
