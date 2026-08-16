@@ -8,6 +8,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import scipp as sc
+from easyscience.fitting import AvailableMinimizers
 from easyscience.variable import Parameter
 
 from easydynamics.analysis.analysis1d import Analysis1d
@@ -131,6 +132,77 @@ class TestAnalysis1d:
 
         analysis1d._evaluate_with_convolution.assert_called_once()
         analysis1d._evaluate_direct.assert_called_once()
+
+    #############
+    # The cached fitter
+    #############
+
+    @pytest.fixture
+    def fittable_analysis1d(self):
+        # The analysis1d fixture holds three points against three free parameters, which leaves
+        # a fit with no degrees of freedom. This one has a curve to land on.
+        energy_values = np.linspace(-5.0, 5.0, 20)
+        intensity = 3.0 * np.exp(-0.5 * (energy_values / 1.2) ** 2)
+        data = sc.array(
+            dims=['Q', 'energy'],
+            values=intensity[None, :],
+            variances=np.full_like(intensity, 0.01)[None, :],
+        )
+        experiment = Experiment(
+            data=sc.DataArray(
+                data=data,
+                coords={
+                    'Q': sc.array(dims=['Q'], values=[1.0], unit='1/Angstrom'),
+                    'energy': sc.array(dims=['energy'], values=energy_values, unit='meV'),
+                },
+            )
+        )
+        analysis = Analysis1d(
+            display_name='TestFittable',
+            experiment=experiment,
+            sample_model=SampleModel(components=Gaussian(area=3.0, width=1.2, center=0.0)),
+            instrument_model=InstrumentModel(),
+            Q_index=0,
+        )
+        analysis.instrument_model.fix_energy_offset(Q_index=0)
+        return analysis
+
+    def test_fitter_is_built_lazily_and_cached(self, analysis1d):
+        # THEN
+        fitter = analysis1d.fitter
+
+        # EXPECT
+        assert fitter is analysis1d.fitter
+        assert fitter.fit_object is analysis1d
+
+    def test_fitter_is_rebuilt_when_the_sample_model_changes(self, analysis1d):
+        # WHEN
+        original = analysis1d.fitter
+
+        # THEN
+        analysis1d.sample_model = SampleModel(components=Gaussian(area=1.0))
+
+        # EXPECT
+        assert analysis1d.fitter is not original
+
+    def test_minimizer_can_be_switched_through_the_fitter(self, analysis1d):
+        # THEN
+        analysis1d.fitter.switch_minimizer(AvailableMinimizers.Bumps)
+
+        # EXPECT
+        assert analysis1d.fitter.minimizer.enum == AvailableMinimizers.Bumps
+
+    def test_fit_uses_the_persistent_fitter(self, fittable_analysis1d):
+        # THEN
+        result = fittable_analysis1d.fit()
+
+        # EXPECT
+        assert result is fittable_analysis1d._fit_result
+        assert np.isfinite(result.reduced_chi2)
+
+    #############
+    # Fitting
+    #############
 
     def test_fit_raises_if_no_experiment(self, analysis1d):
         # WHEN THEN
