@@ -682,6 +682,26 @@ class TestExpressionComponentOutputUnit:
         # denominator is 1 + 0.1 and the numerator 6.582120e-2 meV.
         assert value == pytest.approx(6.582120e-2 / 1.1, rel=1e-5)
 
+    def test_conversion_handles_non_si_dimensions_like_counts(self):
+        # WHEN: an intensity-scaled jump-diffusion width, wanted in counts*meV
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            expr = ExpressionComponent(
+                'counts * hbar * D * x**2 / (1 + D * x**2 * tau)',
+                parameters={'counts': 1.0, 'D': 4.6e-10, 'tau': 22.0},
+                parameter_units={'counts': 'counts', 'D': 'm^2/s', 'tau': 'ps'},
+                x_unit='1/angstrom',
+                y_unit='counts*meV',
+            )
+
+        # THEN
+        value = expr.evaluate(np.array([1.0]))[0]
+
+        # EXPECT: counts is a non-SI dimension scipp carries in the unit powers; only the scale
+        # multiplier is converted. D*Q^2*tau = 4.6e-10 m^2/s * 1e20 /m^2 * 22e-12 s = 1.012.
+        expected = 6.582120e-13 * 4.6e-10 * 1e20 / (1.0 + 4.6e-10 * 1e20 * 22e-12)
+        assert value == pytest.approx(expected, rel=1e-5)
+
 
 class TestExpressionComponentPhysicalConstants:
     def test_kb_constant_value_and_unit(self):
