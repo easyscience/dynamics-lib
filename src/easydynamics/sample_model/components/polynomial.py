@@ -435,7 +435,9 @@ class Polynomial(ModelComponent):
         try:
             for i, param in enumerate(self._coefficients):
                 factor = scale**i
-                if factor != 1.0:
+                # Exact comparison on purpose: only a factor of exactly 1.0 (same unit, or the
+                # constant term's scale**0) is a guaranteed no-op worth skipping.
+                if factor != 1.0:  # ruff: ignore[float-equality-comparison]
                     self._rescale_coefficient(param, factor)
                     rescaled.append((param, factor))
         except Exception:
@@ -481,7 +483,9 @@ class Polynomial(ModelComponent):
         rescaled: list[Parameter] = []
         try:
             for param in self._coefficients:
-                if scale != 1.0:
+                # Exact comparison on purpose: only a scale of exactly 1.0 (converting to the
+                # same unit) is a guaranteed no-op worth skipping.
+                if scale != 1.0:  # ruff: ignore[float-equality-comparison]
                     self._rescale_coefficient(param, scale)
                     rescaled.append(param)
         except Exception:
