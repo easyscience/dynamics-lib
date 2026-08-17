@@ -9,6 +9,7 @@ from easyscience.variable import Parameter
 
 from easydynamics.base_classes import EasyDynamicsModelBase
 from easydynamics.sample_model.component_collection import ComponentCollection
+from easydynamics.sample_model.components.delta_function import DeltaFunction
 from easydynamics.sample_model.components.model_component import ModelComponent
 from easydynamics.utils.utils import Numeric
 from easydynamics.utils.utils import convert_parameter_unit
@@ -59,10 +60,13 @@ class ConvolutionBase(EasyDynamicsModelBase):
         Raises
         ------
         TypeError
-            If energy is not a numpy ndarray or a scipp Variable or if energy_unit is not a string
+            If energy is not a numpy ndarray or a scipp Variable or if x_unit is not a string
             or scipp unit, or if energy_offset is not a number or a Parameter, or if
             sample_components is not a ComponentCollection or ModelComponent, or if
             resolution_components is not a ComponentCollection or ModelComponent.
+        ValueError
+            If resolution_components contains a DeltaFunction, or if the x_unit of the sample
+            or resolution components does not match the convolver's x_unit.
         """
 
         super().__init__(
@@ -118,7 +122,71 @@ class ConvolutionBase(EasyDynamicsModelBase):
                 x_unit=resolution_components.x_unit,
                 y_unit=resolution_components.y_unit,
             )
+        self._validate_no_delta_in_resolution(resolution_components)
         self._resolution_components = resolution_components
+
+        self._validate_component_x_units()
+
+    # ------------------------------------------------------------------
+    # Validation helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _validate_no_delta_in_resolution(
+        resolution_components: ComponentCollection | None,
+    ) -> None:
+        """
+        Validate that the resolution collection contains no DeltaFunction components.
+
+        Convolving with a delta function in the resolution is not supported on any path
+        (analytical, numerical, or delta), so the invariant is enforced when the resolution
+        is bound to the convolver.
+
+        Parameters
+        ----------
+        resolution_components : ComponentCollection | None
+            The resolution collection to validate. None is skipped.
+
+        Raises
+        ------
+        ValueError
+            If resolution_components contains a DeltaFunction.
+        """
+        if resolution_components is None:
+            return
+        if any(isinstance(component, DeltaFunction) for component in resolution_components):
+            raise ValueError(
+                'resolution_components contains delta functions. This is not supported.'
+            )
+
+    def _validate_component_x_units(self) -> None:
+        """
+        Validate that sample and resolution collections use the convolver's x_unit.
+
+        Components in a different (even compatible) x_unit would be evaluated with raw
+        numbers in the wrong unit, silently producing wrong results.
+
+        Raises
+        ------
+        ValueError
+            If a collection's x_unit differs from the convolver's x_unit.
+        """
+        if self._x_unit is None:
+            return
+        for label, collection in (
+            ('sample_components', self._sample_components),
+            ('resolution_components', self._resolution_components),
+        ):
+            if collection is None or collection.x_unit is None:
+                continue
+            # Compare as sc.Unit so unit aliases (e.g. 'ueV' vs 'micro-eV') are not false
+            # mismatches.
+            if sc.Unit(str(collection.x_unit)) != sc.Unit(str(self._x_unit)):
+                raise ValueError(
+                    f'{label} has x_unit {str(collection.x_unit)!r}, which does not match the '
+                    f'convolver x_unit {str(self._x_unit)!r}. Convert the components with '
+                    f'convert_x_unit before constructing the convolver.'
+                )
 
     @property
     def energy_offset(self) -> Parameter:
@@ -192,12 +260,16 @@ class ConvolutionBase(EasyDynamicsModelBase):
         Parameters
         ----------
         energy : np.ndarray | sc.Variable
-            1D array of energy values where the convolution is evaluated.
+            1D array of energy values where the convolution is evaluated. A scipp Variable
+            must carry the convolver's x_unit; the x_unit itself can only be changed via
+            convert_x_unit.
 
         Raises
         ------
         TypeError
             If energy is not a numpy ndarray or a scipp Variable.
+        ValueError
+            If energy is a scipp Variable whose unit differs from the convolver's x_unit.
         """
 
         if isinstance(energy, Numeric):
@@ -210,8 +282,15 @@ class ConvolutionBase(EasyDynamicsModelBase):
             self._energy = energy_to_scipp(energy, self._energy.unit)
 
         if isinstance(energy, sc.Variable):
+            # Compare as sc.Unit so unit aliases (e.g. 'ueV' vs 'micro-eV') are not false
+            # mismatches.
+            if self._x_unit is not None and energy.unit != sc.Unit(str(self._x_unit)):
+                raise ValueError(
+                    f'energy has unit {str(energy.unit)!r}, which does not match the convolver '
+                    f'x_unit {str(self._x_unit)!r}. Use convert_x_unit to change the unit, or '
+                    f'provide energy in {str(self._x_unit)!r}.'
+                )
             self._energy = energy
-            self._x_unit = energy.unit
 
     def convert_x_unit(self, unit: str | sc.Unit) -> None:
         """
@@ -237,7 +316,9 @@ class ConvolutionBase(EasyDynamicsModelBase):
         old_offset_unit = str(self.energy_offset.unit)
 
         def _convert_energy(target_unit: str | sc.Unit) -> None:
-            self.energy = sc.to_unit(self.energy, target_unit)
+            # Assign the backing field directly: the public setter rejects unit changes
+            # (convert_x_unit is the one supported route for those).
+            self._energy = sc.to_unit(self._energy, target_unit)
 
         conversions = [
             (_convert_energy, unit, old_x_unit),
@@ -249,7 +330,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
             conversions.append((self.resolution_components.convert_x_unit, unit, old_x_unit))
         convert_units_with_rollback(conversions)
 
-        self._x_unit = unit
+        # Keep the str contract for x_unit even when an sc.Unit was passed.
+        self._x_unit = str(unit) if isinstance(unit, sc.Unit) else unit
 
     def convert_y_unit(self, unit: str | sc.Unit) -> None:
         """
@@ -362,6 +444,8 @@ class ConvolutionBase(EasyDynamicsModelBase):
         ------
         TypeError
             If resolution_components is not a ComponentCollection or ModelComponent.
+        ValueError
+            If resolution_components contains a DeltaFunction.
         """
         if not isinstance(resolution_components, (ComponentCollection, ModelComponent)):
             raise TypeError(
@@ -374,4 +458,5 @@ class ConvolutionBase(EasyDynamicsModelBase):
                 x_unit=resolution_components.x_unit,
                 y_unit=resolution_components.y_unit,
             )
+        self._validate_no_delta_in_resolution(resolution_components)
         self._resolution_components = resolution_components

@@ -75,6 +75,13 @@ class ModelBase(EasyDynamicsModelBase):
 
         self._components = ComponentCollection(x_unit=self.x_unit, y_unit=self.y_unit)
         self._component_collections: list[ComponentCollection] = []
+        # Counter part of state_version: bumped whenever the dirty flag is raised.
+        self._state_counter = 0
+        # Template-collection version the per-Q collections were last built from. Compared
+        # against self._components.version so in-place mutations of the live template
+        # collection (reachable via the `components` property) are detected without
+        # callbacks.
+        self._built_components_version = self._components.version
         self._component_collections_is_dirty = True
         if isinstance(components, (ModelComponent, ComponentCollection)):
             self.append_component(components)
@@ -97,7 +104,8 @@ class ModelBase(EasyDynamicsModelBase):
         Raises
         ------
         ValueError
-            If there are no components in the model to evaluate.
+            If Q is not set on the model, or if there are no components in the model to
+            evaluate.
 
         Returns
         -------
@@ -107,6 +115,11 @@ class ModelBase(EasyDynamicsModelBase):
         """
         self._ensure_component_collections_current()
         if not self._component_collections:
+            if self.Q is None:
+                raise ValueError(
+                    'Q is not set on the model, so there are no per-Q component collections '
+                    'to evaluate. Set Q before evaluating.'
+                )
             raise ValueError('No components in the model to evaluate.')
         return [
             collection.evaluate(x, output=output) for collection in self._component_collections
@@ -149,14 +162,18 @@ class ModelBase(EasyDynamicsModelBase):
     # ------------------------------------------------------------------
 
     @property
-    def components(self) -> list[ModelComponent]:
+    def components(self) -> ComponentCollection:
         """
-        Get the components of the SampleModel.
+        Get the template ComponentCollection of the SampleModel.
+
+        This is the live template collection: mutating it in place (e.g. via
+        ``append_component``) is detected through its ``version`` and triggers a rebuild of
+        the per-Q collections on next use.
 
         Returns
         -------
-        list[ModelComponent]
-            The components of the SampleModel.
+        ComponentCollection
+            The template component collection of the SampleModel.
         """
         return self._components
 
@@ -187,12 +204,73 @@ class ModelBase(EasyDynamicsModelBase):
         """
         Return whether component collections need to be rebuilt before use.
 
+        Collections are stale when the dirty flag was raised (Q or component changes through
+        the model's methods) or when the live template collection was mutated in place since
+        the collections were last built.
+
         Returns
         -------
         bool
             ``True`` if component collections have not been built yet or are stale.
         """
-        return self._component_collections_is_dirty
+        return (
+            self._component_collections_is_dirty
+            or self._built_components_version != self._components.version
+        )
+
+    @property
+    def _component_collections_is_dirty(self) -> bool:
+        """
+        Get the dirty flag for the per-Q component collections.
+
+        Implemented as a property so every write is intercepted: raising the flag bumps the
+        state counter (making ``state_version`` change), and clearing it records the template
+        collection version the collections were built from.
+
+        Returns
+        -------
+        bool
+            The raw dirty flag (does not account for in-place template mutations; use
+            ``component_collections_is_dirty`` for the full staleness check).
+        """
+        return self._component_collections_dirty_flag
+
+    @_component_collections_is_dirty.setter
+    def _component_collections_is_dirty(self, value: bool) -> None:
+        """
+        Set the dirty flag for the per-Q component collections.
+
+        Parameters
+        ----------
+        value : bool
+            ``True`` marks the collections stale and bumps the state counter. ``False``
+            marks them current and records the template collection version they now
+            correspond to.
+        """
+        value = bool(value)
+        if value:
+            self._state_counter += 1
+        else:
+            self._built_components_version = self._components.version
+        self._component_collections_dirty_flag = value
+
+    @property
+    def state_version(self) -> int:
+        """
+        Get a monotonic version of everything affecting the per-Q component collections.
+
+        The value changes whenever Q changes, components are added/removed/replaced through
+        the model's methods, or the live template collection (``components``) is mutated in
+        place. Implemented as an internal counter plus the template collection's mutation
+        version, so it only ever increases. Reading never rebuilds, clears or mutates
+        anything; equal values mean the collections' inputs are unchanged.
+
+        Returns
+        -------
+        int
+            The current state version.
+        """
+        return self._state_counter + self._components.version
 
     @property
     def Q(self) -> sc.Variable | None:
@@ -396,8 +474,11 @@ class ModelBase(EasyDynamicsModelBase):
     def _ensure_component_collections_current(self) -> None:
         """
         Rebuild component collections if any dependency has changed since they were last built.
+
+        Uses the full staleness check, so both flag-raising changes (Q, component methods)
+        and in-place mutations of the live template collection trigger a rebuild.
         """
-        if self._component_collections_is_dirty:
+        if self.component_collections_is_dirty:
             self._generate_component_collections()
             self._component_collections_is_dirty = False
 

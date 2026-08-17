@@ -11,7 +11,6 @@ from easydynamics.sample_model import DeltaFunction
 from easydynamics.sample_model import Gaussian
 from easydynamics.sample_model import Lorentzian
 from easydynamics.sample_model import Voigt
-from easydynamics.sample_model.component_collection import ComponentCollection
 from easydynamics.sample_model.components.model_component import ModelComponent
 
 
@@ -20,12 +19,13 @@ class AnalyticalConvolution(ConvolutionBase):
     Analytical convolution of a ModelComponent or ComponentCollection with a ResolutionModel.
 
     Possible analytical convolutions are any combination of delta functions, Gaussians, Lorentzians
-    and Voigt profiles.
+    and Voigt profiles. Dispatch is subclass-tolerant: a subclass of e.g. Lorentzian is convolved
+    with the Lorentzian rules.
     """
 
-    # Mapping of supported component type pairs to convolution methods.
+    # Mapping of supported canonical component-type-name pairs to convolution methods.
     # Delta functions are handled separately.
-    _CONVOLUTIONS: ClassVar[dict[str, object]] = {
+    _CONVOLUTIONS: ClassVar[dict[tuple[str, str], str]] = {
         ('Gaussian', 'Gaussian'): '_convolute_gaussian_gaussian',
         ('Gaussian', 'Lorentzian'): '_convolute_gaussian_lorentzian',
         ('Gaussian', 'Voigt'): '_convolute_gaussian_voigt',
@@ -33,6 +33,65 @@ class AnalyticalConvolution(ConvolutionBase):
         ('Lorentzian', 'Voigt'): '_convolute_lorentzian_voigt',
         ('Voigt', 'Voigt'): '_convolute_voigt_voigt',
     }
+
+    # The analytical base types used to resolve a component (or a subclass of one of them)
+    # to its canonical dispatch name.
+    _ANALYTICAL_TYPES: ClassVar[tuple[type[ModelComponent], ...]] = (Gaussian, Lorentzian, Voigt)
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        """
+        Initialize the AnalyticalConvolution.
+
+        Accepts the same arguments as ConvolutionBase, but requires sample_components and
+        resolution_components to be provided.
+
+        Parameters
+        ----------
+        *args : object
+            Positional arguments passed to ConvolutionBase.
+        **kwargs : object
+            Keyword arguments passed to ConvolutionBase.
+
+        Raises
+        ------
+        TypeError
+            If sample_components or resolution_components is None.
+        """
+        super().__init__(*args, **kwargs)
+        # ConvolutionBase tolerates None collections, but an analytical convolver cannot
+        # convolve without both models — fail early with a clear error.
+        if self._sample_components is None:
+            raise TypeError(
+                'sample_components must be a ComponentCollection or ModelComponent, not None.'
+            )
+        if self._resolution_components is None:
+            raise TypeError(
+                'resolution_components must be a ComponentCollection or ModelComponent, not None.'
+            )
+
+    @classmethod
+    def _canonical_type_name(cls, component: ModelComponent) -> str:
+        """
+        Resolve a component to the canonical analytical type name used for dispatch.
+
+        A subclass of one of the analytical types (Gaussian, Lorentzian, Voigt) resolves to
+        its base type's name, so subclasses are convolved with the base type's rules.
+
+        Parameters
+        ----------
+        component : ModelComponent
+            The component to resolve.
+
+        Returns
+        -------
+        str
+            The canonical type name, or the component's own class name if it is not an
+            analytical type.
+        """
+        for analytical_type in cls._ANALYTICAL_TYPES:
+            if isinstance(component, analytical_type):
+                return analytical_type.__name__
+        return type(component).__name__
 
     def convolution(
         self,
@@ -90,8 +149,8 @@ class AnalyticalConvolution(ConvolutionBase):
         The convolution of two Voigt profiles results in another Voigt profile, with the Gaussian
         widths summed in quadrature and the Lorentzian widths summed.
 
-        The convolution of a delta function with any component or ComponentCollection results in
-        the same component or ComponentCollection shifted by the delta center.
+        The convolution of a delta function with any component results in the same component
+        shifted by the delta center.
 
         All areas are multiplied in the convolution.
 
@@ -127,15 +186,15 @@ class AnalyticalConvolution(ConvolutionBase):
                 resolution_component,
             )
 
-        pair = (type(sample_component).__name__, type(resolution_component).__name__)
+        sample_name = self._canonical_type_name(sample_component)
+        resolution_name = self._canonical_type_name(resolution_component)
+
+        pair = (sample_name, resolution_name)
         swapped = False
 
         if pair not in self._CONVOLUTIONS:
             # Try reversing the pair
-            pair = (
-                type(resolution_component).__name__,
-                type(sample_component).__name__,
-            )
+            pair = (resolution_name, sample_name)
             swapped = True
 
         func_name = self._CONVOLUTIONS.get(pair)
@@ -154,26 +213,25 @@ class AnalyticalConvolution(ConvolutionBase):
     def _convolute_delta_any(
         self,
         sample_component: DeltaFunction,
-        resolution_components: ComponentCollection | ModelComponent,
+        resolution_component: ModelComponent,
     ) -> np.ndarray:
         """
-        Convolution of delta function with any ModelComponent or ComponentCollection results in the
-        same component or ComponentCollection shifted by the delta center. The areas are
-        multiplied.
+        Convolution of a delta function with a resolution component results in the same
+        component shifted by the delta center. The areas are multiplied.
 
         Parameters
         ----------
         sample_component : DeltaFunction
-            The sample component to be convolved.
-        resolution_components : ComponentCollection | ModelComponent
-            The resolution model to convolve with.
+            The sample delta function to be convolved.
+        resolution_component : ModelComponent
+            The resolution component to convolve with.
 
         Returns
         -------
         np.ndarray
             The evaluated convolution values at self.energy.
         """
-        return sample_component.area.value * resolution_components.evaluate(
+        return sample_component.area.value * resolution_component.evaluate(
             self.energy_with_offset.values - sample_component.center.value
         )
 

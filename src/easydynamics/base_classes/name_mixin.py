@@ -29,9 +29,11 @@ class NameMixin:
             If name is not a string.
         """
 
-        super().__init__(*args, **kwargs)
+        # Validate before delegating to the parent class so an invalid name fails fast,
+        # before the parent registers the object in the global map.
         if not isinstance(name, str):
             raise TypeError('Name must be a string.')
+        super().__init__(*args, **kwargs)
         self._name = name
 
     @property
