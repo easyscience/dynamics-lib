@@ -23,8 +23,6 @@ from easydynamics.settings.detailed_balance_settings import DetailedBalanceSetti
 
 Q_VALUES = [0.5, 1.0, 1.5]
 
-Q_VALUES = [0.5, 1.0, 1.5]
-
 
 class TestAnalysis:
     @pytest.fixture
